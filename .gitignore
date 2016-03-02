@@ -60,3 +60,28 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+
+# Heroku/Foreman
+.env
+
+# webpack
+static/bundles
+node_modules
+
+# Editor stuff
+*.swp
+*.orig
+
+/nbproject
+.idea/
+.redcar/
+codekit-config.json
+.pycharm_helpers/
+
+.project
+.pydevproject
+
+*.DS_Store
+
+# Django static
+staticfiles/
