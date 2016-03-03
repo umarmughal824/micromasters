@@ -14,9 +14,11 @@ web:
     - .:/src
   environment:
     DEBUG: 'True'
+    NODE_ENV: 'development'
     PORT: 8079
     COVERAGE_DIR: htmlcov
     DATABASE_URL: postgres://postgres@db:5432/postgres
+    MICROMASTERS_USE_WEBPACK_DEV_SERVER: 'True'
     STATUS_TOKEN: 'test-token'
   env_file: .env
   ports:
@@ -37,3 +39,5 @@ watch:
     - "8078:8078"
   volumes:
     - .:/src
+  environment:
+    NODE_ENV: 'development'
