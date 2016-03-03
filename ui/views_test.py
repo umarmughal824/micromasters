@@ -17,9 +17,9 @@ class TestViews(TestCase):
 
     def test_index_view(self):
         """Verify the index view is as expected"""
-        response = self.client.get(reverse('ui_index'))
+        response = self.client.get(reverse('ui-index'))
         self.assertContains(
             response,
-            "Hi, I'm ui",
+            "Hi",
             status_code=200
         )
