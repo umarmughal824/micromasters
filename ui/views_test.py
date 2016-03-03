@@ -1,11 +1,12 @@
 """
 Test end to end django views.
 """
-from django.test import TestCase
-from django.test.client import Client
 from django.core.urlresolvers import reverse
 from django.db.models.signals import post_save
+from django.test import TestCase
+from django.test.client import Client
 from factory.django import mute_signals
+
 from courses.factories import ProgramFactory
 from profiles.factories import ProfileFactory, UserFactory
 
@@ -23,7 +24,7 @@ class TestViews(TestCase):
         """Verify only 'live' program visible on homepage"""
         program_live_true = ProgramFactory.create(live=True)
         program_live_false = ProgramFactory.create(live=False)
-        response = self.client.get(reverse('ui-index'))
+        response = self.client.get('/')
         self.assertContains(
             response,
             program_live_true.title,
@@ -67,7 +68,7 @@ class TestViews(TestCase):
                 USE_WEBPACK_DEV_SERVER=True,
                 WEBPACK_SERVER_URL="foo_server"
             ):
-                response = self.client.get(reverse('ui-index'))
+                response = self.client.get('/')
                 self.assertContains(
                     response,
                     expected_url,
