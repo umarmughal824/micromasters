@@ -15,6 +15,7 @@ web:
   environment:
     DEBUG: 'True'
     PORT: 8079
+    COVERAGE_DIR: htmlcov
     DATABASE_URL: postgres://postgres@db:5432/postgres
     STATUS_TOKEN: 'test-token'
   env_file: .env
