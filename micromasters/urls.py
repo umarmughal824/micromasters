@@ -3,7 +3,7 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from rest_framework import routers
 
-from courses.api import ProgramViewSet, CourseViewSet
+from courses.views import ProgramViewSet, CourseViewSet
 
 router = routers.DefaultRouter()
 router.register(r'programs', ProgramViewSet)
