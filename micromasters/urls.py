@@ -11,6 +11,7 @@ router.register(r'courses', CourseViewSet)
 
 urlpatterns = [
     url(r'', include('ui.urls')),
+    url('', include('social.apps.django_app.urls', namespace='social')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api/v0/', include(router.urls)),
 ]
