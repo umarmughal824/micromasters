@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
+    <script type="text/javascript" src="{{ style_src }}"></script>
     <title>{% block title %}{% endblock %}</title>
     {% block extrahead %}
     {% endblock %}
@@ -9,6 +10,7 @@
   <body>
     {% block content %}
     {% endblock %}
+  <script type="text/javascript" src="{{ outer_src }}"></script>
   </body>
 </html>
 

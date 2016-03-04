@@ -4,7 +4,9 @@ var webpack = require('webpack');
 module.exports = {
   context: __dirname,
   entry: {
-    'index_page': './static/js/root'
+    'inner': './static/js/inner',
+    'outer': './static/js/outer',
+    'style': './static/js/style',
   },
   output: {
     path: path.resolve('./static/bundles/'),

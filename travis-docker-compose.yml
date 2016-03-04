@@ -10,9 +10,10 @@ web:
     python3 manage.py migrate &&
     ./with_host.sh python3 manage.py runserver 0.0.0.0:8079'
   environment:
-    DEBUG: 'True'
+    DEBUG: 'False'
     COVERAGE_DIR: htmlcov
     PORT: 8079
+    NODE_ENV: 'production'
     DATABASE_URL: postgres://postgres@db:5432/postgres
   ports:
     - "8079:8079"

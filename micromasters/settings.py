@@ -152,9 +152,15 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
 
-
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ]
 }
+
+# Request files from the webpack dev server
+USE_WEBPACK_DEV_SERVER = get_var('MICROMASTERS_USE_WEBPACK_DEV_SERVER', False)
+WEBPACK_SERVER_URL = get_var('MICROMASTERS_WEBPACK_SERVER_URL', 'http://{host}:8078')
+
+# Important to define this so DEBUG works properly
+INTERNAL_IPS = (get_var('HOST_IP', '127.0.0.1'), )
