@@ -30,6 +30,6 @@
     "webpack-dev-server": "1.14.1"
   },
   "scripts": {
-    "postinstall": "./npm_install_if_prod.sh"
+    "postinstall": "./webpack_if_prod.sh"
   }
 }
