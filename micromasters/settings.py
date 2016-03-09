@@ -81,9 +81,11 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'social.apps.django_app.default',
     # Our INSTALLED_APPS
     'ui',
     'courses',
+    'backends',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -96,6 +98,17 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
 )
+
+AUTHENTICATION_BACKENDS = (
+    'backends.edxorg.EdxOrgOAuth2',
+    # the following needs to stay here to allow login of local users
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+EDXORG_BASE_URL = get_var('EDXORG_BASE_URL', '')
+SOCIAL_AUTH_EDXORG_KEY = get_var('EDXORG_CLIENT_ID', '')
+SOCIAL_AUTH_EDXORG_SECRET = get_var('EDXORG_CLIENT_SECRET', '')
+LOGIN_REDIRECT_URL = '/'
 
 ROOT_URLCONF = 'micromasters.urls'
 
@@ -116,6 +129,11 @@ TEMPLATES = [
         },
     },
 ]
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'social.apps.django_app.context_processors.backends',
+    'social.apps.django_app.context_processors.login_redirect',
+)
 
 WSGI_APPLICATION = 'micromasters.wsgi.application'
 
