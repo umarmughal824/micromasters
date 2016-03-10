@@ -21,7 +21,6 @@ web:
     MICROMASTERS_USE_WEBPACK_DEV_SERVER: 'True'
     MICROMASTERS_SECURE_SSL_REDIRECT: 'False'
     MICROMASTERS_DB_DISABLE_SSL: 'True'
-    STATUS_TOKEN: 'test-token'
   env_file: .env
   ports:
     - "8079:8079"

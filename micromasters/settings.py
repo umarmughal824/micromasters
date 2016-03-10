@@ -81,6 +81,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'server_status',
     'social.apps.django_app.default',
     # Our INSTALLED_APPS
     'ui',
@@ -284,6 +285,6 @@ LOGGING = {
     },
 }
 
-# status
+# server-status
 STATUS_TOKEN = get_var("STATUS_TOKEN", "")
 HEALTH_CHECK = ['POSTGRES']
