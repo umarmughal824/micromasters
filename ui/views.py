@@ -30,5 +30,7 @@ def index(request):
     return render(request, "index.html", context={
         "programs": programs,
         "style_src": get_bundle_url(request, "style.js"),
-        "outer_src": get_bundle_url(request, "outer.js")
+        "outer_src": get_bundle_url(request, "outer.js"),
+        "authenticated": not request.user.is_anonymous(),
+        "username": request.user.username,
     })

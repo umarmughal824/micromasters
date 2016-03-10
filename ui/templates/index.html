@@ -12,12 +12,16 @@
                 MIT credentials are now attainable by anyone in the world with
                 the discipline, dedication and intelligence to master course material.
             </div>
-            <button type="button" class="learn-more-btn" >Learn more</button>
+            <button type="button" class="learn-more-btn button" >Learn more</button>
         </div>
 
     </div>
     <div class="login-button-wrapper">
-        <button type="button" class="login-button">Log in with edx.org</button>
+      {% if authenticated %}
+      <h1>Welcome, {{ username }}</h1>
+      {% else %}
+      <a class="login-button button" href="{% url 'social:begin' 'edxorg' %}">Log in with edx.org</a>
+      {% endif %}
     </div>
     <div class="programs-container">
         {% for program in programs %}
