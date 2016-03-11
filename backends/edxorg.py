@@ -35,7 +35,12 @@ class EdxOrgOAuth2(BaseOAuth2):
             dict: a dictionary containing user information
                 coming from the remote service.
         """
-        return super(EdxOrgOAuth2, self).user_data(access_token, *args, **kwargs)
+        return self.get_json(
+            urljoin(EDXORG_BASE_URL, "/api/mobile/v0.5/my_user_info"),
+            headers={
+                "Authorization": "Bearer {}".format(access_token),
+            }
+        )
 
     def get_user_details(self, response):
         """
@@ -54,13 +59,15 @@ class EdxOrgOAuth2(BaseOAuth2):
                 the following keys:
                 <remote_id>, `username`, `email`, `fullname`, `first_name`, `last_name`
         """
+        full, first, last = self.get_user_names(response['name'])
+
         return {
-            'edx_id': 'unique_edx_id_1',
-            'username': 'my_username',
-            'email': 'firstname_lastname@example.com',
-            'fullname': 'firstname lastname',
-            'first_name': 'firstname',
-            'last_name': 'lastname'
+            'edx_id': response['username'],
+            'username': response['username'],
+            'email': response['email'],
+            'fullname': full,
+            'first_name': first,
+            'last_name': last,
         }
 
     def get_user_id(self, details, response):
