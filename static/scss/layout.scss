@@ -25,26 +25,23 @@ body {
     text-align: center;
     padding: 0 40px;
 }
-button {
+.button {
     border: 1px solid gray;
     background-color: white;
     box-shadow: 2px 2px 1px #888888;
+    padding: 20px 15px;
+    color: black;
+    text-decoration: none;
 }
-button:hover {
+.button:hover {
     background-color: lightgrey;
 }
 .learn-more-btn {
     margin-top: 20px;
 }
 
-.login-button {
-    width: 150px;
-    height: 60px;
-}
 .login-button-wrapper {
-    position:relative;
-    left:50%;
-    margin-left: -75px;
+  text-align: center;
 }
 .programs-container {
     margin: 100px 0;
