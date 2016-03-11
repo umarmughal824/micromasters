@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='micromasters',
-    version='0.0.0',
+    version='0.1.0',
     license='BSD',
     author='MIT ODL Engineering',
     author_email='odl-engineering@mit.edu',
