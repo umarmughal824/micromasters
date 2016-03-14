@@ -1,6 +1,7 @@
 """
 ui views
 """
+import json
 from django.conf import settings
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.shortcuts import render
@@ -26,11 +27,37 @@ def index(request):
     """
     The index view. Display available programs
     """
+
     programs = Program.objects.filter(live=True)
+
+    js_settings = {
+        "gaTrackingID": settings.GA_TRACKING_ID,
+    }
+
     return render(request, "index.html", context={
         "programs": programs,
         "style_src": get_bundle_url(request, "style.js"),
         "outer_src": get_bundle_url(request, "outer.js"),
         "authenticated": not request.user.is_anonymous(),
         "username": request.user.username,
+        "js_settings_json": json.dumps(js_settings),
     })
+
+
+def dashboard(request):
+    """
+    The app dashboard view
+    """
+    js_settings = {
+        "gaTrackingID": settings.GA_TRACKING_ID,
+        "reactGaDebug": settings.REACT_GA_DEBUG
+    }
+
+    return render(
+        request, "dashboard.html",
+        context={
+            "style_src": get_bundle_url(request, "style.js"),
+            "inner_src": get_bundle_url(request, "inner.js"),
+            "js_settings_json": json.dumps(js_settings),
+        }
+    )

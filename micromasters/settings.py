@@ -288,3 +288,6 @@ LOGGING = {
 # server-status
 STATUS_TOKEN = get_var("STATUS_TOKEN", "")
 HEALTH_CHECK = ['POSTGRES']
+
+GA_TRACKING_ID = get_var("GA_TRACKING_ID", "")
+REACT_GA_DEBUG = get_var("REACT_GA_DEBUG", False)
