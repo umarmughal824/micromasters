@@ -1,7 +1,7 @@
 /* global SETTINGS:false */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './containers/App';
+import Dashboard from './containers/Dashboard';
 import '../sass/layout.scss';
 import { Provider } from 'react-redux';
 import configureStore from './store/configureStore';
@@ -27,7 +27,7 @@ ReactDOM.render(
   <div>
     <Provider store={store}>
       <Router history={createBrowserHistory()}>
-        <Route path="/dashboard" component={App} onUpdate={ga.pageview(window.location.pathname)}></Route>
+        <Route path="/dashboard" component={Dashboard} onUpdate={ga.pageview(window.location.pathname)}></Route>
       </Router>
     </Provider>
     {debugTools}

@@ -4,7 +4,7 @@ import {
   updateCheckbox
 } from '../actions';
 
-class App extends React.Component {
+class Dashboard extends React.Component {
 
   handleClick(e) {
     const { dispatch } = this.props;
@@ -14,14 +14,14 @@ class App extends React.Component {
   render() {
     const { checked } = this.props.checkbox;
     return <div>
-      <div id="app-body">
+      <div id="dashboard-body">
         <input type="checkbox" checked={checked} onClick={this.handleClick.bind(this)} />
       </div>
     </div>;
   }
 }
 
-App.propTypes = {
+Dashboard.propTypes = {
   dispatch: React.PropTypes.func.isRequired,
   checkbox: React.PropTypes.object.isRequired
 };
@@ -32,4 +32,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps)(App);
+export default connect(mapStateToProps)(Dashboard);

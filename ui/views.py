@@ -37,7 +37,7 @@ def index(request):
     return render(request, "index.html", context={
         "programs": programs,
         "style_src": get_bundle_url(request, "style.js"),
-        "outer_src": get_bundle_url(request, "outer.js"),
+        "public_src": get_bundle_url(request, "public.js"),
         "authenticated": not request.user.is_anonymous(),
         "username": request.user.username,
         "js_settings_json": json.dumps(js_settings),
@@ -57,7 +57,7 @@ def dashboard(request):
         request, "dashboard.html",
         context={
             "style_src": get_bundle_url(request, "style.js"),
-            "inner_src": get_bundle_url(request, "inner.js"),
+            "dashboard_src": get_bundle_url(request, "dashboard.js"),
             "js_settings_json": json.dumps(js_settings),
         }
     )
