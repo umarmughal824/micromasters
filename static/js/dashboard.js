@@ -2,7 +2,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Dashboard from './containers/Dashboard';
-import '../sass/layout.scss';
 import { Provider } from 'react-redux';
 import configureStore from './store/configureStore';
 import createBrowserHistory from 'history/lib/createBrowserHistory';
