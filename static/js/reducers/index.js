@@ -1,7 +1,7 @@
+/* global SETTINGS: false */
 import { combineReducers } from 'redux';
 import { handleActions } from 'redux-actions';
 import {
-    UPDATE_CHECKBOX,
     REQUEST_COURSE_LIST,
     CLEAR_COURSE_LIST,
     FETCH_FAILURE,
@@ -18,18 +18,6 @@ function payloadMerge(fn) {
     return Object.assign({}, state, fn(action));
   };
 }
-
-const INITIAL_CHECKBOX_STATE = {
-  checked: false
-};
-
-export const checkbox = handleActions({
-  UPDATE_CHECKBOX: payloadMerge((action) => ({
-    checked: action.payload.checked,
-  }))
-}, INITIAL_CHECKBOX_STATE);
-
-
 
 const INITIAL_COURSE_LIST_STATE = {
   courseList: []
@@ -56,8 +44,16 @@ export const courseList = handleActions({
 
 }, INITIAL_COURSE_LIST_STATE);
 
+const INITIAL_AUTHENTICATION_STATE = {
+  isAuthenticated: SETTINGS.isAuthenticated,
+  name: SETTINGS.name,
+};
+
+export const authentication = handleActions({
+  // nothing here yet
+}, INITIAL_AUTHENTICATION_STATE);
 
 export default combineReducers({
-  checkbox,
-  courseList
+  courseList,
+  authentication,
 });

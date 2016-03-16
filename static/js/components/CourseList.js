@@ -6,12 +6,14 @@ class CourseList extends React.Component {
 
     return <ul className="course-list">
       {
-        courseList.map(function(course) {
-          return <li key={course.id}>{course.title}</li>;
-        })
+        courseList.map(course => <li key={course.id}>{course.title}</li>)
       }
     </ul>;
   }
 }
+
+CourseList.propTypes = {
+  courseList: React.PropTypes.array.isRequired
+};
 
 export default CourseList;
