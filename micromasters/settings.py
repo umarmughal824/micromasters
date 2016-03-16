@@ -87,6 +87,7 @@ INSTALLED_APPS = (
     'ui',
     'courses',
     'backends',
+    'profiles',
 )
 
 MIDDLEWARE_CLASSES = (
