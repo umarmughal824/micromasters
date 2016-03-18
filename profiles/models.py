@@ -1,7 +1,6 @@
 """
 Models for user profile
 """
-
 from django.contrib.auth.models import User
 from django.db import models
 from jsonfield import JSONField
@@ -51,7 +50,7 @@ class Profile(models.Model):
         (OTHER_EDUCATION, "Other education"),
     )
 
-    user = models.ForeignKey(User)
+    user = models.OneToOneField(User)
     account_privacy = models.TextField(
         default=PRIVATE,
         choices=ACCOUNT_PRIVACY_CHOICES,
@@ -76,7 +75,7 @@ class Profile(models.Model):
     name = models.TextField(blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
     country = models.TextField(blank=True, null=True)
-    has_profile_image = models.BooleanField()
+    has_profile_image = models.BooleanField(default=False)
     profile_url_full = models.TextField(blank=True, null=True)
     profile_url_large = models.TextField(blank=True, null=True)
     profile_url_medium = models.TextField(blank=True, null=True)
@@ -98,4 +97,7 @@ class Profile(models.Model):
         null=True,
     )
     mailing_address = models.TextField(blank=True, null=True)
-    date_joined = models.DateTimeField(blank=True, null=True)
+    date_joined_micromasters = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+
+    def __str__(self):
+        return 'Profile for "{0}"'.format(self.user.username)

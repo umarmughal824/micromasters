@@ -107,9 +107,21 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-EDXORG_BASE_URL = get_var('EDXORG_BASE_URL', '')
+EDXORG_BASE_URL = get_var('EDXORG_BASE_URL', 'https://courses.edx.org/')
 SOCIAL_AUTH_EDXORG_KEY = get_var('EDXORG_CLIENT_ID', '')
 SOCIAL_AUTH_EDXORG_SECRET = get_var('EDXORG_CLIENT_SECRET', '')
+SOCIAL_AUTH_PIPELINE = (
+    'social.pipeline.social_auth.social_details',
+    'social.pipeline.social_auth.social_uid',
+    'social.pipeline.social_auth.auth_allowed',
+    'social.pipeline.social_auth.social_user',
+    'social.pipeline.user.get_username',
+    'social.pipeline.user.create_user',
+    'backends.pipeline_api.update_profile_from_edx',
+    'social.pipeline.social_auth.associate_user',
+    'social.pipeline.social_auth.load_extra_data',
+    'social.pipeline.user.user_details',
+)
 LOGIN_REDIRECT_URL = '/'
 
 ROOT_URLCONF = 'micromasters.urls'
@@ -285,6 +297,13 @@ LOGGING = {
         }
     },
 }
+
+# to run the app locally on mac you need to bypass syslog
+if get_var('MICROMASTERS_BYPASS_SYSLOG', False):
+    LOGGING['handlers'].pop('syslog')
+    LOGGING['loggers']['root']['handlers'] = ['console']
+    LOGGING['loggers']['ui']['handlers'] = ['console']
+    LOGGING['loggers']['django']['handlers'] = ['console']
 
 # server-status
 STATUS_TOKEN = get_var("STATUS_TOKEN", "")

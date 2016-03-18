@@ -6,8 +6,6 @@ from urllib.parse import urljoin
 from django.conf import settings
 from social.backends.oauth import BaseOAuth2
 
-EDXORG_BASE_URL = settings.EDXORG_BASE_URL or 'https://courses.edx.org/'
-
 
 class EdxOrgOAuth2(BaseOAuth2):
     """
@@ -16,6 +14,7 @@ class EdxOrgOAuth2(BaseOAuth2):
     name = 'edxorg'
     ID_KEY = 'edx_id'
     REQUEST_TOKEN_URL = None
+    EDXORG_BASE_URL = settings.EDXORG_BASE_URL
     AUTHORIZATION_URL = urljoin(EDXORG_BASE_URL, '/oauth2/authorize/')
     ACCESS_TOKEN_URL = urljoin(EDXORG_BASE_URL, '/oauth2/access_token/')
     ACCESS_TOKEN_METHOD = 'POST'
@@ -36,7 +35,7 @@ class EdxOrgOAuth2(BaseOAuth2):
                 coming from the remote service.
         """
         return self.get_json(
-            urljoin(EDXORG_BASE_URL, "/api/mobile/v0.5/my_user_info"),
+            urljoin(self.EDXORG_BASE_URL, "/api/mobile/v0.5/my_user_info"),
             headers={
                 "Authorization": "Bearer {}".format(access_token),
             }
