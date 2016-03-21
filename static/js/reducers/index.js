@@ -1,8 +1,13 @@
 import { combineReducers } from 'redux';
 import { handleActions } from 'redux-actions';
 import {
-    UPDATE_CHECKBOX
-} from '../actions';
+    UPDATE_CHECKBOX,
+    REQUEST_COURSE_LIST,
+    CLEAR_COURSE_LIST,
+    FETCH_FAILURE,
+    FETCH_PROCESSING,
+    FETCH_SUCCESS,
+} from '../actions/index';
 
 // Helper function to avoid a commonly repeated pattern where we merge
 // state with something computed solely from the actions. Accepts a
@@ -24,7 +29,35 @@ export const checkbox = handleActions({
   }))
 }, INITIAL_CHECKBOX_STATE);
 
-export default combineReducers({
-  checkbox
-});
 
+
+const INITIAL_COURSE_LIST_STATE = {
+  courseList: []
+};
+
+export const courseList = handleActions({
+  REQUEST_COURSE_LIST: payloadMerge((action) => ({
+    courseListStatus: FETCH_PROCESSING
+  })),
+
+  RECEIVE_COURSE_LIST_SUCCESS: payloadMerge((action) => ({
+    courseListStatus: FETCH_SUCCESS,
+    courseList: action.payload.courseList
+  })),
+
+  RECEIVE_COURSE_LIST_FAILURE: payloadMerge((action) => ({
+    courseListStatus: FETCH_FAILURE
+  })),
+
+  CLEAR_COURSE_LIST: payloadMerge((action) => ({
+    courseListStatus: undefined,
+    courseList: []
+  }))
+
+}, INITIAL_COURSE_LIST_STATE);
+
+
+export default combineReducers({
+  checkbox,
+  courseList
+});
