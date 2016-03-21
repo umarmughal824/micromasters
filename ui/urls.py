@@ -2,12 +2,9 @@
 URLs for ui
 """
 from django.conf.urls import url
-from django.views.generic import TemplateView
+
+from ui.views import index
 
 urlpatterns = [
-    url(
-        r'^$',
-        TemplateView.as_view(template_name='index.html'),
-        name='ui-index'
-    ),
+    url(r'^$', index, name='ui-index'),
 ]

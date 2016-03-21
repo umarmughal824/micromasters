@@ -1,0 +1,77 @@
+
+
+body {
+    background-color: lightgray;
+}
+#container {
+    position: relative;
+    max-width: 900px;
+    border: 1px solid grey;
+    min-height: 900px;
+    margin: 0 auto;
+    background-color: white;
+}
+.purpose-statement-box {
+    width: 600px;
+    border: 2px solid gray;
+    margin: 50px auto;
+    height: 200px;
+    display: table;
+
+}
+.purpose-statement-text {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+    padding: 0 40px;
+}
+.button {
+    border: 1px solid gray;
+    background-color: white;
+    box-shadow: 2px 2px 1px #888888;
+    padding: 20px 15px;
+    color: black;
+    text-decoration: none;
+}
+.button:hover {
+    background-color: lightgrey;
+}
+.learn-more-btn {
+    margin-top: 20px;
+}
+
+.login-button-wrapper {
+  text-align: center;
+}
+.programs-container {
+    margin: 100px 0;
+    position: relative;
+    padding: 0 40px;
+    text-align: center;
+}
+.program-box {
+    display: inline-block;
+    width: 225px;
+    border: 2px solid gray;
+    margin: 10px;
+    overflow: hidden;
+}
+.program-name {
+    vertical-align: middle;
+    display: inline-block;
+}
+.footer-row {
+    font-size: 14px;
+    margin: 0 30px;
+    border-top: 3px solid grey;
+    position: absolute;
+    bottom: 15px;
+
+}
+.footer-links>a {
+    display: inline-block;
+    margin-right: 5px;
+}
+
+
+
