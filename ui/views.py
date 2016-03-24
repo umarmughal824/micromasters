@@ -2,10 +2,16 @@
 ui views
 """
 import json
+import logging
+
 from django.conf import settings
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.shortcuts import render
+
 from courses.models import Program
+
+
+log = logging.getLogger(__name__)
 
 
 def get_bundle_url(request, bundle_name):
@@ -29,9 +35,11 @@ def index(request):
     """
 
     programs = Program.objects.filter(live=True)
+    host = request.get_host().split(":")[0]
 
     js_settings = {
         "gaTrackingID": settings.GA_TRACKING_ID,
+        "host": host
     }
 
     return render(request, "index.html", context={
@@ -48,9 +56,18 @@ def dashboard(request):
     """
     The app dashboard view
     """
+    host = request.get_host().split(":")[0]
+
+    name = ""
+    if not request.user.is_anonymous():
+        name = request.user.profile.name or request.user.username
+
     js_settings = {
         "gaTrackingID": settings.GA_TRACKING_ID,
-        "reactGaDebug": settings.REACT_GA_DEBUG
+        "reactGaDebug": settings.REACT_GA_DEBUG,
+        "authenticated": not request.user.is_anonymous(),
+        "name": name,
+        "host": host,
     }
 
     return render(

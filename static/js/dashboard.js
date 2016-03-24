@@ -1,13 +1,13 @@
 /* global SETTINGS:false */
+__webpack_public_path__ = `http://${SETTINGS.host}:8078/`;  // eslint-disable-line no-undef, camelcase
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Dashboard from './containers/Dashboard';
+import DashboardPage from './containers/DashboardPage';
 import { Provider } from 'react-redux';
 import configureStore from './store/configureStore';
-import createBrowserHistory from 'history/lib/createBrowserHistory';
 import { devTools, persistState } from 'redux-devtools';
 import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
-import { Router, Route, IndexRoute } from 'react-router';
+import { Router, Route, IndexRoute, browserHistory } from 'react-router';
 import ga from 'react-ga';
 
 const store = configureStore();
@@ -25,11 +25,11 @@ if (process.env.NODE_ENV !== 'production') {
 ReactDOM.render(
   <div>
     <Provider store={store}>
-      <Router history={createBrowserHistory()}>
-        <Route path="/dashboard" component={Dashboard} onUpdate={ga.pageview(window.location.pathname)}></Route>
+      <Router history={browserHistory}>
+        <Route path="/dashboard" component={DashboardPage} onUpdate={ga.pageview(window.location.pathname)}></Route>
       </Router>
     </Provider>
     {debugTools}
   </div>,
-  document.getElementById("container")
+  document.getElementById("dashboard")
 );
