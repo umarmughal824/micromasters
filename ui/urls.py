@@ -8,4 +8,6 @@ from ui.views import index, dashboard
 urlpatterns = [
     url(r'^dashboard/', dashboard, name='ui-dashboard'),
     url(r'^$', index, name='ui-index'),
+    url(r'^logout/$', 'django.contrib.auth.views.logout',
+        {'next_page': '/'})
 ]
