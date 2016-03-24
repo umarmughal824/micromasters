@@ -78,6 +78,25 @@ body {
     display: inline-block;
     margin-right: 5px;
 }
+.course-list-container{
+  background-color: lightgrey;
+}
+.course-list{
+  border: 1px solid gray;
+  display: inline-block;
+  width: 400px;
+  list-style-type: none;
+  padding: 0;
+}
+
+.course-list>li{
+  padding: 10px;
+  border-bottom: 1px solid gray;
+}
+.course-list>li:last-child{
+  border-bottom: none;
+}
+
 
 
 
