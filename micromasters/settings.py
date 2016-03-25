@@ -17,7 +17,7 @@ import platform
 import dj_database_url
 import yaml
 
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 
 CONFIG_PATHS = [
     os.environ.get('MICROMASTERS_CONFIG', ''),
