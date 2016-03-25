@@ -11,7 +11,8 @@ import {
 
 import * as api from '../util/api';
 import { COURSE_LIST_RESPONSE } from '../constants';
-import configureTestStore from '../store/configureStore_test';
+import configureTestStore from 'redux-asserts';
+import rootReducer from '../reducers';
 import assert from 'assert';
 import sinon from 'sinon';
 
@@ -20,7 +21,7 @@ describe('reducers', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     courseListStub = sandbox.stub(api, 'getCourseList');
-    store = configureTestStore();
+    store = configureTestStore(rootReducer);
   });
   afterEach(() => {
     sandbox.restore();
