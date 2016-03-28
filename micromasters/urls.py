@@ -3,11 +3,13 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from rest_framework import routers
 
-from courses.api import ProgramViewSet, CourseViewSet
+from courses.views import ProgramViewSet, CourseViewSet
+from profiles.views import ProfileViewSet
 
 router = routers.DefaultRouter()
 router.register(r'programs', ProgramViewSet)
 router.register(r'courses', CourseViewSet)
+router.register(r'profiles', ProfileViewSet)
 
 urlpatterns = [
     url(r'', include('ui.urls')),

@@ -1,11 +1,12 @@
 var path = require("path");
 var webpack = require('webpack');
+var NodeNeat = require("node-neat");
 
 module.exports = {
   context: __dirname,
   entry: {
-    'inner': './static/js/inner',
-    'outer': './static/js/outer',
+    'dashboard': './static/js/dashboard',
+    'public': './static/js/public',
     'style': './static/js/style',
   },
   output: {
@@ -29,6 +30,10 @@ module.exports = {
         loader: 'style!css!sass'
       }
     ]
+  },
+
+  sassLoader: {
+    includePaths: NodeNeat.includePaths
   },
 
   resolve: {

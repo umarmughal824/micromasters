@@ -1,11 +1,10 @@
 {% extends "base.html" %}
 {% load i18n static %}
 
-{% block title %}{% trans "ui" %}{% endblock %}
+{% block title %}{% trans "Micromasters" %}{% endblock %}
 
 {% block content %}
-
-<div id="container">
+<div id="public">
     <div class="purpose-statement-box">
         <div class="purpose-statement-text">
             <div>
@@ -40,6 +39,5 @@
         </div>
     </div>
 </div>
-
+<script type="text/javascript" src="{{ public_src }}"></script>
 {% endblock %}
-

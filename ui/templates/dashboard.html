@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Micromasters" %}{% endblock %}
+
+{% block content %}
+<div id="dashboard"></div>
+<script type="text/javascript" src="{{ dashboard_src }}"></script>
+{% endblock %}

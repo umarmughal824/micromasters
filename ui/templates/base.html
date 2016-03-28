@@ -2,6 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <script type="text/javascript">
+    var SETTINGS = {{ js_settings_json|safe }};
+    </script>
     <script type="text/javascript" src="{{ style_src }}"></script>
     <title>{% block title %}{% endblock %}</title>
     {% block extrahead %}
@@ -10,7 +15,6 @@
   <body>
     {% block content %}
     {% endblock %}
-  <script type="text/javascript" src="{{ outer_src }}"></script>
   </body>
 </html>
 

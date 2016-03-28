@@ -1,6 +1,27 @@
 Release Notes
 =============
 
+Version 0.2.0
+-------------
+
+- Updated dockerignore
+- Removed pip from apt.txt, this gets installed separately
+- Moved factory libraries to requirements.txt to fix management commands
+- Use sitepackages=True so tox reuses the same packages in the docker environment
+- Added REST API for profiles
+- Added dockerignore
+- Implemented student Dashboard
+- Implemented course list component
+- Profiles creation
+- Correct the heroku runtime
+- Added model for user profiles
+- Added django specific pylint
+- Upgraded Django to security release
+- Removed static/sass, merged into static/scss
+- Removed setup.py
+- Rename inner to dashboard, and outer to public.
+- Add react, redux and friends.
+
 Version 0.1.0
 -------------
 
