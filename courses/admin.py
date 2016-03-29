@@ -17,9 +17,10 @@ class CourseRunInline(admin.StackedInline):
 
 class CourseAdmin(admin.ModelAdmin):
     """ModelAdmin for Courses"""
-    list_display = ('title',)
+    list_display = ('position_in_program', 'title',)
     list_filter = ('program__live',)
     inlines = [CourseRunInline]
+    ordering = ('position_in_program',)
 
 
 class CourseRunAdmin(admin.ModelAdmin):
