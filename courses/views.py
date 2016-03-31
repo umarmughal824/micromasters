@@ -1,7 +1,7 @@
 """Views for courses"""
 from rest_framework import viewsets
-from courses.models import Course, Program
-from courses.serializers import CourseSerializer, ProgramSerializer
+from courses.models import CourseRun, Program
+from courses.serializers import CourseRunSerializer, ProgramSerializer
 
 
 class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
@@ -10,7 +10,7 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ProgramSerializer
 
 
-class CourseViewSet(viewsets.ReadOnlyModelViewSet):
+class CourseRunViewSet(viewsets.ReadOnlyModelViewSet):
     """API for the Program collection"""
-    queryset = Course.objects.filter(program__live=True)
-    serializer_class = CourseSerializer
+    queryset = CourseRun.objects.filter(course__program__live=True)
+    serializer_class = CourseRunSerializer
