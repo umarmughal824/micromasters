@@ -98,6 +98,7 @@ class Profile(models.Model):
     )
     mailing_address = models.TextField(blank=True, null=True)
     date_joined_micromasters = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    linkedin = JSONField(blank=True, null=True)
 
     def __str__(self):
         return 'Profile for "{0}"'.format(self.user.username)

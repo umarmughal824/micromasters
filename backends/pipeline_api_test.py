@@ -8,12 +8,13 @@ from django.test import TestCase
 import mock
 
 from backends import pipeline_api, edxorg
+from .pipeline_api import update_from_linkedin
 from profiles.models import Profile
 from profiles.factories import UserFactory
 
 
 # pylint: disable=no-self-use
-class PipelineApiTest(TestCase):
+class EdxPipelineApiTest(TestCase):
     """
     Test class for APIs run during the Python Social Auth
     authentication pipeline.
@@ -166,3 +167,18 @@ class PipelineApiTest(TestCase):
         ]
 
         self.check_profile_fields(self.user_profile, all_fields)
+
+
+class LinkedInPipelineTests(TestCase):
+    """Tests for the LinkedIn pipline entry"""
+
+    def test_saves_linkedin_response(self):
+        """Happy path"""
+        backend = mock.Mock()
+        backend.name = 'linkedin-oauth2'
+        user = UserFactory.create()
+        response = {'test': 'works'}
+        update_from_linkedin(backend, user, response)
+
+        profile = Profile.objects.get(user=user)
+        assert profile.linkedin == {'test': 'works'}

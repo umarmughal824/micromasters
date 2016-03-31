@@ -103,9 +103,29 @@ MIDDLEWARE_CLASSES = (
 
 AUTHENTICATION_BACKENDS = (
     'backends.edxorg.EdxOrgOAuth2',
+    'social.backends.linkedin.LinkedinOAuth2',
     # the following needs to stay here to allow login of local users
     'django.contrib.auth.backends.ModelBackend',
 )
+
+
+SOCIAL_AUTH_LINKEDIN_OAUTH2_KEY = get_var('LINKEDIN_CLIENT_ID', '')
+SOCIAL_AUTH_LINKEDIN_OAUTH2_SECRET = get_var('LINKEDIN_CLIENT_SECRET', '')
+SOCIAL_AUTH_LINKEDIN_OAUTH2_SCOPE = ["r_basicprofile"]
+SOCIAL_AUTH_LINKEDIN_OAUTH2_FIELD_SELECTORS = [
+    'first-name', 'last-name',
+    'headline',
+    'industry',
+    'location',
+    'current-share',
+    'num-connections', 'num-connections-capped',
+    'summary',
+    'specialties',
+    'positions',
+    'picture-urls',
+    'public-profile-url',
+]
+
 
 EDXORG_BASE_URL = get_var('EDXORG_BASE_URL', 'https://courses.edx.org/')
 SOCIAL_AUTH_EDXORG_KEY = get_var('EDXORG_CLIENT_ID', '')
@@ -118,6 +138,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.user.get_username',
     'social.pipeline.user.create_user',
     'backends.pipeline_api.update_profile_from_edx',
+    'backends.pipeline_api.update_from_linkedin',
     'social.pipeline.social_auth.associate_user',
     'social.pipeline.social_auth.load_extra_data',
     'social.pipeline.user.user_details',
@@ -236,6 +257,11 @@ LOG_HOST = get_var('MICROMASTERS_LOG_HOST', 'localhost')
 LOG_HOST_PORT = get_var('MICROMASTERS_LOG_HOST_PORT', 514)
 
 HOSTNAME = platform.node().split('.')[0]
+DEFAULT_LOG_STANZA = {
+    'handlers': ['console', 'syslog'],
+    'level': LOG_LEVEL,
+}
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
@@ -274,14 +300,11 @@ LOGGING = {
         },
     },
     'loggers': {
-        'root': {
-            'handlers': ['console', 'syslog'],
-            'level': LOG_LEVEL,
-        },
-        'ui': {
-            'handlers': ['console', 'syslog'],
-            'level': LOG_LEVEL,
-        },
+        'root': DEFAULT_LOG_STANZA,
+        'ui': DEFAULT_LOG_STANZA,
+        'backends': DEFAULT_LOG_STANZA,
+        'profiles': DEFAULT_LOG_STANZA,
+        'courses': DEFAULT_LOG_STANZA,
         'django': {
             'propagate': True,
             'level': DJANGO_LOG_LEVEL,
