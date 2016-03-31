@@ -10,39 +10,39 @@ import {
   RECEIVE_USER_PROFILE_FAILURE,
   CLEAR_PROFILE,
 
+  REQUEST_DASHBOARD,
+  RECEIVE_DASHBOARD_SUCCESS,
+  RECEIVE_DASHBOARD_FAILURE,
+  CLEAR_DASHBOARD,
+
   FETCH_FAILURE,
   FETCH_PROCESSING,
   FETCH_SUCCESS,
-} from '../actions/index';
+} from '../actions';
 
 const INITIAL_COURSE_LIST_STATE = {
-  courseList: []
+  courseList: [],
+  programList: []
 };
 
 export const courseList = (state = INITIAL_COURSE_LIST_STATE, action) => {
   switch (action.type) {
   case REQUEST_COURSE_LIST:
     return Object.assign({}, state, {
-      courseListStatus: FETCH_PROCESSING
+      fetchStatus: FETCH_PROCESSING
     });
-
   case RECEIVE_COURSE_LIST_SUCCESS:
     return Object.assign({}, state, {
-      courseListStatus: FETCH_SUCCESS,
-      courseList: action.payload.courseList
+      fetchStatus: FETCH_SUCCESS,
+      courseList: action.payload.courseList,
+      programList: action.payload.programList
     });
-
   case RECEIVE_COURSE_LIST_FAILURE:
     return Object.assign({}, state, {
-      courseListStatus: FETCH_FAILURE
+      fetchStatus: FETCH_FAILURE
     });
-
   case CLEAR_COURSE_LIST:
-    return Object.assign({}, state, {
-      courseListStatus: undefined,
-      courseList: []
-    });
-
+    return INITIAL_COURSE_LIST_STATE;
   default:
     return state;
   }
@@ -56,7 +56,6 @@ export const INITIAL_USER_PROFILE_STATE = {
         replace(/([^:]\/)\/+/g, "$1")
   }
 };
-
 
 export const userProfile = (state = INITIAL_USER_PROFILE_STATE, action) => {
   switch (action.type) {
@@ -90,8 +89,37 @@ export const authentication = (state = INITIAL_AUTHENTICATION_STATE, action) => 
   return state;
 };
 
+
+const INITIAL_DASHBOARD_STATE = {
+  courses: []
+};
+
+export const dashboard = (state = INITIAL_DASHBOARD_STATE, action) => {
+  switch (action.type) {
+  case REQUEST_DASHBOARD:
+    return Object.assign({}, state, {
+      fetchStatus: FETCH_PROCESSING
+    });
+  case RECEIVE_DASHBOARD_SUCCESS:
+    return Object.assign({}, state, {
+      fetchStatus: FETCH_SUCCESS,
+      courses: action.payload.courses
+    });
+  case RECEIVE_DASHBOARD_FAILURE:
+    return Object.assign({}, state, {
+      fetchStatus: FETCH_FAILURE
+    });
+  case CLEAR_DASHBOARD:
+    return INITIAL_DASHBOARD_STATE;
+  default:
+    return state;
+  }
+};
+
+
 export default combineReducers({
   courseList,
   authentication,
-  userProfile
+  userProfile,
+  dashboard,
 });

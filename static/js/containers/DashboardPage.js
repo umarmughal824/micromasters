@@ -7,29 +7,34 @@ import {
   fetchCourseList,
   clearCourseList,
   fetchUserProfile,
-  clearProfile
+  clearProfile,
+  fetchDashboard,
+  clearDashboard,
 } from '../actions/index';
 
 class DashboardPage extends React.Component {
   componentDidMount() {
     this.fetchCourseList();
     this.fetchUserProfile(SETTINGS.username);
+    this.fetchDashboard();
   }
 
   componentDidUpdate() {
     this.fetchCourseList();
     this.fetchUserProfile(SETTINGS.username);
+    this.fetchDashboard();
   }
 
   componentWillUnmount() {
     const { dispatch, profile } = this.props;
     dispatch(clearCourseList());
     dispatch(clearProfile());
+    dispatch(clearDashboard());
   }
 
   fetchCourseList() {
     const { courseList, dispatch } = this.props;
-    if (courseList.courseListStatus === undefined) {
+    if (courseList.fetchStatus === undefined) {
       dispatch(fetchCourseList());
     }
   }
@@ -40,11 +45,22 @@ class DashboardPage extends React.Component {
     }
   }
 
+  fetchDashboard() {
+    const { dashboard, dispatch } = this.props;
+    if (dashboard.fetchStatus === undefined) {
+      dispatch(fetchDashboard());
+    }
+  }
+
   render() {
-    const { courseList, profile } = this.props;
+    const { courseList, profile, dashboard } = this.props;
     return <div>
       <Header />
-      <Dashboard courseList={courseList.courseList} profile={profile.profile}/>
+      <Dashboard
+        courseList={courseList}
+        profile={profile.profile}
+        dashboard={dashboard}
+      />
     </div>;
   }
 }
@@ -52,13 +68,15 @@ class DashboardPage extends React.Component {
 const mapStateToProps = (state) => {
   return {
     courseList: state.courseList,
-    profile: state.userProfile
+    profile: state.userProfile,
+    dashboard: state.dashboard,
   };
 };
 
 DashboardPage.propTypes = {
   courseList: React.PropTypes.object.isRequired,
   profile: React.PropTypes.object.isRequired,
+  dashboard: React.PropTypes.object.isRequired,
   dispatch: React.PropTypes.func.isRequired
 };
 
