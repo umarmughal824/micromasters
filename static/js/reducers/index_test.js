@@ -1,3 +1,4 @@
+/* global SETTINGS: false */
 import {
   fetchCourseList,
   receiveCourseListSuccess,
@@ -60,6 +61,23 @@ describe('reducers', () => {
       dispatchThen(fetchCourseList(), [REQUEST_COURSE_LIST, RECEIVE_COURSE_LIST_FAILURE]).then(courseState => {
         assert.equal(courseState.courseListStatus, FETCH_FAILURE);
 
+        done();
+      });
+    });
+  });
+
+  describe('authentication reducers', () => {
+    let dispatchThen;
+    beforeEach(() => {
+      dispatchThen = store.createDispatchThen(state => state.authentication);
+    });
+
+    it('should have default authentication state', done => {
+      dispatchThen({type: 'unknown'}, ['unknown']).then(state => {
+        assert.deepEqual(state, {
+          name: SETTINGS.name,
+          isAuthenticated: SETTINGS.isAuthenticated
+        });
         done();
       });
     });

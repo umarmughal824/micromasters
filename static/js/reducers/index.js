@@ -1,57 +1,58 @@
 /* global SETTINGS: false */
 import { combineReducers } from 'redux';
-import { handleActions } from 'redux-actions';
 import {
-    REQUEST_COURSE_LIST,
-    CLEAR_COURSE_LIST,
-    FETCH_FAILURE,
-    FETCH_PROCESSING,
-    FETCH_SUCCESS,
-} from '../actions/index';
+  REQUEST_COURSE_LIST,
+  RECEIVE_COURSE_LIST_SUCCESS,
+  RECEIVE_COURSE_LIST_FAILURE,
+  CLEAR_COURSE_LIST,
 
-// Helper function to avoid a commonly repeated pattern where we merge
-// state with something computed solely from the actions. Accepts a
-// function that will get the action, and should return the value to
-// be merged with the existing state.
-function payloadMerge(fn) {
-  return (state, action) => {
-    return Object.assign({}, state, fn(action));
-  };
-}
+  FETCH_FAILURE,
+  FETCH_PROCESSING,
+  FETCH_SUCCESS,
+} from '../actions/index';
 
 const INITIAL_COURSE_LIST_STATE = {
   courseList: []
 };
 
-export const courseList = handleActions({
-  REQUEST_COURSE_LIST: payloadMerge((action) => ({
-    courseListStatus: FETCH_PROCESSING
-  })),
+export const courseList = (state = INITIAL_COURSE_LIST_STATE, action) => {
+  switch (action.type) {
+  case REQUEST_COURSE_LIST:
+    return Object.assign({}, state, {
+      courseListStatus: FETCH_PROCESSING
+    });
 
-  RECEIVE_COURSE_LIST_SUCCESS: payloadMerge((action) => ({
-    courseListStatus: FETCH_SUCCESS,
-    courseList: action.payload.courseList
-  })),
+  case RECEIVE_COURSE_LIST_SUCCESS:
+    return Object.assign({}, state, {
+      courseListStatus: FETCH_SUCCESS,
+      courseList: action.payload.courseList
+    });
 
-  RECEIVE_COURSE_LIST_FAILURE: payloadMerge((action) => ({
-    courseListStatus: FETCH_FAILURE
-  })),
+  case RECEIVE_COURSE_LIST_FAILURE:
+    return Object.assign({}, state, {
+      courseListStatus: FETCH_FAILURE
+    });
 
-  CLEAR_COURSE_LIST: payloadMerge((action) => ({
-    courseListStatus: undefined,
-    courseList: []
-  }))
+  case CLEAR_COURSE_LIST:
+    return Object.assign({}, state, {
+      courseListStatus: undefined,
+      courseList: []
+    });
 
-}, INITIAL_COURSE_LIST_STATE);
+  default:
+    return state;
+  }
+};
 
 const INITIAL_AUTHENTICATION_STATE = {
   isAuthenticated: SETTINGS.isAuthenticated,
   name: SETTINGS.name,
 };
 
-export const authentication = handleActions({
-  // nothing here yet
-}, INITIAL_AUTHENTICATION_STATE);
+export const authentication = (state = INITIAL_AUTHENTICATION_STATE, action) => {
+  return state;
+};
+
 
 export default combineReducers({
   courseList,
