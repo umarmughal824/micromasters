@@ -2,26 +2,30 @@
 import {
   fetchCourseList,
   receiveCourseListSuccess,
+  fetchUserProfile,
+  receiveUserProfileSuccess,
 
   REQUEST_COURSE_LIST,
   RECEIVE_COURSE_LIST_SUCCESS,
   RECEIVE_COURSE_LIST_FAILURE,
+  REQUEST_USER_PROFILE,
+  RECEIVE_USER_PROFILE_SUCCESS,
+  RECEIVE_USER_PROFILE_FAILURE,
   FETCH_FAILURE,
   FETCH_SUCCESS
 } from '../actions/index';
-
 import * as api from '../util/api';
-import { COURSE_LIST_RESPONSE } from '../constants';
 import configureTestStore from 'redux-asserts';
-import rootReducer from '../reducers';
+import rootReducer, { INITIAL_USER_PROFILE_STATE } from '../reducers';
 import assert from 'assert';
 import sinon from 'sinon';
 
 describe('reducers', () => {
-  let sandbox, store, dispatchThen, courseListStub;
+  let sandbox, store, dispatchThen, courseListStub, userProfileStub;
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     courseListStub = sandbox.stub(api, 'getCourseList');
+    userProfileStub = sandbox.stub(api, 'getUserProfile');
     store = configureTestStore(rootReducer);
   });
   afterEach(() => {
@@ -60,6 +64,41 @@ describe('reducers', () => {
 
       dispatchThen(fetchCourseList(), [REQUEST_COURSE_LIST, RECEIVE_COURSE_LIST_FAILURE]).then(courseState => {
         assert.equal(courseState.courseListStatus, FETCH_FAILURE);
+
+        done();
+      });
+    });
+  });
+  describe('profile reducers', () => {
+    beforeEach(() => {
+      dispatchThen = store.createDispatchThen(state => state.userProfile);
+    });
+
+    it('should have initial state', done => {
+      dispatchThen({type: 'unknown'}, ['unknown']).then(state => {
+        assert.deepEqual(state, INITIAL_USER_PROFILE_STATE);
+        done();
+      });
+    });
+
+    it('should fetch user profile successfully', done => {
+      userProfileStub.returns(Promise.resolve(["data"]));
+
+      dispatchThen(fetchUserProfile('jane'), [REQUEST_USER_PROFILE, RECEIVE_USER_PROFILE_SUCCESS]).
+      then(profileState => {
+        assert.deepEqual(profileState.profile, ["data"]);
+        assert.equal(profileState.userProfileStatus, FETCH_SUCCESS);
+
+        done();
+      });
+    });
+
+    it('should fail to fetch user profile', done => {
+      userProfileStub.returns(Promise.reject());
+
+      dispatchThen(fetchUserProfile('jane'), [REQUEST_USER_PROFILE, RECEIVE_USER_PROFILE_FAILURE]).
+      then(profileState => {
+        assert.equal(profileState.userProfileStatus, FETCH_FAILURE);
 
         done();
       });
