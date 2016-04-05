@@ -7,9 +7,17 @@ class LoginButton extends React.Component {
   render() {
     const { authentication } = this.props;
 
-    return <DropdownButton title={authentication.name}>
-      <MenuItem eventKey="logout">Logout</MenuItem>
-    </DropdownButton>;
+    return (
+      <DropdownButton
+        title={authentication.name}
+        id="logout-button">
+        <MenuItem
+          href="/logout"
+          eventKey="logout">
+          Logout
+        </MenuItem>
+      </DropdownButton>
+    );
   }
 }
 
