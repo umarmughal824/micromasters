@@ -144,6 +144,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.user.user_details',
 )
 LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/'
 
 ROOT_URLCONF = 'micromasters.urls'
 

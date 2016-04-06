@@ -4,7 +4,10 @@ Test end to end django views.
 from django.test import TestCase
 from django.test.client import Client
 from django.core.urlresolvers import reverse
+from django.db.models.signals import post_save
+from factory.django import mute_signals
 from courses.factories import ProgramFactory
+from profiles.factories import ProfileFactory, UserFactory
 
 
 class TestViews(TestCase):
@@ -29,6 +32,27 @@ class TestViews(TestCase):
         self.assertNotContains(
             response,
             program_live_false.title,
+            status_code=200
+        )
+
+    def test_unauthenticated_user_redirect(self):
+        """Verify that an unauthenticated user can't visit '/dashboard'"""
+        response = self.client.get(reverse('ui-dashboard'))
+        self.assertRedirects(
+            response,
+            "/?next={}".format(reverse('ui-dashboard'))
+        )
+
+    def test_authenticated_user_doesnt_redirect(self):
+        """Verify that we let an authenticated user through to '/dashboard'"""
+        with mute_signals(post_save):
+            user = UserFactory.create()
+            ProfileFactory.create(user=user)
+        self.client.force_login(user)
+        response = self.client.get(reverse('ui-dashboard'))
+        self.assertContains(
+            response,
+            "Micromasters",
             status_code=200
         )
 

@@ -7,6 +7,7 @@ import logging
 from django.conf import settings
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 
 from courses.models import Program
 
@@ -52,6 +53,7 @@ def index(request):
     })
 
 
+@login_required()
 def dashboard(request):
     """
     The app dashboard view
