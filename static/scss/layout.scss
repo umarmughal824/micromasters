@@ -126,7 +126,7 @@ body {
     }
 
     .header-logo {
-      @include span-columns(2);
+      @include span-columns(3);
       padding: 25px 20px;
     }
 
@@ -151,7 +151,7 @@ body {
 
     .header-links-login {
       @include span-columns(1);
-      @include shift(6);
+      @include shift(5);
       padding: 25px 0;
       font-size: small;
     }
