@@ -6,8 +6,8 @@ class Header extends React.Component {
   render() {
     return <div id="header">
       <div className="header-logo">
-        <a href="/" alt="MIT Micromasters">
-          <img src="/static/images/mit-white.png" alt="MIT"/>
+        <a href="/">
+          <img src="/static/images/mit-micromasters.png" alt="MIT Micromasters"/>
         </a>
       </div>
       <div className="header-links-dashboard">
