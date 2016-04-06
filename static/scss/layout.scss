@@ -165,19 +165,39 @@ body {
       border: 1px solid #dddddd;
       border-radius: 5px;
       background-color: white;
-      padding: 25px;
-
-      .card-image {
+      .card-user {
+        background-color: darkslategrey;
         @include span-columns(12);
-        padding: 25px 0px;
+        .card-image-box {
+          @include span-columns(2);
+          min-width: 190px;
+          height: 220px;
+          padding-top: 40px;
+          .card-image{
+            border-radius: 50%;
+            height: 140px;
+            width: 140px;
+            margin-left: 50px;
+          }
+        }
+        .card-name {
+          margin-top: 50px;
+          color: white;
+          font-size: 25px;
+          line-height: 100px;
+          height: 100px;
+          @include span-columns(5);
+        }
+
       }
+
 
       .card-header {
         padding: 25px;
-
         font-size: x-large;
         color: #b34a4c;
         font-weight: bold;
+        @include span-columns(12);
       }
 
       .card-copy {

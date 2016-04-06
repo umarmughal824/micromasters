@@ -1,7 +1,7 @@
 import assert from 'assert';
 import fetchMock from 'fetch-mock/src/server';
-import { getCourseList } from './api';
-import { COURSE_LIST_RESPONSE } from '../constants';
+import { getCourseList, getUserProfile} from './api';
+import { COURSE_LIST_RESPONSE, USER_PROFILE_RESPONSE } from '../constants';
 
 describe('common api functions', function() {
   this.timeout(5000);  // eslint-disable-line no-invalid-this
@@ -16,6 +16,26 @@ describe('common api functions', function() {
 
   it('fails to get a list of courses', done => {
     fetchMock.mock('/api/v0/courses/', () => {
+      return {
+        status: 400
+      };
+    });
+
+    getCourseList().catch(() => {
+      done();
+    });
+  });
+
+  it('gets user profile', done => {
+    fetchMock.mock('/api/v0/profiles/jane', USER_PROFILE_RESPONSE);
+    getUserProfile('jane').then(receivedUserProfile => {
+      assert.deepEqual(receivedUserProfile, USER_PROFILE_RESPONSE);
+      done();
+    });
+  });
+
+  it('fails to get user profile', done => {
+    fetchMock.mock('/api/v0/profiles/jane', () => {
       return {
         status: 400
       };

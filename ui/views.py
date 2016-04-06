@@ -67,7 +67,9 @@ def dashboard(request):
         "reactGaDebug": settings.REACT_GA_DEBUG,
         "authenticated": not request.user.is_anonymous(),
         "name": name,
+        "username": request.user.username,
         "host": host,
+        "edx_base_url": settings.EDXORG_BASE_URL
     }
 
     return render(
