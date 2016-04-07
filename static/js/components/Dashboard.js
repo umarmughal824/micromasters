@@ -6,7 +6,7 @@ import UserImage from './UserImage';
 class Dashboard extends React.Component {
 
   render() {
-    const { courseList, profile } = this.props;
+    const { courseList, profile, dashboard } = this.props;
     return <div className="main-content">
       <div className="card">
         <div className="card-user">
@@ -21,7 +21,7 @@ class Dashboard extends React.Component {
           Your Status
         </div>
         <div className="card-copy">
-          <CourseList courseList={courseList}/>
+          <CourseList courseList={courseList} dashboard={dashboard} />
         </div>
       </div>
     </div>;
@@ -29,8 +29,9 @@ class Dashboard extends React.Component {
 }
 
 Dashboard.propTypes = {
-  courseList: React.PropTypes.array.isRequired,
-  profile: React.PropTypes.object.isRequired
+  profile: React.PropTypes.object.isRequired,
+  courseList: React.PropTypes.object.isRequired,
+  dashboard: React.PropTypes.object.isRequired,
 };
 
 export default Dashboard;
