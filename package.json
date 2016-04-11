@@ -4,6 +4,7 @@
   "devDependencies": {
     "babel-eslint": "5.0.0",
     "babel-plugin-transform-react-jsx": "6.6.4",
+    "babel-register": "6.7.2",
     "eslint": "2.2.0",
     "eslint-config-defaults": "9.0.0",
     "eslint-plugin-babel": "3.1.0",
@@ -49,6 +50,9 @@
     "webpack-dev-server": "1.14.1"
   },
   "scripts": {
-    "postinstall": "./webpack_if_prod.sh"
+    "postinstall": "./webpack_if_prod.sh",
+    "lint": "node ./node_modules/eslint/bin/eslint.js ./static/js",
+    "test": "mocha --compilers js:babel-register --require static/js/global_init.js 'static/**/*/*_test.js'",
+    "coverage": "node ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --compilers js:babel-register --require static/js/global_init.js 'static/**/*/*_test.js'"
   }
 }
