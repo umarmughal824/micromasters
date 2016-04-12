@@ -12,6 +12,14 @@ class LoginButton extends React.Component {
         title={authentication.name}
         id="logout-button">
         <MenuItem
+          href="/profile">
+          Profile
+        </MenuItem>
+        <MenuItem
+          href="/settings">
+          Settings
+        </MenuItem>
+        <MenuItem
           href="/logout"
           eventKey="logout">
           Logout
