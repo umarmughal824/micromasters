@@ -157,11 +157,11 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_user',
     'social.pipeline.user.get_username',
     'social.pipeline.user.create_user',
-    'backends.pipeline_api.update_profile_from_edx',
-    'backends.pipeline_api.update_from_linkedin',
     'social.pipeline.social_auth.associate_user',
     'social.pipeline.social_auth.load_extra_data',
     'social.pipeline.user.user_details',
+    'backends.pipeline_api.update_profile_from_edx',
+    'backends.pipeline_api.update_from_linkedin',
 )
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/'
