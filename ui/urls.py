@@ -3,11 +3,10 @@ URLs for ui
 """
 from django.conf.urls import url
 
-from ui.views import index, dashboard
+from ui.views import dashboard
 
 urlpatterns = [
     url(r'^dashboard/', dashboard, name='ui-dashboard'),
-    url(r'^$', index, name='ui-index'),
     url(r'^logout/$', 'django.contrib.auth.views.logout',
         {'next_page': '/'})
 ]

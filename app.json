@@ -76,6 +76,19 @@
         "STATUS_TOKEN": {
             "description": "Token to access the status API.",
             "required": true
+        },
+        "AWS_ACCESS_KEY_ID": {
+            "description": "AWS Access Key for S3 storage."
+        },
+        "AWS_SECRET_ACCESS_KEY": {
+            "description": "AWS Secret Key for S3 storage."
+        },
+        "AWS_STORAGE_BUCKET_NAME": {
+            "description": "S3 Bucket name."
+        },
+        "MICROMASTERS_USE_S3": {
+            "description": "Use S3 for storage backend (required on Heroku)",
+            "value": "True"
         }
     }
 }
