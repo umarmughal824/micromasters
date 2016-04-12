@@ -1,6 +1,26 @@
 Release Notes
 =============
 
+Version 0.3.0
+-------------
+
+- Moved JS tests to npm scripts
+- Added google analytics to base ui template
+- Added redirect, &quot;/dashboard&quot; -&gt; &quot;/&quot; if user not logged in
+- Implemented React component for dashboard API
+- Added MIT Micromasters graphic and updated title
+- Display student avatar and name
+- Made log out button on dashboard log user out
+- Added CourseRun to gen_fake_data
+- Updated tox version
+- Removed redux-actions
+- Introduced new Course model to support CourseRuns
+- Added code coverage for javascript
+- Added sign-in-with LinkedIn backend support.
+- Removed configureStore_test.js, use redux-asserts instead
+- Updated django-server-status
+- Fixed LICENSE organization
+
 Version 0.2.0
 -------------
 
