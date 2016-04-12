@@ -15,9 +15,6 @@ class Header extends React.Component {
           Dashboard
         </Link>
       </div>
-      <div className="header-links-programs">
-        Programs
-      </div>
       <div className="header-links-login">
         <LoginButton />
       </div>
