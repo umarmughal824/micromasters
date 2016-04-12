@@ -77,6 +77,18 @@
             "description": "Token to access the status API.",
             "required": true
         },
+        "EDXORG_BASE_URL": {
+            "description": "The base URL of the edX instance to use for logging in.",
+            "required": true
+        },
+        "EDXORG_CLIENT_ID": {
+            "description": "The OAuth client ID configured in the edX instance.",
+            "required": true
+        },
+        "EDXORG_CLIENT_SECRET": {
+            "description": "The OAuth client secret configured in the edX instance.",
+            "required": true
+        },
         "AWS_ACCESS_KEY_ID": {
             "description": "AWS Access Key for S3 storage."
         },
