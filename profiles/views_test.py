@@ -4,6 +4,7 @@ Tests for profile view
 import json
 from mock import patch
 
+from dateutil.parser import parse
 from django.core.urlresolvers import resolve, reverse
 from django.db.models.signals import post_save
 from django.test import TestCase
@@ -131,9 +132,11 @@ class ProfileTests(TestCase):
 
         old_profile = Profile.objects.get(user__username=self.user1.username)
         for key, value in patch_data.items():
-            if key == "date_joined_micromasters":
+            if key == "filled_out":
                 # this field is readonly
                 continue
+            elif key == "date_of_birth":
+                assert getattr(old_profile, key) == parse(value).date()
             else:
                 assert getattr(old_profile, key) == value
 

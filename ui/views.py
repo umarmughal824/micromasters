@@ -9,7 +9,6 @@ from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 
-
 log = logging.getLogger(__name__)
 
 
@@ -37,7 +36,7 @@ def dashboard(request):
 
     name = ""
     if not request.user.is_anonymous():
-        name = request.user.profile.name or request.user.username
+        name = request.user.profile.preferred_name or request.user.username
 
     js_settings = {
         "gaTrackingID": settings.GA_TRACKING_ID,
