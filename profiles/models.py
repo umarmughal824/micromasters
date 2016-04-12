@@ -2,7 +2,8 @@
 Models for user profile
 """
 from django.contrib.auth.models import User
-from django.db import models
+from django.db import models, transaction
+from django.db.models import Max
 from jsonfield import JSONField
 
 
@@ -121,6 +122,25 @@ class Profile(models.Model):
     edx_mailing_address = models.TextField(blank=True, null=True)
     date_joined_micromasters = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     linkedin = JSONField(blank=True, null=True)
+    student_id = models.IntegerField(blank=True, null=True, unique=True)
+
+    @transaction.atomic
+    def save(self, *args, **kwargs):
+        """need to handle setting the student_id number"""
+        if self.id is None or self.student_id is None:
+            max_id = Profile.objects.aggregate(Max('student_id'))
+            max_id = max_id['student_id__max'] or 1
+            iteration_limit = 1000
+            while Profile.objects.filter(student_id=max_id).exists() and iteration_limit > 0:
+                max_id += 1
+                iteration_limit -= 1
+            self.student_id = max_id
+        super(Profile, self).save(*args, **kwargs)
 
     def __str__(self):
         return 'Profile for "{0}"'.format(self.user.username)
+
+    @property
+    def pretty_printed_student_id(self):
+        """pretty prints the student id for easy display"""
+        return "MMM{0:06}".format(self.student_id) if self.student_id else ""

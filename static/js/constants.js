@@ -48,7 +48,8 @@ export const USER_PROFILE_RESPONSE = {
   "profile_url_small": "http://192.168.33.10:8000/static/images/profiles/default_30.png",
   "date_of_birth": '1984-04-13',
   "preferred_language": 'en',
-  "gender": "f"
+  "gender": "f",
+  "pretty_printed_student_id": "MMM000011"
 };
 
 export const PROGRAM_LIST_RESPONSE = [

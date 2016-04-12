@@ -45,7 +45,8 @@ class ProfileTests(TestCase):
             'birth_country': profile.birth_country,
             'birth_state_or_territory': profile.birth_state_or_territory,
             'birth_city': profile.birth_city,
-            'preferred_language': profile.preferred_language
+            'preferred_language': profile.preferred_language,
+            'pretty_printed_student_id': profile.pretty_printed_student_id
         }
 
     def test_limited(self):  # pylint: disable=no-self-use

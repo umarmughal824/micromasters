@@ -132,8 +132,8 @@ class ProfileTests(TestCase):
 
         old_profile = Profile.objects.get(user__username=self.user1.username)
         for key, value in patch_data.items():
-            if key == "filled_out":
-                # this field is readonly
+            if key in ["filled_out", "pretty_printed_student_id"]:
+                # these fields are readonly
                 continue
             elif key == "date_of_birth":
                 assert getattr(old_profile, key) == parse(value).date()

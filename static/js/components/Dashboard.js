@@ -14,6 +14,9 @@ class Dashboard extends React.Component {
         </div>
         <div className="card-name">
           { SETTINGS.name }
+          <div className="card-student-id">
+            ID: { profile.pretty_printed_student_id }
+          </div>
         </div>
       </div>
       <div className="card-header">

@@ -159,14 +159,20 @@ body {
           }
         }
         .card-name {
-          margin-top: 50px;
+          margin-top: 70px;
           color: white;
-          font-size: 25px;
-          line-height: 100px;
+          font-size: 30px;
+          line-height: 35px;
           height: 100px;
+          font-weight: 400;
           @include span-columns(5);
-        }
 
+          .card-student-id {
+            font-size: 18px;
+            color: #DB686C;
+            font-weight: 600;
+          }
+        }
       }
 
 

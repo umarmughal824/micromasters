@@ -1,13 +1,19 @@
 """
 Serializers for user profiles
 """
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 from profiles.models import Profile
 
 
 class ProfileSerializer(ModelSerializer):
     """Serializer for Profile objects"""
+    pretty_printed_student_id = SerializerMethodField()
+
+    def get_pretty_printed_student_id(self, obj):
+        """helper method for the SerializerMethodField"""
+        # pylint: disable=no-self-use
+        return obj.pretty_printed_student_id
 
     class Meta:  # pylint: disable=missing-docstring
         model = Profile
@@ -32,6 +38,7 @@ class ProfileSerializer(ModelSerializer):
             'date_of_birth',
             'preferred_language',
             'gender',
+            'pretty_printed_student_id',
         )
         read_only_fields = (
             'filled_out',

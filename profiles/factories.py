@@ -11,6 +11,7 @@ from factory.fuzzy import (
     FuzzyAttribute,
     FuzzyChoice,
     FuzzyDate,
+    FuzzyInteger,
     FuzzyDateTime,
     FuzzyText,
 )
@@ -76,6 +77,7 @@ class ProfileFactory(DjangoModelFactory):
     )
     edx_mailing_address = FuzzyText()
     date_joined_micromasters = FuzzyDateTime(datetime(1850, 1, 1, tzinfo=timezone.utc))
+    student_id = FuzzyInteger(1, 1000)
 
     class Meta:  # pylint: disable=missing-docstring
         model = Profile
