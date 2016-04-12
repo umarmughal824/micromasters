@@ -125,12 +125,6 @@ body {
       font-size: small;
     }
 
-    .header-links-programs {
-      @include span-columns(1);
-      padding: 35px 0;
-      font-size: small;
-    }
-
     .header-links-login {
       @include span-columns(1);
       @include shift(5);
