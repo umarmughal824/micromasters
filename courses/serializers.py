@@ -3,7 +3,7 @@ Serializers for courses
 """
 from rest_framework import serializers
 
-from courses.models import Course, Program
+from courses.models import CourseRun, Program
 
 
 class ProgramSerializer(serializers.ModelSerializer):
@@ -13,8 +13,16 @@ class ProgramSerializer(serializers.ModelSerializer):
         fields = ('id', 'title',)
 
 
-class CourseSerializer(serializers.ModelSerializer):
-    """Serializer for Program objects"""
+class CourseRunSerializer(serializers.ModelSerializer):
+    """Serializer for CourseRun objects"""
+    program = serializers.SerializerMethodField()
+
     class Meta:  # pylint: disable=missing-docstring
-        model = Course
+        model = CourseRun
         exclude = ('edx_course_key',)
+
+    def get_program(self, obj):  # pylint: disable=no-self-use
+        """
+        Get program id.
+        """
+        return obj.course.program.id

@@ -4,17 +4,21 @@
   "devDependencies": {
     "babel-eslint": "5.0.0",
     "babel-plugin-transform-react-jsx": "6.6.4",
+    "babel-register": "6.7.2",
     "eslint": "2.2.0",
     "eslint-config-defaults": "9.0.0",
     "eslint-plugin-babel": "3.1.0",
     "eslint-plugin-react": "4.1.0",
     "fetch-mock": "4.3.0",
+    "istanbul": "1.0.0-alpha.2",
     "jsdom": "8.1.0",
     "jsdom-global": "1.6.2",
     "mocha": "2.4.5",
     "react-addons-test-utils": "0.14.7",
     "react-hot-loader": "1.3.0",
-    "sinon": "1.17.3"
+    "redux-asserts": "0.0.6",
+    "sinon": "1.17.3",
+    "striptags": "2.1.1"
   },
   "dependencies": {
     "babel": "6.5.2",
@@ -28,6 +32,7 @@
     "history": "2.0.1",
     "isomorphic-fetch": "2.2.1",
     "lodash": "4.6.1",
+    "moment": "2.12.0",
     "node-neat": "1.7.2",
     "node-sass": "3.4.2",
     "react": "0.14.7",
@@ -36,7 +41,6 @@
     "react-ga": "1.2.0",
     "react-redux": "4.4.0",
     "react-router": "2.0.0",
-    "redux-actions": "0.9.1",
     "redux-devtools": "2.1.5",
     "redux-logger": "2.6.1",
     "redux-thunk": "2.0.1",
@@ -46,6 +50,9 @@
     "webpack-dev-server": "1.14.1"
   },
   "scripts": {
-    "postinstall": "./webpack_if_prod.sh"
+    "postinstall": "./webpack_if_prod.sh",
+    "lint": "node ./node_modules/eslint/bin/eslint.js ./static/js",
+    "test": "mocha --compilers js:babel-register --require static/js/global_init.js 'static/**/*/*_test.js'",
+    "coverage": "node ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --compilers js:babel-register --require static/js/global_init.js 'static/**/*/*_test.js'"
   }
 }

@@ -3,7 +3,7 @@ import factory
 from factory import fuzzy
 from factory.django import DjangoModelFactory
 
-from .models import Program, Course
+from .models import Program, Course, CourseRun
 
 
 class ProgramFactory(DjangoModelFactory):
@@ -21,3 +21,12 @@ class CourseFactory(DjangoModelFactory):
 
     class Meta:  # pylint: disable=missing-docstring
         model = Course
+
+
+class CourseRunFactory(DjangoModelFactory):
+    """Factory for CourseRuns"""
+    title = fuzzy.FuzzyText(prefix="CourseRun ")
+    course = factory.SubFactory(CourseFactory)
+
+    class Meta:  # pylint: disable=missing-docstring
+        model = CourseRun

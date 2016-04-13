@@ -3,6 +3,7 @@ git
 curl
 libpq-dev
 python3-dev
+libjpeg-dev
 
 # developer requirements
 postgresql-client

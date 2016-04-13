@@ -3,6 +3,8 @@
 import 'isomorphic-fetch';
 import _ from 'lodash';
 
+import { DASHBOARD_RESPONSE } from '../constants';
+
 function getCookie(name) {
   let cookieValue = null;
 
@@ -78,4 +80,16 @@ function fetchJSONWithCSRF(input, init) {
 
 export function getCourseList() {
   return fetchJSONWithCSRF('/api/v0/courses/');
+}
+
+export function getProgramList() {
+  return fetchJSONWithCSRF('/api/v0/programs/');
+}
+
+export function getUserProfile(username) {
+  return fetchJSONWithCSRF('/api/v0/profiles/' + username);
+}
+
+export function getDashboard() {
+  return Promise.resolve(DASHBOARD_RESPONSE);
 }

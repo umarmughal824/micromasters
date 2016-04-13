@@ -82,25 +82,6 @@ body {
     margin-right: 5px;
   }
 }
-.course-list-container{
-  background-color: lightgrey;
-}
-.course-list{
-  border: 1px solid gray;
-  display: inline-block;
-  width: 400px;
-  list-style-type: none;
-  padding: 0;
-}
-
-.course-list>li{
-  padding: 10px;
-  border-bottom: 1px solid gray;
-}
-.course-list>li:last-child{
-  border-bottom: none;
-}
-
 
 // dashboard
 #dashboard {
@@ -126,7 +107,7 @@ body {
     }
 
     .header-logo {
-      @include span-columns(2);
+      @include span-columns(3);
       padding: 25px 20px;
     }
 
@@ -151,7 +132,7 @@ body {
 
     .header-links-login {
       @include span-columns(1);
-      @include shift(6);
+      @include shift(5);
       padding: 25px 0;
       font-size: small;
     }
@@ -165,24 +146,77 @@ body {
       border: 1px solid #dddddd;
       border-radius: 5px;
       background-color: white;
-      padding: 25px;
-
-      .card-image {
+      .card-user {
+        background-color: darkslategrey;
         @include span-columns(12);
-        padding: 25px 0px;
+        .card-image-box {
+          @include span-columns(2);
+          min-width: 190px;
+          height: 220px;
+          padding-top: 40px;
+          .card-image{
+            border-radius: 50%;
+            height: 140px;
+            width: 140px;
+            margin-left: 50px;
+          }
+        }
+        .card-name {
+          margin-top: 50px;
+          color: white;
+          font-size: 25px;
+          line-height: 100px;
+          height: 100px;
+          @include span-columns(5);
+        }
+
       }
+
 
       .card-header {
         padding: 25px;
-
         font-size: x-large;
         color: #b34a4c;
         font-weight: bold;
+        @include span-columns(12);
       }
 
       .card-copy {
+        @include outer-container;
         padding: 25px;
       }
+    }
+  }
+
+  .course-list {
+    @include outer-container;
+    @include span-columns(8);
+    border: 1px solid grey;
+
+    ul {
+      @include span-columns(8 of 8);
+      border-bottom: 1px solid lightgray;
+      margin: 0px;
+    }
+    ul:last-child {
+      border-bottom: 0px;
+    }
+
+    .course-list-header {
+      background-color: #eff5f7;
+      font-weight: bold;
+      font-size: larger;
+    }
+
+    li {
+      @include span-columns(4 of 8);
+      @include omega(2n);
+      display: block;
+      padding: 15px;
+    }
+
+    li:last-child {
+      text-align: right;
     }
   }
 }

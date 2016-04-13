@@ -7,6 +7,7 @@ import logging
 from django.conf import settings
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 
 from courses.models import Program
 
@@ -52,6 +53,7 @@ def index(request):
     })
 
 
+@login_required()
 def dashboard(request):
     """
     The app dashboard view
@@ -67,7 +69,9 @@ def dashboard(request):
         "reactGaDebug": settings.REACT_GA_DEBUG,
         "authenticated": not request.user.is_anonymous(),
         "name": name,
+        "username": request.user.username,
         "host": host,
+        "edx_base_url": settings.EDXORG_BASE_URL
     }
 
     return render(
