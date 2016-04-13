@@ -1,0 +1,53 @@
+#header {
+  @include outer-container;
+
+  border-bottom: 1px solid #dddddd;
+  background-color: white;
+
+  h1 {
+    font-size: large;
+    display: inline-block;
+  }
+  #navigation {
+    button div span {
+      text-transform: initial;
+    }
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .header-logo {
+    @include span-columns(3);
+    padding: 25px 20px;
+  }
+
+  .header-logo-text {
+    @include span-columns(1);
+    font-size: large;
+    font-weight: bold;
+    padding: 35px 0;
+  }
+
+  .header-links-dashboard {
+    @include span-columns(1);
+    padding: 35px 0;
+    font-size: small;
+  }
+
+  .header-links-login {
+    @include span-columns(1);
+    @include shift(5);
+    padding: 25px 0;
+    font-size: small;
+  }
+  .btn-outline {
+    background-color: transparent;
+    color: #46be8a;
+    border-radius: 3px;
+    padding: 6px 15px;
+    line-height: 1.57142857;
+  }
+}

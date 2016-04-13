@@ -1,0 +1,90 @@
+#dashboard {
+  .main-content {
+    @include outer-container;
+    @include pad(20px);
+
+    .card {
+      border: 1px solid #dddddd;
+      border-radius: 5px;
+      background-color: white;
+      .card-user {
+        background-color: darkslategrey;
+        background-image: url(/static/images/mit-stata-center.png);
+        background-position: 50% 50%;
+        @include span-columns(12);
+        .card-image-box {
+          @include span-columns(2);
+          min-width: 190px;
+          height: 220px;
+          padding-top: 40px;
+          .card-image{
+            border-radius: 50%;
+            height: 140px;
+            width: 140px;
+            margin-left: 50px;
+          }
+        }
+        .card-name {
+          margin-top: 70px;
+          color: white;
+          font-size: 30px;
+          line-height: 35px;
+          height: 100px;
+          font-weight: 400;
+          @include span-columns(5);
+
+          .card-student-id {
+            font-size: 18px;
+            color: #DB686C;
+            font-weight: 600;
+          }
+        }
+      }
+
+      .card-header {
+        padding: 25px;
+        font-size: x-large;
+        color: #b34a4c;
+        font-weight: bold;
+        @include span-columns(12);
+      }
+
+      .card-copy {
+        @include outer-container;
+        padding: 25px;
+      }
+    }
+  }
+
+  .course-list {
+    @include outer-container;
+    @include span-columns(8);
+    border: 1px solid grey;
+
+    ul {
+      @include span-columns(8 of 8);
+      border-bottom: 1px solid lightgray;
+      margin: 0px;
+    }
+    ul:last-child {
+      border-bottom: 0px;
+    }
+
+    .course-list-header {
+      background-color: #eff5f7;
+      font-weight: bold;
+      font-size: larger;
+    }
+
+    li {
+      @include span-columns(4 of 8);
+      @include omega(2n);
+      display: block;
+      padding: 15px;
+    }
+
+    li:last-child {
+      text-align: right;
+    }
+  }
+}
