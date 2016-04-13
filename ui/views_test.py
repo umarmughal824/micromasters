@@ -6,6 +6,7 @@ from django.db.models.signals import post_save
 from django.test import TestCase
 from django.test.client import Client
 from factory.django import mute_signals
+from factory.fuzzy import FuzzyText
 
 from courses.factories import ProgramFactory
 from profiles.factories import ProfileFactory, UserFactory
@@ -35,6 +36,29 @@ class TestViews(TestCase):
             program_live_false.title,
             status_code=200
         )
+
+    def test_dashboard_settings(self):
+        """
+        Assert settings we pass to dashboard
+        """
+        with mute_signals(post_save):
+            profile = ProfileFactory.create()
+        self.client.force_login(profile.user)
+
+        ga_tracking_id = FuzzyText().fuzz()
+        react_ga_debug = FuzzyText().fuzz()
+        edx_base_url = FuzzyText().fuzz()
+        with self.settings(
+            GA_TRACKING_ID=ga_tracking_id,
+            REACT_GA_DEBUG=react_ga_debug,
+            EDXORG_BASE_URL=edx_base_url
+        ):
+            resp = self.client.get(reverse('ui-dashboard'))
+            self.assertContains(resp, ga_tracking_id)
+            self.assertContains(resp, react_ga_debug)
+            self.assertContains(resp, edx_base_url)
+            self.assertContains(resp, profile.preferred_name)
+            self.assertContains(resp, profile.user.username)
 
     def test_unauthenticated_user_redirect(self):
         """Verify that an unauthenticated user can't visit '/dashboard'"""

@@ -1,7 +1,6 @@
 """
 Serializers for user profiles
 """
-from rest_framework.fields import JSONField
 from rest_framework.serializers import ModelSerializer
 
 from profiles.models import Profile
@@ -9,32 +8,33 @@ from profiles.models import Profile
 
 class ProfileSerializer(ModelSerializer):
     """Serializer for Profile objects"""
-    language_proficiencies = JSONField()
 
     class Meta:  # pylint: disable=missing-docstring
         model = Profile
         fields = (
+            'filled_out',
             'account_privacy',
             'email_optin',
-            'employer',
-            'job_title',
-            'state_or_territory',
-            'name',
-            'bio',
+            'first_name',
+            'last_name',
+            'preferred_name',
             'country',
+            'state_or_territory',
+            'city',
+            'birth_country',
+            'birth_state_or_territory',
+            'birth_city',
             'has_profile_image',
             'profile_url_full',
             'profile_url_large',
             'profile_url_medium',
             'profile_url_small',
-            'requires_parental_consent',
-            'year_of_birth',
-            'level_of_education',
-            'goals',
-            'language_proficiencies',
+            'date_of_birth',
+            'preferred_language',
             'gender',
-            'mailing_address',
-            'date_joined_micromasters',
+        )
+        read_only_fields = (
+            'filled_out',
         )
 
 
@@ -46,13 +46,11 @@ class ProfileLimitedSerializer(ModelSerializer):
     class Meta:  # pylint: disable=missing-docstring
         model = Profile
         fields = (
-            'name',
-            'bio',
+            'preferred_name',
             'account_privacy',
-            'employer',
-            'job_title',
-            'state_or_territory',
             'country',
+            'state_or_territory',
+            'city',
             'has_profile_image',
             'profile_url_full',
             'profile_url_large',

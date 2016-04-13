@@ -8,9 +8,10 @@ from django.test import TestCase
 import mock
 
 from backends import pipeline_api, edxorg
-from .pipeline_api import update_from_linkedin
+from backends.pipeline_api import update_from_linkedin
 from profiles.models import Profile
 from profiles.factories import UserFactory
+from profiles.util import split_name
 
 
 # pylint: disable=no-self-use
@@ -20,29 +21,27 @@ class EdxPipelineApiTest(TestCase):
     authentication pipeline.
     """
 
-    def check_profile_fields(self, profile, profile_fields=None):
+    def check_empty_profile(self, profile):
         """
         Helper function that checks if a profile is empty
         """
-        all_empty_fields = [
-            ('account_privacy', Profile.PRIVATE),
-            ('name', None),
-            ('bio', None),
-            ('country', None),
-            ('has_profile_image', False),
-            ('profile_url_full', None),
-            ('profile_url_large', None),
-            ('profile_url_medium', None),
-            ('profile_url_small', None),
-            ('requires_parental_consent', None),
-            ('year_of_birth', None),
-            ('level_of_education', None),
-            ('goals', None),
-            ('language_proficiencies', None),
-            ('gender', None),
-            ('mailing_address', None),
-        ]
-        profile_fields = profile_fields or all_empty_fields
+        profile.refresh_from_db()
+        for field in profile._meta.get_fields():  # pylint: disable=protected-access
+            key = field.name
+            if key in ('id', 'user', 'date_joined_micromasters'):
+                continue
+            if key == 'account_privacy':
+                assert getattr(profile, key) == Profile.PRIVATE
+            elif key in ('has_profile_image', 'filled_out', 'email_optin'):
+                # booleans
+                assert getattr(profile, key) is False
+            else:
+                assert getattr(profile, key) is None
+
+    def check_profile_fields(self, profile, profile_fields):
+        """
+        Helper function that asserts the values of a profile
+        """
         profile.refresh_from_db()
         for key, val in profile_fields:
             assert getattr(profile, key) == val
@@ -54,65 +53,7 @@ class EdxPipelineApiTest(TestCase):
         self.user = UserFactory()
         self.user_profile = Profile.objects.get(user=self.user)
 
-    def test_update_profile_wrong_backend(self):
-        """
-        The only backend allowed for update_profile is edxorg
-        """
-        self.check_profile_fields(self.user_profile)
-
-        backend = mock.MagicMock(name='other_backend')
-        pipeline_api.update_profile_from_edx(
-            backend, self.user, {'access_token': 'foo'}, True)
-
-        self.user_profile.refresh_from_db()
-        self.check_profile_fields(self.user_profile)
-
-    def test_update_profile_old_user(self):
-        """
-        Only new users are updated
-        """
-        self.check_profile_fields(self.user_profile)
-        pipeline_api.update_profile_from_edx(
-            edxorg.EdxOrgOAuth2, self.user, {'access_token': 'foo'}, False)
-
-        self.user_profile.refresh_from_db()
-        self.check_profile_fields(self.user_profile)
-
-    def test_update_profile_no_access_token(self):
-        """
-        The response dict has no access token
-        """
-        self.check_profile_fields(self.user_profile)
-
-        pipeline_api.update_profile_from_edx(
-            edxorg.EdxOrgOAuth2, self.user, {'access_token': ''}, True)
-
-        self.user_profile.refresh_from_db()
-        self.check_profile_fields(self.user_profile)
-
-    def test_update_profile_no_existing_profile(self):
-        """
-        The profile did not exist for the user
-        """
-        self.user_profile.delete()
-
-        with self.assertRaises(Profile.DoesNotExist):
-            Profile.objects.get(user=self.user)
-
-        # just checking that nothing raises an exception
-        pipeline_api.update_profile_from_edx(
-            edxorg.EdxOrgOAuth2, self.user, {'access_token': 'foo_token'}, True)
-
-        # verify that a profile has not been created
-        with self.assertRaises(Profile.DoesNotExist):
-            Profile.objects.get(user=self.user)
-
-    @mock.patch('backends.edxorg.EdxOrgOAuth2.get_json')
-    def test_update_profile(self, mocked_get_json):
-        """
-        Happy path
-        """
-        mocked_content = {
+        self.mocked_edx_profile = {
             'account_privacy': 'all_users',
             'bio': 'this is my personal profile text',
             'country': 'IT',
@@ -136,6 +77,66 @@ class EdxPipelineApiTest(TestCase):
             'username': self.user.username,
             'year_of_birth': 1986
         }
+
+    def test_update_profile_wrong_backend(self):
+        """
+        The only backend allowed for update_profile is edxorg
+        """
+        self.check_empty_profile(self.user_profile)
+
+        backend = mock.MagicMock(name='other_backend')
+        pipeline_api.update_profile_from_edx(
+            backend, self.user, {'access_token': 'foo'}, True)
+
+        self.user_profile.refresh_from_db()
+        self.check_empty_profile(self.user_profile)
+
+    def test_update_profile_old_user(self):
+        """
+        Only new users are updated
+        """
+        self.check_empty_profile(self.user_profile)
+        pipeline_api.update_profile_from_edx(
+            edxorg.EdxOrgOAuth2, self.user, {'access_token': 'foo'}, False)
+
+        self.user_profile.refresh_from_db()
+        self.check_empty_profile(self.user_profile)
+
+    def test_update_profile_no_access_token(self):
+        """
+        The response dict has no access token
+        """
+        self.check_empty_profile(self.user_profile)
+
+        pipeline_api.update_profile_from_edx(
+            edxorg.EdxOrgOAuth2, self.user, {'access_token': ''}, True)
+
+        self.user_profile.refresh_from_db()
+        self.check_empty_profile(self.user_profile)
+
+    def test_update_profile_no_existing_profile(self):
+        """
+        The profile did not exist for the user
+        """
+        self.user_profile.delete()
+
+        with self.assertRaises(Profile.DoesNotExist):
+            Profile.objects.get(user=self.user)
+
+        # just checking that nothing raises an exception
+        pipeline_api.update_profile_from_edx(
+            edxorg.EdxOrgOAuth2, self.user, {'access_token': 'foo_token'}, True)
+
+        # verify that a profile has not been created
+        with self.assertRaises(Profile.DoesNotExist):
+            Profile.objects.get(user=self.user)
+
+    @mock.patch('backends.edxorg.EdxOrgOAuth2.get_json')
+    def test_update_profile(self, mocked_get_json):
+        """
+        Happy path
+        """
+        mocked_content = self.mocked_edx_profile
         mocked_get_json.return_value = mocked_content
         pipeline_api.update_profile_from_edx(
             edxorg.EdxOrgOAuth2, self.user, {'access_token': 'foo_token'}, True)
@@ -147,26 +148,71 @@ class EdxPipelineApiTest(TestCase):
             headers={'Authorization': 'Bearer foo_token'}
         )
 
+        first_name, last_name = split_name(mocked_content['name'])
+
         all_fields = [
-            ('account_privacy', mocked_content['account_privacy']),
-            ('name', mocked_content['name']),
-            ('bio', mocked_content['bio']),
+            ('account_privacy', Profile.PUBLIC),
+            ('edx_name', mocked_content['name']),
+            ('first_name', first_name),
+            ('last_name', last_name),
+            ('preferred_name', None),
+            ('edx_bio', mocked_content['bio']),
             ('country', mocked_content['country']),
             ('has_profile_image', mocked_content['profile_image']['has_image']),
             ('profile_url_full', mocked_content['profile_image']['image_url_full']),
             ('profile_url_large', mocked_content['profile_image']['image_url_large']),
             ('profile_url_medium', mocked_content['profile_image']['image_url_medium']),
             ('profile_url_small', mocked_content['profile_image']['image_url_small']),
-            ('requires_parental_consent', mocked_content['requires_parental_consent']),
-            ('year_of_birth', mocked_content['year_of_birth']),
-            ('level_of_education', mocked_content['level_of_education']),
-            ('goals', mocked_content['goals']),
-            ('language_proficiencies', mocked_content['language_proficiencies']),
+            ('edx_requires_parental_consent', mocked_content['requires_parental_consent']),
+            ('edx_level_of_education', mocked_content['level_of_education']),
+            ('edx_goals', mocked_content['goals']),
+            ('edx_language_proficiencies', mocked_content['language_proficiencies']),
+            ('preferred_language', mocked_content['language_proficiencies'][0]['code']),
             ('gender', mocked_content['gender']),
-            ('mailing_address', mocked_content['mailing_address']),
+            ('edx_mailing_address', mocked_content['mailing_address']),
         ]
 
         self.check_profile_fields(self.user_profile, all_fields)
+
+        # We do not set the date_of_birth using year_of_birth
+        assert self.user_profile.date_of_birth is None
+
+    @mock.patch('backends.edxorg.EdxOrgOAuth2.get_json')
+    def test_preferred_language(self, mocked_get_json):
+        """
+        If language_proficiencies is missing or invalid, we should not set
+        preferred_language. We already test the success case in test_update_profile
+        """
+        for proficiencies in ([], {}, [{}], None):
+            mocked_content = dict(self.mocked_edx_profile)
+            mocked_content['language_proficiencies'] = proficiencies
+            mocked_get_json.return_value = mocked_content
+            pipeline_api.update_profile_from_edx(
+                edxorg.EdxOrgOAuth2, self.user, {'access_token': 'foo_token'}, True)
+
+            self.user_profile.refresh_from_db()
+            assert self.user_profile.preferred_language is None
+            assert self.user_profile.edx_language_proficiencies == proficiencies
+
+    @mock.patch('backends.edxorg.EdxOrgOAuth2.get_json')
+    def test_account_privacy(self, mocked_get_json):
+        """
+        Test that account_privacy is modified correctly
+        """
+        account_privacy_values = [
+            ('private', Profile.PRIVATE),
+            (None, Profile.PRIVATE),
+            ('all_users', Profile.PUBLIC),
+        ]
+        for edx_privacy, mm_privacy in account_privacy_values:
+            mocked_content = dict(self.mocked_edx_profile)
+            mocked_content['account_privacy'] = edx_privacy
+            mocked_get_json.return_value = mocked_content
+            pipeline_api.update_profile_from_edx(
+                edxorg.EdxOrgOAuth2, self.user, {'access_token': 'foo_token'}, True)
+
+            self.user_profile.refresh_from_db()
+            assert self.user_profile.account_privacy == mm_privacy
 
 
 class LinkedInPipelineTests(TestCase):
