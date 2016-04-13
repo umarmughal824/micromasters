@@ -221,6 +221,18 @@ body {
   font-weight: bold;
 }
 
+// Remove link styling
+.no-hover {
+  text-decoration: none !important;
+  cursor: default !important;
+  color: inherit !important;
+}
+
+.Select {
+  // 300px seems to be what material-design-lite uses
+  max-width: 300px !important;
+}
+
 // Wagtail responsive embeds
 .rich-text img {
     max-width: 100%;

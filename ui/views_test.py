@@ -1,7 +1,6 @@
 """
 Test end to end django views.
 """
-from django.core.urlresolvers import reverse
 from django.db.models.signals import post_save
 from django.test import TestCase
 from django.test.client import Client
@@ -53,7 +52,7 @@ class TestViews(TestCase):
             REACT_GA_DEBUG=react_ga_debug,
             EDXORG_BASE_URL=edx_base_url
         ):
-            resp = self.client.get(reverse('ui-dashboard'))
+            resp = self.client.get('/dashboard/')
             self.assertContains(resp, ga_tracking_id)
             self.assertContains(resp, react_ga_debug)
             self.assertContains(resp, edx_base_url)
@@ -62,10 +61,10 @@ class TestViews(TestCase):
 
     def test_unauthenticated_user_redirect(self):
         """Verify that an unauthenticated user can't visit '/dashboard'"""
-        response = self.client.get(reverse('ui-dashboard'))
+        response = self.client.get('/dashboard/')
         self.assertRedirects(
             response,
-            "/?next={}".format(reverse('ui-dashboard'))
+            "/?next=/dashboard/"
         )
 
     def test_authenticated_user_doesnt_redirect(self):
@@ -74,7 +73,7 @@ class TestViews(TestCase):
             user = UserFactory.create()
             ProfileFactory.create(user=user)
         self.client.force_login(user)
-        response = self.client.get(reverse('ui-dashboard'))
+        response = self.client.get('/dashboard/')
         self.assertContains(
             response,
             "Micromasters",

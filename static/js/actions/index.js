@@ -10,6 +10,7 @@ export const REQUEST_USER_PROFILE = 'REQUEST_USER_PROFILE';
 export const RECEIVE_USER_PROFILE_SUCCESS = 'RECEIVE_USER_PROFILE_SUCCESS';
 export const RECEIVE_USER_PROFILE_FAILURE = 'RECEIVE_USER_PROFILE_FAILURE';
 export const CLEAR_PROFILE = 'CLEAR_PROFILE';
+export const UPDATE_PROFILE = 'UPDATE_PROFILE';
 
 // constants for fetch status (these are not action types)
 export const FETCH_FAILURE = 'FETCH_FAILURE';
@@ -48,6 +49,11 @@ export const receiveUserProfileSuccess = profile =>({
 const receiveUserProfileFailure = () => ({ type: RECEIVE_USER_PROFILE_FAILURE });
 
 export const clearProfile = () => ({ type: CLEAR_PROFILE });
+
+export const updateProfile = profile => ({
+  type: UPDATE_PROFILE,
+  payload: { profile }
+});
 
 export function fetchUserProfile(username) {
   return dispatch => {
