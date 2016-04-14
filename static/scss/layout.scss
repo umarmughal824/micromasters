@@ -144,6 +144,7 @@ body {
       .card-user {
         background-color: darkslategrey;
         background-image: url(/static/images/mit-stata-center.png);
+        background-position: 50% 50%;
         @include span-columns(12);
         .card-image-box {
           @include span-columns(2);
