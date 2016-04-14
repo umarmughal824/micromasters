@@ -5,10 +5,12 @@ import {
   RECEIVE_COURSE_LIST_SUCCESS,
   RECEIVE_COURSE_LIST_FAILURE,
   CLEAR_COURSE_LIST,
+
   REQUEST_USER_PROFILE,
   RECEIVE_USER_PROFILE_SUCCESS,
   RECEIVE_USER_PROFILE_FAILURE,
   CLEAR_PROFILE,
+  UPDATE_PROFILE,
 
   REQUEST_DASHBOARD,
   RECEIVE_DASHBOARD_SUCCESS,
@@ -48,14 +50,16 @@ export const courseList = (state = INITIAL_COURSE_LIST_STATE, action) => {
   }
 };
 
+const DEFAULT_PROFILE_IMAGE =
+  (SETTINGS.edx_base_url + '/static/images/profiles/default_120.png').
+  //replacing multiple "/" with a single forward slash, excluding the ones following the colon
+  replace(/([^:]\/)\/+/g, "$1");
 export const INITIAL_USER_PROFILE_STATE = {
   profile: {
-    profile_url_large: // eslint-disable-line camelcase
-      (SETTINGS.edx_base_url + '/static/images/profiles/default_120.png').
-        //replacing multiple "/" with a single forward slash, excluding the ones following the colon
-        replace(/([^:]\/)\/+/g, "$1")
+    profile_url_large: DEFAULT_PROFILE_IMAGE// eslint-disable-line camelcase
   }
 };
+INITIAL_USER_PROFILE_STATE.profileCopy = INITIAL_USER_PROFILE_STATE.profile;
 
 export const userProfile = (state = INITIAL_USER_PROFILE_STATE, action) => {
   switch (action.type) {
@@ -66,7 +70,8 @@ export const userProfile = (state = INITIAL_USER_PROFILE_STATE, action) => {
   case RECEIVE_USER_PROFILE_SUCCESS:
     return Object.assign({}, state, {
       userProfileStatus: FETCH_SUCCESS,
-      profile: action.payload.profile
+      profile: action.payload.profile,
+      profileCopy: action.payload.profile
     });
   case RECEIVE_USER_PROFILE_FAILURE:
     return Object.assign({}, state, {
@@ -74,7 +79,10 @@ export const userProfile = (state = INITIAL_USER_PROFILE_STATE, action) => {
     });
   case CLEAR_PROFILE:
     return INITIAL_USER_PROFILE_STATE;
-
+  case UPDATE_PROFILE:
+    return Object.assign({}, state, {
+      profileCopy: action.payload.profile
+    });
   default:
     return state;
   }

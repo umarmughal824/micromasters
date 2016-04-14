@@ -28,7 +28,7 @@ def get_bundle_url(request, bundle_name):
 
 
 @login_required()
-def dashboard(request):
+def dashboard(request, *args):  # pylint: disable=unused-argument
     """
     The app dashboard view
     """

@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import DropdownButton from 'react-bootstrap/lib/DropdownButton';
 import MenuItem from 'react-bootstrap/lib/MenuItem';
+import Link from 'react-router/lib/Link';
 
 class LoginButton extends React.Component {
   render() {
@@ -11,9 +12,10 @@ class LoginButton extends React.Component {
       <DropdownButton
         title={authentication.name}
         id="logout-button">
-        <MenuItem
-          href="/profile">
-          Profile
+        <MenuItem>
+          <Link to="/profile">
+            Profile
+          </Link>
         </MenuItem>
         <MenuItem
           href="/settings">
