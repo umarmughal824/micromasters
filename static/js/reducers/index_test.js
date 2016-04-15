@@ -9,11 +9,22 @@ import {
   CLEAR_COURSE_LIST,
 
   fetchUserProfile,
+  receiveGetUserProfileSuccess,
   clearProfile,
-  REQUEST_USER_PROFILE,
-  RECEIVE_USER_PROFILE_SUCCESS,
-  RECEIVE_USER_PROFILE_FAILURE,
+  saveProfile,
+  updateProfile,
+  startProfileEdit,
+  clearProfileEdit,
+  REQUEST_GET_USER_PROFILE,
+  RECEIVE_GET_USER_PROFILE_SUCCESS,
+  RECEIVE_GET_USER_PROFILE_FAILURE,
   CLEAR_PROFILE,
+  UPDATE_PROFILE,
+  START_PROFILE_EDIT,
+  CLEAR_PROFILE_EDIT,
+  REQUEST_PATCH_USER_PROFILE,
+  RECEIVE_PATCH_USER_PROFILE_SUCCESS,
+  RECEIVE_PATCH_USER_PROFILE_FAILURE,
 
   fetchDashboard,
   clearDashboard,
@@ -30,6 +41,7 @@ import {
   COURSE_LIST_RESPONSE,
   PROGRAM_LIST_RESPONSE,
   DASHBOARD_RESPONSE,
+  USER_PROFILE_RESPONSE,
 } from '../constants';
 import configureTestStore from 'redux-asserts';
 import rootReducer, { INITIAL_USER_PROFILE_STATE } from '../reducers';
@@ -111,10 +123,11 @@ describe('reducers', () => {
     });
   });
   describe('profile reducers', () => {
-    let userProfileStub;
+    let getUserProfileStub, patchUserProfileStub;
     beforeEach(() => {
       dispatchThen = store.createDispatchThen(state => state.userProfile);
-      userProfileStub = sandbox.stub(api, 'getUserProfile');
+      getUserProfileStub = sandbox.stub(api, 'getUserProfile');
+      patchUserProfileStub = sandbox.stub(api, 'patchUserProfile');
     });
 
     it('should have initial state', done => {
@@ -125,12 +138,14 @@ describe('reducers', () => {
     });
 
     it('should fetch user profile successfully then clear it', done => {
-      userProfileStub.returns(Promise.resolve(["data"]));
+      getUserProfileStub.returns(Promise.resolve(USER_PROFILE_RESPONSE));
 
-      dispatchThen(fetchUserProfile('jane'), [REQUEST_USER_PROFILE, RECEIVE_USER_PROFILE_SUCCESS]).
+      dispatchThen(fetchUserProfile('jane'), [REQUEST_GET_USER_PROFILE, RECEIVE_GET_USER_PROFILE_SUCCESS]).
       then(profileState => {
-        assert.deepEqual(profileState.profile, ["data"]);
-        assert.equal(profileState.userProfileStatus, FETCH_SUCCESS);
+        assert.deepEqual(profileState.profile, USER_PROFILE_RESPONSE);
+        assert.equal(profileState.getStatus, FETCH_SUCCESS);
+
+        assert.ok(getUserProfileStub.calledWith('jane'));
 
         dispatchThen(clearProfile(), [CLEAR_PROFILE]).then(state => {
           assert.deepEqual(state, INITIAL_USER_PROFILE_STATE);
@@ -141,13 +156,72 @@ describe('reducers', () => {
     });
 
     it('should fail to fetch user profile', done => {
-      userProfileStub.returns(Promise.reject());
+      getUserProfileStub.returns(Promise.reject());
 
-      dispatchThen(fetchUserProfile('jane'), [REQUEST_USER_PROFILE, RECEIVE_USER_PROFILE_FAILURE]).
+      dispatchThen(fetchUserProfile('jane'), [REQUEST_GET_USER_PROFILE, RECEIVE_GET_USER_PROFILE_FAILURE]).
       then(profileState => {
-        assert.equal(profileState.userProfileStatus, FETCH_FAILURE);
+        assert.equal(profileState.getStatus, FETCH_FAILURE);
+
+        assert.ok(getUserProfileStub.calledWith('jane'));
 
         done();
+      });
+    });
+
+    it("should patch the profile successfully", done => {
+      patchUserProfileStub.returns(Promise.resolve());
+
+      dispatchThen(
+        saveProfile('jane', USER_PROFILE_RESPONSE),
+        [REQUEST_PATCH_USER_PROFILE, RECEIVE_PATCH_USER_PROFILE_SUCCESS]
+      ).then(profileState => {
+        assert.equal(profileState.patchStatus, FETCH_SUCCESS);
+        assert.deepEqual(profileState.profile, USER_PROFILE_RESPONSE);
+
+        assert.ok(patchUserProfileStub.calledWith('jane', USER_PROFILE_RESPONSE));
+
+        done();
+      });
+    });
+
+    it("should fail to patch the profile", done => {
+      patchUserProfileStub.returns(Promise.reject());
+
+      dispatchThen(
+        saveProfile('jane', USER_PROFILE_RESPONSE),
+        [REQUEST_PATCH_USER_PROFILE, RECEIVE_PATCH_USER_PROFILE_FAILURE]
+      ).then(profileState => {
+        assert.equal(profileState.patchStatus, FETCH_FAILURE);
+
+        assert.ok(patchUserProfileStub.calledWith('jane', USER_PROFILE_RESPONSE));
+
+        done();
+      });
+    });
+
+    it("should start editing the profile, update the copy, then clear it", done => {
+      // populate a profile
+      store.dispatch(receiveGetUserProfileSuccess(USER_PROFILE_RESPONSE));
+      dispatchThen(startProfileEdit(), [START_PROFILE_EDIT]).then(profileState => {
+        assert.deepEqual(profileState.edit, {
+          profile: USER_PROFILE_RESPONSE
+        });
+
+        let newProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
+          newField: true
+        });
+
+        dispatchThen(updateProfile(newProfile), [UPDATE_PROFILE]).then(profileState => {
+          assert.deepEqual(profileState.edit, {
+            profile: newProfile
+          });
+
+          dispatchThen(clearProfileEdit(), [CLEAR_PROFILE_EDIT]).then(profileState => {
+            assert.deepEqual(profileState.edit, undefined);
+
+            done();
+          });
+        });
       });
     });
   });

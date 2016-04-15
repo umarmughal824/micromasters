@@ -1,13 +1,41 @@
+/* global SETTINGS */
 import React from 'react';
 import { connect } from 'react-redux';
 import Tabs from 'react-mdl/lib/Tabs/Tabs';
 import Tab from 'react-mdl/lib/Tabs/Tab';
 
+import {
+  startProfileEdit,
+  updateProfile,
+  clearProfileEdit,
+  saveProfile,
+} from '../actions';
 import PersonalTab from '../components/PersonalTab';
 
 class ProfilePage extends React.Component {
+  updateProfile(profile) {
+    const { dispatch } = this.props;
+    if (profile.edit === undefined) {
+      dispatch(startProfileEdit());
+    }
+    dispatch(updateProfile(profile));
+  }
+
+  saveProfile(profile) {
+    const { dispatch } = this.props;
+    return dispatch(saveProfile(SETTINGS.username, profile)).then(() => {
+      dispatch(clearProfileEdit());
+    });
+  }
+
   render() {
-    const { profile, dispatch } = this.props;
+    let { profile } = this.props;
+
+    if (profile.edit !== undefined && profile.edit.profile !== undefined) {
+      profile = profile.edit.profile;
+    } else {
+      profile = profile.profile;
+    }
 
     return <div className="card">
       <div className="card-copy">
@@ -22,7 +50,11 @@ class ProfilePage extends React.Component {
           <Tab className="no-hover">Professional</Tab>
         </Tabs>
         <section>
-          <PersonalTab profile={profile} dispatch={dispatch} />
+          <PersonalTab
+            profile={profile}
+            updateProfile={this.updateProfile.bind(this)}
+            saveProfile={this.saveProfile.bind(this)}
+          />
         </section>
       </div>
     </div>;

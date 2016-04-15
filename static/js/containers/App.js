@@ -39,7 +39,7 @@ class App extends React.Component {
   }
   fetchUserProfile(username) {
     const { profile, dispatch } = this.props;
-    if (profile.userProfileStatus === undefined) {
+    if (profile.getStatus === undefined) {
       dispatch(fetchUserProfile(username));
     }
   }

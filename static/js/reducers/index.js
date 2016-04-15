@@ -6,11 +6,16 @@ import {
   RECEIVE_COURSE_LIST_FAILURE,
   CLEAR_COURSE_LIST,
 
-  REQUEST_USER_PROFILE,
-  RECEIVE_USER_PROFILE_SUCCESS,
-  RECEIVE_USER_PROFILE_FAILURE,
+  REQUEST_GET_USER_PROFILE,
+  RECEIVE_GET_USER_PROFILE_SUCCESS,
+  RECEIVE_GET_USER_PROFILE_FAILURE,
   CLEAR_PROFILE,
   UPDATE_PROFILE,
+  START_PROFILE_EDIT,
+  CLEAR_PROFILE_EDIT,
+  REQUEST_PATCH_USER_PROFILE,
+  RECEIVE_PATCH_USER_PROFILE_SUCCESS,
+  RECEIVE_PATCH_USER_PROFILE_FAILURE,
 
   REQUEST_DASHBOARD,
   RECEIVE_DASHBOARD_SUCCESS,
@@ -53,29 +58,52 @@ export const courseList = (state = INITIAL_COURSE_LIST_STATE, action) => {
 export const INITIAL_USER_PROFILE_STATE = {
   profile: {}
 };
-INITIAL_USER_PROFILE_STATE.profileCopy = INITIAL_USER_PROFILE_STATE.profile;
 
 export const userProfile = (state = INITIAL_USER_PROFILE_STATE, action) => {
   switch (action.type) {
-  case REQUEST_USER_PROFILE:
+  case REQUEST_GET_USER_PROFILE:
     return Object.assign({}, state, {
-      userProfileStatus: FETCH_PROCESSING
+      getStatus: FETCH_PROCESSING
     });
-  case RECEIVE_USER_PROFILE_SUCCESS:
+  case RECEIVE_GET_USER_PROFILE_SUCCESS:
     return Object.assign({}, state, {
-      userProfileStatus: FETCH_SUCCESS,
-      profile: action.payload.profile,
-      profileCopy: action.payload.profile
+      getStatus: FETCH_SUCCESS,
+      profile: action.payload.profile
     });
-  case RECEIVE_USER_PROFILE_FAILURE:
+  case RECEIVE_GET_USER_PROFILE_FAILURE:
     return Object.assign({}, state, {
-      userProfileStatus: FETCH_FAILURE
+      getStatus: FETCH_FAILURE
     });
   case CLEAR_PROFILE:
     return INITIAL_USER_PROFILE_STATE;
   case UPDATE_PROFILE:
     return Object.assign({}, state, {
-      profileCopy: action.payload.profile
+      edit: Object.assign({}, state.edit, {
+        profile: action.payload.profile
+      })
+    });
+  case START_PROFILE_EDIT:
+    return Object.assign({}, state, {
+      edit: {
+        profile: state.profile
+      }
+    });
+  case CLEAR_PROFILE_EDIT:
+    return Object.assign({}, state, {
+      edit: undefined
+    });
+  case REQUEST_PATCH_USER_PROFILE:
+    return Object.assign({}, state, {
+      patchStatus: FETCH_PROCESSING
+    });
+  case RECEIVE_PATCH_USER_PROFILE_SUCCESS:
+    return Object.assign({}, state, {
+      patchStatus: FETCH_SUCCESS,
+      profile: action.payload.profile
+    });
+  case RECEIVE_PATCH_USER_PROFILE_FAILURE:
+    return Object.assign({}, state, {
+      patchStatus: FETCH_FAILURE
     });
   default:
     return state;

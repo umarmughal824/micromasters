@@ -87,7 +87,14 @@ export function getProgramList() {
 }
 
 export function getUserProfile(username) {
-  return fetchJSONWithCSRF('/api/v0/profiles/' + username);
+  return fetchJSONWithCSRF(`/api/v0/profiles/${username}/`);
+}
+
+export function patchUserProfile(username, profile) {
+  return fetchJSONWithCSRF(`/api/v0/profiles/${username}/`, {
+    method: 'PATCH',
+    body: JSON.stringify(profile)
+  });
 }
 
 export function getDashboard() {
