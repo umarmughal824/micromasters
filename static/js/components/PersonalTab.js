@@ -1,6 +1,5 @@
 import React from 'react';
 import TextField from 'react-mdl/lib/Textfield';
-import Card from 'react-mdl/lib/Card';
 import Select from 'react-select';
 
 import { updateProfile } from '../actions';
@@ -20,7 +19,7 @@ class PersonalTab extends React.Component {
       value={profileCopy[name]}
       onChange={onChange}
     />;
-  };
+  }
 
   updateGender(gender) {
     const { dispatch, profile: { profileCopy } } = this.props;

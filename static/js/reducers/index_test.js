@@ -2,7 +2,6 @@
 import {
 
   fetchCourseList,
-  receiveCourseListSuccess,
   clearCourseList,
   REQUEST_COURSE_LIST,
   RECEIVE_COURSE_LIST_SUCCESS,
@@ -10,7 +9,6 @@ import {
   CLEAR_COURSE_LIST,
 
   fetchUserProfile,
-  receiveUserProfileSuccess,
   clearProfile,
   REQUEST_USER_PROFILE,
   RECEIVE_USER_PROFILE_SUCCESS,

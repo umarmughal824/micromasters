@@ -25,7 +25,7 @@ class App extends React.Component {
   }
 
   componentWillUnmount() {
-    const { dispatch, profile } = this.props;
+    const { dispatch } = this.props;
     dispatch(clearCourseList());
     dispatch(clearProfile());
     dispatch(clearDashboard());
@@ -73,9 +73,10 @@ const mapStateToProps = (state) => {
 
 App.propTypes = {
   courseList: React.PropTypes.object.isRequired,
-  profile: React.PropTypes.object.isRequired,
-  dashboard: React.PropTypes.object.isRequired,
-  dispatch: React.PropTypes.func.isRequired
+  children:   React.PropTypes.object.isRequired,
+  profile:    React.PropTypes.object.isRequired,
+  dashboard:  React.PropTypes.object.isRequired,
+  dispatch:   React.PropTypes.func.isRequired
 };
 
 export default connect(mapStateToProps)(App);

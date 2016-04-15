@@ -30,7 +30,8 @@ class ProfilePage extends React.Component {
 }
 
 ProfilePage.propTypes = {
-  profile: React.PropTypes.object.isRequired
+  profile:    React.PropTypes.object.isRequired,
+  dispatch:   React.PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
