@@ -50,14 +50,8 @@ export const courseList = (state = INITIAL_COURSE_LIST_STATE, action) => {
   }
 };
 
-const DEFAULT_PROFILE_IMAGE =
-  (SETTINGS.edx_base_url + '/static/images/profiles/default_120.png').
-  //replacing multiple "/" with a single forward slash, excluding the ones following the colon
-  replace(/([^:]\/)\/+/g, "$1");
 export const INITIAL_USER_PROFILE_STATE = {
-  profile: {
-    profile_url_large: DEFAULT_PROFILE_IMAGE// eslint-disable-line camelcase
-  }
+  profile: {}
 };
 INITIAL_USER_PROFILE_STATE.profileCopy = INITIAL_USER_PROFILE_STATE.profile;
 
