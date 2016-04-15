@@ -5,10 +5,12 @@ import ReactDOM from 'react-dom';
 import App from './containers/App';
 import DashboardPage from './containers/DashboardPage';
 import ProfilePage from './containers/ProfilePage';
+import PersonalTab from './components/PersonalTab';
+import EmploymentTab from './components/EmploymentTab';
 import { Provider } from 'react-redux';
 import configureStore from './store/configureStore';
 import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
-import { Router, Route, browserHistory } from 'react-router';
+import { Router, IndexRedirect, Route, browserHistory } from 'react-router';
 import ga from 'react-ga';
 
 // requirements for react-mdl which uses a modified version of material-design-lite
@@ -36,7 +38,11 @@ ReactDOM.render(
       <Router history={browserHistory}>
         <Route path="/" component={App} onUpdate={ga.pageview(window.location.pathname)}>
           <Route path="dashboard" component={DashboardPage} />
-          <Route path="profile" component={ProfilePage} />
+          <Route path="profile" component={ProfilePage}>
+            <IndexRedirect to="personal" />
+            <Route path="personal" component={PersonalTab} />
+            <Route path="professional" component={EmploymentTab} />
+          </Route>
         </Route>
       </Router>
     </Provider>

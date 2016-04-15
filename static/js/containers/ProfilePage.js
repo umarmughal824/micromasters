@@ -3,6 +3,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Tabs from 'react-mdl/lib/Tabs/Tabs';
 import Tab from 'react-mdl/lib/Tabs/Tab';
+import { browserHistory } from 'react-router';
 
 import {
   startProfileEdit,
@@ -10,7 +11,6 @@ import {
   clearProfileEdit,
   saveProfile,
 } from '../actions';
-import PersonalTab from '../components/PersonalTab';
 
 class ProfilePage extends React.Component {
   updateProfile(profile) {
@@ -28,6 +28,22 @@ class ProfilePage extends React.Component {
     });
   }
 
+  makeTabs () {
+    return this.props.route.childRoutes.map( (route) => (
+      <Tab
+        key={route.path}
+        onClick={() => browserHistory.push(`/profile/${route.path}`)} >
+        {route.path}
+      </Tab>
+    ));
+  }
+
+  activeTab () {
+    return this.props.route.childRoutes.findIndex( (route) => (
+      route.path === this.props.location.pathname.split("/")[2]
+    ));
+  }
+
   render() {
     let { profile } = this.props;
 
@@ -37,6 +53,14 @@ class ProfilePage extends React.Component {
       profile = profile.profile;
     }
 
+    let childrenWithProps = React.Children.map(this.props.children, (child) => (
+      React.cloneElement(child, {
+        profile: profile,
+        updateProfile: this.updateProfile.bind(this),
+        saveProfile: this.saveProfile.bind(this)
+      })
+    ));
+
     return <div className="card">
       <div className="card-copy">
         <h1>Enroll in MIT Micromasters</h1>
@@ -44,17 +68,11 @@ class ProfilePage extends React.Component {
           Please tell us more about yourself so you can participate in the
           micromasters community and qualify for your micromasters certificate.
         </p>
-        <Tabs activeTab={0}>
-          <Tab>Personal</Tab>
-          <Tab className="no-hover">Education</Tab>
-          <Tab className="no-hover">Professional</Tab>
+        <Tabs activeTab={this.activeTab()}>
+          {this.makeTabs()}
         </Tabs>
         <section>
-          <PersonalTab
-            profile={profile}
-            updateProfile={this.updateProfile.bind(this)}
-            saveProfile={this.saveProfile.bind(this)}
-          />
+          {this.props.children && childrenWithProps}
         </section>
       </div>
     </div>;
@@ -63,6 +81,7 @@ class ProfilePage extends React.Component {
 
 ProfilePage.propTypes = {
   profile:    React.PropTypes.object.isRequired,
+  children:   React.PropTypes.node,
   dispatch:   React.PropTypes.func.isRequired
 };
 
