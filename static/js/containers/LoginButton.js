@@ -1,8 +1,8 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import DropdownButton from 'react-bootstrap/lib/DropdownButton';
+import LinkContainer from 'react-router-bootstrap/lib/LinkContainer';
 import MenuItem from 'react-bootstrap/lib/MenuItem';
-import Link from 'react-router/lib/Link';
 
 class LoginButton extends React.Component {
   render() {
@@ -12,11 +12,11 @@ class LoginButton extends React.Component {
       <DropdownButton
         title={authentication.name}
         id="logout-button">
-        <MenuItem>
-          <Link to="/profile">
+        <LinkContainer to={{ pathname: '/profile' }} active={false}>
+          <MenuItem>
             Profile
-          </Link>
-        </MenuItem>
+          </MenuItem>
+        </LinkContainer>
         <MenuItem
           href="/settings">
           Settings
