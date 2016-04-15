@@ -106,6 +106,7 @@ INSTALLED_APPS = (
     'courses',
     'backends',
     'profiles',
+    'dashboard',
 )
 
 MIDDLEWARE_CLASSES = (
