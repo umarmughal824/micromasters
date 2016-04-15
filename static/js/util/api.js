@@ -3,8 +3,6 @@
 import 'isomorphic-fetch';
 import _ from 'lodash';
 
-import { DASHBOARD_RESPONSE } from '../constants';
-
 function getCookie(name) {
   let cookieValue = null;
 

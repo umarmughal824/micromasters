@@ -10,7 +10,7 @@ import { browserHistory } from 'react-router';
 
 // bind to this.boundTextField in the constructor of a form component
 // to update text fields when editing the profile
-function boundTextField(key, label) {
+function boundTextField(key, label, error) {
   const { updateProfile, profile } = this.props;
   let onChange = e => {
     let clone = Object.assign({}, profile);
@@ -22,6 +22,7 @@ function boundTextField(key, label) {
       floatingLabel
       label={label}
       value={profile[key]}
+      error={error}
       onChange={onChange} />
   );
 }
@@ -29,20 +30,21 @@ function boundTextField(key, label) {
 // bind this to this.boundSelectField in the constructor of a form component
 // to update select fields
 // pass in the name (used as placeholder), key for profile, and the options.
-function boundSelectField(key, label, options) {
+function boundSelectField(key, label, options, error) {
   const { updateProfile, profile } = this.props;
   let onChange = value => {
     let clone = Object.assign({}, profile);
     clone[key] = value ? value.value : null;
     updateProfile(clone);
   };
-  return (
+  return <div>
     <Select
       options={options}
       value={profile[key]}
       placeholder={label}
       onChange={onChange} />
-  );
+    <span className="validation-error-text">{error}</span>
+  </div>;
 }
 
 // bind to this.saveAndContinue.bind(this, '/next/url')

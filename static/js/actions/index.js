@@ -1,4 +1,7 @@
+import _ from 'lodash';
+
 import * as api from '../util/api';
+import * as util from '../util/util';
 
 // course list actions
 export const REQUEST_COURSE_LIST = 'REQUEST_COURSE_LIST';
@@ -17,6 +20,7 @@ export const CLEAR_PROFILE_EDIT = 'CLEAR_PROFILE_EDIT';
 export const REQUEST_PATCH_USER_PROFILE = 'REQUEST_PATCH_USER_PROFILE';
 export const RECEIVE_PATCH_USER_PROFILE_SUCCESS = 'RECEIVE_PATCH_USER_PROFILE_SUCCESS';
 export const RECEIVE_PATCH_USER_PROFILE_FAILURE = 'RECEIVE_PATCH_USER_PROFILE_FAILURE';
+export const UPDATE_PROFILE_VALIDATION = 'UPDATE_PROFILE_VALIDATION';
 
 // constants for fetch status (these are not action types)
 export const FETCH_FAILURE = 'FETCH_FAILURE';
@@ -81,6 +85,22 @@ export const saveProfile = (username, profile) => {
     return api.patchUserProfile(username, profile).
       then(() => dispatch(receivePatchUserProfileSuccess(profile))).
       catch(() => dispatch(receivePatchUserProfileFailure()));
+  };
+};
+export const updateProfileValidation = errors => ({
+  type: UPDATE_PROFILE_VALIDATION,
+  payload: { errors }
+});
+
+export const validateProfile = profile => {
+  return dispatch => {
+    let errors = util.validateProfile(profile);
+    dispatch(updateProfileValidation(errors));
+    if (_.isEmpty(errors)) {
+      return Promise.resolve();
+    } else {
+      return Promise.reject();
+    }
   };
 };
 

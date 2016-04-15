@@ -16,6 +16,7 @@ import {
   REQUEST_PATCH_USER_PROFILE,
   RECEIVE_PATCH_USER_PROFILE_SUCCESS,
   RECEIVE_PATCH_USER_PROFILE_FAILURE,
+  UPDATE_PROFILE_VALIDATION,
 
   REQUEST_DASHBOARD,
   RECEIVE_DASHBOARD_SUCCESS,
@@ -77,15 +78,24 @@ export const userProfile = (state = INITIAL_USER_PROFILE_STATE, action) => {
   case CLEAR_PROFILE:
     return INITIAL_USER_PROFILE_STATE;
   case UPDATE_PROFILE:
+    if (state.edit === undefined) {
+      // caller must have dispatched START_PROFILE_EDIT successfully first
+      return state;
+    }
     return Object.assign({}, state, {
       edit: Object.assign({}, state.edit, {
         profile: action.payload.profile
       })
     });
   case START_PROFILE_EDIT:
+    if (state.getStatus !== FETCH_SUCCESS) {
+      // ignore attempts to edit if we don't have a valid profile to edit yet
+      return state;
+    }
     return Object.assign({}, state, {
       edit: {
-        profile: state.profile
+        profile: state.profile,
+        errors: {}
       }
     });
   case CLEAR_PROFILE_EDIT:
@@ -104,6 +114,16 @@ export const userProfile = (state = INITIAL_USER_PROFILE_STATE, action) => {
   case RECEIVE_PATCH_USER_PROFILE_FAILURE:
     return Object.assign({}, state, {
       patchStatus: FETCH_FAILURE
+    });
+  case UPDATE_PROFILE_VALIDATION:
+    if (state.edit === undefined) {
+      // caller must have dispatched START_PROFILE_EDIT successfully first
+      return state;
+    }
+    return Object.assign({}, state, {
+      edit: Object.assign({}, state.edit, {
+        errors: action.payload.errors
+      })
     });
   default:
     return state;
