@@ -182,7 +182,12 @@ describe('utility functions', () => {
         'last_name',
         'preferred_name',
         'gender',
-        'preferred_language'
+        'preferred_language',
+        'city',
+        'country',
+        'birth_city',
+        'birth_country',
+        'date_of_birth',
       ];
 
       let profile = {};

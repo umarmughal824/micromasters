@@ -1,5 +1,5 @@
 // from http://data.okfn.org/data/core/language-codes
-export const LANGUAGE_CODES = [
+export default [
   {
     "alpha2": "aa",
     "English": "Afar"
