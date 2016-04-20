@@ -26,8 +26,8 @@ class PersonalTab extends React.Component {
       {this.boundTextField("first_name", "Given name")}<br />
       {this.boundTextField("last_name", "Family name")}<br />
       {this.boundTextField("preferred_name", "Preferred name (optional)")}<br />
-      {this.boundSelectField('Gender', this.genderOptions, 'gender')}<br />
-      {this.boundSelectField('Preferred language', this.languageOptions, 'preferred_language')}<br />
+      {this.boundSelectField('gender', 'Gender', this.genderOptions)}<br />
+      {this.boundSelectField('preferred_language', 'Preferred language', this.languageOptions)}<br />
       <Button raised onClick={this.saveAndContinue}>
         Save and continue
       </Button>
