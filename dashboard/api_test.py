@@ -132,7 +132,7 @@ class FormatRunTest(CourseMixin):
                 'title': crun.title,
                 'status': api.CourseStatus.PASSED,
                 'position_in_program': self.course.position_in_program,
-                'id': self.course.pk,
+                'id': crun.pk,
                 'course_id': crun.edx_course_key,
             }
         )
@@ -151,7 +151,7 @@ class FormatRunTest(CourseMixin):
                 'title': crun.title,
                 'status': api.CourseStatus.OFFERED,
                 'position_in_program': self.course.position_in_program,
-                'id': self.course.pk,
+                'id': crun.pk,
                 'course_id': crun.edx_course_key,
                 'enrollment_start_date': crun.enrollment_start,
                 'fuzzy_enrollment_start_date': crun.fuzzy_enrollment_start_date,
