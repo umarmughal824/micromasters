@@ -98,5 +98,5 @@ export function patchUserProfile(username, profile) {
 }
 
 export function getDashboard() {
-  return Promise.resolve(DASHBOARD_RESPONSE);
+  return fetchJSONWithCSRF('/api/v0/dashboard/');
 }

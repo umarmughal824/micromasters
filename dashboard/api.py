@@ -213,7 +213,7 @@ def format_course_for_dashboard(course_run, status_for_user, course, certificate
     }
     if course_run is not None:
         formatted_run.update({
-            'id': course.pk,
+            'id': course_run.id,
             'course_id': course_run.edx_course_key,
             'title': course_run.title,
         })
