@@ -98,10 +98,19 @@ describe('common api functions', function() {
   });
 
   it('gets the dashboard', done => {
-    // when we attach this to the real REST API we should change this
-    // and add a test for a failure case
+    fetchMock.mock('/api/v0/dashboard/', DASHBOARD_RESPONSE);
     getDashboard().then(dashboard => {
       assert.deepEqual(dashboard, DASHBOARD_RESPONSE);
+      done();
+    });
+  });
+
+  it('fails to get the dashboard', done => {
+    fetchMock.mock('/api/v0/dashboard/', () => ({
+      status: 400
+    }));
+
+    getProgramList().catch(() => {
       done();
     });
   });
