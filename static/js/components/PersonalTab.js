@@ -18,7 +18,7 @@ class PersonalTab extends React.Component {
       value: language.alpha2,
       label: language.English
     }));
-    this.saveAndContinue = saveAndContinue.bind(this, '/profile/professional');
+    this.saveAndContinue = saveAndContinue.bind(this, '/dashboard');
   }
 
   render() {

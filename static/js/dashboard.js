@@ -6,7 +6,6 @@ import App from './containers/App';
 import DashboardPage from './containers/DashboardPage';
 import ProfilePage from './containers/ProfilePage';
 import PersonalTab from './components/PersonalTab';
-import EmploymentTab from './components/EmploymentTab';
 import { Provider } from 'react-redux';
 import configureStore from './store/configureStore';
 import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
@@ -41,7 +40,6 @@ ReactDOM.render(
           <Route path="profile" component={ProfilePage}>
             <IndexRedirect to="personal" />
             <Route path="personal" component={PersonalTab} />
-            <Route path="professional" component={EmploymentTab} />
           </Route>
         </Route>
       </Router>
