@@ -2,13 +2,23 @@
 __webpack_public_path__ = `http://${SETTINGS.host}:8078/`;  // eslint-disable-line no-undef, camelcase
 import React from 'react';
 import ReactDOM from 'react-dom';
+import App from './containers/App';
 import DashboardPage from './containers/DashboardPage';
+import ProfilePage from './containers/ProfilePage';
+import PersonalTab from './components/PersonalTab';
+import EmploymentTab from './components/EmploymentTab';
 import { Provider } from 'react-redux';
 import configureStore from './store/configureStore';
-import { devTools, persistState } from 'redux-devtools';
 import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
-import { Router, Route, IndexRoute, browserHistory } from 'react-router';
+import { Router, IndexRedirect, Route, browserHistory } from 'react-router';
 import ga from 'react-ga';
+
+// requirements for react-mdl which uses a modified version of material-design-lite
+import 'style!css!react-mdl/extra/material.css';
+import 'react-mdl/extra/material.js';
+
+// requirements for react-select
+import 'style!css!react-select/dist/react-select.css';
 
 const store = configureStore();
 
@@ -26,7 +36,14 @@ ReactDOM.render(
   <div>
     <Provider store={store}>
       <Router history={browserHistory}>
-        <Route path="/dashboard" component={DashboardPage} onUpdate={ga.pageview(window.location.pathname)}></Route>
+        <Route path="/" component={App} onUpdate={ga.pageview(window.location.pathname)}>
+          <Route path="dashboard" component={DashboardPage} />
+          <Route path="profile" component={ProfilePage}>
+            <IndexRedirect to="personal" />
+            <Route path="personal" component={PersonalTab} />
+            <Route path="professional" component={EmploymentTab} />
+          </Route>
+        </Route>
       </Router>
     </Provider>
     {debugTools}

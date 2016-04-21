@@ -5,6 +5,7 @@ import logging
 from urllib.parse import urljoin
 
 from profiles.models import Profile
+from profiles.util import split_name
 
 log = logging.getLogger(__name__)
 
@@ -50,9 +51,15 @@ def update_profile_from_edx(backend, user, response, is_new, *args, **kwargs):  
         }
     )
 
-    user_profile.account_privacy = user_profile_edx.get('account_privacy')
-    user_profile.name = user_profile_edx.get('name')
-    user_profile.bio = user_profile_edx.get('bio')
+    account_privacy = user_profile_edx.get('account_privacy')
+    if account_privacy == 'all_users':
+        user_profile.account_privacy = Profile.PUBLIC
+    else:
+        user_profile.account_privacy = Profile.PRIVATE
+    name = user_profile_edx.get('name', "")
+    user_profile.edx_name = name
+    user_profile.first_name, user_profile.last_name = split_name(name)
+    user_profile.edx_bio = user_profile_edx.get('bio')
     user_profile.country = user_profile_edx.get('country')
     user_profile.has_profile_image = user_profile_edx.get(
         'profile_image', {}).get('has_image')
@@ -64,13 +71,16 @@ def update_profile_from_edx(backend, user, response, is_new, *args, **kwargs):  
         'profile_image', {}).get('image_url_medium')
     user_profile.profile_url_small = user_profile_edx.get(
         'profile_image', {}).get('image_url_small')
-    user_profile.requires_parental_consent = user_profile_edx.get('requires_parental_consent')
-    user_profile.year_of_birth = user_profile_edx.get('year_of_birth')
-    user_profile.level_of_education = user_profile_edx.get('level_of_education')
-    user_profile.goals = user_profile_edx.get('goals')
-    user_profile.language_proficiencies = user_profile_edx.get('language_proficiencies')
+    user_profile.edx_requires_parental_consent = user_profile_edx.get('requires_parental_consent')
+    user_profile.edx_level_of_education = user_profile_edx.get('level_of_education')
+    user_profile.edx_goals = user_profile_edx.get('goals')
+    user_profile.edx_language_proficiencies = user_profile_edx.get('language_proficiencies')
+    try:
+        user_profile.preferred_language = user_profile.edx_language_proficiencies[0]['code']
+    except (IndexError, ValueError, KeyError, TypeError):
+        pass
     user_profile.gender = user_profile_edx.get('gender')
-    user_profile.mailing_address = user_profile_edx.get('mailing_address')
+    user_profile.edx_mailing_address = user_profile_edx.get('mailing_address')
 
     user_profile.save()
 

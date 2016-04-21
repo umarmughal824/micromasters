@@ -1,11 +1,12 @@
 """
 Test end to end django views.
 """
+from django.db.models.signals import post_save
 from django.test import TestCase
 from django.test.client import Client
-from django.core.urlresolvers import reverse
-from django.db.models.signals import post_save
 from factory.django import mute_signals
+from factory.fuzzy import FuzzyText
+
 from courses.factories import ProgramFactory
 from profiles.factories import ProfileFactory, UserFactory
 
@@ -23,7 +24,7 @@ class TestViews(TestCase):
         """Verify only 'live' program visible on homepage"""
         program_live_true = ProgramFactory.create(live=True)
         program_live_false = ProgramFactory.create(live=False)
-        response = self.client.get(reverse('ui-index'))
+        response = self.client.get('/')
         self.assertContains(
             response,
             program_live_true.title,
@@ -35,12 +36,35 @@ class TestViews(TestCase):
             status_code=200
         )
 
+    def test_dashboard_settings(self):
+        """
+        Assert settings we pass to dashboard
+        """
+        with mute_signals(post_save):
+            profile = ProfileFactory.create()
+        self.client.force_login(profile.user)
+
+        ga_tracking_id = FuzzyText().fuzz()
+        react_ga_debug = FuzzyText().fuzz()
+        edx_base_url = FuzzyText().fuzz()
+        with self.settings(
+            GA_TRACKING_ID=ga_tracking_id,
+            REACT_GA_DEBUG=react_ga_debug,
+            EDXORG_BASE_URL=edx_base_url
+        ):
+            resp = self.client.get('/dashboard/')
+            self.assertContains(resp, ga_tracking_id)
+            self.assertContains(resp, react_ga_debug)
+            self.assertContains(resp, edx_base_url)
+            self.assertContains(resp, profile.preferred_name)
+            self.assertContains(resp, profile.user.username)
+
     def test_unauthenticated_user_redirect(self):
         """Verify that an unauthenticated user can't visit '/dashboard'"""
-        response = self.client.get(reverse('ui-dashboard'))
+        response = self.client.get('/dashboard/')
         self.assertRedirects(
             response,
-            "/?next={}".format(reverse('ui-dashboard'))
+            "/?next=/dashboard/"
         )
 
     def test_authenticated_user_doesnt_redirect(self):
@@ -49,7 +73,7 @@ class TestViews(TestCase):
             user = UserFactory.create()
             ProfileFactory.create(user=user)
         self.client.force_login(user)
-        response = self.client.get(reverse('ui-dashboard'))
+        response = self.client.get('/dashboard/')
         self.assertContains(
             response,
             "Micromasters",
@@ -67,7 +91,7 @@ class TestViews(TestCase):
                 USE_WEBPACK_DEV_SERVER=True,
                 WEBPACK_SERVER_URL="foo_server"
             ):
-                response = self.client.get(reverse('ui-index'))
+                response = self.client.get('/')
                 self.assertContains(
                     response,
                     expected_url,

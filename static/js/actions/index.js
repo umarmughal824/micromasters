@@ -6,16 +6,24 @@ export const RECEIVE_COURSE_LIST_SUCCESS = 'RECEIVE_COURSE_LIST_SUCCESS';
 export const RECEIVE_COURSE_LIST_FAILURE = 'RECEIVE_COURSE_LIST_FAILURE';
 export const CLEAR_COURSE_LIST = 'CLEAR_COURSE_LIST';
 
-export const REQUEST_USER_PROFILE = 'REQUEST_USER_PROFILE';
-export const RECEIVE_USER_PROFILE_SUCCESS = 'RECEIVE_USER_PROFILE_SUCCESS';
-export const RECEIVE_USER_PROFILE_FAILURE = 'RECEIVE_USER_PROFILE_FAILURE';
+// user profile actions
+export const REQUEST_GET_USER_PROFILE = 'REQUEST_GET_USER_PROFILE';
+export const RECEIVE_GET_USER_PROFILE_SUCCESS = 'RECEIVE_GET_USER_PROFILE_SUCCESS';
+export const RECEIVE_GET_USER_PROFILE_FAILURE = 'RECEIVE_GET_USER_PROFILE_FAILURE';
 export const CLEAR_PROFILE = 'CLEAR_PROFILE';
+export const UPDATE_PROFILE = 'UPDATE_PROFILE';
+export const START_PROFILE_EDIT = 'START_PROFILE_EDIT';
+export const CLEAR_PROFILE_EDIT = 'CLEAR_PROFILE_EDIT';
+export const REQUEST_PATCH_USER_PROFILE = 'REQUEST_PATCH_USER_PROFILE';
+export const RECEIVE_PATCH_USER_PROFILE_SUCCESS = 'RECEIVE_PATCH_USER_PROFILE_SUCCESS';
+export const RECEIVE_PATCH_USER_PROFILE_FAILURE = 'RECEIVE_PATCH_USER_PROFILE_FAILURE';
 
 // constants for fetch status (these are not action types)
 export const FETCH_FAILURE = 'FETCH_FAILURE';
 export const FETCH_SUCCESS = 'FETCH_SUCCESS';
 export const FETCH_PROCESSING = 'FETCH_PROCESSING';
 
+// actions for course
 const requestCourseList = () => ({ type: REQUEST_COURSE_LIST });
 export const receiveCourseListSuccess = (courseList, programList) => ({
   type: RECEIVE_COURSE_LIST_SUCCESS,
@@ -38,23 +46,50 @@ export function fetchCourseList() {
   };
 }
 
-const requestUserProfile = () => ({ type: REQUEST_USER_PROFILE });
+// actions for user profile
+const requestGetUserProfile = () => ({ type: REQUEST_GET_USER_PROFILE });
 
-export const receiveUserProfileSuccess = profile =>({
-  type: RECEIVE_USER_PROFILE_SUCCESS,
+export const receiveGetUserProfileSuccess = profile =>({
+  type: RECEIVE_GET_USER_PROFILE_SUCCESS,
   payload: { profile }
 });
 
-const receiveUserProfileFailure = () => ({ type: RECEIVE_USER_PROFILE_FAILURE });
+const receiveGetUserProfileFailure = () => ({ type: RECEIVE_GET_USER_PROFILE_FAILURE });
 
 export const clearProfile = () => ({ type: CLEAR_PROFILE });
 
+export const updateProfile = profile => ({
+  type: UPDATE_PROFILE,
+  payload: { profile }
+});
+
+export const startProfileEdit = () => ({ type: START_PROFILE_EDIT });
+export const clearProfileEdit = () => ({ type: CLEAR_PROFILE_EDIT });
+
+const requestPatchUserProfile = () => ({ type: REQUEST_PATCH_USER_PROFILE });
+
+const receivePatchUserProfileSuccess = profile => ({
+  type: RECEIVE_PATCH_USER_PROFILE_SUCCESS,
+  payload: { profile }
+});
+
+const receivePatchUserProfileFailure = () => ({ type: RECEIVE_PATCH_USER_PROFILE_FAILURE });
+
+export const saveProfile = (username, profile) => {
+  return dispatch => {
+    dispatch(requestPatchUserProfile());
+    return api.patchUserProfile(username, profile).
+      then(() => dispatch(receivePatchUserProfileSuccess(profile))).
+      catch(() => dispatch(receivePatchUserProfileFailure()));
+  };
+};
+
 export function fetchUserProfile(username) {
   return dispatch => {
-    dispatch(requestUserProfile());
+    dispatch(requestGetUserProfile());
     return api.getUserProfile(username).
-      then(json => dispatch(receiveUserProfileSuccess(json))).
-      catch(()=> dispatch(receiveUserProfileFailure()));
+      then(json => dispatch(receiveGetUserProfileSuccess(json))).
+      catch(()=> dispatch(receiveGetUserProfileFailure()));
   };
 }
 

@@ -44,7 +44,7 @@ export function makeCourseStatusDisplay(course, now = moment()) {
       {asPercent(course.grade)}
     </span>;
 
-  case STATUS_VERIFIED_NOT_COMPLETED:
+  case STATUS_VERIFIED_NOT_COMPLETED: {
     if (!course.course_start_date) {
       // Invalid case, API should always send a valid course start date
       return "";
@@ -63,8 +63,8 @@ export function makeCourseStatusDisplay(course, now = moment()) {
     return <span className="course-list-grade">
       {asPercent(grade)}
     </span>;
-
-  case STATUS_ENROLLED_NOT_VERIFIED:
+  }
+  case STATUS_ENROLLED_NOT_VERIFIED: {
     if (!course.verification_date) {
       // Invalid case, API should always send a valid verification date
       return "";
@@ -77,8 +77,8 @@ export function makeCourseStatusDisplay(course, now = moment()) {
       // User cannot verify anymore
       return "";
     }
-
-  case STATUS_OFFERED_NOT_ENROLLED:
+  }
+  case STATUS_OFFERED_NOT_ENROLLED: {
     if (!course.enrollment_start_date) {
       return course.fuzzy_enrollment_start_date;
     }
@@ -89,7 +89,7 @@ export function makeCourseStatusDisplay(course, now = moment()) {
     } else {
       return <Button bsStyle="success">ENROLL</Button>;
     }
-
+  }
   default:
     // also covers NOT_OFFERED case
     return "";

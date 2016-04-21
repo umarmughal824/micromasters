@@ -15,9 +15,10 @@ import os
 import platform
 
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 import yaml
 
-VERSION = "0.3.0"
+VERSION = "0.4.0"
 
 CONFIG_PATHS = [
     os.environ.get('MICROMASTERS_CONFIG', ''),
@@ -83,11 +84,29 @@ INSTALLED_APPS = (
     'rest_framework',
     'server_status',
     'social.apps.django_app.default',
+
+    # WAGTAIL
+    'wagtail.wagtailforms',
+    'wagtail.wagtailredirects',
+    'wagtail.wagtailembeds',
+    'wagtail.wagtailsites',
+    'wagtail.wagtailusers',
+    'wagtail.wagtailsnippets',
+    'wagtail.wagtaildocs',
+    'wagtail.wagtailimages',
+    'wagtail.wagtailsearch',
+    'wagtail.wagtailadmin',
+    'wagtail.wagtailcore',
+    'modelcluster',
+    'taggit',
+
     # Our INSTALLED_APPS
     'ui',
+    'cms',
     'courses',
     'backends',
     'profiles',
+    'dashboard',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -99,6 +118,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'wagtail.wagtailcore.middleware.SiteMiddleware',
+    'wagtail.wagtailredirects.middleware.RedirectMiddleware',
 )
 
 AUTHENTICATION_BACKENDS = (
@@ -137,11 +158,11 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_user',
     'social.pipeline.user.get_username',
     'social.pipeline.user.create_user',
-    'backends.pipeline_api.update_profile_from_edx',
-    'backends.pipeline_api.update_from_linkedin',
     'social.pipeline.social_auth.associate_user',
     'social.pipeline.social_auth.load_extra_data',
     'social.pipeline.user.user_details',
+    'backends.pipeline_api.update_profile_from_edx',
+    'backends.pipeline_api.update_from_linkedin',
 )
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/'
@@ -336,3 +357,30 @@ HEALTH_CHECK = ['POSTGRES']
 
 GA_TRACKING_ID = get_var("GA_TRACKING_ID", "")
 REACT_GA_DEBUG = get_var("REACT_GA_DEBUG", False)
+
+# Wagtail
+WAGTAIL_SITE_NAME = "MIT Micromasters"
+MEDIA_ROOT = get_var('MEDIA_ROOT', '/tmp/')
+MEDIA_URL = '/media/'
+MICROMASTERS_USE_S3 = get_var('MICROMASTERS_USE_S3', False)
+AWS_ACCESS_KEY_ID = get_var('AWS_ACCESS_KEY_ID', False)
+AWS_SECRET_ACCESS_KEY = get_var('AWS_SECRET_ACCESS_KEY', False)
+AWS_STORAGE_BUCKET_NAME = get_var('AWS_STORAGE_BUCKET_NAME', False)
+# Provide nice validation of the configuration
+if (
+        MICROMASTERS_USE_S3 and
+        (not AWS_ACCESS_KEY_ID or
+         not AWS_SECRET_ACCESS_KEY or
+         not AWS_STORAGE_BUCKET_NAME)
+):
+    raise ImproperlyConfigured(
+        'You have enabled S3 support, but are missing one of '
+        'AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, or '
+        'AWS_STORAGE_BUCKET_NAME'
+    )
+if MICROMASTERS_USE_S3:
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+else:
+    # by default use django.core.files.storage.FileSystemStorage with
+    # overwrite feature
+    DEFAULT_FILE_STORAGE = 'storages.backends.overwrite.OverwriteStorage'

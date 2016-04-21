@@ -76,6 +76,31 @@
         "STATUS_TOKEN": {
             "description": "Token to access the status API.",
             "required": true
+        },
+        "EDXORG_BASE_URL": {
+            "description": "The base URL of the edX instance to use for logging in.",
+            "required": true
+        },
+        "EDXORG_CLIENT_ID": {
+            "description": "The OAuth client ID configured in the edX instance.",
+            "required": true
+        },
+        "EDXORG_CLIENT_SECRET": {
+            "description": "The OAuth client secret configured in the edX instance.",
+            "required": true
+        },
+        "AWS_ACCESS_KEY_ID": {
+            "description": "AWS Access Key for S3 storage."
+        },
+        "AWS_SECRET_ACCESS_KEY": {
+            "description": "AWS Secret Key for S3 storage."
+        },
+        "AWS_STORAGE_BUCKET_NAME": {
+            "description": "S3 Bucket name."
+        },
+        "MICROMASTERS_USE_S3": {
+            "description": "Use S3 for storage backend (required on Heroku)",
+            "value": "True"
         }
     }
 }

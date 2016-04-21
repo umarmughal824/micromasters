@@ -4,6 +4,7 @@ import {
   getCourseList,
   getProgramList,
   getUserProfile,
+  patchUserProfile,
   getDashboard,
 } from './api';
 import {
@@ -37,7 +38,7 @@ describe('common api functions', function() {
   });
 
   it('gets user profile', done => {
-    fetchMock.mock('/api/v0/profiles/jane', USER_PROFILE_RESPONSE);
+    fetchMock.mock('/api/v0/profiles/jane/', USER_PROFILE_RESPONSE);
     getUserProfile('jane').then(receivedUserProfile => {
       assert.deepEqual(receivedUserProfile, USER_PROFILE_RESPONSE);
       done();
@@ -45,13 +46,33 @@ describe('common api functions', function() {
   });
 
   it('fails to get user profile', done => {
-    fetchMock.mock('/api/v0/profiles/jane', () => {
+    fetchMock.mock('/api/v0/profiles/jane/', () => {
       return {
         status: 400
       };
     });
 
     getUserProfile('jane').catch(() => {
+      done();
+    });
+  });
+
+  it('patches a user profile', done => {
+    fetchMock.mock('/api/v0/profiles/jane/', (url, opts) => {
+      assert.deepEqual(JSON.parse(opts.body), USER_PROFILE_RESPONSE);
+      return { status: 200 };
+    });
+    patchUserProfile('jane', USER_PROFILE_RESPONSE).then(() => {
+      done();
+    });
+  });
+
+  it('fails to patch a user profile', done => {
+    fetchMock.mock('/api/v0/profiles/jane/', (url, opts) => {
+      assert.deepEqual(JSON.parse(opts.body), USER_PROFILE_RESPONSE);
+      return { status: 400 };
+    });
+    patchUserProfile('jane', USER_PROFILE_RESPONSE).catch(() => {
       done();
     });
   });
@@ -77,10 +98,19 @@ describe('common api functions', function() {
   });
 
   it('gets the dashboard', done => {
-    // when we attach this to the real REST API we should change this
-    // and add a test for a failure case
+    fetchMock.mock('/api/v0/dashboard/', DASHBOARD_RESPONSE);
     getDashboard().then(dashboard => {
       assert.deepEqual(dashboard, DASHBOARD_RESPONSE);
+      done();
+    });
+  });
+
+  it('fails to get the dashboard', done => {
+    fetchMock.mock('/api/v0/dashboard/', () => ({
+      status: 400
+    }));
+
+    getProgramList().catch(() => {
       done();
     });
   });

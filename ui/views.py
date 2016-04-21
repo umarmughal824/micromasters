@@ -9,9 +9,6 @@ from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 
-from courses.models import Program
-
-
 log = logging.getLogger(__name__)
 
 
@@ -30,31 +27,8 @@ def get_bundle_url(request, bundle_name):
         return static("bundles/{bundle}".format(bundle=bundle_name))
 
 
-def index(request):
-    """
-    The index view. Display available programs
-    """
-
-    programs = Program.objects.filter(live=True)
-    host = request.get_host().split(":")[0]
-
-    js_settings = {
-        "gaTrackingID": settings.GA_TRACKING_ID,
-        "host": host
-    }
-
-    return render(request, "index.html", context={
-        "programs": programs,
-        "style_src": get_bundle_url(request, "style.js"),
-        "public_src": get_bundle_url(request, "public.js"),
-        "authenticated": not request.user.is_anonymous(),
-        "username": request.user.username,
-        "js_settings_json": json.dumps(js_settings),
-    })
-
-
 @login_required()
-def dashboard(request):
+def dashboard(request, *args):  # pylint: disable=unused-argument
     """
     The app dashboard view
     """
@@ -62,7 +36,7 @@ def dashboard(request):
 
     name = ""
     if not request.user.is_anonymous():
-        name = request.user.profile.name or request.user.username
+        name = request.user.profile.preferred_name or request.user.username
 
     js_settings = {
         "gaTrackingID": settings.GA_TRACKING_ID,
