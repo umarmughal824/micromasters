@@ -1,6 +1,31 @@
 Release Notes
 =============
 
+Version 0.4.0
+-------------
+
+- Use only information from dashboard API for dashboard display.
+- The dashboard API has to return the course run pk
+- Implemented API dashboard function
+- Added setup documentation
+- Added react-router to profile tabs, moved redux form logic to shared module
+- Added saveProfile action dispatcher, tests for saveProfile and updateProfile
+- Fixed bug: default profile image
+- Added REST API for dashboard
+- Updated eslint configuration
+- Added auto-incrementing `student_id` field to `Profile`
+- Fixed a JS console warning, react-router and react-bootstrap
+- Fixed a small bug with the dashboard background image
+- Added profile React component
+- Added fields, updated serializer for personal data on profile
+- Added stata center image to Dashboard user card background
+- Added a minimal pytest for quick feedback
+- Added Profile and Settings links to dropdown menu
+- Added missing configuration for heroku to app.json
+- Moved our pipeline functions down the python-social-auth pipeline
+- Removed programs link in the header
+- Added wagtail, use it for home page
+
 Version 0.3.0
 -------------
 
