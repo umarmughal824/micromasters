@@ -11,8 +11,12 @@ import {
   STATUS_ENROLLED_NOT_VERIFIED,
   STATUS_OFFERED_NOT_ENROLLED,
   STATUS_VERIFIED_NOT_COMPLETED,
+  USER_PROFILE_RESPONSE,
 } from '../constants';
-import { makeCourseStatusDisplay } from '../util/util';
+import {
+  makeCourseStatusDisplay,
+  validateProfile,
+} from '../util/util';
 
 /* eslint-disable camelcase */
 describe('utility functions', () => {
@@ -163,6 +167,34 @@ describe('utility functions', () => {
       assert.equal(renderCourseStatusDisplay({
         status: "missing"
       }), "");
+    });
+  });
+
+  describe("validateProfile", () => {
+    it('validates the test profile successfully', () => {
+      let errors = validateProfile(USER_PROFILE_RESPONSE);
+      assert.deepEqual(errors, {});
+    });
+
+    it('validates required fields', () => {
+      let requiredFields = [
+        'first_name',
+        'last_name',
+        'preferred_name',
+        'gender',
+        'preferred_language'
+      ];
+
+      let profile = {};
+      for (let key of requiredFields) {
+        profile[key] = '';
+      }
+
+      let errors = validateProfile(profile);
+      for (let key of requiredFields) {
+        let error = errors[key];
+        assert.ok(error.indexOf("is required") !== -1);
+      }
     });
   });
 });

@@ -13,6 +13,8 @@ import {
   clearProfile,
   saveProfile,
   updateProfile,
+  updateProfileValidation,
+  validateProfile,
   startProfileEdit,
   clearProfileEdit,
   REQUEST_GET_USER_PROFILE,
@@ -20,6 +22,7 @@ import {
   RECEIVE_GET_USER_PROFILE_FAILURE,
   CLEAR_PROFILE,
   UPDATE_PROFILE,
+  UPDATE_PROFILE_VALIDATION,
   START_PROFILE_EDIT,
   CLEAR_PROFILE_EDIT,
   REQUEST_PATCH_USER_PROFILE,
@@ -204,7 +207,8 @@ describe('reducers', () => {
       store.dispatch(receiveGetUserProfileSuccess(USER_PROFILE_RESPONSE));
       dispatchThen(startProfileEdit(), [START_PROFILE_EDIT]).then(profileState => {
         assert.deepEqual(profileState.edit, {
-          profile: USER_PROFILE_RESPONSE
+          profile: USER_PROFILE_RESPONSE,
+          errors: {}
         });
 
         let newProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
@@ -213,7 +217,8 @@ describe('reducers', () => {
 
         dispatchThen(updateProfile(newProfile), [UPDATE_PROFILE]).then(profileState => {
           assert.deepEqual(profileState.edit, {
-            profile: newProfile
+            profile: newProfile,
+            errors: {}
           });
 
           dispatchThen(clearProfileEdit(), [CLEAR_PROFILE_EDIT]).then(profileState => {
@@ -222,6 +227,78 @@ describe('reducers', () => {
             done();
           });
         });
+      });
+    });
+
+    it("should start editing the profile, and validate it", done => {
+      // populate a profile
+      store.dispatch(receiveGetUserProfileSuccess(USER_PROFILE_RESPONSE));
+      store.dispatch(startProfileEdit());
+
+      let errors = {error: "I am an error"};
+      dispatchThen(updateProfileValidation(errors), [UPDATE_PROFILE_VALIDATION]).then(profileState => {
+        assert.deepEqual(profileState.edit, {
+          profile: USER_PROFILE_RESPONSE,
+          errors: errors
+        });
+
+        done();
+      });
+    });
+
+    it('should validate an existing profile successfully', done => {
+      // populate a profile
+      store.dispatch(receiveGetUserProfileSuccess(USER_PROFILE_RESPONSE));
+      store.dispatch(startProfileEdit());
+
+      dispatchThen(validateProfile(USER_PROFILE_RESPONSE), [UPDATE_PROFILE_VALIDATION]).then(profileState => {
+        assert.deepEqual(profileState.edit.errors, {});
+
+        // also assert that it returns a resolved promise
+        store.dispatch(validateProfile(USER_PROFILE_RESPONSE)).then(() => {
+          done();
+        });
+      });
+    });
+
+    it('should validate an existing profile with validation errors', done => {
+      let profileWithError = Object.assign({}, USER_PROFILE_RESPONSE, {
+        first_name: ''
+      });
+
+      // populate a profile
+      store.dispatch(receiveGetUserProfileSuccess(USER_PROFILE_RESPONSE));
+      store.dispatch(startProfileEdit());
+      dispatchThen(validateProfile(profileWithError), [UPDATE_PROFILE_VALIDATION]).then(profileState => {
+        assert.deepEqual(profileState.edit.errors, {
+          first_name: 'Given name is required'
+        });
+
+        // also assert that it returns a rejected promise
+        store.dispatch(validateProfile(profileWithError)).catch(() => {
+          done();
+        });
+      });
+    });
+
+    it("can't edit a profile if we never get it successfully", done => {
+      dispatchThen(startProfileEdit(), [START_PROFILE_EDIT]).then(profileState => {
+        assert.deepEqual(profileState.edit, undefined);
+        done();
+      });
+    });
+
+    it("can't edit a profile if edit doesn't exist", done => {
+      dispatchThen(updateProfile(USER_PROFILE_RESPONSE), [UPDATE_PROFILE]).then(profileState => {
+        assert.deepEqual(profileState.edit, undefined);
+        done();
+      });
+    });
+
+    it("can't validate a profile's edits if edit doesn't exist", done => {
+      dispatchThen(updateProfileValidation({error: "an error"}), [UPDATE_PROFILE_VALIDATION]).then(profileState => {
+        assert.deepEqual(profileState.edit, undefined);
+        done();
       });
     });
   });

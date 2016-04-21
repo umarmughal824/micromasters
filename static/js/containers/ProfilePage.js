@@ -8,14 +8,15 @@ import { browserHistory } from 'react-router';
 import {
   startProfileEdit,
   updateProfile,
+  validateProfile,
   clearProfileEdit,
   saveProfile,
 } from '../actions';
 
 class ProfilePage extends React.Component {
-  updateProfile(profile) {
+  updateProfile(isEdit, profile) {
     const { dispatch } = this.props;
-    if (profile.edit === undefined) {
+    if (!isEdit) {
       dispatch(startProfileEdit());
     }
     dispatch(updateProfile(profile));
@@ -23,8 +24,10 @@ class ProfilePage extends React.Component {
 
   saveProfile(profile) {
     const { dispatch } = this.props;
-    return dispatch(saveProfile(SETTINGS.username, profile)).then(() => {
-      dispatch(clearProfileEdit());
+    return dispatch(validateProfile(profile)).then(() => {
+      dispatch(saveProfile(SETTINGS.username, profile)).then(() => {
+        dispatch(clearProfileEdit());
+      });
     });
   }
 
@@ -46,17 +49,23 @@ class ProfilePage extends React.Component {
 
   render() {
     let { profile } = this.props;
+    let errors, isEdit;
 
-    if (profile.edit !== undefined && profile.edit.profile !== undefined) {
+    if (profile.edit !== undefined) {
+      errors = profile.edit.errors;
       profile = profile.edit.profile;
+      isEdit = true;
     } else {
       profile = profile.profile;
+      errors = {};
+      isEdit = false;
     }
 
     let childrenWithProps = React.Children.map(this.props.children, (child) => (
       React.cloneElement(child, {
         profile: profile,
-        updateProfile: this.updateProfile.bind(this),
+        errors: errors,
+        updateProfile: this.updateProfile.bind(this, isEdit),
         saveProfile: this.saveProfile.bind(this)
       })
     ));
