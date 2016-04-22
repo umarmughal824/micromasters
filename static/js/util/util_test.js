@@ -1,8 +1,6 @@
 import assert from 'assert';
 import moment from 'moment';
 import React from 'react';
-import ReactDOM from 'react-dom';
-import striptags from 'striptags';
 
 import {
   STATUS_NOT_OFFERED,
@@ -15,29 +13,30 @@ import {
 } from '../constants';
 import {
   makeCourseStatusDisplay,
+  makeCourseProgressDisplay,
   validateProfile,
+  makeStrippedHtml,
 } from '../util/util';
 
 /* eslint-disable camelcase */
 describe('utility functions', () => {
+  describe('makeStrippedHtml', () => {
+    it('strips HTML from a string', () => {
+      assert.equal(makeStrippedHtml("<a href='x'>y</a>"), "y");
+    });
+    it('strips HTML from a react element', () => {
+      assert.equal(makeStrippedHtml(<div><strong>text</strong></div>), "text");
+    });
+  });
+
   describe("makeCourseStatusDisplay", () => {
     let yesterday = '2016-03-30';
     let today = '2016-03-31';
     let tomorrow = '2016-04-01';
 
-    /**
-     * Returns the string with any HTML rendered and then its tags stripped
-     * @return {String} rendered text stripped of HTML
-     */
     let renderCourseStatusDisplay = (...args) => {
       let textOrElement = makeCourseStatusDisplay(...args);
-      if (React.isValidElement(textOrElement)) {
-        let container = document.createElement("div");
-        ReactDOM.render(textOrElement, container);
-        return striptags(container.innerHTML);
-      } else {
-        return textOrElement;
-      }
+      return makeStrippedHtml(textOrElement);
     };
 
     it('is a passed a course', () => {
@@ -168,6 +167,47 @@ describe('utility functions', () => {
         status: "missing"
       }), "");
     });
+  });
+
+  describe("makeCourseStatusDisplay", () => {
+    let renderCourseProgressDisplay = (...args) => {
+      let textOrElement = makeCourseProgressDisplay(...args);
+      return makeStrippedHtml(textOrElement);
+    };
+
+    it('is a course which is passed', () => {
+      assert.equal(
+        renderCourseProgressDisplay({
+          status: STATUS_PASSED
+        }),
+        "Course passed"
+      );
+    });
+
+    it('is a course which is in progress', () => {
+      assert.equal(
+        renderCourseProgressDisplay({
+          status: STATUS_VERIFIED_NOT_COMPLETED
+        }),
+        "Course started"
+      );
+    });
+
+    it('is a course which is not passed or in progress', () => {
+      for (let status of [
+        STATUS_NOT_PASSED,
+        STATUS_ENROLLED_NOT_VERIFIED,
+        STATUS_OFFERED_NOT_ENROLLED,
+        STATUS_NOT_OFFERED,
+      ]) {
+        assert.equal(
+          renderCourseProgressDisplay({
+            status: status
+          }),
+          "Course not started"
+        );
+      }
+    })
   });
 
   describe("validateProfile", () => {
