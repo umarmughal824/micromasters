@@ -105,7 +105,7 @@ def get_info_for_course(user, course, user_enrollments, user_certificates):
     Returns:
         dict: dictionary representing the course status for the user
     """
-    # pylint: disable=unused-argument, too-many-return-statements
+    # pylint: disable=too-many-return-statements
     with transaction.atomic():
         if not course.courserun_set.count():
             return format_course_for_dashboard(None, CourseStatus.NOT_OFFERED, course)
@@ -132,13 +132,21 @@ def get_info_for_course(user, course, user_enrollments, user_certificates):
         return format_course_for_dashboard(run_status.course_run, CourseStatus.CURRENT_GRADE, course)
     # check if we need to check the certificate
     elif run_status.status == CourseRunStatus.READ_CERT:
-        # TODO: here should go the logic to check the actual certificate  # pylint: disable=fixme
-        #       for now just assume not passed and return the next available course run
-        # this is the case when the certificate says the user did not pass the course
+        # if there is no certificate for the user, the user never passed
+        # the course, so she needs to enroll in the next one
+        if not user_certificates.has_verified_cert(run_status.course_run.edx_course_key):
+            return format_course_for_dashboard(
+                course.get_next_run(),
+                CourseStatus.OFFERED if course.get_next_run() is not None else CourseStatus.NOT_OFFERED,
+                course
+            )
+        # pull the verified certificate for course
+        cert = user_certificates.get_verified_cert(run_status.course_run.edx_course_key)
         return format_course_for_dashboard(
-            course.get_next_run(),
-            CourseStatus.OFFERED if course.get_next_run() is not None else CourseStatus.NOT_OFFERED,
-            course
+            run_status.course_run,
+            CourseStatus.PASSED,
+            course,
+            cert
         )
     elif run_status.status == CourseRunStatus.WILL_ATTEND:
         return format_course_for_dashboard(run_status.course_run, CourseStatus.CURRENT_GRADE, course)
@@ -192,7 +200,7 @@ def get_status_for_courserun(course_run, user_enrollments):
     )
 
 
-def format_course_for_dashboard(course_run, status_for_user, course, certificate_for_course=None):
+def format_course_for_dashboard(course_run, status_for_user, course, certificate=None):
     """
     Helper function that formats a course run adding informations to the fields coming from the DB
 
@@ -200,14 +208,12 @@ def format_course_for_dashboard(course_run, status_for_user, course, certificate
         course_run (CourseRun): a course run
         status_for_user (str): a string representing the status of a course for the user
         course (Course): a course
-        certificate_for_course (Certificate): an object representing the
-            certificates of the user for this run
+        certificate (Certificate): an object representing the
+            certificate of the user for this run
 
     Returns:
         dict: a dictionary containing information about the course
     """
-    # pylint: disable=unused-argument
-
     formatted_run = {
         'title': course.title,
     }
@@ -227,8 +233,13 @@ def format_course_for_dashboard(course_run, status_for_user, course, certificate
         formatted_run[extra_field['format_field']] = getattr(course_run, extra_field['course_run_field'])
 
     if status_for_user == CourseStatus.PASSED:
-        # TODO: here goes the logic to pull the certificate infos  # pylint: disable=fixme
-        pass
+        if certificate is not None:
+            # if the status is passed, pull the grade and the certificate url
+            formatted_run['grade'] = certificate.grade
+            formatted_run['certificate_url'] = certificate.download_url
+        else:
+            # this should never happen, but just in case
+            log.error('A valid certificate was expected')
 
     if status_for_user == CourseStatus.CURRENT_GRADE:
         # TODO: here goes the logic to pull the current grade  # pylint: disable=fixme

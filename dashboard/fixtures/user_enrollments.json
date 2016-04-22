@@ -9,9 +9,9 @@
                     "description": null,
                     "expiration_datetime": null,
                     "min_price": 0,
-                    "name": "Audit",
+                    "name": "Verified",
                     "sku": null,
-                    "slug": "audit",
+                    "slug": "verified",
                     "suggested_prices": ""
                 }
             ],

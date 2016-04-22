@@ -42,13 +42,16 @@ class UserDashboard(APIView):
         edx_client = EdxApi(user_social.extra_data, settings.EDXORG_BASE_URL)
         # get an enrollments client for the student
         enrollments = edx_client.enrollments.get_student_enrollments()
+        # get a certificates client for the student
+        certificates = edx_client.certificates.get_student_certificates(
+            request.user.username, enrollments.get_enrolled_course_ids())
 
         response_data = {'courses': []}
         for program in Program.objects.all():
             for course in program.course_set.all():
                 response_data['courses'].append(
                     get_info_for_course(
-                        request.user, course, enrollments, user_certificates=None)
+                        request.user, course, enrollments, user_certificates=certificates)
                 )
 
         response_data['courses'].sort(key=lambda x: x['position_in_program'])
