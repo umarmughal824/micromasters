@@ -1,7 +1,7 @@
 import React from 'react';
 import Button from 'react-mdl/lib/Button';
-import { boundTextField, boundSelectField, saveAndContinue } from '../util/profile_edit';
 
+import { boundTextField, boundSelectField, saveAndContinue } from '../util/profile_edit';
 import { LANGUAGE_CODES } from '../language_codes';
 
 class PersonalTab extends React.Component {
@@ -18,16 +18,22 @@ class PersonalTab extends React.Component {
       value: language.alpha2,
       label: language.English
     }));
-    this.saveAndContinue = saveAndContinue.bind(this, '/profile/professional');
+    this.saveAndContinue = saveAndContinue.bind(this, '/dashboard');
   }
 
   render() {
+    const { errors } = this.props;
     return <div>
-      {this.boundTextField("first_name", "Given name")}<br />
-      {this.boundTextField("last_name", "Family name")}<br />
-      {this.boundTextField("preferred_name", "Preferred name (optional)")}<br />
-      {this.boundSelectField('Gender', this.genderOptions, 'gender')}<br />
-      {this.boundSelectField('Preferred language', this.languageOptions, 'preferred_language')}<br />
+      {this.boundTextField("first_name", "Given name", errors.first_name)}<br />
+        {this.boundTextField("last_name", "Family name", errors.last_name)}<br />
+        {this.boundTextField("preferred_name", "Preferred name", errors.preferred_name)}<br />
+        {this.boundSelectField('gender', 'Gender', this.genderOptions, errors.gender)}<br />
+        {this.boundSelectField(
+          'preferred_language',
+          'Preferred language',
+          this.languageOptions,
+          errors.preferred_language
+        )}<br />
       <Button raised onClick={this.saveAndContinue}>
         Save and continue
       </Button>
@@ -37,6 +43,7 @@ class PersonalTab extends React.Component {
 
 PersonalTab.propTypes = {
   profile:        React.PropTypes.object,
+  errors:         React.PropTypes.object,
   saveProfile:    React.PropTypes.func,
   updateProfile:  React.PropTypes.func,
 };

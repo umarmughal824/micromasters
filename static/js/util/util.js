@@ -95,3 +95,31 @@ export function makeCourseStatusDisplay(course, now = moment()) {
     return "";
   }
 }
+
+/* eslint-disable camelcase */
+/**
+ * Validates the profile
+ *
+ * @param {Object} profile The user profile
+ * @returns {Object} Validation errors or an empty object if no errors
+ */
+export function validateProfile(profile) {
+  let errors = {};
+
+  let required = {
+    'first_name': "Given name",
+    'last_name': "Family name",
+    'preferred_name': "Preferred name",
+    'gender': "Gender",
+    'preferred_language': "Preferred language"
+  };
+
+  for (let key of Object.keys(required)) {
+    if (!profile[key]) {
+      errors[key] = `${required[key]} is required`;
+    }
+  }
+
+  return errors;
+}
+/* eslint-enable camelcase */

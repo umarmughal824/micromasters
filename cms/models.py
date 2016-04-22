@@ -44,6 +44,7 @@ class HomePage(Page):
         context["authenticated"] = not request.user.is_anonymous()
         context["username"] = request.user.username
         context["js_settings_json"] = json.dumps(js_settings)
+        context["title"] = self.title
 
         return context
 

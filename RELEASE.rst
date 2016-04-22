@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.5.0
+-------------
+
+- Deleted the `employment` route placeholder
+- Styled the homepage
+- Added validation to personal page on profile
+- Move arguments for boundSelectField for consistency
+
 Version 0.4.0
 -------------
 

@@ -9,54 +9,123 @@
 {% block title %}{% trans "MIT Micromasters" %}{% endblock %}
 
 {% block content %}
-<div id="public">
-    <div class="purpose-statement-box">
-      <div class="purpose-statement-text"
-    {% if page.title_background %}
-      {% image page.title_background original as title_background %}
-           style="background-image: url({{ title_background.url }})"
+
+<div id="header">
+  <div class="header-logo">
+    <a href="/">
+      <img src="/static/images/mit-micromasters.png" alt="MIT micromasters">
+    </a>
+  </div>
+  <div class="header-links-dashboard">
+    <a href="/dashboard">Dashboard</a>
+  </div>
+  <div class="header-links-login">
+    {% if authenticated %}
+    <a class="btn btn-outline btn-success" href="/logout">
+      Sign out
+    </a>
+    {% else %}
+    <a class="btn btn-outline btn-success" href="{% url 'social:begin' 'edxorg' %}">
+      Sign in
+    </a>
     {% endif %}
-      >
-        <h1>{{ page.title }}</h1>
-
-        <button type="button" class="learn-more-btn button" >Learn more</button>
-      </div>
-
-    </div>
-    <div class="login-button-wrapper">
-      {% if authenticated %}
-      <h1>Welcome, {{ username }}</h1>
-      {% else %}
-      <a class="login-button button" href="{% url 'social:begin' 'edxorg' %}">Log in with edx.org</a>
-      {% endif %}
-    </div>
-    <div class="programs-container">
-        {% for program in programs %}
-          <div class="program-box">
-            <span style="line-height: 115px"></span>
-            {% if program.programpage %}
-            <a href="{{ program.programpage.url }}">
-              <div class="program-name">{{ program }}</div>
-            </a>
-            {% else %}
-              {{ program }}
-          {% endif %}
-          </div>
-        {% endfor %}
-    </div>
-
-    <div class="footer-row">
-        <div class="footer-links">
-            <a href="http://giving.mit.edu/">MIT Giving</a>
-            <a href="https://www.edx.org/">edX</a>
-            <a href="https://odl.mit.edu/">Office of Digital Learning</a>
-        </div>
-    </div>
+  </div>
 </div>
+
+<div class="main-content-wrapper app-media">
+  <section class="main-content">
+
+
+    <div class="banner-wrapper">
+      <div class="banner-wrapper-content">
+        <h1>
+          {{ title }}
+        </h1>
+        <a href="#" role="button" class="btn btn-primary btn-lg btn-learn-more">
+          <span>LEARN MORE</span>
+        </a>
+      </div>
+      <div class="banner-bottom">
+        <div class="banner-wrapper-content">
+          <h2>Get Started Today!
+            <a href="{% url 'social:begin' 'edxorg' %}" role="button" class="btn btn-success sign-in-button margin-left-10">
+              <span>Sign in with edX.org</span>
+            </a>
+          </h2>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="panel panel-main-content">
+      <div class="panel-body">
+        <h3>Micromasters</h3>
+        <div class="media-list is-grid padding-bottom-50">
+          <ul class="blocks blocks-100 blocks-xlg-4 blocks-lg-3 blocks-md-3 blocks-ms-2 blocks-xs-2" data-plugin="animateList" data-child=">li">
+
+            {% for program in programs %}
+            <li>
+              <div class="media-item">
+                <div class="media-top">
+                  <div class="image-wrap">
+                    <img class="image" src="static/images/course-1.png" alt="..."> 
+                  </div>
+                </div>
+                <div class="info-wrap">
+                  {% if program.programpage %}
+                  <a href="{{ program.programpage.url }}">
+                    <div class="title">{{ program }}</div>
+                  </a>
+                  {% else %}
+                  <div class="title">{{ program }}</div>
+                  {% endif %}
+                  <div class="description">
+                    {% if program.description %}
+                    {{ program.description }}
+                    {% else %}
+                    No description available for this program.
+                    {% endif %}
+                  </div>
+                  <div class="media-footer">
+                    {% if program.course_set.count == 1 %}
+                    <div class="widget-metas"><span class="meta-courses">{{ program.course_set.count }} course</span></div>
+                    {% else %}
+                    <div class="widget-metas"><span class="meta-courses">{{ program.course_set.count }} courses</span></div>
+                    {% endif %}
+                    <div class="widget-rating">
+                      <div class="rating rating-lg blue-600" data-score="4" data-read-only="true" data-class="blue-600" data-plugin="rating"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8">
+        <img src="static/images/logo-mit-white.png" alt="">
+        <div class="footer-links"><a href="add" target="_blank">About Micromasters</a> <a href="https://www.edx.org/" target="_blank">edX</a> <a href="https://odl.mit.edu/" target="_blank">Office of Digital Learning</a>
+        </div>
+        <div class="footer-address">
+          Massachusetts Institute of Technology<br> Cambridge, MA 02139
+        </div>
+      </div>
+      <div class="col-md-4 text-right">
+        <div class="footer-cta"></div>
+        <div class="footer-copy">&copy; 2016, Massachusetts Institute of Technology</div>
+      </div>
+    </div>
+  </div>
+</footer>
+
 <script type="text/javascript" src="{{ public_src }}"></script>
-  {% if not request.is_preview %}
-<script type="text/javascript">
-  // google analytics goes here
-</script>
-  {% endif %}
 {% endblock %}
