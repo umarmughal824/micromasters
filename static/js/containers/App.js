@@ -54,12 +54,14 @@ class App extends React.Component {
   render() {
     const { children } = this.props;
 
-    return <div>
-      <Header />
-      <div className="main-content">
-        {children}
+    return (
+      <div className="app-media layout-boxed">
+        <Header />
+        <div className="main-content">
+          {children}
+        </div>
       </div>
-    </div>;
+    );
   }
 }
 

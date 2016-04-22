@@ -41,6 +41,7 @@ class HomePage(Page):
         context['programs'] = Program.objects.filter(live=True)
         context["style_src"] = get_bundle_url(request, "style.js")
         context["public_src"] = get_bundle_url(request, "public.js")
+        context["style_public_src"] = get_bundle_url(request, "style_public.js")
         context["authenticated"] = not request.user.is_anonymous()
         context["username"] = request.user.username
         context["js_settings_json"] = json.dumps(js_settings)

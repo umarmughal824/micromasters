@@ -7,6 +7,10 @@
     <script type="text/javascript">
     var SETTINGS = {{ js_settings_json|safe }};
     </script>
+    {% if style_public_src %}
+    <script type="text/javascript" src="{{ style_public_src }}"></script>
+    <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+    {% endif %}
     <script type="text/javascript" src="{{ style_src }}"></script>
     <title>{% block title %}{% endblock %}</title>
     {% block extrahead %}

@@ -10,122 +10,155 @@
 
 {% block content %}
 
-<div id="header">
-  <div class="header-logo">
-    <a href="/">
-      <img src="/static/images/mit-micromasters.png" alt="MIT micromasters">
-    </a>
-  </div>
-  <div class="header-links-dashboard">
-    <a href="/dashboard">Dashboard</a>
-  </div>
-  <div class="header-links-login">
-    {% if authenticated %}
-    <a class="btn btn-outline btn-success" href="/logout">
-      Sign out
-    </a>
-    {% else %}
-    <a class="btn btn-outline btn-success" href="{% url 'social:begin' 'edxorg' %}">
-      Sign in
-    </a>
-    {% endif %}
-  </div>
-</div>
+<div class="app-media layout-boxed">
 
-<div class="main-content-wrapper app-media">
-  <section class="main-content">
-
-
-    <div class="banner-wrapper">
-      <div class="banner-wrapper-content">
-        <h1>
-          {{ title }}
-        </h1>
-        <a href="#" role="button" class="btn btn-primary btn-lg btn-learn-more">
-          <span>LEARN MORE</span>
-        </a>
-      </div>
-      <div class="banner-bottom">
-        <div class="banner-wrapper-content">
-          <h2>Get Started Today!
-            <a href="{% url 'social:begin' 'edxorg' %}" role="button" class="btn btn-success sign-in-button margin-left-10">
-              <span>Sign in with edX.org</span>
-            </a>
-          </h2>
+  <nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="javascript:void(0)"><img src="/static/images/logo-micromasters@2x.png" width="215" height="40" alt="MIT Micromasters" /></a>
+        <div class="nav-utility pull-right">
+          {% if authenticated %}
+          <a class="btn btn-danger" href="/logout">
+            Sign out
+          </a>
+          {% else %}
+          <span>Get Started Today!</span>
+          <a class="btn btn-danger" href="{% url 'social:begin' 'edxorg' %}">
+            Sign in with edX.org
+          </a>
+          {% endif %}
         </div>
+        {% if authenticated %}
+        <ul class="nav navbar-toolbar navbar-left">
+          <li class="active">
+            <a href="/dashboard">Dashboard</a>
+          </li>
+        </ul>
+        {% endif %}
       </div>
     </div>
+  </nav>
 
+  <div class="main-content-wrapper">
+    <section class="main-content">
 
-    <div class="panel panel-main-content">
-      <div class="panel-body">
-        <h3>Micromasters</h3>
-        <div class="media-list is-grid padding-bottom-50">
-          <ul class="blocks blocks-100 blocks-xlg-4 blocks-lg-3 blocks-md-3 blocks-ms-2 blocks-xs-2" data-plugin="animateList" data-child=">li">
+      <div class="banner-wrapper">
+        <div class="banner-wrapper-content">
+          <h1>
+            <div class="banner-image">
+              <img src="static/images/logo-mit-verylg@2x.png" alt="MIT" />
+            </div>
+            {{ title }}
+          </h1>
+        </div>
+      </div>
 
-            {% for program in programs %}
-            <li>
-              <div class="media-item">
-                <div class="media-top">
-                  <div class="image-wrap">
-                    <img class="image" src="static/images/course-1.png" alt="..."> 
+      <div class="row sub-banner">
+        <div class="col-md-12">
+          <div class="sub-banner-content">
+            MIT has created a new credential for online learners: the Micromasters, which will be granted by <a href="https://www.edx.org/school/mitx" target="_blank">MITx</a> to students who do exceptionally well in a given set of graduate-level online courses and do well in a subsequent exam. <a href="javascript:void()" data-target="#modal-about" data-toggle="modal">Learn more</a>.
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-main-content">
+        <div class="panel-body">
+          <h3>Micromasters</h3>
+          <div class="media-list is-grid padding-bottom-50">
+            <ul class="blocks blocks-100 blocks-xlg-4 blocks-lg-3 blocks-md-3 blocks-ms-2 blocks-xs-2" data-plugin="animateList" data-child=">li">
+
+              {% for program in programs %}
+              <li>
+                <div class="media-item">
+                  <div class="media-top">
+                    <div class="image-wrap">
+                      <img class="image" src="static/images/course-1.png" alt="course image for {{program}}"> 
+                    </div>
                   </div>
-                </div>
-                <div class="info-wrap">
-                  {% if program.programpage %}
-                  <a href="{{ program.programpage.url }}">
+                  <div class="info-wrap">
+                    {% if program.programpage %}
+                    <a href="{{ program.programpage.url }}">
+                      <div class="title">{{ program }}</div>
+                    </a>
+                    {% else %}
                     <div class="title">{{ program }}</div>
-                  </a>
-                  {% else %}
-                  <div class="title">{{ program }}</div>
-                  {% endif %}
-                  <div class="description">
-                    {% if program.description %}
-                    {{ program.description }}
-                    {% else %}
-                    No description available for this program.
                     {% endif %}
-                  </div>
-                  <div class="media-footer">
-                    {% if program.course_set.count == 1 %}
-                    <div class="widget-metas"><span class="meta-courses">{{ program.course_set.count }} course</span></div>
-                    {% else %}
-                    <div class="widget-metas"><span class="meta-courses">{{ program.course_set.count }} courses</span></div>
-                    {% endif %}
-                    <div class="widget-rating">
-                      <div class="rating rating-lg blue-600" data-score="4" data-read-only="true" data-class="blue-600" data-plugin="rating"></div>
+                    <div class="description">
+                      {% if program.description %}
+                      {{ program.description }}
+                      {% else %}
+                      No description available for this program.
+                      {% endif %}
+                    </div>
+                    <div class="media-footer">
+                      {% if program.course_set.count == 1 %}
+                      <div class="widget-metas"><span class="meta-courses">{{ program.course_set.count }} course</span></div>
+                      {% else %}
+                      <div class="widget-metas"><span class="meta-courses">{{ program.course_set.count }} courses</span></div>
+                      {% endif %}
+                      <div class="widget-rating">
+                        <div class="rating rating-lg blue-600" data-score="4" data-read-only="true" data-class="blue-600" data-plugin="rating"></div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </li>
-            {% endfor %}
-          </ul>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-8">
+          <img src="static/images/logo-mit-white.png" alt="">
+          <div class="footer-links"><a href="add" target="_blank">About Micromasters</a> <a href="https://www.edx.org/" target="_blank">edX</a> <a href="https://odl.mit.edu/" target="_blank">Office of Digital Learning</a>
+          </div>
+          <div class="footer-address">
+            Massachusetts Institute of Technology<br> Cambridge, MA 02139
+          </div>
+        </div>
+        <div class="col-md-4 text-right">
+          <div class="footer-cta"></div>
+          <div class="footer-copy">&copy; 2016, Massachusetts Institute of Technology</div>
         </div>
       </div>
     </div>
-  </section>
-</div>
+  </footer>
 
-
-<footer>
-  <div class="container">
-    <div class="row">
-      <div class="col-md-8">
-        <img src="static/images/logo-mit-white.png" alt="">
-        <div class="footer-links"><a href="add" target="_blank">About Micromasters</a> <a href="https://www.edx.org/" target="_blank">edX</a> <a href="https://odl.mit.edu/" target="_blank">Office of Digital Learning</a>
+  <div class="modal fade modal-fade-in-scale-up" id="modal-about" aria-hidden="true" aria-labelledby="modal-about"
+                                                                                     role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-center">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
+          <!-- <h4 class="modal-title">About Micromasters</h4> -->
         </div>
-        <div class="footer-address">
-          Massachusetts Institute of Technology<br> Cambridge, MA 02139
+        <div class="modal-body">
+          <h2>Micromasters is a new credential</h2>
+          <p>
+          MIT has created a new credential for online learners: the “MicroMaster’s,” which will be granted by MITx (MIT’s online learning initiative) to students who do exceptionally well in a given set of graduate-level online courses and do well in a subsequent exam. The credential will first be available to students who register for the SCM program’s online courses.
+          </p>
+          <h3>Join the MIT Micromasters community</h3>
+          <p>
+          Micromasters aren't just about courseware. Part of the the MIT experience is interacting with other exceptional students like yourself. Fill out your profile on this site and build professional relationships with like-minded learners.
+          </p>
+          <h3>Micromasters courses are delivered through edX.org</h3>
+          <p>
+          Use your edX.org account to enroll in a Micromasters program and share your grades and progress with MIT. When you complete all the requirements and earn a Micromasters credential, you can use it to apply for a Masters degree at MIT.
+          </p>
         </div>
-      </div>
-      <div class="col-md-4 text-right">
-        <div class="footer-cta"></div>
-        <div class="footer-copy">&copy; 2016, Massachusetts Institute of Technology</div>
       </div>
     </div>
   </div>
-</footer>
 
+</div>
 <script type="text/javascript" src="{{ public_src }}"></script>
 {% endblock %}

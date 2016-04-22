@@ -11,6 +11,7 @@ class LoginButton extends React.Component {
     return (
       <DropdownButton
         title={authentication.name}
+        bsStyle="danger"
         id="logout-button">
         <LinkContainer to={{ pathname: '/profile' }} active={false}>
           <MenuItem>
