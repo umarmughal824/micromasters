@@ -10,6 +10,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase
 from mock import patch
 
+from edx_api.certificates.models import Certificate, Certificates
 from edx_api.enrollments.models import Enrollments
 
 from courses.factories import (
@@ -82,6 +83,13 @@ class CourseMixin(TestCase):
     def setUpTestData(cls):
         super(CourseMixin, cls).setUpTestData()
         cls.course = CourseFactory.create(title="Title")
+
+        with open(os.path.join(os.path.dirname(__file__),
+                               'fixtures/certificates.json')) as file_obj:
+            cls.certificates_json = json.loads(file_obj.read())
+
+        cls.certificates = Certificates(
+            [Certificate(cert_json) for cert_json in cls.certificates_json])
 
     def setUp(self):
         super(CourseMixin, self).setUp()
@@ -161,6 +169,52 @@ class FormatRunTest(CourseMixin):
         # test that a weird status raises here
         with self.assertRaises(ImproperlyConfigured):
             api.format_course_for_dashboard(crun, 'foo_status', self.course)
+
+    def test_format_run_no_certificate(self):
+        """Test for format_course_for_dashboard with status PASSED and no certificate"""
+        crun = self.create_run(
+            edx_key="course-v1:edX+DemoX+Demo_Course",
+            start=self.now+timedelta(weeks=52),
+            end=self.now+timedelta(weeks=62),
+            enr_start=self.now+timedelta(weeks=40),
+            enr_end=self.now+timedelta(weeks=50),
+        )
+        self.assertEqual(
+            api.format_course_for_dashboard(
+                crun, api.CourseStatus.PASSED, self.course, certificate=None),
+            {
+                'title': crun.title,
+                'status': api.CourseStatus.PASSED,
+                'position_in_program': self.course.position_in_program,
+                'id': crun.pk,
+                'course_id': crun.edx_course_key,
+            }
+        )
+
+    def test_format_run_certificate(self):
+        """Test for format_course_for_dashboard with status PASSED and certificate"""
+        crun = self.create_run(
+            edx_key="course-v1:edX+DemoX+Demo_Course",
+            start=self.now+timedelta(weeks=52),
+            end=self.now+timedelta(weeks=62),
+            enr_start=self.now+timedelta(weeks=40),
+            enr_end=self.now+timedelta(weeks=50),
+        )
+        cert = self.certificates.get_verified_cert("course-v1:edX+DemoX+Demo_Course")
+        assert cert is not None
+        self.assertEqual(
+            api.format_course_for_dashboard(
+                crun, api.CourseStatus.PASSED, self.course, certificate=cert),
+            {
+                'title': crun.title,
+                'status': api.CourseStatus.PASSED,
+                'position_in_program': self.course.position_in_program,
+                'id': crun.pk,
+                'course_id': crun.edx_course_key,
+                'grade': cert.grade,
+                'certificate_url': cert.download_url,
+            }
+        )
 
 
 class CourseRunTest(CourseMixin):
@@ -309,6 +363,15 @@ class InfoCourseTest(CourseMixin):
             enr_end=now+timedelta(weeks=1),
             edx_key="course-v1:MITx+8.MechCX+2014_T1"
         )
+        # and a run that is past and verified
+        cls.course_run_ver = cls.create_run(
+            cls,
+            start=now-timedelta(weeks=10),
+            end=now-timedelta(weeks=2),
+            enr_start=now-timedelta(weeks=20),
+            enr_end=now-timedelta(weeks=10),
+            edx_key="course-v1:edX+DemoX+Demo_Course"
+        )
 
     @patch('dashboard.api.format_course_for_dashboard', autospec=True)
     def test_info_no_runs(self, mock_format):
@@ -372,11 +435,9 @@ class InfoCourseTest(CourseMixin):
         mock_format.assert_called_once_with(self.course_run, api.CourseStatus.CURRENT_GRADE, self.course)
 
     @patch('dashboard.api.format_course_for_dashboard', autospec=True)
-    def test_info_read_cert(self, mock_format):
+    def test_info_read_cert_no_verified_cert(self, mock_format):
         """
-        test for get_info_for_course
-        TODO: this particular test need to change when the certificates
-            will be implemented
+        test for get_info_for_course in case there is not verified certificate for the course
         """
         with patch(
             'dashboard.api.get_status_for_courserun',
@@ -386,8 +447,29 @@ class InfoCourseTest(CourseMixin):
                 course_run=self.course_run
             )
         ):
-            api.get_info_for_course(self.user, self.course, None, None)
+            api.get_info_for_course(self.user, self.course, None, self.certificates)
         mock_format.assert_called_once_with(self.course_run, api.CourseStatus.OFFERED, self.course)
+
+    @patch('dashboard.api.format_course_for_dashboard', autospec=True)
+    def test_info_read_cert_with_ver_cert(self, mock_format):
+        """
+        test for get_info_for_course in case there is a certificate for the course
+        """
+        with patch(
+            'dashboard.api.get_status_for_courserun',
+            autospec=True,
+            return_value=api.CourseRunUserStatus(
+                status=api.CourseRunStatus.READ_CERT,
+                course_run=self.course_run_ver
+            )
+        ):
+            api.get_info_for_course(self.user, self.course, None, self.certificates)
+        mock_format.assert_called_once_with(
+            self.course_run_ver,
+            api.CourseStatus.PASSED,
+            self.course,
+            self.certificates.get_verified_cert(self.course_run_ver.edx_course_key)
+        )
 
     @patch('dashboard.api.format_course_for_dashboard', autospec=True)
     def test_info_will_attend(self, mock_format):
