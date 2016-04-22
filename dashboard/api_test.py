@@ -445,11 +445,15 @@ class InfoCourseTest(CourseMixin):
 
         run1 = CourseRunFactory.create(
             start_date=datetime.now(pytz.utc),
-            end_date=None
+            end_date=None,
+            enrollment_start=None,
+            enrollment_end=None
         )
         CourseRunFactory.create(
             start_date=datetime.now(pytz.utc),
             end_date=datetime.now(pytz.utc),
+            enrollment_start=None,
+            enrollment_end=None,
             course=run1.course
         )
         with patch(
