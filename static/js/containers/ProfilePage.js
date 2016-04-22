@@ -22,8 +22,12 @@ class ProfilePage extends React.Component {
     dispatch(updateProfile(profile));
   }
 
-  saveProfile(profile) {
+  saveProfile(isEdit, profile) {
     const { dispatch } = this.props;
+    if (!isEdit) {
+      // Validation errors will only show up if we start the edit
+      dispatch(startProfileEdit());
+    }
     return dispatch(validateProfile(profile)).then(() => {
       dispatch(saveProfile(SETTINGS.username, profile)).then(() => {
         dispatch(clearProfileEdit());
@@ -66,7 +70,7 @@ class ProfilePage extends React.Component {
         profile: profile,
         errors: errors,
         updateProfile: this.updateProfile.bind(this, isEdit),
-        saveProfile: this.saveProfile.bind(this)
+        saveProfile: this.saveProfile.bind(this, isEdit)
       })
     ));
 

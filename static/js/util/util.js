@@ -111,7 +111,12 @@ export function validateProfile(profile) {
     'last_name': "Family name",
     'preferred_name': "Preferred name",
     'gender': "Gender",
-    'preferred_language': "Preferred language"
+    'preferred_language': "Preferred language",
+    'city': "City",
+    'country': "Country",
+    'birth_city': 'City',
+    'birth_country': "Country",
+    'date_of_birth': "Date of birth"
   };
 
   for (let key of Object.keys(required)) {

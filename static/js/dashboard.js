@@ -19,6 +19,9 @@ import 'react-mdl/extra/material.js';
 // requirements for react-select
 import 'style!css!react-select/dist/react-select.css';
 
+// requirement for react-datepicker
+import 'style!css!react-datepicker/dist/react-datepicker.css';
+
 const store = configureStore();
 
 let debug = SETTINGS.reactGaDebug === "true";
