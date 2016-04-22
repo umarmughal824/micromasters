@@ -1,14 +1,22 @@
 """Factories for making test data"""
+from datetime import date
+
 import factory
 from factory import fuzzy
 from factory.django import DjangoModelFactory
+import faker
 
 from .models import Program, Course, CourseRun
+
+
+FAKE = faker.Factory.create()
 
 
 class ProgramFactory(DjangoModelFactory):
     """Factory for Programs"""
     title = fuzzy.FuzzyText(prefix="Program ")
+    live = fuzzy.FuzzyAttribute(FAKE.boolean)
+    description = fuzzy.FuzzyText()
 
     class Meta:  # pylint: disable=missing-docstring
         model = Program
@@ -19,6 +27,9 @@ class CourseFactory(DjangoModelFactory):
     title = fuzzy.FuzzyText(prefix="Course ")
     program = factory.SubFactory(ProgramFactory)
     position_in_program = factory.Sequence(lambda n: n)
+
+    description = fuzzy.FuzzyText()
+    prerequisites = fuzzy.FuzzyText(prefix="Course requires ")
 
     class Meta:  # pylint: disable=missing-docstring
         model = Course
@@ -35,6 +46,15 @@ class CourseRunFactory(DjangoModelFactory):
     """Factory for CourseRuns"""
     title = fuzzy.FuzzyText(prefix="CourseRun ")
     course = factory.SubFactory(CourseFactory)
+    edx_course_key = fuzzy.FuzzyText()
+    enrollment_start = fuzzy.FuzzyDate(date(1980, 1, 1))
+    start_date = fuzzy.FuzzyDate(date(1980, 1, 1))
+    enrollment_end = fuzzy.FuzzyDate(date(1980, 1, 1))
+    end_date = fuzzy.FuzzyDate(date(1980, 1, 1))
+    fuzzy_start_date = fuzzy.FuzzyText(prefix="Starting ")
+    fuzzy_enrollment_start_date = fuzzy.FuzzyText(prefix="Enrollment starting ")
+    enrollment_url = fuzzy.FuzzyText(prefix="http://")
+    prerequisites = fuzzy.FuzzyText(prefix="CourseRun requires ")
 
     class Meta:  # pylint: disable=missing-docstring
         model = CourseRun
