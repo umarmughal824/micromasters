@@ -1,7 +1,10 @@
 import React from 'react';
 import _ from 'lodash';
 
-import { makeCourseStatusDisplay } from '../util/util';
+import {
+  makeCourseStatusDisplay,
+  makeCourseProgressDisplay,
+} from '../util/util';
 
 class CourseList extends React.Component {
   render() {
@@ -9,27 +12,37 @@ class CourseList extends React.Component {
 
     let sortedCourses = _.sortBy(dashboard.courses, 'position_in_program');
 
-    let table = sortedCourses.map(course => {
+    let table = sortedCourses.map((course, i) => {
       // id number is not guaranteed to exist here so we need to use the whole
       // object to test uniqueness
       // TODO: fix this when we refactor
+
+      let isTop = i === 0;
+      let isBottom = i === sortedCourses.length - 1;
+
       return <ul
         key={JSON.stringify(course)}
-        className={"course-list-status-" + course.status}
+        className={"course-list-body course-list-status-" + course.status}
       >
-        <li>
+        <li className="course-title">
           {course.title}
         </li>
-        <li>
+        <li className="course-status">
           {makeCourseStatusDisplay(course)}
+        </li>
+        <li className="course-progress">
+          {makeCourseProgressDisplay(course, isTop, isBottom)}
         </li>
       </ul>;
     });
 
     return <div className="course-list">
       <ul className="course-list-header">
-        <li />
-        <li />
+        <li className="course-title" />
+        <li className="course-status " />
+        <li className="course-progress">
+          Progress
+        </li>
       </ul>
       {table}
     </div>;

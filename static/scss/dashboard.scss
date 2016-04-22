@@ -65,26 +65,49 @@
       @include span-columns(8 of 8);
       border-bottom: 1px solid lightgray;
       margin: 0px;
+      display: flex;
+      align-items: center;
+      height: 70px; // same as progress indicator, see makeCourseProgressDisplay
     }
     ul:last-child {
       border-bottom: 0px;
+    }
+
+    li {
+      display: block;
     }
 
     .course-list-header {
       background-color: #eff5f7;
       font-weight: bold;
       font-size: larger;
+
+      .course-progress {
+        font-weight: normal;
+        font-size: small;
+      }
     }
 
-    li {
+    .course-list-body {
+      .course-status {
+        text-align: right;
+      }
+    }
+
+    .course-title {
       @include span-columns(4 of 8);
-      @include omega(2n);
-      display: block;
-      padding: 15px;
+      @include omega(3n);
     }
 
-    li:last-child {
-      text-align: right;
+    .course-status {
+      @include span-columns(3 of 8);
+      @include omega(3n);
+    }
+
+    .course-progress {
+      @include span-columns(1 of 8);
+      @include omega(3n);
+      text-align: center;
     }
   }
 }
