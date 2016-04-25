@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.6.0
+-------------
+
+- Fixed striptags requirement issue
+- Certificates taken in account in dashboard
+- Removed node-sass rebuild step
+- Added fields to factory
+- Added course progress indicator for dashboard
+- Added country and city fields
+
 Version 0.5.0
 -------------
 
