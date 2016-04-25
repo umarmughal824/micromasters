@@ -4,6 +4,7 @@ import ga from 'react-ga';
 import moment from 'moment';
 import Button from 'react-bootstrap/lib/Button';
 import striptags from 'striptags';
+import _ from 'lodash';
 
 import {
   STATUS_PASSED,
@@ -178,30 +179,17 @@ export function makeCourseProgressDisplay(course, isFirst, isLast) {
  * @param {Object} profile The user profile
  * @returns {Object} Validation errors or an empty object if no errors
  */
-export function validateProfile(profile) {
+export function validateProfile(profile, requiredFields, messages) {
   let errors = {};
-
-  let required = {
-    'first_name': "Given name",
-    'last_name': "Family name",
-    'preferred_name': "Preferred name",
-    'gender': "Gender",
-    'preferred_language': "Preferred language",
-    'city': "City",
-    'country': "Country",
-    'birth_city': 'City',
-    'birth_country': "Country",
-    'date_of_birth': "Date of birth"
-  };
-
-  for (let key of Object.keys(required)) {
-    if (!profile[key]) {
-      errors[key] = `${required[key]} is required`;
+  for (let keySet of requiredFields) {
+    let val = _.get(profile, keySet);
+    if (_.isUndefined(val) || _.isNull(val) || val === "" ) {
+      _.set(errors, keySet,  `${messages[keySet.slice(-1)[0]]} is required`);
     }
   }
-
   return errors;
 }
+
 /* eslint-enable camelcase */
 
 /**

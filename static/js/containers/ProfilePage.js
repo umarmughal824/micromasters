@@ -13,6 +13,17 @@ import {
 } from '../actions';
 
 class ProfilePage extends React.Component {
+  static propTypes = {
+    profile:    React.PropTypes.object.isRequired,
+    children:   React.PropTypes.node,
+    dispatch:   React.PropTypes.func.isRequired,
+    history:    React.PropTypes.object.isRequired,
+  };
+
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
+  };
+
   updateProfile(isEdit, profile) {
     const { dispatch } = this.props;
     if (!isEdit) {
@@ -21,13 +32,13 @@ class ProfilePage extends React.Component {
     dispatch(updateProfile(profile));
   }
 
-  saveProfile(isEdit, profile) {
+  saveProfile(isEdit, profile, requiredFields, messages) {
     const { dispatch } = this.props;
     if (!isEdit) {
       // Validation errors will only show up if we start the edit
       dispatch(startProfileEdit());
     }
-    return dispatch(validateProfile(profile)).then(() => {
+    return dispatch(validateProfile(profile, requiredFields, messages)).then(() => {
       dispatch(saveProfile(SETTINGS.username, profile)).then(() => {
         dispatch(clearProfileEdit());
       });
@@ -35,11 +46,10 @@ class ProfilePage extends React.Component {
   }
 
   makeTabs () {
-    const { history } = this.props;
     return this.props.route.childRoutes.map( (route) => (
       <Tab
         key={route.path}
-        onClick={() => history.push(`/profile/${route.path}`)} >
+        onClick={() => this.context.router.push(`/profile/${route.path}`)} >
         {route.path}
       </Tab>
     ));
@@ -91,13 +101,6 @@ class ProfilePage extends React.Component {
     </div>;
   }
 }
-
-ProfilePage.propTypes = {
-  profile:    React.PropTypes.object.isRequired,
-  children:   React.PropTypes.node,
-  dispatch:   React.PropTypes.func.isRequired,
-  history:    React.PropTypes.object.isRequired,
-};
 
 const mapStateToProps = state => ({
   profile: state.userProfile

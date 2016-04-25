@@ -242,35 +242,73 @@ describe('utility functions', () => {
   });
 
   describe("validateProfile", () => {
+    let requiredFields = [
+      ['first_name'],
+      ['last_name'],
+      ['preferred_name'],
+      ['gender'],
+      ['preferred_language'],
+      ['city'],
+      ['country'],
+      ['birth_city'],
+      ['birth_country'],
+      ['date_of_birth'],
+    ];
+
+    let messages = {
+      'first_name': 'First Name',
+      'last_name': 'Last Name',
+      'preferred_name': 'Preferred Name',
+      'gender': 'Gender',
+      'preferred_language': 'Preferred language',
+      'city': 'City',
+      'country': 'Country',
+      'birth_city': 'Birth City',
+      'birth_country': 'Birth Country',
+      'date_of_birth': 'Birth Date',
+    };
+
     it('validates the test profile successfully', () => {
-      let errors = validateProfile(USER_PROFILE_RESPONSE);
+      let errors = validateProfile(USER_PROFILE_RESPONSE, requiredFields, messages);
       assert.deepEqual(errors, {});
     });
 
     it('validates required fields', () => {
-      let requiredFields = [
-        'first_name',
-        'last_name',
-        'preferred_name',
-        'gender',
-        'preferred_language',
-        'city',
-        'country',
-        'birth_city',
-        'birth_country',
-        'date_of_birth',
-      ];
-
       let profile = {};
       for (let key of requiredFields) {
-        profile[key] = '';
+        profile[key[0]] = '';
       }
 
-      let errors = validateProfile(profile);
+      let errors = validateProfile(profile, requiredFields, messages);
       for (let key of requiredFields) {
         let error = errors[key];
         assert.ok(error.indexOf("is required") !== -1);
       }
+    });
+
+    it('validates nested fields', () => {
+      let profile = {
+        nested_array: [{foo: "bar", baz: null}]
+      };
+      const keysToCheck = [
+        ["nested_array", 0, "foo"],
+        ["nested_array", 0, "baz"],
+      ];
+      const nestMessages = {"baz": "Baz"};
+      let errors = validateProfile(profile, keysToCheck, nestMessages);
+      assert.deepEqual({nested_array: [ { baz: "Baz is required" } ] }, errors);
+    });
+
+    it('correctly validates fields with 0', () => {
+      let profile = {
+        nested_array: [{foo: 0}]
+      };
+      const keysToCheck = [
+        ["nested_array", 0, "foo"]
+      ];
+      const nestMessages = {"foo": "Foo"};
+      let errors = validateProfile(profile, keysToCheck, nestMessages);
+      assert.deepEqual({}, errors);
     });
   });
 });

@@ -16,6 +16,11 @@ import 'style!css!react-select/dist/react-select.css';
 // requirement for react-datepicker
 import 'style!css!react-datepicker/dist/react-datepicker.css';
 
+import entries from 'object.entries';
+if (!Object.entries) {
+  entries.shim();
+}
+
 const store = configureStore();
 
 let debug = SETTINGS.reactGaDebug === "true";
