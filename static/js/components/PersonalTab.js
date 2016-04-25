@@ -1,21 +1,13 @@
 import React from 'react';
 import Button from 'react-mdl/lib/Button';
 
-import {
-  boundDateField,
-  boundTextField,
-  boundSelectField,
-  saveAndContinue,
-} from '../util/profile_edit';
+import ProfileTab from "../util/ProfileTab";
+import { saveAndContinue } from "../util/profile_edit";
 import LANGUAGE_CODES from '../language_codes';
-import COUNTRIES from '../countries';
 
-class PersonalTab extends React.Component {
+class PersonalTab extends ProfileTab {
   constructor(props) {
     super(props);
-    this.boundTextField = boundTextField.bind(this);
-    this.boundSelectField = boundSelectField.bind(this);
-    this.boundDateField = boundDateField.bind(this);
     this.genderOptions = [
       { value: 'm', label: 'Male' },
       { value: 'f', label: 'Female' },
@@ -25,10 +17,6 @@ class PersonalTab extends React.Component {
       value: language.alpha2,
       label: language.English
     }));
-    this.countryOptions = COUNTRIES.map(country => ({
-      value: country.Code,
-      label: country.Name
-    }));
     this.saveAndContinue = saveAndContinue.bind(this, '/dashboard');
   }
 
@@ -36,15 +24,15 @@ class PersonalTab extends React.Component {
     const { errors } = this.props;
     return <div>
       {this.boundTextField("first_name", "Given name", errors.first_name)}<br />
-        {this.boundTextField("last_name", "Family name", errors.last_name)}<br />
-        {this.boundTextField("preferred_name", "Preferred name", errors.preferred_name)}<br />
-        {this.boundSelectField('gender', 'Gender', this.genderOptions, errors.gender)}<br />
-        {this.boundSelectField(
-          'preferred_language',
-          'Preferred language',
-          this.languageOptions,
-          errors.preferred_language
-        )}<br />
+      {this.boundTextField("last_name", "Family name", errors.last_name)}<br />
+      {this.boundTextField("preferred_name", "Preferred name", errors.preferred_name)}<br />
+      {this.boundSelectField('gender', 'Gender', this.genderOptions, errors.gender)}<br />
+      {this.boundSelectField(
+        'preferred_language',
+        'Preferred language',
+        this.languageOptions,
+        errors.preferred_language
+      )}<br />
       <h4>Where do you live?</h4>
       {this.boundTextField('city', 'City', errors.city)}<br />
       {this.boundTextField(
