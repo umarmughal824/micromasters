@@ -30,6 +30,7 @@ export const COURSE_LIST_RESPONSE = [
 
 export const USER_PROFILE_RESPONSE = {
   "filled_out": false,
+  "agreed_to_terms_of_service": true,
   "account_privacy": "all_users",
   "email_optin": false,
   "first_name": "Jane",
