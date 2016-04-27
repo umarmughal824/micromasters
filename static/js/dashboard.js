@@ -37,8 +37,8 @@ if (process.env.NODE_ENV !== 'production') {
 ReactDOM.render(
   <div>
     <Provider store={store}>
-      <Router history={browserHistory}>
-        <Route path="/" component={App} onUpdate={ga.pageview(window.location.pathname)}>
+      <Router history={browserHistory} onUpdate={() => ga.pageview(window.location.pathname)}>
+        <Route path="/" component={App}>
           <Route path="dashboard" component={DashboardPage} />
           <Route path="profile" component={ProfilePage}>
             <IndexRedirect to="personal" />
