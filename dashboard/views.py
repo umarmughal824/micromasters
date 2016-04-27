@@ -18,7 +18,7 @@ from courses.models import (
     Program,
 )
 from dashboard.api import (
-    get_info_for_course,
+    get_info_for_program,
 )
 
 
@@ -46,13 +46,7 @@ class UserDashboard(APIView):
         certificates = edx_client.certificates.get_student_certificates(
             request.user.username, enrollments.get_enrolled_course_ids())
 
-        response_data = {'courses': []}
+        response_data = []
         for program in Program.objects.all():
-            for course in program.course_set.all():
-                response_data['courses'].append(
-                    get_info_for_course(
-                        request.user, course, enrollments, user_certificates=certificates)
-                )
-
-        response_data['courses'].sort(key=lambda x: x['position_in_program'])
+            response_data.append(get_info_for_program(program, request.user, enrollments, certificates))
         return Response(response_data)

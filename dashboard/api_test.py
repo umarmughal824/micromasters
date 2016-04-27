@@ -16,6 +16,7 @@ from edx_api.enrollments.models import Enrollments
 from courses.factories import (
     CourseFactory,
     CourseRunFactory,
+    ProgramFactory,
 )
 from dashboard import api
 from profiles.factories import UserFactory
@@ -113,21 +114,16 @@ class CourseMixin(TestCase):
 
 
 class FormatRunTest(CourseMixin):
-    """Tests for the format_course_for_dashboard function"""
+    """Tests for the format_courserun_for_dashboard function"""
 
     def test_format_run_no_run(self):
-        """Test for format_course_for_dashboard"""
-        self.assertEqual(
-            api.format_course_for_dashboard(None, api.CourseStatus.PASSED, self.course),
-            {
-                'title': self.course.title,
-                'status': api.CourseStatus.PASSED,
-                'position_in_program': self.course.position_in_program
-            }
+        """Test for format_courserun_for_dashboard"""
+        self.assertIsNone(
+            api.format_courserun_for_dashboard(None, api.CourseStatus.PASSED)
         )
 
     def test_format_run(self):
-        """Test for format_course_for_dashboard"""
+        """Test for format_courserun_for_dashboard"""
         crun = self.create_run(
             start=self.now+timedelta(weeks=52),
             end=self.now+timedelta(weeks=62),
@@ -135,18 +131,17 @@ class FormatRunTest(CourseMixin):
             enr_end=self.now+timedelta(weeks=50),
         )
         self.assertEqual(
-            api.format_course_for_dashboard(crun, api.CourseStatus.PASSED, self.course),
+            api.format_courserun_for_dashboard(crun, api.CourseStatus.PASSED),
             {
                 'title': crun.title,
                 'status': api.CourseStatus.PASSED,
-                'position_in_program': self.course.position_in_program,
                 'id': crun.pk,
                 'course_id': crun.edx_course_key,
             }
         )
 
     def test_format_run_conditional(self):
-        """Test for format_course_for_dashboard with conditional fields"""
+        """Test for format_courserun_for_dashboard with conditional fields"""
         crun = self.create_run(
             start=self.now+timedelta(weeks=52),
             end=self.now+timedelta(weeks=62),
@@ -154,11 +149,10 @@ class FormatRunTest(CourseMixin):
             enr_end=self.now+timedelta(weeks=50),
         )
         self.assertEqual(
-            api.format_course_for_dashboard(crun, api.CourseStatus.OFFERED, self.course),
+            api.format_courserun_for_dashboard(crun, api.CourseStatus.OFFERED),
             {
                 'title': crun.title,
                 'status': api.CourseStatus.OFFERED,
-                'position_in_program': self.course.position_in_program,
                 'id': crun.pk,
                 'course_id': crun.edx_course_key,
                 'enrollment_start_date': crun.enrollment_start,
@@ -168,10 +162,10 @@ class FormatRunTest(CourseMixin):
 
         # test that a weird status raises here
         with self.assertRaises(ImproperlyConfigured):
-            api.format_course_for_dashboard(crun, 'foo_status', self.course)
+            api.format_courserun_for_dashboard(crun, 'foo_status')
 
     def test_format_run_no_certificate(self):
-        """Test for format_course_for_dashboard with status PASSED and no certificate"""
+        """Test for format_courserun_for_dashboard with status PASSED and no certificate"""
         crun = self.create_run(
             edx_key="course-v1:edX+DemoX+Demo_Course",
             start=self.now+timedelta(weeks=52),
@@ -180,19 +174,18 @@ class FormatRunTest(CourseMixin):
             enr_end=self.now+timedelta(weeks=50),
         )
         self.assertEqual(
-            api.format_course_for_dashboard(
-                crun, api.CourseStatus.PASSED, self.course, certificate=None),
+            api.format_courserun_for_dashboard(
+                crun, api.CourseStatus.PASSED, certificate=None),
             {
                 'title': crun.title,
                 'status': api.CourseStatus.PASSED,
-                'position_in_program': self.course.position_in_program,
                 'id': crun.pk,
                 'course_id': crun.edx_course_key,
             }
         )
 
     def test_format_run_certificate(self):
-        """Test for format_course_for_dashboard with status PASSED and certificate"""
+        """Test for format_courserun_for_dashboard with status PASSED and certificate"""
         crun = self.create_run(
             edx_key="course-v1:edX+DemoX+Demo_Course",
             start=self.now+timedelta(weeks=52),
@@ -203,12 +196,11 @@ class FormatRunTest(CourseMixin):
         cert = self.certificates.get_verified_cert("course-v1:edX+DemoX+Demo_Course")
         assert cert is not None
         self.assertEqual(
-            api.format_course_for_dashboard(
-                crun, api.CourseStatus.PASSED, self.course, certificate=cert),
+            api.format_courserun_for_dashboard(
+                crun, api.CourseStatus.PASSED, certificate=cert),
             {
                 'title': crun.title,
                 'status': api.CourseStatus.PASSED,
-                'position_in_program': self.course.position_in_program,
                 'id': crun.pk,
                 'course_id': crun.edx_course_key,
                 'grade': cert.grade,
@@ -373,13 +365,31 @@ class InfoCourseTest(CourseMixin):
             edx_key="course-v1:edX+DemoX+Demo_Course"
         )
 
-    @patch('dashboard.api.format_course_for_dashboard', autospec=True)
+    def assert_course_equal(self, course, status, course_data_from_call):
+        """Helper to format the course info"""
+        expected_data = {
+            "id": course.pk,
+            "title": course.title,
+            "position_in_program": course.position_in_program,
+            "description": course.description,
+            "prerequisites": course.prerequisites,
+            "status": status,
+        }
+        # remove the runs part: assumed checked with the mock assertion
+        del course_data_from_call['runs']
+        self.assertEqual(expected_data, course_data_from_call)
+
+    @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
     def test_info_no_runs(self, mock_format):
         """test for get_info_for_course"""
-        api.get_info_for_course(self.user, self.course_noruns, None, None)
-        mock_format.assert_called_once_with(None, api.CourseStatus.NOT_OFFERED, self.course_noruns)
+        self.assert_course_equal(
+            self.course_noruns,
+            api.CourseStatus.NOT_OFFERED,
+            api.get_info_for_course(self.user, self.course_noruns, None, None)
+        )
+        assert mock_format.called is False
 
-    @patch('dashboard.api.format_course_for_dashboard', autospec=True)
+    @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
     def test_info_not_enrolled_not_passed(self, mock_format):
         """test for get_info_for_course"""
         with patch(
@@ -390,8 +400,12 @@ class InfoCourseTest(CourseMixin):
                 course_run=self.course_run
             )
         ):
-            api.get_info_for_course(self.user, self.course, None, None)
-        mock_format.assert_called_once_with(self.course_run, api.CourseStatus.OFFERED, self.course)
+            self.assert_course_equal(
+                self.course,
+                api.CourseStatus.OFFERED,
+                api.get_info_for_course(self.user, self.course, None, None)
+            )
+        mock_format.assert_called_once_with(self.course_run, api.CourseStatus.OFFERED)
 
         mock_format.reset_mock()
 
@@ -403,10 +417,14 @@ class InfoCourseTest(CourseMixin):
                 course_run=self.course_run
             )
         ):
-            api.get_info_for_course(self.user, self.course, None, None)
-        mock_format.assert_called_once_with(self.course_run, api.CourseStatus.OFFERED, self.course)
+            self.assert_course_equal(
+                self.course,
+                api.CourseStatus.OFFERED,
+                api.get_info_for_course(self.user, self.course, None, None)
+            )
+        mock_format.assert_called_once_with(self.course_run, api.CourseStatus.OFFERED)
 
-    @patch('dashboard.api.format_course_for_dashboard', autospec=True)
+    @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
     def test_info_not_enrolled_not_passed_not_offered(self, mock_format):
         """test for get_info_for_course"""
         with patch(
@@ -417,10 +435,14 @@ class InfoCourseTest(CourseMixin):
                 course_run=self.course_run
             )
         ), patch('courses.models.Course.get_next_run', autospec=True, return_value=None):
-            api.get_info_for_course(self.user, self.course, None, None)
-        mock_format.assert_called_once_with(None, api.CourseStatus.NOT_OFFERED, self.course)
+            self.assert_course_equal(
+                self.course,
+                api.CourseStatus.NOT_OFFERED,
+                api.get_info_for_course(self.user, self.course, None, None)
+            )
+        assert mock_format.called is False
 
-    @patch('dashboard.api.format_course_for_dashboard', autospec=True)
+    @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
     def test_info_grade(self, mock_format):
         """test for get_info_for_course"""
         with patch(
@@ -431,10 +453,14 @@ class InfoCourseTest(CourseMixin):
                 course_run=self.course_run
             )
         ):
-            api.get_info_for_course(self.user, self.course, None, None)
-        mock_format.assert_called_once_with(self.course_run, api.CourseStatus.CURRENT_GRADE, self.course)
+            self.assert_course_equal(
+                self.course,
+                api.CourseStatus.CURRENT_GRADE,
+                api.get_info_for_course(self.user, self.course, None, None)
+            )
+        mock_format.assert_called_once_with(self.course_run, api.CourseStatus.CURRENT_GRADE)
 
-    @patch('dashboard.api.format_course_for_dashboard', autospec=True)
+    @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
     def test_info_read_cert_no_verified_cert(self, mock_format):
         """
         test for get_info_for_course in case there is not verified certificate for the course
@@ -447,10 +473,14 @@ class InfoCourseTest(CourseMixin):
                 course_run=self.course_run
             )
         ):
-            api.get_info_for_course(self.user, self.course, None, self.certificates)
-        mock_format.assert_called_once_with(self.course_run, api.CourseStatus.OFFERED, self.course)
+            self.assert_course_equal(
+                self.course,
+                api.CourseStatus.OFFERED,
+                api.get_info_for_course(self.user, self.course, None, self.certificates)
+            )
+        mock_format.assert_called_once_with(self.course_run, api.CourseStatus.OFFERED)
 
-    @patch('dashboard.api.format_course_for_dashboard', autospec=True)
+    @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
     def test_info_read_cert_with_ver_cert(self, mock_format):
         """
         test for get_info_for_course in case there is a certificate for the course
@@ -463,15 +493,18 @@ class InfoCourseTest(CourseMixin):
                 course_run=self.course_run_ver
             )
         ):
-            api.get_info_for_course(self.user, self.course, None, self.certificates)
+            self.assert_course_equal(
+                self.course,
+                api.CourseStatus.PASSED,
+                api.get_info_for_course(self.user, self.course, None, self.certificates)
+            )
         mock_format.assert_called_once_with(
             self.course_run_ver,
             api.CourseStatus.PASSED,
-            self.course,
             self.certificates.get_verified_cert(self.course_run_ver.edx_course_key)
         )
 
-    @patch('dashboard.api.format_course_for_dashboard', autospec=True)
+    @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
     def test_info_will_attend(self, mock_format):
         """test for get_info_for_course"""
         with patch(
@@ -482,10 +515,14 @@ class InfoCourseTest(CourseMixin):
                 course_run=self.course_run
             )
         ):
-            api.get_info_for_course(self.user, self.course, None, None)
-        mock_format.assert_called_once_with(self.course_run, api.CourseStatus.CURRENT_GRADE, self.course)
+            self.assert_course_equal(
+                self.course,
+                api.CourseStatus.CURRENT_GRADE,
+                api.get_info_for_course(self.user, self.course, None, None)
+            )
+        mock_format.assert_called_once_with(self.course_run, api.CourseStatus.CURRENT_GRADE)
 
-    @patch('dashboard.api.format_course_for_dashboard', autospec=True)
+    @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
     def test_info_upgrade(self, mock_format):
         """test for get_info_for_course"""
         with patch(
@@ -496,10 +533,14 @@ class InfoCourseTest(CourseMixin):
                 course_run=self.course_run
             )
         ):
-            api.get_info_for_course(self.user, self.course, None, None)
-        mock_format.assert_called_once_with(self.course_run, api.CourseStatus.UPGRADE, self.course)
+            self.assert_course_equal(
+                self.course,
+                api.CourseStatus.UPGRADE,
+                api.get_info_for_course(self.user, self.course, None, None)
+            )
+        mock_format.assert_called_once_with(self.course_run, api.CourseStatus.UPGRADE)
 
-    @patch('dashboard.api.format_course_for_dashboard', autospec=True)
+    @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
     def test_info_default_should_not_happen(self, mock_format):
         """test for get_info_for_course"""
         with patch(
@@ -510,10 +551,14 @@ class InfoCourseTest(CourseMixin):
                 course_run=self.course_run
             )
         ):
-            api.get_info_for_course(self.user, self.course, None, None)
-        mock_format.assert_called_once_with(self.course_run, api.CourseStatus.OFFERED, self.course)
+            self.assert_course_equal(
+                self.course,
+                api.CourseStatus.OFFERED,
+                api.get_info_for_course(self.user, self.course, None, None)
+            )
+        mock_format.assert_called_once_with(self.course_run, api.CourseStatus.OFFERED)
 
-    @patch('dashboard.api.format_course_for_dashboard', autospec=True)
+    @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
     def test_course_run_end_date_mixed(self, mock_format):
         """
         Test with a mix of end_date being None and also a valid date
@@ -543,5 +588,61 @@ class InfoCourseTest(CourseMixin):
             autospec=True,
             side_effect=mocked_get_status_for_courserun
         ):
-            api.get_info_for_course(self.user, run1.course, None, None)
-        mock_format.assert_called_once_with(run1, api.CourseStatus.OFFERED, run1.course)
+            self.assert_course_equal(
+                run1.course,
+                api.CourseStatus.OFFERED,
+                api.get_info_for_course(self.user, run1.course, None, None)
+            )
+        mock_format.assert_called_once_with(run1, api.CourseStatus.OFFERED)
+
+
+class InfoProgramTest(TestCase):
+    """Tests for get_info_for_program"""
+    @classmethod
+    def setUpTestData(cls):
+        super(InfoProgramTest, cls).setUpTestData()
+        cls.user = UserFactory()
+        # create the programs
+        cls.program = ProgramFactory.create()
+        cls.program_no_courses = ProgramFactory.create()
+
+        # create some courses for the program
+        cls.courses = []
+        for num in range(2):
+            cls.courses.append(
+                CourseFactory.create(
+                    title="title course prog1 {}".format(num),
+                    program=cls.program
+                )
+            )
+
+    @patch('dashboard.api.get_info_for_course', autospec=True)
+    def test_program(self, mock_info_course):
+        """Test happy path"""
+        mock_info_course.return_value = {'position_in_program': 1}
+        res = api.get_info_for_program(
+            self.program, self.user, {'enrollments': None}, {'certificates': None})
+        for course in self.courses:
+            mock_info_course.assert_any_call(
+                self.user, course, {'enrollments': None}, {'certificates': None})
+        expected_data = {
+            "id": self.program.pk,
+            "description": self.program.description,
+            "title": self.program.title,
+            "courses": [{'position_in_program': 1}, {'position_in_program': 1}]
+        }
+        self.assertEqual(res, expected_data)
+
+    @patch('dashboard.api.get_info_for_course', autospec=True)
+    def test_program_no_courses(self, mock_info_course):
+        """Test program with no courses"""
+        res = api.get_info_for_program(
+            self.program_no_courses, self.user, {'enrollments': None}, {'certificates': None})
+        assert mock_info_course.called is False
+        expected_data = {
+            "id": self.program_no_courses.pk,
+            "description": self.program_no_courses.description,
+            "title": self.program_no_courses.title,
+            "courses": []
+        }
+        self.assertEqual(res, expected_data)
