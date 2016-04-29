@@ -10,6 +10,8 @@ from django.db import transaction
 
 log = logging.getLogger(__name__)
 
+# pylint: disable=too-many-branches
+
 
 class CourseStatus():
     """
@@ -92,6 +94,34 @@ class CourseRunUserStatus():
         self.enrollment_for_course = enrollment_for_course
 
 
+def get_info_for_program(program, user, enrollments, certificates):
+    """
+    Helper function that formats a program with all the courses and runs
+
+    Args:
+        program (Program): a program
+        user (User): an user object
+        enrollments (Enrollments): the user enrollments object
+        certificates (Certificates): the user certificates objects
+
+    Returns:
+        dict: a dictionary containing information about the program
+    """
+    # basic data for the program
+    data = {
+        "id": program.pk,
+        "description": program.description,
+        "title": program.title,
+        "courses": []
+    }
+    for course in program.course_set.all():
+        data['courses'].append(
+            get_info_for_course(user, course, enrollments, certificates)
+        )
+    data['courses'].sort(key=lambda x: x['position_in_program'])
+    return data
+
+
 def get_info_for_course(user, course, user_enrollments, user_certificates):
     """
     Checks the status of a course given the status of all its runs
@@ -105,10 +135,20 @@ def get_info_for_course(user, course, user_enrollments, user_certificates):
     Returns:
         dict: dictionary representing the course status for the user
     """
-    # pylint: disable=too-many-return-statements
+    # data about the course to be returned anyway
+    course_data = {
+        "id": course.pk,
+        "title": course.title,
+        "position_in_program": course.position_in_program,
+        "description": course.description,
+        "prerequisites": course.prerequisites,
+        "runs": [],
+        "status": None,
+    }
     with transaction.atomic():
         if not course.courserun_set.count():
-            return format_course_for_dashboard(None, CourseStatus.NOT_OFFERED, course)
+            course_data['status'] = CourseStatus.NOT_OFFERED
+            return course_data
         # get all the run statuses
         run_statuses = [get_status_for_courserun(course_run, user_enrollments)
                         for course_run in course.courserun_set.all()]
@@ -123,47 +163,57 @@ def get_info_for_course(user, course, user_enrollments, user_certificates):
         run_status = run_statuses[0]
 
     if run_status.status in (CourseRunStatus.NOT_ENROLLED, CourseRunStatus.NOT_PASSED):
-        return format_course_for_dashboard(
-            course.get_next_run(),
-            CourseStatus.OFFERED if course.get_next_run() is not None else CourseStatus.NOT_OFFERED,
-            course
-        )
+        next_run = course.get_next_run()
+        status = CourseStatus.OFFERED if next_run is not None else CourseStatus.NOT_OFFERED
+        course_data['status'] = status
+        if next_run is not None:
+            course_data['runs'].append(format_courserun_for_dashboard(next_run, status))
     elif run_status.status == CourseRunStatus.GRADE:
-        return format_course_for_dashboard(run_status.course_run, CourseStatus.CURRENT_GRADE, course)
+        course_data['status'] = CourseStatus.CURRENT_GRADE
+        course_data['runs'].append(format_courserun_for_dashboard(run_status.course_run, CourseStatus.CURRENT_GRADE))
     # check if we need to check the certificate
     elif run_status.status == CourseRunStatus.READ_CERT:
         # if there is no certificate for the user, the user never passed
         # the course, so she needs to enroll in the next one
         if not user_certificates.has_verified_cert(run_status.course_run.edx_course_key):
-            return format_course_for_dashboard(
-                course.get_next_run(),
-                CourseStatus.OFFERED if course.get_next_run() is not None else CourseStatus.NOT_OFFERED,
-                course
+            next_run = course.get_next_run()
+            status = CourseStatus.OFFERED if next_run is not None else CourseStatus.NOT_OFFERED
+            course_data['status'] = status
+            if next_run is not None:
+                course_data['runs'].append(format_courserun_for_dashboard(next_run, status))
+        else:
+            # pull the verified certificate for course
+            cert = user_certificates.get_verified_cert(run_status.course_run.edx_course_key)
+            course_data['status'] = CourseStatus.PASSED
+            course_data['runs'].append(
+                format_courserun_for_dashboard(
+                    run_status.course_run,
+                    CourseStatus.PASSED,
+                    cert
+                )
             )
-        # pull the verified certificate for course
-        cert = user_certificates.get_verified_cert(run_status.course_run.edx_course_key)
-        return format_course_for_dashboard(
-            run_status.course_run,
-            CourseStatus.PASSED,
-            course,
-            cert
-        )
     elif run_status.status == CourseRunStatus.WILL_ATTEND:
-        return format_course_for_dashboard(run_status.course_run, CourseStatus.CURRENT_GRADE, course)
+        course_data['status'] = CourseStatus.CURRENT_GRADE
+        course_data['runs'].append(format_courserun_for_dashboard(run_status.course_run, CourseStatus.CURRENT_GRADE))
     elif run_status.status == CourseRunStatus.UPGRADE:
-        return format_course_for_dashboard(run_status.course_run, CourseStatus.UPGRADE, course)
-    # this should never happen, but put a default behavior just in case
-    log.critical(
-        'course %s for user %s has status %s',
-        run_status.course_run.edx_course_key,
-        user.username,
-        run_status.status
-    )
-    return format_course_for_dashboard(
-        course.get_next_run(),
-        CourseStatus.OFFERED if course.get_next_run() is not None else CourseStatus.NOT_OFFERED,
-        course
-    )
+        course_data['status'] = CourseStatus.UPGRADE
+        course_data['runs'].append(format_courserun_for_dashboard(run_status.course_run, CourseStatus.UPGRADE))
+
+    # final check before returning the data
+    if course_data['status'] is None:
+        # this should never happen, but put a default behavior just in case
+        log.critical(
+            'course %s for user %s has status %s',
+            run_status.course_run.edx_course_key,
+            user.username,
+            run_status.status
+        )
+        next_run = course.get_next_run()
+        status = CourseStatus.OFFERED if next_run is not None else CourseStatus.NOT_OFFERED
+        course_data['status'] = status
+        if next_run is not None:
+            course_data['runs'].append(format_courserun_for_dashboard(next_run, status))
+    return course_data
 
 
 def get_status_for_courserun(course_run, user_enrollments):
@@ -200,32 +250,27 @@ def get_status_for_courserun(course_run, user_enrollments):
     )
 
 
-def format_course_for_dashboard(course_run, status_for_user, course, certificate=None):
+def format_courserun_for_dashboard(course_run, status_for_user, certificate=None):
     """
     Helper function that formats a course run adding informations to the fields coming from the DB
 
     Args:
         course_run (CourseRun): a course run
         status_for_user (str): a string representing the status of a course for the user
-        course (Course): a course
         certificate (Certificate): an object representing the
             certificate of the user for this run
 
     Returns:
         dict: a dictionary containing information about the course
     """
+    if course_run is None:
+        return
     formatted_run = {
-        'title': course.title,
+        'id': course_run.id,
+        'course_id': course_run.edx_course_key,
+        'title': course_run.title,
+        'status': status_for_user,
     }
-    if course_run is not None:
-        formatted_run.update({
-            'id': course_run.id,
-            'course_id': course_run.edx_course_key,
-            'title': course_run.title,
-        })
-
-    formatted_run['status'] = status_for_user
-    formatted_run['position_in_program'] = course.position_in_program
 
     # check if there are extra fields to pull in
     extra_fields = CourseFormatConditionalFields.get_assoc_field(status_for_user)

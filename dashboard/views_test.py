@@ -106,10 +106,12 @@ class DashboardTest(APITestCase):
             res = self.client.get(self.url)
         assert res.status_code == status.HTTP_200_OK
         data = res.data
-        assert 'courses' in data
-        assert len(data['courses']) == 4
-        for course in data['courses']:
-            assert course['status'] == CourseStatus.NOT_OFFERED
+        assert len(data) == 2
+        for program in data:
+            assert 'courses' in program
+            assert len(program['courses']) == 2
+            for course in program['courses']:
+                assert course['status'] == CourseStatus.NOT_OFFERED
 
     def test_with_runs(self):
         """Test for GET"""
@@ -138,18 +140,16 @@ class DashboardTest(APITestCase):
             res = self.client.get(self.url)
         assert res.status_code == status.HTTP_200_OK
         data = res.data
-        assert 'courses' in data
-        assert len(data['courses']) == 4
-        course_1_data = None
-        course_2_data = None
-        for course_data in data['courses']:
-            if 'course_id' not in course_data:
-                continue
-            if course_data['course_id'] == "course-v1:edX+DemoX+Demo_Course":
-                course_1_data = course_data
-            if course_data['course_id'] == "course-v1:MITx+8.MechCX+2014_T1":
-                course_2_data = course_data
-        assert course_1_data is not None
-        assert course_2_data is not None
-        assert course_1_data['status'] == CourseStatus.CURRENT_GRADE
-        assert course_2_data['status'] == CourseStatus.UPGRADE
+        assert len(data) == 2
+        for program in data:
+            assert 'courses' in program
+            assert len(program['courses']) == 2
+            for course_data in program['courses']:
+                assert 'status' in course_data
+                assert 'runs' in course_data
+                if len(course_data['runs']) == 1:
+                    assert 'course_id' in course_data['runs'][0]
+                    if course_data['runs'][0]['course_id'] == "course-v1:edX+DemoX+Demo_Course":
+                        assert course_data['runs'][0]['status'] == CourseStatus.CURRENT_GRADE
+                    if course_data['runs'][0]['course_id'] == "course-v1:MITx+8.MechCX+2014_T1":
+                        assert course_data['runs'][0]['status'] == CourseStatus.UPGRADE
