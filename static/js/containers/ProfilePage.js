@@ -3,7 +3,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Tabs from 'react-mdl/lib/Tabs/Tabs';
 import Tab from 'react-mdl/lib/Tabs/Tab';
-import { browserHistory } from 'react-router';
 
 import {
   startProfileEdit,
@@ -36,10 +35,11 @@ class ProfilePage extends React.Component {
   }
 
   makeTabs () {
+    const { history } = this.props;
     return this.props.route.childRoutes.map( (route) => (
       <Tab
         key={route.path}
-        onClick={() => browserHistory.push(`/profile/${route.path}`)} >
+        onClick={() => history.push(`/profile/${route.path}`)} >
         {route.path}
       </Tab>
     ));
@@ -95,7 +95,8 @@ class ProfilePage extends React.Component {
 ProfilePage.propTypes = {
   profile:    React.PropTypes.object.isRequired,
   children:   React.PropTypes.node,
-  dispatch:   React.PropTypes.func.isRequired
+  dispatch:   React.PropTypes.func.isRequired,
+  history:    React.PropTypes.object.isRequired,
 };
 
 const mapStateToProps = state => ({

@@ -19,6 +19,7 @@ class ProfileSerializer(ModelSerializer):
         model = Profile
         fields = (
             'filled_out',
+            'agreed_to_terms_of_service',
             'account_privacy',
             'email_optin',
             'first_name',

@@ -9,6 +9,7 @@ from factory.fuzzy import FuzzyText
 
 from courses.factories import ProgramFactory
 from profiles.factories import ProfileFactory, UserFactory
+from ui.urls import DASHBOARD_URL
 
 
 class TestViews(TestCase):
@@ -41,7 +42,9 @@ class TestViews(TestCase):
         Assert settings we pass to dashboard
         """
         with mute_signals(post_save):
-            profile = ProfileFactory.create()
+            profile = ProfileFactory.create(
+                agreed_to_terms_of_service=True
+            )
         self.client.force_login(profile.user)
 
         ga_tracking_id = FuzzyText().fuzz()
@@ -52,7 +55,7 @@ class TestViews(TestCase):
             REACT_GA_DEBUG=react_ga_debug,
             EDXORG_BASE_URL=edx_base_url
         ):
-            resp = self.client.get('/dashboard/')
+            resp = self.client.get(DASHBOARD_URL)
             self.assertContains(resp, ga_tracking_id)
             self.assertContains(resp, react_ga_debug)
             self.assertContains(resp, edx_base_url)
@@ -61,19 +64,19 @@ class TestViews(TestCase):
 
     def test_unauthenticated_user_redirect(self):
         """Verify that an unauthenticated user can't visit '/dashboard'"""
-        response = self.client.get('/dashboard/')
+        response = self.client.get(DASHBOARD_URL)
         self.assertRedirects(
             response,
-            "/?next=/dashboard/"
+            "/?next={}".format(DASHBOARD_URL)
         )
 
     def test_authenticated_user_doesnt_redirect(self):
         """Verify that we let an authenticated user through to '/dashboard'"""
         with mute_signals(post_save):
             user = UserFactory.create()
-            ProfileFactory.create(user=user)
+            ProfileFactory.create(user=user, agreed_to_terms_of_service=True)
         self.client.force_login(user)
-        response = self.client.get('/dashboard/')
+        response = self.client.get(DASHBOARD_URL)
         self.assertContains(
             response,
             "Micromasters",
