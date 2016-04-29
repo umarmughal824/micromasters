@@ -58,13 +58,13 @@ class App extends React.Component {
   }
 
   requireTermsOfService() {
-    const { userProfile, location: { pathname }, history } = this.props;
+    const { userProfile, location: { pathname } } = this.props;
     if (
       userProfile.getStatus === FETCH_SUCCESS &&
       !userProfile.profile.agreed_to_terms_of_service &&
       !(TERMS_OF_SERVICE_REGEX.test(pathname))
     ) {
-      history.push('/terms_of_service');
+      this.context.router.push('/terms_of_service');
     }
   }
 
@@ -102,6 +102,10 @@ App.propTypes = {
   dashboard:  React.PropTypes.object.isRequired,
   dispatch:   React.PropTypes.func.isRequired,
   history: React.PropTypes.object.isRequired,
+};
+
+App.contextTypes = {
+  router:   React.PropTypes.object.isRequired
 };
 
 export default connect(mapStateToProps)(App);

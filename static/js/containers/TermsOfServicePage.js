@@ -7,7 +7,7 @@ import { saveProfile, FETCH_SUCCESS } from '../actions';
 
 class TermsOfServicePage extends React.Component {
   handleAgree() {
-    const { dispatch, userProfile, history } = this.props;
+    const { dispatch, userProfile } = this.props;
     if (userProfile.getStatus !== FETCH_SUCCESS) {
       // wait until we get user profile before user can agree to terms
       return;
@@ -16,7 +16,7 @@ class TermsOfServicePage extends React.Component {
       agreed_to_terms_of_service: true
     });
     dispatch(saveProfile(SETTINGS.username, profile)).then(() => {
-      history.push("/profile");
+      this.context.router.push("/profile");
     });
   }
 
@@ -51,6 +51,10 @@ TermsOfServicePage.propTypes = {
   dispatch: React.PropTypes.func.isRequired,
   userProfile: React.PropTypes.object.isRequired,
   history: React.PropTypes.object.isRequired
+};
+
+TermsOfServicePage.contextTypes = {
+  router:   React.PropTypes.object.isRequired
 };
 
 export default connect(mapStateToProps)(TermsOfServicePage);
