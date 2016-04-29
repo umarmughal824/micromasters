@@ -28,7 +28,7 @@ class EdxPipelineApiTest(TestCase):
         profile.refresh_from_db()
         for field in profile._meta.get_fields():  # pylint: disable=protected-access
             key = field.name
-            if key in ('id', 'user', 'date_joined_micromasters', 'student_id'):
+            if key in ('id', 'user', 'date_joined_micromasters', 'student_id', 'work_history'):
                 continue
             if key == 'account_privacy':
                 assert getattr(profile, key) == Profile.PRIVATE
@@ -75,7 +75,20 @@ class EdxPipelineApiTest(TestCase):
             },
             'requires_parental_consent': False,
             'username': self.user.username,
-            'year_of_birth': 1986
+            'year_of_birth': 1986,
+            "work_history": [
+                {
+                    "id": 1,
+                    "city": "NY",
+                    "state_or_territory": "NY",
+                    "country": "USA",
+                    "company_name": "XYZ-ABC",
+                    "position": "SSE",
+                    "industry": "IT",
+                    "end_date": "2016-05-17T17:14:00Z",
+                    "start_date": "2016-05-28T17:14:06Z"
+                }
+            ]
         }
 
     def test_update_profile_wrong_backend(self):
