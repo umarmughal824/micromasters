@@ -130,16 +130,6 @@ export const userProfile = (state = INITIAL_USER_PROFILE_STATE, action) => {
   }
 };
 
-const INITIAL_AUTHENTICATION_STATE = {
-  isAuthenticated: SETTINGS.isAuthenticated,
-  name: SETTINGS.name,
-};
-
-export const authentication = (state = INITIAL_AUTHENTICATION_STATE, action) => {
-  return state;
-};
-
-
 const INITIAL_DASHBOARD_STATE = {
   programs: []
 };
@@ -169,7 +159,6 @@ export const dashboard = (state = INITIAL_DASHBOARD_STATE, action) => {
 
 export default combineReducers({
   courseList,
-  authentication,
   userProfile,
   dashboard,
 });
