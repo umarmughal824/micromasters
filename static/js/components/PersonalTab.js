@@ -57,13 +57,14 @@ class PersonalTab extends ProfileTab {
       )}<br />
       <h4>Where do you live?</h4>
       {this.boundTextField(['city'], 'City')}<br />
-      {this.boundTextField(['state_or_territory'],'State or Territory')}<br />
+      {this.boundStateSelectField(['state_or_territory'], ['country'], 'State or Territory')}<br />
       {this.boundSelectField(['country'], 'Country', this.countryOptions)}<br />
       <h4>Where were you born?</h4>
       {this.boundTextField(['birth_city'], 'City')}<br />
-      {this.boundTextField(['birth_state_or_territory'], 'State or Territory')}<br />
+      {this.boundStateSelectField(['birth_state_or_territory'], ['birth_country'], 'State or Territory')}<br />
       {this.boundSelectField(['birth_country'], 'Country', this.countryOptions)}<br />
       {this.boundDateField(['date_of_birth'], 'Date of birth')}<br />
+
       <Button raised onClick={this.saveAndContinue}>
         Save and continue
       </Button>

@@ -5,6 +5,7 @@ import DatePicker from 'react-datepicker';
 import Button from 'react-mdl/lib/Button';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 import moment from 'moment';
+import iso3166 from 'iso-3166-2';
 import _ from 'lodash';
 
 // utility functions for pushing changes to profile forms back to the
@@ -62,9 +63,44 @@ export function boundSelectField(keySet, label, options) {
   </div>;
 }
 
-// bind this to this.boundSelectField in the constructor of a form component
+
+// bind this to this.boundStateSelectField in the constructor of a form component
 // to update select fields
 // pass in the name (used as placeholder), key for profile, and the options.
+export function boundStateSelectField(stateKeySet, countryKeySet, label) {
+  const {
+    updateProfile,
+    errors,
+    profile,
+  } = this.props;
+  let onChange = value => {
+    let clone = _.cloneDeep(profile);
+    _.set(clone, stateKeySet, value ? value.value : null);
+    updateProfile(clone);
+  };
+  let options = [];
+  let country = _.get(profile, countryKeySet);
+  if (iso3166.data[country] !== undefined) {
+    options = Object.keys(iso3166.data[country].sub).map(code => ({
+      value: code,
+      label: iso3166.data[country].sub[code].name
+    }));
+    options = _.sortBy(options, 'label');
+  }
+
+  return <div>
+    <Select
+      options={options}
+      value={_.get(profile, stateKeySet)}
+      placeholder={label}
+      onChange={onChange} />
+    <span className="validation-error-text">{_.get(errors, stateKeySet)}</span>
+  </div>;
+}
+
+// bind this to this.boundDateField in the constructor of a form component
+// to update date fields
+// pass in the name (used as placeholder), key for profile.
 export function boundDateField(keySet, label) {
   const {
     profile,

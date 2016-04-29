@@ -1,4 +1,10 @@
 import assert from 'assert';
+import TestUtils from 'react-addons-test-utils';
+import iso3166 from 'iso-3166-2';
+import _ from 'lodash';
+
+import { boundStateSelectField } from '../util/profile_edit';
+import { USER_PROFILE_RESPONSE } from '../constants';
 import moment from 'moment';
 
 import {
@@ -82,9 +88,9 @@ describe('Profile Editing utility functions', () => {
   describe('Bound select field', () => {
     let selectField, selectElement, errorText;
     let genderOptions = [
-      { value: 'm', label: 'Male' },
-      { value: 'f', label: 'Female' },
-      { value: 'o', label: 'Other/Prefer not to say' }
+      {value: 'm', label: 'Male'},
+      {value: 'f', label: 'Female'},
+      {value: 'o', label: 'Other/Prefer not to say'}
     ];
 
     beforeEach(() => {
@@ -111,6 +117,114 @@ describe('Profile Editing utility functions', () => {
     it('should call the updateProfile callback when onChange fires', () => {
       selectElement.props.onChange(genderOptions[1]);
       assert.equal(that.props.profile.gender, 'f');
+    });
+  });
+
+  describe("Bound state select field", () => {
+    it('lists no states when an invalid country is selected', () => {
+      const country = "MISSING";
+      const state = "MISSING";
+      let profile = Object.assign({}, USER_PROFILE_RESPONSE, {
+        country_key: country,
+        state_key: state
+      });
+
+      let stateSelectField = boundStateSelectField.bind({
+        props: {
+          profile,
+          updateProfile: () => null
+        }
+      });
+
+      let result = stateSelectField(["state_key"], ["country_key"], "");
+      let select;
+      for (let child of result.props.children) {
+        if (child.type.displayName === 'Select') {
+          select = child;
+        }
+      }
+
+      assert.equal(select.props.value, state);
+      assert.deepEqual(select.props.options, []);
+    });
+
+    it('renders a select field with sorted states for the given country', () => {
+      const country = "US";
+      const state = "US-MA";
+      const placeholder = "PLACEHOLDER";
+      const error = "ERROR";
+      let profile = Object.assign({}, USER_PROFILE_RESPONSE, {
+        country_key: country,
+        state_key: state
+      });
+
+      let stateSelectField = boundStateSelectField.bind({
+        props: {
+          profile,
+          errors: {
+            state_key: error
+          },
+          updateProfile: () => null
+        }
+      });
+
+      let result = stateSelectField(["state_key"], ["country_key"], placeholder);
+      let select, errorSpan;
+      for (let child of result.props.children) {
+        if (child.type.displayName === 'Select') {
+          select = child;
+        }
+        if (child.props.className === 'validation-error-text') {
+          errorSpan = child;
+        }
+      }
+
+      assert.equal(TestUtils.renderIntoDocument(errorSpan).innerHTML, error);
+      assert.equal(select.props.placeholder, placeholder);
+      assert.equal(select.props.value, state);
+
+      let options = Object.keys(iso3166.data[country].sub).map(code => ({
+        value: code,
+        label: iso3166.data[country].sub[code].name
+      }));
+      options = _.sortBy(options, 'label');
+      assert.deepEqual(select.props.options, options);
+    });
+
+    it('updates the state properly', () => {
+      const country = "US";
+      let profile = Object.assign({}, USER_PROFILE_RESPONSE, {
+        state_collection: [
+          {
+            country: "US"
+          }
+        ]
+      });
+
+      let stateSelectField = boundStateSelectField.bind({
+        props: {
+          profile,
+          updateProfile: clone => {
+            profile = clone;
+          }
+        }
+      });
+
+      let result = stateSelectField(
+        ["state_collection", 0, "state"],
+        ["state_collection", 0, "country"],
+        "",
+      );
+      let select;
+      for (let child of result.props.children) {
+        if (child.type.displayName === 'Select') {
+          select = child;
+        }
+      }
+      let newStateCode = "US-TN";
+      select.props.onChange({value: newStateCode, label: "Tennessee"});
+      assert.equal(profile.state_collection[0].country, country);
+      assert.equal(profile.state_collection[0].state, newStateCode);
     });
   });
 });
