@@ -120,9 +120,9 @@ export const RECEIVE_DASHBOARD_FAILURE = 'RECEIVE_DASHBOARD_FAILURE';
 export const CLEAR_DASHBOARD = 'CLEAR_DASHBOARD';
 
 const requestDashboard = () => ({ type: REQUEST_DASHBOARD });
-export const receiveDashboardSuccess = dashboard => ({
+export const receiveDashboardSuccess = programs => ({
   type: RECEIVE_DASHBOARD_SUCCESS,
-  payload: dashboard
+  payload: { programs }
 });
 const receiveDashboardFailure = () => ({ type: RECEIVE_DASHBOARD_FAILURE });
 export const clearDashboard = () => ({ type: CLEAR_DASHBOARD });

@@ -34,8 +34,11 @@ describe('utility functions', () => {
     let today = '2016-03-31';
     let tomorrow = '2016-04-01';
 
-    let renderCourseStatusDisplay = (...args) => {
-      let textOrElement = makeCourseStatusDisplay(...args);
+    let renderCourseStatusDisplay = (course, ...args) => {
+      if (course.runs === undefined) {
+        course.runs = [];
+      }
+      let textOrElement = makeCourseStatusDisplay(course, ...args);
       return makeStrippedHtml(textOrElement);
     };
 
@@ -156,6 +159,19 @@ describe('utility functions', () => {
       );
     });
 
+    it("is a run, not a course. If there are any runs the first run should be picked", () => {
+      assert.equal(
+        renderCourseStatusDisplay({
+          status: STATUS_NOT_OFFERED,
+          runs: [{
+            status: STATUS_OFFERED_NOT_ENROLLED,
+            enrollment_start_date: yesterday
+          }]
+        }, moment(today)),
+        "ENROLL"
+      );
+    });
+
     it("is a not offered course", () => {
       assert.equal(renderCourseStatusDisplay({
         status: STATUS_NOT_OFFERED
@@ -170,8 +186,11 @@ describe('utility functions', () => {
   });
 
   describe("makeCourseStatusDisplay", () => {
-    let renderCourseProgressDisplay = (...args) => {
-      let textOrElement = makeCourseProgressDisplay(...args);
+    let renderCourseProgressDisplay = (course, ...args) => {
+      if (course.runs === undefined) {
+        course.runs = [];
+      }
+      let textOrElement = makeCourseProgressDisplay(course, ...args);
       return makeStrippedHtml(textOrElement);
     };
 
@@ -179,6 +198,18 @@ describe('utility functions', () => {
       assert.equal(
         renderCourseProgressDisplay({
           status: STATUS_PASSED
+        }),
+        "Course passed"
+      );
+    });
+
+    it('is a run which is passed. In this case the course status is ignored', () => {
+      assert.equal(
+        renderCourseProgressDisplay({
+          status: STATUS_NOT_OFFERED,
+          runs: [{
+            status: STATUS_PASSED
+          }]
         }),
         "Course passed"
       );

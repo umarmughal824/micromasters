@@ -141,7 +141,7 @@ export const authentication = (state = INITIAL_AUTHENTICATION_STATE, action) => 
 
 
 const INITIAL_DASHBOARD_STATE = {
-  courses: []
+  programs: []
 };
 
 export const dashboard = (state = INITIAL_DASHBOARD_STATE, action) => {
@@ -153,7 +153,7 @@ export const dashboard = (state = INITIAL_DASHBOARD_STATE, action) => {
   case RECEIVE_DASHBOARD_SUCCESS:
     return Object.assign({}, state, {
       fetchStatus: FETCH_SUCCESS,
-      courses: action.payload.courses
+      programs: action.payload.programs
     });
   case RECEIVE_DASHBOARD_FAILURE:
     return Object.assign({}, state, {

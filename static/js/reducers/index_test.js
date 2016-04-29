@@ -331,7 +331,7 @@ describe('reducers', () => {
     it('should have an empty default state', done => {
       dispatchThen({type: 'unknown'}, ['unknown']).then(state => {
         assert.deepEqual(state, {
-          courses: []
+          programs: []
         });
         done();
       });
@@ -341,12 +341,12 @@ describe('reducers', () => {
       dashboardStub.returns(Promise.resolve(DASHBOARD_RESPONSE));
 
       dispatchThen(fetchDashboard(), [REQUEST_DASHBOARD, RECEIVE_DASHBOARD_SUCCESS]).then(dashboardState => {
-        assert.deepEqual(dashboardState.courses, DASHBOARD_RESPONSE.courses);
+        assert.deepEqual(dashboardState.programs, DASHBOARD_RESPONSE);
         assert.equal(dashboardState.fetchStatus, FETCH_SUCCESS);
 
         dispatchThen(clearDashboard(), [CLEAR_DASHBOARD]).then(dashboardState => {
           assert.deepEqual(dashboardState, {
-            courses: []
+            programs: []
           });
 
           done();

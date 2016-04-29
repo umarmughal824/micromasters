@@ -6,7 +6,7 @@ import UserImage from './UserImage';
 class Dashboard extends React.Component {
 
   render() {
-    const { courseList, profile, dashboard } = this.props;
+    const { profile, dashboard } = this.props;
     var imageUrl = (SETTINGS.edx_base_url + '/static/images/profiles/default_120.png').
     //replacing multiple "/" with a single forward slash, excluding the ones following the colon
     replace(/([^:]\/)\/+/g, "$1");
@@ -29,7 +29,7 @@ class Dashboard extends React.Component {
         Your Status
       </div>
       <div className="card-copy">
-        <CourseList courseList={courseList} dashboard={dashboard} />
+        <CourseList dashboard={dashboard} />
       </div>
     </div>;
   }
@@ -37,7 +37,6 @@ class Dashboard extends React.Component {
 
 Dashboard.propTypes = {
   profile: React.PropTypes.object.isRequired,
-  courseList: React.PropTypes.object.isRequired,
   dashboard: React.PropTypes.object.isRequired,
 };
 
