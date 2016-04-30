@@ -93,6 +93,13 @@ class CourseRunUserStatus():
         self.course_run = course_run
         self.enrollment_for_course = enrollment_for_course
 
+    def __repr__(self):
+        return "<CourseRunUserStatus for course {course} status {status} at {address}>".format(
+            status=self.status,
+            course=self.course_run.title if self.course_run is not None else '"None"',
+            address=hex(id(self))
+        )
+
 
 def get_info_for_program(program, user, enrollments, certificates):
     """
@@ -135,6 +142,7 @@ def get_info_for_course(user, course, user_enrollments, user_certificates):
     Returns:
         dict: dictionary representing the course status for the user
     """
+    # pylint: disable=too-many-statements
     # data about the course to be returned anyway
     course_data = {
         "id": course.pk,
@@ -161,16 +169,34 @@ def get_info_for_course(user, course, user_enrollments, user_certificates):
             break
     else:
         run_status = run_statuses[0]
+    # remove the picked run_status from the list
+    run_statuses.remove(run_status)
 
-    if run_status.status in (CourseRunStatus.NOT_ENROLLED, CourseRunStatus.NOT_PASSED):
+    if run_status.status == CourseRunStatus.NOT_ENROLLED:
         next_run = course.get_next_run()
         status = CourseStatus.OFFERED if next_run is not None else CourseStatus.NOT_OFFERED
         course_data['status'] = status
         if next_run is not None:
-            course_data['runs'].append(format_courserun_for_dashboard(next_run, status))
+            course_data['runs'].append(
+                format_courserun_for_dashboard(next_run, status, position=len(course_data['runs'])+1))
+    elif run_status.status == CourseRunStatus.NOT_PASSED:
+        next_run = course.get_next_run()
+        status = CourseStatus.OFFERED if next_run is not None else CourseStatus.NOT_OFFERED
+        course_data['status'] = status
+        if next_run is not None:
+            course_data['runs'].append(
+                format_courserun_for_dashboard(next_run, status, position=len(course_data['runs'])+1))
+        if next_run is None or run_status.course_run.pk != next_run.pk:
+            course_data['runs'].append(
+                format_courserun_for_dashboard(
+                    run_status.course_run, CourseStatus.NOT_PASSED, position=len(course_data['runs'])+1)
+            )
     elif run_status.status == CourseRunStatus.GRADE:
         course_data['status'] = CourseStatus.CURRENT_GRADE
-        course_data['runs'].append(format_courserun_for_dashboard(run_status.course_run, CourseStatus.CURRENT_GRADE))
+        course_data['runs'].append(
+            format_courserun_for_dashboard(
+                run_status.course_run, CourseStatus.CURRENT_GRADE, position=len(course_data['runs'])+1)
+        )
     # check if we need to check the certificate
     elif run_status.status == CourseRunStatus.READ_CERT:
         # if there is no certificate for the user, the user never passed
@@ -180,7 +206,15 @@ def get_info_for_course(user, course, user_enrollments, user_certificates):
             status = CourseStatus.OFFERED if next_run is not None else CourseStatus.NOT_OFFERED
             course_data['status'] = status
             if next_run is not None:
-                course_data['runs'].append(format_courserun_for_dashboard(next_run, status))
+                course_data['runs'].append(
+                    format_courserun_for_dashboard(next_run, status, position=len(course_data['runs'])+1)
+                )
+            # add the run of the status anyway if the next run is different from the one just added
+            if next_run is None or run_status.course_run.pk != next_run.pk:
+                course_data['runs'].append(
+                    format_courserun_for_dashboard(
+                        run_status.course_run, CourseStatus.NOT_PASSED, position=len(course_data['runs'])+1)
+                )
         else:
             # pull the verified certificate for course
             cert = user_certificates.get_verified_cert(run_status.course_run.edx_course_key)
@@ -189,15 +223,22 @@ def get_info_for_course(user, course, user_enrollments, user_certificates):
                 format_courserun_for_dashboard(
                     run_status.course_run,
                     CourseStatus.PASSED,
-                    cert
+                    cert,
+                    position=len(course_data['runs'])+1
                 )
             )
     elif run_status.status == CourseRunStatus.WILL_ATTEND:
         course_data['status'] = CourseStatus.CURRENT_GRADE
-        course_data['runs'].append(format_courserun_for_dashboard(run_status.course_run, CourseStatus.CURRENT_GRADE))
+        course_data['runs'].append(
+            format_courserun_for_dashboard(
+                run_status.course_run, CourseStatus.CURRENT_GRADE, position=len(course_data['runs'])+1)
+            )
     elif run_status.status == CourseRunStatus.UPGRADE:
         course_data['status'] = CourseStatus.UPGRADE
-        course_data['runs'].append(format_courserun_for_dashboard(run_status.course_run, CourseStatus.UPGRADE))
+        course_data['runs'].append(
+            format_courserun_for_dashboard(
+                run_status.course_run, CourseStatus.UPGRADE, position=len(course_data['runs'])+1)
+            )
 
     # final check before returning the data
     if course_data['status'] is None:
@@ -212,7 +253,42 @@ def get_info_for_course(user, course, user_enrollments, user_certificates):
         status = CourseStatus.OFFERED if next_run is not None else CourseStatus.NOT_OFFERED
         course_data['status'] = status
         if next_run is not None:
-            course_data['runs'].append(format_courserun_for_dashboard(next_run, status))
+            course_data['runs'].append(
+                format_courserun_for_dashboard(next_run, status, position=len(course_data['runs'])+1)
+            )
+        # add the run of the status anyway if the next run is different from the one just added
+        if next_run is None or run_status.course_run.pk != next_run.pk:
+            course_data['runs'].append(
+                format_courserun_for_dashboard(
+                    run_status.course_run, CourseStatus.NOT_PASSED, position=len(course_data['runs'])+1)
+            )
+
+    # add all the other runs with status != NOT_ENROLLED
+    # the first one (or two in some cases) has been added with the logic before
+    for run_status in run_statuses:
+        if run_status.status != CourseRunStatus.NOT_ENROLLED:
+            if (run_status.status == CourseRunStatus.READ_CERT and
+                    user_certificates.has_verified_cert(run_status.course_run.edx_course_key)):
+                # in this case the user might have passed the course also in the past
+                cert = user_certificates.get_verified_cert(run_status.course_run.edx_course_key)
+                course_data['runs'].append(
+                    format_courserun_for_dashboard(
+                        run_status.course_run,
+                        CourseStatus.PASSED,
+                        cert,
+                        position=len(course_data['runs'])+1
+                    )
+                )
+            else:
+                # any other status means that the student never passed the course run
+                course_data['runs'].append(
+                    format_courserun_for_dashboard(
+                        run_status.course_run,
+                        CourseStatus.NOT_PASSED,
+                        position=len(course_data['runs'])+1
+                    )
+                )
+
     return course_data
 
 
@@ -250,7 +326,7 @@ def get_status_for_courserun(course_run, user_enrollments):
     )
 
 
-def format_courserun_for_dashboard(course_run, status_for_user, certificate=None):
+def format_courserun_for_dashboard(course_run, status_for_user, certificate=None, position=1):
     """
     Helper function that formats a course run adding informations to the fields coming from the DB
 
@@ -270,6 +346,7 @@ def format_courserun_for_dashboard(course_run, status_for_user, certificate=None
         'course_id': course_run.edx_course_key,
         'title': course_run.title,
         'status': status_for_user,
+        'position': position,
     }
 
     # check if there are extra fields to pull in
