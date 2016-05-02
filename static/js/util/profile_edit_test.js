@@ -10,8 +10,11 @@ import moment from 'moment';
 import {
   boundTextField,
   boundDateField,
-  boundSelectField
+  boundSelectField,
+  boundMonthField,
+  boundYearField
 } from './profile_edit';
+import { DATE_FORMAT } from '../constants';
 
 describe('Profile Editing utility functions', () => {
   let that;
@@ -23,11 +26,13 @@ describe('Profile Editing utility functions', () => {
           "first_name": "",
           "date_of_birth": "",
           "gender": undefined,
+          "date_field": ""
         },
         errors: {
           "first_name": "First name is required",
           "date_of_birth": "Date of birth is required",
           "gender": "Gender is required",
+          "date_field": "Date field is required"
         },
         updateProfile: change
       }
@@ -86,7 +91,75 @@ describe('Profile Editing utility functions', () => {
     it('should call the updateProfile callback when onChange fires', () => {
       let cur = moment();
       dateElement.props.onChange(cur);
-      assert.deepEqual(cur.format('YYYY-MM-DD'), that.props.profile.date_of_birth);
+      assert.deepEqual(cur.format(DATE_FORMAT), that.props.profile.date_of_birth);
+    });
+  });
+
+  describe('Bound Month field', () => {
+    let dateField, selectElement, errorText;
+    const month_options = [
+      {value: 0, label: 'January'},
+      {value: 1, label: 'February'},
+      {value: 2, label: 'March'},
+      {value: 3, label: 'April'},
+      {value: 4, label: 'May'},
+      {value: 5, label: 'June'},
+      {value: 6, label: 'July'},
+      {value: 7, label: 'August'},
+      {value: 8, label: 'September'},
+      {value: 9, label: 'October'},
+      {value: 10, label: 'November'},
+      {value: 11, label: 'December'}
+    ];
+    beforeEach(() => {
+      dateField = boundMonthField.call(
+        that,
+        ["date_field"],
+        "Month"
+      );
+      selectElement = dateField.props.children[0];
+      errorText = dateField.props.children[1];
+    });
+
+    it('should correctly set props on itself', () => {
+      assert.equal('Month', selectElement.props.placeholder);
+      assert.equal(errorText.type, 'span');
+      assert.deepEqual({
+        className: 'validation-error-text',
+        children: "Date field is required",
+      }, errorText.props);
+    });
+
+    it('should call the updateProfile callback when onChange fires', () => {
+      let cur = moment().set('date', 1);
+      selectElement.props.onChange(month_options[cur.month()]);
+      assert.deepEqual(cur.format(DATE_FORMAT), that.props.profile.date_field);
+    });
+  });
+  describe('Bound Year field', () => {
+    let textField, textElement, errorText;
+    beforeEach(() => {
+      textField = boundYearField.call(
+        that,
+        ["date_field"],
+        "Year"
+      );
+      [textElement, errorText] = textField.props.children;
+    });
+
+    it('should correctly set props on itself', () => {
+      assert.deepEqual('Year', textElement.props.label);
+      assert.deepEqual({
+        className: 'validation-error-text',
+        children: "Date field is required"
+      }, errorText.props);
+      assert.deepEqual('', textElement.props.value);
+    });
+
+    it('should call the updateProfile callback when onChange fires', () => {
+      let cur = moment().set('date', 1).set('year', 1995);
+      textElement.props.onChange({target: {value: cur.year()}});
+      assert.deepEqual(cur.format(DATE_FORMAT), that.props.profile.date_field);
     });
   });
 

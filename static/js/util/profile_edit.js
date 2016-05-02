@@ -7,6 +7,7 @@ import Grid, { Cell } from 'react-mdl/lib/Grid';
 import moment from 'moment';
 import iso3166 from 'iso-3166-2';
 import _ from 'lodash';
+import { DATE_FORMAT } from '../constants';
 
 // utility functions for pushing changes to profile forms back to the
 // redux store.
@@ -111,10 +112,10 @@ export function boundDateField(keySet, label) {
   let onChange = date => {
     let clone = _.cloneDeep(profile);
     // format as ISO-8601
-    _.set(clone, keySet, date.format("YYYY-MM-DD"));
+    _.set(clone, keySet, date.format(DATE_FORMAT));
     updateProfile(clone);
   };
-  let newDate = _.get(profile, keySet) ? moment(_.get(profile, keySet), "YYYY-MM-DD") : null;
+  let newDate = _.get(profile, keySet) ? moment(_.get(profile, keySet), DATE_FORMAT) : null;
   return <div>
     <DatePicker
       selected={newDate}
@@ -125,7 +126,82 @@ export function boundDateField(keySet, label) {
     <span className="validation-error-text">{_.get(errors, keySet)}</span>
   </div>;
 }
+export function boundMonthField(keySet, label) {
+  const {updateProfile, errors, profile} = this.props;
+  let onChange = month => {
+    let clone = _.cloneDeep(profile);
 
+    let current_value = _.get(clone, keySet);
+        // format as ISO-8601
+    let date_value;
+    if(!month){
+      date_value = "";
+    }else if (current_value){
+      date_value = moment(current_value).set('month', month.value);
+    } else {
+      date_value = moment().set('date', 1).set('month', month.value);
+    }
+    if(date_value.isValid()){
+      _.set(clone, keySet, date_value.format(DATE_FORMAT));
+    }
+    updateProfile(clone);
+  };
+  let month = _.get(profile, keySet)? moment(_.get(profile, keySet), DATE_FORMAT).month() : "";
+  const month_options = [
+    { value: 0, label: 'January'},
+    { value: 1, label: 'February'},
+    { value: 2, label: 'March'},
+    { value: 3, label: 'April'},
+    { value: 4, label: 'May'},
+    { value: 5, label: 'June'},
+    { value: 6, label: 'July'},
+    { value: 7, label: 'August'},
+    { value: 8, label: 'September'},
+    { value: 9, label: 'October'},
+    { value: 10, label: 'November'},
+    {value: 11, label: 'December'}
+  ];
+
+  return <div>
+    <Select
+      options={month_options}
+      clearable={false}
+      value={month}
+      placeholder={label}
+      onChange={onChange}
+    />
+    <span className="validation-error-text">{_.get(errors, keySet)}</span>
+  </div>;
+}
+
+export function boundYearField(keySet, label) {
+  const {updateProfile, errors, profile} = this.props;
+  let onChange = e => {
+    let clone = _.cloneDeep(profile);
+    let current_value = _.get(clone, keySet);
+    let year = e.target.value;
+    // format as ISO-8601
+    let date_value = '';
+    if (year) {
+      if (current_value) {
+        date_value = moment(current_value).set('year', year);
+      } else {
+        date_value = moment().set('date', 1).set('year', year);
+      }
+      if (date_value.isValid()) {
+        _.set(clone, keySet, date_value.format(DATE_FORMAT));
+      }
+      updateProfile(clone);
+    }
+  };
+  let year = _.get(profile, keySet) ? moment(_.get(profile, keySet), DATE_FORMAT).year() : "";
+  return <div>
+    <TextField
+      label={label}
+      value={year}
+      onChange={onChange}/>
+    <span className="validation-error-text">{_.get(errors, keySet)}</span></div>;
+}
 
 // bind to this.saveAndContinue.bind(this, '/next/url')
 // pass an option callback if you need nested validation

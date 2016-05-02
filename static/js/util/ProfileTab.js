@@ -4,9 +4,12 @@ import {
   boundDateField,
   boundTextField,
   boundSelectField,
+  boundMonthField,
+  boundYearField,
   editProfileObjectArray,
   boundStateSelectField,
 } from './profile_edit';
+import { HIGH_SCHOOL, ASSOCIATE, BACHELORS, MASTERS, DOCTORATE } from '../constants';
 import LANGUAGE_CODES from '../language_codes';
 import iso3166 from 'iso-3166-2';
 import _ from 'lodash';
@@ -22,6 +25,8 @@ class ProfileTab extends React.Component {
     this.boundStateSelectField = boundStateSelectField.bind(this);
     this.boundDateField = boundDateField.bind(this);
     this.editProfileObjectArray = editProfileObjectArray.bind(this);
+    this.boundMonthField = boundMonthField.bind(this);
+    this.boundYearField = boundYearField.bind(this);
 
     // options we set (for select components)
     let countryOptions = Object.keys(iso3166.data).map(code => ({
@@ -46,6 +51,13 @@ class ProfileTab extends React.Component {
       { value: 'public', label: 'Public to the world'},
       { value: 'public_to_mm', label: 'Public to other micromasters students'},
       { value: 'private', label: 'Private'}
+    ];
+    this.educationLevelOptions = [
+      {value: HIGH_SCHOOL, label: "High school"},
+      {value: ASSOCIATE, label: 'Associate degree'},
+      {value: BACHELORS, label: "Bachelor's degree"},
+      {value: MASTERS, label: "Master's or professional degree"},
+      {value: DOCTORATE, label: "Doctorate"}
     ];
   }
 
