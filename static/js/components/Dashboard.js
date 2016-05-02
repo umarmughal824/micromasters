@@ -19,7 +19,7 @@ class Dashboard extends React.Component {
             <UserImage imageUrl={imageUrl}/>
         </div>
         <div className="card-name">
-          { SETTINGS.name }
+          { profile.preferred_name || SETTINGS.name }
           <div className="card-student-id">
             ID: { profile.pretty_printed_student_id }
           </div>
