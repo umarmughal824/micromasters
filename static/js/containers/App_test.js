@@ -4,7 +4,6 @@ import '../global_init';
 import ReactDOM from 'react-dom';
 
 import {
-  CLEAR_COURSE_LIST,
   CLEAR_DASHBOARD,
   CLEAR_PROFILE,
 } from '../actions';
@@ -22,9 +21,9 @@ describe('App', () => {
     helper.cleanup();
   });
 
-  it('clears profile, dashboard and course list after unmounting', done => {
+  it('clears profile and dashboard after unmounting', done => {
     renderComponent("/dashboard").then(([component, div]) => {  // eslint-disable-line no-unused-vars
-      listenForActions([CLEAR_COURSE_LIST, CLEAR_DASHBOARD, CLEAR_PROFILE], () => {
+      listenForActions([CLEAR_DASHBOARD, CLEAR_PROFILE], () => {
         ReactDOM.unmountComponentAtNode(div);
       }).then(() => {
         done();

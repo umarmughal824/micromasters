@@ -1,33 +1,3 @@
-export const COURSE_LIST_RESPONSE = [
-  {
-    "id": 2,
-    "title": "Course xkGecQLCBCuI",
-    "enrollment_start": null,
-    "start_date": null,
-    "enrollment_url": null,
-    "prerequisites": null,
-    "program": 1
-  },
-  {
-    "id": 1,
-    "title": "Course zXHatukOIMTZ",
-    "enrollment_start": null,
-    "start_date": null,
-    "enrollment_url": null,
-    "prerequisites": null,
-    "program": 1
-  },
-  {
-    "id": 7,
-    "title": "Course plTYyFhMcEBj",
-    "enrollment_start": null,
-    "start_date": null,
-    "enrollment_url": null,
-    "prerequisites": null,
-    "program": 3
-  }
-];
-
 export const USER_PROFILE_RESPONSE = {
   "filled_out": false,
   "agreed_to_terms_of_service": true,
@@ -52,16 +22,6 @@ export const USER_PROFILE_RESPONSE = {
   "gender": "f",
   "pretty_printed_student_id": "MMM000011"
 };
-
-export const PROGRAM_LIST_RESPONSE = [
-  {
-    "id": 1,
-    "title": "Program one"
-  }, {
-    "id": 3,
-    "title": "Program three"
-  }
-];
 
 export const STATUS_PASSED = 'passed';
 export const STATUS_NOT_PASSED = 'not-passed';

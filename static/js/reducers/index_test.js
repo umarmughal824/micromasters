@@ -1,13 +1,5 @@
 /* global SETTINGS: false */
 import {
-
-  fetchCourseList,
-  clearCourseList,
-  REQUEST_COURSE_LIST,
-  RECEIVE_COURSE_LIST_SUCCESS,
-  RECEIVE_COURSE_LIST_FAILURE,
-  CLEAR_COURSE_LIST,
-
   fetchUserProfile,
   receiveGetUserProfileSuccess,
   clearProfile,
@@ -41,8 +33,6 @@ import {
 } from '../actions/index';
 import * as api from '../util/api';
 import {
-  COURSE_LIST_RESPONSE,
-  PROGRAM_LIST_RESPONSE,
   DASHBOARD_RESPONSE,
   USER_PROFILE_RESPONSE,
 } from '../constants';
@@ -64,67 +54,6 @@ describe('reducers', () => {
     dispatchThen = null;
   });
 
-  describe('course reducers', () => {
-    let courseListStub, programListStub;
-
-    beforeEach(() => {
-      dispatchThen = store.createDispatchThen(state => state.courseList);
-      courseListStub = sandbox.stub(api, 'getCourseList');
-      programListStub = sandbox.stub(api, 'getProgramList');
-    });
-
-    it('should have an empty default state', done => {
-      dispatchThen({type: 'unknown'}, ['unknown']).then(state => {
-        assert.deepEqual(state, {
-          courseList: [],
-          programList: []
-        });
-        done();
-      });
-    });
-
-    it('should fetch a list of courses successfully then clear the course list', done => {
-      courseListStub.returns(Promise.resolve(COURSE_LIST_RESPONSE));
-      programListStub.returns(Promise.resolve(PROGRAM_LIST_RESPONSE));
-
-      dispatchThen(fetchCourseList(), [REQUEST_COURSE_LIST, RECEIVE_COURSE_LIST_SUCCESS]).then(courseState => {
-        assert.deepEqual(courseState.courseList, COURSE_LIST_RESPONSE);
-        assert.deepEqual(courseState.programList, PROGRAM_LIST_RESPONSE);
-        assert.equal(courseState.fetchStatus, FETCH_SUCCESS);
-
-        dispatchThen(clearCourseList(), [CLEAR_COURSE_LIST]).then(courseState => {
-          assert.deepEqual(courseState, {
-            courseList: [],
-            programList: []
-          });
-
-          done();
-        });
-      });
-    });
-
-    it("should fail to fetch a list of courses if we can't access the course API", done => {
-      courseListStub.returns(Promise.reject());
-      programListStub.returns(Promise.resolve(PROGRAM_LIST_RESPONSE));
-
-      dispatchThen(fetchCourseList(), [REQUEST_COURSE_LIST, RECEIVE_COURSE_LIST_FAILURE]).then(courseState => {
-        assert.equal(courseState.fetchStatus, FETCH_FAILURE);
-
-        done();
-      });
-    });
-
-    it("should fail to fetch a list of courses if we can't access the program API", done => {
-      courseListStub.returns(Promise.reject(COURSE_LIST_RESPONSE));
-      programListStub.returns(Promise.reject());
-
-      dispatchThen(fetchCourseList(), [REQUEST_COURSE_LIST, RECEIVE_COURSE_LIST_FAILURE]).then(courseState => {
-        assert.equal(courseState.fetchStatus, FETCH_FAILURE);
-
-        done();
-      });
-    });
-  });
   describe('profile reducers', () => {
     let getUserProfileStub, patchUserProfileStub;
     beforeEach(() => {

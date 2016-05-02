@@ -3,12 +3,6 @@ import _ from 'lodash';
 import * as api from '../util/api';
 import * as util from '../util/util';
 
-// course list actions
-export const REQUEST_COURSE_LIST = 'REQUEST_COURSE_LIST';
-export const RECEIVE_COURSE_LIST_SUCCESS = 'RECEIVE_COURSE_LIST_SUCCESS';
-export const RECEIVE_COURSE_LIST_FAILURE = 'RECEIVE_COURSE_LIST_FAILURE';
-export const CLEAR_COURSE_LIST = 'CLEAR_COURSE_LIST';
-
 // user profile actions
 export const REQUEST_GET_USER_PROFILE = 'REQUEST_GET_USER_PROFILE';
 export const RECEIVE_GET_USER_PROFILE_SUCCESS = 'RECEIVE_GET_USER_PROFILE_SUCCESS';
@@ -26,29 +20,6 @@ export const UPDATE_PROFILE_VALIDATION = 'UPDATE_PROFILE_VALIDATION';
 export const FETCH_FAILURE = 'FETCH_FAILURE';
 export const FETCH_SUCCESS = 'FETCH_SUCCESS';
 export const FETCH_PROCESSING = 'FETCH_PROCESSING';
-
-// actions for course
-const requestCourseList = () => ({ type: REQUEST_COURSE_LIST });
-export const receiveCourseListSuccess = (courseList, programList) => ({
-  type: RECEIVE_COURSE_LIST_SUCCESS,
-  payload: {
-    courseList,
-    programList,
-  }
-});
-const receiveCourseListFailure = () => ({ type: RECEIVE_COURSE_LIST_FAILURE });
-export const clearCourseList = () => ({ type: CLEAR_COURSE_LIST });
-
-export function fetchCourseList() {
-  return dispatch => {
-    dispatch(requestCourseList());
-    let courseListPromise = api.getCourseList();
-    let programListPromise = api.getProgramList();
-    return Promise.all([courseListPromise, programListPromise]).
-      then(values => dispatch(receiveCourseListSuccess(...values))).
-      catch(() => dispatch(receiveCourseListFailure()));
-  };
-}
 
 // actions for user profile
 const requestGetUserProfile = () => ({ type: REQUEST_GET_USER_PROFILE });
