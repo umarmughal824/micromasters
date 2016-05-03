@@ -49,7 +49,7 @@ export function boundSelectField(keySet, label, options) {
   } = this.props;
   let onChange = value => {
     let clone = _.cloneDeep(profile);
-    _.set(clone, keySet, value? value.value : null)
+    _.set(clone, keySet, value? value.value : null);
     updateProfile(clone);
   };
   return <div>
@@ -76,7 +76,7 @@ export function boundDateField(keySet, label) {
     let clone = _.cloneDeep(profile);
     // format as ISO-8601
     _.set(clone, keySet, date.format("YYYY-MM-DD"));
-    updateProfile(clone)
+    updateProfile(clone);
   };
   let newDate = _.get(profile, keySet) ? moment(_.get(profile, keySet), "YYYY-MM-DD") : null;
   return <div>
@@ -110,7 +110,7 @@ export function saveAndContinue(next, nestedValidationCallback) {
   }
 
   saveProfile( profile, fields, validationMessages).then(() => {
-    this.context.router.push(next)
+    this.context.router.push(next);
   });
 }
 
@@ -128,7 +128,7 @@ export function editProfileObjectArray (arrayName, blankEntry, formCallback) {
       let clone = Object.assign({}, profile);
       clone[arrayName] = clone[arrayName].concat(blankEntry);
       updateProfile(clone);
-    }
+    };
     editForms.push(
       <Grid className="profile-tab-grid" key={arrayName}>
         <Cell col={12} align='middle'>
@@ -144,7 +144,7 @@ export function editProfileObjectArray (arrayName, blankEntry, formCallback) {
       let clone = Object.assign({}, profile);
       clone[arrayName] = [blankEntry];
       updateProfile(clone);
-    }
+    };
     return (
       <Grid className="profile-tab-grid">
         <Cell col={12} align='middle'>

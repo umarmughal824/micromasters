@@ -20,7 +20,7 @@ class EmploymentTab extends ProfileTab {
       city: "",
       country: "",
       state_or_territory: '',
-    }
+    };
   }
 
   static propTypes = {
@@ -61,7 +61,7 @@ class EmploymentTab extends ProfileTab {
     let nestedFields = (index) => {
       let keySet = (key) => ['work_history', index, key];
       return keys.map(key => keySet(key));
-    }
+    };
 
     return requiredFields.concat(
       ...profile.work_history.map( (v,i) => nestedFields(i))

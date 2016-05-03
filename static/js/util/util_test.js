@@ -238,7 +238,7 @@ describe('utility functions', () => {
           "Course not started"
         );
       }
-    })
+    });
   });
 
   describe("validateProfile", () => {
