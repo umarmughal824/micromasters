@@ -29,9 +29,7 @@ class EmploymentTab extends ProfileTab {
   };
 
   static defaultProps = {
-    requiredFields: [
-      ['currently_employed']
-    ],
+    requiredFields: [],
     validationMessages: {
       'currently_employed': 'Current employment status',
       'position': 'Position',
@@ -45,21 +43,21 @@ class EmploymentTab extends ProfileTab {
     },
   };
 
-  static validation (profile, requiredFields) {
-    const keys = [
-      'position',
-      'industry',
-      'company_name',
-      'start_date',
-      'end_date',
-      'city',
-      'country',
-      'state_or_territory',
-    ];
+  static nestedValidationKeys = [
+    'position',
+    'industry',
+    'company_name',
+    'start_date',
+    'end_date',
+    'city',
+    'country',
+    'state_or_territory',
+  ];
 
+  static validation (profile, requiredFields) {
     let nestedFields = (index) => {
       let keySet = (key) => ['work_history', index, key];
-      return keys.map(key => keySet(key));
+      return EmploymentTab.nestedValidationKeys.map(key => keySet(key));
     };
 
     return requiredFields.concat(
@@ -102,14 +100,6 @@ class EmploymentTab extends ProfileTab {
   render () {
     return (
       <div>
-        <Grid className="profile-tab-grid">
-          <Cell col={6}>
-            Are you currently employed?
-          </Cell>
-          <Cell col={6}>
-            {this.boundSelectField(['currently_employed'], 'Yes/No (required)', this.boolOptions)}
-          </Cell>
-        </Grid>
         {this.editProfileObjectArray(
           'work_history',
           this.blankWorkHistoryEntry,

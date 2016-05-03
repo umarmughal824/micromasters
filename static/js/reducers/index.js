@@ -18,10 +18,50 @@ import {
   RECEIVE_DASHBOARD_FAILURE,
   CLEAR_DASHBOARD,
 
+  CLEAR_UI,
+  UPDATE_DIALOG_TEXT,
+  UPDATE_DIALOG_TITLE,
+  SET_DIALOG_VISIBILITY,
+
   FETCH_FAILURE,
   FETCH_PROCESSING,
   FETCH_SUCCESS,
 } from '../actions';
+
+const INITIAL_UI_STATE = {};
+
+export const ui = (state = INITIAL_UI_STATE, action) => {
+  switch (action.type) {
+  case UPDATE_DIALOG_TEXT:
+    return Object.assign({}, state, {
+      dialog: Object.assign(
+        {},
+        state.dialog,
+        { text: action.payload }
+      )
+    });
+  case UPDATE_DIALOG_TITLE:
+    return Object.assign({}, state, {
+      dialog: Object.assign(
+        {},
+        state.dialog,
+        { title: action.payload }
+      )
+    });
+  case SET_DIALOG_VISIBILITY:
+    return Object.assign({}, state, {
+      dialog: Object.assign(
+        {},
+        state.dialog,
+        { visible: action.payload }
+      )
+    });
+  case CLEAR_UI:
+    return INITIAL_UI_STATE;
+  default:
+    return state;
+  }
+};
 
 export const INITIAL_USER_PROFILE_STATE = {
   profile: {}
@@ -127,4 +167,5 @@ export const dashboard = (state = INITIAL_DASHBOARD_STATE, action) => {
 export default combineReducers({
   userProfile,
   dashboard,
+  ui,
 });

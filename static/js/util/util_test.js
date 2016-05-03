@@ -15,8 +15,12 @@ import {
   makeCourseStatusDisplay,
   makeCourseProgressDisplay,
   validateProfile,
+  validateProfileComplete,
   makeStrippedHtml,
 } from '../util/util';
+import PersonalTab from '../components/PersonalTab';
+import EmploymentTab from '../components/EmploymentTab';
+import PrivacyTab from '../components/PrivacyTab';
 
 /* eslint-disable camelcase */
 describe('utility functions', () => {
@@ -309,6 +313,76 @@ describe('utility functions', () => {
       const nestMessages = {"foo": "Foo"};
       let errors = validateProfile(profile, keysToCheck, nestMessages);
       assert.deepEqual({}, errors);
+    });
+  });
+
+  describe('validateProfileComplete', () => {
+    let profile;
+    beforeEach(() => {
+      profile = {};
+    });
+
+    it('should return fields for dialog for an empty profile', () => {
+      let expectation = [false, {
+        url: "/profile/personal",
+        title: "Personal Info",
+        text: "Please complete your personal information.",
+      }];
+      assert.deepEqual(validateProfileComplete(profile), expectation);
+    });
+
+    it('should return appropriate fields for dialog when a field is missing', () => {
+      PersonalTab.defaultProps.requiredFields.forEach( (field) => {
+        profile[field[0]] = "filled in";
+      });
+      profile['account_privacy'] = '';
+      let expectation = [false, {
+        url: "/profile/privacy",
+        title: "Privacy Settings",
+        text: "Please complete the privacy settings.",
+      }];
+      assert.deepEqual(validateProfileComplete(profile), expectation);
+    });
+
+    it('should return true when all top-level fields are filled in', () => {
+      PersonalTab.defaultProps.requiredFields.forEach( (field) => {
+        profile[field[0]] = "filled in";
+      });
+      PrivacyTab.defaultProps.requiredFields.forEach( (field) => {
+        profile[field[0]] = "filled in";
+      });
+      assert.deepEqual(validateProfileComplete(profile), [true, {}]);
+    });
+
+    it('should return true when all nested fields are filled in', () => {
+      PersonalTab.defaultProps.requiredFields.forEach( (field) => {
+        profile[field[0]] = "filled in";
+      });
+      PrivacyTab.defaultProps.requiredFields.forEach( (field) => {
+        profile[field[0]] = "filled in";
+      });
+      profile['work_history'] = [{}];
+      EmploymentTab.nestedValidationKeys.forEach( k => {
+        profile['work_history'][0][k] = "filled in";
+      });
+      assert.deepEqual(validateProfileComplete(profile), [true, {}]);
+    });
+
+    it('should return fields for dialog when a nested field is missing', () => {
+      PersonalTab.defaultProps.requiredFields.forEach( (field) => {
+        profile[field[0]] = "filled in";
+      });
+      profile['work_history'] = [{}];
+      EmploymentTab.nestedValidationKeys.forEach( k => {
+        profile['work_history'][0][k] = "filled in";
+      });
+      profile['work_history'][0]['country'] = '';
+      let expectation = [ false, {
+        url: "/profile/professional",
+        title: "Professional Info",
+        text: "Please complete your work history information.",
+      }];
+      assert.deepEqual(validateProfileComplete(profile), expectation);
     });
   });
 });

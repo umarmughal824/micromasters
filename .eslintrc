@@ -26,7 +26,8 @@
     }],
     "comma-dangle": [0],
     "no-unreachable": [2],
-    "semi": [2, "always"]
+    "semi": [2, "always"],
+    "eqeqeq": [2],
   },
   "env": {
     "es6": true,

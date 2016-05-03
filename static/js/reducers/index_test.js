@@ -21,6 +21,15 @@ import {
   RECEIVE_PATCH_USER_PROFILE_SUCCESS,
   RECEIVE_PATCH_USER_PROFILE_FAILURE,
 
+  CLEAR_UI,
+  UPDATE_DIALOG_TEXT,
+  UPDATE_DIALOG_TITLE,
+  SET_DIALOG_VISIBILITY,
+  clearUI,
+  updateDialogText,
+  updateDialogTitle,
+  setDialogVisibility,
+
   fetchDashboard,
   clearDashboard,
   REQUEST_DASHBOARD,
@@ -291,6 +300,40 @@ describe('reducers', () => {
     it("can't validate a profile's edits if edit doesn't exist", done => {
       dispatchThen(updateProfileValidation({error: "an error"}), [UPDATE_PROFILE_VALIDATION]).then(profileState => {
         assert.deepEqual(profileState.edit, undefined);
+        done();
+      });
+    });
+  });
+
+  describe('ui reducers', () => {
+    beforeEach(() => {
+      dispatchThen = store.createDispatchThen(state => state.ui);
+    });
+
+    it('should set a dialog title', done => {
+      dispatchThen(updateDialogTitle('A title'), [UPDATE_DIALOG_TITLE]).then(state => {
+        assert.equal(state.dialog.title, 'A title');
+        done();
+      });
+    });
+
+    it('should set dialog text', done => {
+      dispatchThen(updateDialogText('Some Text'), [UPDATE_DIALOG_TEXT]).then(state => {
+        assert.equal(state.dialog.text, 'Some Text');
+        done();
+      });
+    });
+
+    it('should set dialog visibility', done => {
+      dispatchThen(setDialogVisibility(true), [SET_DIALOG_VISIBILITY]).then(state => {
+        assert.equal(state.dialog.visible, true);
+        done();
+      });
+    });
+
+    it('should clear the ui', done => {
+      dispatchThen(clearUI(), [CLEAR_UI]).then(state => {
+        assert.deepEqual(state, {});
         done();
       });
     });

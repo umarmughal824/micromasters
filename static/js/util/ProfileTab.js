@@ -30,8 +30,8 @@ class ProfileTab extends React.Component {
     }));
     this.countryOptions = _.sortBy(countryOptions, 'label');
     this.boolOptions = [
-      { value: 'yes', label: 'Yes' },
-      { value: 'no', label: 'No' }
+      { value: 'y', label: 'Yes' },
+      { value: 'n', label: 'No' }
     ];
     this.genderOptions = [
       { value: 'm', label: 'Male' },

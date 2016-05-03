@@ -5,6 +5,11 @@ import moment from 'moment';
 import Button from 'react-bootstrap/lib/Button';
 import striptags from 'striptags';
 import _ from 'lodash';
+import dialogPolyfill from 'dialog-polyfill';
+
+import PersonalTab from '../components/PersonalTab';
+import EmploymentTab from '../components/EmploymentTab';
+import PrivacyTab from '../components/PrivacyTab';
 
 import {
   STATUS_PASSED,
@@ -191,6 +196,53 @@ export function validateProfile(profile, requiredFields, messages) {
 }
 
 /* eslint-enable camelcase */
+/*
+check that the profile is complete. we make the assumption that a
+complete profile consists of:
+  - a valid personal tab
+  - an entry for 'currently employed', and a work history entry if
+    `currently employed == 'yes'`
+*/
+export function validateProfileComplete(profile) {
+  let reqFields = [];
+
+  // check personal tab
+  reqFields = reqFields.concat(...PersonalTab.defaultProps.requiredFields);
+  let errors = validateProfile(profile, reqFields, {});
+  if ( !_.isEqual(errors, {}) ) {
+    return ([false, {
+      url: "/profile/personal",
+      title: "Personal Info",
+      text: "Please complete your personal information.",
+    }]);
+  }
+
+  // check professional tab
+  if ( _.isArray(profile.work_history) && !_.isEmpty(profile.work_history) ) {
+    reqFields = EmploymentTab.validation(profile, reqFields);
+  }
+  errors = validateProfile(profile, reqFields, {});
+  if ( !_.isEqual(errors, {}) ) {
+    return ([false, {
+      url: "/profile/professional",
+      title: "Professional Info",
+      text: "Please complete your work history information.",
+    }]);
+  }
+
+  // check privacy tab
+  reqFields = reqFields.concat(...PrivacyTab.defaultProps.requiredFields);
+  errors = validateProfile(profile, reqFields, {});
+  if ( !_.isEqual(errors, {}) ) {
+    return ([false, {
+      url: "/profile/privacy",
+      title: "Privacy Settings",
+      text: "Please complete the privacy settings.",
+    }]);
+  }
+
+  return [true, {}];
+}
 
 /**
  * Returns the string with any HTML rendered and then its tags stripped
@@ -203,5 +255,13 @@ export function makeStrippedHtml(textOrElement) {
     return striptags(container.innerHTML);
   } else {
     return striptags(textOrElement);
+  }
+}
+
+export function doDialogPolyfill () {
+  const node = ReactDOM.findDOMNode(this);
+  let dialogArray = [...node.querySelectorAll("dialog")];
+  for (let dialog of dialogArray) {
+    dialogPolyfill.registerDialog(dialog);
   }
 }

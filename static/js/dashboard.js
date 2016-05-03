@@ -21,6 +21,9 @@ if (!Object.entries) {
   entries.shim();
 }
 
+// requirement for dialog-polyfill
+import 'style!css!dialog-polyfill/dialog-polyfill.css';
+
 const store = configureStore();
 
 let debug = SETTINGS.reactGaDebug === "true";
