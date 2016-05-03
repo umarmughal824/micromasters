@@ -76,14 +76,6 @@ function fetchJSONWithCSRF(input, init) {
   });
 }
 
-export function getCourseList() {
-  return fetchJSONWithCSRF('/api/v0/courses/');
-}
-
-export function getProgramList() {
-  return fetchJSONWithCSRF('/api/v0/programs/');
-}
-
 export function getUserProfile(username) {
   return fetchJSONWithCSRF(`/api/v0/profiles/${username}/`);
 }

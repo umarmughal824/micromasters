@@ -1,11 +1,6 @@
 /* global SETTINGS: false */
 import { combineReducers } from 'redux';
 import {
-  REQUEST_COURSE_LIST,
-  RECEIVE_COURSE_LIST_SUCCESS,
-  RECEIVE_COURSE_LIST_FAILURE,
-  CLEAR_COURSE_LIST,
-
   REQUEST_GET_USER_PROFILE,
   RECEIVE_GET_USER_PROFILE_SUCCESS,
   RECEIVE_GET_USER_PROFILE_FAILURE,
@@ -27,34 +22,6 @@ import {
   FETCH_PROCESSING,
   FETCH_SUCCESS,
 } from '../actions';
-
-const INITIAL_COURSE_LIST_STATE = {
-  courseList: [],
-  programList: []
-};
-
-export const courseList = (state = INITIAL_COURSE_LIST_STATE, action) => {
-  switch (action.type) {
-  case REQUEST_COURSE_LIST:
-    return Object.assign({}, state, {
-      fetchStatus: FETCH_PROCESSING
-    });
-  case RECEIVE_COURSE_LIST_SUCCESS:
-    return Object.assign({}, state, {
-      fetchStatus: FETCH_SUCCESS,
-      courseList: action.payload.courseList,
-      programList: action.payload.programList
-    });
-  case RECEIVE_COURSE_LIST_FAILURE:
-    return Object.assign({}, state, {
-      fetchStatus: FETCH_FAILURE
-    });
-  case CLEAR_COURSE_LIST:
-    return INITIAL_COURSE_LIST_STATE;
-  default:
-    return state;
-  }
-};
 
 export const INITIAL_USER_PROFILE_STATE = {
   profile: {}
@@ -158,7 +125,6 @@ export const dashboard = (state = INITIAL_DASHBOARD_STATE, action) => {
 
 
 export default combineReducers({
-  courseList,
   userProfile,
   dashboard,
 });
