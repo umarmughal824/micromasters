@@ -1,7 +1,9 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import ga from 'react-ga';
 import moment from 'moment';
 import Button from 'react-bootstrap/lib/Button';
+import striptags from 'striptags';
 
 import {
   STATUS_PASSED,
@@ -96,6 +98,69 @@ export function makeCourseStatusDisplay(course, now = moment()) {
   }
 }
 
+/**
+ * Determine progress React element for the UI given a course
+ * @param {object} course A course coming from the dashboard
+ * @param {bool} isFirst If false, draw a line up to the previous course
+ * @param {bool} isLast If false, draw a line down to the next course
+ * @returns {ReactElement} Some React element or string to display for course status
+ */
+export function makeCourseProgressDisplay(course, isFirst, isLast) {
+  let height = 70, outerRadius = 10, innerRadius = 8, width = 30, color="#7fbaec";
+  let centerX = width/2, centerY = height/2;
+
+  let topLine;
+  if (!isFirst) {
+    topLine = <line
+      x1={centerX}
+      x2={centerX}
+      y1={0}
+      y2={centerY - outerRadius}
+      stroke={color}
+      strokeWidth={1}
+    />;
+  }
+  let bottomLine;
+  if (!isLast) {
+    bottomLine = <line
+      x1={centerX}
+      x2={centerX}
+      y1={centerY + outerRadius}
+      y2={height}
+      stroke={color}
+      strokeWidth={1}
+    />;
+  }
+
+  let alt = "Course not started";
+  let innerElement;
+  if (course.status === STATUS_PASSED) {
+    // full circle to indicate course passed
+    alt = "Course passed";
+    innerElement = <circle cx={centerX} cy={centerY} r={innerRadius} fill={color} />;
+  } else if (course.status === STATUS_VERIFIED_NOT_COMPLETED) {
+    alt = "Course started";
+    // semi circle on the left side
+    // see path docs: https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths#Arcs
+    let path = [
+      "M", centerX, centerY - innerRadius,
+      "A", innerRadius, innerRadius, 0, 0, 0, centerX, centerY + innerRadius
+    ].join(" ");
+    innerElement = <path
+      d={path}
+      fill={color}
+    />;
+  }
+
+  return <svg style={{width: width, height: height}}>
+    <desc>{alt}</desc>
+    <circle cx={centerX} cy={centerY} r={outerRadius} stroke={color} fillOpacity={0} />
+    {innerElement}
+    {topLine}
+    {bottomLine}
+  </svg>;
+}
+
 /* eslint-disable camelcase */
 /**
  * Validates the profile
@@ -111,7 +176,12 @@ export function validateProfile(profile) {
     'last_name': "Family name",
     'preferred_name': "Preferred name",
     'gender': "Gender",
-    'preferred_language': "Preferred language"
+    'preferred_language': "Preferred language",
+    'city': "City",
+    'country': "Country",
+    'birth_city': 'City',
+    'birth_country': "Country",
+    'date_of_birth': "Date of birth"
   };
 
   for (let key of Object.keys(required)) {
@@ -123,3 +193,17 @@ export function validateProfile(profile) {
   return errors;
 }
 /* eslint-enable camelcase */
+
+/**
+ * Returns the string with any HTML rendered and then its tags stripped
+ * @return {String} rendered text stripped of HTML
+ */
+export function makeStrippedHtml(textOrElement) {
+  if (React.isValidElement(textOrElement)) {
+    let container = document.createElement("div");
+    ReactDOM.render(textOrElement, container);
+    return striptags(container.innerHTML);
+  } else {
+    return striptags(textOrElement);
+  }
+}
