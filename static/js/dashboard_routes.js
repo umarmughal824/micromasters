@@ -1,7 +1,6 @@
 import React from 'react';
 import { Route, Router, IndexRedirect } from 'react-router';
 import { Provider } from 'react-redux';
-import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
 
 import App from './containers/App';
 import DashboardPage from './containers/DashboardPage';
@@ -16,17 +15,9 @@ import TermsOfServicePage from './containers/TermsOfServicePage';
  * @param browserHistory A browserHistory object
  * @param store The redux store to be used
  * @param onRouteUpdate {function} Function called when the route changes
- * @param addDebugPanel {bool} If true, add the debug panel
  * @returns {ReactElement}
  */
-export function makeDashboardRoutes(browserHistory, store, onRouteUpdate, addDebugPanel) {
-  let debugTools;
-  if (addDebugPanel) {
-    debugTools = <DebugPanel top right bottom>
-      <DevTools store={store} monitor={LogMonitor} visibleOnLoad={false}/>
-    </DebugPanel>;
-  }
-
+export function makeDashboardRoutes(browserHistory, store, onRouteUpdate) {
   return <div>
     <Provider store={store}>
       <Router history={browserHistory} onUpdate={onRouteUpdate}>
@@ -41,6 +32,5 @@ export function makeDashboardRoutes(browserHistory, store, onRouteUpdate, addDeb
         </Route>
       </Router>
     </Provider>
-    {debugTools}
   </div>;
 }

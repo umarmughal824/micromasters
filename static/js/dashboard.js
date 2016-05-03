@@ -30,8 +30,7 @@ ReactDOM.render(
   makeDashboardRoutes(
     browserHistory,
     store,
-    () => ga.pageview(window.location.pathname),
-    process.env.NODE_ENV !== 'production'
+    () => ga.pageview(window.location.pathname)
   ),
   document.getElementById("dashboard")
 );
