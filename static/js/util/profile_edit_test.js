@@ -75,7 +75,7 @@ describe('Profile Editing utility functions', () => {
     it('should call the updateProfile callback when onChange fires', () => {
       let cur = moment();
       dateElement.props.onChange(cur);
-      assert.deepEqual(cur.format('YYYY-MM-DD'), that.props.profile.date_of_birth)
+      assert.deepEqual(cur.format('YYYY-MM-DD'), that.props.profile.date_of_birth);
     });
   });
 

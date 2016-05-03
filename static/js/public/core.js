@@ -133,7 +133,7 @@
     get: function(name) {
       var callback = function(data, name) {
         return data[name];
-      }
+      };
 
       var data = this.data;
 
