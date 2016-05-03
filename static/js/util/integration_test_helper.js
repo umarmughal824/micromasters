@@ -61,7 +61,7 @@ class IntegrationTestHelper {
         this.browserHistory.push(url);
         div = document.createElement("div");
         component = ReactDOM.render(
-          makeDashboardRoutes(this.browserHistory, this.store, () => null, false),
+          makeDashboardRoutes(this.browserHistory, this.store, () => null),
           div
         );
       }).then(() => {

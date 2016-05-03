@@ -9,9 +9,16 @@ class LoginButton extends React.Component {
   render() {
     const { profile } = this.props;
 
+    // span tags are a workaround for weird indentation with react-bootstrap
+    // and React 15. React 15 removed span tags but react-bootstrap still expects
+    // them.
+    let title = <span>
+      {profile.preferred_name || SETTINGS.name}
+    </span>;
+
     return (
       <DropdownButton
-        title={profile.preferred_name || SETTINGS.name}
+        title={title}
         bsStyle="danger"
         id="logout-button">
         <LinkContainer to={{ pathname: '/profile' }} active={false}>

@@ -55,6 +55,11 @@ describe('Profile Editing utility functions', () => {
       textField.props.onChange({target: {value: "foo"}});
       assert.deepEqual("foo", that.props.profile.first_name);
     });
+
+    it('should use an empty string instead of undefined for the value prop', () => {
+      let blankTextField = boundTextField.call(that, ["missing"], "Missing");
+      assert.equal('', blankTextField.props.value);
+    });
   });
 
   describe('Bound Date field', () => {

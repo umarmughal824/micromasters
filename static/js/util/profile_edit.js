@@ -33,7 +33,7 @@ export function boundTextField(keySet, label) {
     <TextField
       floatingLabel
       label={label}
-      value={_.get(profile, keySet)}
+      value={_.get(profile, keySet, "")}
       error={_.get(errors, keySet)}
       onChange={onChange} />
   );
