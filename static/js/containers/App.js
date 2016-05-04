@@ -1,8 +1,10 @@
 /* global SETTINGS: false */
 import React from 'react';
 import { connect } from 'react-redux';
+
 import Header from '../components/Header';
 import {
+  FETCH_SUCCESS,
   fetchCourseList,
   clearCourseList,
   fetchUserProfile,
@@ -11,17 +13,21 @@ import {
   clearDashboard,
 } from '../actions/index';
 
+const TERMS_OF_SERVICE_REGEX = /\/terms_of_service\/?/;
+
 class App extends React.Component {
   componentDidMount() {
     this.fetchCourseList();
     this.fetchUserProfile(SETTINGS.username);
     this.fetchDashboard();
+    this.requireTermsOfService();
   }
 
   componentDidUpdate() {
     this.fetchCourseList();
     this.fetchUserProfile(SETTINGS.username);
     this.fetchDashboard();
+    this.requireTermsOfService();
   }
 
   componentWillUnmount() {
@@ -38,8 +44,8 @@ class App extends React.Component {
     }
   }
   fetchUserProfile(username) {
-    const { profile, dispatch } = this.props;
-    if (profile.getStatus === undefined) {
+    const { userProfile, dispatch } = this.props;
+    if (userProfile.getStatus === undefined) {
       dispatch(fetchUserProfile(username));
     }
   }
@@ -51,22 +57,40 @@ class App extends React.Component {
     }
   }
 
-  render() {
-    const { children } = this.props;
+  requireTermsOfService() {
+    const { userProfile, location: { pathname } } = this.props;
+    if (
+      userProfile.getStatus === FETCH_SUCCESS &&
+      !userProfile.profile.agreed_to_terms_of_service &&
+      !(TERMS_OF_SERVICE_REGEX.test(pathname))
+    ) {
+      this.context.router.push('/terms_of_service');
+    }
+  }
 
-    return <div>
-      <Header />
-      <div className="main-content">
-        {children}
+  render() {
+    const { children, location: { pathname } } = this.props;
+
+    let empty = false;
+    if (TERMS_OF_SERVICE_REGEX.test(pathname)) {
+      empty = true;
+    }
+
+    return (
+      <div className="app-media layout-boxed">
+        <Header empty={empty} />
+        <div className="main-content">
+          {children}
+        </div>
       </div>
-    </div>;
+    );
   }
 }
 
 const mapStateToProps = (state) => {
   return {
     courseList: state.courseList,
-    profile: state.userProfile,
+    userProfile: state.userProfile,
     dashboard: state.dashboard,
   };
 };
@@ -74,9 +98,14 @@ const mapStateToProps = (state) => {
 App.propTypes = {
   courseList: React.PropTypes.object.isRequired,
   children:   React.PropTypes.object.isRequired,
-  profile:    React.PropTypes.object.isRequired,
+  userProfile:    React.PropTypes.object.isRequired,
   dashboard:  React.PropTypes.object.isRequired,
-  dispatch:   React.PropTypes.func.isRequired
+  dispatch:   React.PropTypes.func.isRequired,
+  history: React.PropTypes.object.isRequired,
+};
+
+App.contextTypes = {
+  router:   React.PropTypes.object.isRequired
 };
 
 export default connect(mapStateToProps)(App);

@@ -34,8 +34,11 @@ describe('utility functions', () => {
     let today = '2016-03-31';
     let tomorrow = '2016-04-01';
 
-    let renderCourseStatusDisplay = (...args) => {
-      let textOrElement = makeCourseStatusDisplay(...args);
+    let renderCourseStatusDisplay = (course, ...args) => {
+      if (course.runs === undefined) {
+        course.runs = [];
+      }
+      let textOrElement = makeCourseStatusDisplay(course, ...args);
       return makeStrippedHtml(textOrElement);
     };
 
@@ -156,6 +159,19 @@ describe('utility functions', () => {
       );
     });
 
+    it("is a run, not a course. If there are any runs the first run should be picked", () => {
+      assert.equal(
+        renderCourseStatusDisplay({
+          status: STATUS_NOT_OFFERED,
+          runs: [{
+            status: STATUS_OFFERED_NOT_ENROLLED,
+            enrollment_start_date: yesterday
+          }]
+        }, moment(today)),
+        "ENROLL"
+      );
+    });
+
     it("is a not offered course", () => {
       assert.equal(renderCourseStatusDisplay({
         status: STATUS_NOT_OFFERED
@@ -170,8 +186,11 @@ describe('utility functions', () => {
   });
 
   describe("makeCourseStatusDisplay", () => {
-    let renderCourseProgressDisplay = (...args) => {
-      let textOrElement = makeCourseProgressDisplay(...args);
+    let renderCourseProgressDisplay = (course, ...args) => {
+      if (course.runs === undefined) {
+        course.runs = [];
+      }
+      let textOrElement = makeCourseProgressDisplay(course, ...args);
       return makeStrippedHtml(textOrElement);
     };
 
@@ -179,6 +198,18 @@ describe('utility functions', () => {
       assert.equal(
         renderCourseProgressDisplay({
           status: STATUS_PASSED
+        }),
+        "Course passed"
+      );
+    });
+
+    it('is a run which is passed. In this case the course status is ignored', () => {
+      assert.equal(
+        renderCourseProgressDisplay({
+          status: STATUS_NOT_OFFERED,
+          runs: [{
+            status: STATUS_PASSED
+          }]
         }),
         "Course passed"
       );
@@ -207,39 +238,77 @@ describe('utility functions', () => {
           "Course not started"
         );
       }
-    })
+    });
   });
 
   describe("validateProfile", () => {
+    let requiredFields = [
+      ['first_name'],
+      ['last_name'],
+      ['preferred_name'],
+      ['gender'],
+      ['preferred_language'],
+      ['city'],
+      ['country'],
+      ['birth_city'],
+      ['birth_country'],
+      ['date_of_birth'],
+    ];
+
+    let messages = {
+      'first_name': 'First Name',
+      'last_name': 'Last Name',
+      'preferred_name': 'Preferred Name',
+      'gender': 'Gender',
+      'preferred_language': 'Preferred language',
+      'city': 'City',
+      'country': 'Country',
+      'birth_city': 'Birth City',
+      'birth_country': 'Birth Country',
+      'date_of_birth': 'Birth Date',
+    };
+
     it('validates the test profile successfully', () => {
-      let errors = validateProfile(USER_PROFILE_RESPONSE);
+      let errors = validateProfile(USER_PROFILE_RESPONSE, requiredFields, messages);
       assert.deepEqual(errors, {});
     });
 
     it('validates required fields', () => {
-      let requiredFields = [
-        'first_name',
-        'last_name',
-        'preferred_name',
-        'gender',
-        'preferred_language',
-        'city',
-        'country',
-        'birth_city',
-        'birth_country',
-        'date_of_birth',
-      ];
-
       let profile = {};
       for (let key of requiredFields) {
-        profile[key] = '';
+        profile[key[0]] = '';
       }
 
-      let errors = validateProfile(profile);
+      let errors = validateProfile(profile, requiredFields, messages);
       for (let key of requiredFields) {
         let error = errors[key];
         assert.ok(error.indexOf("is required") !== -1);
       }
+    });
+
+    it('validates nested fields', () => {
+      let profile = {
+        nested_array: [{foo: "bar", baz: null}]
+      };
+      const keysToCheck = [
+        ["nested_array", 0, "foo"],
+        ["nested_array", 0, "baz"],
+      ];
+      const nestMessages = {"baz": "Baz"};
+      let errors = validateProfile(profile, keysToCheck, nestMessages);
+      assert.deepEqual({nested_array: [ { baz: "Baz is required" } ] }, errors);
+    });
+
+    it('correctly validates fields with 0', () => {
+      let profile = {
+        nested_array: [{foo: 0}]
+      };
+      const keysToCheck = [
+        ["nested_array", 0, "foo"]
+      ];
+      const nestMessages = {"foo": "Foo"};
+      let errors = validateProfile(profile, keysToCheck, nestMessages);
+      assert.deepEqual({}, errors);
     });
   });
 });

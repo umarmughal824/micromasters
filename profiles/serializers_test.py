@@ -28,6 +28,7 @@ class ProfileTests(TestCase):
         assert ProfileSerializer().to_representation(profile) == {
             'first_name': profile.first_name,
             'filled_out': profile.filled_out,
+            'agreed_to_terms_of_service': profile.agreed_to_terms_of_service,
             'last_name': profile.last_name,
             'preferred_name': profile.preferred_name,
             'email_optin': profile.email_optin,

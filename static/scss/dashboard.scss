@@ -1,7 +1,15 @@
 #dashboard {
+  .validation-wrapper {
+    padding-bottom: 10px;
+  }
+  .validation-error-text {
+    color: #DA0000;
+    font-size: smaller;
+  }
   .main-content {
     @include outer-container;
-    @include pad(20px);
+
+    padding: 20px 0px;
 
     .card {
       border: 1px solid #dddddd;
@@ -60,6 +68,7 @@
     @include outer-container;
     @include span-columns(8);
     border: 1px solid grey;
+    margin: 10px 0;
 
     ul {
       @include span-columns(8 of 8);
@@ -109,5 +118,9 @@
       @include omega(3n);
       text-align: center;
     }
+  }
+
+  .profile-tab-grid {
+    max-width: 900px;
   }
 }

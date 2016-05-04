@@ -4,6 +4,7 @@ import ga from 'react-ga';
 import moment from 'moment';
 import Button from 'react-bootstrap/lib/Button';
 import striptags from 'striptags';
+import _ from 'lodash';
 
 import {
   STATUS_PASSED,
@@ -39,25 +40,30 @@ function asPercent(number) {
  * @returns {ReactElement} Some React element or string to display for course status
  */
 export function makeCourseStatusDisplay(course, now = moment()) {
-  switch (course.status) {
+  let courseOrRun = course;
+  if (course.runs.length > 0) {
+    courseOrRun = course.runs[0];
+  }
+
+  switch (courseOrRun.status) {
   case STATUS_PASSED:
   case STATUS_NOT_PASSED:
     return <span className="course-list-grade">
-      {asPercent(course.grade)}
+      {asPercent(courseOrRun.grade)}
     </span>;
 
   case STATUS_VERIFIED_NOT_COMPLETED: {
-    if (!course.course_start_date) {
+    if (!courseOrRun.course_start_date) {
       // Invalid case, API should always send a valid course start date
       return "";
     }
 
-    let courseStartDate = moment(course.course_start_date);
+    let courseStartDate = moment(courseOrRun.course_start_date);
     if (courseStartDate.isAfter(now, 'day')) {
       return "Course starting: " + courseStartDate.format("M/D/Y");
     }
 
-    let grade = course.grade;
+    let grade = courseOrRun.grade;
     if (grade === undefined || grade === null) {
       // Grade defaults to 0%
       grade = 0;
@@ -67,12 +73,12 @@ export function makeCourseStatusDisplay(course, now = moment()) {
     </span>;
   }
   case STATUS_ENROLLED_NOT_VERIFIED: {
-    if (!course.verification_date) {
+    if (!courseOrRun.verification_date) {
       // Invalid case, API should always send a valid verification date
       return "";
     }
 
-    let verificationDate = moment(course.verification_date);
+    let verificationDate = moment(courseOrRun.verification_date);
     if (verificationDate.isAfter(now, 'day')) {
       return <Button bsStyle="success">UPGRADE TO VERIFIED</Button>;
     } else {
@@ -81,11 +87,11 @@ export function makeCourseStatusDisplay(course, now = moment()) {
     }
   }
   case STATUS_OFFERED_NOT_ENROLLED: {
-    if (!course.enrollment_start_date) {
-      return course.fuzzy_enrollment_start_date;
+    if (!courseOrRun.enrollment_start_date) {
+      return courseOrRun.fuzzy_enrollment_start_date;
     }
 
-    let enrollmentDate = moment(course.enrollment_start_date);
+    let enrollmentDate = moment(courseOrRun.enrollment_start_date);
     if (enrollmentDate.isAfter(now, 'day')) {
       return "Enrollment starting: " + enrollmentDate.format("M/D/Y");
     } else {
@@ -106,6 +112,11 @@ export function makeCourseStatusDisplay(course, now = moment()) {
  * @returns {ReactElement} Some React element or string to display for course status
  */
 export function makeCourseProgressDisplay(course, isFirst, isLast) {
+  let courseOrRun = course;
+  if (course.runs.length > 0) {
+    courseOrRun = course.runs[0];
+  }
+
   let height = 70, outerRadius = 10, innerRadius = 8, width = 30, color="#7fbaec";
   let centerX = width/2, centerY = height/2;
 
@@ -134,11 +145,11 @@ export function makeCourseProgressDisplay(course, isFirst, isLast) {
 
   let alt = "Course not started";
   let innerElement;
-  if (course.status === STATUS_PASSED) {
+  if (courseOrRun.status === STATUS_PASSED) {
     // full circle to indicate course passed
     alt = "Course passed";
     innerElement = <circle cx={centerX} cy={centerY} r={innerRadius} fill={color} />;
-  } else if (course.status === STATUS_VERIFIED_NOT_COMPLETED) {
+  } else if (courseOrRun.status === STATUS_VERIFIED_NOT_COMPLETED) {
     alt = "Course started";
     // semi circle on the left side
     // see path docs: https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths#Arcs
@@ -168,30 +179,17 @@ export function makeCourseProgressDisplay(course, isFirst, isLast) {
  * @param {Object} profile The user profile
  * @returns {Object} Validation errors or an empty object if no errors
  */
-export function validateProfile(profile) {
+export function validateProfile(profile, requiredFields, messages) {
   let errors = {};
-
-  let required = {
-    'first_name': "Given name",
-    'last_name': "Family name",
-    'preferred_name': "Preferred name",
-    'gender': "Gender",
-    'preferred_language': "Preferred language",
-    'city': "City",
-    'country': "Country",
-    'birth_city': 'City',
-    'birth_country': "Country",
-    'date_of_birth': "Date of birth"
-  };
-
-  for (let key of Object.keys(required)) {
-    if (!profile[key]) {
-      errors[key] = `${required[key]} is required`;
+  for (let keySet of requiredFields) {
+    let val = _.get(profile, keySet);
+    if (_.isUndefined(val) || _.isNull(val) || val === "" ) {
+      _.set(errors, keySet,  `${messages[keySet.slice(-1)[0]]} is required`);
     }
   }
-
   return errors;
 }
+
 /* eslint-enable camelcase */
 
 /**

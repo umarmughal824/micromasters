@@ -24,7 +24,9 @@
       "vars": "local",
       "argsIgnorePattern": "action"
     }],
-    "comma-dangle": [0]
+    "comma-dangle": [0],
+    "no-unreachable": [2],
+    "semi": [2, "always"]
   },
   "env": {
     "es6": true,

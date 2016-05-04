@@ -55,6 +55,7 @@ class Profile(models.Model):
 
     # Is the profile filled out yet?
     filled_out = models.BooleanField(default=False)
+    agreed_to_terms_of_service = models.BooleanField(default=False)
     # Defining these here instead of in User to avoid Django's 30 character max limit
     first_name = models.TextField(blank=True, null=True)
     last_name = models.TextField(blank=True, null=True)

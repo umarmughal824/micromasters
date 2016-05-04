@@ -50,6 +50,7 @@ import configureTestStore from 'redux-asserts';
 import rootReducer, { INITIAL_USER_PROFILE_STATE } from '../reducers';
 import assert from 'assert';
 import sinon from 'sinon';
+import PersonalTab from '../components/PersonalTab';
 
 describe('reducers', () => {
   let sandbox, store, dispatchThen;
@@ -251,11 +252,19 @@ describe('reducers', () => {
       store.dispatch(receiveGetUserProfileSuccess(USER_PROFILE_RESPONSE));
       store.dispatch(startProfileEdit());
 
-      dispatchThen(validateProfile(USER_PROFILE_RESPONSE), [UPDATE_PROFILE_VALIDATION]).then(profileState => {
+      dispatchThen(validateProfile(
+        USER_PROFILE_RESPONSE,
+        PersonalTab.defaultProps.requiredFields,
+        PersonalTab.defaultProps.validationMessages
+      ), [UPDATE_PROFILE_VALIDATION]).then(profileState => {
         assert.deepEqual(profileState.edit.errors, {});
 
         // also assert that it returns a resolved promise
-        store.dispatch(validateProfile(USER_PROFILE_RESPONSE)).then(() => {
+        store.dispatch(validateProfile(
+          USER_PROFILE_RESPONSE,
+          PersonalTab.defaultProps.requiredFields,
+          PersonalTab.defaultProps.validationMessages
+        )).then(() => {
           done();
         });
       });
@@ -265,21 +274,73 @@ describe('reducers', () => {
       let profileWithError = Object.assign({}, USER_PROFILE_RESPONSE, {
         first_name: ''
       });
+      let keysToCheck = [["first_name"]];
+      let messages = {"first_name": "Given name"};
 
       // populate a profile
       store.dispatch(receiveGetUserProfileSuccess(USER_PROFILE_RESPONSE));
       store.dispatch(startProfileEdit());
-      dispatchThen(validateProfile(profileWithError), [UPDATE_PROFILE_VALIDATION]).then(profileState => {
+      dispatchThen(validateProfile(
+        profileWithError,
+        keysToCheck,
+        messages
+      ), [UPDATE_PROFILE_VALIDATION]).then(profileState => {
         assert.deepEqual(profileState.edit.errors, {
           first_name: 'Given name is required'
         });
 
         // also assert that it returns a rejected promise
-        store.dispatch(validateProfile(profileWithError)).catch(() => {
+        store.dispatch(validateProfile(
+          profileWithError,
+          keysToCheck,
+          messages
+        )).catch(() => {
           done();
         });
       });
     });
+
+    it('should validate a profile with nested objects and errors', done => {
+      let profileWithError = Object.assign({}, USER_PROFILE_RESPONSE, {
+        work_history: [{
+          company_name: "foocorp",
+          position: undefined
+        }]
+      });
+      let keysToCheck = [
+        ["work_history", 0, "company_name"],
+        ["work_history", 0, "position"],
+      ];
+      let messages = {
+        "company_name": "Company name",
+        "position": "Position",
+      };
+
+      // populate a profile
+      store.dispatch(receiveGetUserProfileSuccess(USER_PROFILE_RESPONSE));
+      store.dispatch(startProfileEdit());
+      dispatchThen(validateProfile(
+        profileWithError,
+        keysToCheck,
+        messages
+      ), [UPDATE_PROFILE_VALIDATION]).then(profileState => {
+        assert.deepEqual(profileState.edit.errors, {
+          work_history: [
+            {position: 'Position is required'}
+          ]
+        });
+
+        // also assert that it returns a rejected promise
+        store.dispatch(validateProfile(
+          profileWithError,
+          keysToCheck,
+          messages
+        )).catch(() => {
+          done();
+        });
+      });
+    });
+
 
     it("can't edit a profile if we never get it successfully", done => {
       dispatchThen(startProfileEdit(), [START_PROFILE_EDIT]).then(profileState => {
@@ -303,23 +364,6 @@ describe('reducers', () => {
     });
   });
 
-  describe('authentication reducers', () => {
-    let dispatchThen;
-    beforeEach(() => {
-      dispatchThen = store.createDispatchThen(state => state.authentication);
-    });
-
-    it('should have default authentication state', done => {
-      dispatchThen({type: 'unknown'}, ['unknown']).then(state => {
-        assert.deepEqual(state, {
-          name: SETTINGS.name,
-          isAuthenticated: SETTINGS.isAuthenticated
-        });
-        done();
-      });
-    });
-  });
-
   describe('dashboard reducers', () => {
     let dashboardStub;
 
@@ -331,7 +375,7 @@ describe('reducers', () => {
     it('should have an empty default state', done => {
       dispatchThen({type: 'unknown'}, ['unknown']).then(state => {
         assert.deepEqual(state, {
-          courses: []
+          programs: []
         });
         done();
       });
@@ -341,12 +385,12 @@ describe('reducers', () => {
       dashboardStub.returns(Promise.resolve(DASHBOARD_RESPONSE));
 
       dispatchThen(fetchDashboard(), [REQUEST_DASHBOARD, RECEIVE_DASHBOARD_SUCCESS]).then(dashboardState => {
-        assert.deepEqual(dashboardState.courses, DASHBOARD_RESPONSE.courses);
+        assert.deepEqual(dashboardState.programs, DASHBOARD_RESPONSE);
         assert.equal(dashboardState.fetchStatus, FETCH_SUCCESS);
 
         dispatchThen(clearDashboard(), [CLEAR_DASHBOARD]).then(dashboardState => {
           assert.deepEqual(dashboardState, {
-            courses: []
+            programs: []
           });
 
           done();

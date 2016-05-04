@@ -35,6 +35,7 @@ class ProfileFactory(DjangoModelFactory):
     """Factory for Profiles"""
     user = SubFactory(UserFactory)
     filled_out = FuzzyAttribute(FAKE.boolean)
+    agreed_to_terms_of_service = FuzzyAttribute(FAKE.boolean)
 
     first_name = FuzzyText()
     last_name = FuzzyText()

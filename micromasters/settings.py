@@ -18,7 +18,7 @@ import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 import yaml
 
-VERSION = "0.6.0"
+VERSION = "0.7.0"
 
 CONFIG_PATHS = [
     os.environ.get('MICROMASTERS_CONFIG', ''),
@@ -164,7 +164,7 @@ SOCIAL_AUTH_PIPELINE = (
     'backends.pipeline_api.update_profile_from_edx',
     'backends.pipeline_api.update_from_linkedin',
 )
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/dashboard'
 LOGIN_URL = '/'
 
 ROOT_URLCONF = 'micromasters.urls'

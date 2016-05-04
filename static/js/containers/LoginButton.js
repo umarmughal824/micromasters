@@ -1,3 +1,4 @@
+/* global SETTINGS: false */
 import React from 'react';
 import { connect } from 'react-redux';
 import DropdownButton from 'react-bootstrap/lib/DropdownButton';
@@ -6,11 +7,12 @@ import MenuItem from 'react-bootstrap/lib/MenuItem';
 
 class LoginButton extends React.Component {
   render() {
-    const { authentication } = this.props;
+    const { profile } = this.props;
 
     return (
       <DropdownButton
-        title={authentication.name}
+        title={profile.preferred_name || SETTINGS.name}
+        bsStyle="danger"
         id="logout-button">
         <LinkContainer to={{ pathname: '/profile' }} active={false}>
           <MenuItem>
@@ -33,12 +35,12 @@ class LoginButton extends React.Component {
 
 LoginButton.propTypes = {
   dispatch: React.PropTypes.func.isRequired,
-  authentication: React.PropTypes.object.isRequired
+  profile: React.PropTypes.object.isRequired
 };
 
 const mapStateToProps = (state) => {
   return {
-    authentication: state.authentication
+    profile: state.userProfile.profile
   };
 };
 

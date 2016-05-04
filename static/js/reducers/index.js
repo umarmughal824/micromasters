@@ -130,18 +130,8 @@ export const userProfile = (state = INITIAL_USER_PROFILE_STATE, action) => {
   }
 };
 
-const INITIAL_AUTHENTICATION_STATE = {
-  isAuthenticated: SETTINGS.isAuthenticated,
-  name: SETTINGS.name,
-};
-
-export const authentication = (state = INITIAL_AUTHENTICATION_STATE, action) => {
-  return state;
-};
-
-
 const INITIAL_DASHBOARD_STATE = {
-  courses: []
+  programs: []
 };
 
 export const dashboard = (state = INITIAL_DASHBOARD_STATE, action) => {
@@ -153,7 +143,7 @@ export const dashboard = (state = INITIAL_DASHBOARD_STATE, action) => {
   case RECEIVE_DASHBOARD_SUCCESS:
     return Object.assign({}, state, {
       fetchStatus: FETCH_SUCCESS,
-      courses: action.payload.courses
+      programs: action.payload.programs
     });
   case RECEIVE_DASHBOARD_FAILURE:
     return Object.assign({}, state, {
@@ -169,7 +159,6 @@ export const dashboard = (state = INITIAL_DASHBOARD_STATE, action) => {
 
 export default combineReducers({
   courseList,
-  authentication,
   userProfile,
   dashboard,
 });
