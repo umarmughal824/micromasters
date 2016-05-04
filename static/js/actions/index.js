@@ -54,7 +54,7 @@ export const saveProfile = (username, profile) => {
   return dispatch => {
     dispatch(requestPatchUserProfile());
     return api.patchUserProfile(username, profile).
-      then(() => dispatch(receivePatchUserProfileSuccess(profile))).
+      then(newProfile => dispatch(receivePatchUserProfileSuccess(newProfile))).
       catch(() => dispatch(receivePatchUserProfileFailure()));
   };
 };

@@ -102,14 +102,17 @@ describe('reducers', () => {
     });
 
     it("should patch the profile successfully", done => {
-      patchUserProfileStub.returns(Promise.resolve());
+      let updatedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
+        change: true
+      });
+      patchUserProfileStub.returns(Promise.resolve(updatedProfile));
 
       dispatchThen(
         saveProfile('jane', USER_PROFILE_RESPONSE),
         [REQUEST_PATCH_USER_PROFILE, RECEIVE_PATCH_USER_PROFILE_SUCCESS]
       ).then(profileState => {
         assert.equal(profileState.patchStatus, FETCH_SUCCESS);
-        assert.deepEqual(profileState.profile, USER_PROFILE_RESPONSE);
+        assert.deepEqual(profileState.profile, updatedProfile);
 
         assert.ok(patchUserProfileStub.calledWith('jane', USER_PROFILE_RESPONSE));
 
