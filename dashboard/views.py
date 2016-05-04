@@ -13,7 +13,9 @@ from rest_framework.response import Response
 
 from edx_api.client import EdxApi
 
+from backends import utils
 from backends.edxorg import EdxOrgOAuth2
+
 from courses.models import (
     Program,
 )
@@ -36,8 +38,17 @@ class UserDashboard(APIView):
         """
         Returns information needed to display the user dashboard for a program.
         """
+
         # get the credentials for the current user for edX
         user_social = request.user.social_auth.get(provider=EdxOrgOAuth2.name)
+        try:
+            utils.refresh_user_token(user_social)
+        except utils.InvalidCredentialStored as exc:
+            return Response(
+                status=exc.http_status_code,
+                data={'error': str(exc)}
+            )
+
         # create an instance of the client to query edX
         edx_client = EdxApi(user_social.extra_data, settings.EDXORG_BASE_URL)
         # get an enrollments client for the student

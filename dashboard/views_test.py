@@ -4,10 +4,14 @@ Tests for the dashboard views
 import json
 import os
 from datetime import datetime, timedelta
+from mock import (
+    MagicMock,
+    patch,
+)
 
 import pytz
 from django.core.urlresolvers import reverse
-from mock import patch
+from requests.exceptions import HTTPError
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -96,7 +100,8 @@ class DashboardTest(APITestCase):
         res = self.client.get(self.url)
         assert res.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_no_run_available(self):
+    @patch('backends.utils.refresh_user_token', autospec=True)
+    def test_no_run_available(self, mocked_refresh):
         """Test for GET"""
         with patch(
             'edx_api.enrollments.CourseEnrollments.get_student_enrollments',
@@ -104,6 +109,7 @@ class DashboardTest(APITestCase):
             return_value=self.enrollments
         ):
             res = self.client.get(self.url)
+        assert mocked_refresh.called
         assert res.status_code == status.HTTP_200_OK
         data = res.data
         assert len(data) == 2
@@ -113,7 +119,8 @@ class DashboardTest(APITestCase):
             for course in program['courses']:
                 assert course['status'] == CourseStatus.NOT_OFFERED
 
-    def test_with_runs(self):
+    @patch('backends.utils.refresh_user_token', autospec=True)
+    def test_with_runs(self, mocked_refresh):
         """Test for GET"""
         # create some runs
         self.create_run(
@@ -138,6 +145,7 @@ class DashboardTest(APITestCase):
             return_value=self.enrollments
         ):
             res = self.client.get(self.url)
+        assert mocked_refresh.called
         assert res.status_code == status.HTTP_200_OK
         data = res.data
         assert len(data) == 2
@@ -153,3 +161,90 @@ class DashboardTest(APITestCase):
                         assert course_data['runs'][0]['status'] == CourseStatus.CURRENT_GRADE
                     if course_data['runs'][0]['course_id'] == "course-v1:MITx+8.MechCX+2014_T1":
                         assert course_data['runs'][0]['status'] == CourseStatus.UPGRADE
+
+
+class DashboardTokensTest(APITestCase):
+    """
+    Tests for access tokens in dashboard Rest API
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        super(DashboardTokensTest, cls).setUpTestData()
+        # create an user
+        cls.user = UserFactory.create()
+        # create a social auth for the user
+        cls.user.social_auth.create(
+            provider='edxorg',
+            uid=cls.user.username,
+            extra_data='{"access_token": "fooooootoken", "refresh_token": "baaaarrefresh"}'
+        )
+
+        cls.enrollments = Enrollments([])
+
+        # url for the dashboard
+        cls.url = reverse('dashboard_api')
+
+    def setUp(self):
+        super(DashboardTokensTest, self).setUp()
+        self.client.force_login(self.user)
+        self.now = datetime.now(pytz.utc)
+
+    def update_social_extra_data(self, data):
+        """Helper function to update the python social auth extra data"""
+        social_user = self.user.social_auth.get(provider='edxorg')
+        social_user.extra_data.update(data)
+        social_user.save()
+
+    def request_with_mocked_enrollments(self):
+        """Helper function to make requests with mocked enrollment endpoint"""
+        with patch(
+            'edx_api.enrollments.CourseEnrollments.get_student_enrollments',
+            autospec=True,
+            return_value=self.enrollments
+        ):
+            return self.client.get(self.url)
+
+    @patch('backends.edxorg.EdxOrgOAuth2.refresh_token', autospec=True)
+    def test_refresh_token(self, mock_refresh):
+        """Test to verify that the access token is refreshed if it has expired"""
+        extra_data = {
+            "updated_at": (self.now - timedelta(weeks=1)).timestamp(),
+            "expires_in": 100  # seconds
+        }
+        self.update_social_extra_data(extra_data)
+        res = self.request_with_mocked_enrollments()
+        assert mock_refresh.called
+        assert res.status_code == status.HTTP_200_OK
+
+    @patch('backends.edxorg.EdxOrgOAuth2.refresh_token', autospec=True)
+    def test_refresh_token_still_valid(self, mock_refresh):
+        """Test to verify that the access token is not refreshed if it has not expired"""
+        extra_data = {
+            "updated_at": (self.now - timedelta(minutes=1)).timestamp(),
+            "expires_in": 31535999  # 1 year - 1 second
+        }
+        self.update_social_extra_data(extra_data)
+        res = self.request_with_mocked_enrollments()
+        assert not mock_refresh.called
+        assert res.status_code == status.HTTP_200_OK
+
+    @patch('backends.edxorg.EdxOrgOAuth2.refresh_token', autospec=True)
+    def test_refresh_token_error_server(self, mock_refresh):
+        """Test to check what happens when the OAUTH server returns an invalid status code"""
+        def raise_http_error(*args, **kwargs):  # pylint: disable=unused-argument
+            """Mock function to raise an exception"""
+            error = HTTPError()
+            error.response = MagicMock()
+            error.response.status_code = 400
+            raise error
+
+        mock_refresh.side_effect = raise_http_error
+        extra_data = {
+            "updated_at": (self.now - timedelta(weeks=1)).timestamp(),
+            "expires_in": 100  # seconds
+        }
+        self.update_social_extra_data(extra_data)
+        res = self.request_with_mocked_enrollments()
+        assert mock_refresh.called
+        assert res.status_code == status.HTTP_400_BAD_REQUEST
