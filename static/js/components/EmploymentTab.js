@@ -11,7 +11,6 @@ class EmploymentTab extends ProfileTab {
     super(props);
     this.saveAndContinue = saveAndContinue.bind(this, '/dashboard', EmploymentTab.validation);
     this.blankWorkHistoryEntry = {
-      id: null,
       position: "",
       industry: "",
       company_name: "",

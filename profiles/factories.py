@@ -17,7 +17,7 @@ from factory.fuzzy import (
 )
 import faker
 
-from profiles.models import Profile
+from profiles.models import Employment, Profile
 
 
 FAKE = faker.Factory.create()
@@ -82,3 +82,21 @@ class ProfileFactory(DjangoModelFactory):
 
     class Meta:  # pylint: disable=missing-docstring
         model = Profile
+
+
+class EmploymentFactory(DjangoModelFactory):
+    """
+    A factory for work history
+    """
+    profile = SubFactory(ProfileFactory)
+    city = FuzzyText(suffix=" city")
+    country = FuzzyText(suffix=" land")
+    state_or_territory = FuzzyText(suffix=" state")
+    company_name = FuzzyText(suffix=" XYZ-ABC")
+    industry = FuzzyText(suffix=" IT")
+    position = FuzzyText(suffix=" developer")
+    end_date = FuzzyDate(date(1850, 1, 1))
+    start_date = FuzzyDate(date(1850, 1, 1))
+
+    class Meta:  # pylint: disable=missing-docstring
+        model = Employment

@@ -7,6 +7,24 @@ from django.db.models import Max
 from jsonfield import JSONField
 
 
+class Employment(models.Model):
+    """
+    A user work_history
+    """
+    city = models.TextField()
+    company_name = models.TextField()
+    country = models.TextField()
+    industry = models.TextField()
+    position = models.TextField()
+    state_or_territory = models.TextField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)
+    start_date = models.DateField(blank=True, null=True)
+    profile = models.ForeignKey('Profile', on_delete=models.CASCADE, related_name='work_history')
+
+    def __str__(self):
+        return 'Employment history for "{0}"'.format(self.profile.user.username)
+
+
 class Profile(models.Model):
     """
     A user profile
