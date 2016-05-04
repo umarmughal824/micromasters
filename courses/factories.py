@@ -1,5 +1,6 @@
 """Factories for making test data"""
-from datetime import date
+from datetime import datetime
+import pytz
 
 import factory
 from factory import fuzzy
@@ -47,10 +48,10 @@ class CourseRunFactory(DjangoModelFactory):
     title = fuzzy.FuzzyText(prefix="CourseRun ")
     course = factory.SubFactory(CourseFactory)
     edx_course_key = fuzzy.FuzzyText()
-    enrollment_start = fuzzy.FuzzyDate(date(1980, 1, 1))
-    start_date = fuzzy.FuzzyDate(date(1980, 1, 1))
-    enrollment_end = fuzzy.FuzzyDate(date(1980, 1, 1))
-    end_date = fuzzy.FuzzyDate(date(1980, 1, 1))
+    enrollment_start = fuzzy.FuzzyDateTime(datetime(1980, 1, 1, tzinfo=pytz.utc))
+    start_date = fuzzy.FuzzyDateTime(datetime(1980, 1, 1, tzinfo=pytz.utc))
+    enrollment_end = fuzzy.FuzzyDateTime(datetime(1980, 1, 1, tzinfo=pytz.utc))
+    end_date = fuzzy.FuzzyDateTime(datetime(1980, 1, 1, tzinfo=pytz.utc))
     fuzzy_start_date = fuzzy.FuzzyText(prefix="Starting ")
     fuzzy_enrollment_start_date = fuzzy.FuzzyText(prefix="Enrollment starting ")
     enrollment_url = fuzzy.FuzzyText(prefix="http://")
