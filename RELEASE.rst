@@ -1,6 +1,28 @@
 Release Notes
 =============
 
+Version 0.7.0
+-------------
+
+- Moved stage1 plugin into production. Add --bail to exit with non-zero status on error
+- Removed test.js
+- Added semicolon enforcement rule
+- Added employment to profile model, expanded employment tab
+- Removed unused authentication state, use profile state instead for name
+- Fixed JS console error with react-router history
+- Updated frontend for changes to dashboard API
+- Added `singleTest` to package.json for running a single JS test file
+- osx_run script
+- Made `npm test` run the tests
+- Dashboard JSON refactored
+- Added page for terms of service
+- Incorporated updated homepage design
+- Moved onUpdate from Route to Router
+- Pointing the edx-api-client requirement to release
+- After login the user is redirected to dashboard
+- Added ProfileTab utility class
+- Added script to run development server on OS X without docker
+
 Version 0.6.0
 -------------
 
