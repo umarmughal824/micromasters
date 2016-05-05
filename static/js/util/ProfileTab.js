@@ -46,7 +46,7 @@ class ProfileTab extends React.Component {
       { value: 'public', label: 'Public to the world'},
       { value: 'public_to_mm', label: 'Public to other micromasters students'},
       { value: 'private', label: 'Private'}
-    ]
+    ];
   }
 
   static contextTypes = {
