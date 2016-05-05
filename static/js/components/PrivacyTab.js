@@ -22,7 +22,7 @@ class PrivacyTab extends ProfileTab {
       ['account_privacy']
     ],
     validationMessages: {
-      'account_privacy': 'Privacy'
+      'account_privacy': 'Privacy level'
     }
   };
 
