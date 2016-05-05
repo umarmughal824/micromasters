@@ -7,6 +7,7 @@ import DashboardPage from './containers/DashboardPage';
 import ProfilePage from './containers/ProfilePage';
 import PersonalTab from './components/PersonalTab';
 import EmploymentTab from './components/EmploymentTab';
+import PrivacyTab from './components/PrivacyTab';
 import TermsOfServicePage from './containers/TermsOfServicePage';
 
 /**
@@ -27,6 +28,7 @@ export function makeDashboardRoutes(browserHistory, store, onRouteUpdate) {
             <IndexRedirect to="personal" />
             <Route path="personal" component={PersonalTab} />
             <Route path="professional" component={EmploymentTab} />
+            <Route path="privacy" component={PrivacyTab} />
           </Route>
           <Route path="/terms_of_service" component={TermsOfServicePage} />
         </Route>

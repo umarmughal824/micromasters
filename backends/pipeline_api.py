@@ -51,11 +51,6 @@ def update_profile_from_edx(backend, user, response, is_new, *args, **kwargs):  
         }
     )
 
-    account_privacy = user_profile_edx.get('account_privacy')
-    if account_privacy == 'all_users':
-        user_profile.account_privacy = Profile.PUBLIC
-    else:
-        user_profile.account_privacy = Profile.PRIVATE
     name = user_profile_edx.get('name', "")
     user_profile.edx_name = name
     user_profile.first_name, user_profile.last_name = split_name(name)
