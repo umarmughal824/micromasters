@@ -42,6 +42,11 @@ class ProfileTab extends React.Component {
       value: language.alpha2,
       label: language.English
     }));
+    this.privacyOptions = [
+      { value: 'public', label: 'Public to the world'},
+      { value: 'public_to_mm', label: 'Public to other micromasters students'},
+      { value: 'private', label: 'Private'}
+    ]
   }
 
   static contextTypes = {

@@ -50,7 +50,7 @@ export function boundSelectField(keySet, label, options) {
   } = this.props;
   let onChange = value => {
     let clone = _.cloneDeep(profile);
-    _.set(clone, keySet, value? value.value : null);
+    _.set(clone, keySet, value? value.value : '');
     updateProfile(clone);
   };
   return <div>

@@ -9,7 +9,7 @@ import { saveAndContinue } from '../util/profile_edit';
 class EmploymentTab extends ProfileTab {
   constructor(props) {
     super(props);
-    this.saveAndContinue = saveAndContinue.bind(this, '/dashboard', EmploymentTab.validation);
+    this.saveAndContinue = saveAndContinue.bind(this, '/profile/privacy', EmploymentTab.validation);
     this.blankWorkHistoryEntry = {
       position: "",
       industry: "",
