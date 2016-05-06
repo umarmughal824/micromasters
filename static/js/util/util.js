@@ -1,3 +1,4 @@
+/* global SETTINGS:false */
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ga from 'react-ga';
@@ -50,6 +51,9 @@ export function makeCourseStatusDisplay(course, now = moment()) {
     courseOrRun = course.runs[0];
   }
 
+  let courseUpgradeUrl = `${SETTINGS.edx_base_url}course_modes/choose/${courseOrRun.course_id}/`;
+  let courseInfoUrl = `${SETTINGS.edx_base_url}courses/${courseOrRun.course_id}/info`;
+
   switch (courseOrRun.status) {
   case STATUS_PASSED:
   case STATUS_NOT_PASSED:
@@ -85,7 +89,7 @@ export function makeCourseStatusDisplay(course, now = moment()) {
 
     let verificationDate = moment(courseOrRun.verification_date);
     if (verificationDate.isAfter(now, 'day')) {
-      return <Button bsStyle="success">UPGRADE TO VERIFIED</Button>;
+      return <Button bsStyle="success" href={courseUpgradeUrl} target="_blank">UPGRADE TO VERIFIED</Button>;
     } else {
       // User cannot verify anymore
       return "";
@@ -100,7 +104,7 @@ export function makeCourseStatusDisplay(course, now = moment()) {
     if (enrollmentDate.isAfter(now, 'day')) {
       return "Enrollment starting: " + enrollmentDate.format("M/D/Y");
     } else {
-      return <Button bsStyle="success">ENROLL</Button>;
+      return <Button bsStyle="success" href={courseInfoUrl} target="_blank">ENROLL</Button>;
     }
   }
   default:

@@ -64,6 +64,10 @@
     }
   }
 
+  .clear-float {
+    clear: both;
+  }
+
   .course-list {
     @include outer-container;
     @include span-columns(8);
