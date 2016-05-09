@@ -1,12 +1,14 @@
 import React from 'react';
-import TextField from 'react-mdl/lib/Textfield';
-import Select from 'react-select';
 import DatePicker from 'react-datepicker';
 import Button from 'react-mdl/lib/Button';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 import moment from 'moment';
 import iso3166 from 'iso-3166-2';
 import _ from 'lodash';
+import AutoComplete from 'material-ui/AutoComplete';
+import MenuItem from 'material-ui/MenuItem';
+import TextField from 'material-ui/TextField';
+
 import { DATE_FORMAT } from '../constants';
 
 // utility functions for pushing changes to profile forms back to the
@@ -30,12 +32,16 @@ export function boundTextField(keySet, label) {
     _.set(clone, keySet, e.target.value);
     updateProfile(clone);
   };
+
+  // fullWidth means set width to 100% instead of 256px. This lets us use the
+  // Grid and Cell to manage its size
   return (
     <TextField
-      floatingLabel
-      label={label}
+      name={label}
+      floatingLabelText={label}
       value={_.get(profile, keySet, "")}
-      error={_.get(errors, keySet)}
+      fullWidth={true}
+      errorText={_.get(errors, keySet)}
       onChange={onChange} />
   );
 }
@@ -49,36 +55,103 @@ export function boundSelectField(keySet, label, options) {
     errors,
     updateProfile,
   } = this.props;
-  let onChange = value => {
+
+  // use a temporary edit value to store text currently in the textbox
+  let editKeySet = keySet.concat();
+  editKeySet[editKeySet.length - 1] = editKeySet[editKeySet.length - 1] + "_edit";
+
+  let caseInsensitivePrefixFilter = (searchText, key) => {
+    let index = key.toLowerCase().indexOf(searchText.toLowerCase());
+    return index === 0;
+  };
+
+  let onNewRequest = (optionOrString, index) => {
     let clone = _.cloneDeep(profile);
-    _.set(clone, keySet, value? value.value : '');
+    let toStore;
+    if (index === -1) {
+      // enter was pressed and optionOrString is a string
+      // select first item in dropdown if any are present
+      let filteredOptionValues = options.
+        map(option => option.label).
+        filter(caseInsensitivePrefixFilter.bind(this, optionOrString));
+      if (filteredOptionValues.length > 0) {
+        let option = options.find(option => option.label === filteredOptionValues[0]);
+        toStore = option.value;
+      }
+    } else {
+      // user selected an item in the menu
+      toStore = _.get(optionOrString, ['value', 'props', 'value']);
+    }
+
+    if (toStore !== undefined) {
+      _.set(clone, keySet, toStore);
+    } // else we couldn't figure out what the user wanted to select, so leave it as is
+    _.set(clone, editKeySet, undefined);
+
     updateProfile(clone);
   };
-  return <div>
-    <Select
-      options={options}
-      value={_.get(profile, keySet)}
-      placeholder={label}
-      onChange={onChange} />
-    <span className="validation-error-text">{_.get(errors, keySet)}</span>
-  </div>;
+
+  let selectedValue = _.get(profile, keySet);
+  let selectedOption = options.find(option => option.value === selectedValue);
+  let onUpdateInput = searchText => {
+    let clone = _.cloneDeep(profile);
+    _.set(clone, editKeySet, searchText);
+    updateProfile(clone);
+  };
+  let onBlur = () => {
+    // clear the edit value when we lose focus. In its place we will display
+    // the selected option label if one is selected, or an empty string
+    let clone = _.cloneDeep(profile);
+    _.set(clone, editKeySet, undefined);
+    updateProfile(clone);
+  };
+
+  let convertOption = option => ({
+    text: option.label,
+    value: <MenuItem primaryText={option.label} value={option.value}/>
+  });
+
+  let searchText;
+  let editText = _.get(profile, editKeySet);
+  if (editText !== undefined) {
+    searchText = editText;
+  } else if (selectedOption) {
+    searchText = selectedOption.label;
+  } else {
+    searchText = "";
+  }
+
+
+  return (
+    <AutoComplete
+      ref="autocomplete"
+      animated={false}
+      menuCloseDelay={0}
+      filter={caseInsensitivePrefixFilter}
+      dataSource={options.map(convertOption)}
+      searchText={searchText}
+      floatingLabelText={label}
+      openOnFocus={true}
+      menuStyle={{maxHeight: 300}}
+      fullWidth={true}
+      onNewRequest={onNewRequest}
+      onUpdateInput={onUpdateInput}
+      onBlur={onBlur}
+      errorText={_.get(errors, keySet)}
+    />
+  );
 }
 
+// HACK: we need to import the function above to allow us to mock it for testing
+import { boundSelectField as mockedBoundSelectField } from './profile_edit';
 
 // bind this to this.boundStateSelectField in the constructor of a form component
 // to update select fields
 // pass in the name (used as placeholder), key for profile, and the options.
 export function boundStateSelectField(stateKeySet, countryKeySet, label) {
   const {
-    updateProfile,
-    errors,
     profile,
   } = this.props;
-  let onChange = value => {
-    let clone = _.cloneDeep(profile);
-    _.set(clone, stateKeySet, value ? value.value : null);
-    updateProfile(clone);
-  };
   let options = [];
   let country = _.get(profile, countryKeySet);
   if (iso3166.data[country] !== undefined) {
@@ -89,14 +162,7 @@ export function boundStateSelectField(stateKeySet, countryKeySet, label) {
     options = _.sortBy(options, 'label');
   }
 
-  return <div>
-    <Select
-      options={options}
-      value={_.get(profile, stateKeySet)}
-      placeholder={label}
-      onChange={onChange} />
-    <span className="validation-error-text">{_.get(errors, stateKeySet)}</span>
-  </div>;
+  return mockedBoundSelectField.call(this, stateKeySet, label, options);
 }
 
 // bind this to this.boundDateField in the constructor of a form component
@@ -125,82 +191,6 @@ export function boundDateField(keySet, label) {
     />
     <span className="validation-error-text">{_.get(errors, keySet)}</span>
   </div>;
-}
-export function boundMonthField(keySet, label) {
-  const {updateProfile, errors, profile} = this.props;
-  let onChange = month => {
-    let clone = _.cloneDeep(profile);
-
-    let currentValue = _.get(clone, keySet);
-        // format as ISO-8601
-    let dateValue;
-    if(!month){
-      dateValue = "";
-    }else if (currentValue){
-      dateValue = moment(currentValue).set('month', month.value);
-    } else {
-      dateValue = moment().set('date', 1).set('month', month.value);
-    }
-    if(dateValue.isValid()){
-      _.set(clone, keySet, dateValue.format(DATE_FORMAT));
-    }
-    updateProfile(clone);
-  };
-  let month = _.get(profile, keySet)? moment(_.get(profile, keySet), DATE_FORMAT).month() : "";
-  const monthOptions = [
-    { value: 0, label: 'January'},
-    { value: 1, label: 'February'},
-    { value: 2, label: 'March'},
-    { value: 3, label: 'April'},
-    { value: 4, label: 'May'},
-    { value: 5, label: 'June'},
-    { value: 6, label: 'July'},
-    { value: 7, label: 'August'},
-    { value: 8, label: 'September'},
-    { value: 9, label: 'October'},
-    { value: 10, label: 'November'},
-    {value: 11, label: 'December'}
-  ];
-
-  return <div>
-    <Select
-      options={monthOptions}
-      clearable={false}
-      value={month}
-      placeholder={label}
-      onChange={onChange}
-    />
-    <span className="validation-error-text">{_.get(errors, keySet)}</span>
-  </div>;
-}
-
-export function boundYearField(keySet, label) {
-  const {updateProfile, errors, profile} = this.props;
-  let onChange = e => {
-    let clone = _.cloneDeep(profile);
-    let currentValue = _.get(clone, keySet);
-    let year = e.target.value;
-    // format as ISO-8601
-    let dateValue = '';
-    if (year) {
-      if (currentValue) {
-        dateValue = moment(currentValue).set('year', year);
-      } else {
-        dateValue = moment().set('date', 1).set('year', year);
-      }
-      if (dateValue.isValid()) {
-        _.set(clone, keySet, dateValue.format(DATE_FORMAT));
-      }
-      updateProfile(clone);
-    }
-  };
-  let year = _.get(profile, keySet) ? moment(_.get(profile, keySet), DATE_FORMAT).year() : "";
-  return <div>
-    <TextField
-      label={label}
-      value={year}
-      onChange={onChange}/>
-    <span className="validation-error-text">{_.get(errors, keySet)}</span></div>;
 }
 
 // bind to this.saveAndContinue.bind(this, '/next/url')

@@ -14,8 +14,10 @@ import {
   closeEducationForm,
   clearProfileEdit
 } from '../actions';
-import { Grid, Cell, Switch, FABButton, Icon } from 'react-mdl';
-
+import Grid, { Cell } from 'react-mdl/lib/Grid';
+import Switch from 'react-mdl/lib/Switch';
+import FABButton from 'react-mdl/lib/FABButton';
+import Icon from 'react-mdl/lib/Icon';
 import Dialog from 'material-ui/Dialog';
 
 class EducationTab extends ProfileTab {
@@ -31,7 +33,7 @@ class EducationTab extends ProfileTab {
     this.handleCloseDialog = this.handleCloseDialog.bind(this);
 
   }
-  static propTypes ={
+  static propTypes = {
     educationLevels: React.PropTypes.object,
     educationDialog: React.PropTypes.object,
     profile: React.PropTypes.object,
@@ -185,6 +187,7 @@ class EducationTab extends ProfileTab {
       <Button key="save" type='button' onClick={()=>{this.saveEducationForm(EducationTab.validation);}}>Save</Button>,
       <Button key="cancel" type='button' onClick={this.handleCloseDialog}>Cancel</Button>
     ];
+
     return <Grid className="profile-tab-grid">
       <Dialog
         open={educationDialog.openDialog}
@@ -197,11 +200,8 @@ class EducationTab extends ProfileTab {
           <Cell col={6}>
             {this.boundTextField(keySet('field_of_study'), 'Field of Study')}
           </Cell>
-          <Cell col={3}>
-            {this.boundMonthField(keySet('graduation_date'), 'Month')}
-          </Cell>
-          <Cell col={3}>
-            {this.boundYearField(keySet('graduation_date'), 'YYYY')}
+          <Cell col={6}>
+            {this.boundDateField(keySet('graduation_date'), 'Graduation Date')}
           </Cell>
         </Grid>
         <Grid>
@@ -222,7 +222,6 @@ class EducationTab extends ProfileTab {
             {this.boundSelectField(keySet('school_country'), 'Country', this.countryOptions)}
           </Cell>
         </Grid>
-
       </Dialog>
 
       {levelsGrid}
