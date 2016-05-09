@@ -4,30 +4,31 @@ import '../global_init';
 import ReactDOM from 'react-dom';
 import assert from 'assert';
 
+import { CLEAR_DASHBOARD, CLEAR_PROFILE, } from '../actions';
 import {
-  CLEAR_DASHBOARD,
-  CLEAR_PROFILE,
   UPDATE_DIALOG_TEXT,
   UPDATE_DIALOG_TITLE,
-  CLEAR_UI,
   SET_DIALOG_VISIBILITY,
-} from '../actions';
+  CLEAR_UI,
+} from '../actions/ui';
+
 import { USER_PROFILE_RESPONSE } from '../constants';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import EmploymentTab from '../components/EmploymentTab';
 
 describe('App', () => {
   let listenForActions, renderComponent, helper;
-  let dialogActions = [
-    UPDATE_DIALOG_TEXT,
-    UPDATE_DIALOG_TITLE,
-    SET_DIALOG_VISIBILITY,
-  ];
+  let dialogActions; 
 
   beforeEach(() => {
     helper = new IntegrationTestHelper();
     listenForActions = helper.listenForActions.bind(helper);
     renderComponent = helper.renderComponent.bind(helper);
+    dialogActions = [
+      UPDATE_DIALOG_TEXT,
+      UPDATE_DIALOG_TITLE,
+      SET_DIALOG_VISIBILITY,
+    ];
   });
 
   afterEach(() => {
@@ -61,13 +62,14 @@ describe('App', () => {
       // USER_PROFILE_RESPONSE doesn't have `current_employed`
       let workHistory = {};
       EmploymentTab.nestedValidationKeys.forEach( k => {
-        workHistory[k] = k === "city" ? undefined : "filled in";
+        workHistory[k] = k === "city" ? "" : "filled in";
       });
 
       let response = Object.assign({}, USER_PROFILE_RESPONSE, {
         work_history: [workHistory]
       });
       helper.profileGetStub.returns(Promise.resolve(response));
+
       renderComponent("/dashboard", dialogActions).then(() => {
         assert.equal(helper.currentLocation.pathname, "/profile/professional");
         done();

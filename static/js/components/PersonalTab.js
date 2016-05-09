@@ -3,13 +3,12 @@ import Button from 'react-mdl/lib/Button';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 
 import ProfileTab from "../util/ProfileTab";
-import { saveAndContinue } from "../util/profile_edit";
 
 class PersonalTab extends ProfileTab {
   constructor(props) {
     super(props);
-    this.saveAndContinue = saveAndContinue.bind(this, '/profile/education');
   }
+  nextUrl = "/profile/education";
 
   static propTypes = {
     profile:        React.PropTypes.object,

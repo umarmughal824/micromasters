@@ -6,9 +6,6 @@ import _ from 'lodash';
 import ProfileTab from "../util/ProfileTab";
 import { generateNewEducation } from "../util/util";
 import {
-  saveAndContinue
-} from '../util/profile_edit';
-import {
   toggleEducationLevel,
   openEducationForm,
   closeEducationForm,
@@ -28,11 +25,11 @@ class EducationTab extends ProfileTab {
     this.educationLevelOptions.forEach(level => {
       this.educationLevelLabels[level.value] = level.label;
     });
-    this.saveAndContinue = saveAndContinue.bind(this, '/profile/professional', EducationTab.validation);
     this.openNewEducationForm = this.openNewEducationForm.bind(this);
     this.handleCloseDialog = this.handleCloseDialog.bind(this);
-
   }
+  nextUrl = "/profile/professional";
+
   static propTypes = {
     educationLevels: React.PropTypes.object,
     educationDialog: React.PropTypes.object,

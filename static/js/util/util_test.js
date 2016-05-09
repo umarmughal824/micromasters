@@ -404,13 +404,16 @@ describe('utility functions', () => {
     });
     it('returns undefined if the text is not an integer number', () => {
       assert.equal(undefined, validateMonth("two"));
-      assert.equal(undefined, validateMonth(""));
       assert.equal(undefined, validateMonth(null));
       assert.equal(undefined, validateMonth({}));
       assert.equal(undefined, validateMonth(undefined));
       assert.equal(undefined, validateMonth("2e0"));
       assert.equal(undefined, validateMonth("3-4"));
       assert.equal(undefined, validateMonth("3.4"));
+    });
+
+    it('returns an empty string if passed an empty string', () => {
+      assert.equal("", validateMonth(""));
     });
   });
 
@@ -430,13 +433,16 @@ describe('utility functions', () => {
     });
     it('returns undefined if the text is not an integer number', () => {
       assert.equal(undefined, validateYear("two"));
-      assert.equal(undefined, validateYear(""));
       assert.equal(undefined, validateYear(null));
       assert.equal(undefined, validateYear({}));
       assert.equal(undefined, validateYear(undefined));
       assert.equal(undefined, validateYear("2e0"));
       assert.equal(undefined, validateYear("3-4"));
       assert.equal(undefined, validateYear("3.4"));
+    });
+
+    it('returns an empty string if passed an empty string', () => {
+      assert.equal("", validateYear(""));
     });
   });
 });

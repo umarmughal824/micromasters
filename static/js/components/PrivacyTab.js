@@ -2,13 +2,12 @@ import React from 'react';
 import Button from 'react-mdl/lib/Button';
 
 import ProfileTab from "../util/ProfileTab";
-import { saveAndContinue } from "../util/profile_edit";
 
 class PrivacyTab extends ProfileTab {
   constructor(props) {
     super(props);
-    this.saveAndContinue = saveAndContinue.bind(this, '/dashboard');
   }
+  nextUrl = "/dashboard";
 
   static propTypes = {
     profile:        React.PropTypes.object,

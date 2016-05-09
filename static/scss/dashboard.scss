@@ -123,8 +123,102 @@
   }
 }
 
+.no-border {
+  border: none!important;
+}
+
+.employment-splash {
+  border-bottom: 1px dashed #CCCCCC;
+  .mdl-cell {
+    margin: 20px auto;
+    font-family: "Open Sans";
+    text-align: center;
+  }
+}
+.mdl-dialog.profile-employment-dialog {
+  font-family: "Open Sans";
+  width: 700px;
+  padding: 30px;
+}
+.mdl-button.work-button {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 25px;
+}
+.work-button.cancel-button {
+  color: #b7b2b2;
+}
+.work-button.save-button {
+  color: #58b7bc;
+  margin-right: 20px;
+}
+.mdl-button.profile-save-and-continue {
+  background: #4C8399!important;
+  text-transform: none;
+  font-size: 16px;
+  font-weight: 600;
+  height: 50px;
+  span {
+    padding: 10px;
+  }
+}
 .profile-tab-grid {
   max-width: 900px;
+  border: 1px grey solid;
+  font-family: "Open Sans";
+  .mdl-textfield {
+    width: 100%;
+  }
+  .employment-form-title {
+    font-size: 22px;
+    font-weight: 600;
+  }
+  .end-date-hint {
+    font-size: 12px;
+  }
+  .profile-tab-card {
+    width: 100%;
+    position: relative;
+    overflow: visible;
+    .add-employment-button {
+      left: 40%;
+    }
+    .add-employment-button.no-entries {
+      top: 68px;
+    }
+    .add-employment-button.one-entry {
+      top: 38px;
+    }
+    .add-employment-button.more-entries {
+      top: 28px;
+    }
+    .job-row {
+    }
+    .profile-tab-card-grid:first-child {
+      padding-top: 15px;
+    }
+    .profile-tab-card-grid {
+      font-family: "Open Sans";
+      margin: 0;
+      padding: 6px 15px;
+      .employment-title {
+        font-weight: 600;
+        font-size: 19px;
+      }
+      .company-icons {
+        text-align: right;
+        color: #898989;
+      }
+      .company-name {
+        font-size: 16px;
+        font-weight: 700;
+      }
+      .company-date-range {
+        font-size: 16px;
+        font-weight: 300;
+      }
+    }
+  }
 }
 
 .education-level-name {

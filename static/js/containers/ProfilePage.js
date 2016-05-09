@@ -11,6 +11,11 @@ import {
   clearProfileEdit,
   saveProfile,
 } from '../actions';
+import {
+  setWorkHistoryEdit,
+  setWorkDialogVisibility,
+  setWorkDialogIndex,
+} from '../actions/ui';
 
 class ProfilePage extends React.Component {
   static propTypes = {
@@ -18,6 +23,7 @@ class ProfilePage extends React.Component {
     children:   React.PropTypes.node,
     dispatch:   React.PropTypes.func.isRequired,
     history:    React.PropTypes.object.isRequired,
+    ui:         React.PropTypes.object.isRequired,
   };
 
   static contextTypes = {
@@ -31,6 +37,26 @@ class ProfilePage extends React.Component {
       dispatch(startProfileEdit());
     }
     dispatch(updateProfile(profile));
+  }
+
+  setWorkHistoryEdit = (bool) => {
+    const { dispatch } = this.props;
+    dispatch(setWorkHistoryEdit(bool));
+  }
+
+  setWorkDialogVisibility = (bool) => {
+    const { dispatch } = this.props;
+    dispatch(setWorkDialogVisibility(bool));
+  }
+
+  setWorkDialogIndex = (index) => {
+    const { dispatch } = this.props;
+    dispatch(setWorkDialogIndex(index));
+  }
+
+  clearProfileEdit = () => {
+    const { dispatch } = this.props;
+    dispatch(clearProfileEdit());
   }
 
   saveProfile(isEdit, profile, requiredFields, messages) {
@@ -63,7 +89,7 @@ class ProfilePage extends React.Component {
   }
 
   render() {
-    let { profile } = this.props;
+    let { profile, ui } = this.props;
     let errors, isEdit;
 
     if (profile.edit !== undefined) {
@@ -80,8 +106,13 @@ class ProfilePage extends React.Component {
       React.cloneElement(child, {
         profile: profile,
         errors: errors,
+        ui: ui,
         updateProfile: this.updateProfile.bind(this, isEdit),
-        saveProfile: this.saveProfile.bind(this, isEdit)
+        saveProfile: this.saveProfile.bind(this, isEdit),
+        setWorkHistoryEdit: this.setWorkHistoryEdit,
+        setWorkDialogVisibility: this.setWorkDialogVisibility,
+        setWorkDialogIndex: this.setWorkDialogIndex,
+        clearProfileEdit: this.clearProfileEdit,
       })
     ));
 
@@ -104,7 +135,8 @@ class ProfilePage extends React.Component {
 }
 
 const mapStateToProps = state => ({
-  profile: state.userProfile
+  profile:  state.userProfile,
+  ui:       state.ui,
 });
 
 export default connect(mapStateToProps)(ProfilePage);

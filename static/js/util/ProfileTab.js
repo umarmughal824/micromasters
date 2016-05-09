@@ -6,8 +6,8 @@ import {
   boundTextField,
   boundSelectField,
   boundMonthYearField,
-  editProfileObjectArray,
   boundStateSelectField,
+  saveAndContinue,
 } from './profile_edit';
 import { HIGH_SCHOOL, ASSOCIATE, BACHELORS, MASTERS, DOCTORATE } from '../constants';
 import LANGUAGE_CODES from '../language_codes';
@@ -24,7 +24,6 @@ class ProfileTab extends React.Component {
     this.boundStateSelectField = boundStateSelectField.bind(this);
     this.boundDateField = boundDateField.bind(this);
     this.boundMonthYearField = boundMonthYearField.bind(this);
-    this.editProfileObjectArray = editProfileObjectArray.bind(this);
 
     // options we set (for select components)
     let countryOptions = Object.keys(iso3166.data).map(code => ({
@@ -54,6 +53,12 @@ class ProfileTab extends React.Component {
       {value: MASTERS, label: "Master's or professional degree"},
       {value: DOCTORATE, label: "Doctorate"}
     ];
+  }
+
+  saveAndContinue = () => {
+    saveAndContinue.call(this, this.constructor.prototype.validation).then(() => {
+      this.context.router.push(this.nextUrl);
+    });
   }
 
   static contextTypes = {

@@ -1,7 +1,5 @@
 import React from 'react';
 import DatePicker from 'react-datepicker';
-import Button from 'react-mdl/lib/Button';
-import Grid, { Cell } from 'react-mdl/lib/Grid';
 import moment from 'moment';
 import iso3166 from 'iso-3166-2';
 import _ from 'lodash';
@@ -42,6 +40,10 @@ export function boundTextField(keySet, label) {
     _.set(clone, keySet, e.target.value);
     updateProfile(clone);
   };
+  let getValue = () => {
+    let value = _.get(profile, keySet, "");
+    return ( _.isNull(value) || _.isUndefined(value) ) ? "" : value;
+  };
 
   // fullWidth means set width to 100% instead of 256px. This lets us use the
   // Grid and Cell to manage its size
@@ -49,7 +51,7 @@ export function boundTextField(keySet, label) {
     <TextField
       name={label}
       floatingLabelText={label}
-      value={_.get(profile, keySet, "")}
+      value={getValue()}
       fullWidth={true}
       errorText={_.get(errors, keySet)}
       onChange={onChange} />
@@ -200,7 +202,8 @@ export function boundDateField(keySet, label) {
   let onChange = date => {
     let clone = _.cloneDeep(profile);
     // format as ISO-8601
-    _.set(clone, keySet, date.format(DATE_FORMAT));
+    let newDate = _.isNull(date) ? date : date.format(DATE_FORMAT);
+    _.set(clone, keySet, newDate);
     updateProfile(clone);
   };
   let newDate = _.get(profile, keySet) ? moment(_.get(profile, keySet), DATE_FORMAT) : null;
@@ -286,6 +289,9 @@ export function boundMonthYearField(keySet, label) {
       // store the edit value and make the formatted date null so it doesn't pass validation
       _.set(clone, editKeySet, newMonthYear);
       _.set(clone, keySet, undefined);
+    } else if ( validatedMonth === "" || validatedYear === "") {
+      _.set(clone, editKeySet, undefined);
+      _.set(clone, keySet, null);
     } else {
       // format date and store it, and erase the edit data
       let formattedDate = moment().
@@ -330,14 +336,12 @@ export function boundMonthYearField(keySet, label) {
 
 
 /**
- * Bind to this.saveAndContinue.bind(this, '/next/url')
- * pass an option callback if you need nested validation
- * (see EmploymentTab for an example)
+ * Saves the profile and returns a promise, taking an optional function
+ * to retrieve keys for validation of nested fields (e.g. profile.work_history)
  *
- * @param next {String} URL to redirect to after successful validation
  * @param nestedValidationCallback {func} If present, a function to retrieve validation fields
  */
-export function saveAndContinue(next, nestedValidationCallback) {
+export function saveAndContinue(nestedValidationCallback) {
   const {
     saveProfile,
     profile,
@@ -352,53 +356,5 @@ export function saveAndContinue(next, nestedValidationCallback) {
     fields = requiredFields;
   }
 
-  saveProfile( profile, fields, validationMessages).then(() => {
-    this.context.router.push(next);
-  });
-}
-
-/**
- * Allows editing an array of objects stored in the profile
- * 
- * @param arrayName {String} key the array is stored under on the profile
- * @param blankEntry {Object} an object with the requisite fields, with undefined, "", or null values
- * @param formCallback {func} a function that takes an index (into the object array) and draws
- * ui (using boundTextField and so on) to edit an object in the array
- * @returns {ReactElement}
- */
-export function editProfileObjectArray (arrayName, blankEntry, formCallback) {
-  const { updateProfile, profile } = this.props;
-  if ( profile.hasOwnProperty(arrayName) && !_.isEmpty(profile[arrayName]) ) {
-    let editForms = profile[arrayName].map((v, i) => formCallback(i));
-    let addAnotherBlankEntry = () => {
-      let clone = Object.assign({}, profile);
-      clone[arrayName] = clone[arrayName].concat(blankEntry);
-      updateProfile(clone);
-    };
-    editForms.push(
-      <Grid className="profile-tab-grid" key={arrayName}>
-        <Cell col={12} align='middle'>
-          <Button onClick={addAnotherBlankEntry}>
-            Add another entry
-          </Button>
-        </Cell>
-      </Grid>
-    );
-    return editForms;
-  } else {
-    let startEditing = () => {
-      let clone = Object.assign({}, profile);
-      clone[arrayName] = [blankEntry];
-      updateProfile(clone);
-    };
-    return (
-      <Grid className="profile-tab-grid">
-        <Cell col={12} align='middle'>
-          <Button onClick={startEditing}>
-            Start Editing
-          </Button>
-        </Cell>
-      </Grid>
-    );
-  }
+  return saveProfile(profile, fields, validationMessages);
 }

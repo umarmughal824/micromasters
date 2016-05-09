@@ -22,51 +22,12 @@ import {
   RECEIVE_DASHBOARD_FAILURE,
   CLEAR_DASHBOARD,
 
-  CLEAR_UI,
-  UPDATE_DIALOG_TEXT,
-  UPDATE_DIALOG_TITLE,
-  SET_DIALOG_VISIBILITY,
-
   FETCH_FAILURE,
   FETCH_PROCESSING,
   FETCH_SUCCESS,
 } from '../actions';
 import { HIGH_SCHOOL, ASSOCIATE, BACHELORS, MASTERS, DOCTORATE } from '../constants';
-
-const INITIAL_UI_STATE = {};
-
-export const ui = (state = INITIAL_UI_STATE, action) => {
-  switch (action.type) {
-  case UPDATE_DIALOG_TEXT:
-    return Object.assign({}, state, {
-      dialog: Object.assign(
-        {},
-        state.dialog,
-        { text: action.payload }
-      )
-    });
-  case UPDATE_DIALOG_TITLE:
-    return Object.assign({}, state, {
-      dialog: Object.assign(
-        {},
-        state.dialog,
-        { title: action.payload }
-      )
-    });
-  case SET_DIALOG_VISIBILITY:
-    return Object.assign({}, state, {
-      dialog: Object.assign(
-        {},
-        state.dialog,
-        { visible: action.payload }
-      )
-    });
-  case CLEAR_UI:
-    return INITIAL_UI_STATE;
-  default:
-    return state;
-  }
-};
+import { ui } from './ui';
 
 export const INITIAL_DIALOG_STATE = {
   openDialog: false,

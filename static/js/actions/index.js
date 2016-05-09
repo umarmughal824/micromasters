@@ -16,12 +16,6 @@ export const RECEIVE_PATCH_USER_PROFILE_SUCCESS = 'RECEIVE_PATCH_USER_PROFILE_SU
 export const RECEIVE_PATCH_USER_PROFILE_FAILURE = 'RECEIVE_PATCH_USER_PROFILE_FAILURE';
 export const UPDATE_PROFILE_VALIDATION = 'UPDATE_PROFILE_VALIDATION';
 
-// ui actions
-export const CLEAR_UI = 'CLEAR_UI';
-export const UPDATE_DIALOG_TEXT = 'UPDATE_DIALOG_TEXT';
-export const UPDATE_DIALOG_TITLE = 'UPDATE_DIALOG_TITLE';
-export const SET_DIALOG_VISIBILITY = 'SET_DIALOG_VISIBILITY';
-
 export const SHOW_EDUCATION_FORM_DIALOG = 'SHOW_EDUCATION_FORM_DIALOG';
 export const HIDE_EDUCATION_FORM_DIALOG = 'HIDE_EDUCATION_FORM_DIALOG';
 export const TOGGLE_EDUCATION_LEVEL = 'TOGGLE_EDUCATION_LEVEL';
@@ -30,20 +24,6 @@ export const TOGGLE_EDUCATION_LEVEL = 'TOGGLE_EDUCATION_LEVEL';
 export const FETCH_FAILURE = 'FETCH_FAILURE';
 export const FETCH_SUCCESS = 'FETCH_SUCCESS';
 export const FETCH_PROCESSING = 'FETCH_PROCESSING';
-
-// general UI actions
-export const clearUI = () => ({ type: CLEAR_UI });
-export const updateDialogText = text => (
-  { type: UPDATE_DIALOG_TEXT, payload: text }
-);
-
-export const updateDialogTitle = title => (
-  { type: UPDATE_DIALOG_TITLE, payload: title }
-);
-
-export const setDialogVisibility = bool => (
-  { type: SET_DIALOG_VISIBILITY, payload: bool }
-);
 
 // actions for user profile
 const requestGetUserProfile = () => ({ type: REQUEST_GET_USER_PROFILE });
