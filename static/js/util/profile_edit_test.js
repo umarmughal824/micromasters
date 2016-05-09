@@ -11,10 +11,12 @@ import {
   boundDateField,
   boundSelectField,
   boundStateSelectField,
+  boundMonthYearField,
 } from './profile_edit';
 import { DATE_FORMAT } from '../constants';
 import { USER_PROFILE_RESPONSE } from '../constants';
 import * as profileEdit from '../util/profile_edit';
+import * as util from '../util/util';
 
 describe('Profile Editing utility functions', () => {
   let that;
@@ -255,6 +257,136 @@ describe('Profile Editing utility functions', () => {
       options = _.sortBy(options, 'label');
 
       assert(boundSelectFieldSpy.calledWith(stateKey, placeholder, options));
+    });
+  });
+
+  describe("Bound month/year field", () => {
+    let monthYearField, monthTextField, yearTextField, errorSpan, labelField;
+    let sandbox, validateYearSpy, validateMonthSpy;
+    let __; // eslint-disable-line no-unused-vars
+    let renderMonthYearField = () => {
+      monthYearField = boundMonthYearField.call(
+        that,
+        ["date_of_birth"],
+        "Date of birth"
+      );
+
+      return monthYearField.props.children.filter(React.isValidElement);
+    };
+
+    beforeEach(() => {
+      [labelField, __, monthTextField, __, yearTextField, errorSpan] = renderMonthYearField();
+
+      sandbox = sinon.sandbox.create();
+
+      validateYearSpy = sandbox.spy(util, 'validateYear');
+      validateMonthSpy = sandbox.spy(util, 'validateMonth');
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+
+    it("has proper props for an invalid or missing value", () => {
+      for (let dateOfBirth of ['', {}, null, undefined]) {
+        that.props.profile.date_of_birth = dateOfBirth;
+        [labelField, __, monthTextField, __, yearTextField, errorSpan] = renderMonthYearField();
+
+        assert.equal(labelField.props.children, "Date of birth");
+        assert.equal(monthTextField.props.floatingLabelText, "MM");
+        assert.equal(monthTextField.props.value, "");
+        assert.equal(yearTextField.props.floatingLabelText, "YYYY");
+        assert.equal(yearTextField.props.value, "");
+        assert.equal(errorSpan.props.children, "Date of birth is required");
+      }
+    });
+
+    it("has proper props for a defined valid value", () => {
+      that.props.profile.date_of_birth = "1985-12-31";
+      [labelField, __, monthTextField, __, yearTextField, errorSpan] = renderMonthYearField();
+
+      assert.equal(labelField.props.children, "Date of birth");
+      assert.equal(monthTextField.props.floatingLabelText, "MM");
+      assert.equal(monthTextField.props.value, 12);
+      assert.equal(yearTextField.props.floatingLabelText, "YYYY");
+      assert.equal(yearTextField.props.value, 1985);
+      assert.equal(errorSpan.props.children, "Date of birth is required");
+    });
+
+    it("updates the month edit value when the month TextField onChange is used", () => {
+      monthTextField.props.onChange({target: {value: "text"}});
+
+      assert.deepEqual(that.props.profile.date_of_birth_edit, {
+        month: "text",
+        year: undefined
+      });
+    });
+
+    it("updates the year edit value when the year TextField onChange is used", () => {
+      yearTextField.props.onChange({target: {value: "text"}});
+
+      assert.deepEqual(that.props.profile.date_of_birth_edit, {
+        month: undefined,
+        year: "text"
+      });
+    });
+
+    it("updates the month correctly when edit value already exists", () => {
+      that.props.profile.date_of_birth_edit = {
+        month: "month",
+        year: "year"
+      };
+      monthTextField.props.onChange({target: {value: "changed"}});
+      assert.deepEqual(that.props.profile.date_of_birth_edit, {
+        month: "changed",
+        year: "year"
+      });
+    });
+
+    it("updates the year correctly when edit value already exists", () => {
+      that.props.profile.date_of_birth_edit = {
+        month: "month",
+        year: "year"
+      };
+      yearTextField.props.onChange({target: {value: "changed"}});
+      assert.deepEqual(that.props.profile.date_of_birth_edit, {
+        month: "month",
+        year: "changed"
+      });
+    });
+    
+    it("updates the formatted date if month and year are valid", () => {
+      monthTextField.props.onChange({target: {value: "12"}});
+      [labelField, __, monthTextField, __, yearTextField, errorSpan] = renderMonthYearField();
+
+      yearTextField.props.onChange({target: {value: "2077"}});
+
+      assert.equal(that.props.profile.date_of_birth, "2077-12-01");
+      assert.deepEqual(that.props.profile.date_of_birth_edit, undefined);
+    });
+
+    it("stores text in date_of_birth_edit if it's not a valid date", () => {
+      that.props.profile.date_of_birth = "2066-02-28";
+      [labelField, __, monthTextField, __, yearTextField, errorSpan] = renderMonthYearField();
+      monthTextField.props.onChange({target: {value: "13"}});
+      [labelField, __, monthTextField, __, yearTextField, errorSpan] = renderMonthYearField();
+
+      assert.deepEqual(that.props.profile.date_of_birth, null);
+      assert.deepEqual(that.props.profile.date_of_birth_edit, {
+        month: "13",
+        year: "2066"
+      });
+    });
+
+    it("uses validateMonth for validation", () => {
+      monthTextField.props.onChange({target: {value: "a month"}});
+      assert(validateMonthSpy.calledWith("a month"));
+    });
+
+    it("uses validateYear for validation", () => {
+      yearTextField.props.onChange({target: {value: "a year"}});
+      assert(validateYearSpy.calledWith("a year"));
     });
   });
 });

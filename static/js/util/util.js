@@ -268,6 +268,18 @@ export function validateProfileComplete(profile) {
 }
 
 /**
+ * Converts string to int using base 10. Stricter in what is accepted than parseInt
+ * @param value {String} A value to be parsed
+ * @returns {Number|undefined} Either an integer or undefined if parsing didn't work.
+ */
+const filterPositiveInt = value => {
+  if(/^[0-9]+$/.test(value)) {
+    return Number(value);
+  }
+  return undefined;
+};
+
+/**
  * Returns the string with any HTML rendered and then its tags stripped
  * @return {String} rendered text stripped of HTML
  */
@@ -279,4 +291,37 @@ export function makeStrippedHtml(textOrElement) {
   } else {
     return striptags(textOrElement);
   }
+}
+
+/**
+ * Validate a month number
+ * @param {String} string The input string
+ * @returns {Number|undefined} The valid month or undefined if not valid
+ */
+export function validateMonth(string) {
+  let month = filterPositiveInt(string);
+  if (month === undefined) {
+    return undefined;
+  }
+  if (month < 1 || month > 12) {
+    return undefined;
+  }
+  return month;
+}
+
+/**
+ * Validate a year string is an integer and fits into YYYY
+ * @param {String} string The input string
+ * @returns {Number|undefined} The valid year or undefined if not valid
+ */
+export function validateYear(string) {
+  let year = filterPositiveInt(string);
+  if (year === undefined) {
+    return undefined;
+  }
+  if (year < 1 || year > 9999) {
+    // fit into YYYY format
+    return undefined;
+  }
+  return year;
 }
