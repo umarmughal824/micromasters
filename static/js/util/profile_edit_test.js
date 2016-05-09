@@ -97,7 +97,7 @@ describe('Profile Editing utility functions', () => {
 
   describe('Bound Month field', () => {
     let dateField, selectElement, errorText;
-    const month_options = [
+    const monthOptions = [
       {value: 0, label: 'January'},
       {value: 1, label: 'February'},
       {value: 2, label: 'March'},
@@ -132,7 +132,7 @@ describe('Profile Editing utility functions', () => {
 
     it('should call the updateProfile callback when onChange fires', () => {
       let cur = moment().set('date', 1);
-      selectElement.props.onChange(month_options[cur.month()]);
+      selectElement.props.onChange(monthOptions[cur.month()]);
       assert.deepEqual(cur.format(DATE_FORMAT), that.props.profile.date_field);
     });
   });

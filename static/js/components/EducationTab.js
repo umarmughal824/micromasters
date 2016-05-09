@@ -75,15 +75,15 @@ class EducationTab extends ProfileTab {
 
   openNewEducationForm(level, index) {
     const {dispatch, profile, updateProfile} = this.props;
-    let new_index = index;
+    let newIndex = index;
     if (index === null){
-      new_index = profile['education'].length;
+      newIndex = profile['education'].length;
     }
     /* add empty education */
     let clone = Object.assign({}, profile);
     clone['education'] = clone['education'].concat(generateNewEducation(level));
     updateProfile(clone);
-    dispatch(openEducationForm(level, new_index));
+    dispatch(openEducationForm(level, newIndex));
   }
 
   printAddDegree(level){
@@ -121,11 +121,11 @@ class EducationTab extends ProfileTab {
     });
   }
 
-  openEditEducationForm(level, education_id){
+  openEditEducationForm(level, educationId){
     const { dispatch, profile } = this.props;
 
     let index = profile['education'].findIndex((education) => {
-      return education_id === education.id;
+      return educationId === education.id;
     });
     dispatch(openEducationForm(level, index));
   }
@@ -163,7 +163,7 @@ class EducationTab extends ProfileTab {
       return null;
     }
 
-    var levels_grid = this.educationLevelOptions.map(level =>{
+    let levelsGrid = this.educationLevelOptions.map(level =>{
       return <Cell col={12} key={level.value} >
         <Grid key={level.value} className="education-level-header">
           <Cell col={11}><h5 className="education-level-name">{level.label}</h5></Cell>
@@ -220,7 +220,7 @@ class EducationTab extends ProfileTab {
           </DialogActions>
         </Dialog>
 
-      {levels_grid}
+      {levelsGrid}
 
      <Button raised onClick={this.saveAndContinue}>
         Save and continue

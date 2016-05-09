@@ -131,23 +131,23 @@ export function boundMonthField(keySet, label) {
   let onChange = month => {
     let clone = _.cloneDeep(profile);
 
-    let current_value = _.get(clone, keySet);
+    let currentValue = _.get(clone, keySet);
         // format as ISO-8601
-    let date_value;
+    let dateValue;
     if(!month){
-      date_value = "";
-    }else if (current_value){
-      date_value = moment(current_value).set('month', month.value);
+      dateValue = "";
+    }else if (currentValue){
+      dateValue = moment(currentValue).set('month', month.value);
     } else {
-      date_value = moment().set('date', 1).set('month', month.value);
+      dateValue = moment().set('date', 1).set('month', month.value);
     }
-    if(date_value.isValid()){
-      _.set(clone, keySet, date_value.format(DATE_FORMAT));
+    if(dateValue.isValid()){
+      _.set(clone, keySet, dateValue.format(DATE_FORMAT));
     }
     updateProfile(clone);
   };
   let month = _.get(profile, keySet)? moment(_.get(profile, keySet), DATE_FORMAT).month() : "";
-  const month_options = [
+  const monthOptions = [
     { value: 0, label: 'January'},
     { value: 1, label: 'February'},
     { value: 2, label: 'March'},
@@ -164,7 +164,7 @@ export function boundMonthField(keySet, label) {
 
   return <div>
     <Select
-      options={month_options}
+      options={monthOptions}
       clearable={false}
       value={month}
       placeholder={label}
@@ -178,18 +178,18 @@ export function boundYearField(keySet, label) {
   const {updateProfile, errors, profile} = this.props;
   let onChange = e => {
     let clone = _.cloneDeep(profile);
-    let current_value = _.get(clone, keySet);
+    let currentValue = _.get(clone, keySet);
     let year = e.target.value;
     // format as ISO-8601
-    let date_value = '';
+    let dateValue = '';
     if (year) {
-      if (current_value) {
-        date_value = moment(current_value).set('year', year);
+      if (currentValue) {
+        dateValue = moment(currentValue).set('year', year);
       } else {
-        date_value = moment().set('date', 1).set('year', year);
+        dateValue = moment().set('date', 1).set('year', year);
       }
-      if (date_value.isValid()) {
-        _.set(clone, keySet, date_value.format(DATE_FORMAT));
+      if (dateValue.isValid()) {
+        _.set(clone, keySet, dateValue.format(DATE_FORMAT));
       }
       updateProfile(clone);
     }

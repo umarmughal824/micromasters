@@ -1,4 +1,4 @@
-/* eslint-disable  no-undef, max-len */
+/* eslint-disable  no-undef, max-len, no-var */
 (function(window, document, $) {
   'use strict';
 

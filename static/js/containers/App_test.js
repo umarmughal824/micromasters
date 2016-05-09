@@ -59,13 +59,13 @@ describe('App', () => {
 
     it('redirects to /profile/professional if a field is missing there', done => {
       // USER_PROFILE_RESPONSE doesn't have `current_employed`
-      let work_history = {};
+      let workHistory = {};
       EmploymentTab.nestedValidationKeys.forEach( k => {
-        work_history[k] = k === "city" ? undefined : "filled in";
+        workHistory[k] = k === "city" ? undefined : "filled in";
       });
 
       let response = Object.assign({}, USER_PROFILE_RESPONSE, {
-        work_history: [work_history]
+        work_history: [workHistory]
       });
       helper.profileGetStub.returns(Promise.resolve(response));
       renderComponent("/dashboard", dialogActions).then(() => {
@@ -87,13 +87,13 @@ describe('App', () => {
     });
 
     it("checks work_history if currently_employed = 'yes'", done => {
-      let work_history = {};
+      let workHistory = {};
       EmploymentTab.nestedValidationKeys.forEach( k => {
-        work_history[k] = k === "city" ? undefined : "filled in";
+        workHistory[k] = k === "city" ? undefined : "filled in";
       });
       let response = Object.assign({}, USER_PROFILE_RESPONSE, {
         currently_employed: "yes",
-        work_history: [work_history]
+        work_history: [workHistory]
       });
       helper.profileGetStub.returns(Promise.resolve(response));
 
@@ -134,13 +134,13 @@ describe('App', () => {
     });
 
     it('sets a dialog with appropriate text for professional info', done => {
-      let work_history = {};
+      let workHistory = {};
       EmploymentTab.nestedValidationKeys.forEach( k => {
-        work_history[k] = k === "city" ? undefined : "filled in";
+        workHistory[k] = k === "city" ? undefined : "filled in";
       });
       let response = Object.assign({}, USER_PROFILE_RESPONSE, {
         currently_employed: "yes",
-        work_history: [work_history]
+        work_history: [workHistory]
       });
       helper.profileGetStub.returns(Promise.resolve(response));
 

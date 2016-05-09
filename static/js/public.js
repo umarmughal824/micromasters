@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars, no-undef */
+/* eslint-disable no-unused-vars, no-undef, no-var */
 __webpack_public_path__ = `http://${SETTINGS.host}:8078/`;  // eslint-disable-line no-undef, camelcase
 
 require("bootstrap");
