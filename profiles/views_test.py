@@ -132,7 +132,7 @@ class ProfileTests(TestCase):
 
         old_profile = Profile.objects.get(user__username=self.user1.username)
         for key, value in patch_data.items():
-            if key in ["filled_out", "pretty_printed_student_id", "work_history"]:
+            if key in ["filled_out", "pretty_printed_student_id", "work_history", "education"]:
                 # these fields are readonly
                 continue
             elif key == "date_of_birth":

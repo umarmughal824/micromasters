@@ -115,3 +115,11 @@ export const DASHBOARD_RESPONSE = [
     "id": 3
   },
 ];
+
+export const HIGH_SCHOOL = 'hs';
+export const ASSOCIATE = 'a';
+export const BACHELORS = 'b';
+export const MASTERS = 'm';
+export const DOCTORATE = 'p';
+
+export const DATE_FORMAT = 'YYYY-MM-DD';

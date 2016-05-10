@@ -195,6 +195,26 @@ export function validateProfile(profile, requiredFields, messages) {
   return errors;
 }
 
+/* eslint-disable camelcase */
+/**
+ * Generate new education object 
+ *
+ * @param {String} level The select degree level
+ * @returns {Object} New empty education object
+ */
+export function generateNewEducation(level) {
+  return {
+    'degree_name': level,
+    'graduation_date': "",
+    'field_of_study': "",
+    'online_degree': false,
+    'school_name': "",
+    'school_city': "",
+    'school_state_or_territory': "",
+    'school_country': ""
+  };
+}
+
 /* eslint-enable camelcase */
 /*
 check that the profile is complete. we make the assumption that a

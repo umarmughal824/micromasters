@@ -28,7 +28,7 @@ class EdxPipelineApiTest(TestCase):
         profile.refresh_from_db()
         for field in profile._meta.get_fields():  # pylint: disable=protected-access
             key = field.name
-            if key in ('id', 'user', 'date_joined_micromasters', 'student_id', 'work_history'):
+            if key in ('id', 'user', 'date_joined_micromasters', 'student_id', 'work_history', 'education'):
                 continue
             if key == 'account_privacy':
                 assert getattr(profile, key) == Profile.PRIVATE

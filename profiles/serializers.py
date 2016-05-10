@@ -6,7 +6,7 @@ from django.db import transaction
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import ModelSerializer, SerializerMethodField, IntegerField
 
-from profiles.models import Employment, Profile
+from profiles.models import Employment, Profile, Education
 
 
 def update_work_history(work_history_list, profile_id):
@@ -37,6 +37,32 @@ def update_work_history(work_history_list, profile_id):
     Employment.objects.filter(profile_id=profile_id).exclude(id__in=saved_work_history_ids).delete()
 
 
+def update_education(education_list, profile_id):
+    """
+    Update education for given profile id.
+
+    Args:
+        education_list (list): List of education dicts.
+        profile_id (int): User profile id.
+    """
+    saved_education_ids = set()
+    for education in education_list:
+        education_id = education.get("id")
+        if education_id is not None:
+            try:
+                education_instance = Education.objects.get(profile_id=profile_id, id=education_id)
+            except Education.DoesNotExist:
+                raise ValidationError("Education {} does not exist".format(education_id))
+        else:
+            education_instance = None
+        education_serializer = EducationSerializer(instance=education_instance, data=education)
+        education_serializer.is_valid(raise_exception=True)
+        education_serializer.save(profile_id=profile_id)
+        saved_education_ids.add(education_serializer.instance.id)
+
+    Education.objects.filter(profile_id=profile_id).exclude(id__in=saved_education_ids).delete()
+
+
 class EmploymentSerializer(ModelSerializer):
     """Serializer for Employment objects"""
     id = IntegerField(required=False)  # override the read_only flag so we can edit it
@@ -56,10 +82,29 @@ class EmploymentSerializer(ModelSerializer):
         )
 
 
+class EducationSerializer(ModelSerializer):
+    """Serializer for Education objects"""
+    id = IntegerField(required=False)  # override the read_only flag so we can edit it
+
+    class Meta:
+        model = Education
+        fields = (
+            'id',
+            'degree_name',
+            'graduation_date',
+            'field_of_study',
+            'online_degree',
+            'school_name',
+            'school_city',
+            'school_state_or_territory',
+            'school_country')
+
+
 class ProfileSerializer(ModelSerializer):
     """Serializer for Profile objects"""
     pretty_printed_student_id = SerializerMethodField()
     work_history = EmploymentSerializer(many=True)
+    education = EducationSerializer(many=True)
 
     def get_pretty_printed_student_id(self, obj):
         """helper method for the SerializerMethodField"""
@@ -69,16 +114,17 @@ class ProfileSerializer(ModelSerializer):
     def update(self, instance, validated_data):
         with transaction.atomic():
             for attr, value in validated_data.items():
-                if attr == 'work_history':
+                if attr == 'work_history' or attr == 'education':
                     continue
                 else:
                     setattr(instance, attr, value)
-
             instance.save()
             if 'work_history' in validated_data:
                 update_work_history(validated_data['work_history'], instance.id)
 
-        return instance
+            if 'education' in validated_data:
+                update_education(validated_data['education'], instance.id)
+            return instance
 
     class Meta:  # pylint: disable=missing-docstring
         model = Profile
@@ -106,6 +152,8 @@ class ProfileSerializer(ModelSerializer):
             'gender',
             'pretty_printed_student_id',
             'work_history',
+            'edx_level_of_education',
+            'education'
         )
         read_only_fields = (
             'filled_out',
