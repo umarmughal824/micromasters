@@ -22,8 +22,9 @@ if (!Object.entries) {
   entries.shim();
 }
 
-// requirement for dialog-polyfill
-import 'style!css!dialog-polyfill/dialog-polyfill.css';
+// material-ui requirement
+import injectTapEventPlugin from 'react-tap-event-plugin';
+injectTapEventPlugin();
 
 const store = configureStore();
 

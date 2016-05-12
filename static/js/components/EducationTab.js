@@ -14,7 +14,9 @@ import {
   closeEducationForm,
   clearProfileEdit
 } from '../actions';
-import { Grid, Cell, Switch, Dialog, DialogTitle, DialogContent, DialogActions, FABButton, Icon } from 'react-mdl';
+import { Grid, Cell, Switch, FABButton, Icon } from 'react-mdl';
+
+import Dialog from 'material-ui/Dialog';
 
 class EducationTab extends ProfileTab {
   constructor(props) {
@@ -179,46 +181,49 @@ class EducationTab extends ProfileTab {
 
     let keySet = (key) =>['education', educationDialog.educationIndex, key];
 
+    let actions = [
+      <Button key="save" type='button' onClick={()=>{this.saveEducationForm(EducationTab.validation);}}>Save</Button>,
+      <Button key="cancel" type='button' onClick={this.handleCloseDialog}>Cancel</Button>
+    ];
     return <Grid className="profile-tab-grid">
-      <Dialog open={educationDialog.openDialog} className="profile-form-dialog" onCancel={this.handleCloseDialog}>
-          <DialogTitle>{this.educationLevelLabels[educationDialog.degreeLevel]}</DialogTitle>
-          <DialogContent>
-            <Grid>
-             <Cell col={6}>
-               {this.boundTextField( keySet('field_of_study'), 'Field of Study')}
-              </Cell>
-              <Cell col={3}>
-                {this.boundMonthField(keySet('graduation_date'), 'Month')}
-              </Cell>
-              <Cell col={3}>
-                {this.boundYearField(keySet('graduation_date'), 'YYYY')}
-              </Cell>
-            </Grid>
-            <Grid>
-              <Cell col={6}>
-                {this.boundTextField(keySet('school_name'), 'School Name')}
-              </Cell>
-              <Cell col={6}>
-              </Cell>
-            </Grid>
-            <Grid>
-              <Cell col={4}>
-                {this.boundTextField(keySet('school_city'), 'City')}
-              </Cell>
-              <Cell col={4}>
-                {this.boundTextField(keySet('school_state_or_territory'), 'State')}
-              </Cell>
-              <Cell col={4}>
-                {this.boundSelectField(keySet('school_country'), 'Country', this.countryOptions)}
-              </Cell>
-            </Grid>
+      <Dialog
+        open={educationDialog.openDialog}
+        className="profile-form-dialog"
+        onRequestClose={this.handleCloseDialog}
+        title={this.educationLevelLabels[educationDialog.degreeLevel]}
+        actions={actions}
+      >
+        <Grid>
+          <Cell col={6}>
+            {this.boundTextField(keySet('field_of_study'), 'Field of Study')}
+          </Cell>
+          <Cell col={3}>
+            {this.boundMonthField(keySet('graduation_date'), 'Month')}
+          </Cell>
+          <Cell col={3}>
+            {this.boundYearField(keySet('graduation_date'), 'YYYY')}
+          </Cell>
+        </Grid>
+        <Grid>
+          <Cell col={6}>
+            {this.boundTextField(keySet('school_name'), 'School Name')}
+          </Cell>
+          <Cell col={6}>
+          </Cell>
+        </Grid>
+        <Grid>
+          <Cell col={4}>
+            {this.boundTextField(keySet('school_city'), 'City')}
+          </Cell>
+          <Cell col={4}>
+            {this.boundTextField(keySet('school_state_or_territory'), 'State')}
+          </Cell>
+          <Cell col={4}>
+            {this.boundSelectField(keySet('school_country'), 'Country', this.countryOptions)}
+          </Cell>
+        </Grid>
 
-          </DialogContent>
-          <DialogActions>
-            <Button type='button' onClick={()=>{this.saveEducationForm(EducationTab.validation);}}>Save</Button>
-            <Button type='button' onClick={this.handleCloseDialog}>Cancel</Button>
-          </DialogActions>
-        </Dialog>
+      </Dialog>
 
       {levelsGrid}
 
