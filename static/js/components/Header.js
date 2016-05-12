@@ -1,25 +1,15 @@
 import React from 'react';
 import LoginButton from '../containers/LoginButton';
 import { Navbar } from 'react-bootstrap';
-import Link from 'react-router/lib/Link';
 
 class Header extends React.Component {
   render () {
     const { empty } = this.props;
     let content;
     if (!empty) {
-      content = <div>
-        <ul className="nav navbar-toolbar navbar-left">
-          <li role="presentation">
-            <Link to="/dashboard">
-              Dashboard
-            </Link>
-          </li>
-        </ul>
-        <div className="nav-utility pull-right">
+      content = <div className="nav-utility pull-right">
           <LoginButton />
-        </div>
-      </div>;
+        </div>;
     }
 
     return (
