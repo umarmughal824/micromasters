@@ -2,12 +2,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import _ from 'lodash';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-} from 'react-mdl';
+import Dialog from 'material-ui/Dialog';
 
 import Header from '../components/Header';
 import {
@@ -21,10 +16,7 @@ import {
   updateDialogTitle,
   setDialogVisibility,
 } from '../actions/index';
-import {
-  validateProfileComplete,
-  doDialogPolyfill
-} from '../util/util';
+import { validateProfileComplete } from '../util/util';
 
 const TERMS_OF_SERVICE_REGEX = /\/terms_of_service\/?/;
 const PROFILE_REGEX = /^\/profile\/?[a-z]?/;
@@ -48,7 +40,6 @@ class App extends React.Component {
     this.fetchDashboard();
     this.requireTermsOfService();
     this.requireCompleteProfile();
-    doDialogPolyfill.call(this);
   }
 
   componentDidUpdate() {
@@ -118,21 +109,24 @@ class App extends React.Component {
     let text = _.get(ui, ['dialog', 'text']);
     let title = _.get(ui, ['dialog', 'title']);
     let close = () => dispatch(setDialogVisibility(false));
+    let actions = [
+      <div
+        role='button'
+        key="close"
+        onClick={close}
+        className="mdl-button mdl-js-button"
+      >
+        close
+      </div>
+    ];
     return (
-      <Dialog open={visible} onCancel={close}>
-        <DialogTitle>{title}</DialogTitle>
-        <DialogContent>
-          {text}
-        </DialogContent>
-        <DialogActions>
-          <div
-            role='button'
-            onClick={close}
-            className="mdl-button mdl-js-button"
-          >
-            close
-          </div>
-        </DialogActions>
+      <Dialog
+        open={visible}
+        onRequestClose={close}
+        title={title}
+        actions={actions}
+      >
+        {text !== undefined ? text : ""}
       </Dialog>
     );
   }

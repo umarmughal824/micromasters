@@ -6,7 +6,6 @@ import moment from 'moment';
 import Button from 'react-bootstrap/lib/Button';
 import striptags from 'striptags';
 import _ from 'lodash';
-import dialogPolyfill from 'dialog-polyfill';
 
 import PersonalTab from '../components/PersonalTab';
 import EmploymentTab from '../components/EmploymentTab';
@@ -279,13 +278,5 @@ export function makeStrippedHtml(textOrElement) {
     return striptags(container.innerHTML);
   } else {
     return striptags(textOrElement);
-  }
-}
-
-export function doDialogPolyfill () {
-  const node = ReactDOM.findDOMNode(this);
-  let dialogArray = [...node.querySelectorAll("dialog")];
-  for (let dialog of dialogArray) {
-    dialogPolyfill.registerDialog(dialog);
   }
 }

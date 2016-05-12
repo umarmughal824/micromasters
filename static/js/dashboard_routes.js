@@ -10,6 +10,8 @@ import EmploymentTab from './components/EmploymentTab';
 import PrivacyTab from './components/PrivacyTab';
 import EducationTab from './components/EducationTab';
 import TermsOfServicePage from './containers/TermsOfServicePage';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
 /**
  * Create the dashboard routes (the root React elements to be rendered into our container)
@@ -21,20 +23,22 @@ import TermsOfServicePage from './containers/TermsOfServicePage';
  */
 export function makeDashboardRoutes(browserHistory, store, onRouteUpdate) {
   return <div>
-    <Provider store={store}>
-      <Router history={browserHistory} onUpdate={onRouteUpdate}>
-        <Route path="/" component={App}>
-          <Route path="dashboard" component={DashboardPage} />
-          <Route path="profile" component={ProfilePage}>
-            <IndexRedirect to="personal" />
-            <Route path="personal" component={PersonalTab} />
-            <Route path="education" component={EducationTab}/>
-            <Route path="professional" component={EmploymentTab} />
-            <Route path="privacy" component={PrivacyTab} />
+    <MuiThemeProvider muiTheme={getMuiTheme()}>
+      <Provider store={store}>
+        <Router history={browserHistory} onUpdate={onRouteUpdate}>
+          <Route path="/" component={App}>
+            <Route path="dashboard" component={DashboardPage}/>
+            <Route path="profile" component={ProfilePage}>
+              <IndexRedirect to="personal"/>
+              <Route path="personal" component={PersonalTab}/>
+              <Route path="education" component={EducationTab}/>
+              <Route path="professional" component={EmploymentTab}/>
+              <Route path="privacy" component={PrivacyTab}/>
+            </Route>
+            <Route path="/terms_of_service" component={TermsOfServicePage}/>
           </Route>
-          <Route path="/terms_of_service" component={TermsOfServicePage} />
-        </Route>
-      </Router>
-    </Provider>
+        </Router>
+      </Provider>
+    </MuiThemeProvider>
   </div>;
 }
