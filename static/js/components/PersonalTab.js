@@ -1,5 +1,6 @@
 import React from 'react';
 import Button from 'react-mdl/lib/Button';
+import Grid, { Cell } from 'react-mdl/lib/Grid';
 
 import ProfileTab from "../util/ProfileTab";
 import { saveAndContinue } from "../util/profile_edit";
@@ -45,30 +46,34 @@ class PersonalTab extends ProfileTab {
   }
 
   render() {
-    return <div>
-      {this.boundTextField(["first_name"], "Given name")}<br />
-      {this.boundTextField(["last_name"], "Family name")}<br />
-      {this.boundTextField(["preferred_name"], "Preferred name")}<br />
-      {this.boundSelectField(['gender'], 'Gender', this.genderOptions)}<br />
-      {this.boundSelectField(
+    return <Grid className="profile-tab-grid">
+      <Cell col={4}>{this.boundTextField(["first_name"], "Given name")}</Cell><Cell col={8} />
+      <Cell col={4}>{this.boundTextField(["last_name"], "Family name")}</Cell><Cell col={8} />
+      <Cell col={4}>{this.boundTextField(["preferred_name"], "Preferred name")}</Cell><Cell col={8} />
+      <Cell col={4}>{this.boundSelectField(['gender'], 'Gender', this.genderOptions)}</Cell><Cell col={8} />
+      <Cell col={4}>{this.boundSelectField(
         ['preferred_language'],
         'Preferred language',
         this.languageOptions
-      )}<br />
-      <h4>Where do you live?</h4>
-      {this.boundTextField(['city'], 'City')}<br />
-      {this.boundStateSelectField(['state_or_territory'], ['country'], 'State or Territory')}<br />
-      {this.boundSelectField(['country'], 'Country', this.countryOptions)}<br />
-      <h4>Where were you born?</h4>
-      {this.boundTextField(['birth_city'], 'City')}<br />
-      {this.boundStateSelectField(['birth_state_or_territory'], ['birth_country'], 'State or Territory')}<br />
-      {this.boundSelectField(['birth_country'], 'Country', this.countryOptions)}<br />
-      {this.boundDateField(['date_of_birth'], 'Date of birth')}<br />
+      )}</Cell><Cell col={8} />
+      <Cell col={4}><h4>Where do you live?</h4></Cell><Cell col={8} />
+      <Cell col={4}>{this.boundTextField(['city'], 'City')}</Cell><Cell col={8} />
+      <Cell col={4}>
+        {this.boundStateSelectField(['state_or_territory'], ['country'], 'State or Territory')}
+      </Cell><Cell col={8} />
+      <Cell col={4}>{this.boundSelectField(['country'], 'Country', this.countryOptions)}</Cell><Cell col={8} />
+      <Cell col={4}><h4>Where were you born?</h4></Cell><Cell col={8} />
+      <Cell col={4}>{this.boundTextField(['birth_city'], 'City')}</Cell><Cell col={8} />
+      <Cell col={4}>
+        {this.boundStateSelectField(['birth_state_or_territory'], ['birth_country'], 'State or Territory')}
+      </Cell><Cell col={8} />
+      <Cell col={4}>{this.boundSelectField(['birth_country'], 'Country', this.countryOptions)}</Cell><Cell col={8} />
+      <Cell col={4}>{this.boundDateField(['date_of_birth'], 'Date of birth')}</Cell><Cell col={8} />
 
       <Button raised onClick={this.saveAndContinue}>
         Save and continue
       </Button>
-    </div>;
+    </Grid>;
   }
 }
 
