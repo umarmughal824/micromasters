@@ -168,20 +168,6 @@ describe('Profile Editing utility functions', () => {
       assert.equal(selectField.props.searchText, 'Female');
     });
 
-    it('should keep valid state when onBlur is called', () => {
-      that.props.profile.gender = 'f';
-      that.props.profile.gender_edit = 'text not matching anything';
-      selectField = boundSelectField.call(
-        that,
-        ['gender'],
-        "Gender",
-        genderOptions
-      );
-      selectField.props.onBlur();
-
-      assert.equal(that.props.profile.gender, 'f');
-    });
-
     it('should update the edit state when onUpdateInput is called', () => {
       selectField = boundSelectField.call(
         that,
