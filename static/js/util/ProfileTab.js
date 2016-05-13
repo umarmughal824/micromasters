@@ -5,6 +5,7 @@ import {
   boundDateField,
   boundTextField,
   boundSelectField,
+  boundMonthYearField,
   editProfileObjectArray,
   boundStateSelectField,
 } from './profile_edit';
@@ -22,6 +23,7 @@ class ProfileTab extends React.Component {
     this.boundSelectField = boundSelectField.bind(this);
     this.boundStateSelectField = boundStateSelectField.bind(this);
     this.boundDateField = boundDateField.bind(this);
+    this.boundMonthYearField = boundMonthYearField.bind(this);
     this.editProfileObjectArray = editProfileObjectArray.bind(this);
 
     // options we set (for select components)

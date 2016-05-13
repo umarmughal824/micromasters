@@ -17,6 +17,8 @@ import {
   validateProfile,
   validateProfileComplete,
   makeStrippedHtml,
+  validateMonth,
+  validateYear,
 } from '../util/util';
 import PersonalTab from '../components/PersonalTab';
 import EmploymentTab from '../components/EmploymentTab';
@@ -383,6 +385,58 @@ describe('utility functions', () => {
         text: "Please complete your work history information.",
       }];
       assert.deepEqual(validateProfileComplete(profile), expectation);
+    });
+  });
+
+  describe('validateMonth', () => {
+    it('handles months starting with 0 without treating as octal', () => {
+      assert.equal(9, validateMonth("09"));
+    });
+    it('converts strings to numbers', () => {
+      assert.equal(3, validateMonth("3"));
+    });
+    it('returns undefined for invalid months', () => {
+      assert.equal(undefined, validateMonth("-3"));
+      assert.equal(undefined, validateMonth("0"));
+      assert.equal(1, validateMonth("1"));
+      assert.equal(12, validateMonth("12"));
+      assert.equal(undefined, validateMonth("13"));
+    });
+    it('returns undefined if the text is not an integer number', () => {
+      assert.equal(undefined, validateMonth("two"));
+      assert.equal(undefined, validateMonth(""));
+      assert.equal(undefined, validateMonth(null));
+      assert.equal(undefined, validateMonth({}));
+      assert.equal(undefined, validateMonth(undefined));
+      assert.equal(undefined, validateMonth("2e0"));
+      assert.equal(undefined, validateMonth("3-4"));
+      assert.equal(undefined, validateMonth("3.4"));
+    });
+  });
+
+  describe('validateYear', () => {
+    it('handles years starting with 0 without treating as octal', () => {
+      assert.equal(999, validateYear("0999"));
+    });
+    it('converts strings to numbers', () => {
+      assert.equal(3, validateYear("3"));
+    });
+    it('returns undefined for invalid years', () => {
+      assert.equal(undefined, validateYear("-3"));
+      assert.equal(undefined, validateYear("0"));
+      assert.equal(1, validateYear("1"));
+      assert.equal(9999, validateYear("9999"));
+      assert.equal(undefined, validateYear("10000"));
+    });
+    it('returns undefined if the text is not an integer number', () => {
+      assert.equal(undefined, validateYear("two"));
+      assert.equal(undefined, validateYear(""));
+      assert.equal(undefined, validateYear(null));
+      assert.equal(undefined, validateYear({}));
+      assert.equal(undefined, validateYear(undefined));
+      assert.equal(undefined, validateYear("2e0"));
+      assert.equal(undefined, validateYear("3-4"));
+      assert.equal(undefined, validateYear("3.4"));
     });
   });
 });
