@@ -5,29 +5,29 @@ import ReactDOM from 'react-dom';
 import assert from 'assert';
 import _ from 'lodash';
 
-import { CLEAR_DASHBOARD, CLEAR_PROFILE, } from '../actions';
 import {
-  UPDATE_DIALOG_TEXT,
-  UPDATE_DIALOG_TITLE,
-  SET_DIALOG_VISIBILITY,
+  CLEAR_DASHBOARD,
+  CLEAR_PROFILE,
+  START_PROFILE_EDIT,
+  UPDATE_PROFILE_VALIDATION,
+} from '../actions';
+import {
   CLEAR_UI,
 } from '../actions/ui';
-
 import { USER_PROFILE_RESPONSE } from '../constants';
 import IntegrationTestHelper from '../util/integration_test_helper';
 
 describe('App', () => {
   let listenForActions, renderComponent, helper;
-  let dialogActions;
+  let editProfileActions;
 
   beforeEach(() => {
     helper = new IntegrationTestHelper();
     listenForActions = helper.listenForActions.bind(helper);
     renderComponent = helper.renderComponent.bind(helper);
-    dialogActions = [
-      UPDATE_DIALOG_TEXT,
-      UPDATE_DIALOG_TITLE,
-      SET_DIALOG_VISIBILITY,
+    editProfileActions = [
+      START_PROFILE_EDIT,
+      UPDATE_PROFILE_VALIDATION
     ];
   });
 
@@ -52,7 +52,7 @@ describe('App', () => {
       });
       helper.profileGetStub.returns(Promise.resolve(response));
 
-      renderComponent("/dashboard", dialogActions).then(() => {
+      renderComponent("/dashboard", editProfileActions).then(() => {
         assert.equal(helper.currentLocation.pathname, "/profile/personal");
         done();
       });
@@ -75,8 +75,7 @@ describe('App', () => {
       profile.work_history[1].city = "";
 
       helper.profileGetStub.returns(Promise.resolve(profile));
-
-      renderComponent("/dashboard", dialogActions).then(() => {
+      renderComponent("/dashboard", editProfileActions).then(() => {
         assert.equal(helper.currentLocation.pathname, "/profile/professional");
         done();
       });
@@ -101,7 +100,7 @@ describe('App', () => {
 
       helper.profileGetStub.returns(Promise.resolve(profile));
 
-      renderComponent("/dashboard", dialogActions).then(() => {
+      renderComponent("/dashboard", editProfileActions).then(() => {
         assert.equal(helper.currentLocation.pathname, "/profile/professional");
         done();
       });
@@ -113,66 +112,10 @@ describe('App', () => {
       });
       helper.profileGetStub.returns(Promise.resolve(response));
 
-      renderComponent("/dashboard", dialogActions).then(() => {
+      renderComponent("/dashboard", editProfileActions).then(() => {
         assert.equal(helper.currentLocation.pathname, "/profile/privacy");
         done();
       });
     });
-
-    it('sets a dialog with appropriate text for personal info', done => {
-      let response = Object.assign({}, USER_PROFILE_RESPONSE, {
-        first_name: undefined
-      });
-      helper.profileGetStub.returns(Promise.resolve(response));
-
-      renderComponent("/dashboard", dialogActions).then(() => {
-        let state = helper.store.getState();
-        assert.deepEqual(state.ui.dialog, {
-          visible: true,
-          title: "Personal Info",
-          text: "Please complete your personal information.",
-        });
-        assert.equal(helper.currentLocation.pathname, "/profile/personal");
-        done();
-      });
-    });
-
-    it('sets a dialog with appropriate text for professional info', done => {
-      let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
-      profile.work_history[1].city = undefined;
-      profile.currently_employed = "yes";
-
-      helper.profileGetStub.returns(Promise.resolve(profile));
-
-      renderComponent("/dashboard", dialogActions).then(() => {
-        let state = helper.store.getState();
-        assert.deepEqual(state.ui.dialog, {
-          visible: true,
-          title: "Professional Info",
-          text: "Please complete your work history information.",
-        });
-        assert.equal(helper.currentLocation.pathname, "/profile/professional");
-        done();
-      });
-    });
-
-    it('sets a dialog with appropriate text for privacy info', done => {
-      let response = Object.assign({}, USER_PROFILE_RESPONSE, {
-        account_privacy: ''
-      });
-      helper.profileGetStub.returns(Promise.resolve(response));
-
-      renderComponent("/dashboard", dialogActions).then(() => {
-        let state = helper.store.getState();
-        assert.deepEqual(state.ui.dialog, {
-          visible: true,
-          title: "Privacy Settings",
-          text: "Please complete the privacy settings.",
-        });
-        assert.equal(helper.currentLocation.pathname, "/profile/privacy");
-        done();
-      });
-    });
-
   });
 });
