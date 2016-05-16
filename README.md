@@ -1,58 +1,41 @@
 # Micromasters
 Portal for learners and course teams to access MITx Micromasters programs
 
-## Getting Started
+## Major Dependencies
+- Docker
+  - OSX recommended install method: [Download from Docker website](https://docs.docker.com/mac/)
+- docker-compose
+  - Recommended install: pip `pip install docker-compose`
+- Virtualbox (https://www.virtualbox.org/wiki/Downloads)
 
-Although you can run Micromasters locally with a default sqlite database after
-installing the ``requirements.txt`` file, the recommended way is to 
-use [Docker](https://www.docker.io). Install Docker, then install 
-``docker-compose`` and run the app: 
+## (OSX only) Getting your machine Docker-ready
 
-    pip install docker-compose 
-    docker-compose up
+#### Create your docker container:
 
-### (OSX only) Create your docker machine:
-
-    docker-machine create default
-    docker-machine start default
-    docker-machine env default
-    eval "$(docker-machine env default)"
-
-These commands create a Docker container named ``default``, start the
+The following commands create a Docker machine named ``mm``, start the
 container, and configure environment variables to facilitate communication
-with the ``edX`` instance.
+with the edX instance.
 
+    docker-machine create --driver virtualbox mm
+    docker-machine start mm
+    # 'docker-machine env (machine)' prints export commands for important environment variables
+    eval "$(docker-machine env mm)"
 
-This will set up a near production-ready containerized development 
-environment that runs migrations, with the Django development server 
-running on port ``8079``.
+#### Enable file syncing between the host machine and Docker:
 
-To run one-off commands, like shell, you can run:
+Due to file notification issues using Docker in OSX, development is more
+efficient if you install [docker-osx-dev](https://github.com/brikis98/docker-osx-dev).
+This synchronizes host file-system changes with the Docker container.
 
-    docker-compose run web python manage.py shell
+First, set up ``docker-osx-dev`` via shell script.
 
-or to create root user:
+    . ./osx_docker_dev_setup.sh
 
-    docker-compose run web python manage.py createsuperuser
-
-
-## For OS X Development
-
-Due to issues using Docker in OSX, development is more efficient if you
-install [docker-osx-dev](https://github.com/brikis98/docker-osx-dev).
-docker-osx-dev synchronizes host file-system changes with the Docker
-container. If you have [``homebrew``](http://brew.sh/) installed, you can 
-install ``docker-osx-dev`` by typing ``make`` in the root of the Micromasters
-project directory. The make file will install or update Docker using Homebrew
-and go on to install ``docker-osx-dev``.
-
-Subsequently, before you run the application with ``docker-compose up``, 
-you would run:
+Subsequently, before you run the application with ``docker-compose up``,
+you would run this command in a separate terminal tab (assumes machine
+name ``mm``):
   
-    docker-osx-dev -m default -s ./ --ignore-file '.rsync-ignore'
-
-(Assuming your Docker VM is called ``default``, and your current working
-directory is the root of the ``micromasters`` source directory).
+    docker-osx-dev -m mm -s ./ --ignore-file '.rsync-ignore'
 
 This starts a process that monitors the file system for changes. On startup
 you may receive this error:
@@ -68,96 +51,120 @@ you may receive this error:
 
 Answer ``yes``.
 
-## Configuration and Start-up
+## Running edX devstack locally _(optional, but recommended)_
 
-Create a user who has permission to view the course:
+Micromasters can work with a live instance of edX, but it's recommended that
+you get it running locally. It's obviously more configurable that way, and you'll
+likely need to run it locally for other projects in the future.
 
-    docker-compose run web python manage.py createsuperuser
+#### 1) Install edX
+Run through the
+[instructions provided by edX](https://edx-installing-configuring-and-running.readthedocs.io/en/latest/installation/devstack/install_devstack.html)
+up to and including the **LMS Workflow** section. Note that this section mentions
+some helpful dummy accounts that edX devstack comes preloaded with (eg: staff@example.com).
 
-Start the machine:
+#### 2) Run the machine and SSH into it
 
-    docker-compose up
-
-(OSX only) visit: http://192.168.99.100:8079/
-
-Note: Your IP address may vary depending on what address Docker 
-assigns to your container.  If the IP address above doesn't work, enter 
-this command:
-
-    docker-machine ls
-
-The command lists the containers and their URLs.  Your container's URL
-will be something like ``tcp://192.168.99.100:2376``.  Micromasters will 
-run at that URL, but on port ``8079``.  So, for this example, Micromasters 
-will run at ``192.168.99.100:8079``.
-
-## Configuring edX devstack
-
-These instruction presume that you're running Micromasters in a development 
-environment that includes a local edX devstack.  If you don't have a edX
-devstack installed navigate to these
-[instructions](https://openedx.atlassian.net/wiki/display/OpenOPS/Running+Devstack)
-that walk you through the installation.  We'll wait.
-
-### Create a superuser 
-   
-You need a user with superuser privileges to create the edX client for 
-Micromasters.  Start up the edX devstack and ssh into the ``edxapp`` user.
-
+    # Start the VM
     vagrant up
+    # Once that's done, ssh into the running VM
     vagrant ssh
+    # Switch to the edxapp account within SSH session
     sudo su edxapp
 
-    edxapp@precise64:~/edx-platform$ pip install ipython
+Switching to the edxapp account sources the edxapp environment and sets the
+current working directory to the edx-platform repository. If you get the error
+_"Unknown task: devstack, the working directory has not been updated properly"_,
+simply run ``cd /edx/app/edxapp/edx-platform`` and re-run the command.
 
-Open an iPython shell and execute these commands:
+#### 3) Set up a user with superuser permissions
 
-      edxapp@precise64:~/edx-platform$ python manage.py lms --settings=devstack shell
-      Python 2.7.10 (default, Jun 29 2015, 22:38:23)
-      Type "copyright", "credits" or "license" for more information.
+Once in the VM, creating a superuser/setting superuser permissions can be done
+in Django admin or in a shell. It's preferable to do it in Django admin as you'll
+need to use Django admin for the next step anyway.
 
-      IPython 4.1.2 -- An enhanced Interactive Python.
-      ?         -> Introduction and overview of IPython's features.
-      %quickref -> Quick reference.
-      help      -> Python's own help system.
-      object?   -> Details about 'object', use 'object??' for extra details.
+- **In Django admin**
 
-      In [1]: from django.contrib.auth.models import User
+    Run the server (``paver devstack --fast lms``) and navigate to Django admin
+    (eg: http://192.168.33.10:8000/admin). In the **Authentication and Authorization**
+    section, select a **User**, or add one then select it. In the **Permissions**
+    section, check the **Superuser status** box and save.
 
-      In [2]: User.objects.get(username='staff')
-      Out[2]: <User: staff>
+- **In a Python shell**
 
-      In [3]: staff=_
+        # Kick off an interactive shell
+        python manage.py lms --settings=devstack shell
 
-      In [4]: staff.is_superuser=True
+        ### RUN THESE WITHIN THE SHELL ###
+        from django.contrib.auth.models import User
+        # We'll update the dummy user 'staff' to have superuser permissions
+        user = User.objects.get(username='staff')
+        user.is_superuser=True
+        user.save()
 
-      In [5]: staff.save()
+#### 4) Add an OAuth client
 
-      In [6]:
-      Do you really want to exit ([y]/n)? y
+Run Django admin (see "In Django admin" section from step 2), navigate to the
+OAuth2 clients section (eg: http://192.168.33.10:8000/admin/oauth2/client/), and add a
+new client. Fill in the values as follows:
 
-Start the LMS:
+- **User**: Use the lookup (magnifying glass) to find your superuser
+- **Name**: Anything you want. Something like 'micromasters-local'
+- **Url**: The URL where Micromasters will be running. If you're running it via
+Docker, run ``docker-machine ip`` from the host machine to get the container IP.
+Micromasters runs on port ``8079`` by default, so this value should be something
+like ``http://192.168.99.100:8079``
+- **Redirect uri**: Your **Url** value with "/complete/edxorg/" at the end
 
-    paver devstack lms
+#### 5) Copy relevant values to use in the Micromasters .env file
 
-Navigate to ``localhost:8000/admin`` and login with the superuser account.
-Scroll down to the "Oauth2" section and open "Clients".
-Create a new client
-    name - your choice of name, mine is ``micromasters-local``.
-    Url - the URL of your local Micromasters instance, a URL on port ``8087``.
-    Redirect url: the same URL, but with ``/complete/edxorg/`` at the end. 
-    Client type: Chose "Confidential (Web applications)"
+The Micromasters codebase contains a ``.env.sample`` file which will be used as
+a template to create your ``.env`` file. For Micromasters to work, it needs 3 values:
 
-Make a note of the Client id and the Client secret; you need them to
-configure Micromasters.  Don't forget to save your new client.
+- ``EDXORG_BASE_URL``
 
-Return to Micromasters and, the project root directory, copy the 
-``.env.sample`` file to ``.env`` and edit these values:
-    
-    STATUS_TOKEN: Can be anything. STATUS_TOKEN is not used in local development.
-    EDXORG_BASE_URL: The URL of your local edX instance. Something like: ``http://192.168.33.10:8000``
-    EDXORG_CLIENT_ID: The ``Client id`` from the edX Oauth2 client.
-    EDXORG_CLIENT_SECRET: The ``Client secret`` from the edX Oauth2 client.
+    This value _should_ be ``http://192.168.33.10:8000``. The Vagrant VM IP is hard-coded
+    in the Vagrantfile, and it's unlikely that edX will change that. The LMS server runs
+    on port ``8000`` by default.
+- ``EDXORG_CLIENT_ID`` and ``EDXORG_CLIENT_SECRET``
 
+    These values can be found in Django admin OAuth client section discussed above.
+    **Client id:** and **Client secret:** values should be auto-generated for
+    your new client. Use those values for the corresponding ``EDXORG_``
+    variables in the ``.env`` file
+
+## Docker Container Configuration and Start-up
+
+First, create a ``.env`` file from the sample in the codebases:
+
+    cp .env.sample .env
+
+Set the ``EDXORG_BASE_URL``, ``EDXORG_CLIENT_ID``, and ``EDXORG_CLIENT_SECRET``
+variables in the ``.env`` file appropriately.
+
+For first-time container start-up, start it with a full build:
+
+    docker-compose up --build
+
+In another terminal tab, navigate the the Micromasters directory
+and add a superuser in the now-running Docker container:
+
+    docker-compose run web python3 manage.py createsuperuser
+
+Starting the container after this can be done without the ``--build``
+param: ``docker-compose up``
+
+You should now be able to do the following:
+
+1. Visit Micromasters in your browser on port `8079`. _(OSX Only)_ Docker auto-assigns
+ the container IP. Run ``docker-machine ip`` to see it. Your Micromasters URL will
+ be something like this: ``192.168.99.100:8079``.
+1. Click "Sign in with edX.org" and sign in by authorizing an edX client. If you're
+ running edX locally, this will be the client you created in the steps above.
+
+As shown above, manage commands can be executed on the Docker-contained
+Micromasters app. For example, you can run a shell with the following command:
+
+    docker-compose run web python3 manage.py shell
 
 
