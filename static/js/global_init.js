@@ -7,3 +7,6 @@ global.SETTINGS = {
 
 // Make sure window and document are available for testing
 require('jsdom-global')();
+
+// required for interacting with react-mdl components
+require('react-mdl/extra/material.js');

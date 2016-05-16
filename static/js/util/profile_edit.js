@@ -340,8 +340,9 @@ export function boundMonthYearField(keySet, label) {
  * to retrieve keys for validation of nested fields (e.g. profile.work_history)
  *
  * @param nestedValidationCallback {func} If present, a function to retrieve validation fields
+ * @param finalStep {bool} If true, this is the last tab in the profile
  */
-export function saveAndContinue(nestedValidationCallback) {
+export function saveAndContinue(nestedValidationCallback, finalStep) {
   const {
     saveProfile,
     profile,
@@ -356,5 +357,13 @@ export function saveAndContinue(nestedValidationCallback) {
     fields = requiredFields;
   }
 
-  return saveProfile(profile, fields, validationMessages);
+  let clone = Object.assign({}, profile, {
+    filled_out: !!finalStep
+  });
+  if (finalStep) {
+    // user has also seen email consent message at this point
+    clone.email_optin = true;
+  }
+
+  return saveProfile(clone, fields, validationMessages);
 }

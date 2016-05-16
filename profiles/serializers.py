@@ -155,9 +155,6 @@ class ProfileSerializer(ModelSerializer):
             'edx_level_of_education',
             'education'
         )
-        read_only_fields = (
-            'filled_out',
-        )
 
 
 class ProfileLimitedSerializer(ModelSerializer):
