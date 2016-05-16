@@ -17,7 +17,7 @@ class CourseRunInline(admin.StackedInline):
 
 class CourseAdmin(admin.ModelAdmin):
     """ModelAdmin for Courses"""
-    list_display = ('position_in_program', 'title',)
+    list_display = ('title', 'position_in_program',)
     list_filter = ('program__live',)
     inlines = [CourseRunInline]
     ordering = ('position_in_program',)
@@ -25,7 +25,7 @@ class CourseAdmin(admin.ModelAdmin):
 
 class CourseRunAdmin(admin.ModelAdmin):
     """ModelAdmin for Courses"""
-    list_display = ('title', 'program',)
+    list_display = ('title', 'edx_course_key', 'program',)
     list_filter = ('course__program__live',)
 
     def program(self, run):  # pylint: disable=no-self-use
