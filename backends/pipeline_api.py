@@ -2,6 +2,7 @@
 APIs for extending the python social auth pipeline
 """
 import logging
+from datetime import datetime
 from urllib.parse import urljoin
 
 from profiles.models import Profile
@@ -115,3 +116,18 @@ def update_from_linkedin(backend, user, response, *args, **kwargs):   # pylint: 
 
     user_profile.linkedin = response
     user_profile.save()
+
+
+def set_last_update(details, *args, **kwargs):  # pylint: disable=unused-argument
+    """
+    Pipeline function to add extra information about when the social auth
+    profile has been updated.
+
+    Args:
+        details (dict): dictionary of informations about the user
+
+    Returns:
+        dict: updated details dictionary
+    """
+    details['updated_at'] = datetime.utcnow().timestamp()
+    return details

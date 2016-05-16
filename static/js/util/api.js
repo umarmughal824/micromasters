@@ -37,11 +37,15 @@ function csrfSafeMethod(method) {
  *
  * @param {string} input URL of fetch
  * @param {Object} init Settings to pass to fetch
+ * @param {bool} loginOnError force login on http errors
  * @returns {Promise} The promise with JSON of the response
  */
-function fetchJSONWithCSRF(input, init) {
+function fetchJSONWithCSRF(input, init, loginOnError) {
   if (init === undefined) {
     init = {};
+  }
+  if (loginOnError === undefined) {
+    loginOnError = false;
   }
   init.headers = init.headers || {};
   _.defaults(init.headers, {
@@ -62,6 +66,13 @@ function fetchJSONWithCSRF(input, init) {
     // Also note that text is a promise here, not a string
     let text = response.text();
 
+    // For 400 and 401 errors, force login
+    // the 400 error comes from edX in case there are problems with the refresh
+    // token because the data stored locally is wrong and the solution is only
+    // to force a new login
+    if (loginOnError === true && (response.status === 400 || response.status === 401)) {
+      window.location = '/login/edxorg/';
+    }
     // For non 2xx status codes reject the promise
     if (response.status < 200 || response.status >= 300) {
       return Promise.reject(text);
@@ -88,5 +99,5 @@ export function patchUserProfile(username, profile) {
 }
 
 export function getDashboard() {
-  return fetchJSONWithCSRF('/api/v0/dashboard/');
+  return fetchJSONWithCSRF('/api/v0/dashboard/', {}, true);
 }
