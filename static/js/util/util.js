@@ -50,8 +50,8 @@ export function makeCourseStatusDisplay(course, now = moment()) {
     courseOrRun = course.runs[0];
   }
 
-  let courseUpgradeUrl = `${SETTINGS.edx_base_url}course_modes/choose/${courseOrRun.course_id}/`;
-  let courseInfoUrl = `${SETTINGS.edx_base_url}courses/${courseOrRun.course_id}/info`;
+  let courseUpgradeUrl = `${SETTINGS.edx_base_url}/course_modes/choose/${courseOrRun.course_id}/`;
+  let courseInfoUrl = `${SETTINGS.edx_base_url}/courses/${courseOrRun.course_id}/about`;
 
   switch (courseOrRun.status) {
   case STATUS_PASSED:
