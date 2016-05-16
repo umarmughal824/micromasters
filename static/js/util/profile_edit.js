@@ -115,13 +115,6 @@ export function boundSelectField(keySet, label, options) {
     _.set(clone, editKeySet, searchText);
     updateProfile(clone);
   };
-  let onBlur = () => {
-    // clear the edit value when we lose focus. In its place we will display
-    // the selected option label if one is selected, or an empty string
-    let clone = _.cloneDeep(profile);
-    _.set(clone, editKeySet, undefined);
-    updateProfile(clone);
-  };
 
   let convertOption = option => ({
     text: option.label,
@@ -153,7 +146,6 @@ export function boundSelectField(keySet, label, options) {
       fullWidth={true}
       onNewRequest={onNewRequest}
       onUpdateInput={onUpdateInput}
-      onBlur={onBlur}
       errorText={_.get(errors, keySet)}
     />
   );
