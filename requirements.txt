@@ -1,4 +1,4 @@
-Django==1.9.4
+Django==1.9.6
 PyYAML==3.11
 boto==2.39.0
 dj-database-url==0.3.0
