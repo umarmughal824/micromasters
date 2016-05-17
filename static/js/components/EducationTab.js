@@ -210,13 +210,13 @@ class EducationTab extends ProfileTab {
         </Grid>
         <Grid>
           <Cell col={4}>
-            {this.boundTextField(keySet('school_city'), 'City')}
+            {this.boundSelectField(keySet('school_country'), 'Country', this.countryOptions)}
           </Cell>
           <Cell col={4}>
             {this.boundTextField(keySet('school_state_or_territory'), 'State')}
           </Cell>
           <Cell col={4}>
-            {this.boundSelectField(keySet('school_country'), 'Country', this.countryOptions)}
+            {this.boundTextField(keySet('school_city'), 'City')}
           </Cell>
         </Grid>
       </Dialog>

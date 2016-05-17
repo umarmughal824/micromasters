@@ -60,17 +60,17 @@ class PersonalTab extends ProfileTab {
         this.languageOptions
       )}</Cell><Cell col={8} />
       <Cell col={4}><h4>Where do you live?</h4></Cell><Cell col={8} />
-      <Cell col={4}>{this.boundTextField(['city'], 'City')}</Cell><Cell col={8} />
+      <Cell col={4}>{this.boundSelectField(['country'], 'Country', this.countryOptions)}</Cell><Cell col={8} />
       <Cell col={4}>
         {this.boundStateSelectField(['state_or_territory'], ['country'], 'State or Territory')}
       </Cell><Cell col={8} />
-      <Cell col={4}>{this.boundSelectField(['country'], 'Country', this.countryOptions)}</Cell><Cell col={8} />
+      <Cell col={4}>{this.boundTextField(['city'], 'City')}</Cell><Cell col={8} />
       <Cell col={4}><h4>Where were you born?</h4></Cell><Cell col={8} />
-      <Cell col={4}>{this.boundTextField(['birth_city'], 'City')}</Cell><Cell col={8} />
+      <Cell col={4}>{this.boundSelectField(['birth_country'], 'Country', this.countryOptions)}</Cell><Cell col={8} />
       <Cell col={4}>
         {this.boundStateSelectField(['birth_state_or_territory'], ['birth_country'], 'State or Territory')}
       </Cell><Cell col={8} />
-      <Cell col={4}>{this.boundSelectField(['birth_country'], 'Country', this.countryOptions)}</Cell><Cell col={8} />
+      <Cell col={4}>{this.boundTextField(['birth_city'], 'City')}</Cell><Cell col={8} />
       <Cell col={4}>{this.boundDateField(['date_of_birth'], 'Date of birth')}</Cell><Cell col={8} />
 
       <Button raised onClick={this.saveAndContinue}>
