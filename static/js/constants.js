@@ -1,3 +1,9 @@
+export const HIGH_SCHOOL = 'hs';
+export const ASSOCIATE = 'a';
+export const BACHELORS = 'b';
+export const MASTERS = 'm';
+export const DOCTORATE = 'p';
+
 export const USER_PROFILE_RESPONSE = {
   "filled_out": false,
   "agreed_to_terms_of_service": true,
@@ -20,7 +26,47 @@ export const USER_PROFILE_RESPONSE = {
   "date_of_birth": '1984-04-13',
   "preferred_language": 'en',
   "gender": "f",
-  "pretty_printed_student_id": "MMM000011"
+  "pretty_printed_student_id": "MMM000011",
+  "work_history": [{
+    "id": 1,
+    "city": "Cambridge",
+    "state_or_territory": "US-MA",
+    "country": "US",
+    "company_name": "MIT",
+    "position": "Software Developer",
+    "industry": "Education",
+    "start_date": "1982-02-02",
+    "end_date": "7654-03-21"
+  }, {
+    "id": 2,
+    "city": "New York",
+    "state_or_territory": "US-NY",
+    "country": "US",
+    "company_name": "Planet Express",
+    "position": "Delivery",
+    "industry": "Shipping",
+    "start_date": "3000-01-01",
+    "end_date": "4000-01-01"
+  }],
+  "education": [{
+    "id": 1,
+    "degree_name": HIGH_SCHOOL,
+    "graduation_date": "2013-05-01",
+    "field_of_study": "Computer Science",
+    "school_name": "MIT",
+    "school_city": "Cambridge",
+    "school_state_or_territory": "US-MA",
+    "school_country": "US"
+  }, {
+    "id": 2,
+    "degree_name": BACHELORS,
+    "graduation_date": "1975-12-01",
+    "field_of_study": "Philosophy",
+    "school_name": "Harvard",
+    "school_city": "Cambridge",
+    "school_state_or_territory": "US-MA",
+    "school_country": "US"
+  }]
 };
 
 export const STATUS_PASSED = 'passed';
@@ -115,11 +161,5 @@ export const DASHBOARD_RESPONSE = [
     "id": 3
   },
 ];
-
-export const HIGH_SCHOOL = 'hs';
-export const ASSOCIATE = 'a';
-export const BACHELORS = 'b';
-export const MASTERS = 'm';
-export const DOCTORATE = 'p';
 
 export const DATE_FORMAT = 'YYYY-MM-DD';

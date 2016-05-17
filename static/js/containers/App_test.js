@@ -3,6 +3,7 @@ import '../global_init';
 
 import ReactDOM from 'react-dom';
 import assert from 'assert';
+import _ from 'lodash';
 
 import { CLEAR_DASHBOARD, CLEAR_PROFILE, } from '../actions';
 import {
@@ -14,7 +15,6 @@ import {
 
 import { USER_PROFILE_RESPONSE } from '../constants';
 import IntegrationTestHelper from '../util/integration_test_helper';
-import EmploymentTab from '../components/EmploymentTab';
 
 describe('App', () => {
   let listenForActions, renderComponent, helper;
@@ -59,16 +59,10 @@ describe('App', () => {
     });
 
     it('redirects to /profile/professional if a field is missing there', done => {
-      // USER_PROFILE_RESPONSE doesn't have `current_employed`
-      let workHistory = {};
-      EmploymentTab.nestedValidationKeys.forEach( k => {
-        workHistory[k] = k === "city" ? "" : "filled in";
-      });
+      let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
+      profile.work_history[1].city = "";
 
-      let response = Object.assign({}, USER_PROFILE_RESPONSE, {
-        work_history: [workHistory]
-      });
-      helper.profileGetStub.returns(Promise.resolve(response));
+      helper.profileGetStub.returns(Promise.resolve(profile));
 
       renderComponent("/dashboard", dialogActions).then(() => {
         assert.equal(helper.currentLocation.pathname, "/profile/professional");
@@ -89,15 +83,11 @@ describe('App', () => {
     });
 
     it("checks work_history if currently_employed = 'yes'", done => {
-      let workHistory = {};
-      EmploymentTab.nestedValidationKeys.forEach( k => {
-        workHistory[k] = k === "city" ? undefined : "filled in";
-      });
-      let response = Object.assign({}, USER_PROFILE_RESPONSE, {
-        currently_employed: "yes",
-        work_history: [workHistory]
-      });
-      helper.profileGetStub.returns(Promise.resolve(response));
+      let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
+      profile.work_history[1].city = "";
+      profile.currently_employed = "yes";
+
+      helper.profileGetStub.returns(Promise.resolve(profile));
 
       renderComponent("/dashboard", dialogActions).then(() => {
         assert.equal(helper.currentLocation.pathname, "/profile/professional");
@@ -136,15 +126,11 @@ describe('App', () => {
     });
 
     it('sets a dialog with appropriate text for professional info', done => {
-      let workHistory = {};
-      EmploymentTab.nestedValidationKeys.forEach( k => {
-        workHistory[k] = k === "city" ? undefined : "filled in";
-      });
-      let response = Object.assign({}, USER_PROFILE_RESPONSE, {
-        currently_employed: "yes",
-        work_history: [workHistory]
-      });
-      helper.profileGetStub.returns(Promise.resolve(response));
+      let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
+      profile.work_history[1].city = undefined;
+      profile.currently_employed = "yes";
+
+      helper.profileGetStub.returns(Promise.resolve(profile));
 
       renderComponent("/dashboard", dialogActions).then(() => {
         let state = helper.store.getState();
