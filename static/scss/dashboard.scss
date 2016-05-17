@@ -1,4 +1,4 @@
-.validation-wrapper {
+c.validation-wrapper {
   padding-bottom: 10px;
 }
 .validation-error-text {
@@ -6,8 +6,6 @@
   font-size: smaller;
 }
 .main-content {
-  @include outer-container;
-
   padding: 20px 0px;
 
   .card {
@@ -18,9 +16,7 @@
       background-color: darkslategrey;
       background-image: url(/static/images/mit-stata-center.png);
       background-position: 50% 50%;
-      @include span-columns(12);
       .card-image-box {
-        @include span-columns(2);
         min-width: 190px;
         height: 220px;
         padding-top: 40px;
@@ -38,7 +34,6 @@
         line-height: 35px;
         height: 100px;
         font-weight: 400;
-        @include span-columns(5);
 
         .card-student-id {
           font-size: 18px;
@@ -53,36 +48,61 @@
       font-size: x-large;
       color: #b34a4c;
       font-weight: bold;
-      @include span-columns(12);
     }
 
     .card-copy {
-      @include outer-container;
       padding: 25px;
     }
   }
 }
 
-.clear-float {
-  clear: both;
-}
-
 .course-list {
-  @include outer-container;
-  @include span-columns(8);
   border: 1px solid grey;
   margin: 10px 0;
 
-  ul {
-    @include span-columns(8 of 8);
+  .mdl-grid {
+    padding: 0 !important;
+  }
+
+  .course-list-row {
     border-bottom: 1px solid lightgray;
     margin: 0px;
-    display: flex;
-    align-items: center;
-    height: 70px; // same as progress indicator, see makeCourseProgressDisplay
   }
-  ul:last-child {
+  .course-list-row:last-child {
     border-bottom: 0px;
+  }
+
+  .course-list-center {
+    display: flex;
+
+    .course-title {
+      align-self: center;
+      padding-left: 20px;
+    }
+
+    .course-status {
+      align-self: center;
+    }
+
+    .course-progress {
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+    }
+
+    &.course-list-header {
+      .course-progress {
+        align-self: center;
+      }
+    }
+
+  }
+
+  .course-run-title {
+    padding-left: 30px;
+  }
+
+  .course-run-status {
+    text-align: right;
   }
 
   li {
@@ -106,19 +126,7 @@
     }
   }
 
-  .course-title {
-    @include span-columns(4 of 8);
-    @include omega(3n);
-  }
-
-  .course-status {
-    @include span-columns(3 of 8);
-    @include omega(3n);
-  }
-
   .course-progress {
-    @include span-columns(1 of 8);
-    @include omega(3n);
     text-align: center;
   }
 }

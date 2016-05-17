@@ -6,6 +6,7 @@ import {
   SET_WORK_HISTORY_EDIT,
   SET_WORK_DIALOG_VISIBILITY,
   SET_WORK_DIALOG_INDEX,
+  TOGGLE_DASHBOARD_EXPANDER,
 
   clearUI,
   updateDialogText,
@@ -14,6 +15,7 @@ import {
   setWorkHistoryEdit,
   setWorkDialogVisibility,
   setWorkDialogIndex,
+  toggleDashboardExpander,
 } from '../actions/ui';
 import { INITIAL_UI_STATE } from '../reducers/ui';
 
@@ -94,6 +96,24 @@ describe('ui reducers', () => {
 
       dispatchThen(setWorkDialogIndex(5), [SET_WORK_DIALOG_INDEX]).then(state => {
         assert.equal(state.workDialogIndex, 5);
+        done();
+      });
+    });
+  });
+
+  describe('dashboard expander', () => {
+    it('has an empty default state', done => {
+      dispatchThen({type: "undefined"}, []).then(state => {
+        assert.deepEqual(state.dashboardExpander, {});
+        done();
+      });
+    });
+
+    it('toggles a course expander', done => {
+      dispatchThen(toggleDashboardExpander(3, true), [TOGGLE_DASHBOARD_EXPANDER]).then(state => {
+        assert.deepEqual(state.dashboardExpander, {
+          3: true
+        });
         done();
       });
     });

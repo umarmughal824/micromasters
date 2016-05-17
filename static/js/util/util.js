@@ -12,11 +12,14 @@ import EmploymentTab from '../components/EmploymentTab';
 import PrivacyTab from '../components/PrivacyTab';
 
 import {
+  STATUS_NOT_OFFERED,
   STATUS_PASSED,
   STATUS_NOT_PASSED,
   STATUS_VERIFIED_NOT_COMPLETED,
   STATUS_ENROLLED_NOT_VERIFIED,
   STATUS_OFFERED_NOT_ENROLLED,
+  DASHBOARD_COURSE_HEIGHT,
+  DASHBOARD_RUN_HEIGHT,
 } from '../constants';
 
 export function sendGoogleAnalyticsEvent(category, action, label, value) {
@@ -45,33 +48,29 @@ function asPercent(number) {
  * @returns {ReactElement} Some React element or string to display for course status
  */
 export function makeCourseStatusDisplay(course, now = moment()) {
-  let courseOrRun = course;
+  let firstRun = {};
   if (course.runs.length > 0) {
-    courseOrRun = course.runs[0];
+    firstRun = course.runs[0];
   }
 
-  let courseUpgradeUrl = `${SETTINGS.edx_base_url}/course_modes/choose/${courseOrRun.course_id}/`;
-  let courseInfoUrl = `${SETTINGS.edx_base_url}/courses/${courseOrRun.course_id}/about`;
-
-  switch (courseOrRun.status) {
+  switch (course.status) {
   case STATUS_PASSED:
-  case STATUS_NOT_PASSED:
     return <span className="course-list-grade">
-      {asPercent(courseOrRun.grade)}
+      {asPercent(firstRun.grade)}
     </span>;
 
   case STATUS_VERIFIED_NOT_COMPLETED: {
-    if (!courseOrRun.course_start_date) {
+    if (!firstRun.course_start_date) {
       // Invalid case, API should always send a valid course start date
       return "";
     }
 
-    let courseStartDate = moment(courseOrRun.course_start_date);
+    let courseStartDate = moment(firstRun.course_start_date);
     if (courseStartDate.isAfter(now, 'day')) {
       return "Course starting: " + courseStartDate.format("M/D/Y");
     }
 
-    let grade = courseOrRun.grade;
+    let grade = firstRun.grade;
     if (grade === undefined || grade === null) {
       // Grade defaults to 0%
       grade = 0;
@@ -81,12 +80,14 @@ export function makeCourseStatusDisplay(course, now = moment()) {
     </span>;
   }
   case STATUS_ENROLLED_NOT_VERIFIED: {
-    if (!courseOrRun.verification_date) {
+    if (!firstRun.verification_date) {
       // Invalid case, API should always send a valid verification date
       return "";
     }
 
-    let verificationDate = moment(courseOrRun.verification_date);
+    let courseUpgradeUrl = `${SETTINGS.edx_base_url}/course_modes/choose/${firstRun.course_id}/`;
+
+    let verificationDate = moment(firstRun.verification_date);
     if (verificationDate.isAfter(now, 'day')) {
       return <Button bsStyle="success" href={courseUpgradeUrl} target="_blank">UPGRADE TO VERIFIED</Button>;
     } else {
@@ -95,11 +96,13 @@ export function makeCourseStatusDisplay(course, now = moment()) {
     }
   }
   case STATUS_OFFERED_NOT_ENROLLED: {
-    if (!courseOrRun.enrollment_start_date) {
-      return courseOrRun.fuzzy_enrollment_start_date;
+    let courseInfoUrl = `${SETTINGS.edx_base_url}/courses/${firstRun.course_id}/about`;
+
+    if (!firstRun.enrollment_start_date) {
+      return firstRun.fuzzy_enrollment_start_date;
     }
 
-    let enrollmentDate = moment(courseOrRun.enrollment_start_date);
+    let enrollmentDate = moment(firstRun.enrollment_start_date);
     if (enrollmentDate.isAfter(now, 'day')) {
       return "Enrollment starting: " + enrollmentDate.format("M/D/Y");
     } else {
@@ -117,47 +120,49 @@ export function makeCourseStatusDisplay(course, now = moment()) {
  * @param {object} course A course coming from the dashboard
  * @param {bool} isFirst If false, draw a line up to the previous course
  * @param {bool} isLast If false, draw a line down to the next course
+ * @param {Number} numRuns The number of course runs to draw a line past
  * @returns {ReactElement} Some React element or string to display for course status
  */
-export function makeCourseProgressDisplay(course, isFirst, isLast) {
-  let courseOrRun = course;
-  if (course.runs.length > 0) {
-    courseOrRun = course.runs[0];
-  }
-
-  let height = 70, outerRadius = 10, innerRadius = 8, width = 30, color="#7fbaec";
-  let centerX = width/2, centerY = height/2;
+export function makeCourseProgressDisplay(course, isFirst, isLast, numRuns) {
+  let outerRadius = 10, innerRadius = 8, width = 30;
+  let totalHeight = DASHBOARD_COURSE_HEIGHT + numRuns * DASHBOARD_RUN_HEIGHT;
+  let centerX = width/2, centerY = DASHBOARD_COURSE_HEIGHT/2;
+  const blue = "#7fbaec";
+  const red = "#dc1c2e";
 
   let topLine;
   if (!isFirst) {
     topLine = <line
+      className="top-line"
       x1={centerX}
       x2={centerX}
       y1={0}
       y2={centerY - outerRadius}
-      stroke={color}
+      stroke={blue}
       strokeWidth={1}
     />;
   }
   let bottomLine;
   if (!isLast) {
     bottomLine = <line
+      className="bottom-line"
       x1={centerX}
       x2={centerX}
       y1={centerY + outerRadius}
-      y2={height}
-      stroke={color}
+      y2={totalHeight}
+      stroke={blue}
       strokeWidth={1}
     />;
   }
 
   let alt = "Course not started";
+  let circleColor = blue; // light blue
   let innerElement;
-  if (courseOrRun.status === STATUS_PASSED) {
+  if (course.status === STATUS_PASSED) {
     // full circle to indicate course passed
     alt = "Course passed";
-    innerElement = <circle cx={centerX} cy={centerY} r={innerRadius} fill={color} />;
-  } else if (courseOrRun.status === STATUS_VERIFIED_NOT_COMPLETED) {
+    innerElement = <circle cx={centerX} cy={centerY} r={innerRadius} fill={blue} />;
+  } else if (course.status === STATUS_VERIFIED_NOT_COMPLETED) {
     alt = "Course started";
     // semi circle on the left side
     // see path docs: https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths#Arcs
@@ -167,17 +172,38 @@ export function makeCourseProgressDisplay(course, isFirst, isLast) {
     ].join(" ");
     innerElement = <path
       d={path}
-      fill={color}
+      fill={blue}
     />;
+  } else if (course.status === STATUS_NOT_OFFERED) {
+    // A course is failed if the first run is NOT_PASSED
+    if (course.runs.length > 0 && course.runs[0].status === STATUS_NOT_PASSED) {
+      circleColor = red;
+    }
   }
 
-  return <svg style={{width: width, height: height}}>
+  return <svg style={{width: width, height: totalHeight}}>
     <desc>{alt}</desc>
-    <circle cx={centerX} cy={centerY} r={outerRadius} stroke={color} fillOpacity={0} />
+    <circle cx={centerX} cy={centerY} r={outerRadius} stroke={circleColor} fillOpacity={0} />
     {innerElement}
     {topLine}
     {bottomLine}
   </svg>;
+}
+
+/**
+ * Display status for a course run
+ * @param run {Object} A course run
+ * @returns {ReactElement}
+ */
+export function makeRunStatusDisplay(run) {
+  switch (run.status) {
+  case STATUS_PASSED:
+    return "Passed";
+  case STATUS_NOT_PASSED:
+    return "Not passed";
+  default:
+    return "";
+  }
 }
 
 /* eslint-disable camelcase */

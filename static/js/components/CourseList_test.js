@@ -21,7 +21,7 @@ describe("CourseList", () => {
 
   it('renders apply for master button and text', () => {
     let renderedComponent = TestUtils.renderIntoDocument(
-      <CourseList dashboard={{programs: DASHBOARD_RESPONSE}} />
+      <CourseList dashboard={{programs: DASHBOARD_RESPONSE}} expander={{}} dispatch={() => {}}/>
     );
     let programBottomDivComponent = TestUtils.scryRenderedDOMComponentsWithClass(
       renderedComponent,
@@ -62,7 +62,7 @@ describe("CourseList", () => {
     let makeCourseStatusDisplaySpy = sandbox.spy(util, 'makeCourseStatusDisplay');
 
     TestUtils.renderIntoDocument(
-      <CourseList dashboard={{programs: DASHBOARD_RESPONSE}} />
+      <CourseList dashboard={{programs: DASHBOARD_RESPONSE}} expander={{}} dispatch={() => {}} />
     );
 
     let callCount = 0;

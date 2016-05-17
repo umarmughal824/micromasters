@@ -5,6 +5,7 @@ export const SET_DIALOG_VISIBILITY = 'SET_DIALOG_VISIBILITY';
 export const SET_WORK_HISTORY_EDIT = 'SET_WORK_HISTORY_EDIT';
 export const SET_WORK_DIALOG_VISIBILITY = 'SET_WORK_DIALOG_VISIBILITY';
 export const SET_WORK_DIALOG_INDEX = 'SET_WORK_DIALOG_INDEX';
+export const TOGGLE_DASHBOARD_EXPANDER = 'TOGGLE_DASHBOARD_EXPANDER';
 
 export const clearUI = () => ({ type: CLEAR_UI });
 export const updateDialogText = text => (
@@ -30,3 +31,8 @@ export const setWorkDialogVisibility = bool => (
 export const setWorkDialogIndex = index => (
   { type: SET_WORK_DIALOG_INDEX, payload: index }
 );
+
+export const toggleDashboardExpander = (courseId, newValue) => ({
+  type: TOGGLE_DASHBOARD_EXPANDER,
+  payload: { courseId, newValue }
+});
