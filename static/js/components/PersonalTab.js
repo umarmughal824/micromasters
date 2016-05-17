@@ -26,8 +26,10 @@ class PersonalTab extends ProfileTab {
       ['gender'],
       ['preferred_language'],
       ['city'],
+      ['state_or_territory'],
       ['country'],
       ['birth_city'],
+      ['birth_state_or_territory'],
       ['birth_country'],
       ['date_of_birth'],
     ],
@@ -38,8 +40,10 @@ class PersonalTab extends ProfileTab {
       'gender': "Gender",
       'preferred_language': "Preferred language",
       'city': "City",
+      'state_or_territory': 'State or Territory',
       'country': "Country",
       'birth_city': 'City',
+      'birth_state_or_territory': 'State or Territory',
       'birth_country': "Country",
       'date_of_birth': "Date of birth"
     }
