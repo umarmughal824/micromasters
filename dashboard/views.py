@@ -58,6 +58,6 @@ class UserDashboard(APIView):
             request.user.username, enrollments.get_enrolled_course_ids())
 
         response_data = []
-        for program in Program.objects.all():
+        for program in Program.objects.filter(live=True):
             response_data.append(get_info_for_program(program, request.user, enrollments, certificates))
         return Response(response_data)
