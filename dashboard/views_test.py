@@ -50,8 +50,9 @@ class DashboardTest(APITestCase):
         cls.enrollments = Enrollments(cls.enrollments_json)
 
         # create the programs
-        cls.program_1 = ProgramFactory.create()
-        cls.program_2 = ProgramFactory.create()
+        cls.program_1 = ProgramFactory.create(live=True)
+        cls.program_2 = ProgramFactory.create(live=True)
+        cls.program_no_live = ProgramFactory.create(live=False)
 
         # create some courses for each program
         cls.courses_1 = []
@@ -94,6 +95,15 @@ class DashboardTest(APITestCase):
             run.save()
         return run
 
+    def get_with_mocked_enrollment(self):
+        """Helper function to permorm get request with mocked enrollments"""
+        with patch(
+            'edx_api.enrollments.CourseEnrollments.get_student_enrollments',
+            autospec=True,
+            return_value=self.enrollments
+        ):
+            return self.client.get(self.url)
+
     def test_anonym_access(self):
         """Test for GET"""
         self.client.logout()
@@ -101,14 +111,22 @@ class DashboardTest(APITestCase):
         assert res.status_code == status.HTTP_403_FORBIDDEN
 
     @patch('backends.utils.refresh_user_token', autospec=True)
+    def test_programs(self, mocked_refresh):
+        """Test for GET"""
+        res = self.get_with_mocked_enrollment()
+        assert mocked_refresh.called
+        assert res.status_code == status.HTTP_200_OK
+        data = res.data
+        assert len(data) == 2
+        program_ids = [data[0]['id'], data[1]['id'], ]
+        assert self.program_1.pk in program_ids
+        assert self.program_2.pk in program_ids
+        assert self.program_no_live.pk not in program_ids
+
+    @patch('backends.utils.refresh_user_token', autospec=True)
     def test_no_run_available(self, mocked_refresh):
         """Test for GET"""
-        with patch(
-            'edx_api.enrollments.CourseEnrollments.get_student_enrollments',
-            autospec=True,
-            return_value=self.enrollments
-        ):
-            res = self.client.get(self.url)
+        res = self.get_with_mocked_enrollment()
         assert mocked_refresh.called
         assert res.status_code == status.HTTP_200_OK
         data = res.data
@@ -139,12 +157,7 @@ class DashboardTest(APITestCase):
             enr_end=self.now+timedelta(weeks=1),
             edx_key="course-v1:MITx+8.MechCX+2014_T1"
         )
-        with patch(
-            'edx_api.enrollments.CourseEnrollments.get_student_enrollments',
-            autospec=True,
-            return_value=self.enrollments
-        ):
-            res = self.client.get(self.url)
+        res = self.get_with_mocked_enrollment()
         assert mocked_refresh.called
         assert res.status_code == status.HTTP_200_OK
         data = res.data
@@ -196,7 +209,7 @@ class DashboardTokensTest(APITestCase):
         social_user.extra_data.update(data)
         social_user.save()
 
-    def request_with_mocked_enrollments(self):
+    def get_with_mocked_enrollments(self):
         """Helper function to make requests with mocked enrollment endpoint"""
         with patch(
             'edx_api.enrollments.CourseEnrollments.get_student_enrollments',
@@ -213,7 +226,7 @@ class DashboardTokensTest(APITestCase):
             "expires_in": 100  # seconds
         }
         self.update_social_extra_data(extra_data)
-        res = self.request_with_mocked_enrollments()
+        res = self.get_with_mocked_enrollments()
         assert mock_refresh.called
         assert res.status_code == status.HTTP_200_OK
 
@@ -225,7 +238,7 @@ class DashboardTokensTest(APITestCase):
             "expires_in": 31535999  # 1 year - 1 second
         }
         self.update_social_extra_data(extra_data)
-        res = self.request_with_mocked_enrollments()
+        res = self.get_with_mocked_enrollments()
         assert not mock_refresh.called
         assert res.status_code == status.HTTP_200_OK
 
@@ -245,6 +258,6 @@ class DashboardTokensTest(APITestCase):
             "expires_in": 100  # seconds
         }
         self.update_social_extra_data(extra_data)
-        res = self.request_with_mocked_enrollments()
+        res = self.get_with_mocked_enrollments()
         assert mock_refresh.called
         assert res.status_code == status.HTTP_400_BAD_REQUEST
