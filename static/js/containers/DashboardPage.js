@@ -4,6 +4,12 @@ import { connect } from 'react-redux';
 import Dashboard from '../components/Dashboard';
 
 class DashboardPage extends React.Component {
+  static propTypes = {
+    profile:    React.PropTypes.object.isRequired,
+    dashboard:  React.PropTypes.object.isRequired,
+    dispatch:   React.PropTypes.func.isRequired,
+  };
+
   render() {
     const { profile, dashboard } = this.props;
     return <Dashboard
@@ -18,12 +24,6 @@ const mapStateToProps = (state) => {
     profile: state.userProfile,
     dashboard: state.dashboard,
   };
-};
-
-DashboardPage.propTypes = {
-  profile: React.PropTypes.object.isRequired,
-  dashboard: React.PropTypes.object.isRequired,
-  dispatch: React.PropTypes.func.isRequired
 };
 
 export default connect(mapStateToProps)(DashboardPage);

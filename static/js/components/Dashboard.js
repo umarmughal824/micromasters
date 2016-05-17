@@ -4,6 +4,10 @@ import CourseList from './CourseList';
 import UserImage from './UserImage';
 
 class Dashboard extends React.Component {
+  static propTypes = {
+    profile:    React.PropTypes.object.isRequired,
+    dashboard:  React.PropTypes.object.isRequired,
+  };
 
   render() {
     const { profile, dashboard } = this.props;
@@ -34,10 +38,5 @@ class Dashboard extends React.Component {
     </div>;
   }
 }
-
-Dashboard.propTypes = {
-  profile: React.PropTypes.object.isRequired,
-  dashboard: React.PropTypes.object.isRequired,
-};
 
 export default Dashboard;

@@ -6,6 +6,16 @@ import { connect } from 'react-redux';
 import { saveProfile, FETCH_SUCCESS } from '../actions';
 
 class TermsOfServicePage extends React.Component {
+  static propTypes = {
+    dispatch:     React.PropTypes.func.isRequired,
+    userProfile:  React.PropTypes.object.isRequired,
+    history:      React.PropTypes.object.isRequired,
+  };
+
+  static contextTypes = {
+    router:   React.PropTypes.object.isRequired
+  };
+
   handleAgree() {
     const { dispatch, userProfile } = this.props;
     if (userProfile.getStatus !== FETCH_SUCCESS) {
@@ -46,15 +56,5 @@ class TermsOfServicePage extends React.Component {
 const mapStateToProps = state => ({
   userProfile: state.userProfile
 });
-
-TermsOfServicePage.propTypes = {
-  dispatch: React.PropTypes.func.isRequired,
-  userProfile: React.PropTypes.object.isRequired,
-  history: React.PropTypes.object.isRequired
-};
-
-TermsOfServicePage.contextTypes = {
-  router:   React.PropTypes.object.isRequired
-};
 
 export default connect(mapStateToProps)(TermsOfServicePage);

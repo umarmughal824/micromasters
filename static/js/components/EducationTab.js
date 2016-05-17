@@ -20,7 +20,6 @@ import Dialog from 'material-ui/Dialog';
 class EducationTab extends ProfileTab {
   constructor(props) {
     super(props);
-
     this.educationLevelLabels = {};
     this.educationLevelOptions.forEach(level => {
       this.educationLevelLabels[level.value] = level.label;
@@ -53,6 +52,7 @@ class EducationTab extends ProfileTab {
       'school_country': 'Country'
     }
   };
+
   static nestedValidationKeys = [
     'degree_name',
     'graduation_date',
@@ -63,8 +63,8 @@ class EducationTab extends ProfileTab {
     'school_state_or_territory',
     'school_country'
   ];
-  static validation(profile, requiredFields) {
 
+  static validation(profile, requiredFields) {
     let nestedFields = (index) => {
       let keySet = (key) => ['education', index, key];
       return EducationTab.nestedValidationKeys.map(key => keySet(key));
@@ -229,7 +229,6 @@ class EducationTab extends ProfileTab {
     </Grid>;
   }
 }
-
 
 const mapStateToProps = state => ({
   educationDialog: state.educationDialog,

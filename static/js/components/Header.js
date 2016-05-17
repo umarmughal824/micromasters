@@ -3,6 +3,10 @@ import LoginButton from '../containers/LoginButton';
 import { Navbar } from 'react-bootstrap';
 
 class Header extends React.Component {
+  static propTypes = {
+    empty: React.PropTypes.bool
+  };
+
   render () {
     const { empty } = this.props;
     let content;
@@ -26,9 +30,5 @@ class Header extends React.Component {
     );
   }
 }
-
-Header.propTypes = {
-  empty: React.PropTypes.bool
-};
 
 export default Header;

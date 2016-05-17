@@ -2,6 +2,10 @@
 import React from 'react';
 
 class UserImage extends React.Component {
+  static propTypes = {
+    imageUrl: React.PropTypes.string.isRequired
+  };
+
   render() {
     const { imageUrl } = this.props;
 
@@ -11,7 +15,4 @@ class UserImage extends React.Component {
   }
 }
 
-UserImage.propTypes = {
-  imageUrl: React.PropTypes.string.isRequired
-};
 export default UserImage;

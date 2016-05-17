@@ -9,6 +9,10 @@ import {
 import { STATUS_PASSED } from '../constants';
 
 class CourseList extends React.Component {
+  static propTypes = {
+    dashboard: React.PropTypes.object.isRequired,
+  };
+
   render() {
     const { dashboard } = this.props;
 
@@ -70,9 +74,5 @@ class CourseList extends React.Component {
     </div>;
   }
 }
-
-CourseList.propTypes = {
-  dashboard: React.PropTypes.object.isRequired,
-};
 
 export default CourseList;
