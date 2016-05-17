@@ -66,7 +66,7 @@ class ProfilePage extends React.Component {
       dispatch(startProfileEdit());
     }
     return dispatch(validateProfile(profile, requiredFields, messages)).then(() => {
-      dispatch(saveProfile(SETTINGS.username, profile)).then(() => {
+      return dispatch(saveProfile(SETTINGS.username, profile)).then(() => {
         dispatch(clearProfileEdit());
       });
     });

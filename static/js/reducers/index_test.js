@@ -97,7 +97,10 @@ describe('reducers', () => {
 
         assert.ok(getUserProfileStub.calledWith('jane'));
 
-        done();
+        // assert that it returns a rejected promise on failure
+        store.dispatch(fetchUserProfile('jane')).catch(() => {
+          done();
+        });
       });
     });
 
@@ -131,7 +134,10 @@ describe('reducers', () => {
 
         assert.ok(patchUserProfileStub.calledWith('jane', USER_PROFILE_RESPONSE));
 
-        done();
+        // assert that it returns a rejected promise on failure
+        store.dispatch(saveProfile('jane', USER_PROFILE_RESPONSE)).catch(() => {
+          done();
+        });
       });
     });
 
@@ -336,7 +342,10 @@ describe('reducers', () => {
       dispatchThen(fetchDashboard(), [REQUEST_DASHBOARD, RECEIVE_DASHBOARD_FAILURE]).then(dashboardState => {
         assert.equal(dashboardState.fetchStatus, FETCH_FAILURE);
 
-        done();
+        // assert that it returns a rejected promise on failure
+        store.dispatch(fetchDashboard()).catch(() => {
+          done();
+        });
       });
     });
   });

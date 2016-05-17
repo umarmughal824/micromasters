@@ -69,7 +69,11 @@ export const saveProfile = (username, profile) => {
     dispatch(requestPatchUserProfile());
     return api.patchUserProfile(username, profile).
       then(newProfile => dispatch(receivePatchUserProfileSuccess(newProfile))).
-      catch(() => dispatch(receivePatchUserProfileFailure()));
+      catch(e => {
+        dispatch(receivePatchUserProfileFailure());
+        // propagate exception
+        return Promise.reject(e);
+      });
   };
 };
 export const updateProfileValidation = errors => ({
@@ -94,7 +98,11 @@ export function fetchUserProfile(username) {
     dispatch(requestGetUserProfile());
     return api.getUserProfile(username).
       then(json => dispatch(receiveGetUserProfileSuccess(json))).
-      catch(()=> dispatch(receiveGetUserProfileFailure()));
+      catch(e => {
+        dispatch(receiveGetUserProfileFailure());
+        // propagate exception
+        return Promise.reject(e);
+      });
   };
 }
 
@@ -117,6 +125,10 @@ export function fetchDashboard() {
     dispatch(requestDashboard());
     return api.getDashboard().
       then(dashboard => dispatch(receiveDashboardSuccess(dashboard))).
-      catch(() => dispatch(receiveDashboardFailure()));
+      catch(e => {
+        dispatch(receiveDashboardFailure());
+        // propagate exception
+        return Promise.reject(e);
+      });
   };
 }
