@@ -27,15 +27,6 @@ class LoginButton extends React.Component {
           title={title}
           bsStyle="danger"
           id="logout-button">
-          <LinkContainer to={{ pathname: '/profile' }} active={false}>
-            <MenuItem>
-              Profile
-            </MenuItem>
-          </LinkContainer>
-          <MenuItem
-            href="/settings">
-            Settings
-          </MenuItem>
           <MenuItem
             href="/logout"
             eventKey="logout">
