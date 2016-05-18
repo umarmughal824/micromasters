@@ -15,11 +15,13 @@ class EdxOrgOAuth2(BaseOAuth2):
     ID_KEY = 'edx_id'
     REQUEST_TOKEN_URL = None
     EDXORG_BASE_URL = settings.EDXORG_BASE_URL
-    AUTHORIZATION_URL = urljoin(EDXORG_BASE_URL, '/oauth2/authorize/')
-    ACCESS_TOKEN_URL = urljoin(EDXORG_BASE_URL, '/oauth2/access_token/')
     ACCESS_TOKEN_METHOD = 'POST'
     REDIRECT_STATE = False
-    DEFAULT_SCOPE = ['email']
+
+    # Settings for Django OAUTH toolkit
+    AUTHORIZATION_URL = urljoin(EDXORG_BASE_URL, '/_o/authorize/')
+    ACCESS_TOKEN_URL = urljoin(EDXORG_BASE_URL, '/_o/token/')
+    DEFAULT_SCOPE = ['read', 'write']
 
     def user_data(self, access_token, *args, **kwargs):
         """
