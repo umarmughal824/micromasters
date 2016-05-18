@@ -56,7 +56,8 @@ class ProfileTab extends React.Component {
   }
 
   saveAndContinue = () => {
-    saveAndContinue.call(this, this.constructor.prototype.validation).then(() => {
+    let lastTab = this.nextUrl === "/dashboard";
+    saveAndContinue.call(this, this.constructor.prototype.validation, lastTab).then(() => {
       this.context.router.push(this.nextUrl);
     });
   }

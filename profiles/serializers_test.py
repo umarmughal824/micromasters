@@ -103,12 +103,6 @@ class ProfileTests(TestCase):
             'profile_url_small': profile.profile_url_small,
         }
 
-    def test_readonly(self):
-        """
-        Test that certain fields cannot be altered
-        """
-        assert ProfileSerializer.Meta.read_only_fields == ('filled_out',)
-
     def test_add_education(self):
         """
         Test that we handle adding an Education correctly
