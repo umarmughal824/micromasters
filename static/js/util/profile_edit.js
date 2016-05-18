@@ -6,6 +6,7 @@ import _ from 'lodash';
 import AutoComplete from '../components/AutoComplete';
 import MenuItem from 'material-ui/MenuItem';
 import TextField from 'material-ui/TextField';
+import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
 
 import { DATE_FORMAT } from '../constants';
 import {
@@ -17,6 +18,59 @@ import {
 // redux store.
 // this expects that the `updateProfile` and `profile` props are passed
 // in to whatever component it is used in.
+
+/**
+ * bind this to this.boundRadioGroupField in the constructor of a form component
+ * to update radio buttons.
+ * pass in the name (used as placeholder), key for profile, and the options.
+ *
+ * @param keySet {String[]} Path to the field
+ * @param label {String} Label for the field
+ * @param options {Object[]} A list of options for the select field
+ * @returns {ReactElement}
+ */
+export function boundRadioGroupField(keySet, label, options) {
+  const { profile, updateProfile } = this.props;
+  const defaultSelected = _.get(profile, keySet);
+  if (defaultSelected) {
+    const styles = {
+      labelStyle: {
+        left: -10,
+      }
+    };
+
+    let onChange = e => {
+      let clone = _.cloneDeep(profile);
+      _.set(clone, keySet, e.target.value);
+      updateProfile(clone);
+    };
+
+    const radioButtons = options.map(obj => {
+      let label = (
+        <span className="radio-label">
+          {obj.label}<span className="radio-label-hint"> - {obj.helper}</span>
+        </span>
+      );
+
+      return (
+        <RadioButton
+          key={obj.value}
+          labelStyle={styles.labelStyle}
+          value={obj.value}
+          label={label}/>
+      );
+    });
+
+    return (
+      <RadioButtonGroup
+        name={label}
+        onChange={onChange}
+        defaultSelected={defaultSelected}>
+        {radioButtons}
+      </RadioButtonGroup>
+    );
+  }
+}
 
 /**
  * bind to this.boundTextField in the constructor of a form component
