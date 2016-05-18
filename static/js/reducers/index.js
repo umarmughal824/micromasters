@@ -13,10 +13,6 @@ import {
   RECEIVE_PATCH_USER_PROFILE_FAILURE,
   UPDATE_PROFILE_VALIDATION,
 
-  SHOW_EDUCATION_FORM_DIALOG,
-  HIDE_EDUCATION_FORM_DIALOG,
-  TOGGLE_EDUCATION_LEVEL,
-
   REQUEST_DASHBOARD,
   RECEIVE_DASHBOARD_SUCCESS,
   RECEIVE_DASHBOARD_FAILURE,
@@ -26,47 +22,7 @@ import {
   FETCH_PROCESSING,
   FETCH_SUCCESS,
 } from '../actions';
-import { HIGH_SCHOOL, ASSOCIATE, BACHELORS, MASTERS, DOCTORATE } from '../constants';
 import { ui } from './ui';
-
-export const INITIAL_DIALOG_STATE = {
-  openDialog: false,
-  degreeLevel: '',
-  educationIndex: null,
-  educationId: null
-};
-export const educationDialog = (state = INITIAL_DIALOG_STATE, action) => {
-  switch (action.type) {
-  case SHOW_EDUCATION_FORM_DIALOG:
-    return Object.assign({}, state, {
-      openDialog: true,
-      degreeLevel: action.payload.level,
-      educationIndex: action.payload.index
-    });
-  case HIDE_EDUCATION_FORM_DIALOG:
-    return INITIAL_DIALOG_STATE;
-  default:
-    return state;
-  }
-};
-
-export const INITIAL_EDUCATION_LEVEL_STATE = {};
-INITIAL_EDUCATION_LEVEL_STATE[HIGH_SCHOOL] = true;
-INITIAL_EDUCATION_LEVEL_STATE[ASSOCIATE] = true;
-INITIAL_EDUCATION_LEVEL_STATE[BACHELORS] = true;
-INITIAL_EDUCATION_LEVEL_STATE[MASTERS] = false;
-INITIAL_EDUCATION_LEVEL_STATE[DOCTORATE] = false;
-
-export const educationLevels = (state = INITIAL_EDUCATION_LEVEL_STATE, action) => {
-  switch (action.type) {
-  case TOGGLE_EDUCATION_LEVEL:
-    return action.payload.educationLevels;
-  
-  default:
-    return state;
-  }
-};
-
 
 export const INITIAL_USER_PROFILE_STATE = {
   profile: {}
@@ -173,6 +129,4 @@ export default combineReducers({
   userProfile,
   dashboard,
   ui,
-  educationDialog,
-  educationLevels
 });

@@ -1,22 +1,16 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import Button from 'react-mdl/lib/Button';
 import IconButton from 'react-mdl/lib/IconButton';
 import _ from 'lodash';
 
 import ProfileTab from "../util/ProfileTab";
 import { generateNewEducation } from "../util/util";
-import {
-  toggleEducationLevel,
-  openEducationForm,
-  closeEducationForm,
-  clearProfileEdit
-} from '../actions';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 import Switch from 'react-mdl/lib/Switch';
 import FABButton from 'react-mdl/lib/FABButton';
 import Icon from 'react-mdl/lib/Icon';
 import Dialog from 'material-ui/Dialog';
+import { saveAndContinue } from '../util/profile_edit';
 
 class EducationTab extends ProfileTab {
   constructor(props) {
@@ -25,19 +19,19 @@ class EducationTab extends ProfileTab {
     this.educationLevelOptions.forEach(level => {
       this.educationLevelLabels[level.value] = level.label;
     });
-    this.openNewEducationForm = this.openNewEducationForm.bind(this);
-    this.handleCloseDialog = this.handleCloseDialog.bind(this);
   }
   nextUrl = "/profile/professional";
 
   static propTypes = {
-    educationLevels: React.PropTypes.object,
-    educationDialog: React.PropTypes.object,
-    profile: React.PropTypes.object,
-    saveProfile: React.PropTypes.func,
-    updateProfile: React.PropTypes.func,
-    errors: React.PropTypes.object,
-    dispatch: React.PropTypes.func.isRequired
+    profile:                        React.PropTypes.object,
+    ui:                             React.PropTypes.object,
+    updateProfile:                  React.PropTypes.func,
+    clearProfileEdit:               React.PropTypes.func,
+    errors:                         React.PropTypes.object,
+    setEducationDialogVisibility:   React.PropTypes.func,
+    setEducationDialogIndex:        React.PropTypes.func,
+    setEducationDegreeLevel:        React.PropTypes.func,
+    setEducationDegreeInclusions:   React.PropTypes.func,
   };
 
   static defaultProps = {
@@ -75,8 +69,14 @@ class EducationTab extends ProfileTab {
     );
   }
 
-  openNewEducationForm(level, index) {
-    const {dispatch, profile, updateProfile} = this.props;
+  openNewEducationForm = (level, index) => {
+    const {
+      profile,
+      updateProfile,
+      setEducationDialogIndex,
+      setEducationDegreeLevel,
+      setEducationDialogVisibility,
+    } = this.props;
     let newIndex = index;
     if (index === null){
       newIndex = profile['education'].length;
@@ -85,7 +85,9 @@ class EducationTab extends ProfileTab {
     let clone = Object.assign({}, profile);
     clone['education'] = clone['education'].concat(generateNewEducation(level));
     updateProfile(clone);
-    dispatch(openEducationForm(level, newIndex));
+    setEducationDialogIndex(newIndex);
+    setEducationDegreeLevel(level);
+    setEducationDialogVisibility(true);
   }
 
   deleteEducationEntry = index => {
@@ -96,12 +98,13 @@ class EducationTab extends ProfileTab {
   }
 
   printAddDegree(level){
-    const { educationLevels } = this.props;
-    if (educationLevels[level.value]){
+    const { ui: { educationDegreeInclusions } } = this.props;
+    if (educationDegreeInclusions[level.value]){
+      let openForm = () => this.openNewEducationForm(level.value, null);
       return <Grid key={`add-${level.value}`}>
         <Cell col={11}></Cell>
         <Cell col={1}>
-          <FABButton mini onClick={this.openNewEducationForm.bind(this, level.value, null )} raised ripple>
+          <FABButton mini onClick={openForm} raised ripple>
             <Icon name="add" />
           </FABButton>
         </Cell>
@@ -138,42 +141,60 @@ class EducationTab extends ProfileTab {
   }
 
   openEditEducationForm = (level, educationId) => {
-    const { dispatch, profile } = this.props;
+    const {
+      profile,
+      setEducationDialogIndex,
+      setEducationDegreeLevel,
+      setEducationDialogVisibility,
+    } = this.props;
 
     let index = profile['education'].findIndex((education) => {
       return educationId === education.id;
     });
-    dispatch(openEducationForm(level, index));
+    setEducationDialogIndex(index);
+    setEducationDegreeLevel(level);
+    setEducationDialogVisibility(true);
   }
 
-  saveEducationForm(nestedValidationCallback){
-    const { dispatch, saveProfile, profile, requiredFields, validationMessages } = this.props;
-    let fields;
-    if (_.isFunction(nestedValidationCallback)) {
-      fields = nestedValidationCallback(profile, requiredFields);
-    } else {
-      fields = requiredFields;
-    }
-    saveProfile(profile, fields, validationMessages ).then(() => {
-      dispatch(closeEducationForm());
+  saveEducationForm = () => {
+    saveAndContinue.call(this, EducationTab.validation).then(() => {
+      this.clearEducationEdit();
     });
   }
 
   handleSwitchClick(level){
-    const {dispatch, educationLevels} = this.props;
-    let newState = Object.assign({}, educationLevels);
-    newState[level] = !educationLevels[level];
-    dispatch(toggleEducationLevel(newState));
+    const {
+      ui: { educationDegreeInclusions },
+      setEducationDegreeInclusions,
+    } = this.props;
+    let newState = Object.assign({}, educationDegreeInclusions);
+    newState[level] = !educationDegreeInclusions[level];
+    setEducationDegreeInclusions(newState);
   }
 
-  handleCloseDialog(){
-    const { dispatch } = this.props;
-    dispatch(closeEducationForm());
-    dispatch(clearProfileEdit());
+  clearEducationEdit = () => {
+    const {
+      setEducationDialogVisibility,
+      setEducationDegreeLevel,
+      setEducationDialogIndex,
+      clearProfileEdit,
+    } = this.props;
+    setEducationDialogVisibility(false);
+    setEducationDegreeLevel('');
+    setEducationDialogIndex(null);
+    clearProfileEdit();
   }
 
   render() {
-    let { profile, educationDialog, educationLevels} = this.props;
+    let {
+      profile,
+      ui: {
+        educationDialogVisibility,
+        educationDegreeInclusions,
+        educationDialogIndex,
+        educationDegreeLevel,
+      }
+    } = this.props;
 
     if (profile['education'] === undefined){
       return null;
@@ -185,7 +206,7 @@ class EducationTab extends ProfileTab {
           <Cell col={11}><h5 className="education-level-name">{level.label}</h5></Cell>
           <Cell col={1}>
             <Switch ripple onChange={()=>{this.handleSwitchClick(level.value);}}
-              checked={educationLevels[level.value]}/>
+              checked={educationDegreeInclusions[level.value]}/>
           </Cell>
         </Grid>
         { this.printAddDegree(level)}
@@ -193,19 +214,19 @@ class EducationTab extends ProfileTab {
       </Cell>;
     });
 
-    let keySet = (key) =>['education', educationDialog.educationIndex, key];
+    let keySet = (key) =>['education', educationDialogIndex, key];
 
     let actions = [
-      <Button key="save" type='button' onClick={()=>{this.saveEducationForm(EducationTab.validation);}}>Save</Button>,
-      <Button key="cancel" type='button' onClick={this.handleCloseDialog}>Cancel</Button>
+      <Button key="save" type='button' onClick={this.saveEducationForm}>Save</Button>,
+      <Button key="cancel" type='button' onClick={this.clearEducationEdit}>Cancel</Button>
     ];
 
     return <Grid className="profile-tab-grid">
       <Dialog
-        open={educationDialog.openDialog}
+        open={educationDialogVisibility}
         className="profile-form-dialog"
-        onRequestClose={this.handleCloseDialog}
-        title={this.educationLevelLabels[educationDialog.degreeLevel]}
+        onRequestClose={this.clearEducationEdit}
+        title={this.educationLevelLabels[educationDegreeLevel]}
         actions={actions}
       >
         <Grid>
@@ -249,9 +270,4 @@ class EducationTab extends ProfileTab {
   }
 }
 
-const mapStateToProps = state => ({
-  educationDialog: state.educationDialog,
-  educationLevels: state.educationLevels
-});
-
-export default connect(mapStateToProps)(EducationTab);
+export default EducationTab;

@@ -15,6 +15,10 @@ import {
   setWorkHistoryEdit,
   setWorkDialogVisibility,
   setWorkDialogIndex,
+  setEducationDialogVisibility,
+  setEducationDialogIndex,
+  setEducationDegreeLevel,
+  setEducationDegreeInclusions,
 } from '../actions/ui';
 
 class ProfilePage extends React.Component {
@@ -57,6 +61,26 @@ class ProfilePage extends React.Component {
   clearProfileEdit = () => {
     const { dispatch } = this.props;
     dispatch(clearProfileEdit());
+  }
+
+  setEducationDialogVisibility = bool => {
+    const { dispatch } = this.props;
+    dispatch(setEducationDialogVisibility(bool));
+  }
+
+  setEducationDialogIndex = index => {
+    const { dispatch } = this.props;
+    dispatch(setEducationDialogIndex(index));
+  }
+
+  setEducationDegreeLevel = level => {
+    const { dispatch } = this.props;
+    dispatch(setEducationDegreeLevel(level));
+  }
+
+  setEducationDegreeInclusions = inclusions => {
+    const { dispatch } = this.props;
+    dispatch(setEducationDegreeInclusions(inclusions));
   }
 
   saveProfile(isEdit, profile, requiredFields, messages) {
@@ -113,6 +137,10 @@ class ProfilePage extends React.Component {
         setWorkDialogVisibility: this.setWorkDialogVisibility,
         setWorkDialogIndex: this.setWorkDialogIndex,
         clearProfileEdit: this.clearProfileEdit,
+        setEducationDialogVisibility: this.setEducationDialogVisibility,
+        setEducationDialogIndex: this.setEducationDialogIndex,
+        setEducationDegreeLevel: this.setEducationDegreeLevel,
+        setEducationDegreeInclusions: this.setEducationDegreeInclusions,
       })
     ));
 
