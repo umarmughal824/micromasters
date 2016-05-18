@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import Button from 'react-mdl/lib/Button';
+import IconButton from 'react-mdl/lib/IconButton';
 import _ from 'lodash';
 
 import ProfileTab from "../util/ProfileTab";
@@ -87,6 +88,13 @@ class EducationTab extends ProfileTab {
     dispatch(openEducationForm(level, newIndex));
   }
 
+  deleteEducationEntry = index => {
+    const { updateProfile, profile } = this.props;
+    let clone = _.cloneDeep(profile);
+    clone['education'].splice(index, 1);
+    updateProfile(clone);
+  }
+
   printAddDegree(level){
     const { educationLevels } = this.props;
     if (educationLevels[level.value]){
@@ -103,26 +111,33 @@ class EducationTab extends ProfileTab {
   }
 
   printExistingEducations(level) {
-    const {profile} = this.props;
-    return profile['education'].map(education => {
+    const { profile, errors } = this.props;
+    let educationRow = (education, index) => {
       if (education.degree_name === level.value && 'id' in education) {
-        return <Grid key={"education-row-" + education.id} className="existing-education-grid">
+        let deleteEntry = () => this.deleteEducationEntry(index);
+        let editEntry = () => (
+          this.openEditEducationForm(education.degree_name, education.id)
+        );
+        let validationAlert = () => {
+          if (_.get(errors, ['education', index])) {
+            return <IconButton name="error" onClick={editEntry} />;
+          }
+        };
+        return <Grid key={`education-row-${education.id}`} className="existing-education-grid">
           <Cell col={3}>{this.educationLevelLabels[education.degree_name]}</Cell>
           <Cell col={7}>{education.graduation_date}</Cell>
-          <Cell col={1}>
-            <Button onClick={this.openEditEducationForm.bind(this, education.degree_name, education.id)}>
-              <Icon name="edit"/>
-            </Button>
-          </Cell>
-          <Cell col={1}>
-            <Button ><Icon name="delete"/></Button>
+          <Cell col={2} className="education-icons">
+            {validationAlert()}
+            <IconButton name="edit" onClick={editEntry} />
+            <IconButton name="delete" onClick={deleteEntry} />
           </Cell>
         </Grid>;
       }
-    });
+    };
+    return profile['education'].map(educationRow);
   }
 
-  openEditEducationForm(level, educationId){
+  openEditEducationForm = (level, educationId) => {
     const { dispatch, profile } = this.props;
 
     let index = profile['education'].findIndex((education) => {
