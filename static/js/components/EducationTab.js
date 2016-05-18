@@ -213,7 +213,11 @@ class EducationTab extends ProfileTab {
             {this.boundSelectField(keySet('school_country'), 'Country', this.countryOptions)}
           </Cell>
           <Cell col={4}>
-            {this.boundTextField(keySet('school_state_or_territory'), 'State')}
+            {this.boundStateSelectField(
+              keySet('school_state_or_territory'),
+              keySet('school_country'),
+              'State'
+            )}
           </Cell>
           <Cell col={4}>
             {this.boundTextField(keySet('school_city'), 'City')}
