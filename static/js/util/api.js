@@ -3,7 +3,7 @@
 import 'isomorphic-fetch';
 import _ from 'lodash';
 
-function getCookie(name) {
+export function getCookie(name) {
   let cookieValue = null;
 
   if (document.cookie && document.cookie !== '') {
@@ -22,7 +22,7 @@ function getCookie(name) {
   return cookieValue;
 }
 
-function csrfSafeMethod(method) {
+export function csrfSafeMethod(method) {
   // these HTTP methods do not require CSRF protection
   return /^(GET|HEAD|OPTIONS|TRACE)$/.test(method);
 }
@@ -40,7 +40,7 @@ function csrfSafeMethod(method) {
  * @param {bool} loginOnError force login on http errors
  * @returns {Promise} The promise with JSON of the response
  */
-function fetchJSONWithCSRF(input, init, loginOnError) {
+export function fetchJSONWithCSRF(input, init, loginOnError) {
   if (init === undefined) {
     init = {};
   }
@@ -87,17 +87,19 @@ function fetchJSONWithCSRF(input, init, loginOnError) {
   });
 }
 
+// import to allow mocking in tests
+import { fetchJSONWithCSRF as mockableFetchJSONWithCSRF } from './api';
 export function getUserProfile(username) {
-  return fetchJSONWithCSRF(`/api/v0/profiles/${username}/`);
+  return mockableFetchJSONWithCSRF(`/api/v0/profiles/${username}/`);
 }
 
 export function patchUserProfile(username, profile) {
-  return fetchJSONWithCSRF(`/api/v0/profiles/${username}/`, {
+  return mockableFetchJSONWithCSRF(`/api/v0/profiles/${username}/`, {
     method: 'PATCH',
     body: JSON.stringify(profile)
   });
 }
 
 export function getDashboard() {
-  return fetchJSONWithCSRF('/api/v0/dashboard/', {}, true);
+  return mockableFetchJSONWithCSRF('/api/v0/dashboard/', {}, true);
 }
