@@ -14,7 +14,7 @@ class Dashboard extends React.Component {
 
   render() {
     const { profile, dashboard, expander, dispatch } = this.props;
-    let imageUrl = (SETTINGS.edx_base_url + '/static/images/profiles/default_120.png').
+    let imageUrl = `${SETTINGS.edx_base_url}/static/images/profiles/default_120.png`.
     //replacing multiple "/" with a single forward slash, excluding the ones following the colon
     replace(/([^:]\/)\/+/g, "$1");
     if (profile.profile_url_large) {

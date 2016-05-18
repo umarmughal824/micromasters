@@ -32,7 +32,8 @@
     "camelcase": [2, {
       "properties": "never"
     }],
-    "guard-for-in": [2]
+    "guard-for-in": [2],
+    "prefer-template": [2],
   },
   "env": {
     "es6": true,

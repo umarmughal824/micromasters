@@ -98,7 +98,7 @@ class EducationTab extends ProfileTab {
   printAddDegree(level){
     const { educationLevels } = this.props;
     if (educationLevels[level.value]){
-      return <Grid key={"add-"+level.value}>
+      return <Grid key={`add-${level.value}`}>
         <Cell col={11}></Cell>
         <Cell col={1}>
           <FABButton mini onClick={this.openNewEducationForm.bind(this, level.value, null )} raised ripple>

@@ -11,7 +11,7 @@ class UserImage extends React.Component {
 
     return <img
       className="card-image" src={ imageUrl }
-      alt={"Profile image for " + SETTINGS.name}/>;
+      alt={`Profile image for ${SETTINGS.name}`}/>;
   }
 }
 

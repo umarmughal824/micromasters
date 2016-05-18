@@ -77,7 +77,7 @@ export function boundSelectField(keySet, label, options) {
 
   // use a temporary edit value to store text currently in the textbox
   let editKeySet = keySet.concat();
-  editKeySet[editKeySet.length - 1] = editKeySet[editKeySet.length - 1] + "_edit";
+  editKeySet[editKeySet.length - 1] = `${editKeySet[editKeySet.length - 1]}_edit`;
 
   let caseInsensitivePrefixFilter = (searchText, key) => {
     let index = key.toLowerCase().indexOf(searchText.toLowerCase());
@@ -236,7 +236,7 @@ export function boundMonthYearField(keySet, label) {
 
   // make a copy of keySet with a slightly different key for temporary storage of the textfields being edited
   let editKeySet = keySet.concat();
-  editKeySet[editKeySet.length - 1] = editKeySet[editKeySet.length - 1] + "_edit";
+  editKeySet[editKeySet.length - 1] = `${editKeySet[editKeySet.length - 1]}_edit`;
 
   // Get the moment object from the state, or null if not available
   let getDate = () => {

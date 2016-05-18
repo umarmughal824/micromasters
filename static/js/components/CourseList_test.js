@@ -41,9 +41,8 @@ describe("CourseList", () => {
 
       // Tests for program's `apply for master` bottom UI.
       let coursesNeedToPass = totalCourses - coursesPassed;
-      let programBottomText = "You need to pass " + coursesNeedToPass +
-          " more courses before you can apply for " + program.title + " Master's Degree.";
-      let programBottomButtonText = "Apply for " + program.title + " Master Degree";
+      let programBottomText = `You need to pass ${coursesNeedToPass} more courses before you can apply for ${program.title} Master's Degree.`; // eslint-disable-line max-len
+      let programBottomButtonText = `Apply for ${program.title} Master Degree`;
 
       let div = ReactDOM.findDOMNode(programBottomDivComponent[programCount]);
       let renderedProgramBottomMessage = div.querySelectorAll("p");

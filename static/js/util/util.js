@@ -38,7 +38,7 @@ function asPercent(number) {
   if (number === undefined || number === null) {
     return "";
   }
-  return Math.round(number * 100) + "%";
+  return `${Math.round(number * 100)}%`;
 }
 
 /**
@@ -67,7 +67,7 @@ export function makeCourseStatusDisplay(course, now = moment()) {
 
     let courseStartDate = moment(firstRun.course_start_date);
     if (courseStartDate.isAfter(now, 'day')) {
-      return "Course starting: " + courseStartDate.format("M/D/Y");
+      return `Course starting: ${courseStartDate.format("M/D/Y")}`;
     }
 
     let grade = firstRun.grade;
@@ -104,7 +104,7 @@ export function makeCourseStatusDisplay(course, now = moment()) {
 
     let enrollmentDate = moment(firstRun.enrollment_start_date);
     if (enrollmentDate.isAfter(now, 'day')) {
-      return "Enrollment starting: " + enrollmentDate.format("M/D/Y");
+      return `Enrollment starting: ${enrollmentDate.format("M/D/Y")}`;
     } else {
       return <Button bsStyle="success" href={courseInfoUrl} target="_blank">ENROLL</Button>;
     }
