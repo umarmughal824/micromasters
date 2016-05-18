@@ -6,11 +6,13 @@ import {
   SET_WORK_HISTORY_EDIT,
   SET_WORK_DIALOG_VISIBILITY,
   SET_WORK_DIALOG_INDEX,
+  TOGGLE_DASHBOARD_EXPANDER,
 } from '../actions/ui';
 
 export const INITIAL_UI_STATE = {
   workHistoryEdit: true,
   workDialogVisibility: false,
+  dashboardExpander: {}
 };
 
 export const ui = (state = INITIAL_UI_STATE, action) => {
@@ -53,6 +55,13 @@ export const ui = (state = INITIAL_UI_STATE, action) => {
     });
   case CLEAR_UI:
     return INITIAL_UI_STATE;
+  case TOGGLE_DASHBOARD_EXPANDER: {
+    let clone = Object.assign({}, state.dashboardExpander);
+    clone[action.payload.courseId] = action.payload.newValue;
+    return Object.assign({}, state, {
+      dashboardExpander: clone
+    });
+  }
   default:
     return state;
   }

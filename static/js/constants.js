@@ -85,6 +85,73 @@ export const DASHBOARD_RESPONSE = [
     "id": 2
   },
   {
+    "description": "Not passed program",
+    "title": "Not passed program",
+    "courses": [
+      {
+        "prerequisites": "",
+        "runs": [
+          {
+            "position": 1,
+            "title": "Gio Test Course #15",
+            "course_id": "course-v1:odl+GIO101+CR-FALL15",
+            "status": "not-passed",
+            "id": 199
+          },
+          {
+            "position": 2,
+            "title": "Gio Test Course #14",
+            "course_id": "course-v1:odl+GIO101+FALL14",
+            "status": "not-passed",
+            "id": 399
+          },
+          {
+            "certificate_url": "www.google.com",
+            "title": "Gio Test Course #13",
+            "status": "passed",
+            "position": 3,
+            "grade": "0.66",
+            "course_id": "course-v1:odl+GIO101+FALL13",
+            "id": 299
+          }
+        ],
+        "position_in_program": 0,
+        "title": "Gio Course",
+        "status": "not-offered",
+        "description": "",
+        "id": 199
+      },
+      {
+        "prerequisites": "",
+        "runs": [],
+        "position_in_program": 1,
+        "title": "8.MechCx Advanced Introductory Classical Mechanics",
+        "status": "not-offered",
+        "description": "",
+        "id": 299
+      },
+      {
+        "prerequisites": "",
+        "runs": [],
+        "position_in_program": 2,
+        "title": "EDX Demo course",
+        "status": "not-offered",
+        "description": "",
+        "id": 399
+      },
+      {
+        "prerequisites": "",
+        "runs": [],
+        "position_in_program": 3,
+        "title": "Peter Course",
+        "status": "not-offered",
+        "description": "",
+        "id": 499
+      }
+    ],
+    "id": 799
+  },
+  {
     "courses": [
       {
         "id": 3,
@@ -163,3 +230,6 @@ export const DASHBOARD_RESPONSE = [
 ];
 
 export const DATE_FORMAT = 'YYYY-MM-DD';
+
+export const DASHBOARD_COURSE_HEIGHT = 70;
+export const DASHBOARD_RUN_HEIGHT = 40;

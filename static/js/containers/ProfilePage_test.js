@@ -13,7 +13,9 @@ import { USER_PROFILE_RESPONSE } from '../constants';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../util/api';
 
-describe("ProfilePage", () => {
+describe("ProfilePage", function() {
+  this.timeout(5000);  // eslint-disable-line no-invalid-this
+
   let listenForActions, renderComponent, helper, patchUserProfileStub;
   beforeEach(() => {
     helper = new IntegrationTestHelper();

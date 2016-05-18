@@ -1,20 +1,29 @@
 import React from 'react';
 import _ from 'lodash';
 import Button from 'react-bootstrap/lib/Button';
+import Grid, { Cell } from 'react-mdl/lib/Grid';
 
+import { toggleDashboardExpander } from '../actions/ui';
 import {
   makeCourseStatusDisplay,
   makeCourseProgressDisplay,
+  makeRunStatusDisplay,
 } from '../util/util';
-import { STATUS_PASSED } from '../constants';
+import {
+  STATUS_PASSED,
+  DASHBOARD_COURSE_HEIGHT,
+  DASHBOARD_RUN_HEIGHT,
+} from '../constants';
 
 class CourseList extends React.Component {
   static propTypes = {
     dashboard: React.PropTypes.object.isRequired,
+    expander: React.PropTypes.object.isRequired,
+    dispatch: React.PropTypes.func.isRequired,
   };
 
   render() {
-    const { dashboard } = this.props;
+    const { dashboard, dispatch, expander } = this.props;
 
     let programs = dashboard.programs.map(program => {
       let sortedCourses = _.sortBy(program.courses, 'position_in_program');
@@ -29,37 +38,78 @@ class CourseList extends React.Component {
           coursesPassed++;
         }
 
-        return <ul
+        let courseRuns = [];
+        if (expander[course.id]) {
+          courseRuns = course.runs.map(run =>
+            <Grid style={{height: DASHBOARD_RUN_HEIGHT}} key={run.id}>
+              <Cell
+                col={6}
+                className="course-run-title"
+              >
+                {run.title}
+              </Cell>
+              <Cell col={4} className="course-run-status">
+                {makeRunStatusDisplay(run)}
+              </Cell>
+            </Grid>
+          );
+        }
+
+        let expanderSpan;
+        if (course.runs.length > 0) {
+          const toggleExpander = () => {
+            dispatch(toggleDashboardExpander(course.id, !expander[course.id]));
+          };
+          expanderSpan = <span
+            onClick={toggleExpander}
+            className={`glyphicon glyphicon-chevron-${expander[course.id] ? 'up' : 'down'}`}
+            style={{cursor: "pointer"}}
+          />;
+        }
+
+        let height = DASHBOARD_COURSE_HEIGHT + courseRuns.length * DASHBOARD_RUN_HEIGHT;
+        return <div
           key={course.id}
-          className={"course-list-body course-list-status-" + course.status}
+          className="course-list-body course-list-row"
+          style={{height: height}}
         >
-          <li className="course-title">
-            {course.title}
-          </li>
-          <li className="course-status">
-            {makeCourseStatusDisplay(course)}
-          </li>
-          <li className="course-progress">
-            {makeCourseProgressDisplay(course, isTop, isBottom)}
-          </li>
-        </ul>;
+          <Grid style={{height: DASHBOARD_COURSE_HEIGHT}} className="course-list-center">
+            <Cell col={6} className="course-title">
+              {course.title} {expanderSpan}
+            </Cell>
+            <Cell col={4} className="course-status">
+              {makeCourseStatusDisplay(course)}
+            </Cell>
+            <Cell col={2} className="course-progress">
+              {makeCourseProgressDisplay(course, isTop, isBottom, courseRuns.length)}
+            </Cell>
+          </Grid>
+          {courseRuns}
+        </div>;
       });
 
       return (
-        <div key={program.id}>
-          <div className="course-list">
-            <ul className="course-list-header">
-              <li className="course-title">
-                {program.title}
-              </li>
-              <li className="course-status "/>
-              <li className="course-progress">
-                Progress
-              </li>
-            </ul>
-            {table}
-          </div>
-          <div className="clear-float apply-for-ms">
+        <div key={program.id} className="program">
+          <Grid>
+            <Cell col={8}>
+              <div className="course-list">
+                <Grid
+                  className="course-list-header course-list-center course-list-row"
+                  style={{height: DASHBOARD_COURSE_HEIGHT}}
+                >
+                  <Cell col={6} className="course-title">
+                    {program.title}
+                  </Cell>
+                  <Cell col={4} className="course-status "/>
+                  <Cell col={2} className="course-progress">
+                    Progress
+                  </Cell>
+                </Grid>
+                {table}
+              </div>
+            </Cell>
+          </Grid>
+          <div className="apply-for-ms">
             <br/>
             <p>You need to pass {totalCourses - coursesPassed} more courses
               before you can apply for <strong>{program.title}</strong> Master's Degree.</p>
