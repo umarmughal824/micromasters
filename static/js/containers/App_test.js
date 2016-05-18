@@ -18,7 +18,7 @@ import IntegrationTestHelper from '../util/integration_test_helper';
 
 describe('App', () => {
   let listenForActions, renderComponent, helper;
-  let dialogActions; 
+  let dialogActions;
 
   beforeEach(() => {
     helper = new IntegrationTestHelper();
@@ -53,6 +53,18 @@ describe('App', () => {
       helper.profileGetStub.returns(Promise.resolve(response));
 
       renderComponent("/dashboard", dialogActions).then(() => {
+        assert.equal(helper.currentLocation.pathname, "/profile/personal");
+        done();
+      });
+    });
+
+    it('redirects to /profile if profile is not filled out', done => {
+      let response = Object.assign({}, USER_PROFILE_RESPONSE, {
+        filled_out: false
+      });
+      helper.profileGetStub.returns(Promise.resolve(response));
+
+      renderComponent("/dashboard", []).then(() => {
         assert.equal(helper.currentLocation.pathname, "/profile/personal");
         done();
       });
