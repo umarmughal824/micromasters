@@ -3,7 +3,7 @@ import DatePicker from 'react-datepicker';
 import moment from 'moment';
 import iso3166 from 'iso-3166-2';
 import _ from 'lodash';
-import AutoComplete from 'material-ui/AutoComplete';
+import AutoComplete from '../components/AutoComplete';
 import MenuItem from 'material-ui/MenuItem';
 import TextField from 'material-ui/TextField';
 
@@ -115,12 +115,20 @@ export function boundSelectField(keySet, label, options) {
   let onUpdateInput = searchText => {
     let clone = _.cloneDeep(profile);
     _.set(clone, editKeySet, searchText);
+    _.set(clone, keySet, null);
+    updateProfile(clone);
+  };
+  let onBlur = () => {
+    // clear the edit value when we lose focus. In its place we will display
+    // the selected option label if one is selected, or an empty string
+    let clone = _.cloneDeep(profile);
+    _.set(clone, editKeySet, undefined);
     updateProfile(clone);
   };
 
   let convertOption = option => ({
     text: option.label,
-    value: <MenuItem primaryText={option.label} value={option.value}/>
+    value: <MenuItem key={option.value} primaryText={option.label} value={option.value}/>
   });
 
   let searchText;
@@ -148,6 +156,7 @@ export function boundSelectField(keySet, label, options) {
       fullWidth={true}
       onNewRequest={onNewRequest}
       onUpdateInput={onUpdateInput}
+      onBlur={onBlur}
       errorText={_.get(errors, keySet)}
     />
   );
