@@ -287,3 +287,44 @@ c.validation-wrapper {
 .header-privacy-tab {
   color: #A2AAB3;
 }
+
+.terms-of-service-main {
+  width: 75%;
+  margin-left: auto;
+  margin-right: auto;
+  div.terms-card-header {
+    padding: 25px 0;
+    font-size: x-large;
+    color: #b34a4c;
+    font-weight: bold;
+  }
+  .terms-of-service-container {
+    border: 1px solid grey;
+    margin: 10px 0;
+    height: 250px;
+    overflow-y: scroll;
+    li {
+      display: list-item;
+    }
+    .terms-of-service-title-container {
+      font-family: "Open Sans";
+      background-color: #eff5f7;
+      display: flex;
+      .terms-of-service-title-row {
+        border-bottom: 1px solid lightgray;
+        margin: 0px;
+      }
+      .terms-of-service-title {
+        padding: 0 20px;
+        font-weight: 600;
+        font-size: 19px;
+        position: relative;
+        top: 50%;
+        transform: translateY(-25%);
+      }
+    }
+    .terms-of-service-content {
+      padding: 20px;
+    }
+  }
+}
