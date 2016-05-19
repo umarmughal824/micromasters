@@ -61,7 +61,7 @@ class ProfilePage extends React.Component {
 
   clearProfileEdit = () => {
     const { dispatch } = this.props;
-    dispatch(clearProfileEdit());
+    dispatch(clearProfileEdit(SETTINGS.username));
   }
 
   setEducationDialogVisibility = bool => {
