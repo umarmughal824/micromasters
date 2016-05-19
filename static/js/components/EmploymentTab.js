@@ -110,8 +110,8 @@ class EmploymentTab extends ProfileTab {
     const { ui } = this.props;
     let keySet = (key) => ['work_history', ui.workDialogIndex, key];
     return (
-      <Grid className="profile-tab-grid no-border">
-        <Cell col={12} className="employment-form-title">
+      <Grid className="profile-tab-grid">
+        <Cell col={12} className="profile-form-title">
           Add Employment
         </Cell>
         <Cell col={12}>
@@ -152,30 +152,19 @@ class EmploymentTab extends ProfileTab {
       if ( !_.isUndefined(work_history) ) {
         workHistoryRows = work_history.map((entry, i) => this.jobRow(entry, i));
       }
-      let fabSpacing = () => {
-        let len = _.isArray(work_history) ? work_history.length : 0;
-        switch ( len ) {
-        case 0:
-          return "no-entries";
-        case 1:
-          return "one-entry";
-        default:
-          return "more-entries";
-        }
-      };
       workHistoryRows.push(
         <FABButton
           colored
           onClick={this.addWorkHistoryEntry}
           key="I'm unique!"
-          className={`add-employment-button ${fabSpacing()}`}>
+          className="profile-add-button">
           <Icon name="add" />
         </FABButton>
       );
       return workHistoryRows;
     } else {
       return (
-        <Grid className="profile-tab-grid no-border">
+        <Grid className="profile-tab-grid">
           <Cell col={12} className="work-history-absent">
             No work history entered, click the switch to begin.
           </Cell>
@@ -206,16 +195,16 @@ class EmploymentTab extends ProfileTab {
     let deleteEntry = () => this.deleteWorkHistoryEntry(index);
     return (
       <Grid className="profile-tab-card-grid" key={index}>
-        <Cell col={4} className="job-row company-name">
+        <Cell col={4} className="profile-row-name">
           {`${position.company_name}, ${position.position}`}
         </Cell>
-        <Cell col={6} className="job-row company-date-range">
+        <Cell col={6} className="profile-row-date-range">
           {`${dateFormat(position.start_date)} - ${endDateText()}`}
         </Cell>
-        <Cell col={2} className="job-row company-icons">
+        <Cell col={2} className="profile-row-icons">
           {validationAlert()}
           <IconButton name="edit" onClick={editCallback} />
-          <IconButton name="clear" onClick={deleteEntry} />
+          <IconButton name="delete" onClick={deleteEntry} />
         </Cell>
       </Grid>
     );
@@ -227,27 +216,27 @@ class EmploymentTab extends ProfileTab {
       <Button
         type='button'
         key='cancel'
-        className="cancel-button work-button"
+        className="cancel-button"
         onClick={this.closeWorkDialog}>
         Cancel
       </Button>,
       <Button
         key='save'
         type='button'
-        className="save-button work-button"
+        className="save-button"
         onClick={this.saveWorkHistoryEntry}>
         Save
       </Button>,
     ];
 
     return (
-      <div id="employment-history">
-        <Grid className="employment-splash">
+      <div>
+        <Grid className="profile-splash">
           <Cell col={12}>
             Tell us about your employment.
           </Cell>
         </Grid>
-        <Grid className="profile-tab-grid no-border">
+        <Grid className="profile-tab-grid">
           <Dialog
             open={workDialogVisibility}
             className="dashboard-dialog"
@@ -261,7 +250,7 @@ class EmploymentTab extends ProfileTab {
           <Cell col={10}>
             <Card shadow={1} className="profile-tab-card">
               <Grid className="profile-tab-card-grid">
-                <Cell col={4} className="employment-title">
+                <Cell col={4} className="profile-card-title">
                   Employment
                 </Cell>
                 <Cell col={7}></Cell>

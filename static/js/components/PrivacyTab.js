@@ -28,13 +28,13 @@ class PrivacyTab extends ProfileTab {
   render() {
     return (
       <div>
-        <Grid className="employment-splash">
+        <Grid className="profile-splash">
           <Cell col={12}>
             We care about your privacy.
           </Cell>
         </Grid>
         <br/><br/>
-        <Grid className="profile-tab-grid profile-tab-grid-borderless">
+        <Grid className="profile-tab-grid">
           <Cell col={12}>
             <span className="header-privacy-tab">Who can see your profile?</span>
             { this.boundRadioGroupField(['account_privacy'], 'Privacy', this.privacyOptions) } <br />
