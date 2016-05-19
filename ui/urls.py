@@ -7,6 +7,7 @@ from ui.url_utils import (
     DASHBOARD_URL,
     PROFILE_URL,
     TERMS_OF_SERVICE_URL,
+    USERS_URL,
 )
 from ui.views import dashboard
 
@@ -16,11 +17,11 @@ dashboard_urlpatterns = [
         DASHBOARD_URL,
         PROFILE_URL,
         TERMS_OF_SERVICE_URL,
+        USERS_URL,
     ]
 ]
 
 urlpatterns = [
-    url(r'^(dashboard|profile|terms_of_service)/', dashboard, name='ui-dashboard'),
     url(r'^logout/$', 'django.contrib.auth.views.logout',
         {'next_page': '/'})
 ] + dashboard_urlpatterns

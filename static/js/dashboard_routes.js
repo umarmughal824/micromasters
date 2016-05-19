@@ -12,6 +12,7 @@ import EmploymentTab from './components/EmploymentTab';
 import PrivacyTab from './components/PrivacyTab';
 import EducationTab from './components/EducationTab';
 import TermsOfServicePage from './containers/TermsOfServicePage';
+import UserPage from './containers/UserPage';
 
 /**
  * Create the dashboard routes (the root React elements to be rendered into our container)
@@ -36,6 +37,7 @@ export function makeDashboardRoutes(browserHistory, store, onRouteUpdate) {
               <Route path="privacy" component={PrivacyTab} />
             </Route>
             <Route path="/terms_of_service" component={TermsOfServicePage} />
+            <Route path="/users/:username" component={UserPage} />
           </Route>
         </Router>
       </Provider>

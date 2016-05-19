@@ -1,3 +1,7 @@
+body {
+  font-family: "Open Sans" !important;
+}
+
 c.validation-wrapper {
   padding-bottom: 10px;
 }
@@ -20,11 +24,11 @@ c.validation-wrapper {
         min-width: 190px;
         height: 220px;
         padding-top: 40px;
+        text-align: center;
         .card-image{
           border-radius: 50%;
           height: 140px;
           width: 140px;
-          margin-left: 50px;
         }
       }
       .card-name {
@@ -168,7 +172,6 @@ c.validation-wrapper {
 .profile-tab-grid {
   max-width: 900px;
   border: 1px grey solid;
-  font-family: "Open Sans";
   .mdl-textfield {
     width: 100%;
   }
@@ -256,4 +259,12 @@ c.validation-wrapper {
   h3 {
     border-bottom: 0 !important;
   }
+}
+.users-name {
+  text-align: center;
+}
+.users-location {
+  display: block;
+  font-weight: 100;
+  text-align: center;
 }
