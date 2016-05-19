@@ -5,7 +5,7 @@ export const MASTERS = 'm';
 export const DOCTORATE = 'p';
 
 export const USER_PROFILE_RESPONSE = {
-  "filled_out": false,
+  "filled_out": true,
   "agreed_to_terms_of_service": true,
   "account_privacy": "all_users",
   "email_optin": false,

@@ -9,7 +9,9 @@ from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 
-from ui.decorators import require_terms_of_service
+from ui.decorators import (
+    require_mandatory_urls,
+)
 
 log = logging.getLogger(__name__)
 
@@ -29,7 +31,7 @@ def get_bundle_url(request, bundle_name):
         return static("bundles/{bundle}".format(bundle=bundle_name))
 
 
-@require_terms_of_service
+@require_mandatory_urls
 @login_required()
 def dashboard(request, *args):  # pylint: disable=unused-argument
     """

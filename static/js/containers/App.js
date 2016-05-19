@@ -41,6 +41,7 @@ class App extends React.Component {
     this.fetchUserProfile(SETTINGS.username);
     this.fetchDashboard();
     this.requireTermsOfService();
+    this.requireProfileFilledOut();
     this.requireCompleteProfile();
   }
 
@@ -48,6 +49,7 @@ class App extends React.Component {
     this.fetchUserProfile(SETTINGS.username);
     this.fetchDashboard();
     this.requireTermsOfService();
+    this.requireProfileFilledOut();
     this.requireCompleteProfile();
   }
 
@@ -80,6 +82,18 @@ class App extends React.Component {
       !(TERMS_OF_SERVICE_REGEX.test(pathname))
     ) {
       this.context.router.push('/terms_of_service');
+    }
+  }
+
+  requireProfileFilledOut() {
+    const { userProfile, location: { pathname } } = this.props;
+    if (
+      userProfile.getStatus === FETCH_SUCCESS &&
+      !userProfile.profile.filled_out &&
+      !(TERMS_OF_SERVICE_REGEX.test(pathname)) &&
+      !(PROFILE_REGEX.test(pathname))
+    ) {
+      this.context.router.push('/profile');
     }
   }
 

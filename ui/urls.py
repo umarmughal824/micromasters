@@ -3,19 +3,18 @@ URLs for ui
 """
 from django.conf.urls import url
 
+from ui.url_utils import (
+    DASHBOARD_URL,
+    PROFILE_URL,
+    TERMS_OF_SERVICE_URL,
+)
 from ui.views import dashboard
-
-DASHBOARD_URL = '/dashboard/'
-PROFILE_URL = '/profile/'
-PROFILE_PERSONAL_URL = '/profile/personal/'
-TERMS_OF_SERVICE_URL = '/terms_of_service/'
 
 dashboard_urlpatterns = [
     url(r'^{}'.format(dashboard_url.lstrip("/")), dashboard, name='ui-dashboard')
     for dashboard_url in [
         DASHBOARD_URL,
         PROFILE_URL,
-        PROFILE_PERSONAL_URL,
         TERMS_OF_SERVICE_URL,
     ]
 ]
