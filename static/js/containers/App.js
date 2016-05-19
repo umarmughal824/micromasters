@@ -141,6 +141,8 @@ class App extends React.Component {
         onRequestClose={close}
         title={title}
         actions={actions}
+        autoScrollBodyContent={true}
+        className="dashboard-dialog"
       >
         {text !== undefined ? text : ""}
       </Dialog>

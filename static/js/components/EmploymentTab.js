@@ -261,9 +261,11 @@ class EmploymentTab extends ProfileTab {
         <Grid className="profile-tab-grid no-border">
           <Dialog
             open={workDialogVisibility}
-            className="profile-employment-dialog"
+            className="dashboard-dialog"
             onRequestClose={this.closeWorkDialog}
-            actions={actions}>
+            actions={actions}
+            autoScrollBodyContent={true}
+          >
             {this.editWorkHistoryForm()}
           </Dialog>
           <Cell col={1}></Cell>
