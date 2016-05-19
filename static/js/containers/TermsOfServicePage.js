@@ -53,8 +53,16 @@ class TermsOfServicePage extends React.Component {
   }
 }
 
-const mapStateToProps = state => ({
-  userProfile: state.userProfile
-});
+const mapStateToProps = state => {
+  let profile = {
+    profile: {}
+  };
+  if (state.profiles[SETTINGS.username] !== undefined) {
+    profile = state.profiles[SETTINGS.username];
+  }
+  return {
+    userProfile: profile
+  };
+};
 
 export default connect(mapStateToProps)(TermsOfServicePage);
