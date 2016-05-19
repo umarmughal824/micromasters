@@ -234,13 +234,31 @@ export function validateProfile(profile, requiredFields, messages) {
 export function generateNewEducation(level) {
   return {
     'degree_name': level,
-    'graduation_date': "",
-    'field_of_study': "",
+    'graduation_date': null,
+    'field_of_study': null,
     'online_degree': false,
-    'school_name': "",
-    'school_city': "",
-    'school_state_or_territory': "",
-    'school_country': ""
+    'school_name': null,
+    'school_city': null,
+    'school_state_or_territory': null,
+    'school_country': null
+  };
+}
+
+/**
+ * Generate new work history object
+ * 
+ * @returns {Object} New empty work history object
+ */
+export function generateNewWorkHistory() {
+  return {
+    position: null,
+    industry: null,
+    company_name: null,
+    start_date: null,
+    end_date: null,
+    city: null,
+    country: null,
+    state_or_territory: null,
   };
 }
 
