@@ -53,7 +53,7 @@ class App extends React.Component {
 
   componentWillUnmount() {
     const { dispatch } = this.props;
-    dispatch(clearProfile());
+    dispatch(clearProfile(SETTINGS.username));
     dispatch(clearDashboard());
     dispatch(clearUI());
   }
@@ -154,8 +154,14 @@ class App extends React.Component {
 }
 
 const mapStateToProps = (state) => {
+  let profile = {
+    profile: {}
+  };
+  if (state.profiles[SETTINGS.username] !== undefined) {
+    profile = state.profiles[SETTINGS.username];
+  }
   return {
-    userProfile:  state.userProfile,
+    userProfile:  profile,
     dashboard:    state.dashboard,
     ui:           state.ui,
   };

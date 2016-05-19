@@ -36,11 +36,12 @@ class ProfilePage extends React.Component {
 
   updateProfile(isEdit, profile) {
     const { dispatch } = this.props;
+    const username = SETTINGS.username;
 
     if (!isEdit) {
-      dispatch(startProfileEdit());
+      dispatch(startProfileEdit(username));
     }
-    dispatch(updateProfile(profile));
+    dispatch(updateProfile(username, profile));
   }
 
   setWorkHistoryEdit = (bool) => {
@@ -85,13 +86,15 @@ class ProfilePage extends React.Component {
 
   saveProfile(isEdit, profile, requiredFields, messages) {
     const { dispatch } = this.props;
+    const username = SETTINGS.username;
+
     if (!isEdit) {
       // Validation errors will only show up if we start the edit
-      dispatch(startProfileEdit());
+      dispatch(startProfileEdit(username));
     }
-    return dispatch(validateProfile(profile, requiredFields, messages)).then(() => {
-      return dispatch(saveProfile(SETTINGS.username, profile)).then(() => {
-        dispatch(clearProfileEdit());
+    return dispatch(validateProfile(username, profile, requiredFields, messages)).then(() => {
+      return dispatch(saveProfile(username, profile)).then(() => {
+        dispatch(clearProfileEdit(username));
       });
     });
   }
@@ -162,9 +165,17 @@ class ProfilePage extends React.Component {
   }
 }
 
-const mapStateToProps = state => ({
-  profile:  state.userProfile,
-  ui:       state.ui,
-});
+const mapStateToProps = state => {
+  let profile = {
+    profile: {}
+  };
+  if (state.profiles[SETTINGS.username] !== undefined) {
+    profile = state.profiles[SETTINGS.username];
+  }
+  return {
+    profile: profile,
+    ui: state.ui,
+  };
+};
 
 export default connect(mapStateToProps)(ProfilePage);

@@ -24,72 +24,91 @@ import {
 } from '../actions';
 import { ui } from './ui';
 
-export const INITIAL_USER_PROFILE_STATE = {
-  profile: {}
-};
+export const INITIAL_PROFILES_STATE = {};
 
-export const userProfile = (state = INITIAL_USER_PROFILE_STATE, action) => {
+export const profiles = (state = INITIAL_PROFILES_STATE, action) => {
+  let patchProfile = newProfile => {
+    let clone = Object.assign({}, state);
+    let username = action.payload.username;
+    clone[username] = Object.assign(
+      { profile: {} },
+      clone[username],
+      newProfile
+    );
+    return clone;
+  };
+
+  let getProfile = () => {
+    if (state[action.payload.username] !== undefined) {
+      return state[action.payload.username];
+    }
+    return {};
+  };
+
   switch (action.type) {
   case REQUEST_GET_USER_PROFILE:
-    return Object.assign({}, state, {
+    return patchProfile({
       getStatus: FETCH_PROCESSING
     });
   case RECEIVE_GET_USER_PROFILE_SUCCESS:
-    return Object.assign({}, state, {
+    return patchProfile({
       getStatus: FETCH_SUCCESS,
       profile: action.payload.profile
     });
   case RECEIVE_GET_USER_PROFILE_FAILURE:
-    return Object.assign({}, state, {
+    return patchProfile({
       getStatus: FETCH_FAILURE
     });
-  case CLEAR_PROFILE:
-    return INITIAL_USER_PROFILE_STATE;
+  case CLEAR_PROFILE: {
+    let clone = Object.assign({}, state);
+    delete clone[action.payload.username];
+    return clone;
+  }
   case UPDATE_PROFILE:
-    if (state.edit === undefined) {
+    if (getProfile().edit === undefined) {
       // caller must have dispatched START_PROFILE_EDIT successfully first
       return state;
     }
-    return Object.assign({}, state, {
-      edit: Object.assign({}, state.edit, {
+    return patchProfile({
+      edit: Object.assign({}, getProfile().edit, {
         profile: action.payload.profile
       })
     });
   case START_PROFILE_EDIT:
-    if (state.getStatus !== FETCH_SUCCESS) {
+    if (getProfile().getStatus !== FETCH_SUCCESS) {
       // ignore attempts to edit if we don't have a valid profile to edit yet
       return state;
     }
-    return Object.assign({}, state, {
+    return patchProfile({
       edit: {
-        profile: state.profile,
+        profile: getProfile().profile,
         errors: {}
       }
     });
   case CLEAR_PROFILE_EDIT:
-    return Object.assign({}, state, {
+    return patchProfile({
       edit: undefined
     });
   case REQUEST_PATCH_USER_PROFILE:
-    return Object.assign({}, state, {
+    return patchProfile({
       patchStatus: FETCH_PROCESSING
     });
   case RECEIVE_PATCH_USER_PROFILE_SUCCESS:
-    return Object.assign({}, state, {
+    return patchProfile({
       patchStatus: FETCH_SUCCESS,
       profile: action.payload.profile
     });
   case RECEIVE_PATCH_USER_PROFILE_FAILURE:
-    return Object.assign({}, state, {
+    return patchProfile({
       patchStatus: FETCH_FAILURE
     });
   case UPDATE_PROFILE_VALIDATION:
-    if (state.edit === undefined) {
+    if (getProfile().edit === undefined) {
       // caller must have dispatched START_PROFILE_EDIT successfully first
       return state;
     }
-    return Object.assign({}, state, {
-      edit: Object.assign({}, state.edit, {
+    return patchProfile({
+      edit: Object.assign({}, getProfile().edit, {
         errors: action.payload.errors
       })
     });
@@ -126,7 +145,7 @@ export const dashboard = (state = INITIAL_DASHBOARD_STATE, action) => {
 
 
 export default combineReducers({
-  userProfile,
+  profiles,
   dashboard,
   ui,
 });

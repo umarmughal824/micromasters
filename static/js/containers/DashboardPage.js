@@ -23,8 +23,14 @@ class DashboardPage extends React.Component {
 }
 
 const mapStateToProps = (state) => {
+  let profile = {
+    profile: {}
+  };
+  if (state.profiles[SETTINGS.username] !== undefined) {
+    profile = state.profiles[SETTINGS.username];
+  }
   return {
-    profile: state.userProfile,
+    profile: profile,
     dashboard: state.dashboard,
     expander: state.ui.dashboardExpander
   };
