@@ -2,7 +2,6 @@
 import assert from 'assert';
 import moment from 'moment';
 import React from 'react';
-import _ from 'lodash';
 
 import {
   STATUS_NOT_OFFERED,
@@ -414,10 +413,9 @@ describe('utility functions', () => {
     });
 
     it('should return fields for an empty profile', () => {
-      let errors = {};
-      _.forIn(PersonalTab.defaultProps.validationMessages, (value, key) => {
-        _.set(errors, key, `${value} is required`);
-      });
+      let errors = Object.assign({}, ...Object.entries(PersonalTab.defaultProps.validationMessages).map(
+        ([k,v]) => ({[k]: `${v} is required`})
+      ));
       const expectation = [false, "/profile/personal", errors];
       assert.deepEqual(validateProfileComplete(profile), expectation);
     });
@@ -467,11 +465,7 @@ describe('utility functions', () => {
       });
       profile['work_history'][0]['country'] = '';
       let expectation = [false, "/profile/professional", {
-        work_history: [
-          {
-            country: "Country is required"
-          }
-        ]
+        work_history: [{country: "Country is required"}]
       }];
       assert.deepEqual(validateProfileComplete(profile), expectation);
     });

@@ -6,7 +6,7 @@ import assert from 'assert';
 import {
   REQUEST_PATCH_USER_PROFILE,
   RECEIVE_PATCH_USER_PROFILE_SUCCESS,
-} from '../actions';
+} from '../actions/index';
 import { USER_PROFILE_RESPONSE } from '../constants';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../util/api';
