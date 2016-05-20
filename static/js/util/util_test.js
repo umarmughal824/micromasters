@@ -20,6 +20,8 @@ import {
   makeStrippedHtml,
   validateMonth,
   validateYear,
+  generateNewEducation,
+  generateNewWorkHistory,
 } from '../util/util';
 import PersonalTab from '../components/PersonalTab';
 import EmploymentTab from '../components/EmploymentTab';
@@ -527,6 +529,37 @@ describe('utility functions', () => {
 
     it('returns an empty string if passed an empty string', () => {
       assert.equal("", validateYear(""));
+    });
+  });
+  
+  describe('generateNewWorkHistory', () => {
+    it('generates a new work history object', () => {
+      assert.deepEqual(generateNewWorkHistory(), {
+        position: null,
+        industry: null,
+        company_name: null,
+        start_date: null,
+        end_date: null,
+        city: null,
+        country: null,
+        state_or_territory: null,
+      });
+    });
+  });
+  
+  describe('generateNewEducation', () => {
+    it('generates a new education object', () => {
+      let level = 'level';
+      assert.deepEqual(generateNewEducation(level), {
+        'degree_name': level,
+        'graduation_date': null,
+        'field_of_study': null,
+        'online_degree': false,
+        'school_name': null,
+        'school_city': null,
+        'school_state_or_territory': null,
+        'school_country': null
+      });
     });
   });
 });

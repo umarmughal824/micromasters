@@ -10,23 +10,11 @@ import _ from 'lodash';
 import Dialog from 'material-ui/Dialog';
 import moment from 'moment';
 
+import { generateNewWorkHistory } from '../util/util';
 import ProfileTab from "../util/ProfileTab";
 import { saveAndContinue } from '../util/profile_edit';
 
 class EmploymentTab extends ProfileTab {
-  constructor(props) {
-    super(props);
-    this.blankWorkHistoryEntry = {
-      position: null,
-      industry: null,
-      company_name: null,
-      start_date: null,
-      end_date: null,
-      city: null,
-      country: null,
-      state_or_territory: null,
-    };
-  }
   nextUrl = "/profile/privacy";
 
   static propTypes = {
@@ -103,8 +91,9 @@ class EmploymentTab extends ProfileTab {
       setWorkDialogIndex,
       setWorkDialogVisibility,
     } = this.props;
-    let clone = _.cloneDeep(profile);
-    clone['work_history'] = clone['work_history'].concat(this.blankWorkHistoryEntry);
+    let clone = Object.assign({}, profile, {
+      work_history: profile.work_history.concat(generateNewWorkHistory())
+    });
     updateProfile(clone);
     setWorkDialogIndex(clone.work_history.length - 1);
     setWorkDialogVisibility(true);
