@@ -257,7 +257,8 @@ REST_FRAMEWORK = {
 
 # Request files from the webpack dev server
 USE_WEBPACK_DEV_SERVER = get_var('MICROMASTERS_USE_WEBPACK_DEV_SERVER', False)
-WEBPACK_SERVER_URL = get_var('MICROMASTERS_WEBPACK_SERVER_URL', 'http://{host}:8078')
+WEBPACK_DEV_SERVER_HOST = get_var('WEBPACK_DEV_SERVER_HOST', '')
+WEBPACK_DEV_SERVER_PORT = get_var('WEBPACK_DEV_SERVER_PORT', '8078')
 
 # Important to define this so DEBUG works properly
 INTERNAL_IPS = (get_var('HOST_IP', '127.0.0.1'), )

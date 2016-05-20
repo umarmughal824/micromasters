@@ -91,13 +91,14 @@ class TestViews(TestCase):
     def test_webpack_url(self):
         """Verify that webpack bundle src shows up in production"""
         for debug, expected_url in [
-                (True, "foo_server/style.js"),
+                (True, "foo_server:0000/style.js"),
                 (False, "bundles/style.js")
         ]:
             with self.settings(
                 DEBUG=debug,
                 USE_WEBPACK_DEV_SERVER=True,
-                WEBPACK_SERVER_URL="foo_server"
+                WEBPACK_DEV_SERVER_HOST='foo_server',
+                WEBPACK_DEV_SERVER_PORT='0000',
             ):
                 response = self.client.get('/')
                 self.assertContains(

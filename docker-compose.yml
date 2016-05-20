@@ -30,13 +30,11 @@ web:
 watch:
   image: micromasters_web
   command: >
-    /bin/bash -c '
-    npm install --no-bin-links &&
-    echo Finished npm install &&
-    node ./node_modules/webpack-dev-server/bin/webpack-dev-server.js --config webpack.config.dev.js -d --content-base ./static --host 0.0.0.0 --port 8078 --progress --inline --hot'
+    /bin/bash -c './webpack_dev_server.sh --install'
   ports:
     - "8078:8078"
   volumes:
     - .:/src
   environment:
     NODE_ENV: 'development'
+  env_file: .env

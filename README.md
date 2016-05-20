@@ -5,8 +5,11 @@ Portal for learners and course teams to access MITx Micromasters programs
 - Docker
   - OSX recommended install method: [Download from Docker website](https://docs.docker.com/mac/)
 - docker-compose
-  - Recommended install: pip `pip install docker-compose`
+  - Recommended install: pip (`pip install docker-compose`)
 - Virtualbox (https://www.virtualbox.org/wiki/Downloads)
+- _(OSX only)_ Node/NPM
+  - OSX recommended install method: [Installer on Node website](https://nodejs.org/en/download/)
+  - No specific version has been chosen yet.
 
 ## (OSX only) Getting your machine Docker-ready
 
@@ -20,36 +23,6 @@ with the edX instance.
     docker-machine start mm
     # 'docker-machine env (machine)' prints export commands for important environment variables
     eval "$(docker-machine env mm)"
-
-#### Enable file syncing between the host machine and Docker:
-
-Due to file notification issues using Docker in OSX, development is more
-efficient if you install [docker-osx-dev](https://github.com/brikis98/docker-osx-dev).
-This synchronizes host file-system changes with the Docker container.
-
-First, set up ``docker-osx-dev`` via shell script.
-
-    . ./osx_docker_dev_setup.sh
-
-Subsequently, before you run the application with ``docker-compose up``,
-you would run this command in a separate terminal tab (assumes machine
-name ``mm``):
-  
-    docker-osx-dev -m mm -s ./ --ignore-file '.rsync-ignore'
-
-This starts a process that monitors the file system for changes. On startup
-you may receive this error:
-  
-      [ERROR] Found VirtualBox shared folders on your Boot2Docker VM. 
-      These may void any performance benefits from using docker-osx-dev:
-      
-      /Users
-      
-      [INSTRUCTIONS] Would you like this script to remove them?
-      1) yes
-      2) no
-
-Answer ``yes``.
 
 ## Running edX devstack locally _(optional, but recommended)_
 
@@ -135,12 +108,38 @@ a template to create your ``.env`` file. For Micromasters to work, it needs 3 va
 
 ## Docker Container Configuration and Start-up
 
-First, create a ``.env`` file from the sample in the codebases:
+#### 1) Create your ``.env`` file
+
+This file should be copied from the sample in the codebase:
 
     cp .env.sample .env
 
 Set the ``EDXORG_BASE_URL``, ``EDXORG_CLIENT_ID``, and ``EDXORG_CLIENT_SECRET``
 variables in the ``.env`` file appropriately.
+
+#### 2) _(OSX only)_ Set up and run the webpack dev server on your host machine
+
+First, you'll need to add another variable into ``.env``:
+
+    WEBPACK_DEV_SERVER_HOST='localhost'
+
+In the development environment, our static assets are served from the webpack
+dev server. When this environment variable is set, the script sources will
+look for the webpack server at that host instead of the host where Docker is running.
+
+Now, in a separate terminal tab, use the webpack helper script to install npm modules and run the dev server:
+
+    ./webpack_dev_server.sh --install
+
+The ``--install`` flag is only needed if you're starting up for the first time, or if updates have been made
+to the packages in ``./package.json``. If you've installed those packages and there are no ``./package.json``
+updates, you can run this without the ``--install`` flag: ``./webpack_dev_server.sh``
+
+**DEBUGGING NOTE:** If you see an error related to node-sass when you run this script, try running
+``npm rebuild node-sass``
+
+
+#### 3) Run the container
 
 For first-time container start-up, start it with a full build:
 
@@ -162,9 +161,18 @@ You should now be able to do the following:
 1. Click "Sign in with edX.org" and sign in by authorizing an edX client. If you're
  running edX locally, this will be the client you created in the steps above.
 
+## Running Commands and Testing
+
 As shown above, manage commands can be executed on the Docker-contained
-Micromasters app. For example, you can run a shell with the following command:
+Micromasters app. For example, you can run a Python shell with the following command:
 
     docker-compose run web python3 manage.py shell
 
+Tests should be run in the Docker container, not the host machine. They can be run with the following commands:
 
+    # Run the full suite
+    docker-compose run web tox
+    # Run Python tests only
+    docker-compose run web tox -e py34
+    # Run JS tests only
+    docker-compose run web tox -e js
