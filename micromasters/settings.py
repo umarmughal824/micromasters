@@ -120,6 +120,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
     'wagtail.wagtailcore.middleware.SiteMiddleware',
     'wagtail.wagtailredirects.middleware.RedirectMiddleware',
+    'social.apps.django_app.middleware.SocialAuthExceptionMiddleware',
 )
 
 AUTHENTICATION_BACKENDS = (
@@ -174,6 +175,7 @@ SOCIAL_AUTH_EDXORG_EXTRA_DATA = ['updated_at']
 
 LOGIN_REDIRECT_URL = '/dashboard'
 LOGIN_URL = '/'
+LOGIN_ERROR_URL = '/'
 
 ROOT_URLCONF = 'micromasters.urls'
 
