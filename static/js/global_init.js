@@ -2,7 +2,8 @@
 global.SETTINGS = {
   isAuthenticated: true,
   name: "full name",
-  username: "jane"
+  username: "jane",
+  edx_base_url: "/edx/"
 };
 
 // Make sure window and document are available for testing

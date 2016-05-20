@@ -1,3 +1,4 @@
+/* global SETTINGS: false */
 import assert from 'assert';
 import moment from 'moment';
 import React from 'react';
@@ -18,6 +19,7 @@ import {
   validateProfile,
   validateProfileComplete,
   makeStrippedHtml,
+  makeProfileImageUrl,
   validateMonth,
   validateYear,
   generateNewEducation,
@@ -560,6 +562,20 @@ describe('utility functions', () => {
         'school_state_or_territory': null,
         'school_country': null
       });
+    });
+  });
+
+  describe('makeProfileImageUrl', () => {
+    it('uses the large profile image if available', () => {
+      let url = "/url";
+      assert.equal(url, makeProfileImageUrl({ profile_url_large: url }));
+    });
+    
+    it('uses a default profile image if not available, removing duplicate slashes', () => {
+      assert.equal(
+        `${SETTINGS.edx_base_url}static/images/profiles/default_120.png`,
+        makeProfileImageUrl({})
+      );
     });
   });
 });
