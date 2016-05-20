@@ -224,10 +224,11 @@ class EducationTab extends ProfileTab {
     return <Grid className="profile-tab-grid">
       <Dialog
         open={educationDialogVisibility}
-        className="profile-form-dialog"
+        className="dashboard-dialog"
         onRequestClose={this.clearEducationEdit}
         title={this.educationLevelLabels[educationDegreeLevel]}
         actions={actions}
+        autoScrollBodyContent={true}
       >
         <Grid>
           <Cell col={6}>

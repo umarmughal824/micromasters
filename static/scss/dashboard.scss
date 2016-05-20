@@ -143,11 +143,6 @@ c.validation-wrapper {
     text-align: center;
   }
 }
-.mdl-dialog.profile-employment-dialog {
-  font-family: "Open Sans";
-  width: 700px;
-  padding: 30px;
-}
 .mdl-button.work-button {
   font-size: 16px;
   font-weight: 600;
@@ -236,9 +231,6 @@ c.validation-wrapper {
 .education-level-header {
   border: 1px solid lightgrey;
 }
-.mdl-dialog.profile-form-dialog {
-  width: 600px;
-}
 .existing-education-grid.mdl-grid {
   padding-top: 0px;
   padding-bottom: 0px;
@@ -250,4 +242,18 @@ c.validation-wrapper {
 }
 .education-icons {
   text-align: right;
+}
+
+.dashboard-dialog {
+  font-family: "Open Sans";
+  width: 700px;
+  padding: 30px;
+
+  div {
+    border-top: 0 !important;
+  }
+
+  h3 {
+    border-bottom: 0 !important;
+  }
 }
