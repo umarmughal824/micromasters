@@ -10,6 +10,7 @@ from wagtail.wagtailcore.models import Page
 from wagtail.wagtailcore.fields import RichTextField
 from wagtail.wagtailadmin.edit_handlers import FieldPanel
 
+from micromasters.utils import webpack_dev_server_host
 from courses.models import Program
 from ui.views import get_bundle_url
 
@@ -29,16 +30,14 @@ class HomePage(Page):
     ]
 
     def get_context(self, request):
-        host = request.get_host().split(":")[0]
-
         js_settings = {
             "gaTrackingID": settings.GA_TRACKING_ID,
-            "host": host
+            "host": webpack_dev_server_host(request)
         }
 
         context = super(HomePage, self).get_context(request)
 
-        context['programs'] = Program.objects.filter(live=True)
+        context["programs"] = Program.objects.filter(live=True)
         context["style_src"] = get_bundle_url(request, "style.js")
         context["public_src"] = get_bundle_url(request, "public.js")
         context["style_public_src"] = get_bundle_url(request, "style_public.js")
