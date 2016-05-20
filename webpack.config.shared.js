@@ -1,6 +1,5 @@
 var path = require("path");
 var webpack = require("webpack");
-var NodeNeat = require("node-neat");
 
 module.exports = {
   entry: {
@@ -40,10 +39,6 @@ module.exports = {
         loader: 'style!css'
       },
     ]
-  },
-
-  sassLoader: {
-    includePaths: NodeNeat.includePaths
   },
 
   resolve: {
