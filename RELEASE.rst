@@ -1,6 +1,57 @@
 Release Notes
 =============
 
+Version 0.8.0
+-------------
+
+- Use Django OAuth Toolkit
+- Turned on dialog scrollbars
+- Redirect to profile if the profile is not complete
+- Fixed clear profile edit bug
+- Refactored profiles reducer to handle multiple profiles
+- Moved education reducers and actions into `ui`
+- Added prefer-template eslint rule
+- Implemented UI for showing course runs in dashboard
+- Added &#39;delete&#39; functionality to education entries
+- Used state select field for education tab
+- Added tests for api functions
+- Marked profile as incomplete when it&#39;s being filled out and as complete when it&#39;s done
+- Changed location order to Country -&gt; State -&gt; City
+- Added fake values for employment and education constants
+- Removed not implemented links in dropdown menu
+- Fixed profile submission to wait for a 200
+- Changed all class properties to use es7 class property syntax
+- Implemented new employment page design
+- Added requirement for state_or_territory on PersonalTab
+- Only live programs are available in dashboard
+- Additional changes to the admin
+- Implemented refresh token
+- Updated micromasters documentation
+- Fixed urls for enroll and upgdate course in a program
+- added edx_course_key to courserun list display in admin
+- Removed onBlur callback from AutoComplete
+- Removed hello_test.js
+- Added field for month/year
+- Added material-ui AutoComplete
+- Upgraded to latest django
+- Added material-ui, replaced react-mdl Dialog with material-ui Dialog
+- Added no-var and camelcase eslint rules
+- Removed dashboard link from dashboard page and added this link to username on header dropdown.
+- Added dashboard links to enroll and upgrade courses, and a disabled button to apply for masters on campus.
+- education tab
+- Updated redux-asserts
+- Added check for profile completeness before visiting dashboard
+- change account_privacy error message
+- fix pipeline_api tests
+- Added Privacy tab to profile
+- Old not passed courses in dashboard API
+- Updated profile PATCH code to use return value as new profile
+- Created employment history table and migration
+- Updated date to datetime to match CourseRun fields
+- Upgraded npm packages
+- Added field for state or territory
+- Removed programs and courses APIs which are replaced by dashboard API
+
 Version 0.7.0
 -------------
 
