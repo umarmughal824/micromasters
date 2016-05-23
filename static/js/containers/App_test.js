@@ -36,7 +36,8 @@ describe('App', () => {
   });
 
   it('clears profile, ui, and dashboard after unmounting', done => {
-    renderComponent("/dashboard").then(([component, div]) => {  // eslint-disable-line no-unused-vars
+    renderComponent("/dashboard", editProfileActions).then(
+    ([component, div]) => {  // eslint-disable-line no-unused-vars
       listenForActions([CLEAR_DASHBOARD, CLEAR_PROFILE, CLEAR_UI], () => {
         ReactDOM.unmountComponentAtNode(div);
       }).then(() => {
@@ -64,8 +65,8 @@ describe('App', () => {
       });
       helper.profileGetStub.returns(Promise.resolve(response));
 
-      renderComponent("/dashboard", []).then(() => {
-        assert.equal(helper.currentLocation.pathname, "/profile/personal");
+      renderComponent("/dashboard", editProfileActions).then(() => {
+        assert.equal(helper.currentLocation.pathname, "/profile/education");
         done();
       });
     });
@@ -87,8 +88,8 @@ describe('App', () => {
       });
       helper.profileGetStub.returns(Promise.resolve(response));
 
-      renderComponent("/dashboard").then(() => {
-        assert.equal(helper.currentLocation.pathname, "/dashboard");
+      renderComponent("/dashboard", editProfileActions).then(() => {
+        assert.equal(helper.currentLocation.pathname, "/profile/education");
         done();
       });
     });
@@ -113,7 +114,7 @@ describe('App', () => {
       helper.profileGetStub.returns(Promise.resolve(response));
 
       renderComponent("/dashboard", editProfileActions).then(() => {
-        assert.equal(helper.currentLocation.pathname, "/profile/privacy");
+        assert.equal(helper.currentLocation.pathname, "/profile/education");
         done();
       });
     });
