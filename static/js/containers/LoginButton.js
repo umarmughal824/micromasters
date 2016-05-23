@@ -39,11 +39,9 @@ class LoginButton extends React.Component {
 }
 
 const mapStateToProps = (state) => {
-  let profile = {
-    profile: {}
-  };
+  let profile = {};
   if (state.profiles[SETTINGS.username] !== undefined) {
-    profile = state.profiles[SETTINGS.username];
+    profile = state.profiles[SETTINGS.username].profile;
   }
   return {
     profile: profile
