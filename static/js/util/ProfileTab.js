@@ -7,6 +7,7 @@ import {
   boundSelectField,
   boundMonthYearField,
   boundStateSelectField,
+  boundRadioGroupField,
   saveAndContinue,
 } from './profile_edit';
 import { HIGH_SCHOOL, ASSOCIATE, BACHELORS, MASTERS, DOCTORATE } from '../constants';
@@ -24,6 +25,7 @@ class ProfileTab extends React.Component {
     this.boundStateSelectField = boundStateSelectField.bind(this);
     this.boundDateField = boundDateField.bind(this);
     this.boundMonthYearField = boundMonthYearField.bind(this);
+    this.boundRadioGroupField = boundRadioGroupField.bind(this);
 
     // options we set (for select components)
     let countryOptions = Object.keys(iso3166.data).map(code => ({
@@ -42,9 +44,12 @@ class ProfileTab extends React.Component {
     }));
     this.languageOptions = _.sortBy(languageOptions, 'label');
     this.privacyOptions = [
-      { value: 'public', label: 'Public to the world'},
-      { value: 'public_to_mm', label: 'Public to other micromasters students'},
-      { value: 'private', label: 'Private'}
+      { value: 'public', label: 'Public to the world', helper: `We will publish your Micromasters 
+        profile on our website.` },
+      { value: 'public_to_mm', label: 'Public to other micromasters students', helper: `Your Micromasters profile 
+        will only be viewable by other learners in your program, and by MIT faculity and staff.` },
+      { value: 'private', label: 'Private', helper: `Your Micromasters profile will be viewable only by 
+        MIT faculty and staff.` }
     ];
     this.educationLevelOptions = [
       {value: HIGH_SCHOOL, label: "High school"},

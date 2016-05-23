@@ -145,6 +145,8 @@ c.validation-wrapper {
     margin: 20px auto;
     font-family: "Open Sans";
     text-align: center;
+    color: #414141;
+    font-weight: 400;
   }
 }
 .mdl-button.work-button {
@@ -163,8 +165,9 @@ c.validation-wrapper {
   background: #4C8399!important;
   text-transform: none;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 400;
   height: 50px;
+  min-width: 200px;
   span {
     padding: 10px;
   }
@@ -227,6 +230,10 @@ c.validation-wrapper {
   }
 }
 
+.profile-tab-grid-borderless {
+  border: 0;
+}
+
 .education-level-name {
   display: inline;
 }
@@ -267,4 +274,16 @@ c.validation-wrapper {
   display: block;
   font-weight: 100;
   text-align: center;
+}
+
+.radio-label {
+  color: #2D2D2D;
+  font-weight: 400;
+  .radio-label-hint {
+    font-size: small;
+    color: #9196A0;
+  }
+}
+.header-privacy-tab {
+  color: #A2AAB3;
 }

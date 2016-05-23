@@ -12,6 +12,7 @@ import {
   boundSelectField,
   boundStateSelectField,
   boundMonthYearField,
+  boundRadioGroupField
 } from './profile_edit';
 import { DATE_FORMAT } from '../constants';
 import { USER_PROFILE_RESPONSE } from '../constants';
@@ -25,6 +26,7 @@ describe('Profile Editing utility functions', () => {
     that = {
       props: {
         profile: {
+          "account_privacy": "private",
           "first_name": "",
           "date_of_birth": "",
           "gender": undefined,
@@ -39,6 +41,39 @@ describe('Profile Editing utility functions', () => {
         updateProfile: change
       }
     };
+  });
+
+  describe('Bound radio group', () => {
+    let radioGroup;
+    let privacyOptions = [
+      { value: 'public', label: 'Public to the world', helper: `We will publish your Micromasters 
+        profile on our website.` },
+      { value: 'public_to_mm', label: 'Public to other micromasters students', helper: `Your Micromasters profile 
+        will only be viewable by other learners in your program, and by MIT faculity and staff.` },
+      { value: 'private', label: 'Private', helper: `Your Micromasters profile will be viewable only by 
+        MIT faculty and staff.` }
+    ];
+    beforeEach(() => {
+      radioGroup = boundRadioGroupField.call(
+        that,
+        ["account_privacy"],
+        "Privacy level",
+        privacyOptions
+      );
+    });
+
+    it('should correctly set props on itself', () => {
+      assert.deepEqual(
+        undefined,
+        radioGroup.props.floatingLabelText
+      );
+      assert.deepEqual(undefined, radioGroup.props.value);
+    });
+
+    it('should call the updateProfile callback when onChange fires', () => {
+      radioGroup.props.onChange({target: {value: "public_to_mm"}});
+      assert.deepEqual("public_to_mm", that.props.profile.account_privacy);
+    });
   });
 
   describe('Bound Text field', () => {

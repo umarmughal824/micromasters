@@ -32,7 +32,7 @@ describe("ProfilePage", function() {
   it('marks email_optin and filled_out when saving this page', done => {
     renderComponent("/profile/privacy").then(([component, div]) => {  // eslint-disable-line no-unused-vars
       let button = div.querySelectorAll("button")[1];
-      assert.equal(button.innerHTML, "Save and continue");
+      assert.equal(button.innerHTML, "I’m Done!");
 
       let updatedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
         email_optin: true,
