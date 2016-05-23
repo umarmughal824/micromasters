@@ -20,6 +20,7 @@ import {
   setEducationDegreeLevel,
   setEducationDegreeInclusions,
 } from '../actions/ui';
+import Jumbotron from '../components/Jumbotron';
 
 class ProfilePage extends React.Component {
   static propTypes = {
@@ -147,20 +148,20 @@ class ProfilePage extends React.Component {
       })
     ));
 
+    let text = `Welcome ${profile.preferred_name || SETTINGS.name}, let's
+    complete your enrollment to MIT MicroMaster's.`;
+
     return <div className="card">
-      <div className="card-copy">
-        <h1>Enroll in MIT Micromasters</h1>
-        <p>
-          Please tell us more about yourself so you can participate in the
-          micromasters community and qualify for your micromasters certificate.
-        </p>
-        <Tabs activeTab={this.activeTab()}>
-          {this.makeTabs()}
-        </Tabs>
-        <section>
-          {this.props.children && childrenWithProps}
-        </section>
-      </div>
+      <Jumbotron profile={profile} text={text}>
+        <div className="card-copy">
+          <Tabs activeTab={this.activeTab()}>
+            {this.makeTabs()}
+          </Tabs>
+          <section>
+            {this.props.children && childrenWithProps}
+          </section>
+        </div>
+      </Jumbotron>
     </div>;
   }
 }

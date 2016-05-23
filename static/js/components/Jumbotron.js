@@ -2,19 +2,17 @@
 import React from 'react';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 
-import CourseList from './CourseList';
 import { makeProfileImageUrl } from '../util/util';
 
-class Dashboard extends React.Component {
+class Jumbotron extends React.Component {
   static propTypes = {
-    profile:    React.PropTypes.object.isRequired,
-    dashboard:  React.PropTypes.object.isRequired,
-    expander: React.PropTypes.object.isRequired,
-    dispatch: React.PropTypes.func.isRequired,
+    profile:      React.PropTypes.object.isRequired,
+    text:         React.PropTypes.string.isRequired,
+    children:     React.PropTypes.object.isRequired,
   };
 
   render() {
-    const { profile, dashboard, expander, dispatch } = this.props;
+    const { profile, text } = this.props;
     let imageUrl = makeProfileImageUrl(profile);
     return <div className="card">
       <Grid className="card-user">
@@ -29,20 +27,15 @@ class Dashboard extends React.Component {
           />
         </Cell>
         <Cell col={5} className="card-name">
-          { profile.preferred_name || SETTINGS.name }
+          { text }
           <div className="card-student-id">
             ID: { profile.pretty_printed_student_id }
           </div>
         </Cell>
       </Grid>
-      <div className="card-header">
-        Your Status
-      </div>
-      <div className="card-copy">
-        <CourseList dashboard={dashboard} expander={expander} dispatch={dispatch} />
-      </div>
+      { this.props.children }
     </div>;
   }
 }
 
-export default Dashboard;
+export default Jumbotron;
