@@ -1,6 +1,7 @@
 /* global SETTINGS:false */
 __webpack_public_path__ = `http://${SETTINGS.host}:8078/`;  // eslint-disable-line no-undef, camelcase
 import ReactDOM from 'react-dom';
+
 import configureStore from './store/configureStore';
 import ga from 'react-ga';
 import { browserHistory } from 'react-router';
@@ -10,9 +11,6 @@ import { makeDashboardRoutes } from './dashboard_routes';
 import 'style!css!react-mdl/extra/material.css';
 import 'react-mdl/extra/material.js';
 
-// requirements for react-select
-import 'style!css!react-select/dist/react-select.css';
-
 // requirement for react-datepicker
 import 'style!css!react-datepicker/dist/react-datepicker.css';
 
@@ -20,6 +18,10 @@ import entries from 'object.entries';
 if (!Object.entries) {
   entries.shim();
 }
+
+// material-ui requirement
+import injectTapEventPlugin from 'react-tap-event-plugin';
+injectTapEventPlugin();
 
 const store = configureStore();
 
@@ -30,8 +32,7 @@ ReactDOM.render(
   makeDashboardRoutes(
     browserHistory,
     store,
-    () => ga.pageview(window.location.pathname),
-    process.env.NODE_ENV !== 'production'
+    () => ga.pageview(window.location.pathname)
   ),
   document.getElementById("dashboard")
 );

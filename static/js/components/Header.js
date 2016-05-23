@@ -1,25 +1,19 @@
 import React from 'react';
 import LoginButton from '../containers/LoginButton';
 import { Navbar } from 'react-bootstrap';
-import Link from 'react-router/lib/Link';
 
 class Header extends React.Component {
+  static propTypes = {
+    empty: React.PropTypes.bool
+  };
+
   render () {
     const { empty } = this.props;
     let content;
     if (!empty) {
-      content = <div>
-        <ul className="nav navbar-toolbar navbar-left">
-          <li role="presentation">
-            <Link to="/dashboard">
-              Dashboard
-            </Link>
-          </li>
-        </ul>
-        <div className="nav-utility pull-right">
+      content = <div className="nav-utility pull-right">
           <LoginButton />
-        </div>
-      </div>;
+        </div>;
     }
 
     return (
@@ -36,9 +30,5 @@ class Header extends React.Component {
     );
   }
 }
-
-Header.propTypes = {
-  empty: React.PropTypes.bool
-};
 
 export default Header;

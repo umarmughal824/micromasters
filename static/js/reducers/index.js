@@ -1,11 +1,6 @@
 /* global SETTINGS: false */
 import { combineReducers } from 'redux';
 import {
-  REQUEST_COURSE_LIST,
-  RECEIVE_COURSE_LIST_SUCCESS,
-  RECEIVE_COURSE_LIST_FAILURE,
-  CLEAR_COURSE_LIST,
-
   REQUEST_GET_USER_PROFILE,
   RECEIVE_GET_USER_PROFILE_SUCCESS,
   RECEIVE_GET_USER_PROFILE_FAILURE,
@@ -27,101 +22,93 @@ import {
   FETCH_PROCESSING,
   FETCH_SUCCESS,
 } from '../actions';
+import { ui } from './ui';
 
-const INITIAL_COURSE_LIST_STATE = {
-  courseList: [],
-  programList: []
-};
+export const INITIAL_PROFILES_STATE = {};
 
-export const courseList = (state = INITIAL_COURSE_LIST_STATE, action) => {
-  switch (action.type) {
-  case REQUEST_COURSE_LIST:
-    return Object.assign({}, state, {
-      fetchStatus: FETCH_PROCESSING
-    });
-  case RECEIVE_COURSE_LIST_SUCCESS:
-    return Object.assign({}, state, {
-      fetchStatus: FETCH_SUCCESS,
-      courseList: action.payload.courseList,
-      programList: action.payload.programList
-    });
-  case RECEIVE_COURSE_LIST_FAILURE:
-    return Object.assign({}, state, {
-      fetchStatus: FETCH_FAILURE
-    });
-  case CLEAR_COURSE_LIST:
-    return INITIAL_COURSE_LIST_STATE;
-  default:
-    return state;
-  }
-};
+export const profiles = (state = INITIAL_PROFILES_STATE, action) => {
+  let patchProfile = newProfile => {
+    let clone = Object.assign({}, state);
+    let username = action.payload.username;
+    clone[username] = Object.assign(
+      { profile: {} },
+      clone[username],
+      newProfile
+    );
+    return clone;
+  };
 
-export const INITIAL_USER_PROFILE_STATE = {
-  profile: {}
-};
+  let getProfile = () => {
+    if (state[action.payload.username] !== undefined) {
+      return state[action.payload.username];
+    }
+    return {};
+  };
 
-export const userProfile = (state = INITIAL_USER_PROFILE_STATE, action) => {
   switch (action.type) {
   case REQUEST_GET_USER_PROFILE:
-    return Object.assign({}, state, {
+    return patchProfile({
       getStatus: FETCH_PROCESSING
     });
   case RECEIVE_GET_USER_PROFILE_SUCCESS:
-    return Object.assign({}, state, {
+    return patchProfile({
       getStatus: FETCH_SUCCESS,
       profile: action.payload.profile
     });
   case RECEIVE_GET_USER_PROFILE_FAILURE:
-    return Object.assign({}, state, {
+    return patchProfile({
       getStatus: FETCH_FAILURE
     });
-  case CLEAR_PROFILE:
-    return INITIAL_USER_PROFILE_STATE;
+  case CLEAR_PROFILE: {
+    let clone = Object.assign({}, state);
+    delete clone[action.payload.username];
+    return clone;
+  }
   case UPDATE_PROFILE:
-    if (state.edit === undefined) {
+    if (getProfile().edit === undefined) {
       // caller must have dispatched START_PROFILE_EDIT successfully first
       return state;
     }
-    return Object.assign({}, state, {
-      edit: Object.assign({}, state.edit, {
+    return patchProfile({
+      edit: Object.assign({}, getProfile().edit, {
         profile: action.payload.profile
       })
     });
   case START_PROFILE_EDIT:
-    if (state.getStatus !== FETCH_SUCCESS) {
+    if (getProfile().getStatus !== FETCH_SUCCESS) {
       // ignore attempts to edit if we don't have a valid profile to edit yet
       return state;
     }
-    return Object.assign({}, state, {
+    return patchProfile({
       edit: {
-        profile: state.profile,
+        profile: getProfile().profile,
         errors: {}
       }
     });
   case CLEAR_PROFILE_EDIT:
-    return Object.assign({}, state, {
+    return patchProfile({
       edit: undefined
     });
   case REQUEST_PATCH_USER_PROFILE:
-    return Object.assign({}, state, {
+    return patchProfile({
       patchStatus: FETCH_PROCESSING
     });
   case RECEIVE_PATCH_USER_PROFILE_SUCCESS:
-    return Object.assign({}, state, {
+    return patchProfile({
       patchStatus: FETCH_SUCCESS,
       profile: action.payload.profile
     });
   case RECEIVE_PATCH_USER_PROFILE_FAILURE:
-    return Object.assign({}, state, {
+    return patchProfile({
       patchStatus: FETCH_FAILURE
     });
   case UPDATE_PROFILE_VALIDATION:
-    if (state.edit === undefined) {
+    if (getProfile().edit === undefined) {
       // caller must have dispatched START_PROFILE_EDIT successfully first
       return state;
     }
-    return Object.assign({}, state, {
-      edit: Object.assign({}, state.edit, {
+    return patchProfile({
+      edit: Object.assign({}, getProfile().edit, {
         errors: action.payload.errors
       })
     });
@@ -158,7 +145,7 @@ export const dashboard = (state = INITIAL_DASHBOARD_STATE, action) => {
 
 
 export default combineReducers({
-  courseList,
-  userProfile,
+  profiles,
   dashboard,
+  ui,
 });

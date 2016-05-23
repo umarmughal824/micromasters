@@ -14,9 +14,16 @@ import {
 import {
   makeCourseStatusDisplay,
   makeCourseProgressDisplay,
+  makeRunStatusDisplay,
   validateProfile,
+  validateProfileComplete,
   makeStrippedHtml,
+  validateMonth,
+  validateYear,
 } from '../util/util';
+import PersonalTab from '../components/PersonalTab';
+import EmploymentTab from '../components/EmploymentTab';
+import PrivacyTab from '../components/PrivacyTab';
 
 /* eslint-disable camelcase */
 describe('utility functions', () => {
@@ -42,25 +49,33 @@ describe('utility functions', () => {
       return makeStrippedHtml(textOrElement);
     };
 
-    it('is a passed a course', () => {
+    it('is a passed course', () => {
       assert.equal(renderCourseStatusDisplay({
         status: STATUS_PASSED,
-        grade: 0.34
+        runs: [{
+          grade: 0.34
+        }]
       }), "34%");
       assert.equal(renderCourseStatusDisplay({
-        status: STATUS_PASSED
+        status: STATUS_PASSED,
+        runs: []
       }), "");
       assert.equal(renderCourseStatusDisplay({
         status: STATUS_PASSED,
-        grade: null
+        runs: [{
+          grade: null
+        }]
       }), "");
     });
 
     it("is a failed course", () => {
       assert.equal(renderCourseStatusDisplay({
-        status: STATUS_NOT_PASSED,
-        grade: 0.99999
-      }), "100%");
+        status: STATUS_NOT_OFFERED,
+        runs: [{
+          status: STATUS_NOT_PASSED,
+          grade: 0.99999,
+        }]
+      }), "");
       assert.equal(renderCourseStatusDisplay({
         status: STATUS_NOT_PASSED
       }), "");
@@ -68,14 +83,17 @@ describe('utility functions', () => {
 
     it("is a verified course without a course start date", () => {
       assert.equal(renderCourseStatusDisplay({
-        status: STATUS_VERIFIED_NOT_COMPLETED
+        status: STATUS_VERIFIED_NOT_COMPLETED,
+        runs: []
       }), "");
     });
 
     it("is a verified course with a course start date of tomorrow", () => {
       assert.equal(renderCourseStatusDisplay({
         status: STATUS_VERIFIED_NOT_COMPLETED,
-        course_start_date: tomorrow
+        runs: [{
+          course_start_date: tomorrow
+        }]
       }, moment(today)), "Course starting: 4/1/2016");
     });
 
@@ -83,15 +101,19 @@ describe('utility functions', () => {
       // Note the lack of grade field
       assert.equal(renderCourseStatusDisplay({
         status: STATUS_VERIFIED_NOT_COMPLETED,
-        course_start_date: today
+        runs: [{
+          course_start_date: today
+        }]
       }, moment(today)), "0%");
     });
 
     it("is a verified course with a course start date of yesterday", () => {
       assert.equal(renderCourseStatusDisplay({
         status: STATUS_VERIFIED_NOT_COMPLETED,
-        course_start_date: yesterday,
-        grade: 0.33333
+        runs: [{
+          course_start_date: yesterday,
+          grade: 0.33333
+        }]
       }, moment(today)), "33%");
     });
 
@@ -105,7 +127,9 @@ describe('utility functions', () => {
       assert.equal(
         renderCourseStatusDisplay({
           status: STATUS_ENROLLED_NOT_VERIFIED,
-          verification_date: tomorrow
+          runs: [{
+            verification_date: tomorrow
+          }]
         }, moment(today)),
         "UPGRADE TO VERIFIED"
       );
@@ -114,28 +138,36 @@ describe('utility functions', () => {
     it("is an enrolled course with a verification date of today", () => {
       assert.equal(renderCourseStatusDisplay({
         status: STATUS_ENROLLED_NOT_VERIFIED,
-        verification_date: today
+        runs: [{
+          verification_date: today
+        }]
       }, moment(today)), "");
     });
 
     it("is an enrolled course with a verification date of yesterday", () => {
       assert.equal(renderCourseStatusDisplay({
         status: STATUS_ENROLLED_NOT_VERIFIED,
-        verification_date: yesterday
+        runs: [{
+          verification_date: yesterday
+        }]
       }, moment(today)), "");
     });
 
     it("is an offered course with no enrollment start date", () => {
       assert.equal(renderCourseStatusDisplay({
         status: STATUS_OFFERED_NOT_ENROLLED,
-        fuzzy_enrollment_start_date: "fuzzy start date"
+        runs: [{
+          fuzzy_enrollment_start_date: "fuzzy start date"
+        }]
       }), "fuzzy start date");
     });
 
     it("is an offered course with an enrollment date of tomorrow", () => {
       assert.equal(renderCourseStatusDisplay({
         status: STATUS_OFFERED_NOT_ENROLLED,
-        enrollment_start_date: tomorrow
+        runs: [{
+          enrollment_start_date: tomorrow
+        }]
       }, moment(today)), "Enrollment starting: 4/1/2016");
     });
 
@@ -143,7 +175,9 @@ describe('utility functions', () => {
       assert.equal(
         renderCourseStatusDisplay({
           status: STATUS_OFFERED_NOT_ENROLLED,
-          enrollment_start_date: today
+          runs: [{
+            enrollment_start_date: today
+          }]
         }, moment(today)),
         "ENROLL"
       );
@@ -153,22 +187,24 @@ describe('utility functions', () => {
       assert.equal(
         renderCourseStatusDisplay({
           status: STATUS_OFFERED_NOT_ENROLLED,
-          enrollment_start_date: yesterday
+          runs: [{
+            enrollment_start_date: yesterday
+          }]
         }, moment(today)),
         "ENROLL"
       );
     });
 
-    it("is a run, not a course. If there are any runs the first run should be picked", () => {
+    it("doesn't show any special message even if the run is not passed", () => {
+      // we do show this information in the progress circle and in the expander
       assert.equal(
         renderCourseStatusDisplay({
           status: STATUS_NOT_OFFERED,
           runs: [{
-            status: STATUS_OFFERED_NOT_ENROLLED,
-            enrollment_start_date: yesterday
+            status: STATUS_NOT_PASSED
           }]
         }, moment(today)),
-        "ENROLL"
+        ""
       );
     });
 
@@ -186,40 +222,38 @@ describe('utility functions', () => {
   });
 
   describe("makeCourseStatusDisplay", () => {
-    let renderCourseProgressDisplay = (course, ...args) => {
-      if (course.runs === undefined) {
-        course.runs = [];
+    let passedCourse = {
+      status: STATUS_PASSED,
+      runs: []
+    };
+    let notPassedCourse = {
+      status: STATUS_NOT_OFFERED,
+      runs: [{
+        status: STATUS_NOT_PASSED
+      }]
+    };
+    let inProgressCourse = {
+      status: STATUS_VERIFIED_NOT_COMPLETED
+    };
+    
+    let renderCourseProgressDisplay = (course, isTop, isBottom, numRuns) => {
+      if (numRuns === undefined) {
+        numRuns = 0;
       }
-      let textOrElement = makeCourseProgressDisplay(course, ...args);
+      let textOrElement = makeCourseProgressDisplay(course, isTop, isBottom, numRuns);
       return makeStrippedHtml(textOrElement);
     };
 
     it('is a course which is passed', () => {
       assert.equal(
-        renderCourseProgressDisplay({
-          status: STATUS_PASSED
-        }),
-        "Course passed"
-      );
-    });
-
-    it('is a run which is passed. In this case the course status is ignored', () => {
-      assert.equal(
-        renderCourseProgressDisplay({
-          status: STATUS_NOT_OFFERED,
-          runs: [{
-            status: STATUS_PASSED
-          }]
-        }),
+        renderCourseProgressDisplay(passedCourse),
         "Course passed"
       );
     });
 
     it('is a course which is in progress', () => {
       assert.equal(
-        renderCourseProgressDisplay({
-          status: STATUS_VERIFIED_NOT_COMPLETED
-        }),
+        renderCourseProgressDisplay(inProgressCourse),
         "Course started"
       );
     });
@@ -233,10 +267,66 @@ describe('utility functions', () => {
       ]) {
         assert.equal(
           renderCourseProgressDisplay({
-            status: status
+            status: status,
+            runs: []
           }),
           "Course not started"
         );
+      }
+    });
+
+    it('is a course which is not-passed', () => {
+      assert.equal(
+        renderCourseProgressDisplay(notPassedCourse),
+        "Course not started"
+      );
+    });
+    
+    let getLines = progress => {
+      let topLine = false, bottomLine = false;
+
+      for (let child of progress.props.children) {
+        if (React.isValidElement(child)) {
+          if (child.props.className === "top-line") {
+            topLine = true;
+          }
+          if (child.props.className === "bottom-line") {
+            bottomLine = true;
+          }
+        }
+      }
+
+      return [topLine, bottomLine];
+    };
+
+    it('draws lines going up and down correctly', () => {
+      for (let isFirst of [true, false]) {
+        for (let isLast of [true, false]) {
+          let progress = makeCourseProgressDisplay(passedCourse, isFirst, isLast, 10);
+          let lines = getLines(progress);
+          assert.deepEqual(lines, [!isFirst, !isLast]);
+        }
+      }
+    });
+  });
+
+  describe("makeRunStatusDisplay", () => {
+    it('shows Course passed when a course is passed', () => {
+      assert.equal("Passed", makeRunStatusDisplay({ status: STATUS_PASSED }));
+    });
+
+    it('shows Course not passed when a course is not passed', () => {
+      assert.equal("Not passed", makeRunStatusDisplay({ status: STATUS_NOT_PASSED }));
+    });
+
+    it('returns an empty string for all other statuses', () => {
+      for (let status of [
+        STATUS_ENROLLED_NOT_VERIFIED,
+        STATUS_NOT_OFFERED,
+        STATUS_OFFERED_NOT_ENROLLED,
+        STATUS_VERIFIED_NOT_COMPLETED,
+      ]) {
+        assert.equal("", makeRunStatusDisplay({ status: status }));
       }
     });
   });
@@ -309,6 +399,134 @@ describe('utility functions', () => {
       const nestMessages = {"foo": "Foo"};
       let errors = validateProfile(profile, keysToCheck, nestMessages);
       assert.deepEqual({}, errors);
+    });
+  });
+
+  describe('validateProfileComplete', () => {
+    let profile;
+    beforeEach(() => {
+      profile = {};
+    });
+
+    it('should return fields for dialog for an empty profile', () => {
+      let expectation = [false, {
+        url: "/profile/personal",
+        title: "Personal Info",
+        text: "Please complete your personal information.",
+      }];
+      assert.deepEqual(validateProfileComplete(profile), expectation);
+    });
+
+    it('should return appropriate fields for dialog when a field is missing', () => {
+      PersonalTab.defaultProps.requiredFields.forEach( (field) => {
+        profile[field[0]] = "filled in";
+      });
+      profile['account_privacy'] = '';
+      let expectation = [false, {
+        url: "/profile/privacy",
+        title: "Privacy Settings",
+        text: "Please complete the privacy settings.",
+      }];
+      assert.deepEqual(validateProfileComplete(profile), expectation);
+    });
+
+    it('should return true when all top-level fields are filled in', () => {
+      PersonalTab.defaultProps.requiredFields.forEach( (field) => {
+        profile[field[0]] = "filled in";
+      });
+      PrivacyTab.defaultProps.requiredFields.forEach( (field) => {
+        profile[field[0]] = "filled in";
+      });
+      assert.deepEqual(validateProfileComplete(profile), [true, {}]);
+    });
+
+    it('should return true when all nested fields are filled in', () => {
+      PersonalTab.defaultProps.requiredFields.forEach( (field) => {
+        profile[field[0]] = "filled in";
+      });
+      PrivacyTab.defaultProps.requiredFields.forEach( (field) => {
+        profile[field[0]] = "filled in";
+      });
+      profile['work_history'] = [{}];
+      EmploymentTab.nestedValidationKeys.forEach( k => {
+        profile['work_history'][0][k] = "filled in";
+      });
+      assert.deepEqual(validateProfileComplete(profile), [true, {}]);
+    });
+
+    it('should return fields for dialog when a nested field is missing', () => {
+      PersonalTab.defaultProps.requiredFields.forEach( (field) => {
+        profile[field[0]] = "filled in";
+      });
+      profile['work_history'] = [{}];
+      EmploymentTab.nestedValidationKeys.forEach( k => {
+        profile['work_history'][0][k] = "filled in";
+      });
+      profile['work_history'][0]['country'] = '';
+      let expectation = [ false, {
+        url: "/profile/professional",
+        title: "Professional Info",
+        text: "Please complete your work history information.",
+      }];
+      assert.deepEqual(validateProfileComplete(profile), expectation);
+    });
+  });
+
+  describe('validateMonth', () => {
+    it('handles months starting with 0 without treating as octal', () => {
+      assert.equal(9, validateMonth("09"));
+    });
+    it('converts strings to numbers', () => {
+      assert.equal(3, validateMonth("3"));
+    });
+    it('returns undefined for invalid months', () => {
+      assert.equal(undefined, validateMonth("-3"));
+      assert.equal(undefined, validateMonth("0"));
+      assert.equal(1, validateMonth("1"));
+      assert.equal(12, validateMonth("12"));
+      assert.equal(undefined, validateMonth("13"));
+    });
+    it('returns undefined if the text is not an integer number', () => {
+      assert.equal(undefined, validateMonth("two"));
+      assert.equal(undefined, validateMonth(null));
+      assert.equal(undefined, validateMonth({}));
+      assert.equal(undefined, validateMonth(undefined));
+      assert.equal(undefined, validateMonth("2e0"));
+      assert.equal(undefined, validateMonth("3-4"));
+      assert.equal(undefined, validateMonth("3.4"));
+    });
+
+    it('returns an empty string if passed an empty string', () => {
+      assert.equal("", validateMonth(""));
+    });
+  });
+
+  describe('validateYear', () => {
+    it('handles years starting with 0 without treating as octal', () => {
+      assert.equal(999, validateYear("0999"));
+    });
+    it('converts strings to numbers', () => {
+      assert.equal(3, validateYear("3"));
+    });
+    it('returns undefined for invalid years', () => {
+      assert.equal(undefined, validateYear("-3"));
+      assert.equal(undefined, validateYear("0"));
+      assert.equal(1, validateYear("1"));
+      assert.equal(9999, validateYear("9999"));
+      assert.equal(undefined, validateYear("10000"));
+    });
+    it('returns undefined if the text is not an integer number', () => {
+      assert.equal(undefined, validateYear("two"));
+      assert.equal(undefined, validateYear(null));
+      assert.equal(undefined, validateYear({}));
+      assert.equal(undefined, validateYear(undefined));
+      assert.equal(undefined, validateYear("2e0"));
+      assert.equal(undefined, validateYear("3-4"));
+      assert.equal(undefined, validateYear("3.4"));
+    });
+
+    it('returns an empty string if passed an empty string', () => {
+      assert.equal("", validateYear(""));
     });
   });
 });

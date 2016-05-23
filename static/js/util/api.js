@@ -3,17 +3,17 @@
 import 'isomorphic-fetch';
 import _ from 'lodash';
 
-function getCookie(name) {
+export function getCookie(name) {
   let cookieValue = null;
 
   if (document.cookie && document.cookie !== '') {
     let cookies = document.cookie.split(';');
 
-    for (var i = 0; i < cookies.length; i++) {
-      let cookie = cookies[i].trim();
+    for (let cookie of cookies) {
+      cookie = cookie.trim();
 
       // Does this cookie string begin with the name we want?
-      if (cookie.substring(0, name.length + 1) === name + '=') {
+      if (cookie.substring(0, name.length + 1) === `${name}=`) {
         cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
         break;
       }
@@ -22,7 +22,7 @@ function getCookie(name) {
   return cookieValue;
 }
 
-function csrfSafeMethod(method) {
+export function csrfSafeMethod(method) {
   // these HTTP methods do not require CSRF protection
   return /^(GET|HEAD|OPTIONS|TRACE)$/.test(method);
 }
@@ -37,11 +37,15 @@ function csrfSafeMethod(method) {
  *
  * @param {string} input URL of fetch
  * @param {Object} init Settings to pass to fetch
+ * @param {bool} loginOnError force login on http errors
  * @returns {Promise} The promise with JSON of the response
  */
-function fetchJSONWithCSRF(input, init) {
+export function fetchJSONWithCSRF(input, init, loginOnError) {
   if (init === undefined) {
     init = {};
+  }
+  if (loginOnError === undefined) {
+    loginOnError = false;
   }
   init.headers = init.headers || {};
   _.defaults(init.headers, {
@@ -62,6 +66,13 @@ function fetchJSONWithCSRF(input, init) {
     // Also note that text is a promise here, not a string
     let text = response.text();
 
+    // For 400 and 401 errors, force login
+    // the 400 error comes from edX in case there are problems with the refresh
+    // token because the data stored locally is wrong and the solution is only
+    // to force a new login
+    if (loginOnError === true && (response.status === 400 || response.status === 401)) {
+      window.location = '/login/edxorg/';
+    }
     // For non 2xx status codes reject the promise
     if (response.status < 200 || response.status >= 300) {
       return Promise.reject(text);
@@ -76,25 +87,19 @@ function fetchJSONWithCSRF(input, init) {
   });
 }
 
-export function getCourseList() {
-  return fetchJSONWithCSRF('/api/v0/courses/');
-}
-
-export function getProgramList() {
-  return fetchJSONWithCSRF('/api/v0/programs/');
-}
-
+// import to allow mocking in tests
+import { fetchJSONWithCSRF as mockableFetchJSONWithCSRF } from './api';
 export function getUserProfile(username) {
-  return fetchJSONWithCSRF(`/api/v0/profiles/${username}/`);
+  return mockableFetchJSONWithCSRF(`/api/v0/profiles/${username}/`);
 }
 
 export function patchUserProfile(username, profile) {
-  return fetchJSONWithCSRF(`/api/v0/profiles/${username}/`, {
+  return mockableFetchJSONWithCSRF(`/api/v0/profiles/${username}/`, {
     method: 'PATCH',
     body: JSON.stringify(profile)
   });
 }
 
 export function getDashboard() {
-  return fetchJSONWithCSRF('/api/v0/dashboard/');
+  return mockableFetchJSONWithCSRF('/api/v0/dashboard/', {}, true);
 }

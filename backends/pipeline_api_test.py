@@ -28,7 +28,7 @@ class EdxPipelineApiTest(TestCase):
         profile.refresh_from_db()
         for field in profile._meta.get_fields():  # pylint: disable=protected-access
             key = field.name
-            if key in ('id', 'user', 'date_joined_micromasters', 'student_id'):
+            if key in ('id', 'user', 'date_joined_micromasters', 'student_id', 'work_history', 'education'):
                 continue
             if key == 'account_privacy':
                 assert getattr(profile, key) == Profile.PRIVATE
@@ -75,7 +75,20 @@ class EdxPipelineApiTest(TestCase):
             },
             'requires_parental_consent': False,
             'username': self.user.username,
-            'year_of_birth': 1986
+            'year_of_birth': 1986,
+            "work_history": [
+                {
+                    "id": 1,
+                    "city": "NY",
+                    "state_or_territory": "NY",
+                    "country": "USA",
+                    "company_name": "XYZ-ABC",
+                    "position": "SSE",
+                    "industry": "IT",
+                    "end_date": "2016-05-17T17:14:00Z",
+                    "start_date": "2016-05-28T17:14:06Z"
+                }
+            ]
         }
 
     def test_update_profile_wrong_backend(self):
@@ -151,7 +164,7 @@ class EdxPipelineApiTest(TestCase):
         first_name, last_name = split_name(mocked_content['name'])
 
         all_fields = [
-            ('account_privacy', Profile.PUBLIC),
+            ('account_privacy', Profile.PRIVATE),
             ('edx_name', mocked_content['name']),
             ('first_name', first_name),
             ('last_name', last_name),
@@ -193,26 +206,6 @@ class EdxPipelineApiTest(TestCase):
             self.user_profile.refresh_from_db()
             assert self.user_profile.preferred_language is None
             assert self.user_profile.edx_language_proficiencies == proficiencies
-
-    @mock.patch('backends.edxorg.EdxOrgOAuth2.get_json')
-    def test_account_privacy(self, mocked_get_json):
-        """
-        Test that account_privacy is modified correctly
-        """
-        account_privacy_values = [
-            ('private', Profile.PRIVATE),
-            (None, Profile.PRIVATE),
-            ('all_users', Profile.PUBLIC),
-        ]
-        for edx_privacy, mm_privacy in account_privacy_values:
-            mocked_content = dict(self.mocked_edx_profile)
-            mocked_content['account_privacy'] = edx_privacy
-            mocked_get_json.return_value = mocked_content
-            pipeline_api.update_profile_from_edx(
-                edxorg.EdxOrgOAuth2, self.user, {'access_token': 'foo_token'}, True)
-
-            self.user_profile.refresh_from_db()
-            assert self.user_profile.account_privacy == mm_privacy
 
 
 class LinkedInPipelineTests(TestCase):

@@ -1,35 +1,11 @@
-export const COURSE_LIST_RESPONSE = [
-  {
-    "id": 2,
-    "title": "Course xkGecQLCBCuI",
-    "enrollment_start": null,
-    "start_date": null,
-    "enrollment_url": null,
-    "prerequisites": null,
-    "program": 1
-  },
-  {
-    "id": 1,
-    "title": "Course zXHatukOIMTZ",
-    "enrollment_start": null,
-    "start_date": null,
-    "enrollment_url": null,
-    "prerequisites": null,
-    "program": 1
-  },
-  {
-    "id": 7,
-    "title": "Course plTYyFhMcEBj",
-    "enrollment_start": null,
-    "start_date": null,
-    "enrollment_url": null,
-    "prerequisites": null,
-    "program": 3
-  }
-];
+export const HIGH_SCHOOL = 'hs';
+export const ASSOCIATE = 'a';
+export const BACHELORS = 'b';
+export const MASTERS = 'm';
+export const DOCTORATE = 'p';
 
 export const USER_PROFILE_RESPONSE = {
-  "filled_out": false,
+  "filled_out": true,
   "agreed_to_terms_of_service": true,
   "account_privacy": "all_users",
   "email_optin": false,
@@ -50,18 +26,48 @@ export const USER_PROFILE_RESPONSE = {
   "date_of_birth": '1984-04-13',
   "preferred_language": 'en',
   "gender": "f",
-  "pretty_printed_student_id": "MMM000011"
-};
-
-export const PROGRAM_LIST_RESPONSE = [
-  {
+  "pretty_printed_student_id": "MMM000011",
+  "work_history": [{
     "id": 1,
-    "title": "Program one"
+    "city": "Cambridge",
+    "state_or_territory": "US-MA",
+    "country": "US",
+    "company_name": "MIT",
+    "position": "Software Developer",
+    "industry": "Education",
+    "start_date": "1982-02-02",
+    "end_date": "7654-03-21"
   }, {
-    "id": 3,
-    "title": "Program three"
-  }
-];
+    "id": 2,
+    "city": "New York",
+    "state_or_territory": "US-NY",
+    "country": "US",
+    "company_name": "Planet Express",
+    "position": "Delivery",
+    "industry": "Shipping",
+    "start_date": "3000-01-01",
+    "end_date": "4000-01-01"
+  }],
+  "education": [{
+    "id": 1,
+    "degree_name": HIGH_SCHOOL,
+    "graduation_date": "2013-05-01",
+    "field_of_study": "Computer Science",
+    "school_name": "MIT",
+    "school_city": "Cambridge",
+    "school_state_or_territory": "US-MA",
+    "school_country": "US"
+  }, {
+    "id": 2,
+    "degree_name": BACHELORS,
+    "graduation_date": "1975-12-01",
+    "field_of_study": "Philosophy",
+    "school_name": "Harvard",
+    "school_city": "Cambridge",
+    "school_state_or_territory": "US-MA",
+    "school_country": "US"
+  }]
+};
 
 export const STATUS_PASSED = 'passed';
 export const STATUS_NOT_PASSED = 'not-passed';
@@ -77,6 +83,73 @@ export const DASHBOARD_RESPONSE = [
     "courses": [
     ],
     "id": 2
+  },
+  {
+    "description": "Not passed program",
+    "title": "Not passed program",
+    "courses": [
+      {
+        "prerequisites": "",
+        "runs": [
+          {
+            "position": 1,
+            "title": "Gio Test Course #15",
+            "course_id": "course-v1:odl+GIO101+CR-FALL15",
+            "status": "not-passed",
+            "id": 199
+          },
+          {
+            "position": 2,
+            "title": "Gio Test Course #14",
+            "course_id": "course-v1:odl+GIO101+FALL14",
+            "status": "not-passed",
+            "id": 399
+          },
+          {
+            "certificate_url": "www.google.com",
+            "title": "Gio Test Course #13",
+            "status": "passed",
+            "position": 3,
+            "grade": "0.66",
+            "course_id": "course-v1:odl+GIO101+FALL13",
+            "id": 299
+          }
+        ],
+        "position_in_program": 0,
+        "title": "Gio Course",
+        "status": "not-offered",
+        "description": "",
+        "id": 199
+      },
+      {
+        "prerequisites": "",
+        "runs": [],
+        "position_in_program": 1,
+        "title": "8.MechCx Advanced Introductory Classical Mechanics",
+        "status": "not-offered",
+        "description": "",
+        "id": 299
+      },
+      {
+        "prerequisites": "",
+        "runs": [],
+        "position_in_program": 2,
+        "title": "EDX Demo course",
+        "status": "not-offered",
+        "description": "",
+        "id": 399
+      },
+      {
+        "prerequisites": "",
+        "runs": [],
+        "position_in_program": 3,
+        "title": "Peter Course",
+        "status": "not-offered",
+        "description": "",
+        "id": 499
+      }
+    ],
+    "id": 799
   },
   {
     "courses": [
@@ -155,3 +228,8 @@ export const DASHBOARD_RESPONSE = [
     "id": 3
   },
 ];
+
+export const DATE_FORMAT = 'YYYY-MM-DD';
+
+export const DASHBOARD_COURSE_HEIGHT = 70;
+export const DASHBOARD_RUN_HEIGHT = 40;

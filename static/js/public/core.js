@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, indent, no-console, no-undef */
+/* eslint-disable no-undef, indent, no-var, no-console, no-undef, prefer-template */
 /*!
  * remark (http://getbootstrapadmin.com/remark)
  * Copyright 2015 amazingsurge

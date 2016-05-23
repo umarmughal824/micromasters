@@ -4,26 +4,36 @@ import { connect } from 'react-redux';
 import Dashboard from '../components/Dashboard';
 
 class DashboardPage extends React.Component {
+  static propTypes = {
+    profile:    React.PropTypes.object.isRequired,
+    dashboard:  React.PropTypes.object.isRequired,
+    dispatch:   React.PropTypes.func.isRequired,
+    expander: React.PropTypes.object.isRequired,
+  };
+
   render() {
-    const { profile, dashboard } = this.props;
+    const { profile, dashboard, expander, dispatch } = this.props;
     return <Dashboard
       profile={profile.profile}
       dashboard={dashboard}
+      expander={expander}
+      dispatch={dispatch}
     />;
   }
 }
 
 const mapStateToProps = (state) => {
-  return {
-    profile: state.userProfile,
-    dashboard: state.dashboard,
+  let profile = {
+    profile: {}
   };
-};
-
-DashboardPage.propTypes = {
-  profile: React.PropTypes.object.isRequired,
-  dashboard: React.PropTypes.object.isRequired,
-  dispatch: React.PropTypes.func.isRequired
+  if (state.profiles[SETTINGS.username] !== undefined) {
+    profile = state.profiles[SETTINGS.username];
+  }
+  return {
+    profile: profile,
+    dashboard: state.dashboard,
+    expander: state.ui.dashboardExpander
+  };
 };
 
 export default connect(mapStateToProps)(DashboardPage);

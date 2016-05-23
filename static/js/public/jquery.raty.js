@@ -1,4 +1,4 @@
-/* eslint-disable indent, no-unused-vars, no-undef */
+/* eslint-disable indent, no-unused-vars, no-undef, no-var, prefer-template */
 /*!
  * jQuery Raty - A Star Rating Plugin
  *

@@ -18,7 +18,7 @@ import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 import yaml
 
-VERSION = "0.7.0"
+VERSION = "0.8.0"
 
 CONFIG_PATHS = [
     os.environ.get('MICROMASTERS_CONFIG', ''),
@@ -159,11 +159,19 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.user.get_username',
     'social.pipeline.user.create_user',
     'social.pipeline.social_auth.associate_user',
+    # the following custom pipeline func goes before load_extra_data
+    'backends.pipeline_api.set_last_update',
     'social.pipeline.social_auth.load_extra_data',
     'social.pipeline.user.user_details',
     'backends.pipeline_api.update_profile_from_edx',
     'backends.pipeline_api.update_from_linkedin',
 )
+SOCIAL_AUTH_EDXORG_AUTH_EXTRA_ARGUMENTS = {
+    'access_type': 'offline',
+    'approval_prompt': 'auto'
+}
+SOCIAL_AUTH_EDXORG_EXTRA_DATA = ['updated_at']
+
 LOGIN_REDIRECT_URL = '/dashboard'
 LOGIN_URL = '/'
 

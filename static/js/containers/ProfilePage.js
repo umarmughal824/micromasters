@@ -11,6 +11,15 @@ import {
   clearProfileEdit,
   saveProfile,
 } from '../actions';
+import {
+  setWorkHistoryEdit,
+  setWorkDialogVisibility,
+  setWorkDialogIndex,
+  setEducationDialogVisibility,
+  setEducationDialogIndex,
+  setEducationDegreeLevel,
+  setEducationDegreeInclusions,
+} from '../actions/ui';
 
 class ProfilePage extends React.Component {
   static propTypes = {
@@ -18,6 +27,7 @@ class ProfilePage extends React.Component {
     children:   React.PropTypes.node,
     dispatch:   React.PropTypes.func.isRequired,
     history:    React.PropTypes.object.isRequired,
+    ui:         React.PropTypes.object.isRequired,
   };
 
   static contextTypes = {
@@ -26,21 +36,65 @@ class ProfilePage extends React.Component {
 
   updateProfile(isEdit, profile) {
     const { dispatch } = this.props;
+    const username = SETTINGS.username;
+
     if (!isEdit) {
-      dispatch(startProfileEdit());
+      dispatch(startProfileEdit(username));
     }
-    dispatch(updateProfile(profile));
+    dispatch(updateProfile(username, profile));
+  }
+
+  setWorkHistoryEdit = (bool) => {
+    const { dispatch } = this.props;
+    dispatch(setWorkHistoryEdit(bool));
+  }
+
+  setWorkDialogVisibility = (bool) => {
+    const { dispatch } = this.props;
+    dispatch(setWorkDialogVisibility(bool));
+  }
+
+  setWorkDialogIndex = (index) => {
+    const { dispatch } = this.props;
+    dispatch(setWorkDialogIndex(index));
+  }
+
+  clearProfileEdit = () => {
+    const { dispatch } = this.props;
+    dispatch(clearProfileEdit(SETTINGS.username));
+  }
+
+  setEducationDialogVisibility = bool => {
+    const { dispatch } = this.props;
+    dispatch(setEducationDialogVisibility(bool));
+  }
+
+  setEducationDialogIndex = index => {
+    const { dispatch } = this.props;
+    dispatch(setEducationDialogIndex(index));
+  }
+
+  setEducationDegreeLevel = level => {
+    const { dispatch } = this.props;
+    dispatch(setEducationDegreeLevel(level));
+  }
+
+  setEducationDegreeInclusions = inclusions => {
+    const { dispatch } = this.props;
+    dispatch(setEducationDegreeInclusions(inclusions));
   }
 
   saveProfile(isEdit, profile, requiredFields, messages) {
     const { dispatch } = this.props;
+    const username = SETTINGS.username;
+
     if (!isEdit) {
       // Validation errors will only show up if we start the edit
-      dispatch(startProfileEdit());
+      dispatch(startProfileEdit(username));
     }
-    return dispatch(validateProfile(profile, requiredFields, messages)).then(() => {
-      dispatch(saveProfile(SETTINGS.username, profile)).then(() => {
-        dispatch(clearProfileEdit());
+    return dispatch(validateProfile(username, profile, requiredFields, messages)).then(() => {
+      return dispatch(saveProfile(username, profile)).then(() => {
+        dispatch(clearProfileEdit(username));
       });
     });
   }
@@ -62,7 +116,7 @@ class ProfilePage extends React.Component {
   }
 
   render() {
-    let { profile } = this.props;
+    let { profile, ui } = this.props;
     let errors, isEdit;
 
     if (profile.edit !== undefined) {
@@ -79,8 +133,17 @@ class ProfilePage extends React.Component {
       React.cloneElement(child, {
         profile: profile,
         errors: errors,
+        ui: ui,
         updateProfile: this.updateProfile.bind(this, isEdit),
-        saveProfile: this.saveProfile.bind(this, isEdit)
+        saveProfile: this.saveProfile.bind(this, isEdit),
+        setWorkHistoryEdit: this.setWorkHistoryEdit,
+        setWorkDialogVisibility: this.setWorkDialogVisibility,
+        setWorkDialogIndex: this.setWorkDialogIndex,
+        clearProfileEdit: this.clearProfileEdit,
+        setEducationDialogVisibility: this.setEducationDialogVisibility,
+        setEducationDialogIndex: this.setEducationDialogIndex,
+        setEducationDegreeLevel: this.setEducationDegreeLevel,
+        setEducationDegreeInclusions: this.setEducationDegreeInclusions,
       })
     ));
 
@@ -102,8 +165,17 @@ class ProfilePage extends React.Component {
   }
 }
 
-const mapStateToProps = state => ({
-  profile: state.userProfile
-});
+const mapStateToProps = state => {
+  let profile = {
+    profile: {}
+  };
+  if (state.profiles[SETTINGS.username] !== undefined) {
+    profile = state.profiles[SETTINGS.username];
+  }
+  return {
+    profile: profile,
+    ui: state.ui,
+  };
+};
 
 export default connect(mapStateToProps)(ProfilePage);

@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+/* eslint-disable no-undef, no-var */
 /*!
  * remark (http://getbootstrapadmin.com/remark)
  * Copyright 2015 amazingsurge

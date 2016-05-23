@@ -43,7 +43,8 @@ class TestViews(TestCase):
         """
         with mute_signals(post_save):
             profile = ProfileFactory.create(
-                agreed_to_terms_of_service=True
+                agreed_to_terms_of_service=True,
+                filled_out=True,
             )
         self.client.force_login(profile.user)
 
@@ -74,7 +75,11 @@ class TestViews(TestCase):
         """Verify that we let an authenticated user through to '/dashboard'"""
         with mute_signals(post_save):
             user = UserFactory.create()
-            ProfileFactory.create(user=user, agreed_to_terms_of_service=True)
+            ProfileFactory.create(
+                user=user,
+                agreed_to_terms_of_service=True,
+                filled_out=True,
+            )
         self.client.force_login(user)
         response = self.client.get(DASHBOARD_URL)
         self.assertContains(

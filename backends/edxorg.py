@@ -1,6 +1,7 @@
 """
 EdX.org backend for Python Social Auth
 """
+from datetime import datetime
 from urllib.parse import urljoin
 
 from django.conf import settings
@@ -15,11 +16,20 @@ class EdxOrgOAuth2(BaseOAuth2):
     ID_KEY = 'edx_id'
     REQUEST_TOKEN_URL = None
     EDXORG_BASE_URL = settings.EDXORG_BASE_URL
-    AUTHORIZATION_URL = urljoin(EDXORG_BASE_URL, '/oauth2/authorize/')
-    ACCESS_TOKEN_URL = urljoin(EDXORG_BASE_URL, '/oauth2/access_token/')
+
+    # Settings for Django OAUTH toolkit
+    AUTHORIZATION_URL = urljoin(EDXORG_BASE_URL, '/_o/authorize/')
+    ACCESS_TOKEN_URL = urljoin(EDXORG_BASE_URL, '/_o/token/')
+    DEFAULT_SCOPE = ['read', 'write']
+
     ACCESS_TOKEN_METHOD = 'POST'
     REDIRECT_STATE = False
-    DEFAULT_SCOPE = ['email']
+    EXTRA_DATA = [
+        ('refresh_token', 'refresh_token', True),
+        ('expires_in', 'expires_in'),
+        ('token_type', 'token_type', True),
+        ('scope', 'scope'),
+    ]
 
     def user_data(self, access_token, *args, **kwargs):
         """
@@ -82,3 +92,17 @@ class EdxOrgOAuth2(BaseOAuth2):
             string: the unique identifier for the user in the remote service.
         """
         return details.get(self.ID_KEY)
+
+    def refresh_token(self, token, *args, **kwargs):
+        """
+        Overridden method to add extra info during refresh token.
+
+        Args:
+            token (str): valid refresh token
+
+        Returns:
+            dict of information about the user
+        """
+        response = super(EdxOrgOAuth2, self).refresh_token(token, *args, **kwargs)
+        response['updated_at'] = datetime.utcnow().timestamp()
+        return response

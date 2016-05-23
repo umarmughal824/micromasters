@@ -36,19 +36,32 @@ describe("TermsOfService", () => {
     });
   });
 
+  it("requires terms of service if user hasn't already agreed to it even if profile is not complete", done => {
+    let response = Object.assign({}, USER_PROFILE_RESPONSE, {
+      agreed_to_terms_of_service: false,
+      filled_out: false
+    });
+    helper.profileGetStub.returns(Promise.resolve(response));
+
+    renderComponent("/dashboard").then(() => {
+      assert.equal(helper.currentLocation.pathname, "/terms_of_service");
+
+      done();
+    });
+  });
+
   it("agrees to terms of service", done => {
     let response = Object.assign({}, USER_PROFILE_RESPONSE, {
       agreed_to_terms_of_service: false
     });
     helper.profileGetStub.returns(Promise.resolve(response));
+
+    let updatedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
+      agreed_to_terms_of_service: true
+    });
     let profilePatchStub = helper.sandbox.stub(api, 'patchUserProfile');
     profilePatchStub.throws("Invalid arguments");
-    profilePatchStub.withArgs(
-      SETTINGS.username,
-      Object.assign({}, USER_PROFILE_RESPONSE, {
-        agreed_to_terms_of_service: true
-      })
-    ).returns(Promise.resolve());
+    profilePatchStub.withArgs(SETTINGS.username, updatedProfile).returns(Promise.resolve(updatedProfile));
 
     renderComponent("/terms_of_service").then(([component]) => {
       listenForActions([REQUEST_PATCH_USER_PROFILE, RECEIVE_PATCH_USER_PROFILE_SUCCESS], () => {

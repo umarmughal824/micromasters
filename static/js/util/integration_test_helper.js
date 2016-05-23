@@ -5,16 +5,12 @@ import { createMemoryHistory } from 'react-router';
 
 import * as api from '../util/api';
 import {
-  COURSE_LIST_RESPONSE,
   DASHBOARD_RESPONSE,
-  PROGRAM_LIST_RESPONSE,
   USER_PROFILE_RESPONSE,
 } from '../constants';
 import {
-  REQUEST_COURSE_LIST,
   REQUEST_DASHBOARD,
   REQUEST_GET_USER_PROFILE,
-  RECEIVE_COURSE_LIST_SUCCESS,
   RECEIVE_DASHBOARD_SUCCESS,
   RECEIVE_GET_USER_PROFILE_SUCCESS,
 } from '../actions';
@@ -34,10 +30,6 @@ class IntegrationTestHelper {
     this.listenForActions = this.store.createListenForActions();
     this.dispatchThen = this.store.createDispatchThen();
 
-    this.programStub = this.sandbox.stub(api, 'getProgramList');
-    this.programStub.returns(Promise.resolve(PROGRAM_LIST_RESPONSE));
-    this.courseStub = this.sandbox.stub(api, 'getCourseList');
-    this.courseStub.returns(Promise.resolve(COURSE_LIST_RESPONSE));
     this.dashboardStub = this.sandbox.stub(api, 'getDashboard');
     this.dashboardStub.returns(Promise.resolve(DASHBOARD_RESPONSE));
     this.profileGetStub = this.sandbox.stub(api, 'getUserProfile');
@@ -56,10 +48,8 @@ class IntegrationTestHelper {
   renderComponent(url = "/", extraTypesToAssert = []) {
     return new Promise(resolve => {
       let expectedTypes = [
-        REQUEST_COURSE_LIST,
         REQUEST_DASHBOARD,
         REQUEST_GET_USER_PROFILE,
-        RECEIVE_COURSE_LIST_SUCCESS,
         RECEIVE_DASHBOARD_SUCCESS,
         RECEIVE_GET_USER_PROFILE_SUCCESS,
       ];
@@ -71,7 +61,7 @@ class IntegrationTestHelper {
         this.browserHistory.push(url);
         div = document.createElement("div");
         component = ReactDOM.render(
-          makeDashboardRoutes(this.browserHistory, this.store, () => null, false),
+          makeDashboardRoutes(this.browserHistory, this.store, () => null),
           div
         );
       }).then(() => {
