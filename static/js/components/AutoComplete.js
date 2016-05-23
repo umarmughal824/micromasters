@@ -1,5 +1,5 @@
-// copied from https://raw.githubusercontent.com/callemall/material-ui/master/src/AutoComplete/AutoComplete.js
-/* eslint-disable indent */
+/* eslint-disable indent, max-len */
+// adapted from https://github.com/callemall/material-ui/blob/8e80a35e8d2cdb410c3727333e8518cadc08783b/src/AutoComplete/AutoComplete.js
 import React, {Component, PropTypes} from 'react';
 import ReactDOM from 'react-dom';
 import keycode from 'keycode';
@@ -332,7 +332,7 @@ class AutoComplete extends Component {
       this.close();
     }
 
-    if (this.props.onBlur && !this.state.skipFocusHandler) {
+    if (this.props.onBlur && !this.state.skipFocusHandler && this.timerTouchTapCloseId === null) {
       this.props.onBlur(event);
     }
     this.setState({ skipFocusHandler: false });
