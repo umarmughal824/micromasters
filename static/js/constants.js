@@ -56,7 +56,8 @@ export const USER_PROFILE_RESPONSE = {
     "school_name": "MIT",
     "school_city": "Cambridge",
     "school_state_or_territory": "US-MA",
-    "school_country": "US"
+    "school_country": "US",
+    "online_degree": false
   }, {
     "id": 2,
     "degree_name": BACHELORS,
@@ -65,7 +66,8 @@ export const USER_PROFILE_RESPONSE = {
     "school_name": "Harvard",
     "school_city": "Cambridge",
     "school_state_or_territory": "US-MA",
-    "school_country": "US"
+    "school_country": "US",
+    "online_degree": false
   }],
   "edx_level_of_education": null
 };

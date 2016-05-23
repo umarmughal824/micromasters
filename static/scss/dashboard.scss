@@ -158,6 +158,8 @@ c.validation-wrapper {
 }
 .profile-tab-grid {
   max-width: 900px;
+},
+.profile-tab-grid, .user-cards-grid {
   .mdl-textfield {
     width: 100%;
   }

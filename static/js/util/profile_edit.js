@@ -441,31 +441,16 @@ export function boundDateField(keySet, label, omitDay) {
  * Saves the profile and returns a promise, taking an optional function
  * to retrieve keys for validation of nested fields (e.g. profile.work_history)
  *
- * @param nestedValidationCallback {func} If present, a function to retrieve validation fields
  * @param finalStep {bool} If true, this is the last tab in the profile
  */
-export function saveAndContinue(nestedValidationCallback, finalStep) {
-  const {
-    saveProfile,
-    profile,
-    requiredFields,
-    validationMessages
-  } = this.props;
-
-  let fields;
-  if ( _.isFunction(nestedValidationCallback) ) {
-    fields = nestedValidationCallback(profile, requiredFields);
-  } else {
-    fields = requiredFields;
-  }
-
+export function saveAndContinue(finalStep) {
+  const { saveProfile, profile } = this.props;
   let clone = Object.assign({}, profile, {
-    filled_out: !!finalStep
+    filled_out: profile.filled_out || finalStep
   });
   if (finalStep) {
     // user has also seen email consent message at this point
     clone.email_optin = true;
   }
-
-  return saveProfile(clone, fields, validationMessages);
+  return saveProfile(clone);
 }

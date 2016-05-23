@@ -56,11 +56,42 @@ describe("ProfilePage", function() {
   });
 
   for (let page of ['personal', 'education', 'professional']) {
-    it(`marks filled_out = false when saving on /profile/${page}`, done => {
+    it(`it respects the current value (true) when saving on /profile/${page}`, done => {
       helper.profileGetStub.returns(
         Promise.resolve(
           Object.assign({}, USER_PROFILE_RESPONSE, {
             filled_out: true
+          })
+        )
+      );
+
+      renderComponent(`/profile/${page}`).then(([, div]) => {
+        let button = div.querySelector(".profile-save-and-continue");
+
+        let updatedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
+          filled_out: true 
+        });
+
+        patchUserProfileStub.throws("Invalid arguments");
+        patchUserProfileStub.withArgs(SETTINGS.username, updatedProfile).returns(Promise.resolve(updatedProfile));
+
+        listenForActions([
+          REQUEST_PATCH_USER_PROFILE,
+          RECEIVE_PATCH_USER_PROFILE_SUCCESS,
+          START_PROFILE_EDIT,
+          UPDATE_PROFILE_VALIDATION
+        ], () => {
+          TestUtils.Simulate.click(button);
+        }).then(() => {
+          done();
+        });
+      });
+    });
+    it(`it respects the current value (false) when saving on /profile/${page}`, done => {
+      helper.profileGetStub.returns(
+        Promise.resolve(
+          Object.assign({}, USER_PROFILE_RESPONSE, {
+            filled_out: false
           })
         )
       );

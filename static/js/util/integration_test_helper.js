@@ -51,7 +51,7 @@ class IntegrationTestHelper {
         REQUEST_DASHBOARD,
         RECEIVE_DASHBOARD_SUCCESS,
         REQUEST_GET_USER_PROFILE,
-        RECEIVE_GET_USER_PROFILE_SUCCESS,
+        RECEIVE_GET_USER_PROFILE_SUCCESS
       ];
 
       expectedTypes.push(...extraTypesToAssert);

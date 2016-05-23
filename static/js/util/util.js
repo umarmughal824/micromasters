@@ -7,11 +7,12 @@ import Button from 'react-bootstrap/lib/Button';
 import striptags from 'striptags';
 import _ from 'lodash';
 
-import PersonalTab from '../components/PersonalTab';
-import EducationTab from '../components/EducationTab';
-import EmploymentTab from '../components/EmploymentTab';
-import PrivacyTab from '../components/PrivacyTab';
-
+import {
+  personalValidation,
+  educationValidation,
+  employmentValidation,
+  privacyValidation,
+} from './validation';
 import {
   STATUS_NOT_OFFERED,
   STATUS_PASSED,
@@ -325,15 +326,14 @@ export function makeProfileProgressDisplay(active) {
  * @param {Object} profile The user profile
  * @returns {Object} Validation errors or an empty object if no errors
  */
-export function validateProfile(profile, requiredFields, messages) {
-  let errors = {};
-  for (let keySet of requiredFields) {
-    let val = _.get(profile, keySet);
-    if (_.isUndefined(val) || _.isNull(val) || val === "" ) {
-      _.set(errors, keySet,  `${messages[keySet.slice(-1)[0]]} is required`);
-    }
-  }
-  return errors;
+export function validateProfile(profile) {
+  return Object.assign(
+    {},
+    personalValidation(profile),
+    educationValidation(profile),
+    employmentValidation(profile),
+    privacyValidation(profile),
+  );
 }
 
 /* eslint-disable camelcase */
@@ -384,28 +384,16 @@ complete profile consists of:
 */
 export function validateProfileComplete(profile) {
   let errors = {};
-  let reqFields = [];
 
   // check personal tab
-  errors = validateProfile(
-    profile,
-    PersonalTab.defaultProps.requiredFields,
-    PersonalTab.defaultProps.validationMessages
-  );
-
+  errors = personalValidation(profile);
   if (!_.isEqual(errors, {})) {
     return [false, '/profile/personal', errors];
   }
 
   // check professional tab
   if (_.isArray(profile.work_history) && !_.isEmpty(profile.work_history)) {
-    reqFields = EmploymentTab.validation(profile, reqFields);
-    errors = validateProfile(
-      profile,
-      reqFields,
-      EmploymentTab.defaultProps.validationMessages
-    );
-
+    errors = employmentValidation(profile);
     if (!_.isEqual(errors, {})) {
       return [false, '/profile/professional', errors];
     }
@@ -413,25 +401,14 @@ export function validateProfileComplete(profile) {
 
   // check education tab
   if (_.isArray(profile.education) && !_.isEmpty(profile.education)) {
-    reqFields = EducationTab.validation(profile, reqFields);
-    errors = validateProfile(
-      profile,
-      reqFields,
-      EducationTab.defaultProps.validationMessages
-    );
-
+    errors = educationValidation(profile);
     if (!_.isEqual(errors, {})) {
       return [false, '/profile/education', errors];
     }
   }
 
   // check privacy tab
-  errors = validateProfile(
-    profile,
-    PrivacyTab.defaultProps.requiredFields,
-    PrivacyTab.defaultProps.validationMessages
-  );
-
+  errors = privacyValidation(profile);
   if (!_.isEqual(errors, {})) {
     return [false, '/profile/privacy', errors];
   }

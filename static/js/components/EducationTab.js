@@ -10,12 +10,12 @@ import { Card } from 'react-mdl/lib/Card';
 import _ from 'lodash';
 import moment from 'moment';
 
-import ProfileTab from "../util/ProfileTab";
+import ProfileFormFields from '../util/ProfileFormFields';
 import { generateNewEducation } from "../util/util";
 import { saveAndContinue } from '../util/profile_edit';
 import { HIGH_SCHOOL } from '../constants';
 
-class EducationTab extends ProfileTab {
+class EducationTab extends ProfileFormFields {
   constructor(props) {
     super(props);
     this.educationLevelLabels = {};
@@ -36,41 +36,6 @@ class EducationTab extends ProfileTab {
     setEducationDegreeLevel:        React.PropTypes.func,
     setEducationDegreeInclusions:   React.PropTypes.func,
   };
-
-  static defaultProps = {
-    requiredFields: [],
-    validationMessages: {
-      'degree_name': 'Degree level',
-      'graduation_date': 'Graduation Date',
-      'field_of_study': 'Field of study',
-      'online_degree': 'Online Degree',
-      'school_name': 'School name',
-      'school_city': 'City',
-      'school_state_or_territory': 'State',
-      'school_country': 'Country'
-    }
-  };
-
-  static nestedValidationKeys = [
-    'degree_name',
-    'graduation_date',
-    'field_of_study',
-    'online_degree',
-    'school_name',
-    'school_city',
-    'school_state_or_territory',
-    'school_country'
-  ];
-
-  static validation(profile, requiredFields) {
-    let nestedFields = (index) => {
-      let keySet = (key) => ['education', index, key];
-      return EducationTab.nestedValidationKeys.map(key => keySet(key));
-    };
-    return requiredFields.concat(
-      ...profile.education.map((v, i) => nestedFields(i))
-    );
-  }
 
   openNewEducationForm = (level, index) => {
     const {

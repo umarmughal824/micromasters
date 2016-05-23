@@ -15,8 +15,7 @@ import LANGUAGE_CODES from '../language_codes';
 import INDUSTRIES from '../industries';
 import iso3166 from 'iso-3166-2';
 
-
-class ProfileTab extends React.Component {
+export default class ProfileFormFields extends React.Component {
   constructor(props) {
     super(props);
 
@@ -67,14 +66,12 @@ class ProfileTab extends React.Component {
 
   saveAndContinue = () => {
     let lastTab = this.nextUrl === "/dashboard";
-    saveAndContinue.call(this, this.constructor.prototype.validation, lastTab).then(() => {
+    saveAndContinue.call(this, lastTab).then(() => {
       this.context.router.push(this.nextUrl);
     });
-  }
+  };
 
   static contextTypes = {
     router: React.PropTypes.object.isRequired
   };
 }
-
-export default ProfileTab;

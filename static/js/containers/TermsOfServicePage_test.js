@@ -6,8 +6,6 @@ import assert from 'assert';
 import {
   REQUEST_PATCH_USER_PROFILE,
   RECEIVE_PATCH_USER_PROFILE_SUCCESS,
-  START_PROFILE_EDIT,
-  UPDATE_PROFILE_VALIDATION,
 } from '../actions';
 import { USER_PROFILE_RESPONSE } from '../constants';
 import IntegrationTestHelper from '../util/integration_test_helper';
@@ -56,9 +54,7 @@ describe("TermsOfService", () => {
   it("agrees to terms of service", done => {
     let profileActions = [
       REQUEST_PATCH_USER_PROFILE,
-      RECEIVE_PATCH_USER_PROFILE_SUCCESS,
-      START_PROFILE_EDIT,
-      UPDATE_PROFILE_VALIDATION
+      RECEIVE_PATCH_USER_PROFILE_SUCCESS
     ];
     let response = Object.assign({}, USER_PROFILE_RESPONSE, {
       agreed_to_terms_of_service: false

@@ -2,6 +2,7 @@
 import assert from 'assert';
 import moment from 'moment';
 import React from 'react';
+import _ from 'lodash';
 
 import {
   STATUS_NOT_OFFERED,
@@ -28,9 +29,6 @@ import {
   getPreferredName,
   makeProfileProgressDisplay,
 } from '../util/util';
-import PersonalTab from '../components/PersonalTab';
-import EmploymentTab from '../components/EmploymentTab';
-import PrivacyTab from '../components/PrivacyTab';
 
 /* eslint-disable camelcase */
 describe('utility functions', () => {
@@ -366,7 +364,7 @@ describe('utility functions', () => {
     };
 
     it('validates the test profile successfully', () => {
-      let errors = validateProfile(USER_PROFILE_RESPONSE, requiredFields, messages);
+      let errors = validateProfile(USER_PROFILE_RESPONSE);
       assert.deepEqual(errors, {});
     });
 
@@ -384,27 +382,16 @@ describe('utility functions', () => {
     });
 
     it('validates nested fields', () => {
-      let profile = {
-        nested_array: [{foo: "bar", baz: null}]
-      };
-      const keysToCheck = [
-        ["nested_array", 0, "foo"],
-        ["nested_array", 0, "baz"],
-      ];
-      const nestMessages = {"baz": "Baz"};
-      let errors = validateProfile(profile, keysToCheck, nestMessages);
-      assert.deepEqual({nested_array: [ { baz: "Baz is required" } ] }, errors);
+      let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
+      _.set(profile, ['work_history', 0, 'city'], '');
+      let errors = validateProfile(profile);
+      assert.deepEqual({work_history: [ { city: "City is required" } ] }, errors);
     });
 
     it('correctly validates fields with 0', () => {
-      let profile = {
-        nested_array: [{foo: 0}]
-      };
-      const keysToCheck = [
-        ["nested_array", 0, "foo"]
-      ];
-      const nestMessages = {"foo": "Foo"};
-      let errors = validateProfile(profile, keysToCheck, nestMessages);
+      let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
+      profile.first_name = 0;
+      let errors = validateProfile(profile);
       assert.deepEqual({}, errors);
     });
   });
@@ -416,17 +403,26 @@ describe('utility functions', () => {
     });
 
     it('should return fields for an empty profile', () => {
-      let errors = Object.assign({}, ...Object.entries(PersonalTab.defaultProps.validationMessages).map(
-        ([k,v]) => ({[k]: `${v} is required`})
-      ));
+      let errors = Object.assign({}, ...Object.entries({
+        'first_name': "Given name",
+        'last_name': "Family name",
+        'preferred_name': "Preferred name",
+        'gender': "Gender",
+        'preferred_language': "Preferred language",
+        'city': "City",
+        'state_or_territory': 'State or Territory',
+        'country': "Country",
+        'birth_city': 'City',
+        'birth_state_or_territory': 'State or Territory',
+        'birth_country': "Country",
+        'date_of_birth': "Date of birth"
+      }).map(([k,v]) => ({[k]: `${v} is required`})));
       const expectation = [false, "/profile/personal", errors];
       assert.deepEqual(validateProfileComplete(profile), expectation);
     });
 
-    it('should return appropriate fields for dialog when a field is missing', () => {
-      PersonalTab.defaultProps.requiredFields.forEach( (field) => {
-        profile[field[0]] = "filled in";
-      });
+    it('should return appropriate fields when a field is missing', () => {
+      profile = _.cloneDeep(USER_PROFILE_RESPONSE);
       profile['account_privacy'] = '';
       let expectation = [false, "/profile/privacy", {
         account_privacy: 'Privacy level is required'
@@ -434,39 +430,13 @@ describe('utility functions', () => {
       assert.deepEqual(validateProfileComplete(profile), expectation);
     });
 
-    it('should return true when all top-level fields are filled in', () => {
-      PersonalTab.defaultProps.requiredFields.forEach( (field) => {
-        profile[field[0]] = "filled in";
-      });
-      PrivacyTab.defaultProps.requiredFields.forEach( (field) => {
-        profile[field[0]] = "filled in";
-      });
-      assert.deepEqual(validateProfileComplete(profile), [true, null, null]);
-    });
-
-    it('should return true when all nested fields are filled in', () => {
-      PersonalTab.defaultProps.requiredFields.forEach( (field) => {
-        profile[field[0]] = "filled in";
-      });
-      PrivacyTab.defaultProps.requiredFields.forEach( (field) => {
-        profile[field[0]] = "filled in";
-      });
-      profile['work_history'] = [{}];
-      EmploymentTab.nestedValidationKeys.forEach( k => {
-        profile['work_history'][0][k] = "filled in";
-      });
-      assert.deepEqual(validateProfileComplete(profile), [true, null, null]);
+    it('should return true when all fields are filled in', () => {
+      assert.deepEqual(validateProfileComplete(USER_PROFILE_RESPONSE), [true, null, null]);
     });
 
     it('should return fields for dialog when a nested field is missing', () => {
-      PersonalTab.defaultProps.requiredFields.forEach( (field) => {
-        profile[field[0]] = "filled in";
-      });
-      profile['work_history'] = [{}];
-      EmploymentTab.nestedValidationKeys.forEach( k => {
-        profile['work_history'][0][k] = "filled in";
-      });
-      profile['work_history'][0]['country'] = '';
+      profile = _.cloneDeep(USER_PROFILE_RESPONSE);
+      _.set(profile, ['work_history', 0, 'country'], '');
       let expectation = [false, "/profile/professional", {
         work_history: [{country: "Country is required"}]
       }];

@@ -2,9 +2,9 @@ import React from 'react';
 import Button from 'react-mdl/lib/Button';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 
-import ProfileTab from "../util/ProfileTab";
+import ProfileFormFields from '../util/ProfileFormFields';
 
-class PrivacyTab extends ProfileTab {
+class PrivacyTab extends ProfileFormFields {
   constructor(props) {
     super(props);
   }
@@ -14,15 +14,6 @@ class PrivacyTab extends ProfileTab {
     profile:        React.PropTypes.object,
     saveProfile:    React.PropTypes.func,
     updateProfile:  React.PropTypes.func
-  };
-
-  static defaultProps = {
-    requiredFields: [
-      ['account_privacy']
-    ],
-    validationMessages: {
-      'account_privacy': 'Privacy level'
-    }
   };
 
   render() {

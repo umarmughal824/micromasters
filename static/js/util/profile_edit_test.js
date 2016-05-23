@@ -669,13 +669,11 @@ describe('Profile Editing utility functions', () => {
     beforeEach(() => {
       that.props.saveProfile = sandbox.stub();
       that.props.saveProfile.returns(saveProfileReturnValue);
-      that.props.requiredFields = ['field1', 'field2'];
-      that.props.validationMessages = {'message1': 'error'};
       that.props.profile.filled_out = false;
     });
 
     it('saves with finalStep as true', () => {
-      let ret = saveAndContinue.call(that, undefined, true);
+      let ret = saveAndContinue.call(that, true);
 
       let clone = Object.assign({}, that.props.profile, {
         filled_out: true,
@@ -684,24 +682,8 @@ describe('Profile Editing utility functions', () => {
 
       assert.ok(that.props.saveProfile.calledWith(
         clone,
-        that.props.requiredFields,
-        that.props.validationMessages
       ));
       assert.equal(ret, saveProfileReturnValue);
-    });
-
-    it('saves with nestedValidationCallback as a function', () => {
-      const newFields = ['field3', 'field4'];
-      let callback = sandbox.stub();
-      callback.returns(newFields);
-      let ret = saveAndContinue.call(that, callback, false);
-      assert.ok(that.props.saveProfile.calledWith(
-        that.props.profile,
-        newFields,
-        that.props.validationMessages
-      ));
-      assert.equal(ret, saveProfileReturnValue);
-      assert.ok(callback.calledWith(that.props.profile, that.props.requiredFields));
     });
   });
 });

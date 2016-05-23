@@ -2,9 +2,9 @@ import React from 'react';
 import Button from 'react-mdl/lib/Button';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 
-import ProfileTab from "../util/ProfileTab";
+import ProfileFormFields from '../util/ProfileFormFields';
 
-class PersonalTab extends ProfileTab {
+class PersonalTab extends ProfileFormFields {
   constructor(props) {
     super(props);
   }
@@ -16,37 +16,6 @@ class PersonalTab extends ProfileTab {
     saveProfile:    React.PropTypes.func,
     updateProfile:  React.PropTypes.func,
   };
-
-  static defaultProps = {
-    requiredFields: [
-      ['first_name'],
-      ['last_name'],
-      ['preferred_name'],
-      ['gender'],
-      ['preferred_language'],
-      ['city'],
-      ['state_or_territory'],
-      ['country'],
-      ['birth_city'],
-      ['birth_state_or_territory'],
-      ['birth_country'],
-      ['date_of_birth'],
-    ],
-    validationMessages: {
-      'first_name': "Given name",
-      'last_name': "Family name",
-      'preferred_name': "Preferred name",
-      'gender': "Gender",
-      'preferred_language': "Preferred language",
-      'city': "City",
-      'state_or_territory': 'State or Territory',
-      'country': "Country",
-      'birth_city': 'City',
-      'birth_state_or_territory': 'State or Territory',
-      'birth_country': "Country",
-      'date_of_birth': "Date of birth"
-    }
-  }
 
   render() {
     return <div>

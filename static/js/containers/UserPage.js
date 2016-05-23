@@ -3,21 +3,10 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Loader from 'react-loader';
 
-import { FETCH_PROCESSING } from '../actions';
-import User from '../components/User';
+import { FETCH_PROCESSING, clearProfile } from '../actions';
+import ProfileFormContainer from './ProfileFormContainer';
 
-import {
-  fetchUserProfile,
-  clearProfile,
-} from '../actions';
-
-class UserPage extends React.Component {
-  static propTypes = {
-    dispatch: React.PropTypes.func.isRequired,
-    profiles: React.PropTypes.object.isRequired,
-    params: React.PropTypes.object.isRequired,
-  };
-
+class UserPage extends ProfileFormContainer {
   componentDidMount() {
     this.fetchProfile();
   }
@@ -25,13 +14,6 @@ class UserPage extends React.Component {
   componentDidUpdate() {
     this.fetchProfile();
   }
-
-  fetchProfile = () => {
-    const { dispatch, profiles, params: { username } } = this.props;
-    if (profiles[username] === undefined || profiles[username].getStatus === undefined) {
-      dispatch(fetchUserProfile(username));
-    }
-  };
 
   componentWillUnmount() {
     const { dispatch, params: { username } } = this.props;
@@ -47,18 +29,15 @@ class UserPage extends React.Component {
     let profile = {};
     let loaded = false;
     if (profiles[username] !== undefined) {
-      profile = profiles[username].profile;
+      profile = profiles[username];
       loaded = profiles[username].getStatus !== FETCH_PROCESSING;
     }
 
+    let childrenWithProps = this.childrenWithProps(profile);
     return <Loader loaded={loaded}>
-      <User profile={profile} />
+      { childrenWithProps }
     </Loader>;
   }
 }
 
-const mapStateToProps = state => ({
-  profiles: state.profiles
-});
-
-export default connect(mapStateToProps)(UserPage);
+export default connect(ProfileFormContainer.mapStateToProps)(UserPage);

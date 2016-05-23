@@ -1,4 +1,6 @@
 /* global SETTINGS: false */
+import _ from 'lodash';
+
 import {
   fetchUserProfile,
   receiveGetUserProfileSuccess,
@@ -40,7 +42,6 @@ import configureTestStore from 'redux-asserts';
 import rootReducer, { INITIAL_PROFILES_STATE } from '../reducers';
 import assert from 'assert';
 import sinon from 'sinon';
-import PersonalTab from '../components/PersonalTab';
 
 describe('reducers', () => {
   let sandbox, store, dispatchThen;
@@ -190,21 +191,14 @@ describe('reducers', () => {
       store.dispatch(receiveGetUserProfileSuccess('jane', USER_PROFILE_RESPONSE));
       store.dispatch(startProfileEdit('jane'));
 
-      dispatchThen(validateProfile(
-        'jane',
-        USER_PROFILE_RESPONSE,
-        PersonalTab.defaultProps.requiredFields,
-        PersonalTab.defaultProps.validationMessages
-      ), [UPDATE_PROFILE_VALIDATION]).then(profileState => {
+      dispatchThen(
+        validateProfile('jane', USER_PROFILE_RESPONSE),
+        [UPDATE_PROFILE_VALIDATION]
+      ).then(profileState => {
         assert.deepEqual(profileState['jane'].edit.errors, {});
 
         // also assert that it returns a resolved promise
-        store.dispatch(validateProfile(
-          'jane',
-          USER_PROFILE_RESPONSE,
-          PersonalTab.defaultProps.requiredFields,
-          PersonalTab.defaultProps.validationMessages
-        )).then(() => {
+        store.dispatch(validateProfile('jane', USER_PROFILE_RESPONSE)).then(() => {
           done();
         });
       });
@@ -214,59 +208,36 @@ describe('reducers', () => {
       let profileWithError = Object.assign({}, USER_PROFILE_RESPONSE, {
         first_name: ''
       });
-      let keysToCheck = [["first_name"]];
-      let messages = {"first_name": "Given name"};
 
       // populate a profile
       store.dispatch(receiveGetUserProfileSuccess('jane', USER_PROFILE_RESPONSE));
       store.dispatch(startProfileEdit('jane'));
-      dispatchThen(validateProfile(
-        'jane',
-        profileWithError,
-        keysToCheck,
-        messages
-      ), [UPDATE_PROFILE_VALIDATION]).then(profileState => {
+      dispatchThen(
+        validateProfile('jane',profileWithError),
+        [UPDATE_PROFILE_VALIDATION]
+      ).then(profileState => {
         assert.deepEqual(profileState['jane'].edit.errors, {
           first_name: 'Given name is required'
         });
 
         // also assert that it returns a rejected promise
-        store.dispatch(validateProfile(
-          'jane',
-          profileWithError,
-          keysToCheck,
-          messages
-        )).catch(() => {
+        store.dispatch(validateProfile('jane', profileWithError)).catch(() => {
           done();
         });
       });
     });
 
     it('should validate a profile with nested objects and errors', done => {
-      let profileWithError = Object.assign({}, USER_PROFILE_RESPONSE, {
-        work_history: [{
-          company_name: "foocorp",
-          position: undefined
-        }]
-      });
-      let keysToCheck = [
-        ["work_history", 0, "company_name"],
-        ["work_history", 0, "position"],
-      ];
-      let messages = {
-        "company_name": "Company name",
-        "position": "Position",
-      };
+      let profileWithError = _.cloneDeep(USER_PROFILE_RESPONSE);
+      profileWithError.work_history[0].position = undefined;
 
       // populate a profile
       store.dispatch(receiveGetUserProfileSuccess('jane', USER_PROFILE_RESPONSE));
       store.dispatch(startProfileEdit('jane'));
-      dispatchThen(validateProfile(
-        'jane',
-        profileWithError,
-        keysToCheck,
-        messages
-      ), [UPDATE_PROFILE_VALIDATION]).then(profileState => {
+      dispatchThen(
+        validateProfile('jane', profileWithError),
+        [UPDATE_PROFILE_VALIDATION]
+      ).then(profileState => {
         assert.deepEqual(profileState['jane'].edit.errors, {
           work_history: [
             {position: 'Position is required'}
@@ -274,12 +245,7 @@ describe('reducers', () => {
         });
 
         // also assert that it returns a rejected promise
-        store.dispatch(validateProfile(
-          'jane',
-          profileWithError,
-          keysToCheck,
-          messages
-        )).catch(() => {
+        store.dispatch(validateProfile('jane', profileWithError)).catch(() => {
           done();
         });
       });

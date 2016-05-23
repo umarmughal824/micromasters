@@ -36,7 +36,7 @@ describe('App', () => {
   });
 
   it('clears profile, ui, and dashboard after unmounting', done => {
-    renderComponent("/dashboard", editProfileActions).then(([, div]) => {
+    renderComponent("/dashboard").then(([, div]) => {
       listenForActions([CLEAR_DASHBOARD, CLEAR_PROFILE, CLEAR_UI], () => {
         ReactDOM.unmountComponentAtNode(div);
       }).then(() => {
@@ -64,8 +64,8 @@ describe('App', () => {
       });
       helper.profileGetStub.returns(Promise.resolve(response));
 
-      renderComponent("/dashboard", editProfileActions).then(() => {
-        assert.equal(helper.currentLocation.pathname, "/profile/education");
+      renderComponent("/dashboard").then(() => {
+        assert.equal(helper.currentLocation.pathname, "/profile/personal");
         done();
       });
     });
@@ -81,35 +81,21 @@ describe('App', () => {
       });
     });
 
-    it("doesn't check work_history if currently_employed = 'no'", done => {
-      let response = Object.assign({}, USER_PROFILE_RESPONSE, {
-        currently_employed: "no"
-      });
-      helper.profileGetStub.returns(Promise.resolve(response));
-
-      renderComponent("/dashboard", editProfileActions).then(() => {
-        assert.equal(helper.currentLocation.pathname, "/profile/education");
-        done();
-      });
-    });
-
-    it("checks work_history if currently_employed = 'yes'", done => {
-      let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
-      profile.work_history[1].city = "";
-      profile.currently_employed = "yes";
-
-      helper.profileGetStub.returns(Promise.resolve(profile));
-
-      renderComponent("/dashboard", editProfileActions).then(() => {
-        assert.equal(helper.currentLocation.pathname, "/profile/professional");
-        done();
-      });
-    });
-
     it('redirects to /profile/privacy if a field is missing there', done => {
       let response = Object.assign({}, USER_PROFILE_RESPONSE, {
         account_privacy: ''
       });
+      helper.profileGetStub.returns(Promise.resolve(response));
+
+      renderComponent("/dashboard", editProfileActions).then(() => {
+        assert.equal(helper.currentLocation.pathname, "/profile/privacy");
+        done();
+      });
+    });
+
+    it('redirects to /profile/education if a field is missing there', done => {
+      let response = _.cloneDeep(USER_PROFILE_RESPONSE);
+      response.education[0].school_name = '';
       helper.profileGetStub.returns(Promise.resolve(response));
 
       renderComponent("/dashboard", editProfileActions).then(() => {

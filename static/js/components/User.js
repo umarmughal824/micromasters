@@ -5,18 +5,19 @@ import IconButton from 'react-mdl/lib/IconButton';
 import iso3166 from 'iso-3166-2';
 
 import { makeProfileImageUrl } from '../util/util';
+import EmploymentForm from './EmploymentForm';
 
 export default class User extends React.Component {
   static propTypes = {
-    profile: React.PropTypes.object.isRequired
+    profile: React.PropTypes.object
   };
 
   render() {
     const { profile } = this.props;
 
-    let getStateName = () => {
-      return iso3166.subdivision(profile.state_or_territory).name;
-    };
+    let getStateName = () => (
+      iso3166.subdivision(profile.state_or_territory).name
+    );
 
     let imageUrl = makeProfileImageUrl(profile);
     return <div className="card">
@@ -35,42 +36,34 @@ export default class User extends React.Component {
           />
         </Cell>
       </Grid>
-        <Card shadow={0} style={{width: "100%"}}>
-          <h3 className="users-name" style={{marginTop: 50}}>
-            { profile.preferred_name }
-          </h3>
+      <Card shadow={0} style={{width: "100%"}}>
+        <h3 className="users-name" style={{marginTop: 50}}>
+          { profile.preferred_name }
+        </h3>
 
-          <span className="users-location">
-            { profile.city }, { getStateName() }
-          </span>
-          <CardMenu>
-            <IconButton name="edit" />
-          </CardMenu>
-        </Card>
+        <span className="users-location">
+          { profile.city }, { getStateName() }
+        </span>
+        <CardMenu>
+          <IconButton name="edit" />
+        </CardMenu>
+      </Card>
 
-        <Grid>
-          <Cell col={6}>
-            <Card shadow={0} style={{width: "100%"}}>
-              <CardTitle>
-                Work History
-              </CardTitle>
-              <CardMenu>
-                <IconButton name="edit" />
-              </CardMenu>
-            </Card>
-          </Cell>
-
-          <Cell col={6}>
-            <Card shadow={0} style={{width: "100%"}}>
-              <CardTitle>
-                Education
-              </CardTitle>
-              <CardMenu>
-                <IconButton name="edit" />
-              </CardMenu>
-            </Card>
-          </Cell>
-        </Grid>
+      <Grid className="user-cards-grid">
+        <Cell col={6}>
+          <EmploymentForm {...this.props} />
+        </Cell>
+        <Cell col={6}>
+          <Card shadow={0} style={{width: "100%"}}>
+            <CardTitle>
+              Education History
+            </CardTitle>
+            <CardMenu>
+              <IconButton name="edit" />
+            </CardMenu>
+          </Card>
+        </Cell>
+      </Grid>
     </div>;
   }
 }
