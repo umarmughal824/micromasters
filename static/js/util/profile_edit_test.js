@@ -2,7 +2,6 @@ import React from 'react';
 import assert from 'assert';
 import iso3166 from 'iso-3166-2';
 import _ from 'lodash';
-import moment from 'moment';
 import MenuItem from 'material-ui/MenuItem';
 import sinon from 'sinon';
 
@@ -12,11 +11,9 @@ import {
   boundSelectField,
   boundStateSelectField,
   boundCountrySelectField,
-  boundMonthYearField,
   boundRadioGroupField,
   saveAndContinue,
 } from './profile_edit';
-import { DATE_FORMAT } from '../constants';
 import { USER_PROFILE_RESPONSE } from '../constants';
 import * as profileEdit from '../util/profile_edit';
 import * as util from '../util/util';
@@ -107,34 +104,6 @@ describe('Profile Editing utility functions', () => {
     it('should use an empty string instead of undefined for the value prop', () => {
       let blankTextField = boundTextField.call(that, ["missing"], "Missing");
       assert.equal('', blankTextField.props.value);
-    });
-  });
-
-  describe('Bound Date field', () => {
-    let dateField, dateElement, errorText;
-    beforeEach(() => {
-      dateField = boundDateField.call(
-        that,
-        ["date_of_birth"],
-        "Date of birth"
-      );
-      dateElement = dateField.props.children[0];
-      errorText = dateField.props.children[1];
-    });
-
-    it('should correctly set props on itself', () => {
-      assert.equal('Date of birth', dateElement.props.placeholderText);
-      assert.equal(errorText.type, 'span');
-      assert.deepEqual({
-        className: 'validation-error-text',
-        children: "Date of birth is required",
-      }, errorText.props);
-    });
-
-    it('should call the updateProfile callback when onChange fires', () => {
-      let cur = moment();
-      dateElement.props.onChange(cur);
-      assert.deepEqual(cur.format(DATE_FORMAT), that.props.profile.date_of_birth);
     });
   });
 
@@ -391,35 +360,52 @@ describe('Profile Editing utility functions', () => {
     });
   });
 
-  describe("Bound month/year field", () => {
-    let monthYearField, monthTextField, yearTextField;
-    let validateYearSpy, validateMonthSpy;
-    let renderMonthYearField = () => {
-      monthYearField = boundMonthYearField.call(
+  describe("Bound date field", () => {
+    let dateField, dayTextField, monthTextField, yearTextField;
+    let validateYearSpy, validateMonthSpy, validateDaySpy;
+    let renderDateField = (...args) => {
+      dateField = boundDateField.call(
         that,
         ["date_of_birth"],
-        "Date of birth"
+        "Date of birth",
+        ...args
       );
 
-      return monthYearField.props.children.filter(React.isValidElement);
+      return dateField.props.children.filter(React.isValidElement);
     };
 
     beforeEach(() => {
-      [monthTextField, , yearTextField] = renderMonthYearField();
-
       validateYearSpy = sandbox.spy(util, 'validateYear');
       validateMonthSpy = sandbox.spy(util, 'validateMonth');
+      validateDaySpy = sandbox.spy(util, 'validateDay');
     });
+
+    afterEach(() => {
+      yearTextField = null;
+      monthTextField = null;
+      dayTextField = null;
+    });
+
+    let rerender = omitDay => {
+      if (omitDay) {
+        [monthTextField, , yearTextField] = renderDateField(true);
+      } else {
+        [monthTextField, , dayTextField, , yearTextField] = renderDateField(false);
+      }
+    };
 
     it("has proper props for an invalid or missing value", () => {
       for (let dateOfBirth of ['', {}, null, undefined]) {
         that.props.profile.date_of_birth = dateOfBirth;
-        [monthTextField, , yearTextField] = renderMonthYearField();
+        rerender(false);
 
         assert.equal(monthTextField.props.floatingLabelText, "Date of birth");
         assert.equal(monthTextField.props.hintText, "MM");
         assert.equal(monthTextField.props.value, "");
         assert.equal(monthTextField.props.errorText, "Date of birth is required");
+        assert.equal(dayTextField.props.floatingLabelText, " ");
+        assert.equal(dayTextField.props.hintText, "DD");
+        assert.equal(dayTextField.props.value, "");
         assert.equal(yearTextField.props.floatingLabelText, " ");
         assert.equal(yearTextField.props.hintText, "YYYY");
         assert.equal(yearTextField.props.value, "");
@@ -428,7 +414,23 @@ describe('Profile Editing utility functions', () => {
 
     it("has proper props for a defined valid value", () => {
       that.props.profile.date_of_birth = "1985-12-31";
-      [monthTextField, , yearTextField] = renderMonthYearField();
+      rerender(false);
+
+      assert.equal(monthTextField.props.floatingLabelText, "Date of birth");
+      assert.equal(monthTextField.props.hintText, "MM");
+      assert.equal(monthTextField.props.value, 12);
+      assert.equal(monthTextField.props.errorText, "Date of birth is required");
+      assert.equal(dayTextField.props.floatingLabelText, " ");
+      assert.equal(dayTextField.props.hintText, "DD");
+      assert.equal(dayTextField.props.value, 31);
+      assert.equal(yearTextField.props.floatingLabelText, " ");
+      assert.equal(yearTextField.props.hintText, "YYYY");
+      assert.equal(yearTextField.props.value, 1985);
+    });
+
+    it("has proper props if we set omitDay to true", () => {
+      that.props.profile.date_of_birth = "1985-12-31";
+      rerender(true);
 
       assert.equal(monthTextField.props.floatingLabelText, "Date of birth");
       assert.equal(monthTextField.props.hintText, "MM");
@@ -439,31 +441,64 @@ describe('Profile Editing utility functions', () => {
       assert.equal(yearTextField.props.value, 1985);
     });
 
+    it("updates the day edit value when the day TextField onChange is used", () => {
+      rerender(false);
+      dayTextField.props.onChange({target: {value: "text"}});
+
+      assert.deepEqual(that.props.profile.date_of_birth_edit, {
+        day: "text",
+        month: undefined,
+        year: undefined
+      });
+    });
+
     it("updates the month edit value when the month TextField onChange is used", () => {
+      rerender(false);
       monthTextField.props.onChange({target: {value: "text"}});
 
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
+        day: undefined,
         month: "text",
         year: undefined
       });
     });
 
     it("updates the year edit value when the year TextField onChange is used", () => {
+      rerender(false);
       yearTextField.props.onChange({target: {value: "text"}});
 
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
+        day: undefined,
         month: undefined,
         year: "text"
       });
     });
 
-    it("updates the month correctly when edit value already exists", () => {
+    it("updates the day correctly when edit value already exists", () => {
       that.props.profile.date_of_birth_edit = {
+        day: "day",
         month: "month",
         year: "year"
       };
+      rerender(false);
+      dayTextField.props.onChange({target: {value: "changed"}});
+      assert.deepEqual(that.props.profile.date_of_birth_edit, {
+        day: "changed",
+        month: "month",
+        year: "year"
+      });
+    });
+
+    it("updates the month correctly when edit value already exists", () => {
+      that.props.profile.date_of_birth_edit = {
+        day: "day",
+        month: "month",
+        year: "year"
+      };
+      rerender(false);
       monthTextField.props.onChange({target: {value: "changed"}});
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
+        day: "day",
         month: "changed",
         year: "year"
       });
@@ -471,47 +506,147 @@ describe('Profile Editing utility functions', () => {
 
     it("updates the year correctly when edit value already exists", () => {
       that.props.profile.date_of_birth_edit = {
+        day: "day",
         month: "month",
         year: "year"
       };
+      rerender(false);
       yearTextField.props.onChange({target: {value: "changed"}});
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
+        day: "day",
         month: "month",
         year: "changed"
       });
     });
     
-    it("updates the formatted date if month and year are valid", () => {
+    it("updates the formatted date if month and year are valid and omitDay is true", () => {
+      rerender(true);
       monthTextField.props.onChange({target: {value: "12"}});
-      [monthTextField, , yearTextField] = renderMonthYearField();
-
+      rerender(true);
       yearTextField.props.onChange({target: {value: "2077"}});
 
       assert.equal(that.props.profile.date_of_birth, "2077-12-01");
-      assert.deepEqual(that.props.profile.date_of_birth_edit, undefined);
+      assert.deepEqual(that.props.profile.date_of_birth_edit, {
+        month: "12",
+        year: "2077",
+        day: undefined
+      });
+    });
+
+    it("updates the formatted date if day, month and year are valid and omitDay is false", () => {
+      rerender(false);
+      dayTextField.props.onChange({target: {value: "1"}});
+      rerender(false);
+      monthTextField.props.onChange({target: {value: "12"}});
+      rerender(false);
+      yearTextField.props.onChange({target: {value: "2077"}});
+
+      assert.equal(that.props.profile.date_of_birth, "2077-12-01");
+      assert.deepEqual(that.props.profile.date_of_birth_edit, {
+        month: "12",
+        year: "2077",
+        day: "1"
+      });
     });
 
     it("stores text in date_of_birth_edit if it's not a valid date", () => {
       that.props.profile.date_of_birth = "2066-02-28";
-      [monthTextField, , yearTextField] = renderMonthYearField();
+      rerender(false);
       monthTextField.props.onChange({target: {value: "13"}});
-      [monthTextField, , yearTextField] = renderMonthYearField();
+      rerender(false);
 
       assert.deepEqual(that.props.profile.date_of_birth, null);
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
+        day: "28",
         month: "13",
         year: "2066"
       });
     });
 
+    it("uses a day of 1 if omitDate is true", () => {
+      that.props.profile.date_of_birth = "2066-02-28";
+      rerender(true);
+      monthTextField.props.onChange({target: {value: "13"}});
+      rerender(true);
+      monthTextField.props.onChange({target: {value: "1"}});
+
+      assert.deepEqual(that.props.profile.date_of_birth, "2066-01-01");
+      // day is 28 here but it's discarded in the timestamp above, resulting in 01
+      assert.deepEqual(that.props.profile.date_of_birth_edit, {
+        month: "1",
+        year: 2066,
+        day: 28
+      });
+    });
+
+    it("uses validateDay for validation", () => {
+      rerender(false);
+      dayTextField.props.onChange({target: {value: "a day"}});
+      assert(validateDaySpy.calledWith("a day"));
+    });
+
     it("uses validateMonth for validation", () => {
+      rerender(false);
       monthTextField.props.onChange({target: {value: "a month"}});
       assert(validateMonthSpy.calledWith("a month"));
     });
 
     it("uses validateYear for validation", () => {
+      rerender(false);
       yearTextField.props.onChange({target: {value: "a year"}});
       assert(validateYearSpy.calledWith("a year"));
+    });
+
+    it("uses moment.js for validation", () => {
+      rerender(false);
+      that.props.profile.date_of_birth = "2066-02-28";
+      rerender(false);
+      dayTextField.props.onChange({target: {value: "31"}});
+      rerender(false);
+
+      // Feb 31 is not a valid date, and only moment.js knows that
+      assert.deepEqual(that.props.profile.date_of_birth, null);
+      assert.deepEqual(that.props.profile.date_of_birth_edit, {
+        day: "31",
+        month: 2,
+        year: 2066
+      });
+    });
+
+    it("treats an empty date string as deleting the format text but not edit data", () => {
+      that.props.profile.date_of_birth = "2066-02-28";
+      rerender(false);
+      dayTextField.props.onChange({target: {value: ""}});
+      assert.deepEqual(that.props.profile.date_of_birth, null);
+      assert.deepEqual(that.props.profile.date_of_birth_edit, {
+        day: "",
+        month: "2",
+        year: "2066"
+      });
+    });
+
+    it("treats an empty month string as deleting the format text but not edit data", () => {
+      that.props.profile.date_of_birth = "2066-02-28";
+      rerender(false);
+      monthTextField.props.onChange({target: {value: ""}});
+      assert.deepEqual(that.props.profile.date_of_birth, null);
+      assert.deepEqual(that.props.profile.date_of_birth_edit, {
+        day: "28",
+        month: "",
+        year: "2066"
+      });
+    });
+
+    it("treats an empty year string as deleting the format text but not edit data", () => {
+      that.props.profile.date_of_birth = "2066-02-28";
+      rerender(false);
+      yearTextField.props.onChange({target: {value: ""}});
+      assert.deepEqual(that.props.profile.date_of_birth, null);
+      assert.deepEqual(that.props.profile.date_of_birth_edit, {
+        day: "28",
+        month: "2",
+        year: ""
+      });
     });
   });
 

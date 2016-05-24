@@ -11,9 +11,7 @@ import { makeDashboardRoutes } from './dashboard_routes';
 import 'style!css!react-mdl/extra/material.css';
 import 'react-mdl/extra/material.js';
 
-// requirement for react-datepicker
-import 'style!css!react-datepicker/dist/react-datepicker.css';
-
+// Object.entries polyfill
 import entries from 'object.entries';
 if (!Object.entries) {
   entries.shim();
