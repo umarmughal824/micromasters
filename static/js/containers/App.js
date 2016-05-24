@@ -106,8 +106,8 @@ class App extends React.Component {
       !PROFILE_REGEX.test(pathname) &&
       !complete
     ) {
-      dispatch(startProfileEdit());
-      dispatch(updateProfileValidation(errors));
+      dispatch(startProfileEdit(SETTINGS.username));
+      dispatch(updateProfileValidation(SETTINGS.username, errors));
       this.context.router.push(url);
     }
   }
