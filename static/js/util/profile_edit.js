@@ -400,20 +400,29 @@ export function boundMonthYearField(keySet, label) {
 
   // fullWidth means set width = 100% instead of 256px
   return <div>
-    <label>{label}</label>
-    <span> </span>
     <TextField
-      floatingLabelText="MM"
+      floatingLabelText={label}
+      floatingLabelFixed={true}
+      floatingLabelStyle={{whiteSpace: "nowrap"}}
+      hintText="MM"
       style={{
         maxWidth: "2em"
+      }}
+      errorStyle={{
+        position: "absolute",
+        top: "100%",
+        whiteSpace: "nowrap"
       }}
       fullWidth={true}
       value={monthYear.month !== undefined ? monthYear.month : ""}
       onChange={e => setNewDate(e.target.value, undefined)}
+      errorText={_.get(errors, keySet)}
     />
     <span className="slash"> / </span>
     <TextField
-      floatingLabelText="YYYY"
+      hintText="YYYY"
+      floatingLabelFixed={true}
+      floatingLabelText=" "
       style={{
         maxWidth: "4em"
       }}
@@ -421,7 +430,6 @@ export function boundMonthYearField(keySet, label) {
       value={monthYear.year !== undefined ? monthYear.year : ""}
       onChange={e => setNewDate(undefined, e.target.value)}
     />
-    <span className="validation-error-text">{_.get(errors, keySet)}</span>
   </div>;
 }
 
