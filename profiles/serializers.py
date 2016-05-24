@@ -4,7 +4,11 @@ Serializers for user profiles
 from django.db import transaction
 
 from rest_framework.exceptions import ValidationError
-from rest_framework.serializers import ModelSerializer, SerializerMethodField, IntegerField
+from rest_framework.serializers import (
+    IntegerField,
+    ModelSerializer,
+    SerializerMethodField
+)
 
 from profiles.models import Employment, Profile, Education
 
@@ -102,14 +106,13 @@ class EducationSerializer(ModelSerializer):
 
 class ProfileSerializer(ModelSerializer):
     """Serializer for Profile objects"""
-    pretty_printed_student_id = SerializerMethodField()
+    username = SerializerMethodField()
     work_history = EmploymentSerializer(many=True)
     education = EducationSerializer(many=True)
 
-    def get_pretty_printed_student_id(self, obj):
-        """helper method for the SerializerMethodField"""
-        # pylint: disable=no-self-use
-        return obj.pretty_printed_student_id
+    def get_username(self, obj):  # pylint: disable=no-self-use
+        """Getter for the username field"""
+        return obj.user.username
 
     def update(self, instance, validated_data):
         with transaction.atomic():
@@ -129,6 +132,7 @@ class ProfileSerializer(ModelSerializer):
     class Meta:  # pylint: disable=missing-docstring
         model = Profile
         fields = (
+            'username',
             'filled_out',
             'agreed_to_terms_of_service',
             'account_privacy',
@@ -162,19 +166,36 @@ class ProfileLimitedSerializer(ModelSerializer):
     Serializer for Profile objects, limited to fields that other users are
     allowed to see if a profile is marked public.
     """
+    username = SerializerMethodField()
+    work_history = EmploymentSerializer(many=True)
+    education = EducationSerializer(many=True)
+
+    def get_username(self, obj):  # pylint: disable=no-self-use
+        """Getter for the username field"""
+        return obj.user.username
+
     class Meta:  # pylint: disable=missing-docstring
         model = Profile
         fields = (
-            'preferred_name',
+            'username',
             'account_privacy',
+            'first_name',
+            'last_name',
+            'preferred_name',
             'country',
             'state_or_territory',
             'city',
+            'birth_country',
             'has_profile_image',
             'profile_url_full',
             'profile_url_large',
             'profile_url_medium',
             'profile_url_small',
+            'preferred_language',
+            'gender',
+            'work_history',
+            'edx_level_of_education',
+            'education'
         )
 
 
@@ -183,9 +204,16 @@ class ProfilePrivateSerializer(ModelSerializer):
     Serializer for Profile objects, limited to fields that other users are
     allowed to see if a profile is marked private.
     """
+    username = SerializerMethodField()
+
+    def get_username(self, obj):  # pylint: disable=no-self-use
+        """Getter for the username field"""
+        return obj.user.username
+
     class Meta:  # pylint: disable=missing-docstring
         model = Profile
         fields = (
+            'username',
             'account_privacy',
             'has_profile_image',
             'profile_url_full',

@@ -39,6 +39,7 @@ class ProfileTests(TestCase):
         """
         profile = ProfileFactory.build()
         assert ProfileSerializer().to_representation(profile) == {
+            'username': profile.user.username,
             'first_name': profile.first_name,
             'filled_out': profile.filled_out,
             'agreed_to_terms_of_service': profile.agreed_to_terms_of_service,
@@ -77,16 +78,30 @@ class ProfileTests(TestCase):
         """
         profile = ProfileFactory.build()
         assert ProfileLimitedSerializer().to_representation(profile) == {
+            'username': profile.user.username,
+            'first_name': profile.first_name,
+            'last_name': profile.last_name,
             'preferred_name': profile.preferred_name,
+            'gender': profile.gender,
             'account_privacy': profile.account_privacy,
             'has_profile_image': profile.has_profile_image,
             'profile_url_full': profile.profile_url_full,
             'profile_url_large': profile.profile_url_large,
             'profile_url_medium': profile.profile_url_medium,
             'profile_url_small': profile.profile_url_small,
-            'city': profile.city,
             'country': profile.country,
             'state_or_territory': profile.state_or_territory,
+            'city': profile.city,
+            'birth_country': profile.birth_country,
+            'preferred_language': profile.preferred_language,
+            'edx_level_of_education': profile.edx_level_of_education,
+            'education': [
+                EducationSerializer().to_representation(education) for education in profile.education.all()
+            ],
+            'work_history': [
+                EmploymentSerializer().to_representation(work_history) for work_history in
+                profile.work_history.all()
+            ]
         }
 
     def test_private(self):  # pylint: disable=no-self-use
@@ -95,6 +110,7 @@ class ProfileTests(TestCase):
         """
         profile = ProfileFactory.build()
         assert ProfilePrivateSerializer().to_representation(profile) == {
+            'username': profile.user.username,
             'account_privacy': profile.account_privacy,
             'has_profile_image': profile.has_profile_image,
             'profile_url_full': profile.profile_url_full,
