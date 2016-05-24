@@ -171,8 +171,14 @@ Micromasters app. For example, you can run a Python shell with the following com
 Tests should be run in the Docker container, not the host machine. They can be run with the following commands:
 
     # Run the full suite
-    docker-compose run web tox
+    ./test_suite.sh
     # Run Python tests only
-    docker-compose run web tox -e py34
-    # Run JS tests only
-    docker-compose run web tox -e js
+    docker-compose run web tox
+    # Run the JS tests with coverage report
+    docker-compose run watch npm run-script coverage
+    # run the JS tests without coverage report
+    docker-compose run watch npm test
+    # run a single JS test file
+    docker-compose run watch npm run-script singleTest /path/to/test.js
+    # Run the JS linter
+    docker-compose run watch npm run-script lint
