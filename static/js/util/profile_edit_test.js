@@ -13,7 +13,8 @@ import {
   boundStateSelectField,
   boundCountrySelectField,
   boundMonthYearField,
-  boundRadioGroupField
+  boundRadioGroupField,
+  saveAndContinue,
 } from './profile_edit';
 import { DATE_FORMAT } from '../constants';
 import { USER_PROFILE_RESPONSE } from '../constants';
@@ -21,7 +22,7 @@ import * as profileEdit from '../util/profile_edit';
 import * as util from '../util/util';
 
 describe('Profile Editing utility functions', () => {
-  let that;
+  let that, sandbox;
   const change = (clone) => that.props.profile = clone;
   beforeEach(() => {
     that = {
@@ -42,6 +43,11 @@ describe('Profile Editing utility functions', () => {
         updateProfile: change
       }
     };
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
   });
 
   describe('Bound radio group', () => {
@@ -215,18 +221,40 @@ describe('Profile Editing utility functions', () => {
 
       assert.equal(that.props.profile.gender_edit, "update input text");
     });
+
+    it('should clear edit text when onBlur is called', () => {
+      that.props.profile.gender = 'f';
+      that.props.profile.gender_edit = 'text not matching anything';
+      selectField = boundSelectField.call(
+        that,
+        ['gender'],
+        "Gender",
+        genderOptions
+      );
+      selectField.props.onBlur();
+
+      assert.equal(that.props.profile.gender, 'f');
+      assert.equal(that.props.profile.gender_edit, undefined);
+    });
+
+    it('should display the edit text if it is set', () => {
+      const text = 'text typed in';
+      that.props.profile.gender_edit = text;
+      that.props.profile.gender = 'f';
+      selectField = boundSelectField.call(
+        that,
+        ['gender'],
+        "Gender",
+        genderOptions
+      );
+      assert.equal(selectField.props.searchText, text);
+    });
   });
 
   describe("Bound state select field", () => {
-    let sandbox, boundSelectFieldSpy;
+    let boundSelectFieldSpy;
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
-
       boundSelectFieldSpy = sandbox.spy(profileEdit, 'boundSelectField');
-    });
-
-    afterEach(() => {
-      sandbox.restore();
     });
 
     it('lists no states when an invalid country is selected', () => {
@@ -283,10 +311,8 @@ describe('Profile Editing utility functions', () => {
   });
 
   describe("Bound country select field", () => {
-    let sandbox, boundSelectFieldSpy, countryOptions;
+    let boundSelectFieldSpy, countryOptions;
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
-
       boundSelectFieldSpy = sandbox.spy(profileEdit, 'boundSelectField');
 
       countryOptions = Object.keys(iso3166.data).map(code => ({
@@ -296,9 +322,6 @@ describe('Profile Editing utility functions', () => {
       countryOptions = _.sortBy(countryOptions, 'label');
     });
 
-    afterEach(() => {
-      sandbox.restore();
-    });
 
     it('shows a list of countries', () => {
       const country = null;
@@ -370,7 +393,7 @@ describe('Profile Editing utility functions', () => {
 
   describe("Bound month/year field", () => {
     let monthYearField, monthTextField, yearTextField, errorSpan, labelField;
-    let sandbox, validateYearSpy, validateMonthSpy;
+    let validateYearSpy, validateMonthSpy;
     let __; // eslint-disable-line no-unused-vars
     let renderMonthYearField = () => {
       monthYearField = boundMonthYearField.call(
@@ -385,16 +408,9 @@ describe('Profile Editing utility functions', () => {
     beforeEach(() => {
       [labelField, __, monthTextField, __, yearTextField, errorSpan] = renderMonthYearField();
 
-      sandbox = sinon.sandbox.create();
-
       validateYearSpy = sandbox.spy(util, 'validateYear');
       validateMonthSpy = sandbox.spy(util, 'validateMonth');
     });
-
-    afterEach(() => {
-      sandbox.restore();
-    });
-
 
     it("has proper props for an invalid or missing value", () => {
       for (let dateOfBirth of ['', {}, null, undefined]) {
@@ -495,6 +511,47 @@ describe('Profile Editing utility functions', () => {
     it("uses validateYear for validation", () => {
       yearTextField.props.onChange({target: {value: "a year"}});
       assert(validateYearSpy.calledWith("a year"));
+    });
+  });
+
+  describe('saveAndContinue', () => {
+    const saveProfileReturnValue = "value";
+    beforeEach(() => {
+      that.props.saveProfile = sandbox.stub();
+      that.props.saveProfile.returns(saveProfileReturnValue);
+      that.props.requiredFields = ['field1', 'field2'];
+      that.props.validationMessages = {'message1': 'error'};
+      that.props.profile.filled_out = false;
+    });
+
+    it('saves with finalStep as true', () => {
+      let ret = saveAndContinue.call(that, undefined, true);
+
+      let clone = Object.assign({}, that.props.profile, {
+        filled_out: true,
+        email_optin: true
+      });
+
+      assert.ok(that.props.saveProfile.calledWith(
+        clone,
+        that.props.requiredFields,
+        that.props.validationMessages
+      ));
+      assert.equal(ret, saveProfileReturnValue);
+    });
+
+    it('saves with nestedValidationCallback as a function', () => {
+      const newFields = ['field3', 'field4'];
+      let callback = sandbox.stub();
+      callback.returns(newFields);
+      let ret = saveAndContinue.call(that, callback, false);
+      assert.ok(that.props.saveProfile.calledWith(
+        that.props.profile,
+        newFields,
+        that.props.validationMessages
+      ));
+      assert.equal(ret, saveProfileReturnValue);
+      assert.ok(callback.calledWith(that.props.profile, that.props.requiredFields));
     });
   });
 });
