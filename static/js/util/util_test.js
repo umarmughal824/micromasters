@@ -412,12 +412,11 @@ describe('utility functions', () => {
       profile = {};
     });
 
-    it('should return fields for dialog for an empty profile', () => {
-      let expectation = [false, {
-        url: "/profile/personal",
-        title: "Personal Info",
-        text: "Please complete your personal information.",
-      }];
+    it('should return fields for an empty profile', () => {
+      let errors = Object.assign({}, ...Object.entries(PersonalTab.defaultProps.validationMessages).map(
+        ([k,v]) => ({[k]: `${v} is required`})
+      ));
+      const expectation = [false, "/profile/personal", errors];
       assert.deepEqual(validateProfileComplete(profile), expectation);
     });
 
@@ -426,10 +425,8 @@ describe('utility functions', () => {
         profile[field[0]] = "filled in";
       });
       profile['account_privacy'] = '';
-      let expectation = [false, {
-        url: "/profile/privacy",
-        title: "Privacy Settings",
-        text: "Please complete the privacy settings.",
+      let expectation = [false, "/profile/privacy", {
+        account_privacy: 'Privacy level is required'
       }];
       assert.deepEqual(validateProfileComplete(profile), expectation);
     });
@@ -441,7 +438,7 @@ describe('utility functions', () => {
       PrivacyTab.defaultProps.requiredFields.forEach( (field) => {
         profile[field[0]] = "filled in";
       });
-      assert.deepEqual(validateProfileComplete(profile), [true, {}]);
+      assert.deepEqual(validateProfileComplete(profile), [true, null, null]);
     });
 
     it('should return true when all nested fields are filled in', () => {
@@ -455,7 +452,7 @@ describe('utility functions', () => {
       EmploymentTab.nestedValidationKeys.forEach( k => {
         profile['work_history'][0][k] = "filled in";
       });
-      assert.deepEqual(validateProfileComplete(profile), [true, {}]);
+      assert.deepEqual(validateProfileComplete(profile), [true, null, null]);
     });
 
     it('should return fields for dialog when a nested field is missing', () => {
@@ -467,10 +464,8 @@ describe('utility functions', () => {
         profile['work_history'][0][k] = "filled in";
       });
       profile['work_history'][0]['country'] = '';
-      let expectation = [ false, {
-        url: "/profile/professional",
-        title: "Professional Info",
-        text: "Please complete your work history information.",
+      let expectation = [false, "/profile/professional", {
+        work_history: [{country: "Country is required"}]
       }];
       assert.deepEqual(validateProfileComplete(profile), expectation);
     });

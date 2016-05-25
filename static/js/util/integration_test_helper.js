@@ -11,7 +11,6 @@ import {
 import {
   REQUEST_DASHBOARD,
   REQUEST_GET_USER_PROFILE,
-  RECEIVE_DASHBOARD_SUCCESS,
   RECEIVE_GET_USER_PROFILE_SUCCESS,
 } from '../actions';
 import rootReducer from '../reducers';
@@ -50,7 +49,6 @@ class IntegrationTestHelper {
       let expectedTypes = [
         REQUEST_DASHBOARD,
         REQUEST_GET_USER_PROFILE,
-        RECEIVE_DASHBOARD_SUCCESS,
         RECEIVE_GET_USER_PROFILE_SUCCESS,
       ];
 
