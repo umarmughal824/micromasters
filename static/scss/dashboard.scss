@@ -318,9 +318,14 @@ c.validation-wrapper {
   background-color: #f9f9f9 !important;
 }
 
-.profile-add-button {
-  background-color: #0cbd8a !important;
-  bottom: -25px;
-  position: absolute;
-  right: -40%;
+// CSS magic to make the radio buttons show up next to each other
+.profile-gender-group {
+  display: block !important;
+  .profile-radio-button {
+    width: unset !important;
+    display: inline-block !important;
+    label {
+      width: unset !important;
+    }
+  }
 }

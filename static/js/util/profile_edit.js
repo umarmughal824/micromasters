@@ -46,14 +46,19 @@ export function boundRadioGroupField(keySet, label, options) {
     };
 
     const radioButtons = options.map(obj => {
+      let helper = "";
+      if (obj.helper) {
+        helper = `- ${obj.helper}`;
+      }
       let label = (
         <span className="radio-label">
-          {obj.label}<span className="radio-label-hint"> - {obj.helper}</span>
+          {obj.label}<span className="radio-label-hint">{helper}</span>
         </span>
       );
 
       return (
         <RadioButton
+          className="profile-radio-button"
           key={obj.value}
           labelStyle={styles.labelStyle}
           value={obj.value}
@@ -63,6 +68,7 @@ export function boundRadioGroupField(keySet, label, options) {
 
     return (
       <RadioButtonGroup
+        className="profile-radio-group"
         name={label}
         onChange={onChange}
         defaultSelected={defaultSelected}>
