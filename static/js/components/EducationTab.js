@@ -209,7 +209,7 @@ class EducationTab extends ProfileTab {
         {this.boundTextField(keySet('field_of_study'), 'Field of Study')}
       </Cell>
       <Cell col={6}>
-        {this.boundMonthYearField(keySet('graduation_date'), 'Graduation Date')}
+        {this.boundDateField(keySet('graduation_date'), 'Graduation Date', true)}
       </Cell>
       <Cell col={6}>
         {this.boundTextField(keySet('school_name'), 'School Name')}

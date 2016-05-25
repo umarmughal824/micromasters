@@ -1,5 +1,4 @@
 import React from 'react';
-import DatePicker from 'react-datepicker';
 import moment from 'moment';
 import iso3166 from 'iso-3166-2';
 import _ from 'lodash';
@@ -8,10 +7,11 @@ import MenuItem from 'material-ui/MenuItem';
 import TextField from 'material-ui/TextField';
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
 
-import { DATE_FORMAT } from '../constants';
+import { ISO_8601_FORMAT } from '../constants';
 import {
   validateMonth,
   validateYear,
+  validateDay,
 } from '../util/util';
 
 // utility functions for pushing changes to profile forms back to the
@@ -281,44 +281,10 @@ export function boundCountrySelectField(stateKeySet, countryKeySet, label) {
  *
  * @param keySet {String[]} Path to look up and set a field
  * @param label {String} Label for the field
+ * @param omitDay {bool} If false, there is a date textbox in addition to month and year
  * @returns {ReactElement}
  */
-export function boundDateField(keySet, label) {
-  const {
-    profile,
-    errors,
-    updateProfile,
-  } = this.props;
-
-  let onChange = date => {
-    let clone = _.cloneDeep(profile);
-    // format as ISO-8601
-    let newDate = _.isNull(date) ? date : date.format(DATE_FORMAT);
-    _.set(clone, keySet, newDate);
-    updateProfile(clone);
-  };
-  let newDate = _.get(profile, keySet) ? moment(_.get(profile, keySet), DATE_FORMAT) : null;
-  return <div>
-    <DatePicker
-      selected={newDate}
-      placeholderText={label}
-      showYearDropdown
-      onChange={onChange}
-    />
-    <span className="validation-error-text">{_.get(errors, keySet)}</span>
-  </div>;
-}
-
-/**
- * bind this to this.boundMonthYearField in the constructor of a form component
- * to update date fields
- * pass in the name (used as placeholder), key for profile.
- *
- * @param keySet {String[]} Path to look up and set a field
- * @param label {String} Label for the field
- * @returns {ReactElement}
- */
-export function boundMonthYearField(keySet, label) {
+export function boundDateField(keySet, label, omitDay) {
   const {
     profile,
     errors,
@@ -334,72 +300,94 @@ export function boundMonthYearField(keySet, label) {
     let formattedDate = _.get(profile, keySet);
 
     if (formattedDate !== undefined && formattedDate !== null) {
-      return moment(formattedDate, DATE_FORMAT);
+      return moment(formattedDate, ISO_8601_FORMAT);
     }
     return null;
   };
 
-  // Get a tuple { month, year } which contains the values being edited in the textbox
+  // Get an object { day, month, year } which contains the values being edited in the textbox
   // values may be strings or numbers. Otherwise return empty object.
-  let getMonthYear = () => {
-    let monthYear = _.get(profile, editKeySet, {});
+  let getEditObject = () => {
+    let edit = _.get(profile, editKeySet, {});
 
-    if (_.isEmpty(monthYear)) {
+    if (_.isEmpty(edit)) {
       let date = getDate();
       if (date !== null && date.isValid()) {
         return {
           month: date.month() + 1,
-          year: date.year()
+          year: date.year(),
+          day: date.date()
         };
       }
     }
-    return monthYear;
+    return edit;
   };
 
-  // Given text values month and year, update the formatted date in the profile
-  // if month and year are filled out. If one or both are invalid, store the text
+  // Given text values date, month and year, update the formatted date in the profile
+  // if day, month and year are filled out. If at least one are invalid, store the text
   // representation instead in a temporary edit value and store null in place of the
   // date format.
-  let setNewDate = (month, year) => {
+  let setNewDate = (day, month, year) => {
     let clone = _.cloneDeep(profile);
 
-    let monthYear = getMonthYear();
-    // Update monthYear with the typed text. Typically only month or year will
-    // have text at a time since the user can't edit two fields at once, so we need
-    // to look in the state to see
-    let newMonthYear = Object.assign({}, monthYear, {
-      year: year !== undefined ? year : monthYear.year,
-      month: month !== undefined ? month : monthYear.month
+    let edit = getEditObject();
+    // Update tuple with the typed text. Typically only one of the arguments
+    // will have text at a time since the user can't edit more than one field at once
+    // so we need to look in the state to see
+    let newEdit = Object.assign({}, edit, {
+      year: year !== undefined ? year : edit.year,
+      month: month !== undefined ? month : edit.month,
+      day: day !== undefined ? day : edit.day
     });
+    
+    // these functions return undefined if a month, day, or year is invalid, and converts the value to a number
+    // except if the input value is an empty string, in which case an empty string is returned
+    let validatedDay = 1;
+    if (!omitDay) {
+      validatedDay = validateDay(newEdit.day);
+    }
+    let validatedMonth = validateMonth(newEdit.month);
+    let validatedYear = validateYear(newEdit.year);
 
-    // these functions return undefined if month or year is invalid, and converts the value to a number
-    let validatedMonth = validateMonth(newMonthYear.month);
-    let validatedYear = validateYear(newMonthYear.year);
+    // keep text up to date
+    _.set(clone, editKeySet, newEdit);
 
-    if (validatedMonth === undefined || validatedYear === undefined) {
-      // store the edit value and make the formatted date null so it doesn't pass validation
-      _.set(clone, editKeySet, newMonthYear);
-      _.set(clone, keySet, undefined);
-    } else if ( validatedMonth === "" || validatedYear === "") {
-      _.set(clone, editKeySet, undefined);
+    if ([validatedDay, validatedMonth, validatedYear].includes(undefined)) {
+      // store the edit value and make the formatted date undefined so it doesn't pass validation
       _.set(clone, keySet, null);
     } else {
-      // format date and store it, and erase the edit data
-      let formattedDate = moment().
-        set('year', validatedYear).
-        set('month', validatedMonth - 1).
-        set('date', 1).
-        format(DATE_FORMAT);
-      _.set(clone, editKeySet, undefined);
-      _.set(clone, keySet, formattedDate);
+      let momentDate = moment(`${validatedYear}-${validatedMonth}-${validatedDay}`, ISO_8601_FORMAT);
+      if (!momentDate.isValid()) {
+        // date is invalid according to moment.js so make the formatted date undefined so it
+        // doesn't pass validation
+        _.set(clone, keySet, null);
+      } else {
+        // format date and store it
+        _.set(clone, keySet, momentDate.format(ISO_8601_FORMAT));
+      }
     }
     updateProfile(clone);
   };
 
-  let monthYear = getMonthYear();
+  let edit = getEditObject();
 
-  // fullWidth means set width = 100% instead of 256px
-  return <div>
+  let dayField, daySlash;
+  if (!omitDay) {
+    daySlash = <span className="slash"> / </span>;
+    dayField = <TextField
+      hintText="DD"
+      floatingLabelText=" "
+      floatingLabelFixed={true}
+      style={{
+        maxWidth: "2em"
+      }}
+      fullWidth={true}
+      value={edit.day !== undefined ? edit.day : ""}
+      onChange={e => setNewDate(e.target.value, undefined, undefined)}
+    />;
+  }
+
+  return <div style={{paddingBottom: "20px"}}>
     <TextField
       floatingLabelText={label}
       floatingLabelFixed={true}
@@ -414,11 +402,13 @@ export function boundMonthYearField(keySet, label) {
         whiteSpace: "nowrap"
       }}
       fullWidth={true}
-      value={monthYear.month !== undefined ? monthYear.month : ""}
-      onChange={e => setNewDate(e.target.value, undefined)}
+      value={edit.month !== undefined ? edit.month : ""}
+      onChange={e => setNewDate(undefined, e.target.value, undefined)}
       errorText={_.get(errors, keySet)}
     />
     <span className="slash"> / </span>
+    {dayField}
+    {daySlash}
     <TextField
       hintText="YYYY"
       floatingLabelFixed={true}
@@ -427,12 +417,11 @@ export function boundMonthYearField(keySet, label) {
         maxWidth: "4em"
       }}
       fullWidth={true}
-      value={monthYear.year !== undefined ? monthYear.year : ""}
-      onChange={e => setNewDate(undefined, e.target.value)}
+      value={edit.year !== undefined ? edit.year : ""}
+      onChange={e => setNewDate(undefined, undefined, e.target.value)}
     />
   </div>;
 }
-
 
 /**
  * Saves the profile and returns a promise, taking an optional function

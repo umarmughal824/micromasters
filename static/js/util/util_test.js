@@ -22,6 +22,7 @@ import {
   makeProfileImageUrl,
   validateMonth,
   validateYear,
+  validateDay,
   generateNewEducation,
   generateNewWorkHistory,
 } from '../util/util';
@@ -486,6 +487,7 @@ describe('utility functions', () => {
       assert.equal(undefined, validateMonth("13"));
     });
     it('returns undefined if the text is not an integer number', () => {
+      assert.equal(undefined, validateMonth(""));
       assert.equal(undefined, validateMonth("two"));
       assert.equal(undefined, validateMonth(null));
       assert.equal(undefined, validateMonth({}));
@@ -493,10 +495,6 @@ describe('utility functions', () => {
       assert.equal(undefined, validateMonth("2e0"));
       assert.equal(undefined, validateMonth("3-4"));
       assert.equal(undefined, validateMonth("3.4"));
-    });
-
-    it('returns an empty string if passed an empty string', () => {
-      assert.equal("", validateMonth(""));
     });
   });
 
@@ -515,6 +513,7 @@ describe('utility functions', () => {
       assert.equal(undefined, validateYear("10000"));
     });
     it('returns undefined if the text is not an integer number', () => {
+      assert.equal(undefined, validateYear(""));
       assert.equal(undefined, validateYear("two"));
       assert.equal(undefined, validateYear(null));
       assert.equal(undefined, validateYear({}));
@@ -523,12 +522,34 @@ describe('utility functions', () => {
       assert.equal(undefined, validateYear("3-4"));
       assert.equal(undefined, validateYear("3.4"));
     });
-
-    it('returns an empty string if passed an empty string', () => {
-      assert.equal("", validateYear(""));
-    });
   });
   
+  describe('validateDate', () => {
+    it('handles dates starting with 0 without treating as octal', () => {
+      assert.equal(1, validateDay("01"));
+    });
+    it('converts strings to numbers', () => {
+      assert.equal(3, validateDay("3"));
+    });
+    it('returns undefined for invalid dates', () => {
+      assert.equal(undefined, validateDay("-3"));
+      assert.equal(undefined, validateDay("0"));
+      assert.equal(1, validateDay("1"));
+      assert.equal(31, validateDay("31"));
+      assert.equal(undefined, validateDay("32"));
+    });
+    it('returns undefined if the text is not an integer number', () => {
+      assert.equal(undefined, validateDay(""));
+      assert.equal(undefined, validateDay("two"));
+      assert.equal(undefined, validateDay(null));
+      assert.equal(undefined, validateDay({}));
+      assert.equal(undefined, validateDay(undefined));
+      assert.equal(undefined, validateDay("2e0"));
+      assert.equal(undefined, validateDay("3-4"));
+      assert.equal(undefined, validateDay("3.4"));
+    });
+  });
+
   describe('generateNewWorkHistory', () => {
     it('generates a new work history object', () => {
       assert.deepEqual(generateNewWorkHistory(), {

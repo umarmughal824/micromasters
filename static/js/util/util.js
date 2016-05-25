@@ -355,15 +355,28 @@ export function makeStrippedHtml(textOrElement) {
 }
 
 /**
+ * Validate a day of month
+ * @param {String} string The input string
+ * @returns {Number|undefined} The valid date if a valid date value or undefined if not valid
+ */
+export function validateDay(string) {
+  let date = filterPositiveInt(string);
+  if (date === undefined) {
+    return undefined;
+  }
+  // More complicated cases like Feb 29 are handled in moment.js isValid
+  if (date < 1 || date > 31) {
+    return undefined;
+  }
+  return date;
+}
+
+/**
  * Validate a month number
  * @param {String} string The input string
- * @returns {Number|undefined} The valid month if a valid month value,
- * an empty string if input is an empty string, or undefined if not valid
+ * @returns {Number|undefined} The valid month if a valid month value or undefined if not valid
  */
 export function validateMonth(string) {
-  if ( string === "" ) {
-    return string;
-  }
   let month = filterPositiveInt(string);
   if (month === undefined) {
     return undefined;
@@ -377,13 +390,9 @@ export function validateMonth(string) {
 /**
  * Validate a year string is an integer and fits into YYYY
  * @param {String} string The input string
- * @returns {Number|undefined} The valid year if a valid year value, an
- * emtpy string if the input is an empty string, or undefined if not valid
+ * @returns {Number|undefined} The valid year if a valid year value or undefined if not valid
  */
 export function validateYear(string) {
-  if ( string === "" ) {
-    return string;
-  }
   let year = filterPositiveInt(string);
   if (year === undefined) {
     return undefined;

@@ -133,10 +133,10 @@ class EmploymentTab extends ProfileTab {
           {this.boundTextField(keySet('position'), 'Position')}
         </Cell>
         <Cell col={6}>
-          {this.boundMonthYearField(keySet('start_date'), 'Start Date')}
+          {this.boundDateField(keySet('start_date'), 'Start Date', true)}
         </Cell>
         <Cell col={6}>
-          {this.boundMonthYearField(keySet('end_date'), 'End Date')}
+          {this.boundDateField(keySet('end_date'), 'End Date', true)}
           <span className="end-date-hint">
             Leave blank if this is a current position
           </span>
