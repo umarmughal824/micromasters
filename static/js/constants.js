@@ -233,4 +233,5 @@ export const DASHBOARD_RESPONSE = [
 export const DATE_FORMAT = 'YYYY-MM-DD';
 
 export const DASHBOARD_COURSE_HEIGHT = 70;
+export const TERMS_CARD_ROW_HEIGHT = 70;
 export const DASHBOARD_RUN_HEIGHT = 40;
