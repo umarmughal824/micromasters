@@ -1,6 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
-import Button from 'react-bootstrap/lib/Button';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import RaisedButton from 'material-ui/RaisedButton';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 
 import { toggleDashboardExpander } from '../actions/ui';
@@ -88,6 +89,11 @@ class CourseList extends React.Component {
         </div>;
       });
 
+      let applyForMSBtnLabel = `Apply for the ${program.title} Master’s Degree`;
+      const btnStyle = {
+        'text-transform': 'none'
+      };
+
       return (
         <div key={program.id} className="program">
           <Grid>
@@ -112,8 +118,10 @@ class CourseList extends React.Component {
           <div className="apply-for-ms">
             <br/>
             <p>You need to pass {totalCourses - coursesPassed} more courses
-              before you can apply for <strong>{program.title}</strong> Master's Degree.</p>
-            <Button bsStyle="primary" disabled>Apply for <strong>{program.title}</strong> Master Degree</Button>
+              before you can apply for the <strong>{program.title}</strong> Master’s Degree.</p>
+            <MuiThemeProvider>
+                <RaisedButton label={applyForMSBtnLabel} disabled={true} labelStyle={btnStyle} />
+            </MuiThemeProvider>
           </div>
         </div>
       );
