@@ -81,8 +81,8 @@ class PersonalTab extends ProfileTab {
       <Cell col={4}>{this.boundTextField(['birth_city'], 'City')}</Cell><Cell col={8} />
       <Cell col={4}>{this.boundDateField(['date_of_birth'], 'Date of birth')}</Cell><Cell col={8} />
 
-      <Button raised onClick={this.saveAndContinue}>
-        Save and continue
+      <Button raised onClick={this.saveAndContinue} className="profile-save-and-continue">
+        <span>Save and Continue</span>
       </Button>
     </Grid>;
   }

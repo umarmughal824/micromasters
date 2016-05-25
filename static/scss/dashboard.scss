@@ -135,11 +135,7 @@ c.validation-wrapper {
   }
 }
 
-.no-border {
-  border: none!important;
-}
-
-.employment-splash {
+.profile-splash {
   border-bottom: 1px dashed #CCCCCC;
   .mdl-cell {
     margin: 20px auto;
@@ -148,18 +144,6 @@ c.validation-wrapper {
     color: #414141;
     font-weight: 400;
   }
-}
-.mdl-button.work-button {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 25px;
-}
-.work-button.cancel-button {
-  color: #b7b2b2;
-}
-.work-button.save-button {
-  color: #58b7bc;
-  margin-right: 20px;
 }
 .mdl-button.profile-save-and-continue {
   background: #4C8399!important;
@@ -174,11 +158,10 @@ c.validation-wrapper {
 }
 .profile-tab-grid {
   max-width: 900px;
-  border: 1px grey solid;
   .mdl-textfield {
     width: 100%;
   }
-  .employment-form-title {
+  .profile-form-title {
     font-size: 22px;
     font-weight: 600;
   }
@@ -189,20 +172,9 @@ c.validation-wrapper {
     width: 100%;
     position: relative;
     overflow: visible;
-    .add-employment-button {
-      left: 40%;
-    }
-    .add-employment-button.no-entries {
-      top: 68px;
-    }
-    .add-employment-button.one-entry {
-      top: 38px;
-    }
-    .add-employment-button.more-entries {
-      top: 28px;
-    }
-    .job-row {
-    }
+    margin-bottom: 20px;
+    padding-bottom: 50px;
+
     .profile-tab-card-grid:first-child {
       padding-top: 15px;
     }
@@ -210,48 +182,45 @@ c.validation-wrapper {
       font-family: "Open Sans";
       margin: 0;
       padding: 6px 15px;
-      .employment-title {
+      .profile-card-title {
         font-weight: 600;
         font-size: 19px;
       }
-      .company-icons {
+      .profile-row-icons {
         text-align: right;
         color: #898989;
       }
-      .company-name {
+      .profile-row-name {
         font-size: 16px;
         font-weight: 700;
       }
-      .company-date-range {
+      .profile-row-date-range {
         font-size: 16px;
         font-weight: 300;
       }
+
+      $switchColor: #00a79d;
+      .mdl-switch.is-checked {
+        .mdl-switch__track {
+          background-color: transparentize($switchColor, 0.5) !important;
+        }
+        .mdl-switch__thumb {
+          background-color: $switchColor !important;
+        }
+      }
+    }
+
+    .profile-add-button {
+      background-color: #0cbd8a !important;
+      bottom: -30px;
+      position: absolute;
+      right: 45px;
     }
   }
-}
-
-.profile-tab-grid-borderless {
-  border: 0;
-}
-
-.education-level-name {
-  display: inline;
-}
-
-.education-level-header {
-  border: 1px solid lightgrey;
-}
-.existing-education-grid.mdl-grid {
-  padding-top: 0px;
-  padding-bottom: 0px;
-}
-.existing-education-grid > .mdl-cell {
-  margin-top: 0px;
-  margin-bottom: 0px;
-  line-height: 2.5;
-}
-.education-icons {
-  text-align: right;
+  .profile-tab-card-greyed {
+    min-height: 100px !important;
+    background-color: #f9f9f9 !important;
+  }
 }
 
 .dashboard-dialog {
@@ -265,6 +234,18 @@ c.validation-wrapper {
 
   h3 {
     border-bottom: 0 !important;
+  }
+  .mdl-button {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 25px;
+  }
+  .cancel-button {
+    color: #b7b2b2;
+  }
+  .save-button {
+    color: #58b7bc;
+    margin-right: 20px;
   }
 }
 .users-name {
@@ -327,4 +308,19 @@ c.validation-wrapper {
       padding: 20px;
     }
   }
+}
+
+.profile-card {
+  padding-bottom: 50px;
+}
+.profile-card-greyed {
+  min-height: 100px !important;
+  background-color: #f9f9f9 !important;
+}
+
+.profile-add-button {
+  background-color: #0cbd8a !important;
+  bottom: -25px;
+  position: absolute;
+  right: -40%;
 }

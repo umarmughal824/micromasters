@@ -30,7 +30,7 @@ describe("ProfilePage", function() {
   });
 
   it('marks email_optin and filled_out when saving this page', done => {
-    renderComponent("/profile/privacy").then(([component, div]) => {  // eslint-disable-line no-unused-vars
+    renderComponent("/profile/privacy").then(([, div]) => {
       let button = div.querySelectorAll("button")[1];
       assert.equal(button.innerHTML, "I’m Done!");
 
@@ -65,11 +65,8 @@ describe("ProfilePage", function() {
         )
       );
 
-      renderComponent(`/profile/${page}`).then(([component, div]) => {  // eslint-disable-line no-unused-vars
-        let buttons = div.querySelectorAll("button");
-        let button = Array.from(buttons).find(
-          button => button.innerHTML.indexOf("Save") !== -1
-        );
+      renderComponent(`/profile/${page}`).then(([, div]) => {
+        let button = div.querySelector(".profile-save-and-continue");
 
         let updatedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
           filled_out: false
