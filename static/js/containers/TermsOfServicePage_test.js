@@ -6,6 +6,8 @@ import assert from 'assert';
 import {
   REQUEST_PATCH_USER_PROFILE,
   RECEIVE_PATCH_USER_PROFILE_SUCCESS,
+  START_PROFILE_EDIT,
+  UPDATE_PROFILE_VALIDATION,
 } from '../actions';
 import { USER_PROFILE_RESPONSE } from '../constants';
 import IntegrationTestHelper from '../util/integration_test_helper';
@@ -13,6 +15,7 @@ import * as api from '../util/api';
 
 describe("TermsOfService", () => {
   let listenForActions, renderComponent, helper;
+
   beforeEach(() => {
     helper = new IntegrationTestHelper();
     listenForActions = helper.listenForActions.bind(helper);
@@ -51,6 +54,12 @@ describe("TermsOfService", () => {
   });
 
   it("agrees to terms of service", done => {
+    let profileActions = [
+      REQUEST_PATCH_USER_PROFILE,
+      RECEIVE_PATCH_USER_PROFILE_SUCCESS,
+      START_PROFILE_EDIT,
+      UPDATE_PROFILE_VALIDATION
+    ];
     let response = Object.assign({}, USER_PROFILE_RESPONSE, {
       agreed_to_terms_of_service: false
     });
@@ -64,7 +73,7 @@ describe("TermsOfService", () => {
     profilePatchStub.withArgs(SETTINGS.username, updatedProfile).returns(Promise.resolve(updatedProfile));
 
     renderComponent("/terms_of_service").then(([component]) => {
-      listenForActions([REQUEST_PATCH_USER_PROFILE, RECEIVE_PATCH_USER_PROFILE_SUCCESS], () => {
+      listenForActions(profileActions, () => {
         let button = component.querySelector(".btn-success");
 
         TestUtils.Simulate.click(button);
