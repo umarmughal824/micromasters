@@ -1,6 +1,7 @@
 """
 Serializers for user profiles
 """
+
 from django.db import transaction
 
 from rest_framework.exceptions import ValidationError
@@ -10,7 +11,15 @@ from rest_framework.serializers import (
     SerializerMethodField
 )
 
-from profiles.models import Employment, Profile, Education
+from profiles.models import (
+    Education,
+    Employment,
+    Profile,
+)
+from profiles.util import (
+    GravatarImgSize,
+    format_gravatar_url,
+)
 
 
 def update_work_history(work_history_list, profile_id):
@@ -104,15 +113,40 @@ class EducationSerializer(ModelSerializer):
             'school_country')
 
 
-class ProfileSerializer(ModelSerializer):
-    """Serializer for Profile objects"""
+class ProfileBaseSerializer(ModelSerializer):
+    """Base class for all the profile serializers"""
+
     username = SerializerMethodField()
-    work_history = EmploymentSerializer(many=True)
-    education = EducationSerializer(many=True)
+    profile_url_full = SerializerMethodField()
+    profile_url_large = SerializerMethodField()
+    profile_url_medium = SerializerMethodField()
+    profile_url_small = SerializerMethodField()
 
     def get_username(self, obj):  # pylint: disable=no-self-use
         """Getter for the username field"""
         return obj.user.username
+
+    def get_profile_url_full(self, obj):  # pylint: disable=no-self-use
+        """Getter for the profile full image url"""
+        return format_gravatar_url(obj.user.email, GravatarImgSize.FULL)
+
+    def get_profile_url_large(self, obj):  # pylint: disable=no-self-use
+        """Getter for the profile large image url"""
+        return format_gravatar_url(obj.user.email, GravatarImgSize.LARGE)
+
+    def get_profile_url_medium(self, obj):  # pylint: disable=no-self-use
+        """Getter for the profile medium url"""
+        return format_gravatar_url(obj.user.email, GravatarImgSize.MEDIUM)
+
+    def get_profile_url_small(self, obj):  # pylint: disable=no-self-use
+        """Getter for the profile small url"""
+        return format_gravatar_url(obj.user.email, GravatarImgSize.SMALL)
+
+
+class ProfileSerializer(ProfileBaseSerializer):
+    """Serializer for Profile objects"""
+    work_history = EmploymentSerializer(many=True)
+    education = EducationSerializer(many=True)
 
     def update(self, instance, validated_data):
         with transaction.atomic():
@@ -161,18 +195,13 @@ class ProfileSerializer(ModelSerializer):
         )
 
 
-class ProfileLimitedSerializer(ModelSerializer):
+class ProfileLimitedSerializer(ProfileBaseSerializer):
     """
     Serializer for Profile objects, limited to fields that other users are
     allowed to see if a profile is marked public.
     """
-    username = SerializerMethodField()
     work_history = EmploymentSerializer(many=True)
     education = EducationSerializer(many=True)
-
-    def get_username(self, obj):  # pylint: disable=no-self-use
-        """Getter for the username field"""
-        return obj.user.username
 
     class Meta:  # pylint: disable=missing-docstring
         model = Profile
@@ -199,16 +228,11 @@ class ProfileLimitedSerializer(ModelSerializer):
         )
 
 
-class ProfilePrivateSerializer(ModelSerializer):
+class ProfilePrivateSerializer(ProfileBaseSerializer):
     """
     Serializer for Profile objects, limited to fields that other users are
     allowed to see if a profile is marked private.
     """
-    username = SerializerMethodField()
-
-    def get_username(self, obj):  # pylint: disable=no-self-use
-        """Getter for the username field"""
-        return obj.user.username
 
     class Meta:  # pylint: disable=missing-docstring
         model = Profile
