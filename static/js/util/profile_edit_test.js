@@ -35,7 +35,8 @@ describe('Profile Editing utility functions', () => {
           "first_name": "First name is required",
           "date_of_birth": "Date of birth is required",
           "gender": "Gender is required",
-          "date_field": "Date field is required"
+          "date_field": "Date field is required",
+          "account_privacy": "Account privacy is required"
         },
         updateProfile: change
       }
@@ -48,7 +49,7 @@ describe('Profile Editing utility functions', () => {
   });
 
   describe('Bound radio group', () => {
-    let radioGroup;
+    let radioGroup, labelSpan, errorSpan;
     let privacyOptions = [
       { value: 'public', label: 'Public to the world', helper: `We will publish your Micromasters 
         profile on our website.` },
@@ -57,26 +58,39 @@ describe('Profile Editing utility functions', () => {
       { value: 'private', label: 'Private', helper: `Your Micromasters profile will be viewable only by 
         MIT faculty and staff.` }
     ];
-    beforeEach(() => {
-      radioGroup = boundRadioGroupField.call(
+
+    let rerender = () => {
+      let component = boundRadioGroupField.call(
         that,
         ["account_privacy"],
         "Privacy level",
         privacyOptions
       );
+      [labelSpan, radioGroup, errorSpan] = component.props.children;
+    };
+
+    beforeEach(() => {
+      rerender();
     });
 
     it('should correctly set props on itself', () => {
-      assert.deepEqual(
-        undefined,
-        radioGroup.props.floatingLabelText
-      );
-      assert.deepEqual(undefined, radioGroup.props.value);
+      assert.equal("Privacy level", radioGroup.props.name);
+      assert.equal("Privacy level", labelSpan.props.children);
+      assert.equal("private", radioGroup.props.valueSelected);
+      assert.equal("Account privacy is required", errorSpan.props.children);
+    });
+
+    it('should render when there is no set value', () => {
+      that.props.account_privacy = undefined;
+      rerender();
+      assert.deepEqual('private', radioGroup.props.valueSelected);
     });
 
     it('should call the updateProfile callback when onChange fires', () => {
       radioGroup.props.onChange({target: {value: "public_to_mm"}});
+      rerender();
       assert.deepEqual("public_to_mm", that.props.profile.account_privacy);
+      assert.deepEqual("public_to_mm", radioGroup.props.valueSelected);
     });
   });
 
