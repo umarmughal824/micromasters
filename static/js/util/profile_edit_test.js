@@ -392,9 +392,8 @@ describe('Profile Editing utility functions', () => {
   });
 
   describe("Bound month/year field", () => {
-    let monthYearField, monthTextField, yearTextField, errorSpan, labelField;
+    let monthYearField, monthTextField, yearTextField;
     let validateYearSpy, validateMonthSpy;
-    let __; // eslint-disable-line no-unused-vars
     let renderMonthYearField = () => {
       monthYearField = boundMonthYearField.call(
         that,
@@ -406,7 +405,7 @@ describe('Profile Editing utility functions', () => {
     };
 
     beforeEach(() => {
-      [labelField, __, monthTextField, __, yearTextField, errorSpan] = renderMonthYearField();
+      [monthTextField, , yearTextField] = renderMonthYearField();
 
       validateYearSpy = sandbox.spy(util, 'validateYear');
       validateMonthSpy = sandbox.spy(util, 'validateMonth');
@@ -415,27 +414,29 @@ describe('Profile Editing utility functions', () => {
     it("has proper props for an invalid or missing value", () => {
       for (let dateOfBirth of ['', {}, null, undefined]) {
         that.props.profile.date_of_birth = dateOfBirth;
-        [labelField, __, monthTextField, __, yearTextField, errorSpan] = renderMonthYearField();
+        [monthTextField, , yearTextField] = renderMonthYearField();
 
-        assert.equal(labelField.props.children, "Date of birth");
-        assert.equal(monthTextField.props.floatingLabelText, "MM");
+        assert.equal(monthTextField.props.floatingLabelText, "Date of birth");
+        assert.equal(monthTextField.props.hintText, "MM");
         assert.equal(monthTextField.props.value, "");
-        assert.equal(yearTextField.props.floatingLabelText, "YYYY");
+        assert.equal(monthTextField.props.errorText, "Date of birth is required");
+        assert.equal(yearTextField.props.floatingLabelText, " ");
+        assert.equal(yearTextField.props.hintText, "YYYY");
         assert.equal(yearTextField.props.value, "");
-        assert.equal(errorSpan.props.children, "Date of birth is required");
       }
     });
 
     it("has proper props for a defined valid value", () => {
       that.props.profile.date_of_birth = "1985-12-31";
-      [labelField, __, monthTextField, __, yearTextField, errorSpan] = renderMonthYearField();
+      [monthTextField, , yearTextField] = renderMonthYearField();
 
-      assert.equal(labelField.props.children, "Date of birth");
-      assert.equal(monthTextField.props.floatingLabelText, "MM");
+      assert.equal(monthTextField.props.floatingLabelText, "Date of birth");
+      assert.equal(monthTextField.props.hintText, "MM");
       assert.equal(monthTextField.props.value, 12);
-      assert.equal(yearTextField.props.floatingLabelText, "YYYY");
+      assert.equal(monthTextField.props.errorText, "Date of birth is required");
+      assert.equal(yearTextField.props.floatingLabelText, " ");
+      assert.equal(yearTextField.props.hintText, "YYYY");
       assert.equal(yearTextField.props.value, 1985);
-      assert.equal(errorSpan.props.children, "Date of birth is required");
     });
 
     it("updates the month edit value when the month TextField onChange is used", () => {
@@ -482,7 +483,7 @@ describe('Profile Editing utility functions', () => {
     
     it("updates the formatted date if month and year are valid", () => {
       monthTextField.props.onChange({target: {value: "12"}});
-      [labelField, __, monthTextField, __, yearTextField, errorSpan] = renderMonthYearField();
+      [monthTextField, , yearTextField] = renderMonthYearField();
 
       yearTextField.props.onChange({target: {value: "2077"}});
 
@@ -492,9 +493,9 @@ describe('Profile Editing utility functions', () => {
 
     it("stores text in date_of_birth_edit if it's not a valid date", () => {
       that.props.profile.date_of_birth = "2066-02-28";
-      [labelField, __, monthTextField, __, yearTextField, errorSpan] = renderMonthYearField();
+      [monthTextField, , yearTextField] = renderMonthYearField();
       monthTextField.props.onChange({target: {value: "13"}});
-      [labelField, __, monthTextField, __, yearTextField, errorSpan] = renderMonthYearField();
+      [monthTextField, , yearTextField] = renderMonthYearField();
 
       assert.deepEqual(that.props.profile.date_of_birth, null);
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
