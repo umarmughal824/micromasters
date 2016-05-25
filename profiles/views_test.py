@@ -9,7 +9,6 @@ from django.core.urlresolvers import resolve, reverse
 from django.db.models.signals import post_save
 from django.test import TestCase
 from factory.django import mute_signals
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.status import (
     HTTP_405_METHOD_NOT_ALLOWED,
 )
@@ -55,8 +54,6 @@ class ProfileTests(TestCase):
         """
         Assert that we set permissions correctly
         """
-        # No unauthenticated users allowed
-        assert IsAuthenticated in ProfileViewSet.permission_classes
         # Users can only edit their own profile
         assert CanEditIfOwner in ProfileViewSet.permission_classes
 
@@ -83,36 +80,110 @@ class ProfileTests(TestCase):
         resp = self.client.get(self.url1)
         assert resp.json() == ProfileSerializer().to_representation(profile)
 
-    def test_get_public_profile(self):
+    def test_anonym_user_get_public_profile(self):
         """
-        Get another user's public profile.
+        An anonymous user gets another user's public profile.
         """
         with mute_signals(post_save):
             profile = ProfileFactory.create(user=self.user2, account_privacy=Profile.PUBLIC)
-        self.client.force_login(self.user1)
-
+        self.client.logout()
         resp = self.client.get(self.url2)
         assert resp.json() == ProfileLimitedSerializer().to_representation(profile)
 
-    def test_get_public_to_mm_profile(self):
+    def test_mm_user_get_public_profile(self):
         """
-        Get another user's public_to_mm profile.
+        An unverified mm user gets another user's public profile.
+        """
+        with mute_signals(post_save):
+            profile = ProfileFactory.create(user=self.user2, account_privacy=Profile.PUBLIC)
+            ProfileFactory.create(user=self.user1, verified_micromaster_user=False)
+        self.client.force_login(self.user1)
+        resp = self.client.get(self.url2)
+        assert resp.json() == ProfileLimitedSerializer().to_representation(profile)
+
+    def test_vermm_user_get_public_profile(self):
+        """
+        A verified mm user gets another user's public profile.
+        """
+        with mute_signals(post_save):
+            profile = ProfileFactory.create(user=self.user2, account_privacy=Profile.PUBLIC)
+            ProfileFactory.create(user=self.user1, verified_micromaster_user=True)
+        self.client.force_login(self.user1)
+        resp = self.client.get(self.url2)
+        assert resp.json() == ProfileLimitedSerializer().to_representation(profile)
+
+    def test_anonym_user_get_public_to_mm_profile(self):
+        """
+        An anonymous user gets user's public_to_mm profile.
         """
         with mute_signals(post_save):
             profile = ProfileFactory.create(user=self.user2, account_privacy=Profile.PUBLIC_TO_MM)
-        self.client.force_login(self.user1)
+        self.client.logout()
+        resp = self.client.get(self.url2)
+        assert resp.json() == ProfilePrivateSerializer().to_representation(profile)
 
+    def test_mm_user_get_public_to_mm_profile(self):
+        """
+        An unverified mm user gets user's public_to_mm profile.
+        """
+        with mute_signals(post_save):
+            profile = ProfileFactory.create(user=self.user2, account_privacy=Profile.PUBLIC_TO_MM)
+            ProfileFactory.create(user=self.user1, verified_micromaster_user=False)
+        self.client.force_login(self.user1)
+        resp = self.client.get(self.url2)
+        assert resp.json() == ProfilePrivateSerializer().to_representation(profile)
+
+    def test_vermm_user_get_public_to_mm_profile(self):
+        """
+        A verified mm user gets  user's public_to_mm profile.
+        """
+        with mute_signals(post_save):
+            profile = ProfileFactory.create(user=self.user2, account_privacy=Profile.PUBLIC_TO_MM)
+            ProfileFactory.create(user=self.user1, verified_micromaster_user=True)
+        self.client.force_login(self.user1)
         resp = self.client.get(self.url2)
         assert resp.json() == ProfileLimitedSerializer().to_representation(profile)
 
-    def test_get_private_profile(self):
+    def test_anonym_user_get_private_profile(self):
         """
-        Get another user's private profile
+        An anonymous user gets user's private profile
         """
         with mute_signals(post_save):
             profile = ProfileFactory.create(user=self.user2, account_privacy=Profile.PRIVATE)
-        self.client.force_login(self.user1)
+        self.client.logout()
+        resp = self.client.get(self.url2)
+        assert resp.json() == ProfilePrivateSerializer().to_representation(profile)
 
+    def test_mm_user_get_private_profile(self):
+        """
+        An unverified mm user gets user's private profile
+        """
+        with mute_signals(post_save):
+            profile = ProfileFactory.create(user=self.user2, account_privacy=Profile.PRIVATE)
+            ProfileFactory.create(user=self.user1, verified_micromaster_user=False)
+        self.client.force_login(self.user1)
+        resp = self.client.get(self.url2)
+        assert resp.json() == ProfilePrivateSerializer().to_representation(profile)
+
+    def test_vermm_user_get_private_profile(self):
+        """
+        A verified mm user gets user's private profile
+        """
+        with mute_signals(post_save):
+            profile = ProfileFactory.create(user=self.user2, account_privacy=Profile.PRIVATE)
+            ProfileFactory.create(user=self.user1, verified_micromaster_user=True)
+        self.client.force_login(self.user1)
+        resp = self.client.get(self.url2)
+        assert resp.json() == ProfilePrivateSerializer().to_representation(profile)
+
+    def test_weird_privacy_get_private_profile(self):
+        """
+        If a user profile has a weird profile setting, it defaults to private
+        """
+        with mute_signals(post_save):
+            profile = ProfileFactory.create(user=self.user2, account_privacy='weird_setting')
+            ProfileFactory.create(user=self.user1, verified_micromaster_user=True)
+        self.client.force_login(self.user1)
         resp = self.client.get(self.url2)
         assert resp.json() == ProfilePrivateSerializer().to_representation(profile)
 
@@ -132,7 +203,8 @@ class ProfileTests(TestCase):
 
         old_profile = Profile.objects.get(user__username=self.user1.username)
         for key, value in patch_data.items():
-            if key in ["filled_out", "pretty_printed_student_id", "work_history", "education"]:
+            if key in ("username", "filled_out", "pretty_printed_student_id",
+                       "work_history", "education", ):
                 # these fields are readonly
                 continue
             elif key == "date_of_birth":

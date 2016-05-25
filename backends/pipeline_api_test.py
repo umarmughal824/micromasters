@@ -32,7 +32,8 @@ class EdxPipelineApiTest(TestCase):
                 continue
             if key == 'account_privacy':
                 assert getattr(profile, key) == Profile.PRIVATE
-            elif key in ('has_profile_image', 'filled_out', 'email_optin', 'agreed_to_terms_of_service'):
+            elif key in ('has_profile_image', 'filled_out', 'email_optin',
+                         'agreed_to_terms_of_service', 'verified_micromaster_user',):
                 # booleans
                 assert getattr(profile, key) is False
             else:
