@@ -269,6 +269,11 @@ class AutoComplete extends Component {
         searchText: searchText,
       });
       this.close();
+      this.setState({
+        focusTextField: true
+      }, () => {
+        this.focus();
+      });
       this.timerTouchTapCloseId = null;
     }, this.props.menuCloseDelay);
   };
