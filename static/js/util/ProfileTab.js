@@ -12,6 +12,7 @@ import {
 } from './profile_edit';
 import { HIGH_SCHOOL, ASSOCIATE, BACHELORS, MASTERS, DOCTORATE } from '../constants';
 import LANGUAGE_CODES from '../language_codes';
+import INDUSTRIES from '../industries';
 import iso3166 from 'iso-3166-2';
 
 
@@ -58,6 +59,10 @@ class ProfileTab extends React.Component {
       {value: MASTERS, label: "Master's or professional degree"},
       {value: DOCTORATE, label: "Doctorate"}
     ];
+    this.industryOptions = INDUSTRIES.map(industry => ({
+      value: industry,
+      label: industry
+    }));
   }
 
   saveAndContinue = () => {
