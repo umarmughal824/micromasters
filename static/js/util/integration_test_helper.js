@@ -10,6 +10,7 @@ import {
 } from '../constants';
 import {
   REQUEST_DASHBOARD,
+  RECEIVE_DASHBOARD_SUCCESS,
   REQUEST_GET_USER_PROFILE,
   RECEIVE_GET_USER_PROFILE_SUCCESS,
 } from '../actions';
@@ -48,6 +49,7 @@ class IntegrationTestHelper {
     return new Promise(resolve => {
       let expectedTypes = [
         REQUEST_DASHBOARD,
+        RECEIVE_DASHBOARD_SUCCESS,
         REQUEST_GET_USER_PROFILE,
         RECEIVE_GET_USER_PROFILE_SUCCESS,
       ];
