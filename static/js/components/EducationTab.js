@@ -13,6 +13,7 @@ import moment from 'moment';
 import ProfileTab from "../util/ProfileTab";
 import { generateNewEducation } from "../util/util";
 import { saveAndContinue } from '../util/profile_edit';
+import { HIGH_SCHOOL } from '../constants';
 
 class EducationTab extends ProfileTab {
   constructor(props) {
@@ -201,16 +202,24 @@ class EducationTab extends ProfileTab {
 
     let keySet = (key) => ['education', educationDialogIndex, key];
 
+    let fieldOfStudy, highSchoolPadding;
+    if (level !== HIGH_SCHOOL) {
+      fieldOfStudy = <Cell col={6}>
+        {this.boundTextField(keySet('field_of_study'), 'Field of Study')}
+      </Cell>;
+    } else {
+      highSchoolPadding = <Cell col={6} />;
+    }
+
     return <Grid className="profile-tab-grid">
       <Cell col={12} className="profile-form-title">
         {this.educationLevelLabels[level]}
       </Cell>
-      <Cell col={6}>
-        {this.boundTextField(keySet('field_of_study'), 'Field of Study')}
-      </Cell>
+      {fieldOfStudy}
       <Cell col={6}>
         {this.boundDateField(keySet('graduation_date'), 'Graduation Date', true)}
       </Cell>
+      {highSchoolPadding}
       <Cell col={6}>
         {this.boundTextField(keySet('school_name'), 'School Name')}
       </Cell>
