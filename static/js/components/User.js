@@ -1,11 +1,12 @@
 import React from 'react';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
-import { Card, CardTitle, CardMenu } from 'react-mdl/lib/Card';
+import { Card, CardMenu } from 'react-mdl/lib/Card';
 import IconButton from 'react-mdl/lib/IconButton';
 import iso3166 from 'iso-3166-2';
 
 import { makeProfileImageUrl } from '../util/util';
 import EmploymentForm from './EmploymentForm';
+import EducationForm from './EducationForm';
 
 export default class User extends React.Component {
   static propTypes = {
@@ -54,14 +55,7 @@ export default class User extends React.Component {
           <EmploymentForm {...this.props} />
         </Cell>
         <Cell col={6}>
-          <Card shadow={0} style={{width: "100%"}}>
-            <CardTitle>
-              Education History
-            </CardTitle>
-            <CardMenu>
-              <IconButton name="edit" />
-            </CardMenu>
-          </Card>
+          <EducationForm {...this.props} />
         </Cell>
       </Grid>
     </div>;
