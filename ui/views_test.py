@@ -84,7 +84,7 @@ class TestViews(TestCase):
         response = self.client.get(DASHBOARD_URL)
         self.assertContains(
             response,
-            "Micromasters",
+            "MicroMaster’s",
             status_code=200
         )
 
