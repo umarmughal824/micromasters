@@ -61,10 +61,6 @@ class ProfileFactory(DjangoModelFactory):
     birth_state_or_territory = FuzzyText(suffix=" state")
 
     has_profile_image = FuzzyAttribute(FAKE.boolean)
-    profile_url_full = FuzzyText(prefix="http://")
-    profile_url_large = FuzzyText(prefix="http://")
-    profile_url_medium = FuzzyText(prefix="http://")
-    profile_url_small = FuzzyText(prefix="http://")
     edx_requires_parental_consent = FuzzyAttribute(FAKE.boolean)
     date_of_birth = FuzzyDate(date(1850, 1, 1))
     edx_level_of_education = FuzzyChoice(

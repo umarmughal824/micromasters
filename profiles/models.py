@@ -122,10 +122,7 @@ class Profile(models.Model):
     )
 
     has_profile_image = models.BooleanField(default=False)
-    profile_url_full = models.TextField(blank=True, null=True)
-    profile_url_large = models.TextField(blank=True, null=True)
-    profile_url_medium = models.TextField(blank=True, null=True)
-    profile_url_small = models.TextField(blank=True, null=True)
+
     edx_requires_parental_consent = models.NullBooleanField()
     date_of_birth = models.DateField(blank=True, null=True)
     edx_level_of_education = models.TextField(
