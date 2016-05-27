@@ -36,7 +36,7 @@ describe('App', () => {
   });
 
   it('clears profile, ui, and dashboard after unmounting', done => {
-    renderComponent("/dashboard").then(([component, div]) => {  // eslint-disable-line no-unused-vars
+    renderComponent("/dashboard", editProfileActions).then(([, div]) => {
       listenForActions([CLEAR_DASHBOARD, CLEAR_PROFILE, CLEAR_UI], () => {
         ReactDOM.unmountComponentAtNode(div);
       }).then(() => {
