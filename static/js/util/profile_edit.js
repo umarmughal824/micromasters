@@ -30,52 +30,60 @@ import {
  * @returns {ReactElement}
  */
 export function boundRadioGroupField(keySet, label, options) {
-  const { profile, updateProfile } = this.props;
-  const defaultSelected = _.get(profile, keySet);
-  if (defaultSelected) {
-    const styles = {
-      labelStyle: {
-        left: -10,
-      }
-    };
+  const { profile, updateProfile, errors } = this.props;
+  const styles = {
+    labelStyle: {
+      left: -10,
+    }
+  };
 
-    let onChange = e => {
-      let clone = _.cloneDeep(profile);
-      _.set(clone, keySet, e.target.value);
-      updateProfile(clone);
-    };
+  let onChange = e => {
+    let clone = _.cloneDeep(profile);
+    _.set(clone, keySet, e.target.value);
+    updateProfile(clone);
+  };
 
-    const radioButtons = options.map(obj => {
-      let helper = "";
-      if (obj.helper) {
-        helper = `- ${obj.helper}`;
-      }
-      let label = (
-        <span className="radio-label">
-          {obj.label}<span className="radio-label-hint">{helper}</span>
-        </span>
-      );
-
-      return (
-        <RadioButton
-          className="profile-radio-button"
-          key={obj.value}
-          labelStyle={styles.labelStyle}
-          value={obj.value}
-          label={label}/>
-      );
-    });
+  const radioButtons = options.map(obj => {
+    let helper = "";
+    if (obj.helper) {
+      helper = `- ${obj.helper}`;
+    }
+    let label = (
+      <span className="radio-label">
+        {obj.label}<span className="radio-label-hint">{helper}</span>
+      </span>
+    );
 
     return (
+      <RadioButton
+        className="profile-radio-button"
+        key={obj.value}
+        labelStyle={styles.labelStyle}
+        value={obj.value}
+        label={label}
+      />
+    );
+  });
+
+  const value = _.get(profile, keySet);
+  return (
+    <div>
+      <span className="profile-radio-group-label">
+        {label}
+      </span>
       <RadioButtonGroup
         className="profile-radio-group"
         name={label}
         onChange={onChange}
-        defaultSelected={defaultSelected}>
+        valueSelected={value}
+      >
         {radioButtons}
       </RadioButtonGroup>
-    );
-  }
+      <span className="validation-error-text">
+        {_.get(errors, keySet)}
+      </span>
+    </div>
+  );
 }
 
 /**

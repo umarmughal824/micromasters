@@ -37,7 +37,7 @@ class PrivacyTab extends ProfileTab {
         <Grid className="profile-tab-grid">
           <Cell col={12}>
             <span className="header-privacy-tab">Who can see your profile?</span>
-            { this.boundRadioGroupField(['account_privacy'], 'Privacy', this.privacyOptions) } <br />
+            { this.boundRadioGroupField(['account_privacy'], '', this.privacyOptions) } <br />
             <Button raised colored className="profile-save-and-continue" onClick={this.saveAndContinue}>
               I’m Done!
             </Button>
