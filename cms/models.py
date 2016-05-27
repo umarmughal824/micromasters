@@ -10,6 +10,7 @@ from wagtail.wagtailcore.models import Page
 from wagtail.wagtailcore.fields import RichTextField
 from wagtail.wagtailadmin.edit_handlers import FieldPanel
 
+from backends.edxorg import EdxOrgOAuth2
 from micromasters.utils import webpack_dev_server_host
 from courses.models import Program
 from ui.views import get_bundle_url
@@ -35,6 +36,11 @@ class HomePage(Page):
             "host": webpack_dev_server_host(request)
         }
 
+        username = None
+        if not request.user.is_anonymous():
+            social_auths = request.user.social_auth.filter(provider=EdxOrgOAuth2.name)
+            if social_auths.exists():
+                username = social_auths.first().uid
         context = super(HomePage, self).get_context(request)
 
         context["programs"] = Program.objects.filter(live=True)
@@ -42,7 +48,7 @@ class HomePage(Page):
         context["public_src"] = get_bundle_url(request, "public.js")
         context["style_public_src"] = get_bundle_url(request, "style_public.js")
         context["authenticated"] = not request.user.is_anonymous()
-        context["username"] = request.user.username
+        context["username"] = username
         context["js_settings_json"] = json.dumps(js_settings)
         context["title"] = self.title
 
