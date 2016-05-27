@@ -149,7 +149,7 @@ class ProfilePage extends React.Component {
     ));
 
     let text = `Welcome ${profile.preferred_name || SETTINGS.name}, let's
-    complete your enrollment to MIT MicroMaster's.`;
+    complete your enrollment to MIT MicroMaster’s.`;
 
     return <div className="card">
       <Jumbotron profile={profile} text={text}>

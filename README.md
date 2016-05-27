@@ -1,5 +1,5 @@
-# Micromasters
-Portal for learners and course teams to access MITx Micromasters programs
+# MicroMaster’s
+Portal for learners and course teams to access MITx MicroMaster’s programs
 
 ## Major Dependencies
 - Docker
@@ -26,7 +26,7 @@ with the edX instance.
 
 ## Running edX devstack locally _(optional, but recommended)_
 
-Micromasters can work with a live instance of edX, but it's recommended that
+MicroMaster’s can work with a live instance of edX, but it's recommended that
 you get it running locally. It's obviously more configurable that way, and you'll
 likely need to run it locally for other projects in the future.
 
@@ -83,16 +83,16 @@ new client. Fill in the values as follows:
 
 - **User**: Use the lookup (magnifying glass) to find your superuser
 - **Name**: Anything you want. Something like 'micromasters-local'
-- **Url**: The URL where Micromasters will be running. If you're running it via
+- **Url**: The URL where MicroMaster’s will be running. If you're running it via
 Docker, run ``docker-machine ip`` from the host machine to get the container IP.
-Micromasters runs on port ``8079`` by default, so this value should be something
+MicroMaster’s runs on port ``8079`` by default, so this value should be something
 like ``http://192.168.99.100:8079``
 - **Redirect uri**: Your **Url** value with "/complete/edxorg/" at the end
 
-#### 5) Copy relevant values to use in the Micromasters .env file
+#### 5) Copy relevant values to use in the MicroMaster’s .env file
 
-The Micromasters codebase contains a ``.env.sample`` file which will be used as
-a template to create your ``.env`` file. For Micromasters to work, it needs 3 values:
+The MicroMaster’s codebase contains a ``.env.sample`` file which will be used as
+a template to create your ``.env`` file. For MicroMaster’s to work, it needs 3 values:
 
 - ``EDXORG_BASE_URL``
 
@@ -145,7 +145,7 @@ For first-time container start-up, start it with a full build:
 
     docker-compose up --build
 
-In another terminal tab, navigate the the Micromasters directory
+In another terminal tab, navigate the the MicroMaster’s directory
 and add a superuser in the now-running Docker container:
 
     docker-compose run web python3 manage.py createsuperuser
@@ -155,8 +155,8 @@ param: ``docker-compose up``
 
 You should now be able to do the following:
 
-1. Visit Micromasters in your browser on port `8079`. _(OSX Only)_ Docker auto-assigns
- the container IP. Run ``docker-machine ip`` to see it. Your Micromasters URL will
+1. Visit MicroMaster’s in your browser on port `8079`. _(OSX Only)_ Docker auto-assigns
+ the container IP. Run ``docker-machine ip`` to see it. Your MicroMaster’s URL will
  be something like this: ``192.168.99.100:8079``.
 1. Click "Sign in with edX.org" and sign in by authorizing an edX client. If you're
  running edX locally, this will be the client you created in the steps above.
@@ -164,7 +164,7 @@ You should now be able to do the following:
 ## Running Commands and Testing
 
 As shown above, manage commands can be executed on the Docker-contained
-Micromasters app. For example, you can run a Python shell with the following command:
+MicroMaster’s app. For example, you can run a Python shell with the following command:
 
     docker-compose run web python3 manage.py shell
 
