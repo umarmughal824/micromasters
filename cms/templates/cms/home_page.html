@@ -65,10 +65,10 @@
         <div class="panel-body">
           <h3>MicroMaster’s</h3>
           <div class="media-list is-grid padding-bottom-50">
-            <ul class="blocks blocks-100 blocks-xlg-4 blocks-lg-3 blocks-md-3 blocks-ms-2 blocks-xs-2" data-plugin="animateList" data-child=">li">
+            <ul class="blocks list-unstyled" data-plugin="animateList" data-child=">li">
 
               {% for program in programs %}
-              <li>
+              <li class="col-sm-6">
                 <div class="media-item">
                   <div class="media-top">
                     <div class="image-wrap">
@@ -96,14 +96,31 @@
                       {% else %}
                       <div class="widget-metas"><span class="meta-courses">{{ program.course_set.count }} courses</span></div>
                       {% endif %}
-                      <div class="widget-rating">
-                        <div class="rating rating-lg blue-600" data-score="4" data-read-only="true" data-class="blue-600" data-plugin="rating"></div>
-                      </div>
                     </div>
                   </div>
                 </div>
               </li>
               {% endfor %}
+              <li class="col-sm-6">
+                <div class="media-item placeholder-card">
+                  <br/><br/><br/>
+                  <div class="container">
+                    <div class="col-sm-12 title-coming-soon text-center">
+                      MIT has plans to bring more MicroMaster’s programs to motivated learners like you.
+                      Please sign up for our <a href="#" data-toggle="modal"
+                      data-target="#subscribeAlert">mailing list</a>
+                      to hear about new MicroMaster’s programs.
+                      Also, don't hesitate to let us know about what MicroMaster’s you’d like to see.
+                    </div>
+                    <div class="row">
+                      <div class="col-sm-12">
+                        <button class="btn btn-danger button-subscribe-alerts center-block"  data-toggle="modal"
+                       data-target="#subscribeAlert">Yes, tell me when Micromasters are available</button>
+                      </div>
+                    </div>
+                  </div>
+               </div>
+              </li>
             </ul>
           </div>
         </div>
@@ -164,5 +181,90 @@
   </div>
 
 </div>
+
+<!-- Modal subscribe alerts -->
+<div id="subscribeAlert" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Sign up to be notified when new programs are announced.</h4>
+      </div>
+      <div class="modal-body">
+        <div class="container">
+            <form class="form-horizontal subscription-form mailchimp">
+                <!-- SUBSCRIPTION SUCCESSFUL OR ERROR MESSAGES -->
+                <h4 class="col-sm-offset-4 subscription-result success"></h4>
+                <h4 class="col-sm-offset-4 subscription-result error"></h4>
+
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Name</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" id="inputname" name="FNAME">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Email</label>
+                    <div class="col-sm-8">
+                        <input type="email" class="form-control" id="inputEmail3" placeholder="">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Tell us more...</label>
+                    <div class="col-sm-8">
+                        <div class="radio">
+                            <label><input type="radio" name="MMERGE2" value="I am an interested learner" id="learner">
+                                I am an interested learner
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label><input type="radio" name="MMERGE2" value="I represent an interested corporation" id="corporation">
+                                I represent an interested corporation
+                            </label>
+                        </div>
+
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="MMERGE2" value="I represent an interested university or educational institution" id="university">
+                                I represent an interested university or educational institution
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="MMERGE2" value="Other" id="other">
+                                Other
+                            </label>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="form-group" id="mce-MMERGE4">
+                    <label for="inputname" class="col-sm-4 control-label">Comments</label>
+                    <div class="col-sm-8">
+                        <textarea  class="form-control" name="MMERGE4"  placeholder=""></textarea>
+                    </div>
+                </div>
+                <div class="form-group" id="mce-MMERGE3">
+                    <label for="inputname" class="col-sm-4 control-label">Institution name</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" name="MMERGE3"  placeholder="">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-4 col-sm-8 text-left">
+                        <button type="submit" class="btn btn-lg btn-primary">Submit</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
 <script type="text/javascript" src="{{ public_src }}"></script>
+<script type="text/javascript" src="{{ wow_src }}"></script>
+<script type="text/javascript" src="{{ ajaxchimp_src }}"></script>
+<script type="text/javascript" src="{{ custom_src }}"></script>
 {% endblock %}

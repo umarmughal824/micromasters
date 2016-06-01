@@ -46,6 +46,9 @@ class HomePage(Page):
         context["programs"] = Program.objects.filter(live=True)
         context["style_src"] = get_bundle_url(request, "style.js")
         context["public_src"] = get_bundle_url(request, "public.js")
+        context["custom_src"] = get_bundle_url(request, "js/home_page/custom.js")
+        context["ajaxchimp_src"] = get_bundle_url(request, "js/home_page/jquery.ajaxchimp.min.js")
+        context["wow_src"] = get_bundle_url(request, "js/home_page/wow.min.js")
         context["style_public_src"] = get_bundle_url(request, "style_public.js")
         context["authenticated"] = not request.user.is_anonymous()
         context["username"] = username
