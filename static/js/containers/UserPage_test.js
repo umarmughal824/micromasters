@@ -19,6 +19,7 @@ import {
   SET_EDUCATION_DEGREE_LEVEL,
   SET_EDUCATION_DIALOG_INDEX,
   SET_EDUCATION_DIALOG_VISIBILITY,
+  SET_USER_PAGE_DIALOG_VISIBILITY,
 } from '../actions/ui';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../util/api';
@@ -186,6 +187,32 @@ describe("UserPage", () => {
           SET_WORK_DIALOG_VISIBILITY
         ], () => {
           TestUtils.Simulate.click(editButton);
+        }).then(() => {
+          done();
+        });
+      });
+    });
+  });
+
+  describe('Personal Info', () => {
+    it('should show name and location', done => {
+      renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
+        let name = div.getElementsByClassName('users-name')[0].textContent;
+        assert.deepEqual(name, USER_PROFILE_RESPONSE.preferred_name);
+
+        let location = div.getElementsByClassName('users-location')[0].textContent;
+
+        assert.deepEqual(location, `${USER_PROFILE_RESPONSE.city}, `);
+        done();
+      });
+    });
+
+    it('should let you edit personal info', done => {
+      renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
+        let personalButton = div.getElementsByClassName('material-icons')[0];
+
+        listenForActions([SET_USER_PAGE_DIALOG_VISIBILITY], () => {
+          TestUtils.Simulate.click(personalButton);
         }).then(() => {
           done();
         });

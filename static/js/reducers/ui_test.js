@@ -11,6 +11,7 @@ import {
   SET_EDUCATION_DIALOG_INDEX,
   SET_EDUCATION_DEGREE_LEVEL,
   SET_EDUCATION_DEGREE_INCLUSIONS,
+  SET_USER_PAGE_DIALOG_VISIBILITY,
 
   clearUI,
   updateDialogText,
@@ -24,6 +25,7 @@ import {
   setEducationDialogIndex,
   setEducationDegreeLevel,
   setEducationDegreeInclusions,
+  setUserPageDialogVisibility,
 } from '../actions/ui';
 import { INITIAL_UI_STATE } from '../reducers/ui';
 import { HIGH_SCHOOL, ASSOCIATE, BACHELORS, MASTERS, DOCTORATE } from '../constants';
@@ -181,6 +183,15 @@ describe('ui reducers', () => {
       };
       dispatchThen(setEducationDegreeInclusions(newInclusions), [SET_EDUCATION_DEGREE_INCLUSIONS]).then(state => {
         assert.deepEqual(state.educationDegreeInclusions, newInclusions);
+        done();
+      });
+    });
+  });
+
+  describe('user page', () => {
+    it('should let you set the user page dialog visibility', done => {
+      dispatchThen(setUserPageDialogVisibility(true), [SET_USER_PAGE_DIALOG_VISIBILITY]).then(state => {
+        assert.deepEqual(state.userPageDialogVisibility, true);
         done();
       });
     });

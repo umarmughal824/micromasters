@@ -14,6 +14,8 @@ import {
   SET_EDUCATION_DIALOG_INDEX,
   SET_EDUCATION_DEGREE_LEVEL,
   SET_EDUCATION_DEGREE_INCLUSIONS,
+
+  SET_USER_PAGE_DIALOG_VISIBILITY,
 } from '../actions/ui';
 import { HIGH_SCHOOL, ASSOCIATE, BACHELORS, MASTERS, DOCTORATE } from '../constants';
 
@@ -31,6 +33,7 @@ export const INITIAL_UI_STATE = {
     [MASTERS]: false,
     [DOCTORATE]: false,
   },
+  userPageDialogVisibility: false,
 };
 
 export const ui = (state = INITIAL_UI_STATE, action) => {
@@ -94,6 +97,11 @@ export const ui = (state = INITIAL_UI_STATE, action) => {
     clone[action.payload.courseId] = action.payload.newValue;
     return Object.assign({}, state, {
       dashboardExpander: clone
+    });
+  }
+  case SET_USER_PAGE_DIALOG_VISIBILITY: {
+    return Object.assign({}, state, {
+      userPageDialogVisibility: action.payload
     });
   }
   default:

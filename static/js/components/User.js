@@ -7,21 +7,37 @@ import iso3166 from 'iso-3166-2';
 import { makeProfileImageUrl } from '../util/util';
 import EmploymentForm from './EmploymentForm';
 import EducationForm from './EducationForm';
+import UserPagePersonalDialog from './UserPagePersonalDialog.js';
 
 export default class User extends React.Component {
   static propTypes = {
-    profile: React.PropTypes.object
+    profile:                      React.PropTypes.object,
+    setUserPageDialogVisibility:  React.PropTypes.func,
+    ui:                           React.PropTypes.object,
   };
+
+  toggleShowPersonalDialog = () => {
+    const {
+      setUserPageDialogVisibility,
+      ui: { userPageDialogVisibility }
+    } = this.props;
+    setUserPageDialogVisibility(!userPageDialogVisibility);
+  }
 
   render() {
     const { profile } = this.props;
 
-    let getStateName = () => (
-      iso3166.subdivision(profile.state_or_territory).name
-    );
+    let getStateName = () => {
+      if ( profile.state_or_territory ) {
+        return iso3166.subdivision(profile.state_or_territory).name;
+      } else {
+        return '';
+      }
+    };
 
     let imageUrl = makeProfileImageUrl(profile);
     return <div className="card">
+      <UserPagePersonalDialog {...this.props} />
       <Grid className="card-user">
         <Cell col={5} />
         <Cell col={2} className="card-image-box">
@@ -46,7 +62,7 @@ export default class User extends React.Component {
           { profile.city }, { getStateName() }
         </span>
         <CardMenu>
-          <IconButton name="edit" />
+          <IconButton name="edit" onClick={this.toggleShowPersonalDialog}/>
         </CardMenu>
       </Card>
 

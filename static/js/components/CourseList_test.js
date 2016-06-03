@@ -4,6 +4,8 @@ import TestUtils from 'react-addons-test-utils';
 import sinon from 'sinon';
 import assert from 'assert';
 import _ from 'lodash';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
 import CourseList from './CourseList';
 import * as util from '../util/util';
@@ -21,7 +23,9 @@ describe("CourseList", () => {
 
   it('renders apply for master button and text', () => {
     let renderedComponent = TestUtils.renderIntoDocument(
-      <CourseList dashboard={{programs: DASHBOARD_RESPONSE}} expander={{}} dispatch={() => {}}/>
+      <MuiThemeProvider muiTheme={getMuiTheme()}>
+        <CourseList dashboard={{programs: DASHBOARD_RESPONSE}} expander={{}} dispatch={() => {}}/>
+      </MuiThemeProvider>
     );
     let programBottomDivComponent = TestUtils.scryRenderedDOMComponentsWithClass(
       renderedComponent,
@@ -61,7 +65,9 @@ describe("CourseList", () => {
     let makeCourseStatusDisplaySpy = sandbox.spy(util, 'makeCourseStatusDisplay');
 
     TestUtils.renderIntoDocument(
-      <CourseList dashboard={{programs: DASHBOARD_RESPONSE}} expander={{}} dispatch={() => {}} />
+      <MuiThemeProvider muiTheme={getMuiTheme()}>
+        <CourseList dashboard={{programs: DASHBOARD_RESPONSE}} expander={{}} dispatch={() => {}} />
+      </MuiThemeProvider>
     );
 
     let callCount = 0;
