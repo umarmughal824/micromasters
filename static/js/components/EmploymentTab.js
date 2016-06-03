@@ -1,11 +1,11 @@
 import React from 'react';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
-import Button from 'react-mdl/lib/Button';
 
 import EmploymentForm from './EmploymentForm';
 import ProfileFormFields from '../util/ProfileFormFields';
 
 class EmploymentTab extends ProfileFormFields {
+  prevUrl = "/profile/education";
   nextUrl = "/profile/privacy";
 
   render () {
@@ -24,13 +24,7 @@ class EmploymentTab extends ProfileFormFields {
           <Cell col={1}></Cell>
           <Cell col={1}></Cell>
           <Cell col={10}>
-            <Button
-              raised
-              colored
-              className="profile-save-and-continue"
-              onClick={this.saveAndContinue}>
-              <span>Save and Continue</span>
-            </Button>
+            {this.progressControls()}
           </Cell>
           <Cell col={1}></Cell>
         </Grid>

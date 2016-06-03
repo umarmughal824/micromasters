@@ -1,14 +1,12 @@
 import React from 'react';
-import Button from 'react-mdl/lib/Button';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 
 import ProfileFormFields from '../util/ProfileFormFields';
 
 class PrivacyTab extends ProfileFormFields {
-  constructor(props) {
-    super(props);
-  }
+  prevUrl = "/profile/professional";
   nextUrl = "/dashboard";
+  isLastTab = true;
 
   static propTypes = {
     profile:        React.PropTypes.object,
@@ -29,9 +27,9 @@ class PrivacyTab extends ProfileFormFields {
           <Cell col={12}>
             <span className="header-privacy-tab">Who can see your profile?</span>
             { this.boundRadioGroupField(['account_privacy'], '', this.privacyOptions) } <br />
-            <Button raised colored className="profile-save-and-continue" onClick={this.saveAndContinue}>
-              I’m Done!
-            </Button>
+          </Cell>
+          <Cell col={12}>
+            {this.progressControls()}
           </Cell>
         </Grid>
       </div>

@@ -17,11 +17,20 @@ describe("ProfilePage", function() {
   this.timeout(5000);  // eslint-disable-line no-invalid-this
 
   let listenForActions, renderComponent, helper, patchUserProfileStub;
+  let pageUrlStubs = [
+    '/profile/personal',
+    '/profile/education',
+    '/profile/professional',
+    '/profile/privacy'
+  ];
+  let lastPage = pageUrlStubs[pageUrlStubs.length - 1];
+  let prevButtonSelector = '.progress-button.previous';
+  let nextButtonSelector = '.progress-button.next';
+
   beforeEach(() => {
     helper = new IntegrationTestHelper();
     listenForActions = helper.listenForActions.bind(helper);
     renderComponent = helper.renderComponent.bind(helper);
-
     patchUserProfileStub = helper.sandbox.stub(api, 'patchUserProfile');
   });
 
@@ -29,94 +38,57 @@ describe("ProfilePage", function() {
     helper.cleanup();
   });
 
-  it('marks email_optin and filled_out when saving this page', done => {
-    renderComponent("/profile/privacy").then(([, div]) => {
-      let button = div.querySelectorAll("button")[1];
-      assert.equal(button.innerHTML, "I’m Done!");
+  let confirmSaveButtonBehavior = (updatedProfile, pageElements) => {
+    let { div, button } = pageElements;
+    button = button || div.querySelector(nextButtonSelector);
+    patchUserProfileStub.throws("Invalid arguments");
+    patchUserProfileStub.withArgs(SETTINGS.username, updatedProfile).returns(Promise.resolve(updatedProfile));
+    return listenForActions([
+      REQUEST_PATCH_USER_PROFILE,
+      RECEIVE_PATCH_USER_PROFILE_SUCCESS,
+      START_PROFILE_EDIT,
+      UPDATE_PROFILE_VALIDATION
+    ], () => {
+      TestUtils.Simulate.click(button);
+    });
+  };
 
+  it('navigates backward when Previous button is clicked', () => {
+    let firstPage = pageUrlStubs[0];
+    let secondPage = pageUrlStubs[1];
+    renderComponent(secondPage).then(([, div]) => {
+      let button = div.querySelector(prevButtonSelector);
+      assert.equal(helper.currentLocation.pathname, secondPage);
+      TestUtils.Simulate.click(button);
+      assert.equal(helper.currentLocation.pathname, firstPage);
+    });
+  });
+
+  it(`marks email_optin and filled_out when saving ${lastPage}`, done => {
+    renderComponent(lastPage).then(([, div]) => {
+      let button = div.querySelector(nextButtonSelector);
+      assert(button.innerHTML.includes("I'm Done!"));
       let updatedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
         email_optin: true,
         filled_out: true
       });
-
-      patchUserProfileStub.throws("Invalid arguments");
-      patchUserProfileStub.withArgs(SETTINGS.username, updatedProfile).returns(Promise.resolve(updatedProfile));
-
-      listenForActions([
-        REQUEST_PATCH_USER_PROFILE,
-        RECEIVE_PATCH_USER_PROFILE_SUCCESS,
-        START_PROFILE_EDIT,
-        UPDATE_PROFILE_VALIDATION
-      ], () => {
-        TestUtils.Simulate.click(button);
-      }).then(() => {
+      confirmSaveButtonBehavior(updatedProfile, {button: button}).then(() => {
         done();
       });
     });
   });
 
-  for (let page of ['personal', 'education', 'professional']) {
-    it(`it respects the current value (true) when saving on /profile/${page}`, done => {
-      helper.profileGetStub.returns(
-        Promise.resolve(
-          Object.assign({}, USER_PROFILE_RESPONSE, {
-            filled_out: true
-          })
-        )
-      );
-
-      renderComponent(`/profile/${page}`).then(([, div]) => {
-        let button = div.querySelector(".profile-save-and-continue");
-
-        let updatedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
-          filled_out: true 
-        });
-
-        patchUserProfileStub.throws("Invalid arguments");
-        patchUserProfileStub.withArgs(SETTINGS.username, updatedProfile).returns(Promise.resolve(updatedProfile));
-
-        listenForActions([
-          REQUEST_PATCH_USER_PROFILE,
-          RECEIVE_PATCH_USER_PROFILE_SUCCESS,
-          START_PROFILE_EDIT,
-          UPDATE_PROFILE_VALIDATION
-        ], () => {
-          TestUtils.Simulate.click(button);
-        }).then(() => {
-          done();
+  for (let pageUrlStub of pageUrlStubs.slice(0,3)) {
+    for (let filledOutValue of [true, false]) {
+      it(`respects the current value (${filledOutValue}) when saving on ${pageUrlStub}`, done => {
+        let updatedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {filled_out: filledOutValue});
+        helper.profileGetStub.returns(Promise.resolve(updatedProfile));
+        renderComponent(pageUrlStub).then(([, div]) => {
+          confirmSaveButtonBehavior(updatedProfile, {div: div}).then(() => {
+            done();
+          });
         });
       });
-    });
-    it(`it respects the current value (false) when saving on /profile/${page}`, done => {
-      helper.profileGetStub.returns(
-        Promise.resolve(
-          Object.assign({}, USER_PROFILE_RESPONSE, {
-            filled_out: false
-          })
-        )
-      );
-
-      renderComponent(`/profile/${page}`).then(([, div]) => {
-        let button = div.querySelector(".profile-save-and-continue");
-
-        let updatedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
-          filled_out: false
-        });
-
-        patchUserProfileStub.throws("Invalid arguments");
-        patchUserProfileStub.withArgs(SETTINGS.username, updatedProfile).returns(Promise.resolve(updatedProfile));
-
-        listenForActions([
-          REQUEST_PATCH_USER_PROFILE,
-          RECEIVE_PATCH_USER_PROFILE_SUCCESS,
-          START_PROFILE_EDIT,
-          UPDATE_PROFILE_VALIDATION
-        ], () => {
-          TestUtils.Simulate.click(button);
-        }).then(() => {
-          done();
-        });
-      });
-    });
+    }
   }
 });
