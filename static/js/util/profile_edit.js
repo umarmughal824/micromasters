@@ -438,17 +438,17 @@ export function boundDateField(keySet, label, omitDay) {
 }
 
 /**
- * Saves the profile and returns a promise, taking an optional function
+   * Saves the profile and returns a promise, taking an optional function
  * to retrieve keys for validation of nested fields (e.g. profile.work_history)
  *
- * @param finalStep {bool} If true, this is the last tab in the profile
+ * @param isLastStep {bool} If true, this is the last tab in the profile
  */
-export function saveAndContinue(finalStep) {
+export function saveProfileStep(isLastStep=false) {
   const { saveProfile, profile } = this.props;
   let clone = Object.assign({}, profile, {
-    filled_out: profile.filled_out || finalStep
+    filled_out: profile.filled_out || isLastStep
   });
-  if (finalStep) {
+  if (isLastStep) {
     // user has also seen email consent message at this point
     clone.email_optin = true;
   }

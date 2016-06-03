@@ -10,7 +10,7 @@ import IconButton from 'react-mdl/lib/IconButton';
 import _ from 'lodash';
 import moment from 'moment';
 
-import { saveAndContinue } from '../util/profile_edit';
+import { saveProfileStep } from '../util/profile_edit';
 import { generateNewWorkHistory } from '../util/util';
 import ProfileFormFields from '../util/ProfileFormFields';
 
@@ -23,7 +23,7 @@ class EmploymentForm extends ProfileFormFields {
   }
 
   saveWorkHistoryEntry = () => {
-    saveAndContinue.call(this).then(() => {
+    saveProfileStep.call(this).then(() => {
       this.closeWorkDialog();
     });
   }

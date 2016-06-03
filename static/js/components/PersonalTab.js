@@ -1,13 +1,9 @@
 import React from 'react';
-import Button from 'react-mdl/lib/Button';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 
 import ProfileFormFields from '../util/ProfileFormFields';
 
 class PersonalTab extends ProfileFormFields {
-  constructor(props) {
-    super(props);
-  }
   nextUrl = "/profile/education";
 
   static propTypes = {
@@ -83,14 +79,7 @@ class PersonalTab extends ProfileFormFields {
         <Cell col={1} />
         <Cell col={1} />
         <Cell col={10}>
-          <Button
-            raised
-            colored
-            className="profile-save-and-continue"
-            onClick={this.saveAndContinue}
-          >
-            <span>Save and Continue</span>
-          </Button>
+          {this.progressControls()}
         </Cell>
         <Cell col={1} />
       </Grid>

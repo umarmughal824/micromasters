@@ -12,7 +12,7 @@ import moment from 'moment';
 
 import ProfileFormFields from '../util/ProfileFormFields';
 import { generateNewEducation } from "../util/util";
-import { saveAndContinue } from '../util/profile_edit';
+import { saveProfileStep } from '../util/profile_edit';
 import { HIGH_SCHOOL } from '../constants';
 
 class EducationTab extends ProfileFormFields {
@@ -23,8 +23,10 @@ class EducationTab extends ProfileFormFields {
       this.educationLevelLabels[level.value] = level.label;
     });
   }
-  nextUrl = "/profile/professional";
 
+  prevUrl = "/profile/personal";
+  nextUrl = "/profile/professional";
+  
   static propTypes = {
     profile:                        React.PropTypes.object,
     ui:                             React.PropTypes.object,
@@ -134,7 +136,7 @@ class EducationTab extends ProfileFormFields {
   };
 
   saveEducationForm = () => {
-    saveAndContinue.call(this, EducationTab.validation).then(() => {
+    saveProfileStep.call(this).then(() => {
       this.clearEducationEdit();
     });
   };
@@ -288,19 +290,10 @@ class EducationTab extends ProfileFormFields {
         >
           {this.editEducationForm(educationDegreeLevel)}
         </Dialog>
-
         {levelsGrid}
-
         <Cell col={1} />
         <Cell col={10}>
-          <Button
-            raised
-            colored
-            className="profile-save-and-continue"
-            onClick={this.saveAndContinue}
-          >
-            <span>Save and Continue</span>
-          </Button>
+          {this.progressControls()}
         </Cell>
         <Cell col={1} />
       </Grid>

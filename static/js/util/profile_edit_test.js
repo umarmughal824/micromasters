@@ -12,7 +12,7 @@ import {
   boundStateSelectField,
   boundCountrySelectField,
   boundRadioGroupField,
-  saveAndContinue,
+  saveProfileStep,
 } from './profile_edit';
 import { USER_PROFILE_RESPONSE } from '../constants';
 import * as profileEdit from '../util/profile_edit';
@@ -664,7 +664,7 @@ describe('Profile Editing utility functions', () => {
     });
   });
 
-  describe('saveAndContinue', () => {
+  describe('saveProfileStep', () => {
     const saveProfileReturnValue = "value";
     beforeEach(() => {
       that.props.saveProfile = sandbox.stub();
@@ -673,7 +673,7 @@ describe('Profile Editing utility functions', () => {
     });
 
     it('saves with finalStep as true', () => {
-      let ret = saveAndContinue.call(that, true);
+      let ret = saveProfileStep.call(that, true);
 
       let clone = Object.assign({}, that.props.profile, {
         filled_out: true,
