@@ -8,7 +8,7 @@ import {
   makeCourseStatusDisplay,
   makeCourseProgressDisplay,
   makeRunStatusDisplay,
-} from '../util/util';
+} from '../util/courseList';
 import {
   STATUS_PASSED,
   DASHBOARD_COURSE_HEIGHT,

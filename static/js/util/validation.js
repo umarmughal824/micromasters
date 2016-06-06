@@ -1,5 +1,6 @@
 import _ from 'lodash';
 
+import { filterPositiveInt } from './util';
 import { HIGH_SCHOOL } from '../constants';
 
 let handleNestedValidation = (profile, keys, nestedKey) => {
@@ -118,4 +119,113 @@ export function privacyValidation(profile) {
     'account_privacy': 'Privacy level'
   };
   return checkFieldPresence(profile, requiredFields, messages);
+}
+
+/* eslint-disable camelcase */
+/**
+ * Validates the profile
+ *
+ * @param {Object} profile The user profile
+ * @returns {Object} Validation errors or an empty object if no errors
+ */
+export function validateProfile(profile) {
+  return Object.assign(
+    {},
+    personalValidation(profile),
+    educationValidation(profile),
+    employmentValidation(profile),
+    privacyValidation(profile),
+  );
+}
+
+/* eslint-enable camelcase */
+/*
+check that the profile is complete. we make the assumption that a
+complete profile consists of:
+  - a valid personal tab
+  - an entry for 'currently employed', and a work history entry if
+    `currently employed == 'yes'`
+*/
+export function validateProfileComplete(profile) {
+  let errors = {};
+
+  // check personal tab
+  errors = personalValidation(profile);
+  if (!_.isEqual(errors, {})) {
+    return [false, '/profile/personal', errors];
+  }
+
+  // check professional tab
+  if (_.isArray(profile.work_history) && !_.isEmpty(profile.work_history)) {
+    errors = employmentValidation(profile);
+    if (!_.isEqual(errors, {})) {
+      return [false, '/profile/professional', errors];
+    }
+  }
+
+  // check education tab
+  if (_.isArray(profile.education) && !_.isEmpty(profile.education)) {
+    errors = educationValidation(profile);
+    if (!_.isEqual(errors, {})) {
+      return [false, '/profile/education', errors];
+    }
+  }
+
+  // check privacy tab
+  errors = privacyValidation(profile);
+  if (!_.isEqual(errors, {})) {
+    return [false, '/profile/privacy', errors];
+  }
+
+  return [true, null, null];
+}
+
+/**
+ * Validate a day of month
+ * @param {String} string The input string
+ * @returns {Number|undefined} The valid date if a valid date value or undefined if not valid
+ */
+export function validateDay(string) {
+  let date = filterPositiveInt(string);
+  if (date === undefined) {
+    return undefined;
+  }
+  // More complicated cases like Feb 29 are handled in moment.js isValid
+  if (date < 1 || date > 31) {
+    return undefined;
+  }
+  return date;
+}
+
+/**
+ * Validate a month number
+ * @param {String} string The input string
+ * @returns {Number|undefined} The valid month if a valid month value or undefined if not valid
+ */
+export function validateMonth(string) {
+  let month = filterPositiveInt(string);
+  if (month === undefined) {
+    return undefined;
+  }
+  if (month < 1 || month > 12) {
+    return undefined;
+  }
+  return month;
+}
+
+/**
+ * Validate a year string is an integer and fits into YYYY
+ * @param {String} string The input string
+ * @returns {Number|undefined} The valid year if a valid year value or undefined if not valid
+ */
+export function validateYear(string) {
+  let year = filterPositiveInt(string);
+  if (year === undefined) {
+    return undefined;
+  }
+  if (year < 1 || year > 9999) {
+    // fit into YYYY format
+    return undefined;
+  }
+  return year;
 }

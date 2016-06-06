@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 import * as api from '../util/api';
-import * as util from '../util/util';
+import * as validation from '../util/validation';
 
 // user profile actions
 export const REQUEST_GET_USER_PROFILE = 'REQUEST_GET_USER_PROFILE';
@@ -90,7 +90,7 @@ export const updateProfileValidation = (username, errors) => ({
 
 export const validateProfile = (username, profile) => {
   return dispatch => {
-    let errors = util.validateProfile(profile);
+    let errors = validation.validateProfile(profile);
     dispatch(updateProfileValidation(username, errors));
     if (_.isEmpty(errors)) {
       return Promise.resolve();

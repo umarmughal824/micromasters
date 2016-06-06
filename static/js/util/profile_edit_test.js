@@ -16,7 +16,7 @@ import {
 } from './profile_edit';
 import { USER_PROFILE_RESPONSE } from '../constants';
 import * as profileEdit from '../util/profile_edit';
-import * as util from '../util/util';
+import * as validation from '../util/validation';
 
 describe('Profile Editing utility functions', () => {
   let that, sandbox;
@@ -389,9 +389,9 @@ describe('Profile Editing utility functions', () => {
     };
 
     beforeEach(() => {
-      validateYearSpy = sandbox.spy(util, 'validateYear');
-      validateMonthSpy = sandbox.spy(util, 'validateMonth');
-      validateDaySpy = sandbox.spy(util, 'validateDay');
+      validateYearSpy = sandbox.spy(validation, 'validateYear');
+      validateMonthSpy = sandbox.spy(validation, 'validateMonth');
+      validateDaySpy = sandbox.spy(validation, 'validateDay');
     });
 
     afterEach(() => {

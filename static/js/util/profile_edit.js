@@ -12,7 +12,7 @@ import {
   validateMonth,
   validateYear,
   validateDay,
-} from '../util/util';
+} from '../util/validation';
 
 // utility functions for pushing changes to profile forms back to the
 // redux store.
