@@ -1,6 +1,56 @@
 Release Notes
 =============
 
+Version 0.9.0
+-------------
+
+- Added handler for rejected promises (#454)
+- Fixed design of homepage to match mockups
+- Added footer at dashboard, terms of service, profile and addded button on homepage footer
+- Fixed design of appy for master button
+- Fixed high school validation error (#444)
+- Added ability to edit employment on profile page
+- Added progress indicator to profile (#435)
+- Switched to social auth username (#420)
+- Replaced all references to MicroMasters with MicroMaster’s
+- Support for gravatar
+- Replace MicroMaster&#39;s certificate text with MicroMaster&#39;s credential in app
+- Added step to run webpack during travis tests
+- Added minimal Dockerfile to run tests with
+- Added missing action to integration tests
+- Removed field of study for high school education
+- Changed AutoComplete to focus on text field after selecting an item
+- Converted industry text field to select field
+- Fixed radio options to be shown if nothing is selected
+- Modified profile REST api to honor privacy settings
+- Replaced react-datepicker with textfields
+- Updated personal tab to look like mockups
+- Changed JS setup to use npm-shrinkwrap
+- Fixed UI for month/year field
+- Updated style of education tab
+- Added tests to increase coverage
+- Updated the terms of service.
+- Removed dialog from profile validation
+- Revert &quot;Added highlight approach to missing fields instead of popup&quot;
+- Added Dashboard splash screen to profile tabs
+- Cleared state field when country field changes
+- Fixed rebase issues
+- Update failing tests
+- Refactoring
+- Removed dialog from profile validation
+- Fixed bug with LoginButton not updating preferred name
+- fixed webpack_if_prod script - can now run on OSX host machines with no problem
+- Updated privacy tab in profile.
+- Removed AutoComplete onBlur handling when user has clicked a menu item
+- Used later version of React to fix test failures
+- Removed node-neat
+- Added middleware to redirect canceled authorizations
+- Changed OSX Docker workflow to expect the webpack server to be run on the host machine
+- Added User page
+- Moved blankWorkHistoryEntry to a function
+- Fixed AutoComplete quirks
+- Added favicon
+
 Version 0.8.0
 -------------
 

@@ -1,12 +1,15 @@
-# Micromasters
-Portal for learners and course teams to access MITx Micromasters programs
+# MicroMaster’s
+Portal for learners and course teams to access MITx MicroMaster’s programs
 
 ## Major Dependencies
 - Docker
   - OSX recommended install method: [Download from Docker website](https://docs.docker.com/mac/)
 - docker-compose
-  - Recommended install: pip `pip install docker-compose`
+  - Recommended install: pip (`pip install docker-compose`)
 - Virtualbox (https://www.virtualbox.org/wiki/Downloads)
+- _(OSX only)_ Node/NPM
+  - OSX recommended install method: [Installer on Node website](https://nodejs.org/en/download/)
+  - No specific version has been chosen yet.
 
 ## (OSX only) Getting your machine Docker-ready
 
@@ -21,39 +24,9 @@ with the edX instance.
     # 'docker-machine env (machine)' prints export commands for important environment variables
     eval "$(docker-machine env mm)"
 
-#### Enable file syncing between the host machine and Docker:
-
-Due to file notification issues using Docker in OSX, development is more
-efficient if you install [docker-osx-dev](https://github.com/brikis98/docker-osx-dev).
-This synchronizes host file-system changes with the Docker container.
-
-First, set up ``docker-osx-dev`` via shell script.
-
-    . ./osx_docker_dev_setup.sh
-
-Subsequently, before you run the application with ``docker-compose up``,
-you would run this command in a separate terminal tab (assumes machine
-name ``mm``):
-  
-    docker-osx-dev -m mm -s ./ --ignore-file '.rsync-ignore'
-
-This starts a process that monitors the file system for changes. On startup
-you may receive this error:
-  
-      [ERROR] Found VirtualBox shared folders on your Boot2Docker VM. 
-      These may void any performance benefits from using docker-osx-dev:
-      
-      /Users
-      
-      [INSTRUCTIONS] Would you like this script to remove them?
-      1) yes
-      2) no
-
-Answer ``yes``.
-
 ## Running edX devstack locally _(optional, but recommended)_
 
-Micromasters can work with a live instance of edX, but it's recommended that
+MicroMaster’s can work with a live instance of edX, but it's recommended that
 you get it running locally. It's obviously more configurable that way, and you'll
 likely need to run it locally for other projects in the future.
 
@@ -110,16 +83,16 @@ new client. Fill in the values as follows:
 
 - **User**: Use the lookup (magnifying glass) to find your superuser
 - **Name**: Anything you want. Something like 'micromasters-local'
-- **Url**: The URL where Micromasters will be running. If you're running it via
+- **Url**: The URL where MicroMaster’s will be running. If you're running it via
 Docker, run ``docker-machine ip`` from the host machine to get the container IP.
-Micromasters runs on port ``8079`` by default, so this value should be something
+MicroMaster’s runs on port ``8079`` by default, so this value should be something
 like ``http://192.168.99.100:8079``
 - **Redirect uri**: Your **Url** value with "/complete/edxorg/" at the end
 
-#### 5) Copy relevant values to use in the Micromasters .env file
+#### 5) Copy relevant values to use in the MicroMaster’s .env file
 
-The Micromasters codebase contains a ``.env.sample`` file which will be used as
-a template to create your ``.env`` file. For Micromasters to work, it needs 3 values:
+The MicroMaster’s codebase contains a ``.env.sample`` file which will be used as
+a template to create your ``.env`` file. For MicroMaster’s to work, it needs 3 values:
 
 - ``EDXORG_BASE_URL``
 
@@ -135,18 +108,44 @@ a template to create your ``.env`` file. For Micromasters to work, it needs 3 va
 
 ## Docker Container Configuration and Start-up
 
-First, create a ``.env`` file from the sample in the codebases:
+#### 1) Create your ``.env`` file
+
+This file should be copied from the sample in the codebase:
 
     cp .env.sample .env
 
 Set the ``EDXORG_BASE_URL``, ``EDXORG_CLIENT_ID``, and ``EDXORG_CLIENT_SECRET``
 variables in the ``.env`` file appropriately.
 
+#### 2) _(OSX only)_ Set up and run the webpack dev server on your host machine
+
+First, you'll need to add another variable into ``.env``:
+
+    WEBPACK_DEV_SERVER_HOST='localhost'
+
+In the development environment, our static assets are served from the webpack
+dev server. When this environment variable is set, the script sources will
+look for the webpack server at that host instead of the host where Docker is running.
+
+Now, in a separate terminal tab, use the webpack helper script to install npm modules and run the dev server:
+
+    ./webpack_dev_server.sh --install
+
+The ``--install`` flag is only needed if you're starting up for the first time, or if updates have been made
+to the packages in ``./package.json``. If you've installed those packages and there are no ``./package.json``
+updates, you can run this without the ``--install`` flag: ``./webpack_dev_server.sh``
+
+**DEBUGGING NOTE:** If you see an error related to node-sass when you run this script, try running
+``npm rebuild node-sass``
+
+
+#### 3) Run the container
+
 For first-time container start-up, start it with a full build:
 
     docker-compose up --build
 
-In another terminal tab, navigate the the Micromasters directory
+In another terminal tab, navigate the the MicroMaster’s directory
 and add a superuser in the now-running Docker container:
 
     docker-compose run web python3 manage.py createsuperuser
@@ -156,15 +155,30 @@ param: ``docker-compose up``
 
 You should now be able to do the following:
 
-1. Visit Micromasters in your browser on port `8079`. _(OSX Only)_ Docker auto-assigns
- the container IP. Run ``docker-machine ip`` to see it. Your Micromasters URL will
+1. Visit MicroMaster’s in your browser on port `8079`. _(OSX Only)_ Docker auto-assigns
+ the container IP. Run ``docker-machine ip`` to see it. Your MicroMaster’s URL will
  be something like this: ``192.168.99.100:8079``.
 1. Click "Sign in with edX.org" and sign in by authorizing an edX client. If you're
  running edX locally, this will be the client you created in the steps above.
 
+## Running Commands and Testing
+
 As shown above, manage commands can be executed on the Docker-contained
-Micromasters app. For example, you can run a shell with the following command:
+MicroMaster’s app. For example, you can run a Python shell with the following command:
 
     docker-compose run web python3 manage.py shell
 
+Tests should be run in the Docker container, not the host machine. They can be run with the following commands:
 
+    # Run the full suite
+    ./test_suite.sh
+    # Run Python tests only
+    docker-compose run web tox
+    # Run the JS tests with coverage report
+    docker-compose run watch npm run-script coverage
+    # run the JS tests without coverage report
+    docker-compose run watch npm test
+    # run a single JS test file
+    docker-compose run watch npm run-script singleTest /path/to/test.js
+    # Run the JS linter
+    docker-compose run watch npm run-script lint

@@ -1,6 +1,8 @@
 """
 util functions for profiles
 """
+import hashlib
+from urllib import parse
 
 
 def split_name(name):
@@ -21,3 +23,39 @@ def split_name(name):
         return "", ""
     else:
         return names[0], " ".join(names[1:])
+
+
+class GravatarImgSize:
+    """
+    Formal definition for the gravatar image size in px
+    """
+    FULL = 800
+    LARGE = 500
+    MEDIUM = 250
+    SMALL = 100
+
+
+def format_gravatar_url(user_email, size):
+    """
+    Helper to format urls for gravatar
+
+    Args:
+        user_email (str): A string representing an email
+        size (int): an integer representing the image size to be requested
+    Returns:
+        string: a string representi the gravatar url
+    """
+    base_gravatar_url = "https://www.gravatar.com/avatar/"
+    default_image_url = "https://s3.amazonaws.com/odl-micromasters-production/avatar_default.png"
+
+    # return the gravatar image
+    md5_hash = hashlib.md5()
+    md5_hash.update(user_email.strip().lower().encode())
+    return parse.urljoin(
+        base_gravatar_url,
+        "{0}?r=PG&s={1}&d={2}".format(
+            md5_hash.hexdigest(),
+            size,
+            parse.quote_plus(default_image_url)
+        )
+    )

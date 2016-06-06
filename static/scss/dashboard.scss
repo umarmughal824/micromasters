@@ -1,3 +1,7 @@
+body {
+  font-family: "Open Sans" !important;
+}
+
 c.validation-wrapper {
   padding-bottom: 10px;
 }
@@ -20,11 +24,11 @@ c.validation-wrapper {
         min-width: 190px;
         height: 220px;
         padding-top: 40px;
+        text-align: center;
         .card-image{
           border-radius: 50%;
           height: 140px;
           width: 140px;
-          margin-left: 50px;
         }
       }
       .card-name {
@@ -131,48 +135,35 @@ c.validation-wrapper {
   }
 }
 
-.no-border {
-  border: none!important;
-}
-
-.employment-splash {
+.profile-splash {
   border-bottom: 1px dashed #CCCCCC;
   .mdl-cell {
     margin: 20px auto;
     font-family: "Open Sans";
     text-align: center;
+    color: #414141;
+    font-weight: 400;
   }
-}
-.mdl-button.work-button {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 25px;
-}
-.work-button.cancel-button {
-  color: #b7b2b2;
-}
-.work-button.save-button {
-  color: #58b7bc;
-  margin-right: 20px;
 }
 .mdl-button.profile-save-and-continue {
   background: #4C8399!important;
   text-transform: none;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 400;
   height: 50px;
+  min-width: 200px;
   span {
     padding: 10px;
   }
 }
 .profile-tab-grid {
   max-width: 900px;
-  border: 1px grey solid;
-  font-family: "Open Sans";
+},
+.profile-tab-grid, .user-cards-grid {
   .mdl-textfield {
     width: 100%;
   }
-  .employment-form-title {
+  .profile-form-title {
     font-size: 22px;
     font-weight: 600;
   }
@@ -183,20 +174,9 @@ c.validation-wrapper {
     width: 100%;
     position: relative;
     overflow: visible;
-    .add-employment-button {
-      left: 40%;
-    }
-    .add-employment-button.no-entries {
-      top: 68px;
-    }
-    .add-employment-button.one-entry {
-      top: 38px;
-    }
-    .add-employment-button.more-entries {
-      top: 28px;
-    }
-    .job-row {
-    }
+    margin-bottom: 20px;
+    padding-bottom: 50px;
+
     .profile-tab-card-grid:first-child {
       padding-top: 15px;
     }
@@ -204,44 +184,45 @@ c.validation-wrapper {
       font-family: "Open Sans";
       margin: 0;
       padding: 6px 15px;
-      .employment-title {
+      .profile-card-title {
         font-weight: 600;
         font-size: 19px;
       }
-      .company-icons {
+      .profile-row-icons {
         text-align: right;
         color: #898989;
       }
-      .company-name {
+      .profile-row-name {
         font-size: 16px;
         font-weight: 700;
       }
-      .company-date-range {
+      .profile-row-date-range {
         font-size: 16px;
         font-weight: 300;
       }
+
+      $switchColor: #00a79d;
+      .mdl-switch.is-checked {
+        .mdl-switch__track {
+          background-color: transparentize($switchColor, 0.5) !important;
+        }
+        .mdl-switch__thumb {
+          background-color: $switchColor !important;
+        }
+      }
+    }
+
+    .profile-add-button {
+      background-color: #0cbd8a !important;
+      bottom: -30px;
+      position: absolute;
+      right: 45px;
     }
   }
-}
-
-.education-level-name {
-  display: inline;
-}
-
-.education-level-header {
-  border: 1px solid lightgrey;
-}
-.existing-education-grid.mdl-grid {
-  padding-top: 0px;
-  padding-bottom: 0px;
-}
-.existing-education-grid > .mdl-cell {
-  margin-top: 0px;
-  margin-bottom: 0px;
-  line-height: 2.5;
-}
-.education-icons {
-  text-align: right;
+  .profile-tab-card-greyed {
+    min-height: 100px !important;
+    background-color: #f9f9f9 !important;
+  }
 }
 
 .dashboard-dialog {
@@ -255,5 +236,104 @@ c.validation-wrapper {
 
   h3 {
     border-bottom: 0 !important;
+  }
+  .mdl-button {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 25px;
+  }
+  .cancel-button {
+    color: #b7b2b2;
+  }
+  .save-button {
+    color: #58b7bc;
+    margin-right: 20px;
+  }
+}
+.users-name {
+  text-align: center;
+}
+.users-location {
+  display: block;
+  font-weight: 100;
+  text-align: center;
+}
+
+.profile-radio-group-label {
+  color: grey;
+  font-weight: 700;
+  font-size: 9pt;
+}
+
+.radio-label {
+  color: #2D2D2D;
+  font-weight: 400;
+  .radio-label-hint {
+    font-size: small;
+    color: #9196A0;
+  }
+}
+.header-privacy-tab {
+  color: #A2AAB3;
+}
+
+.terms-of-service-main {
+  width: 75%;
+  margin-left: auto;
+  margin-right: auto;
+  div.terms-card-header {
+    padding: 25px 0;
+    font-size: x-large;
+    color: #b34a4c;
+    font-weight: bold;
+  }
+  .terms-of-service-container {
+    border: 1px solid grey;
+    margin: 10px 0;
+    height: 250px;
+    overflow-y: scroll;
+    li {
+      display: list-item;
+    }
+    .terms-of-service-title-container {
+      font-family: "Open Sans";
+      background-color: #eff5f7;
+      display: flex;
+      .terms-of-service-title-row {
+        border-bottom: 1px solid lightgray;
+        margin: 0px;
+      }
+      .terms-of-service-title {
+        padding: 0 20px;
+        font-weight: 600;
+        font-size: 19px;
+        position: relative;
+        top: 50%;
+        transform: translateY(-25%);
+      }
+    }
+    .terms-of-service-content {
+      padding: 20px;
+    }
+  }
+}
+
+.profile-card {
+  padding-bottom: 50px;
+}
+.profile-card-greyed {
+  min-height: 100px !important;
+  background-color: #f9f9f9 !important;
+}
+
+// CSS magic to make the radio buttons show up next to each other
+.profile-gender-group {
+  display: block !important;
+  .profile-radio-button {
+    width: unset !important;
+    display: inline-block !important;
+    label {
+      width: unset !important;
+    }
   }
 }

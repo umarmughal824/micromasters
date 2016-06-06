@@ -18,7 +18,7 @@ import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 import yaml
 
-VERSION = "0.8.0"
+VERSION = "0.9.0"
 
 CONFIG_PATHS = [
     os.environ.get('MICROMASTERS_CONFIG', ''),
@@ -120,6 +120,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
     'wagtail.wagtailcore.middleware.SiteMiddleware',
     'wagtail.wagtailredirects.middleware.RedirectMiddleware',
+    'social.apps.django_app.middleware.SocialAuthExceptionMiddleware',
 )
 
 AUTHENTICATION_BACKENDS = (
@@ -174,6 +175,7 @@ SOCIAL_AUTH_EDXORG_EXTRA_DATA = ['updated_at']
 
 LOGIN_REDIRECT_URL = '/dashboard'
 LOGIN_URL = '/'
+LOGIN_ERROR_URL = '/'
 
 ROOT_URLCONF = 'micromasters.urls'
 
@@ -257,7 +259,8 @@ REST_FRAMEWORK = {
 
 # Request files from the webpack dev server
 USE_WEBPACK_DEV_SERVER = get_var('MICROMASTERS_USE_WEBPACK_DEV_SERVER', False)
-WEBPACK_SERVER_URL = get_var('MICROMASTERS_WEBPACK_SERVER_URL', 'http://{host}:8078')
+WEBPACK_DEV_SERVER_HOST = get_var('WEBPACK_DEV_SERVER_HOST', '')
+WEBPACK_DEV_SERVER_PORT = get_var('WEBPACK_DEV_SERVER_PORT', '8078')
 
 # Important to define this so DEBUG works properly
 INTERNAL_IPS = (get_var('HOST_IP', '127.0.0.1'), )
@@ -367,7 +370,7 @@ GA_TRACKING_ID = get_var("GA_TRACKING_ID", "")
 REACT_GA_DEBUG = get_var("REACT_GA_DEBUG", False)
 
 # Wagtail
-WAGTAIL_SITE_NAME = "MIT Micromasters"
+WAGTAIL_SITE_NAME = "MIT MicroMaster’s"
 MEDIA_ROOT = get_var('MEDIA_ROOT', '/tmp/')
 MEDIA_URL = '/media/'
 MICROMASTERS_USE_S3 = get_var('MICROMASTERS_USE_S3', False)

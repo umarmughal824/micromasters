@@ -30,9 +30,9 @@ describe("ProfilePage", function() {
   });
 
   it('marks email_optin and filled_out when saving this page', done => {
-    renderComponent("/profile/privacy").then(([component, div]) => {  // eslint-disable-line no-unused-vars
+    renderComponent("/profile/privacy").then(([, div]) => {
       let button = div.querySelectorAll("button")[1];
-      assert.equal(button.innerHTML, "Save and continue");
+      assert.equal(button.innerHTML, "I’m Done!");
 
       let updatedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
         email_optin: true,
@@ -56,7 +56,7 @@ describe("ProfilePage", function() {
   });
 
   for (let page of ['personal', 'education', 'professional']) {
-    it(`marks filled_out = false when saving on /profile/${page}`, done => {
+    it(`it respects the current value (true) when saving on /profile/${page}`, done => {
       helper.profileGetStub.returns(
         Promise.resolve(
           Object.assign({}, USER_PROFILE_RESPONSE, {
@@ -65,11 +65,39 @@ describe("ProfilePage", function() {
         )
       );
 
-      renderComponent(`/profile/${page}`).then(([component, div]) => {  // eslint-disable-line no-unused-vars
-        let buttons = div.querySelectorAll("button");
-        let button = Array.from(buttons).find(
-          button => button.innerHTML.indexOf("Save") !== -1
-        );
+      renderComponent(`/profile/${page}`).then(([, div]) => {
+        let button = div.querySelector(".profile-save-and-continue");
+
+        let updatedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
+          filled_out: true 
+        });
+
+        patchUserProfileStub.throws("Invalid arguments");
+        patchUserProfileStub.withArgs(SETTINGS.username, updatedProfile).returns(Promise.resolve(updatedProfile));
+
+        listenForActions([
+          REQUEST_PATCH_USER_PROFILE,
+          RECEIVE_PATCH_USER_PROFILE_SUCCESS,
+          START_PROFILE_EDIT,
+          UPDATE_PROFILE_VALIDATION
+        ], () => {
+          TestUtils.Simulate.click(button);
+        }).then(() => {
+          done();
+        });
+      });
+    });
+    it(`it respects the current value (false) when saving on /profile/${page}`, done => {
+      helper.profileGetStub.returns(
+        Promise.resolve(
+          Object.assign({}, USER_PROFILE_RESPONSE, {
+            filled_out: false
+          })
+        )
+      );
+
+      renderComponent(`/profile/${page}`).then(([, div]) => {
+        let button = div.querySelector(".profile-save-and-continue");
 
         let updatedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
           filled_out: false

@@ -3,5 +3,9 @@ language: ruby
 cache: bundler
 script:
   - docker-compose -f travis-docker-compose.yml run web tox
+  - docker-compose -f travis-docker-compose.yml run watch npm install
+  - docker-compose -f travis-docker-compose.yml run watch npm run-script coverage
+  - docker-compose -f travis-docker-compose.yml run watch npm run-script lint
+  - docker-compose -f travis-docker-compose.yml run watch ./webpack_if_prod.sh
 services:
   - docker

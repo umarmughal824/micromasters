@@ -21,3 +21,15 @@ web:
     - "8079:8079"
   links:
     - db
+
+watch:
+  image: node:6.2
+  working_dir: /src
+  command: >
+    /bin/bash -c './webpack_if_prod.sh'
+  ports:
+    - "8078:8078"
+  volumes:
+    - .:/src
+  environment:
+    NODE_ENV: 'production'

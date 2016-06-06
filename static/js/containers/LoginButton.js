@@ -5,6 +5,8 @@ import SplitButton from 'react-bootstrap/lib/SplitButton';
 import LinkContainer from 'react-router-bootstrap/lib/LinkContainer';
 import MenuItem from 'react-bootstrap/lib/MenuItem';
 
+import { getPreferredName } from '../util/util';
+
 class LoginButton extends React.Component {
   static propTypes = {
     dispatch: React.PropTypes.func.isRequired,
@@ -18,7 +20,7 @@ class LoginButton extends React.Component {
     // and React 15. React 15 removed span tags but react-bootstrap still expects
     // them.
     let title = <span>
-      {profile.preferred_name || SETTINGS.name}
+      {getPreferredName(profile)}
     </span>;
 
     return (
@@ -39,11 +41,9 @@ class LoginButton extends React.Component {
 }
 
 const mapStateToProps = (state) => {
-  let profile = {
-    profile: {}
-  };
+  let profile = {};
   if (state.profiles[SETTINGS.username] !== undefined) {
-    profile = state.profiles[SETTINGS.username];
+    profile = state.profiles[SETTINGS.username].profile;
   }
   return {
     profile: profile

@@ -1,12 +1,26 @@
 """
 Serializers for user profiles
 """
+
 from django.db import transaction
 
 from rest_framework.exceptions import ValidationError
-from rest_framework.serializers import ModelSerializer, SerializerMethodField, IntegerField
+from rest_framework.serializers import (
+    IntegerField,
+    ModelSerializer,
+    SerializerMethodField
+)
 
-from profiles.models import Employment, Profile, Education
+from backends.edxorg import EdxOrgOAuth2
+from profiles.models import (
+    Education,
+    Employment,
+    Profile,
+)
+from profiles.util import (
+    GravatarImgSize,
+    format_gravatar_url,
+)
 
 
 def update_work_history(work_history_list, profile_id):
@@ -100,16 +114,40 @@ class EducationSerializer(ModelSerializer):
             'school_country')
 
 
-class ProfileSerializer(ModelSerializer):
+class ProfileBaseSerializer(ModelSerializer):
+    """Base class for all the profile serializers"""
+
+    username = SerializerMethodField()
+    profile_url_full = SerializerMethodField()
+    profile_url_large = SerializerMethodField()
+    profile_url_medium = SerializerMethodField()
+    profile_url_small = SerializerMethodField()
+
+    def get_username(self, obj):  # pylint: disable=no-self-use
+        """Getter for the username field"""
+        return obj.user.social_auth.get(provider=EdxOrgOAuth2.name).uid
+
+    def get_profile_url_full(self, obj):  # pylint: disable=no-self-use
+        """Getter for the profile full image url"""
+        return format_gravatar_url(obj.user.email, GravatarImgSize.FULL)
+
+    def get_profile_url_large(self, obj):  # pylint: disable=no-self-use
+        """Getter for the profile large image url"""
+        return format_gravatar_url(obj.user.email, GravatarImgSize.LARGE)
+
+    def get_profile_url_medium(self, obj):  # pylint: disable=no-self-use
+        """Getter for the profile medium url"""
+        return format_gravatar_url(obj.user.email, GravatarImgSize.MEDIUM)
+
+    def get_profile_url_small(self, obj):  # pylint: disable=no-self-use
+        """Getter for the profile small url"""
+        return format_gravatar_url(obj.user.email, GravatarImgSize.SMALL)
+
+
+class ProfileSerializer(ProfileBaseSerializer):
     """Serializer for Profile objects"""
-    pretty_printed_student_id = SerializerMethodField()
     work_history = EmploymentSerializer(many=True)
     education = EducationSerializer(many=True)
-
-    def get_pretty_printed_student_id(self, obj):
-        """helper method for the SerializerMethodField"""
-        # pylint: disable=no-self-use
-        return obj.pretty_printed_student_id
 
     def update(self, instance, validated_data):
         with transaction.atomic():
@@ -129,6 +167,7 @@ class ProfileSerializer(ModelSerializer):
     class Meta:  # pylint: disable=missing-docstring
         model = Profile
         fields = (
+            'username',
             'filled_out',
             'agreed_to_terms_of_service',
             'account_privacy',
@@ -157,35 +196,49 @@ class ProfileSerializer(ModelSerializer):
         )
 
 
-class ProfileLimitedSerializer(ModelSerializer):
+class ProfileLimitedSerializer(ProfileBaseSerializer):
     """
     Serializer for Profile objects, limited to fields that other users are
     allowed to see if a profile is marked public.
     """
+    work_history = EmploymentSerializer(many=True)
+    education = EducationSerializer(many=True)
+
     class Meta:  # pylint: disable=missing-docstring
         model = Profile
         fields = (
-            'preferred_name',
+            'username',
             'account_privacy',
+            'first_name',
+            'last_name',
+            'preferred_name',
             'country',
             'state_or_territory',
             'city',
+            'birth_country',
             'has_profile_image',
             'profile_url_full',
             'profile_url_large',
             'profile_url_medium',
             'profile_url_small',
+            'preferred_language',
+            'gender',
+            'work_history',
+            'edx_level_of_education',
+            'education'
         )
 
 
-class ProfilePrivateSerializer(ModelSerializer):
+class ProfilePrivateSerializer(ProfileBaseSerializer):
     """
     Serializer for Profile objects, limited to fields that other users are
     allowed to see if a profile is marked private.
     """
+
     class Meta:  # pylint: disable=missing-docstring
         model = Profile
         fields = (
+            'username',
             'account_privacy',
             'has_profile_image',
             'profile_url_full',

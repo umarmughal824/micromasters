@@ -32,7 +32,8 @@ class EdxPipelineApiTest(TestCase):
                 continue
             if key == 'account_privacy':
                 assert getattr(profile, key) == Profile.PRIVATE
-            elif key in ('has_profile_image', 'filled_out', 'email_optin', 'agreed_to_terms_of_service'):
+            elif key in ('has_profile_image', 'filled_out', 'email_optin',
+                         'agreed_to_terms_of_service', 'verified_micromaster_user',):
                 # booleans
                 assert getattr(profile, key) is False
             else:
@@ -51,6 +52,13 @@ class EdxPipelineApiTest(TestCase):
         Set up class
         """
         self.user = UserFactory()
+        self.user.social_auth.create(
+            provider='not_edx',
+        )
+        self.user.social_auth.create(
+            provider=edxorg.EdxOrgOAuth2.name,
+            uid="{}_edx".format(self.user.username),
+        )
         self.user_profile = Profile.objects.get(user=self.user)
 
         self.mocked_edx_profile = {
@@ -74,7 +82,7 @@ class EdxPipelineApiTest(TestCase):
                 'image_url_small': 'https://edx.org/small.jpg'
             },
             'requires_parental_consent': False,
-            'username': self.user.username,
+            'username': self.user.social_auth.get(provider=edxorg.EdxOrgOAuth2.name).uid,
             'year_of_birth': 1986,
             "work_history": [
                 {
@@ -156,7 +164,9 @@ class EdxPipelineApiTest(TestCase):
         mocked_get_json.assert_called_once_with(
             urljoin(
                 edxorg.EdxOrgOAuth2.EDXORG_BASE_URL,
-                '/api/user/v1/accounts/{0}'.format(self.user.username)
+                '/api/user/v1/accounts/{0}'.format(
+                    self.user.social_auth.get(provider=edxorg.EdxOrgOAuth2.name).uid
+                )
             ),
             headers={'Authorization': 'Bearer foo_token'}
         )
@@ -172,10 +182,6 @@ class EdxPipelineApiTest(TestCase):
             ('edx_bio', mocked_content['bio']),
             ('country', mocked_content['country']),
             ('has_profile_image', mocked_content['profile_image']['has_image']),
-            ('profile_url_full', mocked_content['profile_image']['image_url_full']),
-            ('profile_url_large', mocked_content['profile_image']['image_url_large']),
-            ('profile_url_medium', mocked_content['profile_image']['image_url_medium']),
-            ('profile_url_small', mocked_content['profile_image']['image_url_small']),
             ('edx_requires_parental_consent', mocked_content['requires_parental_consent']),
             ('edx_level_of_education', mocked_content['level_of_education']),
             ('edx_goals', mocked_content['goals']),

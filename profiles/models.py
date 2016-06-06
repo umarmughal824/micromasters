@@ -75,6 +75,10 @@ class Profile(models.Model):
     # Is the profile filled out yet?
     filled_out = models.BooleanField(default=False)
     agreed_to_terms_of_service = models.BooleanField(default=False)
+
+    # is the user a verified micromaster user?
+    verified_micromaster_user = models.BooleanField(default=False)
+
     # Defining these here instead of in User to avoid Django's 30 character max limit
     first_name = models.TextField(blank=True, null=True)
     last_name = models.TextField(blank=True, null=True)
@@ -118,10 +122,7 @@ class Profile(models.Model):
     )
 
     has_profile_image = models.BooleanField(default=False)
-    profile_url_full = models.TextField(blank=True, null=True)
-    profile_url_large = models.TextField(blank=True, null=True)
-    profile_url_medium = models.TextField(blank=True, null=True)
-    profile_url_small = models.TextField(blank=True, null=True)
+
     edx_requires_parental_consent = models.NullBooleanField()
     date_of_birth = models.DateField(blank=True, null=True)
     edx_level_of_education = models.TextField(

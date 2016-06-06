@@ -7,10 +7,12 @@ import Button from 'react-bootstrap/lib/Button';
 import striptags from 'striptags';
 import _ from 'lodash';
 
-import PersonalTab from '../components/PersonalTab';
-import EmploymentTab from '../components/EmploymentTab';
-import PrivacyTab from '../components/PrivacyTab';
-
+import {
+  personalValidation,
+  educationValidation,
+  employmentValidation,
+  privacyValidation,
+} from './validation';
 import {
   STATUS_NOT_OFFERED,
   STATUS_PASSED,
@@ -206,6 +208,117 @@ export function makeRunStatusDisplay(run) {
   }
 }
 
+export function makeProfileProgressDisplay(active) {
+  const width = 750, height = 100, radius = 20, paddingX = 40, paddingY = 5;
+  const tabNames = ["Personal", "Education", "Professional", "Profile Privacy"];
+  const numCircles = tabNames.length;
+
+  // width from first circle edge left to the last circle edge right
+  const circlesWidth = width - (paddingX * 2 + radius * 2);
+  // x distance between two circle centers
+  const circleDistance = Math.floor(circlesWidth / (numCircles - 1));
+  const textY = (height - (radius * 2)) / 2 + radius * 2;
+  const circleY = radius + paddingY;
+
+  const greenFill = "#00964e", greenLine = "#7dcba7";
+  const greyStroke = "#ececec", lightGreyText = "#b7b7b7", darkGreyText = "#888888";
+  const greyFill = "#eeeeee", greyCircle = "#dddddd";
+  const colors = {
+    completed: {
+      fill: greenFill,
+      stroke: "white",
+      circleText: "white",
+      text: greenFill,
+      line: greenLine
+    },
+    current: {
+      fill: "white",
+      stroke: greyStroke,
+      circleText: "black",
+      text: "black",
+      line: greyStroke
+    },
+    future: {
+      fill: greyFill,
+      stroke: greyCircle,
+      circleText: darkGreyText,
+      text: lightGreyText,
+      line: greyStroke
+    }
+  };
+
+  const elements = [];
+
+  for (let i = 0; i < numCircles; ++i) {
+    let colorScheme;
+    if (i < active) {
+      colorScheme = colors.completed;
+    } else if (i === active) {
+      colorScheme = colors.current;
+    } else {
+      colorScheme = colors.future;
+    }
+
+    const circleX = paddingX + radius + circleDistance * i;
+    const nextCircleX = paddingX + radius + circleDistance * (i + 1);
+    elements.push(
+      <circle
+        key={`circle_${i}`}
+        cx={circleX}
+        cy={circleY}
+        r={radius}
+        stroke={colorScheme.stroke}
+        fill={colorScheme.fill}
+      />,
+      <text
+        key={`text_${i}`}
+        x={circleX}
+        y={textY}
+        textAnchor="middle"
+        style={{
+          fill: colorScheme.text,
+          fontWeight: 700,
+          fontSize: "12pt"
+        }}
+      >
+        {tabNames[i]}
+      </text>,
+      <text
+        key={`circletext_${i}`}
+        x={circleX}
+        y={circleY}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        style={{
+          fill: colorScheme.circleText,
+          fontWeight: 700,
+          fontSize: "12pt"
+        }}
+      >
+        {i + 1}
+      </text>
+    );
+    if (i !== numCircles - 1) {
+      elements.push(
+        <line
+          key={`line_${i}`}
+          x1={circleX + radius}
+          x2={nextCircleX - radius}
+          y1={circleY}
+          y2={circleY}
+          stroke={colorScheme.line}
+          strokeWidth={2}
+        />
+      );
+    }
+  }
+
+  return <svg style={{width: width, height: height}}>
+    <desc>Profile progress: {tabNames[active]}</desc>
+    {elements}
+  </svg>;
+}
+
 /* eslint-disable camelcase */
 /**
  * Validates the profile
@@ -213,15 +326,14 @@ export function makeRunStatusDisplay(run) {
  * @param {Object} profile The user profile
  * @returns {Object} Validation errors or an empty object if no errors
  */
-export function validateProfile(profile, requiredFields, messages) {
-  let errors = {};
-  for (let keySet of requiredFields) {
-    let val = _.get(profile, keySet);
-    if (_.isUndefined(val) || _.isNull(val) || val === "" ) {
-      _.set(errors, keySet,  `${messages[keySet.slice(-1)[0]]} is required`);
-    }
-  }
-  return errors;
+export function validateProfile(profile) {
+  return Object.assign(
+    {},
+    personalValidation(profile),
+    educationValidation(profile),
+    employmentValidation(profile),
+    privacyValidation(profile),
+  );
 }
 
 /* eslint-disable camelcase */
@@ -234,13 +346,31 @@ export function validateProfile(profile, requiredFields, messages) {
 export function generateNewEducation(level) {
   return {
     'degree_name': level,
-    'graduation_date': "",
-    'field_of_study': "",
+    'graduation_date': null,
+    'field_of_study': null,
     'online_degree': false,
-    'school_name': "",
-    'school_city': "",
-    'school_state_or_territory': "",
-    'school_country': ""
+    'school_name': null,
+    'school_city': null,
+    'school_state_or_territory': null,
+    'school_country': null
+  };
+}
+
+/**
+ * Generate new work history object
+ * 
+ * @returns {Object} New empty work history object
+ */
+export function generateNewWorkHistory() {
+  return {
+    position: null,
+    industry: null,
+    company_name: null,
+    start_date: null,
+    end_date: null,
+    city: null,
+    country: null,
+    state_or_territory: null,
   };
 }
 
@@ -253,44 +383,37 @@ complete profile consists of:
     `currently employed == 'yes'`
 */
 export function validateProfileComplete(profile) {
-  let reqFields = [];
+  let errors = {};
 
   // check personal tab
-  reqFields = reqFields.concat(...PersonalTab.defaultProps.requiredFields);
-  let errors = validateProfile(profile, reqFields, {});
-  if ( !_.isEqual(errors, {}) ) {
-    return ([false, {
-      url: "/profile/personal",
-      title: "Personal Info",
-      text: "Please complete your personal information.",
-    }]);
+  errors = personalValidation(profile);
+  if (!_.isEqual(errors, {})) {
+    return [false, '/profile/personal', errors];
   }
 
   // check professional tab
-  if ( _.isArray(profile.work_history) && !_.isEmpty(profile.work_history) ) {
-    reqFields = EmploymentTab.validation(profile, reqFields);
+  if (_.isArray(profile.work_history) && !_.isEmpty(profile.work_history)) {
+    errors = employmentValidation(profile);
+    if (!_.isEqual(errors, {})) {
+      return [false, '/profile/professional', errors];
+    }
   }
-  errors = validateProfile(profile, reqFields, {});
-  if ( !_.isEqual(errors, {}) ) {
-    return ([false, {
-      url: "/profile/professional",
-      title: "Professional Info",
-      text: "Please complete your work history information.",
-    }]);
+
+  // check education tab
+  if (_.isArray(profile.education) && !_.isEmpty(profile.education)) {
+    errors = educationValidation(profile);
+    if (!_.isEqual(errors, {})) {
+      return [false, '/profile/education', errors];
+    }
   }
 
   // check privacy tab
-  reqFields = reqFields.concat(...PrivacyTab.defaultProps.requiredFields);
-  errors = validateProfile(profile, reqFields, {});
-  if ( !_.isEqual(errors, {}) ) {
-    return ([false, {
-      url: "/profile/privacy",
-      title: "Privacy Settings",
-      text: "Please complete the privacy settings.",
-    }]);
+  errors = privacyValidation(profile);
+  if (!_.isEqual(errors, {})) {
+    return [false, '/profile/privacy', errors];
   }
 
-  return [true, {}];
+  return [true, null, null];
 }
 
 /**
@@ -320,15 +443,28 @@ export function makeStrippedHtml(textOrElement) {
 }
 
 /**
+ * Validate a day of month
+ * @param {String} string The input string
+ * @returns {Number|undefined} The valid date if a valid date value or undefined if not valid
+ */
+export function validateDay(string) {
+  let date = filterPositiveInt(string);
+  if (date === undefined) {
+    return undefined;
+  }
+  // More complicated cases like Feb 29 are handled in moment.js isValid
+  if (date < 1 || date > 31) {
+    return undefined;
+  }
+  return date;
+}
+
+/**
  * Validate a month number
  * @param {String} string The input string
- * @returns {Number|undefined} The valid month if a valid month value,
- * an empty string if input is an empty string, or undefined if not valid
+ * @returns {Number|undefined} The valid month if a valid month value or undefined if not valid
  */
 export function validateMonth(string) {
-  if ( string === "" ) {
-    return string;
-  }
   let month = filterPositiveInt(string);
   if (month === undefined) {
     return undefined;
@@ -342,13 +478,9 @@ export function validateMonth(string) {
 /**
  * Validate a year string is an integer and fits into YYYY
  * @param {String} string The input string
- * @returns {Number|undefined} The valid year if a valid year value, an
- * emtpy string if the input is an empty string, or undefined if not valid
+ * @returns {Number|undefined} The valid year if a valid year value or undefined if not valid
  */
 export function validateYear(string) {
-  if ( string === "" ) {
-    return string;
-  }
   let year = filterPositiveInt(string);
   if (year === undefined) {
     return undefined;
@@ -358,4 +490,25 @@ export function validateYear(string) {
     return undefined;
   }
   return year;
+}
+
+
+export function makeProfileImageUrl(profile) {
+  let imageUrl = `${SETTINGS.edx_base_url}/static/images/profiles/default_120.png`.
+  //replacing multiple "/" with a single forward slash, excluding the ones following the colon
+    replace(/([^:]\/)\/+/g, "$1");
+  if (profile.profile_url_large) {
+    imageUrl = profile.profile_url_large;
+  }
+
+  return imageUrl;
+}
+
+/**
+ * Returns the preferred name or else the username
+ * @param profile {Object} The user profile
+ * @returns {string}
+ */
+export function getPreferredName(profile) {
+  return profile.preferred_name || SETTINGS.name || SETTINGS.username;
 }

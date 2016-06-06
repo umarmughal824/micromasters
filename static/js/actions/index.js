@@ -88,9 +88,9 @@ export const updateProfileValidation = (username, errors) => ({
   payload: { errors, username }
 });
 
-export const validateProfile = (username, profile, requiredFields, messages) => {
+export const validateProfile = (username, profile) => {
   return dispatch => {
-    let errors = util.validateProfile(profile, requiredFields, messages);
+    let errors = util.validateProfile(profile);
     dispatch(updateProfileValidation(username, errors));
     if (_.isEmpty(errors)) {
       return Promise.resolve();

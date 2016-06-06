@@ -10,8 +10,8 @@ import {
 } from '../constants';
 import {
   REQUEST_DASHBOARD,
-  REQUEST_GET_USER_PROFILE,
   RECEIVE_DASHBOARD_SUCCESS,
+  REQUEST_GET_USER_PROFILE,
   RECEIVE_GET_USER_PROFILE_SUCCESS,
 } from '../actions';
 import rootReducer from '../reducers';
@@ -49,9 +49,9 @@ class IntegrationTestHelper {
     return new Promise(resolve => {
       let expectedTypes = [
         REQUEST_DASHBOARD,
-        REQUEST_GET_USER_PROFILE,
         RECEIVE_DASHBOARD_SUCCESS,
-        RECEIVE_GET_USER_PROFILE_SUCCESS,
+        REQUEST_GET_USER_PROFILE,
+        RECEIVE_GET_USER_PROFILE_SUCCESS
       ];
 
       expectedTypes.push(...extraTypesToAssert);

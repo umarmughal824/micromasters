@@ -5,25 +5,27 @@ import {
   boundDateField,
   boundTextField,
   boundSelectField,
-  boundMonthYearField,
+  boundCountrySelectField,
   boundStateSelectField,
+  boundRadioGroupField,
   saveAndContinue,
 } from './profile_edit';
 import { HIGH_SCHOOL, ASSOCIATE, BACHELORS, MASTERS, DOCTORATE } from '../constants';
 import LANGUAGE_CODES from '../language_codes';
+import INDUSTRIES from '../industries';
 import iso3166 from 'iso-3166-2';
 
-
-class ProfileTab extends React.Component {
+export default class ProfileFormFields extends React.Component {
   constructor(props) {
     super(props);
 
     // bind our field methods to this
     this.boundTextField = boundTextField.bind(this);
     this.boundSelectField = boundSelectField.bind(this);
+    this.boundCountrySelectField = boundCountrySelectField.bind(this);
     this.boundStateSelectField = boundStateSelectField.bind(this);
     this.boundDateField = boundDateField.bind(this);
-    this.boundMonthYearField = boundMonthYearField.bind(this);
+    this.boundRadioGroupField = boundRadioGroupField.bind(this);
 
     // options we set (for select components)
     let countryOptions = Object.keys(iso3166.data).map(code => ({
@@ -42,9 +44,12 @@ class ProfileTab extends React.Component {
     }));
     this.languageOptions = _.sortBy(languageOptions, 'label');
     this.privacyOptions = [
-      { value: 'public', label: 'Public to the world'},
-      { value: 'public_to_mm', label: 'Public to other micromasters students'},
-      { value: 'private', label: 'Private'}
+      { value: 'public', label: 'Public to the world', helper: `We will publish your MicroMaster’s 
+        profile on our website.` },
+      { value: 'public_to_mm', label: "Public to other MicroMaster’s students", helper: `Your MicroMaster’s profile 
+        will only be viewable by other learners in your program, and by MIT faculity and staff.` },
+      { value: 'private', label: 'Private', helper: `Your MicroMaster’s profile will be viewable only by 
+        MIT faculty and staff.` }
     ];
     this.educationLevelOptions = [
       {value: HIGH_SCHOOL, label: "High school"},
@@ -53,18 +58,20 @@ class ProfileTab extends React.Component {
       {value: MASTERS, label: "Master's or professional degree"},
       {value: DOCTORATE, label: "Doctorate"}
     ];
+    this.industryOptions = INDUSTRIES.map(industry => ({
+      value: industry,
+      label: industry
+    }));
   }
 
   saveAndContinue = () => {
     let lastTab = this.nextUrl === "/dashboard";
-    saveAndContinue.call(this, this.constructor.prototype.validation, lastTab).then(() => {
+    saveAndContinue.call(this, lastTab).then(() => {
       this.context.router.push(this.nextUrl);
     });
-  }
+  };
 
   static contextTypes = {
     router: React.PropTypes.object.isRequired
   };
 }
-
-export default ProfileTab;

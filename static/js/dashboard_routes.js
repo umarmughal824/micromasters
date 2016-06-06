@@ -1,3 +1,4 @@
+/* global SETTINGS: false */
 import React from 'react';
 import { Route, Router, IndexRedirect } from 'react-router';
 import { Provider } from 'react-redux';
@@ -12,6 +13,8 @@ import EmploymentTab from './components/EmploymentTab';
 import PrivacyTab from './components/PrivacyTab';
 import EducationTab from './components/EducationTab';
 import TermsOfServicePage from './containers/TermsOfServicePage';
+import UserPage from './containers/UserPage';
+import User from './components/User';
 
 /**
  * Create the dashboard routes (the root React elements to be rendered into our container)
@@ -36,6 +39,10 @@ export function makeDashboardRoutes(browserHistory, store, onRouteUpdate) {
               <Route path="privacy" component={PrivacyTab} />
             </Route>
             <Route path="/terms_of_service" component={TermsOfServicePage} />
+            <Route path="/users" component={UserPage} >
+              <IndexRedirect to={`${SETTINGS.username}`} />
+              <Route path=":username" component={User} />
+            </Route>
           </Route>
         </Router>
       </Provider>

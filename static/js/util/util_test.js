@@ -1,6 +1,8 @@
+/* global SETTINGS: false */
 import assert from 'assert';
 import moment from 'moment';
 import React from 'react';
+import _ from 'lodash';
 
 import {
   STATUS_NOT_OFFERED,
@@ -18,12 +20,15 @@ import {
   validateProfile,
   validateProfileComplete,
   makeStrippedHtml,
+  makeProfileImageUrl,
   validateMonth,
   validateYear,
+  validateDay,
+  generateNewEducation,
+  generateNewWorkHistory,
+  getPreferredName,
+  makeProfileProgressDisplay,
 } from '../util/util';
-import PersonalTab from '../components/PersonalTab';
-import EmploymentTab from '../components/EmploymentTab';
-import PrivacyTab from '../components/PrivacyTab';
 
 /* eslint-disable camelcase */
 describe('utility functions', () => {
@@ -359,7 +364,7 @@ describe('utility functions', () => {
     };
 
     it('validates the test profile successfully', () => {
-      let errors = validateProfile(USER_PROFILE_RESPONSE, requiredFields, messages);
+      let errors = validateProfile(USER_PROFILE_RESPONSE);
       assert.deepEqual(errors, {});
     });
 
@@ -377,27 +382,16 @@ describe('utility functions', () => {
     });
 
     it('validates nested fields', () => {
-      let profile = {
-        nested_array: [{foo: "bar", baz: null}]
-      };
-      const keysToCheck = [
-        ["nested_array", 0, "foo"],
-        ["nested_array", 0, "baz"],
-      ];
-      const nestMessages = {"baz": "Baz"};
-      let errors = validateProfile(profile, keysToCheck, nestMessages);
-      assert.deepEqual({nested_array: [ { baz: "Baz is required" } ] }, errors);
+      let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
+      _.set(profile, ['work_history', 0, 'city'], '');
+      let errors = validateProfile(profile);
+      assert.deepEqual({work_history: [ { city: "City is required" } ] }, errors);
     });
 
     it('correctly validates fields with 0', () => {
-      let profile = {
-        nested_array: [{foo: 0}]
-      };
-      const keysToCheck = [
-        ["nested_array", 0, "foo"]
-      ];
-      const nestMessages = {"foo": "Foo"};
-      let errors = validateProfile(profile, keysToCheck, nestMessages);
+      let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
+      profile.first_name = 0;
+      let errors = validateProfile(profile);
       assert.deepEqual({}, errors);
     });
   });
@@ -408,65 +402,43 @@ describe('utility functions', () => {
       profile = {};
     });
 
-    it('should return fields for dialog for an empty profile', () => {
-      let expectation = [false, {
-        url: "/profile/personal",
-        title: "Personal Info",
-        text: "Please complete your personal information.",
-      }];
+    it('should return fields for an empty profile', () => {
+      let errors = Object.assign({}, ...Object.entries({
+        'first_name': "Given name",
+        'last_name': "Family name",
+        'preferred_name': "Preferred name",
+        'gender': "Gender",
+        'preferred_language': "Preferred language",
+        'city': "City",
+        'state_or_territory': 'State or Territory',
+        'country': "Country",
+        'birth_city': 'City',
+        'birth_state_or_territory': 'State or Territory',
+        'birth_country': "Country",
+        'date_of_birth': "Date of birth"
+      }).map(([k,v]) => ({[k]: `${v} is required`})));
+      const expectation = [false, "/profile/personal", errors];
       assert.deepEqual(validateProfileComplete(profile), expectation);
     });
 
-    it('should return appropriate fields for dialog when a field is missing', () => {
-      PersonalTab.defaultProps.requiredFields.forEach( (field) => {
-        profile[field[0]] = "filled in";
-      });
+    it('should return appropriate fields when a field is missing', () => {
+      profile = _.cloneDeep(USER_PROFILE_RESPONSE);
       profile['account_privacy'] = '';
-      let expectation = [false, {
-        url: "/profile/privacy",
-        title: "Privacy Settings",
-        text: "Please complete the privacy settings.",
+      let expectation = [false, "/profile/privacy", {
+        account_privacy: 'Privacy level is required'
       }];
       assert.deepEqual(validateProfileComplete(profile), expectation);
     });
 
-    it('should return true when all top-level fields are filled in', () => {
-      PersonalTab.defaultProps.requiredFields.forEach( (field) => {
-        profile[field[0]] = "filled in";
-      });
-      PrivacyTab.defaultProps.requiredFields.forEach( (field) => {
-        profile[field[0]] = "filled in";
-      });
-      assert.deepEqual(validateProfileComplete(profile), [true, {}]);
-    });
-
-    it('should return true when all nested fields are filled in', () => {
-      PersonalTab.defaultProps.requiredFields.forEach( (field) => {
-        profile[field[0]] = "filled in";
-      });
-      PrivacyTab.defaultProps.requiredFields.forEach( (field) => {
-        profile[field[0]] = "filled in";
-      });
-      profile['work_history'] = [{}];
-      EmploymentTab.nestedValidationKeys.forEach( k => {
-        profile['work_history'][0][k] = "filled in";
-      });
-      assert.deepEqual(validateProfileComplete(profile), [true, {}]);
+    it('should return true when all fields are filled in', () => {
+      assert.deepEqual(validateProfileComplete(USER_PROFILE_RESPONSE), [true, null, null]);
     });
 
     it('should return fields for dialog when a nested field is missing', () => {
-      PersonalTab.defaultProps.requiredFields.forEach( (field) => {
-        profile[field[0]] = "filled in";
-      });
-      profile['work_history'] = [{}];
-      EmploymentTab.nestedValidationKeys.forEach( k => {
-        profile['work_history'][0][k] = "filled in";
-      });
-      profile['work_history'][0]['country'] = '';
-      let expectation = [ false, {
-        url: "/profile/professional",
-        title: "Professional Info",
-        text: "Please complete your work history information.",
+      profile = _.cloneDeep(USER_PROFILE_RESPONSE);
+      _.set(profile, ['work_history', 0, 'country'], '');
+      let expectation = [false, "/profile/professional", {
+        work_history: [{country: "Country is required"}]
       }];
       assert.deepEqual(validateProfileComplete(profile), expectation);
     });
@@ -487,6 +459,7 @@ describe('utility functions', () => {
       assert.equal(undefined, validateMonth("13"));
     });
     it('returns undefined if the text is not an integer number', () => {
+      assert.equal(undefined, validateMonth(""));
       assert.equal(undefined, validateMonth("two"));
       assert.equal(undefined, validateMonth(null));
       assert.equal(undefined, validateMonth({}));
@@ -494,10 +467,6 @@ describe('utility functions', () => {
       assert.equal(undefined, validateMonth("2e0"));
       assert.equal(undefined, validateMonth("3-4"));
       assert.equal(undefined, validateMonth("3.4"));
-    });
-
-    it('returns an empty string if passed an empty string', () => {
-      assert.equal("", validateMonth(""));
     });
   });
 
@@ -516,6 +485,7 @@ describe('utility functions', () => {
       assert.equal(undefined, validateYear("10000"));
     });
     it('returns undefined if the text is not an integer number', () => {
+      assert.equal(undefined, validateYear(""));
       assert.equal(undefined, validateYear("two"));
       assert.equal(undefined, validateYear(null));
       assert.equal(undefined, validateYear({}));
@@ -524,9 +494,127 @@ describe('utility functions', () => {
       assert.equal(undefined, validateYear("3-4"));
       assert.equal(undefined, validateYear("3.4"));
     });
+  });
+  
+  describe('validateDate', () => {
+    it('handles dates starting with 0 without treating as octal', () => {
+      assert.equal(1, validateDay("01"));
+    });
+    it('converts strings to numbers', () => {
+      assert.equal(3, validateDay("3"));
+    });
+    it('returns undefined for invalid dates', () => {
+      assert.equal(undefined, validateDay("-3"));
+      assert.equal(undefined, validateDay("0"));
+      assert.equal(1, validateDay("1"));
+      assert.equal(31, validateDay("31"));
+      assert.equal(undefined, validateDay("32"));
+    });
+    it('returns undefined if the text is not an integer number', () => {
+      assert.equal(undefined, validateDay(""));
+      assert.equal(undefined, validateDay("two"));
+      assert.equal(undefined, validateDay(null));
+      assert.equal(undefined, validateDay({}));
+      assert.equal(undefined, validateDay(undefined));
+      assert.equal(undefined, validateDay("2e0"));
+      assert.equal(undefined, validateDay("3-4"));
+      assert.equal(undefined, validateDay("3.4"));
+    });
+  });
 
-    it('returns an empty string if passed an empty string', () => {
-      assert.equal("", validateYear(""));
+  describe('generateNewWorkHistory', () => {
+    it('generates a new work history object', () => {
+      assert.deepEqual(generateNewWorkHistory(), {
+        position: null,
+        industry: null,
+        company_name: null,
+        start_date: null,
+        end_date: null,
+        city: null,
+        country: null,
+        state_or_territory: null,
+      });
+    });
+  });
+  
+  describe('generateNewEducation', () => {
+    it('generates a new education object', () => {
+      let level = 'level';
+      assert.deepEqual(generateNewEducation(level), {
+        'degree_name': level,
+        'graduation_date': null,
+        'field_of_study': null,
+        'online_degree': false,
+        'school_name': null,
+        'school_city': null,
+        'school_state_or_territory': null,
+        'school_country': null
+      });
+    });
+  });
+
+  describe('makeProfileImageUrl', () => {
+    it('uses the large profile image if available', () => {
+      let url = "/url";
+      assert.equal(url, makeProfileImageUrl({ profile_url_large: url }));
+    });
+    
+    it('uses a default profile image if not available, removing duplicate slashes', () => {
+      assert.equal(
+        `${SETTINGS.edx_base_url}static/images/profiles/default_120.png`,
+        makeProfileImageUrl({})
+      );
+    });
+  });
+
+  describe('getPreferredName', () => {
+    let settingsBackup;
+    beforeEach(() => {
+      settingsBackup = Object.assign({}, SETTINGS);
+    });
+
+    afterEach(() => {
+      Object.assign(SETTINGS, settingsBackup);
+    });
+
+    it('shows profile.preferred_name', () => {
+      assert.equal('profile preferred name', getPreferredName({
+        preferred_name: 'profile preferred name'
+      }));
+    });
+
+    it('uses SETTINGS.name if profile.preferred_name is not available', () => {
+      assert.equal(SETTINGS.name, getPreferredName({}));
+    });
+
+    it('uses SETTINGS.username if SETTINGS.name and profile.preferred_name are not available', () => {
+      SETTINGS.name = '';
+      assert.equal(SETTINGS.username, getPreferredName({}));
+    });
+  });
+
+  describe('makeProfileProgressDisplay', () => {
+    it('renders the right active display', () => {
+      let expected = ["Personal", "Education", "Professional", "Profile Privacy"];
+
+      for (let i = 0; i < expected.length; ++i) {
+        let svg = makeProfileProgressDisplay(i);
+        let desc = svg.props.children[0];
+        assert.equal(desc.props.children.join(""), `Profile progress: ${expected[i]}`);
+
+        for (let child of svg.props.children) {
+          if (child.key === `circle_${i}`) {
+            // the white circle should be the currently selected one
+            assert.equal(child.props.fill, "white");
+          }
+          if (child.key === `circletext_${i}`) {
+            assert.equal(child.props.children, `${i + 1}`);
+          }
+          if (child.key === `text_${i}`) {
+            assert.equal(child.props.children, expected[i]);
+          }
+        }
+      }
     });
   });
 });
