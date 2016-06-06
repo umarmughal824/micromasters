@@ -65,3 +65,18 @@ export const SET_USER_PAGE_DIALOG_VISIBILITY = 'SET_USER_PAGE_DIALOG_VISIBILITY'
 export const setUserPageDialogVisibility = bool => (
   { type: SET_USER_PAGE_DIALOG_VISIBILITY, payload: bool }
 );
+
+export const SET_SHOW_EDUCATION_DELETE_DIALOG = 'SET_SHOW_EDUCATION_DELETE_DIALOG';
+export const setShowEducationDeleteDialog = bool => (
+  { type: SET_SHOW_EDUCATION_DELETE_DIALOG, payload: bool }
+);
+
+export const SET_SHOW_WORK_DELETE_DIALOG = 'SET_SHOW_WORK_DELETE_DIALOG';
+export const setShowWorkDeleteDialog = bool => (
+  { type: SET_SHOW_WORK_DELETE_DIALOG, payload: bool }
+);
+
+export const SET_DELETION_INDEX = 'SET_DELETION_INDEX';
+export const setDeletionIndex = index => (
+  { type: SET_DELETION_INDEX, payload: index }
+);

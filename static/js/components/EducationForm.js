@@ -14,6 +14,7 @@ import ProfileFormFields from '../util/ProfileFormFields';
 import { generateNewEducation } from "../util/util";
 import { saveProfileStep } from '../util/profile_edit';
 import { HIGH_SCHOOL } from '../constants';
+import ConfirmDeletion from './ConfirmDeletion';
 
 class EducationForm extends ProfileFormFields {
   constructor(props) {
@@ -57,10 +58,10 @@ class EducationForm extends ProfileFormFields {
     setEducationDialogVisibility(true);
   };
 
-  deleteEducationEntry = index => {
-    const { saveProfile, profile } = this.props;
+  deleteEducationEntry = () => {
+    const { saveProfile, profile, deletionIndex } = this.props;
     let clone = _.cloneDeep(profile);
-    clone['education'].splice(index, 1);
+    clone['education'].splice(deletionIndex, 1);
     saveProfile(clone);
   };
 
@@ -94,7 +95,7 @@ class EducationForm extends ProfileFormFields {
       return;
     }
 
-    let deleteEntry = () => this.deleteEducationEntry(index);
+    let deleteEntry = () => this.openEducationDeleteDialog(index);
     let editEntry = () => this.openEditEducationForm(index);
     let validationAlert = () => {
       if (_.get(errors, ['education', index])) {
@@ -112,8 +113,8 @@ class EducationForm extends ProfileFormFields {
       </Cell>
       <Cell col={2} className="profile-row-icons">
         {validationAlert()}
-        <IconButton name="edit" onClick={editEntry} />
-        <IconButton name="delete" onClick={deleteEntry} />
+        <IconButton className="edit-button" name="edit" onClick={editEntry} />
+        <IconButton className="delete-button" name="delete" onClick={deleteEntry} />
       </Cell>
     </Grid>;
   };
@@ -216,6 +217,7 @@ class EducationForm extends ProfileFormFields {
         educationDialogVisibility,
         educationDegreeInclusions,
         educationDegreeLevel,
+        showEducationDeleteDialog,
       }
     } = this.props;
 
@@ -267,6 +269,11 @@ class EducationForm extends ProfileFormFields {
 
     return (
       <div>
+        <ConfirmDeletion
+          deleteEntry={this.deleteEducationEntry}
+          open={showEducationDeleteDialog}
+          close={this.closeConfirmDeleteDialog}
+        />
         <Dialog
           open={educationDialogVisibility}
           className="dashboard-dialog"

@@ -20,6 +20,9 @@ import {
   SET_EDUCATION_DIALOG_INDEX,
   SET_EDUCATION_DIALOG_VISIBILITY,
   SET_USER_PAGE_DIALOG_VISIBILITY,
+  SET_DELETION_INDEX,
+  SET_SHOW_WORK_DELETE_DIALOG,
+  SET_SHOW_EDUCATION_DELETE_DIALOG,
 } from '../actions/ui';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../util/api';
@@ -41,11 +44,22 @@ describe("UserPage", () => {
 
   let userActions = [RECEIVE_GET_USER_PROFILE_SUCCESS, REQUEST_GET_USER_PROFILE];
 
+  let openDialog = () => {
+    return [...document.getElementsByClassName('deletion-confirmation')].find(dialog => (
+      dialog.style["left"] === "0px"
+    ));
+  };
+
   afterEach(() => {
     helper.cleanup();
   });
 
   describe("Education History", () => {
+    let deleteButton = div => {
+      return div.getElementsByClassName('profile-tab-card')[1].
+        getElementsByClassName('delete-button')[0];
+    };
+
     it('shows the education component', done => {
       renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
         let title = div.getElementsByClassName('profile-card-title')[1];
@@ -54,7 +68,28 @@ describe("UserPage", () => {
       });
     });
 
-    it('should let you delete an education entry', done => {
+    it('should confirm deletion and let you cancel', done => {
+      renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
+        let button = deleteButton(div);
+
+        listenForActions([
+          SET_DELETION_INDEX,
+          SET_SHOW_EDUCATION_DELETE_DIALOG,
+          SET_SHOW_EDUCATION_DELETE_DIALOG,
+          SET_SHOW_WORK_DELETE_DIALOG,
+          SET_DELETION_INDEX
+        ], () => {
+          TestUtils.Simulate.click(button);
+          let dialog = openDialog();
+          let cancelButton = dialog.getElementsByClassName('cancel-button')[0];
+          TestUtils.Simulate.click(cancelButton);
+        }).then(() => {
+          done();
+        });
+      });
+    });
+
+    it('should confirm deletion and let you continue', done => {
       renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
         let updatedProfile = _.cloneDeep(USER_PROFILE_RESPONSE);
         updatedProfile.education.splice(0,1);
@@ -64,17 +99,23 @@ describe("UserPage", () => {
           Promise.resolve(updatedProfile)
         );
 
-        let deleteButton = div.getElementsByClassName('profile-tab-card')[1].
-          getElementsByClassName('profile-row-icons')[0].
-          getElementsByClassName('mdl-button')[1];
+        let button = deleteButton(div);
 
         listenForActions([
+          SET_DELETION_INDEX,
+          SET_SHOW_EDUCATION_DELETE_DIALOG,
           START_PROFILE_EDIT,
           UPDATE_PROFILE_VALIDATION,
+          SET_SHOW_EDUCATION_DELETE_DIALOG,
+          SET_SHOW_WORK_DELETE_DIALOG,
+          SET_DELETION_INDEX,
           REQUEST_PATCH_USER_PROFILE,
           RECEIVE_PATCH_USER_PROFILE_SUCCESS,
         ], () => {
-          TestUtils.Simulate.click(deleteButton);
+          TestUtils.Simulate.click(button);
+          let dialog = openDialog();
+          button = dialog.getElementsByClassName('delete-button')[0];
+          TestUtils.Simulate.click(button);
         }).then(() => {
           done();
         });
@@ -121,6 +162,12 @@ describe("UserPage", () => {
   });
 
   describe("Employment History", () => {
+    let deleteButton = div => {
+      return div.getElementsByClassName('profile-tab-card')[0].
+        getElementsByClassName('profile-row-icons')[0].
+        getElementsByClassName('mdl-button')[1];
+    };
+
     it('shows the employment history component', done => {
       renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
         let title = div.getElementsByClassName('profile-card-title')[0];
@@ -129,8 +176,28 @@ describe("UserPage", () => {
       });
     });
 
-    it('should let you delete a work history entry', done => {
+    it('should confirm deletion and let you cancel', done => {
+      renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
+        let button = deleteButton(div);
 
+        listenForActions([
+          SET_DELETION_INDEX,
+          SET_SHOW_WORK_DELETE_DIALOG,
+          SET_SHOW_WORK_DELETE_DIALOG,
+          SET_SHOW_EDUCATION_DELETE_DIALOG,
+          SET_DELETION_INDEX,
+        ], () => {
+          TestUtils.Simulate.click(button);
+          let dialog = openDialog();
+          let cancelButton = dialog.getElementsByClassName('cancel-button')[0];
+          TestUtils.Simulate.click(cancelButton);
+        }).then(() => {
+          done();
+        });
+      });
+    });
+
+    it('should confirm deletion and let you continue', done => {
       renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
         let updatedProfile = _.cloneDeep(USER_PROFILE_RESPONSE);
         updatedProfile.work_history.splice(0,1);
@@ -145,12 +212,20 @@ describe("UserPage", () => {
           getElementsByClassName('mdl-button')[1];
 
         listenForActions([
+          SET_DELETION_INDEX,
+          SET_SHOW_WORK_DELETE_DIALOG,
           START_PROFILE_EDIT,
           UPDATE_PROFILE_VALIDATION,
+          SET_SHOW_EDUCATION_DELETE_DIALOG,
+          SET_SHOW_WORK_DELETE_DIALOG,
+          SET_DELETION_INDEX,
           REQUEST_PATCH_USER_PROFILE,
           RECEIVE_PATCH_USER_PROFILE_SUCCESS,
         ], () => {
           TestUtils.Simulate.click(deleteButton);
+          let dialog = openDialog();
+          let button = dialog.getElementsByClassName('delete-button')[0];
+          TestUtils.Simulate.click(button);
         }).then(() => {
           done();
         });

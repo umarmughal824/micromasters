@@ -13,6 +13,7 @@ import moment from 'moment';
 import { saveProfileStep } from '../util/profile_edit';
 import { generateNewWorkHistory } from '../util/util';
 import ProfileFormFields from '../util/ProfileFormFields';
+import ConfirmDeletion from './ConfirmDeletion';
 
 class EmploymentForm extends ProfileFormFields {
   componentWillMount () {
@@ -54,10 +55,10 @@ class EmploymentForm extends ProfileFormFields {
     setWorkDialogVisibility(true);
   }
 
-  deleteWorkHistoryEntry = index => {
-    const { saveProfile, profile } = this.props;
+  deleteWorkHistoryEntry = () => {
+    const { saveProfile, profile, deletionIndex } = this.props;
     let clone = _.cloneDeep(profile);
-    clone['work_history'].splice(index, 1);
+    clone['work_history'].splice(deletionIndex, 1);
     saveProfile(clone);
   }
 
@@ -149,7 +150,7 @@ class EmploymentForm extends ProfileFormFields {
     let endDateText = () => (
       _.isEmpty(position.end_date) ? "Current" : dateFormat(position.end_date)
     );
-    let deleteEntry = () => this.deleteWorkHistoryEntry(index);
+    let deleteEntry = () => this.openWorkDeleteDialog(index);
     return (
       <Grid className="profile-tab-card-grid" key={index}>
         <Cell col={4} className="profile-row-name">
@@ -168,7 +169,13 @@ class EmploymentForm extends ProfileFormFields {
   }
 
   render () {
-    const { ui: { workHistoryEdit, workDialogVisibility } } = this.props;
+    const { 
+      ui: {
+        workHistoryEdit,
+        workDialogVisibility,
+        showWorkDeleteDialog,
+      }
+    } = this.props;
     const actions = [
       <Button
         type='button'
@@ -188,6 +195,11 @@ class EmploymentForm extends ProfileFormFields {
 
     return (
       <div>
+        <ConfirmDeletion
+          deleteEntry={this.deleteWorkHistoryEntry}
+          open={showWorkDeleteDialog}
+          close={this.closeConfirmDeleteDialog}
+        />
         <Dialog
           open={workDialogVisibility}
           className="dashboard-dialog"

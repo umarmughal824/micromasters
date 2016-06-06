@@ -12,6 +12,9 @@ import {
   SET_EDUCATION_DEGREE_LEVEL,
   SET_EDUCATION_DEGREE_INCLUSIONS,
   SET_USER_PAGE_DIALOG_VISIBILITY,
+  SET_SHOW_EDUCATION_DELETE_DIALOG,
+  SET_SHOW_WORK_DELETE_DIALOG,
+  SET_DELETION_INDEX,
 
   clearUI,
   updateDialogText,
@@ -26,6 +29,9 @@ import {
   setEducationDegreeLevel,
   setEducationDegreeInclusions,
   setUserPageDialogVisibility,
+  setShowEducationDeleteDialog,
+  setShowWorkDeleteDialog,
+  setDeletionIndex,
 } from '../actions/ui';
 import { INITIAL_UI_STATE } from '../reducers/ui';
 import { HIGH_SCHOOL, ASSOCIATE, BACHELORS, MASTERS, DOCTORATE } from '../constants';
@@ -189,9 +195,38 @@ describe('ui reducers', () => {
   });
 
   describe('user page', () => {
-    it('should let you set the user page dialog visibility', done => {
-      dispatchThen(setUserPageDialogVisibility(true), [SET_USER_PAGE_DIALOG_VISIBILITY]).then(state => {
-        assert.deepEqual(state.userPageDialogVisibility, true);
+    [true, false].forEach(bool => {
+      it(`should let you set the user page dialog visibility to ${bool}`, done => {
+        dispatchThen(setUserPageDialogVisibility(bool), [SET_USER_PAGE_DIALOG_VISIBILITY]).then(state => {
+          assert.deepEqual(state.userPageDialogVisibility, bool);
+          done();
+        });
+      });
+    });
+  });
+
+  describe('confirm delete dialog', () => {
+    [true, false].forEach( bool => {
+      it(`should let you set to show the education delete dialog to ${bool}`, done => {
+        dispatchThen(setShowEducationDeleteDialog(bool), [SET_SHOW_EDUCATION_DELETE_DIALOG]).then(state => {
+          assert.deepEqual(state.showEducationDeleteDialog, bool);
+          done();
+        });
+      });
+    });
+
+    [true, false].forEach( bool => {
+      it(`should let you set to show the work delete dialog to ${bool}`, done => {
+        dispatchThen(setShowWorkDeleteDialog(bool), [SET_SHOW_WORK_DELETE_DIALOG]).then(state => {
+          assert.deepEqual(state.showWorkDeleteDialog, bool);
+          done();
+        });
+      });
+    });
+
+    it('should let you set a deletion index', done => {
+      dispatchThen(setDeletionIndex(3), [SET_DELETION_INDEX]).then(state => {
+        assert.deepEqual(state.deletionIndex, 3);
         done();
       });
     });

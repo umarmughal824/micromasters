@@ -66,4 +66,33 @@ export default class ProfileFormFields extends React.Component {
   static contextTypes = {
     router: React.PropTypes.object.isRequired
   };
+
+  static propTypes = {
+    setDeletionIndex:             React.PropTypes.func,
+    setShowWorkDeleteDialog:      React.PropTypes.func,
+    setShowEducationDeleteDialog: React.PropTypes.func,
+  };
+
+  closeConfirmDeleteDialog = () => {
+    const {
+      setDeletionIndex,
+      setShowEducationDeleteDialog,
+      setShowWorkDeleteDialog
+    } = this.props;
+    setShowEducationDeleteDialog(false);
+    setShowWorkDeleteDialog(false);
+    setDeletionIndex(null);
+  }
+
+  openEducationDeleteDialog  = index => {
+    const { setDeletionIndex, setShowEducationDeleteDialog } = this.props;
+    setDeletionIndex(index);
+    setShowEducationDeleteDialog(true);
+  }
+
+  openWorkDeleteDialog = index => {
+    const { setDeletionIndex, setShowWorkDeleteDialog } = this.props;
+    setDeletionIndex(index);
+    setShowWorkDeleteDialog(true);
+  }
 }

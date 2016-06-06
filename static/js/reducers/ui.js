@@ -16,6 +16,10 @@ import {
   SET_EDUCATION_DEGREE_INCLUSIONS,
 
   SET_USER_PAGE_DIALOG_VISIBILITY,
+
+  SET_SHOW_EDUCATION_DELETE_DIALOG,
+  SET_SHOW_WORK_DELETE_DIALOG,
+  SET_DELETION_INDEX,
 } from '../actions/ui';
 import { HIGH_SCHOOL, ASSOCIATE, BACHELORS, MASTERS, DOCTORATE } from '../constants';
 
@@ -34,6 +38,9 @@ export const INITIAL_UI_STATE = {
     [DOCTORATE]: false,
   },
   userPageDialogVisibility: false,
+  showWorkDeleteDialog: false,
+  showEducationDeleteDialog: false,
+  deletionIndex: null,
 };
 
 export const ui = (state = INITIAL_UI_STATE, action) => {
@@ -102,6 +109,21 @@ export const ui = (state = INITIAL_UI_STATE, action) => {
   case SET_USER_PAGE_DIALOG_VISIBILITY: {
     return Object.assign({}, state, {
       userPageDialogVisibility: action.payload
+    });
+  }
+  case SET_SHOW_EDUCATION_DELETE_DIALOG: {
+    return Object.assign({}, state, {
+      showEducationDeleteDialog: action.payload
+    });
+  }
+  case SET_SHOW_WORK_DELETE_DIALOG: {
+    return Object.assign({}, state, {
+      showWorkDeleteDialog: action.payload
+    });
+  }
+  case SET_DELETION_INDEX: {
+    return Object.assign({}, state, {
+      deletionIndex: action.payload
     });
   }
   default:

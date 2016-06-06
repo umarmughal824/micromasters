@@ -18,6 +18,9 @@ import {
   setEducationDegreeLevel,
   setEducationDegreeInclusions,
   setUserPageDialogVisibility,
+  setShowEducationDeleteDialog,
+  setShowWorkDeleteDialog,
+  setDeletionIndex,
 } from '../actions/ui';
 
 class ProfileFormContainer extends React.Component {
@@ -56,6 +59,21 @@ class ProfileFormContainer extends React.Component {
       dispatch(startProfileEdit(username));
     }
     dispatch(updateProfile(username, profile));
+  }
+
+  setDeletionIndex = index => {
+    const { dispatch } = this.props;
+    dispatch(setDeletionIndex(index));
+  }
+
+  setShowEducationDeleteDialog = bool => {
+    const { dispatch } = this.props;
+    dispatch(setShowEducationDeleteDialog(bool));
+  }
+
+  setShowWorkDeleteDialog = bool => {
+    const { dispatch } = this.props;
+    dispatch(setShowWorkDeleteDialog(bool));
   }
 
   setUserPageDialogVisibility = bool => {
@@ -149,6 +167,9 @@ class ProfileFormContainer extends React.Component {
         setEducationDegreeInclusions: this.setEducationDegreeInclusions,
         fetchProfile: this.fetchProfile,
         setUserPageDialogVisibility: this.setUserPageDialogVisibility,
+        setShowEducationDeleteDialog: this.setShowEducationDeleteDialog,
+        setShowWorkDeleteDialog: this.setShowWorkDeleteDialog,
+        setDeletionIndex: this.setDeletionIndex,
       })
     ));
   }
