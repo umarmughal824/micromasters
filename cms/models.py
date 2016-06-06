@@ -78,14 +78,18 @@ class ProgramPage(Page):
             "gaTrackingID": settings.GA_TRACKING_ID,
             "host": webpack_dev_server_host(request)
         }
-
+        username = None
+        if not request.user.is_anonymous():
+            social_auths = request.user.social_auth.filter(provider=EdxOrgOAuth2.name)
+            if social_auths.exists():
+                username = social_auths.first().uid
         context = super(ProgramPage, self).get_context(request)
 
         context["style_src"] = get_bundle_url(request, "style.js")
         context["public_src"] = get_bundle_url(request, "public.js")
         context["style_public_src"] = get_bundle_url(request, "style_public.js")
         context["authenticated"] = not request.user.is_anonymous()
-        context["username"] = request.user.username
+        context["username"] = username
         context["js_settings_json"] = json.dumps(js_settings)
         context["title"] = self.title
 
