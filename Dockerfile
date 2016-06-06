@@ -1,4 +1,4 @@
-FROM ubuntu:trusty
+FROM python:3.5
 MAINTAINER ODL DevOps <mitx-devops@mit.edu>
 
 
