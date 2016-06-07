@@ -82,7 +82,7 @@
                   <div class="col-md-8">
                     <h3>{{ page.title }}</h3>
 
-                    <p>{{ page.description|safe }}</p>
+                    <p>{{ page.description|richtext }}</p>
 
 
                   </div>
@@ -171,7 +171,7 @@
                                aria-labelledby="exampleHeadingContinuousOne"
                                role="tabpanel">
                             <div class="panel-body">
-                              {{ course.description|safe }}
+                              {{ course.description|richtext }}
                             </div>
                           </div>
                         </div>
