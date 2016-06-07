@@ -1,6 +1,19 @@
 Release Notes
 =============
 
+Version 0.10.0
+--------------
+
+- Fixed handling of multiple validation errors for education and work history (#491)
+- Moved validation functions to `validation.js`
+- Made personal info editable on user page
+- Fixed two JS console warnings
+- Added ability to edit education to users page
+- Allowed nulls for education and employment fields (#463)
+- Added previous button to profile pages
+- Docker with python35
+- Switched to old OAUTH endpoints for edX
+
 Version 0.9.0
 -------------
 
