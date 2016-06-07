@@ -11,7 +11,7 @@ import _ from 'lodash';
 import moment from 'moment';
 
 import ProfileFormFields from '../util/ProfileFormFields';
-import { generateNewEducation } from "../util/util";
+import { generateNewEducation, userPrivilegeCheck } from "../util/util";
 import { saveProfileStep } from '../util/profile_edit';
 import { HIGH_SCHOOL } from '../constants';
 import ConfirmDeletion from './ConfirmDeletion';
@@ -66,7 +66,11 @@ class EducationForm extends ProfileFormFields {
   };
 
   renderEducationLevel(level){
-    const { ui: { educationDegreeInclusions }, profile: { education } } = this.props;
+    const {
+      ui: { educationDegreeInclusions },
+      profile: { education },
+      profile
+    } = this.props;
     if (educationDegreeInclusions[level.value]) {
       let rows = [];
       if (education !== undefined) {
@@ -74,22 +78,24 @@ class EducationForm extends ProfileFormFields {
           filter(([, education]) => education.degree_name === level.value).
           map(([index, education]) => this.educationRow(education, index));
       }
-      rows.push(
-        <FABButton
-          colored
-          onClick={() => this.openNewEducationForm(level.value, null)}
-          className="profile-add-button"
-          key="I'm unique!"
-        >
-          <Icon name="add" />
-        </FABButton>
-      );
+      userPrivilegeCheck(profile, () => {
+        rows.push(
+          <FABButton
+            colored
+            onClick={() => this.openNewEducationForm(level.value, null)}
+            className="profile-add-button"
+            key="I'm unique!"
+          >
+            <Icon name="add" />
+          </FABButton>
+        );
+      });
       return rows;
     }
   }
 
   educationRow = (education, index) => {
-    const { errors } = this.props;
+    const { errors, profile } = this.props;
     if (!('id' in education)) {
       // don't show new educations, wait until we saved on the server before showing them
       return;
@@ -103,7 +109,17 @@ class EducationForm extends ProfileFormFields {
       }
     };
     let dateFormat = date => moment(date).format("MM[/]YYYY");
-
+    let icons = () => (
+      userPrivilegeCheck(profile,
+        () => (
+          <Cell col={2} className="profile-row-icons">
+            {validationAlert()}
+            <IconButton className="edit-button" name="edit" onClick={editEntry} />
+            <IconButton className="delete-button" name="delete" onClick={deleteEntry} />
+          </Cell>
+        ),
+        () => <Cell col={2} />
+      ));
     return <Grid className="profile-tab-card-grid" key={index}>
       <Cell col={4} className="profile-row-name">
         {education.school_name}
@@ -111,11 +127,7 @@ class EducationForm extends ProfileFormFields {
       <Cell col={6} className="profile-row-date-range">
         {`${dateFormat(education.graduation_date)}`}
       </Cell>
-      <Cell col={2} className="profile-row-icons">
-        {validationAlert()}
-        <IconButton className="edit-button" name="edit" onClick={editEntry} />
-        <IconButton className="delete-button" name="delete" onClick={deleteEntry} />
-      </Cell>
+      {icons()}
     </Grid>;
   };
 

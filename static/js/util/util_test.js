@@ -9,6 +9,7 @@ import {
   generateNewWorkHistory,
   getPreferredName,
   makeProfileProgressDisplay,
+  userPrivilegeCheck,
 } from '../util/util';
 
 /* eslint-disable camelcase */
@@ -124,6 +125,34 @@ describe('utility functions', () => {
           );
         }
       }
+    });
+  });
+
+  describe('User privilege check', () => {
+    it('should return the value of the first function if the profile username matches', () => {
+      let profile = { username: SETTINGS.username };
+      let privilegedCallback = () => "hi";
+      assert.equal(userPrivilegeCheck(profile, privilegedCallback), "hi");
+    });
+
+    it('should return the second argument if the profile username matches', () => {
+      let profile = { username: SETTINGS.username };
+      let privilegedString = "hi";
+      assert.equal(userPrivilegeCheck(profile, privilegedString), "hi");
+    });
+
+    it('should return the value of the second function if the profile username does not match', () => {
+      let profile = { username: "another_user" };
+      let privilegedCallback = () => "vim";
+      let unprivilegedCallback = () => "emacs";
+      assert.equal(userPrivilegeCheck(profile, privilegedCallback, unprivilegedCallback), "emacs");
+    });
+
+    it('should return the value of the second argument if the profile username does not match', () => {
+      let profile = { username: "another_user" };
+      let privilegedCallback = () => "vim";
+      let unprivilegedString = "emacs";
+      assert.equal(userPrivilegeCheck(profile, privilegedCallback, unprivilegedString), "emacs");
     });
   });
 });

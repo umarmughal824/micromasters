@@ -3,6 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ga from 'react-ga';
 import striptags from 'striptags';
+import _ from 'lodash';
 
 export function sendGoogleAnalyticsEvent(category, action, label, value) {
   let event = {
@@ -16,6 +17,13 @@ export function sendGoogleAnalyticsEvent(category, action, label, value) {
   ga.event(event);
 }
 
+export function userPrivilegeCheck (profile, privileged, unPrivileged) {
+  if ( profile.username === SETTINGS.username ) {
+    return _.isFunction(privileged) ? privileged() : privileged;
+  } else {
+    return _.isFunction(unPrivileged) ? unPrivileged() : unPrivileged;
+  }
+}
 
 export function makeProfileProgressDisplay(active) {
   const width = 750, height = 100, radius = 20, paddingX = 40, paddingY = 5;

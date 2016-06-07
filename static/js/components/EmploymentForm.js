@@ -11,7 +11,7 @@ import _ from 'lodash';
 import moment from 'moment';
 
 import { saveProfileStep } from '../util/profile_edit';
-import { generateNewWorkHistory } from '../util/util';
+import { generateNewWorkHistory, userPrivilegeCheck } from '../util/util';
 import ProfileFormFields from '../util/ProfileFormFields';
 import ConfirmDeletion from './ConfirmDeletion';
 
@@ -102,7 +102,7 @@ class EmploymentForm extends ProfileFormFields {
   }
 
   renderWorkHistory () {
-    const { ui, profile: { work_history } } = this.props;
+    const { ui, profile, profile: { work_history } } = this.props;
     if ( ui.workHistoryEdit === true ) {
       let workHistoryRows = [];
       if ( !_.isUndefined(work_history) ) {
@@ -110,15 +110,17 @@ class EmploymentForm extends ProfileFormFields {
           entry.id !== undefined
         ).map(([i, entry]) => this.jobRow(entry, i));
       }
-      workHistoryRows.push(
-        <FABButton
-          colored
-          onClick={this.addWorkHistoryEntry}
-          key="I'm unique!"
-          className="profile-add-button">
-          <Icon name="add" />
-        </FABButton>
-      );
+      userPrivilegeCheck(profile, () => {
+        workHistoryRows.push(
+          <FABButton
+            colored
+            onClick={this.addWorkHistoryEntry}
+            key="I'm unique!"
+            className="profile-add-button">
+            <Icon name="add" />
+          </FABButton>
+        );
+      });
       return workHistoryRows;
     } else {
       return (
@@ -136,6 +138,7 @@ class EmploymentForm extends ProfileFormFields {
       setWorkDialogVisibility,
       setWorkDialogIndex,
       errors,
+      profile,
     } = this.props;
     let editCallback = () => {
       setWorkDialogIndex(index);
@@ -151,6 +154,18 @@ class EmploymentForm extends ProfileFormFields {
       _.isEmpty(position.end_date) ? "Current" : dateFormat(position.end_date)
     );
     let deleteEntry = () => this.openWorkDeleteDialog(index);
+    let icons = () => {
+      return userPrivilegeCheck(profile, 
+        () => (
+          <Cell col={2} className="profile-row-icons">
+            {validationAlert()}
+            <IconButton className="edit-button" name="edit" onClick={editCallback} />
+            <IconButton className="delete-button" name="delete" onClick={deleteEntry} />
+          </Cell>
+        ),
+        () => <Cell col={2} />
+      );
+    };
     return (
       <Grid className="profile-tab-card-grid" key={index}>
         <Cell col={4} className="profile-row-name">
@@ -159,11 +174,7 @@ class EmploymentForm extends ProfileFormFields {
         <Cell col={6} className="profile-row-date-range">
           {`${dateFormat(position.start_date)} - ${endDateText()}`}
         </Cell>
-        <Cell col={2} className="profile-row-icons">
-          {validationAlert()}
-          <IconButton name="edit" onClick={editCallback} />
-          <IconButton name="delete" onClick={deleteEntry} />
-        </Cell>
+        {icons()}
       </Grid>
     );
   }

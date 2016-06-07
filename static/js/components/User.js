@@ -8,6 +8,7 @@ import { makeProfileImageUrl } from '../util/util';
 import EmploymentForm from './EmploymentForm';
 import EducationForm from './EducationForm';
 import UserPagePersonalDialog from './UserPagePersonalDialog.js';
+import { userPrivilegeCheck } from '../util/util';
 
 export default class User extends React.Component {
   static propTypes = {
@@ -62,7 +63,7 @@ export default class User extends React.Component {
           { profile.city }, { getStateName() }
         </span>
         <CardMenu>
-          <IconButton name="edit" onClick={this.toggleShowPersonalDialog}/>
+          {userPrivilegeCheck(profile, () => <IconButton name="edit" onClick={this.toggleShowPersonalDialog}/>)}
         </CardMenu>
       </Card>
 
