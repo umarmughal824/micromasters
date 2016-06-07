@@ -97,7 +97,7 @@ class EmploymentForm extends ProfileFormFields {
     );
   }
 
-  renderWorkHistory(): React$Element|React$Element[] {
+  renderWorkHistory(): ?React$Element[] {
     const { ui, profile, profile: { work_history } } = this.props;
     if ( ui.workHistoryEdit === true ) {
       let workHistoryRows = [];
@@ -118,14 +118,6 @@ class EmploymentForm extends ProfileFormFields {
         );
       });
       return workHistoryRows;
-    } else {
-      return (
-        <Grid className="profile-tab-grid">
-          <Cell col={12} className="work-history-absent">
-            No work history entered, click the switch to begin.
-          </Cell>
-        </Grid>
-      );
     }
   }
 
@@ -215,6 +207,9 @@ class EmploymentForm extends ProfileFormFields {
         );
       }
     };
+    let cardClass = () => (
+      workHistoryEdit ? '' : 'profile-tab-card-greyed'
+    );
 
     return (
       <div>
@@ -232,7 +227,7 @@ class EmploymentForm extends ProfileFormFields {
         >
           {this.editWorkHistoryForm()}
         </Dialog>
-        <Card shadow={1} className="profile-tab-card">
+        <Card shadow={1} className={`profile-tab-card ${cardClass()}`}>
           <Grid className="profile-tab-card-grid">
             <Cell col={4} className="profile-card-title">
               Employment
