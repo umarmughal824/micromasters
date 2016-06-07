@@ -60,3 +60,8 @@ export const SET_EDUCATION_DEGREE_INCLUSIONS = 'SET_EDUCATION_DEGREE_INCLUSIONS'
 export const setEducationDegreeInclusions = degreeInclusions => (
   { type: SET_EDUCATION_DEGREE_INCLUSIONS, payload: degreeInclusions }
 );
+
+export const SET_USER_PAGE_DIALOG_VISIBILITY = 'SET_USER_PAGE_DIALOG_VISIBILITY';
+export const setUserPageDialogVisibility = bool => (
+  { type: SET_USER_PAGE_DIALOG_VISIBILITY, payload: bool }
+);

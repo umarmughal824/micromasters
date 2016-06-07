@@ -14,7 +14,7 @@ import {
   updateProfileValidation,
 } from '../actions/index';
 import { clearUI } from '../actions/ui';
-import { validateProfileComplete } from '../util/util';
+import { validateProfileComplete } from '../util/validation';
 
 const TERMS_OF_SERVICE_REGEX = /\/terms_of_service\/?/;
 const PROFILE_REGEX = /^\/profile\/?[a-z]?/;

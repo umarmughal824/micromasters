@@ -12,11 +12,11 @@ import {
   boundStateSelectField,
   boundCountrySelectField,
   boundRadioGroupField,
-  saveAndContinue,
+  saveProfileStep,
 } from './profile_edit';
 import { USER_PROFILE_RESPONSE } from '../constants';
 import * as profileEdit from '../util/profile_edit';
-import * as util from '../util/util';
+import * as validation from '../util/validation';
 
 describe('Profile Editing utility functions', () => {
   let that, sandbox;
@@ -389,9 +389,9 @@ describe('Profile Editing utility functions', () => {
     };
 
     beforeEach(() => {
-      validateYearSpy = sandbox.spy(util, 'validateYear');
-      validateMonthSpy = sandbox.spy(util, 'validateMonth');
-      validateDaySpy = sandbox.spy(util, 'validateDay');
+      validateYearSpy = sandbox.spy(validation, 'validateYear');
+      validateMonthSpy = sandbox.spy(validation, 'validateMonth');
+      validateDaySpy = sandbox.spy(validation, 'validateDay');
     });
 
     afterEach(() => {
@@ -664,7 +664,7 @@ describe('Profile Editing utility functions', () => {
     });
   });
 
-  describe('saveAndContinue', () => {
+  describe('saveProfileStep', () => {
     const saveProfileReturnValue = "value";
     beforeEach(() => {
       that.props.saveProfile = sandbox.stub();
@@ -673,7 +673,7 @@ describe('Profile Editing utility functions', () => {
     });
 
     it('saves with finalStep as true', () => {
-      let ret = saveAndContinue.call(that, true);
+      let ret = saveProfileStep.call(that, true);
 
       let clone = Object.assign({}, that.props.profile, {
         filled_out: true,

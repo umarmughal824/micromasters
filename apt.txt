@@ -5,6 +5,7 @@ libpq-dev
 python3-dev
 libjpeg-dev
 zlib1g-dev
+net-tools
 
 # developer requirements
 postgresql-client

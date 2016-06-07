@@ -1,6 +1,5 @@
 import React from 'react';
 import _ from 'lodash';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import RaisedButton from 'material-ui/RaisedButton';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 
@@ -9,7 +8,7 @@ import {
   makeCourseStatusDisplay,
   makeCourseProgressDisplay,
   makeRunStatusDisplay,
-} from '../util/util';
+} from '../util/courseList';
 import {
   STATUS_PASSED,
   DASHBOARD_COURSE_HEIGHT,
@@ -91,7 +90,7 @@ class CourseList extends React.Component {
 
       let applyForMSBtnLabel = `Apply for the ${program.title} Master’s Degree`;
       const btnStyle = {
-        'text-transform': 'none'
+        'textTransform': 'none'
       };
 
       return (
@@ -119,9 +118,7 @@ class CourseList extends React.Component {
             <br/>
             <p>You need to pass {totalCourses - coursesPassed} more courses
               before you can apply for the <strong>{program.title}</strong> Master’s Degree.</p>
-            <MuiThemeProvider>
-                <RaisedButton label={applyForMSBtnLabel} disabled={true} labelStyle={btnStyle} />
-            </MuiThemeProvider>
+            <RaisedButton label={applyForMSBtnLabel} disabled={true} labelStyle={btnStyle} />
           </div>
         </div>
       );

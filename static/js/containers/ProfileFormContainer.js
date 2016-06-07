@@ -17,6 +17,7 @@ import {
   setEducationDialogIndex,
   setEducationDegreeLevel,
   setEducationDegreeInclusions,
+  setUserPageDialogVisibility,
 } from '../actions/ui';
 
 class ProfileFormContainer extends React.Component {
@@ -55,6 +56,11 @@ class ProfileFormContainer extends React.Component {
       dispatch(startProfileEdit(username));
     }
     dispatch(updateProfile(username, profile));
+  }
+
+  setUserPageDialogVisibility = bool => {
+    const { dispatch } = this.props;
+    dispatch(setUserPageDialogVisibility(bool));
   }
 
   setWorkHistoryEdit = (bool) => {
@@ -142,6 +148,7 @@ class ProfileFormContainer extends React.Component {
         setEducationDegreeLevel: this.setEducationDegreeLevel,
         setEducationDegreeInclusions: this.setEducationDegreeInclusions,
         fetchProfile: this.fetchProfile,
+        setUserPageDialogVisibility: this.setUserPageDialogVisibility,
       })
     ));
   }

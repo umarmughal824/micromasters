@@ -18,8 +18,8 @@ class EdxOrgOAuth2(BaseOAuth2):
     EDXORG_BASE_URL = settings.EDXORG_BASE_URL
 
     # Settings for Django OAUTH toolkit
-    AUTHORIZATION_URL = urljoin(EDXORG_BASE_URL, '/_o/authorize/')
-    ACCESS_TOKEN_URL = urljoin(EDXORG_BASE_URL, '/_o/token/')
+    AUTHORIZATION_URL = urljoin(EDXORG_BASE_URL, '/oauth2/authorize/')
+    ACCESS_TOKEN_URL = urljoin(EDXORG_BASE_URL, '/oauth2/access_token/')
     DEFAULT_SCOPE = ['read', 'write']
 
     ACCESS_TOKEN_METHOD = 'POST'
