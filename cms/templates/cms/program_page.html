@@ -1,12 +1,234 @@
 {% extends "base.html" %}
 
+{% load i18n static %}
 {% load wagtailcore_tags %}
+
+{% block title %}{% trans "MIT Micromasters" %}{% endblock %}
 
 {% block body_class %}template-programpage{% endblock %}
 
 {% block content %}
-<h1>{{ page.title }}</h1>
+  <div class="app-media layout-boxed">
+    <div class="main-content-wrapper">
+      <section class="main-content">
+        <div class="banner-wrapper banner-sub banner-program-1">
+          <nav class="navbar navbar-default" role="navigation">
+            <div class="container-fluid">
+              <div class="navbar-header">
+                <a class="navbar-brand" href="javascript:void(0)"><img
+                        src="/static/images/logo-mit-micromasters-whitered.png"
+                        width="215" height="40"
+                        alt="MIT Micromasters"/></a>
+                <div class="nav-utility pull-right">
+                  {% if authenticated %}
+                    <a class="btn btn-danger" href="/logout">
+                      Sign out
+                    </a>
+                  {% else %}
+                    <span>Get Started Today!</span>
+                    <a class="btn btn-danger" href="{% url 'social:begin' 'edxorg' %}">
+                      Sign in with edX.org
+                    </a>
+                  {% endif %}
+                </div>
+              </div>
+              <!-- <ul class="nav navbar-toolbar navbar-left">
+                 <li class="active"><a href="">Programs</a></li>
+                 </li>
+                 </ul> -->
+            </div>
+          </nav>
+          <div class="banner-wrapper-content">
+            <h1>MIT’s #1 ranked <span>Supply Chain Management</span> program,<br> now delivered in
+              additional new ways.
+            </h1>
+            <!--<a href="add" type="button" class="btn btn-primary btn-lg">
+               <span>LEARN MORE</span>
+               </a> -->
+          </div>
+          <!--
+             <div class="banner-bottom">
+                <div class="banner-wrapper-content">
+                   <h2>Get Started Today! <a href="add" type="button" class="btn btn-success margin-left-10">
+                      <span>Sign in with edX.org</span>
+                      </a>
+                   </h2>
+                </div>
+             </div>
+             -->
+        </div>
+        <div class="panel panel-main-content">
+          <!-- Nav tabs -->
+          <ul class="nav nav-tabs nav-tabs-line nav-justified nav-tabs-animate nav-programs" role="tablist">
+            <li role="presentation" class="active">
+              <a href="#home" aria-controls="home" role="tab" data-toggle="tab">Program Home</a>
+            </li>
+            <li role="presentation">
+              <a href="#faqs" aria-controls="faqs" role="tab" data-toggle="tab">Frequently Asked
+                Questions</a>
+            </li>
+            <li role="presentation">
+              <a href="#courses" aria-controls="courses" role="tab" data-toggle="tab">Courses</a>
+            </li>
+          </ul>
 
-{{ page.description|richtext }}
+          <!-- Tab panes -->
+          <div class="tab-content tab-content-programs">
+            <div role="tabpanel" class="tab-pane active fade in" id="home">
+
+
+              <div class="panel-body">
+                <div class="row">
+                  <div class="col-md-8">
+                    <h3>{{ page.title }}</h3>
+
+                    <p>{{ page.description|richtext }}</p>
+
+
+                  </div>
+                  <div class="col-md-3 col-md-offset-1">
+
+                    <div class="sidebar-content">
+                      <h5>Contact Us</h5>
+                      <p>1-617-253-1000</p>
+                      <p><a href="mailto:scm@mit.edu">scm@mit.edu</a></p>
+
+                      <h5>Sign Up</h5>
+
+                      <p>ADD FORM: Name, Email, Tell Us More</p>
+
+                      <a class="btn btn-danger">Sign Up</a>
+
+                    </div>
+
+
+                  </div>
+
+                </div>
+
+
+              </div>
+
+
+            </div>
+            <div role="tabpanel" class="tab-pane fade in" id="faqs">
+
+              <div class="panel-body">
+                <div class="row">
+                  <div class="col-md-10">
+                    <h3>You have questions and we have answers</h3>
+                    <div class="panel-group panel-group-continuous" id="exampleAccordionContinuous"
+                         aria-multiselectable="true" role="tablist">
+                      {% for faq in page.faqs.all %}
+                        <div class="panel">
+                          <div class="panel-heading" id="exampleHeadingContinuousOne"
+                               role="tab">
+                            <a class="panel-title"
+                               data-parent="#exampleAccordionContinuous"
+                               data-toggle="collapse"
+                               href="#faqs-{{ forloop.counter }}"
+                               aria-controls="exampleCollapseContinuousOne"
+                               aria-expanded="true">
+                              {{ faq.question }}
+                            </a>
+                          </div>
+                          <div class="panel-collapse collapse in"
+                               id="faqs-{{ forloop.counter }}"
+                               aria-labelledby="exampleHeadingContinuousOne"
+                               role="tabpanel">
+                            <div class="panel-body">
+                              {{ faq.answer }}
+                            </div>
+                          </div>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div role="tabpanel" class="tab-pane fade in" id="courses">
+              <div class="panel-body">
+                <div class="row">
+                  <div class="col-md-10">
+                    <h3>Courses</h3>
+                    <div class="panel-group panel-group-continuous" id="exampleAccordionContinuous"
+                         aria-multiselectable="true" role="tablist">
+                      {% for course in page.courses.all %}
+                        <div class="panel">
+                          <div class="panel-heading" id="exampleHeadingContinuousOne"
+                               role="tab">
+                            <a class="panel-title" data-parent="#exampleAccordionContinuous"
+                               data-toggle="collapse"
+                               href="#course-{{ forloop.counter }}"
+                               aria-controls="exampleCollapseContinuousOne"
+                               aria-expanded="true">
+                              {{ course.title }}
+                            </a>
+                          </div>
+                          <div class="panel-collapse collapse in"
+                               id="course-{{ forloop.counter }}"
+                               aria-labelledby="exampleHeadingContinuousOne"
+                               role="tabpanel">
+                            <div class="panel-body">
+                              {{ course.description|richtext }}
+                            </div>
+                          </div>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    {% include "cms/footer.html" %}
+
+    <div class="modal fade modal-fade-in-scale-up" id="modal-about" aria-hidden="true" aria-labelledby="modal-about"
+         role="dialog" tabindex="-1">
+      <div class="modal-dialog modal-center">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+            <!-- <h4 class="modal-title">About Micromasters</h4> -->
+          </div>
+          <div class="modal-body">
+            <h2>Micromasters is a new credential</h2>
+            <p>
+              MIT has created a new credential for online learners: the “MicroMaster’s,” which will be
+              granted by MITx (MIT’s online learning initiative) to students who do exceptionally well in
+              a given set of graduate-level online courses and do well in a subsequent exam. The
+              credential will first be available to students who register for the SCM program’s online
+              courses.
+            </p>
+            <h3>Join the MIT Micromasters community</h3>
+            <p>
+              Micromasters aren't just about courseware. Part of the the MIT experience is interacting
+              with other exceptional students like yourself. Fill out your profile on this site and build
+              professional relationships with like-minded learners.
+            </p>
+            <h3>Micromasters courses are delivered through edX.org</h3>
+            <p>
+              Use your edX.org account to enroll in a Micromasters program and share your grades and
+              progress with MIT. When you complete all the requirements and earn a Micromasters
+              credential, you can use it to apply for a Masters degree at MIT.
+            </p>
+          </div>
+          <!--
+             <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+
+             </div>
+             -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
 {% endblock %}
