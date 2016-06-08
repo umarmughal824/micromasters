@@ -22,6 +22,7 @@ describe('courseList functions', () => {
     let yesterday = '2016-03-30';
     let today = '2016-03-31';
     let tomorrow = '2016-04-01';
+    let edxCourseKey = "edx course key";
 
     let renderCourseStatusDisplay = (course, ...args) => {
       if (course.runs === undefined) {
@@ -158,6 +159,7 @@ describe('courseList functions', () => {
         renderCourseStatusDisplay({
           status: STATUS_OFFERED_NOT_ENROLLED,
           runs: [{
+            course_id: edxCourseKey,
             enrollment_start_date: today
           }]
         }, moment(today)),
@@ -170,10 +172,22 @@ describe('courseList functions', () => {
         renderCourseStatusDisplay({
           status: STATUS_OFFERED_NOT_ENROLLED,
           runs: [{
+            course_id: edxCourseKey,
             enrollment_start_date: yesterday
           }]
         }, moment(today)),
         "ENROLL"
+      );
+    });
+    it("is an offered course with valid enrollment date and no edx_course_key", () => {
+      assert.equal(
+        renderCourseStatusDisplay({
+          status: STATUS_OFFERED_NOT_ENROLLED,
+          runs: [{
+            enrollment_start_date: yesterday
+          }]
+        }, moment(today)),
+        ""
       );
     });
 

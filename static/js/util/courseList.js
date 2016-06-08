@@ -76,8 +76,6 @@ export function makeCourseStatusDisplay(course, now = moment()) {
     }
   }
   case STATUS_OFFERED_NOT_ENROLLED: {
-    let courseInfoUrl = `${SETTINGS.edx_base_url}/courses/${firstRun.course_id}/about`;
-
     if (!firstRun.enrollment_start_date) {
       return firstRun.fuzzy_enrollment_start_date;
     }
@@ -86,7 +84,12 @@ export function makeCourseStatusDisplay(course, now = moment()) {
     if (enrollmentDate.isAfter(now, 'day')) {
       return `Enrollment starting: ${enrollmentDate.format("M/D/Y")}`;
     } else {
-      return <Button bsStyle="success" href={courseInfoUrl} target="_blank">ENROLL</Button>;
+      if (firstRun.course_id) {
+        let courseInfoUrl = `${SETTINGS.edx_base_url}/courses/${firstRun.course_id}/about`;
+        return <Button bsStyle="success" href={courseInfoUrl} target="_blank">ENROLL</Button>;
+      } else {
+        return "";
+      }
     }
   }
   default:
