@@ -1,30 +1,23 @@
 import React from 'react';
-import Button from 'react-mdl/lib/Button';
 import IconButton from 'react-mdl/lib/IconButton';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 import Switch from 'react-mdl/lib/Switch';
 import FABButton from 'react-mdl/lib/FABButton';
 import Icon from 'react-mdl/lib/Icon';
-import Dialog from 'material-ui/Dialog';
 import { Card } from 'react-mdl/lib/Card';
 import _ from 'lodash';
 import moment from 'moment';
 
 import ProfileFormFields from '../util/ProfileFormFields';
-import { generateNewEducation, userPrivilegeCheck } from "../util/util";
-import { saveProfileStep } from '../util/profile_edit';
-import { HIGH_SCHOOL } from '../constants';
 import ConfirmDeletion from './ConfirmDeletion';
+import EducationDialog from './EducationDialog';
+import {
+  openEditEducationForm,
+  openNewEducationForm,
+  deleteEducationEntry,
+} from '../util/editEducation';
 
 class EducationForm extends ProfileFormFields {
-  constructor(props) {
-    super(props);
-    this.educationLevelLabels = {};
-    this.educationLevelOptions.forEach(level => {
-      this.educationLevelLabels[level.value] = level.label;
-    });
-  }
-
   static propTypes = {
     profile:                        React.PropTypes.object,
     ui:                             React.PropTypes.object,
@@ -37,39 +30,22 @@ class EducationForm extends ProfileFormFields {
     setEducationDegreeInclusions:   React.PropTypes.func,
   };
 
+  openEditEducationForm = index => {
+    openEditEducationForm.call(this, index);
+  }
+
   openNewEducationForm = (level, index) => {
-    const {
-      profile,
-      updateProfile,
-      setEducationDialogIndex,
-      setEducationDegreeLevel,
-      setEducationDialogVisibility,
-    } = this.props;
-    let newIndex = index;
-    if (index === null){
-      newIndex = profile['education'].length;
-    }
-    /* add empty education */
-    let clone = Object.assign({}, profile);
-    clone['education'] = clone['education'].concat(generateNewEducation(level));
-    updateProfile(clone);
-    setEducationDialogIndex(newIndex);
-    setEducationDegreeLevel(level);
-    setEducationDialogVisibility(true);
+    openNewEducationForm.call(this, level, index);
   };
 
   deleteEducationEntry = () => {
-    const { saveProfile, profile, deletionIndex } = this.props;
-    let clone = _.cloneDeep(profile);
-    clone['education'].splice(deletionIndex, 1);
-    saveProfile(clone);
+    deleteEducationEntry.call(this);
   };
 
   renderEducationLevel(level){
     const {
       ui: { educationDegreeInclusions },
       profile: { education },
-      profile
     } = this.props;
     if (educationDegreeInclusions[level.value]) {
       let rows = [];
@@ -78,24 +54,22 @@ class EducationForm extends ProfileFormFields {
           filter(([, education]) => education.degree_name === level.value).
           map(([index, education]) => this.educationRow(education, index));
       }
-      userPrivilegeCheck(profile, () => {
-        rows.push(
-          <FABButton
-            colored
-            onClick={() => this.openNewEducationForm(level.value, null)}
-            className="profile-add-button"
-            key="I'm unique!"
-          >
-            <Icon name="add" />
-          </FABButton>
-        );
-      });
+      rows.push(
+        <FABButton
+          colored
+          onClick={() => this.openNewEducationForm(level.value, null)}
+          className="profile-add-button"
+          key="I'm unique!"
+        >
+          <Icon name="add" />
+        </FABButton>
+      );
       return rows;
     }
   }
 
   educationRow = (education, index) => {
-    const { errors, profile } = this.props;
+    const { errors } = this.props;
     if (!('id' in education)) {
       // don't show new educations, wait until we saved on the server before showing them
       return;
@@ -109,17 +83,6 @@ class EducationForm extends ProfileFormFields {
       }
     };
     let dateFormat = date => moment(date).format("MM[/]YYYY");
-    let icons = () => (
-      userPrivilegeCheck(profile,
-        () => (
-          <Cell col={2} className="profile-row-icons">
-            {validationAlert()}
-            <IconButton className="edit-button" name="edit" onClick={editEntry} />
-            <IconButton className="delete-button" name="delete" onClick={deleteEntry} />
-          </Cell>
-        ),
-        () => <Cell col={2} />
-      ));
     return <Grid className="profile-tab-card-grid" key={index}>
       <Cell col={4} className="profile-row-name">
         {education.school_name}
@@ -127,28 +90,12 @@ class EducationForm extends ProfileFormFields {
       <Cell col={6} className="profile-row-date-range">
         {`${dateFormat(education.graduation_date)}`}
       </Cell>
-      {icons()}
+      <Cell col={2} className="profile-row-icons">
+        {validationAlert()}
+        <IconButton className="edit-button" name="edit" onClick={editEntry} />
+        <IconButton className="delete-button" name="delete" onClick={deleteEntry} />
+      </Cell>
     </Grid>;
-  };
-
-  openEditEducationForm = index => {
-    const {
-      profile,
-      setEducationDialogIndex,
-      setEducationDegreeLevel,
-      setEducationDialogVisibility,
-    } = this.props;
-
-    let education = profile['education'][index];
-    setEducationDialogIndex(index);
-    setEducationDegreeLevel(education.degree_name);
-    setEducationDialogVisibility(true);
-  };
-
-  saveEducationForm = () => {
-    saveProfileStep.call(this).then(() => {
-      this.clearEducationEdit();
-    });
   };
 
   handleSwitchClick(level){
@@ -161,74 +108,11 @@ class EducationForm extends ProfileFormFields {
     setEducationDegreeInclusions(newState);
   }
 
-  clearEducationEdit = () => {
-    const {
-      setEducationDialogVisibility,
-      setEducationDegreeLevel,
-      setEducationDialogIndex,
-      clearProfileEdit,
-    } = this.props;
-    setEducationDialogVisibility(false);
-    setEducationDegreeLevel('');
-    setEducationDialogIndex(null);
-    clearProfileEdit();
-  };
-
-  editEducationForm = level => {
-    const { ui: { educationDialogIndex } } = this.props;
-
-    let keySet = (key) => ['education', educationDialogIndex, key];
-
-    let fieldOfStudy, highSchoolPadding;
-    if (level !== HIGH_SCHOOL) {
-      fieldOfStudy = <Cell col={6}>
-        {this.boundTextField(keySet('field_of_study'), 'Field of Study')}
-      </Cell>;
-    } else {
-      highSchoolPadding = <Cell col={6} />;
-    }
-
-    return <Grid className="profile-tab-grid">
-      <Cell col={12} className="profile-form-title">
-        {this.educationLevelLabels[level]}
-      </Cell>
-      {fieldOfStudy}
-      <Cell col={6}>
-        {this.boundDateField(keySet('graduation_date'), 'Graduation Date', true)}
-      </Cell>
-      {highSchoolPadding}
-      <Cell col={6}>
-        {this.boundTextField(keySet('school_name'), 'School Name')}
-      </Cell>
-      <Cell col={6}>
-      </Cell>
-      <Cell col={4}>
-        {this.boundCountrySelectField(
-          keySet('school_state_or_territory'),
-          keySet('school_country'),
-          'Country'
-        )}
-      </Cell>
-      <Cell col={4}>
-        {this.boundStateSelectField(
-          keySet('school_state_or_territory'),
-          keySet('school_country'),
-          'State'
-        )}
-      </Cell>
-      <Cell col={4} key="school_city">
-        {this.boundTextField(keySet('school_city'), 'City')}
-      </Cell>
-    </Grid>;
-  };
-
   render() {
     let {
       profile,
       ui: {
-        educationDialogVisibility,
         educationDegreeInclusions,
-        educationDegreeLevel,
         showEducationDeleteDialog,
       }
     } = this.props;
@@ -261,24 +145,6 @@ class EducationForm extends ProfileFormFields {
         {this.renderEducationLevel(level)}
       </Card>
     ));
-
-    let actions = [
-      <Button
-        type='button'
-        key='cancel'
-        className="cancel-button"
-        onClick={this.clearEducationEdit}>
-        Cancel
-      </Button>,
-      <Button
-        key='save'
-        type='button'
-        className="save-button"
-        onClick={this.saveEducationForm}>
-        Save
-      </Button>,
-    ];
-
     return (
       <div>
         <ConfirmDeletion
@@ -286,15 +152,7 @@ class EducationForm extends ProfileFormFields {
           open={showEducationDeleteDialog}
           close={this.closeConfirmDeleteDialog}
         />
-        <Dialog
-          open={educationDialogVisibility}
-          className="dashboard-dialog"
-          onRequestClose={this.clearEducationEdit}
-          actions={actions}
-          autoScrollBodyContent={true}
-        >
-          {this.editEducationForm(educationDegreeLevel)}
-        </Dialog>
+        <EducationDialog {...this.props} />
         {levelsGrid}
       </div>
     );

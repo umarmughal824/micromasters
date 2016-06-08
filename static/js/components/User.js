@@ -6,7 +6,7 @@ import iso3166 from 'iso-3166-2';
 
 import { makeProfileImageUrl } from '../util/util';
 import EmploymentForm from './EmploymentForm';
-import EducationForm from './EducationForm';
+import EducationDisplay from './EducationDisplay';
 import UserPagePersonalDialog from './UserPagePersonalDialog.js';
 import { userPrivilegeCheck } from '../util/util';
 
@@ -72,7 +72,7 @@ export default class User extends React.Component {
           <EmploymentForm {...this.props} />
         </Cell>
         <Cell col={6}>
-          <EducationForm {...this.props} />
+          <EducationDisplay {...this.props} />
         </Cell>
       </Grid>
     </div>;

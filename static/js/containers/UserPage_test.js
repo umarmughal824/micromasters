@@ -68,7 +68,7 @@ describe("UserPage", () => {
       it('shows the education component', done => {
         renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
           let title = div.getElementsByClassName('profile-card-title')[1];
-          assert.equal(title.textContent, 'High school');
+          assert.equal(title.textContent, 'Education');
           done();
         });
       });
@@ -149,7 +149,7 @@ describe("UserPage", () => {
 
       it('should let you add an education entry', done => {
         renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let editButton = div.getElementsByClassName('profile-tab-card')[1].
+          let addButton = div.getElementsByClassName('profile-tab-card')[1].
             getElementsByClassName('profile-add-button')[0];
 
           listenForActions([
@@ -159,7 +159,10 @@ describe("UserPage", () => {
             SET_EDUCATION_DIALOG_VISIBILITY,
             SET_EDUCATION_DEGREE_LEVEL,
           ], () => {
-            TestUtils.Simulate.click(editButton);
+            TestUtils.Simulate.click(addButton);
+            addButton = div.getElementsByClassName('add-education-menu')[0].
+              getElementsByTagName('li')[0];
+            TestUtils.Simulate.click(addButton);
           }).then(() => {
             done();
           });

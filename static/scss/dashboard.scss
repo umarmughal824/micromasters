@@ -177,9 +177,23 @@ c.validation-wrapper {
     overflow: visible;
     margin-bottom: 35px;
     padding-bottom: 50px;
-
+    .education-add-menu {
+      position: absolute;
+      top: 5%;
+      left: 75%;
+    }
     .profile-tab-card-grid:first-child {
       padding-top: 15px;
+    }
+    .profile-tab-card-grid.user-page {
+      .school-type {
+        font-size: 12px;
+        font-weight: 400;
+        text-transform: lowercase;
+      }
+      .mdl-cell {
+        margin: auto;
+      }
     }
     .profile-tab-card-grid {
       margin: 0;
