@@ -70,11 +70,15 @@ class ProgramPage(Page):
         on_delete=models.SET_NULL,
         related_name='+'
     )
+    contact_us = RichTextField(blank=True)
+    title_over_image = RichTextField(blank=True)
 
     content_panels = Page.content_panels + [
         FieldPanel('description', classname="full"),
         FieldPanel('program'),
         FieldPanel('background_image'),
+        FieldPanel('contact_us'),
+        FieldPanel('title_over_image'),
         InlinePanel('faqs', label='Frequently Asked Questions'),
         InlinePanel('courses', label='Program Courses')
     ]
