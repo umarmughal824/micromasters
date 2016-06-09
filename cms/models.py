@@ -11,6 +11,7 @@ from wagtail.wagtailcore.models import Page, Orderable
 from wagtail.wagtailcore.fields import RichTextField
 from wagtail.wagtailadmin.edit_handlers import FieldPanel, InlinePanel, MultiFieldPanel
 
+
 from backends.edxorg import EdxOrgOAuth2
 from micromasters.utils import webpack_dev_server_host
 from courses.models import Program
@@ -62,10 +63,18 @@ class ProgramPage(Page):
     """
     description = RichTextField(blank=True)
     program = models.OneToOneField('courses.Program', null=True, on_delete=models.SET_NULL)
+    background_image = models.ForeignKey(
+        Image,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='+'
+    )
 
     content_panels = Page.content_panels + [
         FieldPanel('description', classname="full"),
         FieldPanel('program'),
+        FieldPanel('background_image'),
         InlinePanel('faqs', label='Frequently Asked Questions'),
         InlinePanel('courses', label='Program Courses')
     ]

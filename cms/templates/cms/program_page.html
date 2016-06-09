@@ -2,6 +2,7 @@
 
 {% load i18n static %}
 {% load wagtailcore_tags %}
+{% load wagtailimages_tags %}
 
 {% block title %}{% trans "MIT Micromasters" %}{% endblock %}
 
@@ -11,7 +12,9 @@
   <div class="app-media layout-boxed">
     <div class="main-content-wrapper">
       <section class="main-content">
-        <div class="banner-wrapper banner-sub banner-program-1">
+      {% image page.background_image fill-1310x613 as background_image %}
+        <div class="banner-wrapper banner-sub banner-program-1"
+             style="background: #222 url({{ background_image.url }})">
           <nav class="navbar navbar-default" role="navigation">
             <div class="container-fluid">
               <div class="navbar-header">
