@@ -89,11 +89,7 @@ describe('reducers', () => {
       return dispatchThen(fetchUserProfile('jane'), [REQUEST_GET_USER_PROFILE, RECEIVE_GET_USER_PROFILE_FAILURE]).
       then(profileState => {
         assert.equal(profileState['jane'].getStatus, FETCH_FAILURE);
-
         assert.ok(getUserProfileStub.calledWith('jane'));
-
-        // assert that it returns a rejected promise on failure
-        return assert.isRejected(store.dispatch(fetchUserProfile('jane')));
       });
     });
 
@@ -122,11 +118,7 @@ describe('reducers', () => {
         [REQUEST_PATCH_USER_PROFILE, RECEIVE_PATCH_USER_PROFILE_FAILURE]
       ).then(profileState => {
         assert.equal(profileState['jane'].patchStatus, FETCH_FAILURE);
-
         assert.ok(patchUserProfileStub.calledWith('jane', USER_PROFILE_RESPONSE));
-
-        // assert that it returns a rejected promise on failure
-        return assert.isRejected(store.dispatch(saveProfile('jane', USER_PROFILE_RESPONSE)));
       });
     });
 
@@ -277,9 +269,6 @@ describe('reducers', () => {
 
       return dispatchThen(fetchDashboard(), [REQUEST_DASHBOARD, RECEIVE_DASHBOARD_FAILURE]).then(dashboardState => {
         assert.equal(dashboardState.fetchStatus, FETCH_FAILURE);
-
-        // assert that it returns a rejected promise on failure
-        return assert.isRejected(store.dispatch(fetchDashboard()));
       });
     });
   });

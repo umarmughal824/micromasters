@@ -73,10 +73,9 @@ export const saveProfile = (username, profile) => {
     dispatch(requestPatchUserProfile(username));
     return api.patchUserProfile(username, profile).
       then(newProfile => dispatch(receivePatchUserProfileSuccess(username, newProfile))).
-      catch(e => {
+      catch(() => {
         dispatch(receivePatchUserProfileFailure(username));
-        // propagate exception
-        return Promise.reject(e);
+        // the exception is assumed handled and will not be propagated
       });
   };
 };
@@ -90,10 +89,9 @@ export function fetchUserProfile(username) {
     dispatch(requestGetUserProfile(username));
     return api.getUserProfile(username).
       then(json => dispatch(receiveGetUserProfileSuccess(username, json))).
-      catch(e => {
+      catch(() => {
         dispatch(receiveGetUserProfileFailure(username));
-        // propagate exception
-        return Promise.reject(e);
+        // the exception is assumed handled and will not be propagated
       });
   };
 }
@@ -109,7 +107,10 @@ export const receiveDashboardSuccess = programs => ({
   type: RECEIVE_DASHBOARD_SUCCESS,
   payload: { programs }
 });
-const receiveDashboardFailure = () => ({ type: RECEIVE_DASHBOARD_FAILURE });
+export const receiveDashboardFailure = errorInfo => ({
+  type: RECEIVE_DASHBOARD_FAILURE,
+  payload: { errorInfo }
+});
 export const clearDashboard = () => ({ type: CLEAR_DASHBOARD });
 
 export function fetchDashboard() {
@@ -117,10 +118,9 @@ export function fetchDashboard() {
     dispatch(requestDashboard());
     return api.getDashboard().
       then(dashboard => dispatch(receiveDashboardSuccess(dashboard))).
-      catch(e => {
-        dispatch(receiveDashboardFailure());
-        // propagate exception
-        return Promise.reject(e);
+      catch(error => {
+        dispatch(receiveDashboardFailure(error));
+        // the exception is assumed handled and will not be propagated
       });
   };
 }

@@ -134,7 +134,8 @@ export const dashboard = (state = INITIAL_DASHBOARD_STATE, action) => {
     });
   case RECEIVE_DASHBOARD_FAILURE:
     return Object.assign({}, state, {
-      fetchStatus: FETCH_FAILURE
+      fetchStatus: FETCH_FAILURE,
+      errorInfo: action.payload.errorInfo
     });
   case CLEAR_DASHBOARD:
     return INITIAL_DASHBOARD_STATE;

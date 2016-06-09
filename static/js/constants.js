@@ -232,6 +232,12 @@ export const DASHBOARD_RESPONSE = [
   },
 ];
 
+export const DASHBOARD_RESPONSE_ERROR = {
+  "errorStatusCode": 500,
+  "error_code": "AB123",
+  "user_message": "custom error message for the user."
+};
+
 export const ISO_8601_FORMAT = 'YYYY-MM-DD';
 
 export const DASHBOARD_COURSE_HEIGHT = 70;
