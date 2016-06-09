@@ -46,11 +46,12 @@ export function boundRadioGroupField(keySet, label, options) {
   const radioButtons = options.map(obj => {
     let helper = "";
     if (obj.helper) {
-      helper = `- ${obj.helper}`;
+      helper = `${obj.helper}`;
     }
     let label = (
       <span className="radio-label">
-        {obj.label}<span className="radio-label-hint">{helper}</span>
+        {obj.label}
+        <p className="radio-label-hint">{helper}</p>
       </span>
     );
 

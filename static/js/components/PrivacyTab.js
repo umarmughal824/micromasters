@@ -20,10 +20,9 @@ class PrivacyTab extends ProfileFormFields {
             We care about your privacy.
           </Cell>
         </Grid>
-        <br/><br/>
         <Grid className="profile-tab-grid">
           <Cell col={12}>
-            <span className="header-privacy-tab">Who can see your profile?</span>
+            <h4>Who can see your profile?</h4>
             { this.boundRadioGroupField(['account_privacy'], '', this.privacyOptions) } <br />
           </Cell>
           <Cell col={12}>
