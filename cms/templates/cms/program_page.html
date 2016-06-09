@@ -42,9 +42,7 @@
             </div>
           </nav>
           <div class="banner-wrapper-content">
-            <h1>MIT’s #1 ranked <span>Supply Chain Management</span> program,<br> now delivered in
-              additional new ways.
-            </h1>
+            <h1>{{ page.title_over_image|richtext }}</h1>
             <!--<a href="add" type="button" class="btn btn-primary btn-lg">
                <span>LEARN MORE</span>
                </a> -->
@@ -93,14 +91,11 @@
 
                     <div class="sidebar-content">
                       <h5>Contact Us</h5>
-                      <p>1-617-253-1000</p>
-                      <p><a href="mailto:scm@mit.edu">scm@mit.edu</a></p>
+                      {{ page.contact_us|richtext }}
 
                       <h5>Sign Up</h5>
 
-                      <p>ADD FORM: Name, Email, Tell Us More</p>
-
-                      <a class="btn btn-danger">Sign Up</a>
+                      <a class="btn btn-danger" href="{% url 'social:begin' 'edxorg' %}">Sign Up</a>
 
                     </div>
 
