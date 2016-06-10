@@ -8,6 +8,7 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
 import App from './containers/App';
 import DashboardPage from './containers/DashboardPage';
+import SettingsPage from './containers/SettingsPage';
 import ProfilePage from './containers/ProfilePage';
 import PersonalTab from './components/PersonalTab';
 import EmploymentTab from './components/EmploymentTab';
@@ -40,6 +41,7 @@ export function makeDashboardRoutes(browserHistory: Object, store: Object, onRou
               <Route path="privacy" component={PrivacyTab} />
             </Route>
             <Route path="/terms_of_service" component={TermsOfServicePage} />
+            <Route path="/settings" component={SettingsPage}  />
             <Route path="/users" component={UserPage} >
               <IndexRedirect to={`${SETTINGS.username}`} />
               <Route path=":username" component={User} />
