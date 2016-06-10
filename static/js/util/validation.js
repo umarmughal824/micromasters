@@ -1,6 +1,13 @@
+// @flow
 import _ from 'lodash';
 import moment from 'moment';
 
+import type {
+  Profile,
+  WorkHistoryEntry,
+  ValidationErrors
+} from '../flow/profileTypes';
+import type { UIState } from '../reducers/ui';
 import { filterPositiveInt } from './util';
 import { HIGH_SCHOOL, EDUCATION_LEVELS } from '../constants';
 
@@ -13,7 +20,7 @@ let handleNestedValidation = (profile, keys, nestedKey) => {
 
 let isNilOrEmptyString = val => _.isNil(val) || val === "";
 
-let checkFieldPresence = (profile, requiredFields, messages) => {
+let checkFieldPresence = (profile, requiredFields, messages: any): ValidationErrors => {
   let errors = {};
 
   for (let keySet of requiredFields) {
@@ -25,7 +32,10 @@ let checkFieldPresence = (profile, requiredFields, messages) => {
   return errors;
 };
 
-export function personalValidation(profile) {
+export type Validator = (a: Profile) => ValidationErrors;
+export type UIValidator = (a: Profile, b: UIState) => ValidationErrors;
+
+export function personalValidation(profile: Profile): ValidationErrors {
   let requiredFields = [
     ['first_name'],
     ['last_name'],
@@ -62,7 +72,7 @@ export function personalValidation(profile) {
   return errors;
 }
 
-export function educationValidation(profile) {
+export function educationValidation(profile: Profile): ValidationErrors {
   let messages = {
     'degree_name': 'Degree level is required',
     'graduation_date': 'Please enter a valid graduation date',
@@ -95,7 +105,7 @@ export function educationValidation(profile) {
   }
 }
 
-export function educationUiValidation(profile, ui) {
+export function educationUiValidation(profile: Profile, ui: UIState): ValidationErrors {
   if (profile.education === undefined) {
     profile = Object.assign({}, profile, {
       education: []
@@ -112,7 +122,8 @@ export function educationUiValidation(profile, ui) {
   return errors;
 }
 
-export function employmentValidation(profile) {
+export type WorkEntry = [string, WorkHistoryEntry];
+export function employmentValidation(profile: Profile): ValidationErrors {
   let messages = {
     'position': 'Position is required',
     'industry': 'Industry is required',
@@ -135,7 +146,8 @@ export function employmentValidation(profile) {
     let requiredFields = handleNestedValidation(profile, nestedKeys, 'work_history');
     let errors = checkFieldPresence(profile, requiredFields, messages);
 
-    for (let [index, workHistory] of Object.entries(profile.work_history)) {
+    for (let entry: WorkEntry of Object.entries(profile.work_history)) {
+      let [index, workHistory] = entry;
       if (!isNilOrEmptyString(workHistory.end_date) &&
         moment(workHistory.end_date).isBefore(workHistory.start_date, 'month')) {
         _.set(errors, ['work_history', index, 'end_date'], "End date cannot be before start date");
@@ -155,7 +167,7 @@ export function employmentValidation(profile) {
   }
 }
 
-export function employmentUiValidation(profile, ui) {
+export function employmentUiValidation(profile: Profile, ui: UIState): ValidationErrors {
   if (ui.workHistoryEdit && _.isEmpty(profile.work_history)) {
     return {
       work_history_required: "Work history is required if switch is set"
@@ -165,7 +177,7 @@ export function employmentUiValidation(profile, ui) {
   }
 }
 
-export function privacyValidation(profile) {
+export function privacyValidation(profile: Profile): ValidationErrors {
   let requiredFields = [
     ['account_privacy']
   ];
@@ -183,7 +195,8 @@ complete profile consists of:
   - one or more work items if the user has marked any work history
   - a valid privacy level
 */
-export function validateProfileComplete(profile) {
+export type ProfileComplete = [boolean, ?string, ?ValidationErrors];
+export function validateProfileComplete(profile: Profile): ProfileComplete {
   let errors = {};
 
   // check personal tab
@@ -219,10 +232,8 @@ export function validateProfileComplete(profile) {
 
 /**
  * Validate a day of month
- * @param {String} string The input string
- * @returns {Number|undefined} The valid date if a valid date value or undefined if not valid
  */
-export function validateDay(string) {
+export function validateDay(string: string): ?number {
   let date = filterPositiveInt(string);
   if (date === undefined) {
     return undefined;
@@ -236,10 +247,8 @@ export function validateDay(string) {
 
 /**
  * Validate a month number
- * @param {String} string The input string
- * @returns {Number|undefined} The valid month if a valid month value or undefined if not valid
  */
-export function validateMonth(string) {
+export function validateMonth(string: string): ?number {
   let month = filterPositiveInt(string);
   if (month === undefined) {
     return undefined;
@@ -252,10 +261,8 @@ export function validateMonth(string) {
 
 /**
  * Validate a year string is an integer and fits into YYYY
- * @param {String} string The input string
- * @returns {Number|undefined} The valid year if a valid year value or undefined if not valid
  */
-export function validateYear(string) {
+export function validateYear(string: string): ?number {
   let year = filterPositiveInt(string);
   if (year === undefined) {
     return undefined;
@@ -269,11 +276,9 @@ export function validateYear(string) {
 
 /**
  * Returns a function which merges the results of the given functions on a set of arguments
- * @param validators {Array} A list of validator functions taking (profile, ui)
- * @returns {function()} A function taking (profile, ui) which combines the outputs of the validators
  */
-export function combineValidators(...validators) {
-  return (...args) => _.merge({}, ...validators.map(
+export function combineValidators(...validators: Array<UIValidator|Validator>): UIValidator|Validator {
+  return (...args: Array<Profile|UIState>) => _.merge({}, ...validators.map(
     validator => validator(...args)
   ));
 }

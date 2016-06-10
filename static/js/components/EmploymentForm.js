@@ -1,3 +1,4 @@
+// @flow
 import React from 'react';
 import Button from 'react-mdl/lib/Button';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
@@ -14,27 +15,28 @@ import { generateNewWorkHistory, userPrivilegeCheck } from '../util/util';
 import { employmentValidation } from '../util/validation';
 import ProfileFormFields from '../util/ProfileFormFields';
 import ConfirmDeletion from './ConfirmDeletion';
+import type { WorkHistoryEntry } from '../flow/profileTypes';
 
 class EmploymentForm extends ProfileFormFields {
-  saveWorkHistoryEntry = () => {
+  saveWorkHistoryEntry: Function = (): void => {
     const { saveProfile, profile, ui } = this.props;
     saveProfile(employmentValidation, profile, ui).then(() => {
       this.closeWorkDialog();
     });
-  }
+  };
 
-  toggleWorkHistoryEdit = () => {
+  toggleWorkHistoryEdit: Function = (): void => {
     const { ui, setWorkHistoryEdit } = this.props;
     setWorkHistoryEdit(!ui.workHistoryEdit);
-  }
+  };
 
-  closeWorkDialog = () => {
+  closeWorkDialog: Function = (): void => {
     const { setWorkDialogVisibility, clearProfileEdit } = this.props;
     setWorkDialogVisibility(false);
     clearProfileEdit();
-  }
+  };
 
-  addWorkHistoryEntry = () => {
+  addWorkHistoryEntry: Function = (): void => {
     const {
       updateProfile,
       profile,
@@ -47,16 +49,16 @@ class EmploymentForm extends ProfileFormFields {
     updateProfile(clone);
     setWorkDialogIndex(clone.work_history.length - 1);
     setWorkDialogVisibility(true);
-  }
+  };
 
-  deleteWorkHistoryEntry = () => {
+  deleteWorkHistoryEntry: Function = (): void => {
     const { saveProfile, profile, ui, deletionIndex } = this.props;
     let clone = _.cloneDeep(profile);
     clone['work_history'].splice(deletionIndex, 1);
     saveProfile(employmentValidation, clone, ui);
-  }
+  };
 
-  editWorkHistoryForm () {
+  editWorkHistoryForm(): React$Element {
     const { ui } = this.props;
     let keySet = (key) => ['work_history', ui.workDialogIndex, key];
     return (
@@ -95,12 +97,12 @@ class EmploymentForm extends ProfileFormFields {
     );
   }
 
-  renderWorkHistory () {
+  renderWorkHistory(): React$Element|React$Element[] {
     const { ui, profile, profile: { work_history } } = this.props;
     if ( ui.workHistoryEdit === true ) {
       let workHistoryRows = [];
       if ( !_.isUndefined(work_history) ) {
-        workHistoryRows = Object.entries(work_history).filter(([,entry]) =>
+        workHistoryRows = Object.entries(work_history).filter(([,entry]: [string, WorkHistoryEntry]) =>
           entry.id !== undefined
         ).map(([i, entry]) => this.jobRow(entry, i));
       }
@@ -127,7 +129,7 @@ class EmploymentForm extends ProfileFormFields {
     }
   }
 
-  jobRow (position, index) {
+  jobRow (position: WorkHistoryEntry, index: string) {
     const {
       setWorkDialogVisibility,
       setWorkDialogIndex,

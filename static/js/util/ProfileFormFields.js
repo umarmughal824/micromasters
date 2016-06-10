@@ -1,3 +1,4 @@
+// @flow
 import React from 'react';
 import _ from 'lodash';
 
@@ -13,9 +14,10 @@ import { EDUCATION_LEVELS } from '../constants';
 import LANGUAGE_CODES from '../language_codes';
 import INDUSTRIES from '../industries';
 import iso3166 from 'iso-3166-2';
+import type { Option } from '../flow/generalTypes';
 
 export default class ProfileFormFields extends React.Component {
-  constructor(props) {
+  constructor(props: Object) {
     super(props);
 
     // bind our field methods to this
@@ -56,6 +58,20 @@ export default class ProfileFormFields extends React.Component {
       label: industry
     }));
   }
+  // type declarations
+  boundTextField: Function;
+  boundSelectField: Function;
+  boundCountrySelectField: Function;
+  boundStateSelectField: Function;
+  boundDateField: Function;
+  boundRadioGroupField: Function;
+  countryOptions: Option[];
+  genderOptions: Option[];
+  languageOptions: Option[];
+  privacyOptions: Array<{value: string, label: string, helper: string}>;
+  educationLevelOptions: Option[];
+  industryOptions: Option[];
+
 
   static contextTypes = {
     router: React.PropTypes.object.isRequired
@@ -67,7 +83,7 @@ export default class ProfileFormFields extends React.Component {
     setShowEducationDeleteDialog: React.PropTypes.func,
   };
 
-  closeConfirmDeleteDialog = () => {
+  closeConfirmDeleteDialog: Function = (): void => {
     const {
       setDeletionIndex,
       setShowEducationDeleteDialog,
@@ -78,13 +94,13 @@ export default class ProfileFormFields extends React.Component {
     setDeletionIndex(null);
   }
 
-  openEducationDeleteDialog  = index => {
+  openEducationDeleteDialog: Function = (index: number): void => {
     const { setDeletionIndex, setShowEducationDeleteDialog } = this.props;
     setDeletionIndex(index);
     setShowEducationDeleteDialog(true);
   }
 
-  openWorkDeleteDialog = index => {
+  openWorkDeleteDialog:Function = (index: number): void => {
     const { setDeletionIndex, setShowWorkDeleteDialog } = this.props;
     setDeletionIndex(index);
     setShowWorkDeleteDialog(true);

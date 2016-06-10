@@ -1,3 +1,4 @@
+// @flow
 import React from 'react';
 import Dialog from 'material-ui/Dialog';
 import Button from 'react-mdl/lib/Button';
@@ -14,13 +15,13 @@ export default class UserPagePersonalDialog extends React.Component {
     clearProfileEdit:             React.PropTypes.func,
   };
 
-  closePersonalDialog = () => {
+  closePersonalDialog: Function = (): void => {
     const { setUserPageDialogVisibility, clearProfileEdit } = this.props;
     setUserPageDialogVisibility(false);
     clearProfileEdit();
   };
 
-  savePersonalInfo = () => {
+  savePersonalInfo: Function = (): void => {
     const { profile, ui, saveProfile } = this.props;
     saveProfile(personalValidation, profile, ui).then(() => {
       this.closePersonalDialog();

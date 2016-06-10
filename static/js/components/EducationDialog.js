@@ -1,3 +1,4 @@
+// @flow
 import React from 'react';
 import Button from 'react-mdl/lib/Button';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
@@ -9,13 +10,14 @@ import ProfileFormFields from '../util/ProfileFormFields';
 import { educationValidation } from '../util/validation';
 
 export default class EducationDialog extends ProfileFormFields {
-  constructor(props) {
+  constructor(props: Object) {
     super(props);
     this.educationLevelLabels = {};
     this.educationLevelOptions.forEach(level => {
       this.educationLevelLabels[level.value] = level.label;
     });
   }
+  educationLevelLabels: Object;
 
   static propTypes = {
     open:           React.PropTypes.bool,
@@ -24,7 +26,7 @@ export default class EducationDialog extends ProfileFormFields {
     showLevelForm:  React.PropTypes.bool,
   };
 
-  clearEducationEdit = () => {
+  clearEducationEdit: Function = (): void => {
     const {
       setEducationDialogVisibility,
       setEducationDegreeLevel,
@@ -37,14 +39,14 @@ export default class EducationDialog extends ProfileFormFields {
     clearProfileEdit();
   };
 
-  saveEducationForm = () => {
+  saveEducationForm: Function = (): void => {
     const { saveProfile, profile, ui } = this.props;
     saveProfile(educationValidation, profile, ui).then(() => {
       this.clearEducationEdit();
     });
   };
 
-  editEducationForm = () => {
+  editEducationForm: Function = (): void => {
     const {
       ui: { educationDialogIndex},
       showLevelForm,

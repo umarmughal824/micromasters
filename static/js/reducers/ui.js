@@ -1,3 +1,4 @@
+// @flow
 /* global SETTINGS: false */
 import { RECEIVE_GET_USER_PROFILE_SUCCESS } from '../actions';
 import {
@@ -25,8 +26,24 @@ import {
 } from '../actions/ui';
 import { HIGH_SCHOOL, ASSOCIATE, BACHELORS, MASTERS, DOCTORATE } from '../constants';
 import { calculateDegreeInclusions } from '../util/util';
+import type { Action } from '../flow/generalTypes';
 
-export const INITIAL_UI_STATE = {
+export type UIState = {
+  workHistoryEdit:            boolean;
+  workDialogVisibility:       boolean;
+  dashboardExpander:          {};
+  educationDialogVisibility:  boolean;
+  educationDialogIndex:       ?number;
+  educationDegreeLevel:       string;
+  educationDegreeInclusions: {};
+  userPageDialogVisibility: boolean;
+  showWorkDeleteDialog: boolean;
+  showEducationDeleteDialog: boolean;
+  deletionIndex: ?number;
+  dialog: {};
+};
+
+export const INITIAL_UI_STATE: UIState = {
   workHistoryEdit:            true,
   workDialogVisibility:       false,
   dashboardExpander:          {},
@@ -44,9 +61,10 @@ export const INITIAL_UI_STATE = {
   showWorkDeleteDialog: false,
   showEducationDeleteDialog: false,
   deletionIndex: null,
+  dialog: {},
 };
 
-export const ui = (state = INITIAL_UI_STATE, action) => {
+export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
   switch (action.type) {
   case UPDATE_DIALOG_TEXT:
     return Object.assign({}, state, {

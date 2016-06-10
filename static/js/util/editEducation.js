@@ -1,9 +1,10 @@
+// @flow
 import _ from 'lodash';
 
 import { generateNewEducation } from "../util/util";
 import { educationValidation } from '../util/validation';
 
-export function openEditEducationForm(index) {
+export function openEditEducationForm(index: number) {
   const {
     profile,
     setEducationDialogIndex,
@@ -17,7 +18,7 @@ export function openEditEducationForm(index) {
   setEducationDialogVisibility(true);
 }
 
-export function openNewEducationForm(level, index) {
+export function openNewEducationForm(level: string, index: number) {
   const {
     profile,
     updateProfile,

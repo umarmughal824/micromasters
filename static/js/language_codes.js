@@ -1,3 +1,4 @@
+// @flow
 // from http://data.okfn.org/data/core/language-codes
 export default [
   {

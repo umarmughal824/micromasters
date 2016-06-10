@@ -1,3 +1,4 @@
+// @flow
 import React from 'react';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 import { Card, CardMenu } from 'react-mdl/lib/Card';
@@ -17,13 +18,13 @@ export default class User extends React.Component {
     ui:                           React.PropTypes.object,
   };
 
-  toggleShowPersonalDialog = () => {
+  toggleShowPersonalDialog: Function = (): void => {
     const {
       setUserPageDialogVisibility,
       ui: { userPageDialogVisibility }
     } = this.props;
     setUserPageDialogVisibility(!userPageDialogVisibility);
-  }
+  };
 
   render() {
     const { profile } = this.props;

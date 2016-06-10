@@ -1,3 +1,4 @@
+// @flow
 import React from 'react';
 import IconButton from 'react-mdl/lib/IconButton';
 
@@ -18,21 +19,22 @@ import {
 } from '../util/editEducation';
 import { userPrivilegeCheck } from '../util/util';
 import { HIGH_SCHOOL } from '../constants';
+import type { EducationEntry } from '../flow/profileTypes';
 
 export default class EducationDisplay extends ProfileFormFields {
-  openEditEducationForm = index => {
+  openEditEducationForm: Function = (index: number): void => {
     openEditEducationForm.call(this, index);
-  }
+  };
 
-  openNewEducationForm = (level, index) => {
+  openNewEducationForm: Function = (level: string, index: number): void => {
     openNewEducationForm.call(this, level, index);
   };
 
-  deleteEducationEntry = () => {
+  deleteEducationEntry: Function = (): void => {
     deleteEducationEntry.call(this);
   };
 
-  educationRow = (entry, index) => {
+  educationRow: Function = (entry: EducationEntry, index: number): void => {
     const { profile, errors } = this.props;
     if (!('id' in entry)) {
       // don't show new educations, wait until we saved on the server before showing them
@@ -71,7 +73,7 @@ export default class EducationDisplay extends ProfileFormFields {
     );
   };
 
-  renderEducationEntries = () => {
+  renderEducationEntries: Function = (): React$Element[] => {
     const { profile, profile: { education }} = this.props;
     let rows = [];
     if (education !== undefined) {
@@ -91,7 +93,7 @@ export default class EducationDisplay extends ProfileFormFields {
       );
     });
     return rows;
-  }
+  };
 
   render() {
     const { ui: { showEducationDeleteDialog } } = this.props;

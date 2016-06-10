@@ -1,3 +1,4 @@
+// @flow
 /* global SETTINGS: false */
 import { combineReducers } from 'redux';
 import {
@@ -23,10 +24,12 @@ import {
   FETCH_SUCCESS,
 } from '../actions';
 import { ui } from './ui';
+import type { Action } from '../flow/generalTypes';
+import type { Profile } from '../flow/profileTypes';
 
 export const INITIAL_PROFILES_STATE = {};
-
-export const profiles = (state = INITIAL_PROFILES_STATE, action) => {
+type ProfileState = {};
+export const profiles = (state: ProfileState = INITIAL_PROFILES_STATE, action: Action) => {
   let patchProfile = newProfile => {
     let clone = Object.assign({}, state);
     let username = action.payload.username;
@@ -38,7 +41,7 @@ export const profiles = (state = INITIAL_PROFILES_STATE, action) => {
     return clone;
   };
 
-  let getProfile = () => {
+  let getProfile = (): Profile => {
     if (state[action.payload.username] !== undefined) {
       return state[action.payload.username];
     }
@@ -117,11 +120,12 @@ export const profiles = (state = INITIAL_PROFILES_STATE, action) => {
   }
 };
 
-const INITIAL_DASHBOARD_STATE = {
+type DashboardState = {programs: any[]};
+const INITIAL_DASHBOARD_STATE: any = {
   programs: []
 };
 
-export const dashboard = (state = INITIAL_DASHBOARD_STATE, action) => {
+export const dashboard = (state: DashboardState = INITIAL_DASHBOARD_STATE, action: Action) => {
   switch (action.type) {
   case REQUEST_DASHBOARD:
     return Object.assign({}, state, {

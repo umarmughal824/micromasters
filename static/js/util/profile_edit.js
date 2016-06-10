@@ -1,3 +1,4 @@
+// @flow
 import React from 'react';
 import moment from 'moment';
 import iso3166 from 'iso-3166-2';
@@ -13,6 +14,9 @@ import {
   validateYear,
   validateDay,
 } from '../util/validation';
+import type { Validator, UIValidator } from './validation';
+import type { Profile } from '../flow/profileTypes';
+import type { Option } from '../flow/generalTypes';
 
 // utility functions for pushing changes to profile forms back to the
 // redux store.
@@ -23,13 +27,8 @@ import {
  * bind this to this.boundRadioGroupField in the constructor of a form component
  * to update radio buttons.
  * pass in the name (used as placeholder), key for profile, and the options.
- *
- * @param keySet {String[]} Path to the field
- * @param label {String} Label for the field
- * @param options {Object[]} A list of options for the select field
- * @returns {ReactElement}
  */
-export function boundRadioGroupField(keySet, label, options) {
+export function boundRadioGroupField(keySet: string[], label: string, options: Option[]): React$Element {
   const { profile, updateProfile, errors } = this.props;
   const styles = {
     labelStyle: {
@@ -93,12 +92,8 @@ export function boundRadioGroupField(keySet, label, options) {
  * we pass in a keyset looking like this:
  *
  * ["top-level-key", index, "nested_object_key"] or just ["top_level_key"]
- *
- * @param keySet {String[]} Path to the field
- * @param label {String} Label for the field
- * @returns {ReactElement}
  */
-export function boundTextField(keySet, label) {
+export function boundTextField(keySet: string[], label: string): React$Element {
   const {
     profile,
     errors,
@@ -131,15 +126,9 @@ export function boundTextField(keySet, label) {
  * bind this to this.boundSelectField in the constructor of a form component
  * to update select fields
  * pass in the name (used as placeholder), key for profile, and the options.
- *
- * @param keySet {String[]} Path to the field
- * @param label {String} Label for the field
- * @param options {Object[]} A list of options for the select field
- * @param onChange {func} Handler which is called when the state changes or is cleared.
- * Takes the updated profile as argument
- * @returns {ReactElement}
  */
-export function boundSelectField(keySet, label, options, onChange) {
+export type ChangeFunc = (p: Profile) => void | void;
+export function boundSelectField(keySet: string[], label: string, options: Option[], onChange?: ChangeFunc) {
   const {
     profile,
     errors,
@@ -179,7 +168,7 @@ export function boundSelectField(keySet, label, options, onChange) {
     _.set(clone, editKeySet, undefined);
 
     updateProfile(clone);
-    if (_.isFunction(onChange)) {
+    if (onChange !== undefined) {
       onChange(clone);
     }
   };
@@ -242,13 +231,8 @@ import { boundSelectField as mockedBoundSelectField } from './profile_edit';
 /**
  * Bind this to this.boundStateSelectField in the constructor of a form component
  * to update select fields
- *
- * @param stateKeySet {String[]} Path to the state field
- * @param countryKeySet {String[]} Path to the country field
- * @param label {String} The label of the field
- * @returns {ReactElement}
  */
-export function boundStateSelectField(stateKeySet, countryKeySet, label) {
+export function boundStateSelectField(stateKeySet: string[], countryKeySet: string[], label: string): React$Element {
   const {
     profile,
   } = this.props;
@@ -268,13 +252,8 @@ export function boundStateSelectField(stateKeySet, countryKeySet, label) {
 /**
  * Bind this to this.boundCountrySelectField in the constructor of a form component
  * to update select fields
- *
- * @param stateKeySet {String[]} Path to the state field
- * @param countryKeySet {String[]} Path to the country field
- * @param label {String} The label of the field
- * @returns {ReactElement}
  */
-export function boundCountrySelectField(stateKeySet, countryKeySet, label) {
+export function boundCountrySelectField(stateKeySet: string[], countryKeySet: string[], label: string): React$Element {
   const {
     updateProfile,
   } = this.props;
@@ -293,13 +272,8 @@ export function boundCountrySelectField(stateKeySet, countryKeySet, label) {
  * bind this to this.boundDateField in the constructor of a form component
  * to update date fields
  * pass in the name (used as placeholder), key for profile.
- *
- * @param keySet {String[]} Path to look up and set a field
- * @param label {String} Label for the field
- * @param omitDay {bool} If false, there is a date textbox in addition to month and year
- * @returns {ReactElement}
  */
-export function boundDateField(keySet, label, omitDay) {
+export function boundDateField(keySet: string[], label: string, omitDay: boolean): React$Element {
   const {
     profile,
     errors,
@@ -440,13 +414,10 @@ export function boundDateField(keySet, label, omitDay) {
 
 /**
  * Validates the profile then PATCHes the profile if validation succeeded.
- *
- * @param validator {func} The function used to validate profile
- * @param isLastStep {bool} If true, this is the last tab in the profile
- * @returns {Promise} A promise which resolves with the new profile if validation and PATCH succeeded,
+ * Returns a promise which resolves with the new profile if validation and PATCH succeeded,
  * or rejects if either failed
  */
-export function saveProfileStep(validator, isLastStep=false) {
+export function saveProfileStep(validator: Validator|UIValidator, isLastStep: boolean = false): Promise<Profile> {
   const { saveProfile, profile, ui } = this.props;
   let clone = Object.assign({}, profile, {
     filled_out: profile.filled_out || isLastStep

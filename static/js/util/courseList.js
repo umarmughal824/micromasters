@@ -1,4 +1,5 @@
- /* global SETTINGS: false */
+// @flow
+/* global SETTINGS: false */
 import moment from 'moment';
 import React from 'react';
 import Button from 'react-bootstrap/lib/Button';
@@ -23,11 +24,8 @@ function asPercent(number) {
 
 /**
  * Determine React elements for the UI given a course status
- * @param {object} course A course coming from the dashboard
- * @param {moment} now The current time
- * @returns {ReactElement} Some React element or string to display for course status
  */
-export function makeCourseStatusDisplay(course, now = moment()) {
+export function makeCourseStatusDisplay(course: Object, now: moment = moment()): string|React$Element {
   let firstRun = {};
   if (course.runs.length > 0) {
     firstRun = course.runs[0];
@@ -100,10 +98,8 @@ export function makeCourseStatusDisplay(course, now = moment()) {
 
 /**
  * Display status for a course run
- * @param run {Object} A course run
- * @returns {ReactElement}
  */
-export function makeRunStatusDisplay(run) {
+export function makeRunStatusDisplay(run: Object): string {
   switch (run.status) {
   case STATUS_PASSED:
     return "Passed";
@@ -122,7 +118,7 @@ export function makeRunStatusDisplay(run) {
  * @param {Number} numRuns The number of course runs to draw a line past
  * @returns {ReactElement} Some React element or string to display for course status
  */
-export function makeCourseProgressDisplay(course, isFirst, isLast, numRuns) {
+export function makeCourseProgressDisplay(course: Object, isFirst: boolean, isLast: boolean, numRuns: number) {
   let outerRadius = 10, innerRadius = 8, width = 30;
   let totalHeight = DASHBOARD_COURSE_HEIGHT + numRuns * DASHBOARD_RUN_HEIGHT;
   let centerX = width/2, centerY = DASHBOARD_COURSE_HEIGHT/2;
