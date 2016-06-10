@@ -31,7 +31,7 @@ class EdxPipelineApiTest(TestCase):
             if key in ('id', 'user', 'date_joined_micromasters', 'student_id', 'work_history', 'education'):
                 continue
             if key == 'account_privacy':
-                assert getattr(profile, key) == Profile.PRIVATE
+                assert getattr(profile, key) == Profile.PUBLIC_TO_MM
             elif key in ('has_profile_image', 'filled_out', 'email_optin',
                          'agreed_to_terms_of_service', 'verified_micromaster_user',):
                 # booleans
@@ -174,7 +174,7 @@ class EdxPipelineApiTest(TestCase):
         first_name, last_name = split_name(mocked_content['name'])
 
         all_fields = [
-            ('account_privacy', Profile.PRIVATE),
+            ('account_privacy', Profile.PUBLIC_TO_MM),
             ('edx_name', mocked_content['name']),
             ('first_name', first_name),
             ('last_name', last_name),

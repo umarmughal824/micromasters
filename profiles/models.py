@@ -85,7 +85,7 @@ class Profile(models.Model):
     preferred_name = models.TextField(blank=True, null=True)
 
     account_privacy = models.TextField(
-        default=PRIVATE,
+        default=PUBLIC_TO_MM,
         choices=ACCOUNT_PRIVACY_CHOICES,
     )
 
