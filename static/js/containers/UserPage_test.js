@@ -24,6 +24,10 @@ import {
   SET_SHOW_WORK_DELETE_DIALOG,
   SET_SHOW_EDUCATION_DELETE_DIALOG,
 } from '../actions/ui';
+import {
+  generateNewEducation,
+  generateNewWorkHistory,
+} from '../util/util';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../util/api';
 import { USER_PROFILE_RESPONSE } from '../constants';
@@ -31,6 +35,12 @@ import { USER_PROFILE_RESPONSE } from '../constants';
 describe("UserPage", () => {
   let listenForActions, renderComponent, helper, patchUserProfileStub;
   let userActions = [RECEIVE_GET_USER_PROFILE_SUCCESS, REQUEST_GET_USER_PROFILE];
+
+  let modifyTextField = (field, text) => {
+    field.value = text;
+    TestUtils.Simulate.change(field);
+    TestUtils.Simulate.keyDown(field, {key: "Enter", keyCode: 13, which: 13});
+  };
 
   let openDialog = () => {
     return [...document.getElementsByClassName('deletion-confirmation')].find(dialog => (
@@ -145,14 +155,52 @@ describe("UserPage", () => {
           let addButton = div.getElementsByClassName('profile-tab-card')[1].
             getElementsByClassName('profile-add-button')[0];
 
-          return listenForActions([
+          let updatedProfile = _.cloneDeep(USER_PROFILE_RESPONSE);
+          let entry = generateNewEducation();
+          entry.graduation_date = "1999-12-01";
+          entry.school_name = "A School";
+          entry.school_country = "AF";
+          entry.school_state_or_territory = "AF-BAL";
+          entry.school_city = "FoobarVille";
+          updatedProfile.work_history.push(entry);
+
+          patchUserProfileStub.throws("Invalid arguments");
+          patchUserProfileStub.withArgs(SETTINGS.username, updatedProfile).returns(
+            Promise.resolve(updatedProfile)
+          );
+
+          let expectedActions = [
             START_PROFILE_EDIT,
-            UPDATE_PROFILE,
             SET_EDUCATION_DIALOG_INDEX,
             SET_EDUCATION_DIALOG_VISIBILITY,
             SET_EDUCATION_DEGREE_LEVEL,
-          ], () => {
+            UPDATE_PROFILE_VALIDATION,
+            REQUEST_PATCH_USER_PROFILE,
+          ];
+          for (let i = 0; i < 12; i++) {
+            expectedActions.push(UPDATE_PROFILE);
+          }
+          return listenForActions(expectedActions, () => {
             TestUtils.Simulate.click(addButton);
+
+            let dialog = document.querySelector('.education-dashboard-dialog');
+            let grid = dialog.getElementsByClassName('profile-tab-grid')[0];
+            let inputs = grid.getElementsByTagName('input');
+
+            // set the degree type
+            modifyTextField(inputs[0], "High School");
+
+            // fill out graduation date, school name
+            modifyTextField(inputs[1], "12");
+            modifyTextField(inputs[2], "1999");
+            modifyTextField(inputs[3], "A School");
+
+            // set country, state, and city
+            modifyTextField(inputs[4], "Afghanistan");
+            modifyTextField(inputs[5], "Balkh");
+            modifyTextField(inputs[6], "FoobarVille");
+            let save = dialog.querySelector('.save-button');
+            TestUtils.Simulate.click(save);
           });
         });
       });
@@ -242,17 +290,67 @@ describe("UserPage", () => {
       });
 
       it('should let you add a work history entry', () => {
-        renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let editButton = div.getElementsByClassName('profile-tab-card')[0].
+        return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
+          let addButton = div.getElementsByClassName('profile-tab-card')[0].
             getElementsByClassName('profile-add-button')[0];
 
-          return listenForActions([
+          let updatedProfile = _.cloneDeep(USER_PROFILE_RESPONSE);
+          let entry = generateNewWorkHistory();
+          entry.position = "Assistant Foobar";
+          entry.industry = "Accounting";
+          entry.company_name = "FoobarCorp";
+          entry.start_date = "2001-12-01";
+          entry.end_date = "2002-01-01";
+          entry.city = "FoobarVille";
+          entry.country = "AF";
+          entry.state_or_territory = "AF-BAL";
+          updatedProfile.work_history.push(entry);
+
+          patchUserProfileStub.throws("Invalid arguments");
+          patchUserProfileStub.withArgs(SETTINGS.username, updatedProfile).returns(
+            Promise.resolve(updatedProfile)
+          );
+
+          let expectedActions = [
             START_PROFILE_EDIT,
             UPDATE_PROFILE,
             SET_WORK_DIALOG_INDEX,
-            SET_WORK_DIALOG_VISIBILITY
-          ], () => {
-            TestUtils.Simulate.click(editButton);
+            SET_WORK_DIALOG_VISIBILITY,
+            UPDATE_PROFILE_VALIDATION,
+            REQUEST_PATCH_USER_PROFILE,
+          ];
+          for (let i = 0; i < 14; i++) {
+            expectedActions.push(UPDATE_PROFILE);
+          }
+
+          return listenForActions(expectedActions, () => {
+            TestUtils.Simulate.click(addButton);
+            let dialog = document.querySelector('.employment-dashboard-dialog');
+            let grid = dialog.getElementsByClassName('profile-tab-grid')[0];
+            let inputs = grid.getElementsByTagName('input');
+
+            // company name
+            modifyTextField(inputs[0], "FoobarCorp");
+
+            // country, state, city
+            modifyTextField(inputs[1], "Afghanistan");
+            modifyTextField(inputs[2], "Balkh");
+            modifyTextField(inputs[3], "FoobarVille");
+
+            // industry
+            modifyTextField(inputs[4], "Accounting");
+
+            // position
+            modifyTextField(inputs[5], "Assistant Foobar");
+
+            // start date, end date
+            modifyTextField(inputs[6], "12");
+            modifyTextField(inputs[7], "2001");
+            modifyTextField(inputs[8], "01");
+            modifyTextField(inputs[9], "2002");
+
+            let button = dialog.querySelector(".save-button");
+            TestUtils.Simulate.click(button);
           });
         });
       });

@@ -15,6 +15,11 @@ if (!Object.entries) {
 // Make sure window and document are available for testing
 require('jsdom-global')();
 
+// cleanup document after each test run
+afterEach(function (){
+  document.body.innerHTML = '';
+});
+
 // required for interacting with react-mdl components
 require('react-mdl/extra/material.js');
 

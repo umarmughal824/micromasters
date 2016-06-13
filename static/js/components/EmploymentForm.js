@@ -210,7 +210,7 @@ class EmploymentForm extends ProfileFormFields {
         />
         <Dialog
           open={workDialogVisibility}
-          className="dashboard-dialog"
+          className="dashboard-dialog employment-dashboard-dialog"
           onRequestClose={this.closeWorkDialog}
           actions={actions}
           autoScrollBodyContent={true}

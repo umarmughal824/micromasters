@@ -71,7 +71,7 @@
     "postinstall": "./webpack_if_prod.sh",
     "lint": "node ./node_modules/eslint/bin/eslint.js ./static/js",
     "test": "./js_test.sh",
-    "coverage": "node ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --compilers js:babel-register --require static/js/global_init.js 'static/**/*/*_test.js'",
+    "coverage": "node ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --compilers js:babel-register static/js/global_init.js 'static/**/*/*_test.js'",
     "flow": "flow check"
   }
 }
