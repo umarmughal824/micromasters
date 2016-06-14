@@ -16,13 +16,6 @@ import ProfileFormFields from '../util/ProfileFormFields';
 import ConfirmDeletion from './ConfirmDeletion';
 
 class EmploymentForm extends ProfileFormFields {
-  componentWillMount () {
-    const { profile, setWorkHistoryEdit } = this.props;
-    if ( _.isArray(profile.work_history) && _.isEmpty(profile.work_history) ) {
-      setWorkHistoryEdit(false);
-    }
-  }
-
   saveWorkHistoryEntry = () => {
     const { saveProfile, profile, ui } = this.props;
     saveProfile(employmentValidation, profile, ui).then(() => {
