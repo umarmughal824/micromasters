@@ -73,10 +73,14 @@ export function fetchJSONWithCSRF(input, init, loginOnError) {
     if (loginOnError === true && (response.status === 400 || response.status === 401)) {
       window.location = '/login/edxorg/';
     }
-    // For non 2xx status codes reject the promise
+
+    // For non 2xx status codes reject the promise adding the status code
     if (response.status < 200 || response.status >= 300) {
-      return Promise.reject(text);
+      return text.then(text => {
+        return Promise.reject([text, response.status]);
+      });
     }
+
     return text;
   }).then(text => {
     if (text.length !== 0) {
@@ -84,6 +88,20 @@ export function fetchJSONWithCSRF(input, init, loginOnError) {
     } else {
       return "";
     }
+  }).catch(([text, statusCode]) => {
+    let respJson = {};
+    if (text.length !== 0) {
+      try {
+        respJson = JSON.parse(text);
+      }
+      catch(e) {
+        // If the JSON.parse raises, it means that the backend sent a JSON invalid
+        // string, and in this context the content received is not important
+        // and can be discarded
+      }
+    }
+    respJson.errorStatusCode = statusCode;
+    return Promise.reject(respJson);
   });
 }
 

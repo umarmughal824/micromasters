@@ -45,15 +45,22 @@ class IntegrationTestHelper {
     this.sandbox.restore();
   }
 
-  renderComponent(url = "/", extraTypesToAssert = []) {
+  renderComponent(url = "/", extraTypesToAssert = [], isSuccessExpected = true) {
     let expectedTypes = [
       REQUEST_DASHBOARD,
+      REQUEST_GET_USER_PROFILE
+    ];
+    let expectedSuccessTypes = [
       RECEIVE_DASHBOARD_SUCCESS,
-      REQUEST_GET_USER_PROFILE,
       RECEIVE_GET_USER_PROFILE_SUCCESS
     ];
 
+    // if the success is expected  update the list with the success types
+    if (isSuccessExpected) {
+      expectedTypes.push(...expectedSuccessTypes);
+    }
     expectedTypes.push(...extraTypesToAssert);
+
     let component, div;
 
     return this.listenForActions(expectedTypes, () => {
