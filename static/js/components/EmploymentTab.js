@@ -29,7 +29,7 @@ class EmploymentTab extends React.Component {
         <Grid className="profile-tab-grid">
           <Cell col={1}></Cell>
           <Cell col={10}>
-            <EmploymentForm {...this.props} />
+            <EmploymentForm {...this.props} showSwitch={true} />
           </Cell>
           <Cell col={1}></Cell>
           <Cell col={1}></Cell>

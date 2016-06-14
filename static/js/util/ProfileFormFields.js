@@ -81,6 +81,7 @@ export default class ProfileFormFields extends React.Component {
     setDeletionIndex:             React.PropTypes.func,
     setShowWorkDeleteDialog:      React.PropTypes.func,
     setShowEducationDeleteDialog: React.PropTypes.func,
+    showSwitch:                   React.PropTypes.bool,
   };
 
   closeConfirmDeleteDialog: Function = (): void => {

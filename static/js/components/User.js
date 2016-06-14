@@ -70,7 +70,7 @@ export default class User extends React.Component {
 
       <Grid className="user-cards-grid">
         <Cell col={6}>
-          <EmploymentForm {...this.props} />
+          <EmploymentForm {...this.props} showSwitch={false} />
         </Cell>
         <Cell col={6}>
           <EducationDisplay {...this.props} />

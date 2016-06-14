@@ -183,6 +183,7 @@ class EmploymentForm extends ProfileFormFields {
         showWorkDeleteDialog,
       },
       errors,
+      showSwitch,
     } = this.props;
     const actions = [
       <Button
@@ -200,6 +201,20 @@ class EmploymentForm extends ProfileFormFields {
         Save
       </Button>,
     ];
+    let workSwitch = () => {
+      if ( showSwitch ) {
+        return (
+          <div>
+            <Switch
+              ripple
+              id="profile-tab-professional-switch"
+              onChange={this.toggleWorkHistoryEdit}
+              checked={workHistoryEdit}>
+            </Switch>
+          </div>
+        );
+      }
+    };
 
     return (
       <div>
@@ -224,14 +239,7 @@ class EmploymentForm extends ProfileFormFields {
             </Cell>
             <Cell col={7}></Cell>
             <Cell col={1}>
-              <div>
-                <Switch
-                  ripple
-                  id="profile-tab-professional-switch"
-                  onChange={this.toggleWorkHistoryEdit}
-                  checked={workHistoryEdit}>
-                </Switch>
-              </div>
+              { workSwitch() }
             </Cell>
           </Grid>
           {this.renderWorkHistory()}
