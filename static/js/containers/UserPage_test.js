@@ -153,9 +153,6 @@ describe("UserPage", () => {
             SET_EDUCATION_DEGREE_LEVEL,
           ], () => {
             TestUtils.Simulate.click(addButton);
-            addButton = div.getElementsByClassName('add-education-menu')[0].
-              getElementsByTagName('li')[0];
-            TestUtils.Simulate.click(addButton);
           });
         });
       });

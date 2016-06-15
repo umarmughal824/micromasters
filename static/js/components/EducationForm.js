@@ -160,7 +160,7 @@ class EducationForm extends ProfileFormFields {
           open={showEducationDeleteDialog}
           close={this.closeConfirmDeleteDialog}
         />
-        <EducationDialog {...this.props} />
+        <EducationDialog {...this.props} showLevelForm={false} />
         {levelsGrid}
       </div>
     );

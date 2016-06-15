@@ -2,8 +2,9 @@ import React from 'react';
 import Button from 'react-mdl/lib/Button';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 import Dialog from 'material-ui/Dialog';
+import _ from 'lodash';
 
-import { HIGH_SCHOOL } from '../constants';
+import { HIGH_SCHOOL, BACHELORS, EDUCATION_LEVELS } from '../constants';
 import ProfileFormFields from '../util/ProfileFormFields';
 import { educationValidation } from '../util/validation';
 
@@ -17,9 +18,10 @@ export default class EducationDialog extends ProfileFormFields {
   }
 
   static propTypes = {
-    open:     React.PropTypes.bool,
-    onClose:  React.PropTypes.func,
-    onSave:   React.PropTypes.func,
+    open:           React.PropTypes.bool,
+    onClose:        React.PropTypes.func,
+    onSave:         React.PropTypes.func,
+    showLevelForm:  React.PropTypes.bool,
   };
 
   clearEducationEdit = () => {
@@ -42,29 +44,42 @@ export default class EducationDialog extends ProfileFormFields {
     });
   };
 
-  editEducationForm = level => {
-    const { ui: { educationDialogIndex } } = this.props;
+  editEducationForm = () => {
+    const {
+      ui: { educationDialogIndex},
+      showLevelForm,
+      profile: { education },
+    } = this.props;
 
+    let educationDegreeLevel = _.get(education, [educationDialogIndex, "degree_name"]) || BACHELORS;
     let keySet = (key) => ['education', educationDialogIndex, key];
 
-    let fieldOfStudy, highSchoolPadding;
-    if (level !== HIGH_SCHOOL) {
-      fieldOfStudy = <Cell col={6}>
-        {this.boundTextField(keySet('field_of_study'), 'Field of Study')}
-      </Cell>;
-    } else {
-      highSchoolPadding = <Cell col={6} />;
-    }
+    let fieldOfStudy = () => {
+      if (educationDegreeLevel !== HIGH_SCHOOL) { 
+        return <Cell col={6}>{this.boundTextField(keySet('field_of_study'), 'Field of Study')}</Cell>;
+      }
+    };
+    let highSchoolPadding = () => (
+      educationDegreeLevel === HIGH_SCHOOL ? <Cell col={6} /> : undefined
+    );
+    let levelForm = () => {
+      if ( showLevelForm ) {
+        return <Cell col={12}>
+          {this.boundSelectField(keySet('degree_name'), 'Degree Type', EDUCATION_LEVELS)}
+        </Cell>;
+      }
+    };
 
     return <Grid className="profile-tab-grid">
       <Cell col={12} className="profile-form-title">
-        {this.educationLevelLabels[level]}
+        {this.educationLevelLabels[educationDegreeLevel]}
       </Cell>
-      {fieldOfStudy}
+      { levelForm() }
+      { fieldOfStudy() }
       <Cell col={6}>
         {this.boundDateField(keySet('graduation_date'), 'Graduation Date', true)}
       </Cell>
-      {highSchoolPadding}
+      { highSchoolPadding() }
       <Cell col={6}>
         {this.boundTextField(keySet('school_name'), 'School Name')}
       </Cell>
@@ -91,12 +106,7 @@ export default class EducationDialog extends ProfileFormFields {
   };
 
   render () {
-    const {
-      ui: {
-        educationDialogVisibility,
-        educationDegreeLevel,
-      }
-    } = this.props;
+    const { ui: {educationDialogVisibility } } = this.props;
 
     let actions = [
       <Button
@@ -123,7 +133,7 @@ export default class EducationDialog extends ProfileFormFields {
         actions={actions}
         autoScrollBodyContent={true}
       >
-        {this.editEducationForm(educationDegreeLevel)}
+        {this.editEducationForm()}
       </Dialog>
     );
   }

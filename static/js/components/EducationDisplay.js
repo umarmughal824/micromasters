@@ -5,8 +5,6 @@ import Grid, { Cell } from 'react-mdl/lib/Grid';
 import FABButton from 'react-mdl/lib/FABButton';
 import Icon from 'react-mdl/lib/Icon';
 import { Card } from 'react-mdl/lib/Card';
-import Menu from 'react-mdl/lib/Menu';
-import { MenuItem } from 'react-mdl/lib/Menu';
 import _ from 'lodash';
 import moment from 'moment';
 
@@ -19,6 +17,7 @@ import {
   deleteEducationEntry,
 } from '../util/editEducation';
 import { userPrivilegeCheck } from '../util/util';
+import { HIGH_SCHOOL } from '../constants';
 
 export default class EducationDisplay extends ProfileFormFields {
   openEditEducationForm = index => {
@@ -72,26 +71,6 @@ export default class EducationDisplay extends ProfileFormFields {
     );
   };
 
-  addEducationMenu = () => {
-    let menuItems = this.educationLevelOptions.map(educationLevel => (
-      <MenuItem 
-        key={educationLevel.label}
-        onClick={() => this.openNewEducationForm(educationLevel.value, null)}>
-        { educationLevel.label }
-      </MenuItem>
-    ));
-    return (
-      <Menu
-        target="add-education-button"
-        valign="top"
-        align="right"
-        className="add-education-menu"
-      >
-        { menuItems }
-      </Menu>
-    );
-  };
-
   renderEducationEntries = () => {
     const { profile, profile: { education }} = this.props;
     let rows = [];
@@ -105,6 +84,7 @@ export default class EducationDisplay extends ProfileFormFields {
           id="add-education-button"
           className="profile-add-button"
           key="I'm unique!"
+          onClick={() => this.openNewEducationForm(HIGH_SCHOOL, null)}
         >
           <Icon name="add" />
         </FABButton>
@@ -114,10 +94,7 @@ export default class EducationDisplay extends ProfileFormFields {
   }
 
   render() {
-    const {
-      profile,
-      ui: { showEducationDeleteDialog }
-    } = this.props;
+    const { ui: { showEducationDeleteDialog } } = this.props;
     return (
       <div>
         <ConfirmDeletion
@@ -125,7 +102,7 @@ export default class EducationDisplay extends ProfileFormFields {
           open={showEducationDeleteDialog}
           close={this.closeConfirmDeleteDialog}
         />
-        <EducationDialog {...this.props} />
+        <EducationDialog {...this.props} showLevelForm={true} />
         <Card shadow={1} className="profile-tab-card" id="education-card">
           <Grid className="profile-tab-card-grid">
             <Cell col={4} className="profile-card-title">
@@ -134,7 +111,6 @@ export default class EducationDisplay extends ProfileFormFields {
             <Cell col={8} />
           </Grid>
           { this.renderEducationEntries() }
-          { userPrivilegeCheck(profile, this.addEducationMenu(), undefined) }
         </Card>
       </div>
     );
