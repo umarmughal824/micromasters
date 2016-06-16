@@ -70,6 +70,13 @@ describe("ProfilePage", function() {
     });
   };
 
+  it('should show the pretty-printed MM id', () => {
+    return renderComponent(pageUrlStubs[0]).then(([, div]) => {
+      let id = div.querySelector('.card-student-id');
+      assert.equal(`ID: ${USER_PROFILE_RESPONSE.pretty_printed_student_id}`, id.textContent);
+    });
+  });
+
   it('navigates backward when Previous button is clicked', () => {
     let firstPage = pageUrlStubs[0];
     let secondPage = pageUrlStubs[1];

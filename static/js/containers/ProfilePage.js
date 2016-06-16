@@ -28,7 +28,7 @@ class ProfilePage extends ProfileFormContainer {
 
     let childrenWithProps = this.childrenWithProps(profile);
     return <div className="card">
-      <Jumbotron profile={profile} text={text}>
+      <Jumbotron profile={profile.profile} text={text}>
         <div className="card-copy">
           <div style={{textAlign: "center"}}>
             {makeProfileProgressDisplay(this.activeTab())}
