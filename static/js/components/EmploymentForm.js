@@ -133,15 +133,15 @@ class EmploymentForm extends ProfileFormFields {
     );
   }
 
-  renderWorkHistory(): ?React$Element[] {
+  renderWorkHistory(): Array<React$Element|void>|void {
     const { ui, profile, profile: { work_history } } = this.props;
     if ( ui.workHistoryEdit === true ) {
       let workHistoryRows = [];
       if ( !_.isUndefined(work_history) ) {
         let sorted = sortWorkEntriesByDate(work_history);
-        workHistoryRows = Object.entries(sorted).filter(([,entry]: [string, WorkHistoryEntry]) =>
-          entry.id !== undefined
-        ).map(([i, entry]) => this.jobRow(entry, i));
+        workHistoryRows = sorted.map((entry, index) => (
+          entry.id === undefined ? undefined : this.jobRow(entry, index)
+        ));
       }
       userPrivilegeCheck(profile, () => {
         workHistoryRows.push(
@@ -158,7 +158,7 @@ class EmploymentForm extends ProfileFormFields {
     }
   }
 
-  jobRow (position: WorkHistoryEntry, index: string) {
+  jobRow (position: WorkHistoryEntry, index: number) {
     const {
       setWorkDialogVisibility,
       setWorkDialogIndex,

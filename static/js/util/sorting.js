@@ -1,10 +1,9 @@
 // @flow
 import moment from 'moment';
 
-import type { WorkHistoryEntry, EducationEntry } from '../flow/profileTypes';
+import type { WorkHistoryEntry } from '../flow/profileTypes';
 
-type SortableEntry = WorkHistoryEntry|EducationEntry;
-export function resumeOrder(entries: SortableEntry[], dateFieldName: string): SortableEntry[] {
+export function resumeOrder(entries: WorkHistoryEntry[], dateFieldName: string): WorkHistoryEntry[] {
   let sortFunc = (a, b) => {
     let adate = moment(a[dateFieldName]);
     let bdate = moment(b[dateFieldName]);

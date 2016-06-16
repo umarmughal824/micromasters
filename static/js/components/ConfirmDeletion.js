@@ -4,11 +4,11 @@ import Dialog from 'material-ui/Dialog';
 import Button from 'react-mdl/lib/Button';
 
 export default class ConfirmDeletion extends React.Component {
-  static propTypes = {
-    close:        React.PropTypes.func,
-    deleteFunc:   React.PropTypes.func,
-    open:         React.PropTypes.bool,
-    confirmText:  React.PropTypes.string,
+  props: {
+    close:        () => void,
+    deleteFunc:   () => void,
+    open:         boolean,
+    confirmText:  string,
   };
 
   deleteAndClose: Function = (): void => {

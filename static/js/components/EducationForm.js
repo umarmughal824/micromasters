@@ -19,26 +19,33 @@ import {
 } from '../util/editEducation';
 import { educationValidation } from '../util/validation';
 import type { Option } from '../flow/generalTypes';
-import type { EducationEntry } from '../flow/profileTypes';
+import type {
+  EducationEntry,
+  Profile,
+  ValidationErrors,
+} from '../flow/profileTypes';
+import type { UIState } from '../reducers/ui';
 
 class EducationForm extends ProfileFormFields {
-  static propTypes = {
-    profile:                        React.PropTypes.object,
-    ui:                             React.PropTypes.object,
-    updateProfile:                  React.PropTypes.func,
-    clearProfileEdit:               React.PropTypes.func,
-    errors:                         React.PropTypes.object,
-    setEducationDialogVisibility:   React.PropTypes.func,
-    setEducationDialogIndex:        React.PropTypes.func,
-    setEducationDegreeLevel:        React.PropTypes.func,
-    setEducationDegreeInclusions:   React.PropTypes.func,
+  props: {
+    profile:                          Profile,
+    ui:                               UIState;
+    updateProfile:                    () => void,
+    saveProfile:                      () => void,
+    clearProfileEdit:                 () => void,
+    errors:                           ValidationErrors,
+    setEducationDialogVisibility:     () => void,
+    setEducationDialogIndex:          () => void,
+    setEducationDegreeLevel:          () => void,
+    setEducationDegreeInclusions:     () => void,
+    setShowEducationDeleteAllDialog:  (bool: boolean) => void,
   };
 
   openEditEducationForm: Function = (index: number): void => {
     openEditEducationForm.call(this, index);
   };
 
-  openNewEducationForm: Function = (level: Option, index: number): void => {
+  openNewEducationForm: Function = (level: string, index: number): void => {
     openNewEducationForm.call(this, level, index);
   };
 
@@ -46,17 +53,17 @@ class EducationForm extends ProfileFormFields {
     deleteEducationEntry.call(this);
   };
 
-  renderEducationLevel(level: Option): ?React$Element[] {
+  renderEducationLevel(level: Option): Array<React$Element|void>|void {
     const {
       ui: { educationDegreeInclusions },
       profile: { education },
     } = this.props;
     if (educationDegreeInclusions[level.value]) {
-      let rows = [];
+      let rows: Array<React$Element|void> = [];
       if (education !== undefined) {
-        rows = Object.entries(education).
-          filter(([, education]: [string, EducationEntry]) => education.degree_name === level.value).
-          map(([index, education]) => this.educationRow(education, index));
+        rows = education.map((entry, index) => (
+          entry.degree_name === level.value ? this.educationRow(entry, index) : undefined
+        ));
       }
       rows.push(
         <FABButton
@@ -72,7 +79,7 @@ class EducationForm extends ProfileFormFields {
     }
   }
 
-  educationRow: Function = (education, index) => {
+  educationRow: Function = (education: EducationEntry, index: number) => {
     const { errors } = this.props;
     if (!('id' in education)) {
       // don't show new educations, wait until we saved on the server before showing them

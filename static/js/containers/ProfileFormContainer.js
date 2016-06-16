@@ -1,3 +1,4 @@
+// @flow
 /* global SETTINGS: false */
 import React from 'react';
 import _ from 'lodash';
@@ -25,6 +26,9 @@ import {
   setShowWorkDeleteAllDialog,
   setShowEducationDeleteAllDialog,
 } from '../actions/ui';
+import type { Validator, UIValidator } from '../util/validation';
+import type { Profile } from '../flow/profileTypes';
+import type { UIState } from '../reducers/ui';
 
 class ProfileFormContainer extends React.Component {
   static propTypes = {
@@ -47,14 +51,14 @@ class ProfileFormContainer extends React.Component {
     };
   }
 
-  fetchProfile = () => {
+  fetchProfile: Function = (): void => {
     const { dispatch, profiles, params: { username } } = this.props;
     if (profiles[username] === undefined || profiles[username].getStatus === undefined) {
       dispatch(fetchUserProfile(username));
     }
   };
 
-  updateProfile(isEdit, profile) {
+  updateProfile(isEdit: boolean, profile: Profile) {
     const { dispatch } = this.props;
     const username = SETTINGS.username;
 
@@ -64,17 +68,17 @@ class ProfileFormContainer extends React.Component {
     dispatch(updateProfile(username, profile));
   }
 
-  setDeletionIndex = index => {
+  setDeletionIndex: Function = (index: number): void => {
     const { dispatch } = this.props;
     dispatch(setDeletionIndex(index));
   }
 
-  setShowEducationDeleteDialog = bool => {
+  setShowEducationDeleteDialog: Function = (bool: boolean): void => {
     const { dispatch } = this.props;
     dispatch(setShowEducationDeleteDialog(bool));
   }
 
-  setShowWorkDeleteDialog = bool => {
+  setShowWorkDeleteDialog: Function = (bool: boolean): void => {
     const { dispatch } = this.props;
     dispatch(setShowWorkDeleteDialog(bool));
   }
@@ -89,52 +93,52 @@ class ProfileFormContainer extends React.Component {
     dispatch(setShowEducationDeleteAllDialog(bool));
   };
 
-  setUserPageDialogVisibility = bool => {
+  setUserPageDialogVisibility: Function = (bool: boolean): void => {
     const { dispatch } = this.props;
     dispatch(setUserPageDialogVisibility(bool));
   }
 
-  setWorkHistoryEdit = (bool) => {
+  setWorkHistoryEdit: Function = (bool: boolean): void => {
     const { dispatch } = this.props;
     dispatch(setWorkHistoryEdit(bool));
   }
 
-  setWorkDialogVisibility = (bool) => {
+  setWorkDialogVisibility: Function = (bool: boolean): void => {
     const { dispatch } = this.props;
     dispatch(setWorkDialogVisibility(bool));
   }
 
-  setWorkDialogIndex = (index) => {
+  setWorkDialogIndex: Function = (index: number): void => {
     const { dispatch } = this.props;
     dispatch(setWorkDialogIndex(index));
   }
 
-  clearProfileEdit = () => {
+  clearProfileEdit: Function = (): void => {
     const { dispatch } = this.props;
     dispatch(clearProfileEdit(SETTINGS.username));
   }
 
-  setEducationDialogVisibility = bool => {
+  setEducationDialogVisibility: Function = (bool: boolean): void => {
     const { dispatch } = this.props;
     dispatch(setEducationDialogVisibility(bool));
   }
 
-  setEducationDialogIndex = index => {
+  setEducationDialogIndex: Function = (index: number): void => {
     const { dispatch } = this.props;
     dispatch(setEducationDialogIndex(index));
   }
 
-  setEducationDegreeLevel = level => {
+  setEducationDegreeLevel: Function = (level: string): void => {
     const { dispatch } = this.props;
     dispatch(setEducationDegreeLevel(level));
-  }
+  };
 
-  setEducationDegreeInclusions = inclusions => {
+  setEducationDegreeInclusions: Function = (inclusions: Object): void => {
     const { dispatch } = this.props;
     dispatch(setEducationDegreeInclusions(inclusions));
-  }
+  };
 
-  saveProfile(isEdit, validator, profile, ui) {
+  saveProfile(isEdit: boolean, validator: Validator|UIValidator, profile: Profile, ui: UIState) {
     const { dispatch } = this.props;
     const username = SETTINGS.username;
 
@@ -153,7 +157,7 @@ class ProfileFormContainer extends React.Component {
     }
   }
 
-  childrenWithProps = profileFromStore => {
+  childrenWithProps: Function = (profileFromStore: {profile: Profile}) => {
     let { ui } = this.props;
     let errors, isEdit, profile;
 

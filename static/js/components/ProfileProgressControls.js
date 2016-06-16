@@ -1,3 +1,4 @@
+// @flow
 import React from 'react';
 import Button from 'react-mdl/lib/Button';
 
@@ -14,12 +15,12 @@ export default class ProfileProgressControls extends React.Component {
     validator: React.PropTypes.func.isRequired
   };
 
-  stepBack = () => {
+  stepBack: Function = (): void => {
     const { prevUrl } = this.props;
     this.context.router.push(prevUrl);
   };
 
-  saveAndContinue = () => {
+  saveAndContinue: Function = (): void => {
     const { nextUrl, isLastTab, validator } = this.props;
     saveProfileStep.call(this, validator, isLastTab).then(() => {
       this.context.router.push(nextUrl);

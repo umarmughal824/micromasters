@@ -9,12 +9,14 @@ import {
   employmentUiValidation,
   combineValidators,
 } from '../util/validation';
+import type { Profile } from '../flow/profileTypes';
+import type { UIState } from '../reducers/ui';
 
 class EmploymentTab extends React.Component {
-  static propTypes = {
-    saveProfile: React.PropTypes.func,
-    profile: React.PropTypes.object,
-    ui: React.PropTypes.object
+  props: {
+    saveProfile:  Function,
+    profile:      Profile,
+    ui:           UIState,
   };
 
   render () {

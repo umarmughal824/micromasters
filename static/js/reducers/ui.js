@@ -37,7 +37,7 @@ export type UIState = {
   educationDialogVisibility:  boolean;
   educationDialogIndex:       ?number;
   educationDegreeLevel:       string;
-  educationDegreeInclusions: {};
+  educationDegreeInclusions: {[key: string]: boolean};
   userPageDialogVisibility: boolean;
   showWorkDeleteDialog: boolean;
   showEducationDeleteDialog: boolean;

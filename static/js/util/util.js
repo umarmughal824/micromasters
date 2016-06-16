@@ -182,7 +182,10 @@ export function generateNewWorkHistory(): WorkHistoryEntry {
 /**
  * Converts string to int using base 10. Stricter in what is accepted than parseInt
  */
-export const filterPositiveInt = (value: string): number|void => {
+export const filterPositiveInt = (value: ?string): number|void => {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
   if(/^[0-9]+$/.test(value)) {
     return Number(value);
   }

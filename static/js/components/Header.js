@@ -1,3 +1,4 @@
+// @flow
 import React from 'react';
 import LoginButton from '../containers/LoginButton';
 import { Navbar } from 'react-bootstrap';

@@ -1,3 +1,4 @@
+// @flow
 import { assert } from 'chai';
 import moment from 'moment';
 import React from 'react';
@@ -25,9 +26,6 @@ describe('courseList functions', () => {
     let edxCourseKey = "edx course key";
 
     let renderCourseStatusDisplay = (course, ...args) => {
-      if (course.runs === undefined) {
-        course.runs = [];
-      }
       let textOrElement = makeCourseStatusDisplay(course, ...args);
       return makeStrippedHtml(textOrElement);
     };
@@ -60,7 +58,8 @@ describe('courseList functions', () => {
         }]
       }), "");
       assert.equal(renderCourseStatusDisplay({
-        status: STATUS_NOT_PASSED
+        status: STATUS_NOT_PASSED,
+        runs: [],
       }), "");
     });
 
@@ -102,7 +101,8 @@ describe('courseList functions', () => {
 
     it("is an enrolled course with no verification date", () => {
       assert.equal(renderCourseStatusDisplay({
-        status: STATUS_ENROLLED_NOT_VERIFIED
+        status: STATUS_ENROLLED_NOT_VERIFIED,
+        runs: []
       }, moment(today)), "");
     });
 
@@ -209,20 +209,25 @@ describe('courseList functions', () => {
 
     it("is a not offered course", () => {
       assert.equal(renderCourseStatusDisplay({
-        status: STATUS_NOT_OFFERED
+        status: STATUS_NOT_OFFERED,
+        runs: [],
       }), "");
     });
 
     it("has a status we don't know about", () => {
       assert.equal(renderCourseStatusDisplay({
-        status: "missing"
+        status: "missing",
+        runs: [],
       }), "");
     });
   });
 
   describe("makeRunStatusDisplay", () => {
     it('shows Course passed when a course is passed', () => {
-      assert.equal("Passed", makeRunStatusDisplay({ status: STATUS_PASSED }));
+      assert.equal("Passed", makeRunStatusDisplay({ 
+        status: STATUS_PASSED,
+        runs: []
+      }));
     });
 
     it('shows Course not passed when a course is not passed', () => {
@@ -253,7 +258,8 @@ describe('courseList functions', () => {
       }]
     };
     let inProgressCourse = {
-      status: STATUS_VERIFIED_NOT_COMPLETED
+      status: STATUS_VERIFIED_NOT_COMPLETED,
+      runs: [],
     };
 
     let renderCourseProgressDisplay = (course, isTop, isBottom, numRuns) => {

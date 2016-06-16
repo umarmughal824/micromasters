@@ -1,3 +1,4 @@
+// @flow
 /* global SETTINGS: false */
 import React from 'react';
 import { Route, Router, IndexRedirect } from 'react-router';
@@ -24,7 +25,7 @@ import User from './components/User';
  * @param onRouteUpdate {function} Function called when the route changes
  * @returns {ReactElement}
  */
-export function makeDashboardRoutes(browserHistory, store, onRouteUpdate) {
+export function makeDashboardRoutes(browserHistory: Object, store: Object, onRouteUpdate: Function) {
   return <div>
     <MuiThemeProvider muiTheme={getMuiTheme()}>
       <Provider store={store}>

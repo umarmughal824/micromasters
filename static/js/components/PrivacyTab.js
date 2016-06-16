@@ -1,3 +1,4 @@
+// @flow
 import React from 'react';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 
@@ -12,13 +13,15 @@ import {
   employmentUiValidation,
   privacyValidation,
 } from '../util/validation';
+import type { Profile } from '../flow/profileTypes';
+import type { UIState } from '../reducers/ui';
 
 class PrivacyTab extends ProfileFormFields {
-  static propTypes = {
-    profile:        React.PropTypes.object,
-    saveProfile:    React.PropTypes.func,
-    updateProfile:  React.PropTypes.func,
-    ui:             React.PropTypes.object
+  props: {
+    profile:        Profile,
+    saveProfile:    () => void,
+    updateProfile:  () => void,
+    ui:             UIState,
   };
 
   render() {

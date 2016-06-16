@@ -22,6 +22,7 @@ import {
   BACHELORS,
   HIGH_SCHOOL,
 } from '../constants';
+import { INITIAL_UI_STATE } from '../reducers/ui';
 
 describe('Profile validation functions', () => {
   let sandbox;
@@ -129,12 +130,9 @@ describe('Profile validation functions', () => {
           degree_name: BACHELORS
         }]
       });
-      let ui = {
-        educationDegreeInclusions: {
-          [HIGH_SCHOOL]: true,
-          [BACHELORS]: true
-        }
-      };
+      let ui = Object.assign({}, INITIAL_UI_STATE);
+      ui.educationDegreeInclusions[HIGH_SCHOOL] = true;
+      ui.educationDegreeInclusions[BACHELORS] = true;
 
       let errors = educationUiValidation(profile, ui);
       let highSchoolLabel = EDUCATION_LEVELS.find(education => education.value === HIGH_SCHOOL).label;
@@ -178,9 +176,9 @@ describe('Profile validation functions', () => {
       let profile = Object.assign({}, USER_PROFILE_RESPONSE, {
         work_history: []
       });
-      let ui = {
+      let ui = Object.assign({}, INITIAL_UI_STATE, {
         workHistoryEdit: true
-      };
+      });
 
       let errors = employmentUiValidation(profile, ui);
       assert.deepEqual(errors, {

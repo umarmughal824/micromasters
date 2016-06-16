@@ -119,7 +119,9 @@ export default class SelectField extends React.Component {
       }
     } else {
       // user selected an item in the menu
-      toStore = optionOrString.value;
+      if ( typeof optionOrString !== 'string' ) {
+        toStore = optionOrString.value;
+      }
     }
 
     if (toStore !== undefined) {

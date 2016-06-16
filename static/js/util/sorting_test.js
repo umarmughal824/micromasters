@@ -10,16 +10,16 @@ let format = 'YYYY-MM';
 describe('profile sort functions', () => {
   it('should sort by resume order', () => {
     let entries = ['1969-01', '1997-01', '1992-01', '1934-01'].map(year => (
-      { 'date': moment(year, format).format(format) }
+      { 'end_date': moment(year, format).format(format) }
     ));
-    let sorted = resumeOrder(entries, 'date');
+    let sorted = resumeOrder(entries, 'end_date');
     let expected = [
       '1997-01',
       '1992-01',
       '1969-01',
       '1934-01',
     ];
-    assert.deepEqual(expected, sorted.map(entry => entry.date));
+    assert.deepEqual(expected, sorted.map(entry => entry.end_date));
   });
 
   it('should sort employment entries first by "current" and then by resume order', () => {
@@ -32,8 +32,8 @@ describe('profile sort functions', () => {
       ['2001-12', null],
     ].map(([start, end]) => {
       let entry = generateNewWorkHistory();
-      entry.start_date = moment(start, format);
-      entry.end_date = end ? moment(end, format) : null;
+      entry.start_date = moment(start, format).format(format);
+      entry.end_date = end ? moment(end, format).format(format) : null;
       return entry;
     });
     let sorted = sortWorkEntriesByDate(entries);
@@ -58,8 +58,8 @@ describe('profile sort functions', () => {
       ['1962-12', '1963-11'],
     ];
     let actualDateOrder = sorted.map(entry => ([
-      entry.start_date.format(format), 
-      entry.end_date === null ? null : entry.end_date.format(format)
+      entry.start_date,
+      entry.end_date
     ]));
     assert.deepEqual(expectedDateOrder, actualDateOrder);
   });

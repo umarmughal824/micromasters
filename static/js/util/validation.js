@@ -11,14 +11,16 @@ import type { UIState } from '../reducers/ui';
 import { filterPositiveInt } from './util';
 import { HIGH_SCHOOL, EDUCATION_LEVELS } from '../constants';
 
-let handleNestedValidation = (profile, keys, nestedKey) => {
+let handleNestedValidation = (profile: Profile, keys, nestedKey: string) => {
   let nestedFields = index => (
     keys.map(key => [nestedKey, index, key])
   );
   return _.flatten(profile[nestedKey].map((v, i) => nestedFields(i)));
 };
 
-let isNilOrEmptyString = val => _.isNil(val) || val === "";
+let isNilOrEmptyString = (val: any): boolean => (
+  val === null || val === undefined || val === ""
+);
 
 let checkFieldPresence = (profile, requiredFields, messages: any): ValidationErrors => {
   let errors = {};
@@ -113,6 +115,9 @@ export function educationUiValidation(profile: Profile, ui: UIState): Validation
   }
 
   let errors = {};
+  if ( profile.education === undefined ) {
+    return errors;
+  }
   for (let {value, label} of EDUCATION_LEVELS) {
     let items = profile.education.filter(education => education.degree_name === value);
     if (ui.educationDegreeInclusions[value] && items.length === 0) {
@@ -146,20 +151,20 @@ export function employmentValidation(profile: Profile): ValidationErrors {
     let requiredFields = handleNestedValidation(profile, nestedKeys, 'work_history');
     let errors = checkFieldPresence(profile, requiredFields, messages);
 
-    for (let entry: WorkEntry of Object.entries(profile.work_history)) {
-      let [index, workHistory] = entry;
-      if (!isNilOrEmptyString(workHistory.end_date) &&
+    profile.work_history.forEach((workHistory, index) => {
+      if (!isNilOrEmptyString(workHistory.end_date) && workHistory.end_date !== undefined &&
         moment(workHistory.end_date).isBefore(workHistory.start_date, 'month')) {
         _.set(errors, ['work_history', index, 'end_date'], "End date cannot be before start date");
       }
       let editIsEmpty = _.isEmpty(workHistory.end_date_edit) || (
+        workHistory.end_date_edit !== undefined &&
         isNilOrEmptyString(workHistory.end_date_edit.year) &&
-        isNilOrEmptyString(workHistory.end_date_edit.month)
+          isNilOrEmptyString(workHistory.end_date_edit.month)
       );
       if (isNilOrEmptyString(workHistory.end_date) && !editIsEmpty) {
         _.set(errors, ['work_history', index, 'end_date'], "Please enter a valid end date or leave it blank");
       }
-    }
+    });
 
     return errors;
   } else {
@@ -248,7 +253,7 @@ export function validateDay(string: string): ?number {
 /**
  * Validate a month number
  */
-export function validateMonth(string: string): ?number {
+export function validateMonth(string: ?string): ?number {
   let month = filterPositiveInt(string);
   if (month === undefined) {
     return undefined;
@@ -277,8 +282,8 @@ export function validateYear(string: string): ?number {
 /**
  * Returns a function which merges the results of the given functions on a set of arguments
  */
-export function combineValidators(...validators: Array<UIValidator|Validator>): UIValidator|Validator {
-  return (...args: Array<Profile|UIState>) => _.merge({}, ...validators.map(
+export function combineValidators(...validators: Array<Function>): Function {
+  return (...args) => _.merge({}, ...validators.map(
     validator => validator(...args)
   ));
 }
