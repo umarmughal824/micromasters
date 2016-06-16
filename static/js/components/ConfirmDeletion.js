@@ -1,3 +1,4 @@
+// @flow
 import React from 'react';
 import Dialog from 'material-ui/Dialog';
 import Button from 'react-mdl/lib/Button';
@@ -5,18 +6,19 @@ import Button from 'react-mdl/lib/Button';
 export default class ConfirmDeletion extends React.Component {
   static propTypes = {
     close:        React.PropTypes.func,
-    deleteEntry:  React.PropTypes.func,
+    deleteFunc:   React.PropTypes.func,
     open:         React.PropTypes.bool,
+    confirmText:  React.PropTypes.string,
   };
 
-  deleteAndClose = () => {
-    const { close, deleteEntry } = this.props;
-    deleteEntry();
+  deleteAndClose: Function = (): void => {
+    const { close, deleteFunc } = this.props;
+    deleteFunc();
     close();
   };
 
   render () {
-    const { close, open } = this.props;
+    const { close, open, confirmText } = this.props;
     let actions = [
       <Button
         type='button'
@@ -41,7 +43,7 @@ export default class ConfirmDeletion extends React.Component {
         actions={actions}
         autoScrollBodyContent={true}
       >
-        Delete this entry?
+        { confirmText }
       </Dialog>
     );
   }

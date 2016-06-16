@@ -29,9 +29,13 @@ class EmploymentForm extends ProfileFormFields {
     });
   };
 
-  toggleWorkHistoryEdit: Function = (): void => {
-    const { ui, setWorkHistoryEdit } = this.props;
-    setWorkHistoryEdit(!ui.workHistoryEdit);
+  changeSwitchState: Function = (): void => {
+    const { ui, setWorkHistoryEdit, profile, setShowWorkDeleteAllDialog } = this.props;
+    if ( _.isEmpty(profile.work_history) ) {
+      setWorkHistoryEdit(!ui.workHistoryEdit);
+    } else {
+      setShowWorkDeleteAllDialog(true);
+    }
   };
 
   closeWorkDialog: Function = (): void => {
@@ -60,6 +64,19 @@ class EmploymentForm extends ProfileFormFields {
     let clone = _.cloneDeep(profile);
     clone['work_history'].splice(deletionIndex, 1);
     saveProfile(employmentValidation, clone, ui);
+  };
+
+  deleteAllWorkHistoryEntries: Function = (): void => {
+    const { saveProfile, profile, ui, setWorkHistoryEdit } = this.props;
+    let clone = _.cloneDeep(profile);
+    clone['work_history'] = [];
+    saveProfile(employmentValidation, clone, ui);
+    setWorkHistoryEdit(false);
+  };
+
+  closeConfirmDeleteAllDialog: Function = (): void => {
+    const { setShowWorkDeleteAllDialog } = this.props;
+    setShowWorkDeleteAllDialog(false);
   };
 
   editWorkHistoryForm(): React$Element {
@@ -193,6 +210,7 @@ class EmploymentForm extends ProfileFormFields {
         workHistoryEdit,
         workDialogVisibility,
         showWorkDeleteDialog,
+        showWorkDeleteAllDialog,
       },
       errors,
       showSwitch,
@@ -220,7 +238,7 @@ class EmploymentForm extends ProfileFormFields {
             <Switch
               ripple
               id="profile-tab-professional-switch"
-              onChange={this.toggleWorkHistoryEdit}
+              onChange={this.changeSwitchState}
               checked={workHistoryEdit}>
             </Switch>
           </div>
@@ -234,9 +252,16 @@ class EmploymentForm extends ProfileFormFields {
     return (
       <div>
         <ConfirmDeletion
-          deleteEntry={this.deleteWorkHistoryEntry}
+          deleteFunc={this.deleteWorkHistoryEntry}
           open={showWorkDeleteDialog}
           close={this.closeConfirmDeleteDialog}
+          confirmText="Delete this entry?"
+        />
+        <ConfirmDeletion
+          deleteFunc={this.deleteAllWorkHistoryEntries}
+          open={showWorkDeleteAllDialog}
+          close={this.closeConfirmDeleteAllDialog}
+          confirmText="Delete all work history entries?"
         />
         <Dialog
           open={workDialogVisibility}

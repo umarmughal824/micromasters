@@ -16,6 +16,8 @@ import {
   SET_SHOW_EDUCATION_DELETE_DIALOG,
   SET_SHOW_WORK_DELETE_DIALOG,
   SET_DELETION_INDEX,
+  SET_SHOW_WORK_DELETE_ALL_DIALOG,
+  SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
 
   clearUI,
   updateDialogText,
@@ -33,6 +35,8 @@ import {
   setShowEducationDeleteDialog,
   setShowWorkDeleteDialog,
   setDeletionIndex,
+  setShowWorkDeleteAllDialog,
+  setShowEducationDeleteAllDialog,
 } from '../actions/ui';
 import { receiveGetUserProfileSuccess } from '../actions';
 import { INITIAL_UI_STATE } from '../reducers/ui';
@@ -250,6 +254,21 @@ describe('ui reducers', () => {
     it('should let you set a deletion index', () => {
       return dispatchThen(setDeletionIndex(3), [SET_DELETION_INDEX]).then(state => {
         assert.deepEqual(state.deletionIndex, 3);
+      });
+    });
+  });
+
+  describe('confirm delete all dialog', () => {
+    [
+      [setShowEducationDeleteAllDialog, SET_SHOW_EDUCATION_DELETE_ALL_DIALOG, s => s.showEducationDeleteAllDialog],
+      [setShowWorkDeleteAllDialog, SET_SHOW_WORK_DELETE_ALL_DIALOG, s => s.showWorkDeleteAllDialog],
+    ].forEach( ([actionCreator, action, accessor]) => {
+      [true, false].forEach( bool => {
+        it(`should let you ${action} to ${bool}`, () => {
+          return dispatchThen(actionCreator(bool), [action]).then(state => {
+            assert.deepEqual(accessor(state), bool);
+          });
+        });
       });
     });
   });

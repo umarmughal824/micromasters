@@ -23,6 +23,8 @@ import {
   SET_SHOW_EDUCATION_DELETE_DIALOG,
   SET_SHOW_WORK_DELETE_DIALOG,
   SET_DELETION_INDEX,
+  SET_SHOW_WORK_DELETE_ALL_DIALOG,
+  SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
 } from '../actions/ui';
 import { HIGH_SCHOOL, ASSOCIATE, BACHELORS, MASTERS, DOCTORATE } from '../constants';
 import { calculateDegreeInclusions } from '../util/util';
@@ -41,6 +43,8 @@ export type UIState = {
   showEducationDeleteDialog: boolean;
   deletionIndex: ?number;
   dialog: {};
+  showWorkDeleteAllDialog: boolean;
+  showEducationDeleteAllDialog: boolean;
 };
 
 export const INITIAL_UI_STATE: UIState = {
@@ -62,6 +66,8 @@ export const INITIAL_UI_STATE: UIState = {
   showEducationDeleteDialog: false,
   deletionIndex: null,
   dialog: {},
+  showWorkDeleteAllDialog: false,
+  showEducationDeleteAllDialog: false,
 };
 
 export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
@@ -155,6 +161,16 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
       });
     }
     return state;
+  }
+  case SET_SHOW_WORK_DELETE_ALL_DIALOG: {
+    return Object.assign({}, state, {
+      showWorkDeleteAllDialog: action.payload
+    });
+  }
+  case SET_SHOW_EDUCATION_DELETE_ALL_DIALOG: {
+    return Object.assign({}, state, {
+      showEducationDeleteAllDialog: action.payload
+    });
   }
   default:
     return state;

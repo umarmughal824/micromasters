@@ -100,9 +100,10 @@ export default class EducationDisplay extends ProfileFormFields {
     return (
       <div>
         <ConfirmDeletion
-          deleteEntry={this.deleteEducationEntry}
+          deleteFunc={this.deleteEducationEntry}
           open={showEducationDeleteDialog}
           close={this.closeConfirmDeleteDialog}
+          confirmText="Delete this entry?"
         />
         <EducationDialog {...this.props} showLevelForm={true} />
         <Card shadow={1} className="profile-tab-card" id="education-card">

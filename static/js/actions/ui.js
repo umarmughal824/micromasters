@@ -83,3 +83,13 @@ export const SET_DELETION_INDEX = 'SET_DELETION_INDEX';
 export const setDeletionIndex = (index: number): Action => (
   { type: SET_DELETION_INDEX, payload: index }
 );
+
+export const SET_SHOW_WORK_DELETE_ALL_DIALOG = 'SET_SHOW_WORK_DELETE_ALL_DIALOG';
+export const setShowWorkDeleteAllDialog = (bool: boolean): Action => (
+  { type: SET_SHOW_WORK_DELETE_ALL_DIALOG, payload: bool }
+);
+
+export const SET_SHOW_EDUCATION_DELETE_ALL_DIALOG = 'SET_SHOW_EDUCATION_DELETE_ALL_DIALOG';
+export const setShowEducationDeleteAllDialog = (bool: boolean): Action => (
+  { type: SET_SHOW_EDUCATION_DELETE_ALL_DIALOG, payload: bool }
+);

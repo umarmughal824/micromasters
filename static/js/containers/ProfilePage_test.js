@@ -1,23 +1,38 @@
 /* global SETTINGS: false */
 import TestUtils from 'react-addons-test-utils';
 import { assert } from 'chai';
+import _ from 'lodash';
 
 import {
   REQUEST_PATCH_USER_PROFILE,
   RECEIVE_PATCH_USER_PROFILE_SUCCESS,
   START_PROFILE_EDIT,
   UPDATE_PROFILE_VALIDATION,
+  CLEAR_PROFILE_EDIT,
 
   receiveGetUserProfileSuccess,
 } from '../actions';
 import {
+  SET_SHOW_WORK_DELETE_ALL_DIALOG,
+  SET_EDUCATION_DEGREE_LEVEL,
+  SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
+  SET_EDUCATION_DEGREE_INCLUSIONS,
+  SET_WORK_HISTORY_EDIT,
+
   setEducationDegreeInclusions,
   setWorkHistoryEdit,
 } from '../actions/ui';
-import { USER_PROFILE_RESPONSE, EDUCATION_LEVELS } from '../constants';
+import {
+  USER_PROFILE_RESPONSE,
+  EDUCATION_LEVELS,
+  ASSOCIATE,
+  DOCTORATE,
+  HIGH_SCHOOL,
+  BACHELORS,
+  MASTERS,
+} from '../constants';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../util/api';
-import { HIGH_SCHOOL } from '../constants';
 
 describe("ProfilePage", function() {
   this.timeout(5000);  // eslint-disable-line no-invalid-this
@@ -69,6 +84,217 @@ describe("ProfilePage", function() {
       TestUtils.Simulate.click(button);
     });
   };
+
+  let openDialog = () => {
+    return [...document.getElementsByClassName('deletion-confirmation')].find(dialog => (
+      dialog.style["left"] === "0px"
+    ));
+  };
+
+  describe('switch toggling behavior', () => {
+    beforeEach(() => {
+      helper.profileGetStub.
+        withArgs(SETTINGS.username).
+        returns(
+          Promise.resolve(Object.assign({}, USER_PROFILE_RESPONSE, {
+            username: SETTINGS.username
+          }))
+        );
+    });
+
+    it('should confirm and let you cancel when toggling the switch on work history', () => {
+      return renderComponent(pageUrlStubs[2]).then(([, div]) => {
+        let toggle = div.querySelector('#profile-tab-professional-switch');
+
+        return listenForActions([
+          SET_SHOW_WORK_DELETE_ALL_DIALOG,
+          SET_SHOW_WORK_DELETE_ALL_DIALOG,
+        ], () => {
+          TestUtils.Simulate.change(toggle);
+          let dialog = openDialog();
+          let cancelButton = dialog.querySelector('.cancel-button');
+          TestUtils.Simulate.click(cancelButton);
+          let state = helper.store.getState();
+          let profile = state.profiles.jane.profile;
+          assert.equal(_.isEmpty(profile.work_history), false);
+        });
+      });
+    });
+
+    it('should confirm and let you delete when toggling the switch on work history', () => {
+      return renderComponent(pageUrlStubs[2]).then(([, div]) => {
+        let updateProfile = _.cloneDeep(USER_PROFILE_RESPONSE);
+        updateProfile.username = SETTINGS.username;
+        updateProfile.work_history = [];
+
+        patchUserProfileStub.throws("Invalid arguments");
+        patchUserProfileStub.withArgs(SETTINGS.username, updateProfile).returns(
+          Promise.resolve(updateProfile)
+        );
+
+        let toggle = div.querySelector('#profile-tab-professional-switch');
+        return listenForActions([
+          SET_SHOW_WORK_DELETE_ALL_DIALOG,
+          START_PROFILE_EDIT,
+          UPDATE_PROFILE_VALIDATION,
+          REQUEST_PATCH_USER_PROFILE,
+          SET_WORK_HISTORY_EDIT,
+          SET_SHOW_WORK_DELETE_ALL_DIALOG,
+          RECEIVE_PATCH_USER_PROFILE_SUCCESS,
+          CLEAR_PROFILE_EDIT,
+        ], () => {
+          TestUtils.Simulate.change(toggle);
+          let dialog = openDialog();
+          let deleteButton = dialog.querySelector('.delete-button');
+          TestUtils.Simulate.click(deleteButton);
+        }).then(() => {
+          let state = helper.store.getState();
+          let workHistory = state.profiles.jane.profile.work_history;
+          assert.deepEqual(workHistory, []);
+        });
+      });
+
+    });
+
+    it('shouldnt confirm when toggling the switch on work history if there are no entries', () => {
+      return renderComponent(pageUrlStubs[2]).then(([, div]) => {
+        let emptyWorkHistory = Object.assign({}, USER_PROFILE_RESPONSE, {
+          work_history: []
+        });
+        helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, emptyWorkHistory));
+
+        let toggle = div.querySelector('#profile-tab-professional-switch');
+
+        return listenForActions([
+        ], () => {
+          TestUtils.Simulate.change(toggle);
+          assert.equal(openDialog(), undefined);
+          TestUtils.Simulate.change(toggle);
+          assert.equal(openDialog(), undefined);
+        });
+      });
+    });
+
+
+    let educationSwitchSelectors = EDUCATION_LEVELS.map(level => (
+      { value: level.value, label: level.label, selector: `#profile-tab-education-switch-${level.value}` }
+    ));
+
+    let educationEntries = (level, profile) => (
+      profile.education.filter(entry => entry.degree_name === level)
+    );
+
+    let fullEducation = () => {
+      let clone = _.cloneDeep(USER_PROFILE_RESPONSE);
+      [
+        DOCTORATE,
+        ASSOCIATE,
+        BACHELORS,
+        MASTERS,
+        DOCTORATE,
+        MASTERS,
+        HIGH_SCHOOL,
+        ASSOCIATE,
+      ].forEach((level, index) => clone.education.push({
+        "id": index + 10,
+        "degree_name": level,
+        "graduation_date": "1975-12-01",
+        "field_of_study": "Philosophy",
+        "school_name": "Harvard",
+        "school_city": "Cambridge",
+        "school_state_or_territory": "US-MA",
+        "school_country": "US",
+        "online_degree": false
+      }));
+      clone.username = SETTINGS.username;
+      return clone;
+    };
+
+    educationSwitchSelectors.forEach( ({label, value, selector}) => {
+      it(`should confirm and let you cancel when toggling the ${label} switch on education`, () => {
+        return renderComponent(pageUrlStubs[1]).then(([, div]) => {
+          helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, fullEducation()));
+
+          let toggle = div.querySelector(selector);
+          return listenForActions([
+            SET_EDUCATION_DEGREE_LEVEL,
+            SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
+            SET_EDUCATION_DEGREE_LEVEL,
+            SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
+          ], () => {
+            TestUtils.Simulate.change(toggle);
+            let dialog = openDialog();
+            let cancelButton = dialog.querySelector('.cancel-button');
+            TestUtils.Simulate.click(cancelButton);
+            let state = helper.store.getState();
+            let profile = state.profiles.jane.profile;
+            let entries = educationEntries(value, profile);
+            assert.equal(_.isEmpty(entries), false);
+          });
+        });
+      });
+    });
+
+    educationSwitchSelectors.forEach( ({label, value, selector}) => {
+      it(`should confirm and let you delete when toggling the ${label} switch on education`, () => {
+        return renderComponent(pageUrlStubs[1]).then(([, div]) => {
+          helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, fullEducation()));
+
+          let updateProfile = fullEducation();
+          updateProfile.education = updateProfile.education.filter(entry => entry.degree_name !== value);
+          updateProfile.username = SETTINGS.username;
+
+          patchUserProfileStub.throws("Invalid arguments");
+          patchUserProfileStub.withArgs(SETTINGS.username, updateProfile).returns(
+            Promise.resolve(updateProfile)
+          );
+
+          let toggle = div.querySelector(selector);
+          return listenForActions([
+            SET_EDUCATION_DEGREE_LEVEL,
+            SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
+            SET_EDUCATION_DEGREE_INCLUSIONS,
+            START_PROFILE_EDIT,
+            UPDATE_PROFILE_VALIDATION,
+            REQUEST_PATCH_USER_PROFILE,
+            SET_EDUCATION_DEGREE_LEVEL,
+            SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
+            RECEIVE_PATCH_USER_PROFILE_SUCCESS,
+            CLEAR_PROFILE_EDIT,
+          ], () => {
+            TestUtils.Simulate.change(toggle);
+            let dialog = openDialog();
+            let deleteButton = dialog.querySelector('.delete-button');
+            TestUtils.Simulate.click(deleteButton);
+          }).then(() => {
+            let state = helper.store.getState();
+            let degreesIncluded = state.profiles.jane.profile.education.map(entry => (
+              entry.degree_name
+            ));
+            assert.notInclude(degreesIncluded, value);
+          });
+        });
+      });
+    });
+
+    educationSwitchSelectors.forEach( ({label, selector}) => {
+      it(`shouldnt confirm when toggling the ${label} switch on education if there are no entries`, () => {
+        return renderComponent(pageUrlStubs[1]).then(([, div]) => {
+          let noEducation = _.cloneDeep(USER_PROFILE_RESPONSE);
+          noEducation.education = [];
+          helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, noEducation));
+
+          let toggle = div.querySelector(selector);
+          return listenForActions([SET_EDUCATION_DEGREE_INCLUSIONS], () => {
+            TestUtils.Simulate.change(toggle);
+            assert.equal(openDialog(), undefined);
+            TestUtils.Simulate.change(toggle);
+            assert.equal(openDialog(), undefined);
+          });
+        });
+      });
+    });
+  });
 
   it('should show the pretty-printed MM id', () => {
     return renderComponent(pageUrlStubs[0]).then(([, div]) => {

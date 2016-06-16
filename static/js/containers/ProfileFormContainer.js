@@ -22,6 +22,8 @@ import {
   setShowEducationDeleteDialog,
   setShowWorkDeleteDialog,
   setDeletionIndex,
+  setShowWorkDeleteAllDialog,
+  setShowEducationDeleteAllDialog,
 } from '../actions/ui';
 
 class ProfileFormContainer extends React.Component {
@@ -76,6 +78,16 @@ class ProfileFormContainer extends React.Component {
     const { dispatch } = this.props;
     dispatch(setShowWorkDeleteDialog(bool));
   }
+
+  setShowWorkDeleteAllDialog: Function = (bool: boolean): void => {
+    const { dispatch } = this.props;
+    dispatch(setShowWorkDeleteAllDialog(bool));
+  };
+
+  setShowEducationDeleteAllDialog: Function = (bool: boolean): void => {
+    const { dispatch } = this.props;
+    dispatch(setShowEducationDeleteAllDialog(bool));
+  };
 
   setUserPageDialogVisibility = bool => {
     const { dispatch } = this.props;
@@ -175,6 +187,8 @@ class ProfileFormContainer extends React.Component {
         setShowEducationDeleteDialog: this.setShowEducationDeleteDialog,
         setShowWorkDeleteDialog: this.setShowWorkDeleteDialog,
         setDeletionIndex: this.setDeletionIndex,
+        setShowWorkDeleteAllDialog: this.setShowWorkDeleteAllDialog,
+        setShowEducationDeleteAllDialog: this.setShowEducationDeleteAllDialog
       })
     ));
   }
