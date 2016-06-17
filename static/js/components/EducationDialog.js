@@ -8,6 +8,10 @@ import _ from 'lodash';
 import { HIGH_SCHOOL, BACHELORS, EDUCATION_LEVELS } from '../constants';
 import ProfileFormFields from '../util/ProfileFormFields';
 import { educationValidation } from '../util/validation';
+import SelectField from './inputs/SelectField';
+import CountrySelectField from './inputs/CountrySelectField';
+import StateSelectField from './inputs/StateSelectField';
+import FieldsOfStudySelectField from './inputs/FieldsOfStudySelectField';
 
 export default class EducationDialog extends ProfileFormFields {
   constructor(props: Object) {
@@ -58,7 +62,13 @@ export default class EducationDialog extends ProfileFormFields {
 
     let fieldOfStudy = () => {
       if (educationDegreeLevel !== HIGH_SCHOOL) { 
-        return <Cell col={6}>{this.boundTextField(keySet('field_of_study'), 'Field of Study')}</Cell>;
+        return <Cell col={6}>
+            <FieldsOfStudySelectField
+              keySet={keySet('field_of_study')}
+              label='Field of Study'
+              {...this.defaultInputComponentProps()}
+            />
+          </Cell>;
       }
     };
     let highSchoolPadding = () => (
@@ -67,7 +77,12 @@ export default class EducationDialog extends ProfileFormFields {
     let levelForm = () => {
       if ( showLevelForm ) {
         return <Cell col={12}>
-          {this.boundSelectField(keySet('degree_name'), 'Degree Type', EDUCATION_LEVELS)}
+          <SelectField
+            keySet={keySet('degree_name')}
+            label='Degree Type'
+            options={EDUCATION_LEVELS}
+            {...this.defaultInputComponentProps()}
+          />
         </Cell>;
       }
     };
@@ -88,18 +103,20 @@ export default class EducationDialog extends ProfileFormFields {
       <Cell col={6}>
       </Cell>
       <Cell col={4}>
-        {this.boundCountrySelectField(
-          keySet('school_state_or_territory'),
-          keySet('school_country'),
-          'Country'
-        )}
+        <CountrySelectField
+          stateKeySet={keySet('school_state_or_territory')}
+          countryKeySet={keySet('school_country')}
+          label='Country'
+          {...this.defaultInputComponentProps()}
+        />
       </Cell>
       <Cell col={4}>
-        {this.boundStateSelectField(
-          keySet('school_state_or_territory'),
-          keySet('school_country'),
-          'State'
-        )}
+        <StateSelectField
+          stateKeySet={keySet('school_state_or_territory')}
+          countryKeySet={keySet('school_country')}
+          label='State'
+          {...this.defaultInputComponentProps()}
+        />
       </Cell>
       <Cell col={4} key="school_city">
         {this.boundTextField(keySet('school_city'), 'City')}

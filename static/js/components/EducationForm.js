@@ -32,7 +32,7 @@ class EducationForm extends ProfileFormFields {
 
   openEditEducationForm = index => {
     openEditEducationForm.call(this, index);
-  }
+  };
 
   openNewEducationForm = (level, index) => {
     openNewEducationForm.call(this, level, index);
