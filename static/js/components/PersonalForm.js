@@ -1,5 +1,8 @@
 import React from 'react';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
+import SelectField from './inputs/SelectField';
+import CountrySelectField from './inputs/CountrySelectField';
+import StateSelectField from './inputs/StateSelectField';
 
 import ProfileFormFields from '../util/ProfileFormFields';
 
@@ -30,20 +33,31 @@ export default class PersonalForm extends ProfileFormFields {
           {this.boundRadioGroupField(['gender'], 'Gender', this.genderOptions)}
         </Cell>
         <Cell col={12}>
-          {this.boundSelectField(
-            ['preferred_language'],
-            'Preferred language',
-            this.languageOptions
-          )}
+          <SelectField
+            keySet={['preferred_language']}
+            label='Preferred language'
+            options={this.languageOptions}
+            {...this.defaultInputComponentProps()}
+          />
         </Cell>
         <Cell col={12}>
           <h4>Currently Living</h4>
         </Cell>
         <Cell col={4}>
-          {this.boundCountrySelectField(['state_or_territory'], ['country'], 'Country')}
+          <CountrySelectField
+            stateKeySet={['state_or_territory']}
+            countryKeySet={['country']}
+            label='Country'
+            {...this.defaultInputComponentProps()}
+          />
         </Cell>
         <Cell col={4}>
-          {this.boundStateSelectField(['state_or_territory'], ['country'], 'State or Territory')}
+          <StateSelectField
+            stateKeySet={['state_or_territory']}
+            countryKeySet={['country']}
+            label='State or Territory'
+            {...this.defaultInputComponentProps()}
+          />
         </Cell>
         <Cell col={4}>
           {this.boundTextField(['city'], 'City')}
@@ -52,13 +66,20 @@ export default class PersonalForm extends ProfileFormFields {
           <h4>Where were you born?</h4>
         </Cell>
         <Cell col={4}>
-          {this.boundCountrySelectField(
-            ['birth_state_or_territory'],
-            ['birth_country'],
-            'Country'
-          )}</Cell>
+          <CountrySelectField
+            stateKeySet={['birth_state_or_territory']}
+            countryKeySet={['birth_country']}
+            label='Country'
+            {...this.defaultInputComponentProps()}
+          />
+        </Cell>
         <Cell col={4}>
-          {this.boundStateSelectField(['birth_state_or_territory'], ['birth_country'], 'State or Territory')}
+          <StateSelectField
+            stateKeySet={['birth_state_or_territory']}
+            countryKeySet={['birth_country']}
+            label='State or Territory'
+            {...this.defaultInputComponentProps()}
+          />
         </Cell>
         <Cell col={4}>
           {this.boundTextField(['birth_city'], 'City')}

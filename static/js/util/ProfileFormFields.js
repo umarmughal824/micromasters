@@ -5,15 +5,11 @@ import _ from 'lodash';
 import {
   boundDateField,
   boundTextField,
-  boundSelectField,
-  boundCountrySelectField,
-  boundStateSelectField,
   boundRadioGroupField,
 } from './profile_edit';
 import { EDUCATION_LEVELS } from '../constants';
 import LANGUAGE_CODES from '../language_codes';
 import INDUSTRIES from '../industries';
-import iso3166 from 'iso-3166-2';
 import type { Option } from '../flow/generalTypes';
 
 export default class ProfileFormFields extends React.Component {
@@ -22,18 +18,10 @@ export default class ProfileFormFields extends React.Component {
 
     // bind our field methods to this
     this.boundTextField = boundTextField.bind(this);
-    this.boundSelectField = boundSelectField.bind(this);
-    this.boundCountrySelectField = boundCountrySelectField.bind(this);
-    this.boundStateSelectField = boundStateSelectField.bind(this);
     this.boundDateField = boundDateField.bind(this);
     this.boundRadioGroupField = boundRadioGroupField.bind(this);
 
     // options we set (for select components)
-    let countryOptions = Object.keys(iso3166.data).map(code => ({
-      value: code,
-      label: iso3166.data[code]['name']
-    }));
-    this.countryOptions = _.sortBy(countryOptions, 'label');
     this.genderOptions = [
       { value: 'm', label: 'Male' },
       { value: 'f', label: 'Female' },
@@ -58,30 +46,39 @@ export default class ProfileFormFields extends React.Component {
       label: industry
     }));
   }
+  
   // type declarations
   boundTextField: Function;
-  boundSelectField: Function;
-  boundCountrySelectField: Function;
-  boundStateSelectField: Function;
   boundDateField: Function;
   boundRadioGroupField: Function;
-  countryOptions: Option[];
   genderOptions: Option[];
   languageOptions: Option[];
   privacyOptions: Array<{value: string, label: string, helper: string}>;
   educationLevelOptions: Option[];
   industryOptions: Option[];
 
+  defaultInputComponentProps: Function = (): Object => {
+    return {
+      profile: this.props.profile,
+      updateProfile: this.props.updateProfile,
+      saveProfile: this.props.saveProfile,
+      errors: this.props.errors
+    };
+  };
 
   static contextTypes = {
     router: React.PropTypes.object.isRequired
   };
 
   static propTypes = {
+    profile:                      React.PropTypes.object,
+    updateProfile:                React.PropTypes.func,
+    saveProfile:                  React.PropTypes.func,
+    errors:                       React.PropTypes.object,
     setDeletionIndex:             React.PropTypes.func,
     setShowWorkDeleteDialog:      React.PropTypes.func,
     setShowEducationDeleteDialog: React.PropTypes.func,
-    showSwitch:                   React.PropTypes.bool,
+    showSwitch:                   React.PropTypes.bool
   };
 
   closeConfirmDeleteDialog: Function = (): void => {
@@ -93,17 +90,17 @@ export default class ProfileFormFields extends React.Component {
     setShowEducationDeleteDialog(false);
     setShowWorkDeleteDialog(false);
     setDeletionIndex(null);
-  }
+  };
 
   openEducationDeleteDialog: Function = (index: number): void => {
     const { setDeletionIndex, setShowEducationDeleteDialog } = this.props;
     setDeletionIndex(index);
     setShowEducationDeleteDialog(true);
-  }
+  };
 
   openWorkDeleteDialog:Function = (index: number): void => {
     const { setDeletionIndex, setShowWorkDeleteDialog } = this.props;
     setDeletionIndex(index);
     setShowWorkDeleteDialog(true);
-  }
+  };
 }

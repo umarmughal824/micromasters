@@ -15,6 +15,9 @@ import { generateNewWorkHistory, userPrivilegeCheck } from '../util/util';
 import { employmentValidation } from '../util/validation';
 import ProfileFormFields from '../util/ProfileFormFields';
 import ConfirmDeletion from './ConfirmDeletion';
+import SelectField from './inputs/SelectField';
+import CountrySelectField from './inputs/CountrySelectField';
+import StateSelectField from './inputs/StateSelectField';
 import type { WorkHistoryEntry } from '../flow/profileTypes';
 
 class EmploymentForm extends ProfileFormFields {
@@ -70,16 +73,31 @@ class EmploymentForm extends ProfileFormFields {
           {this.boundTextField(keySet('company_name'), 'Company Name')}
         </Cell>
         <Cell col={4}>
-          {this.boundCountrySelectField(keySet('state_or_territory'), keySet('country'), 'Country')}
+          <CountrySelectField
+            stateKeySet={keySet('state_or_territory')}
+            countryKeySet={keySet('country')}
+            label='Country'
+            {...this.defaultInputComponentProps()}
+          />
         </Cell>
         <Cell col={4}>
-          {this.boundStateSelectField(keySet('state_or_territory'), keySet('country'), 'State or Territory')}
+          <StateSelectField
+            stateKeySet={keySet('state_or_territory')}
+            countryKeySet={keySet('country')}
+            label='State or Territory'
+            {...this.defaultInputComponentProps()}
+          />
         </Cell>
         <Cell col={4}>
           {this.boundTextField(keySet('city'), 'City')}
         </Cell>
         <Cell col={12}>
-          {this.boundSelectField(keySet('industry'), 'Industry', this.industryOptions)}
+          <SelectField
+            keySet={keySet('industry')}
+            label='Industry'
+            options={this.industryOptions}
+            {...this.defaultInputComponentProps()}
+          />
         </Cell>
         <Cell col={12}>
           {this.boundTextField(keySet('position'), 'Position')}
