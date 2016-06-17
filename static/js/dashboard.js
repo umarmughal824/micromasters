@@ -8,7 +8,6 @@ import { browserHistory } from 'react-router';
 import { makeDashboardRoutes } from './dashboard_routes';
 
 // requirements for react-mdl which uses a modified version of material-design-lite
-import 'style!css!react-mdl/extra/material.css';
 import 'react-mdl/extra/material.js';
 
 // Object.entries polyfill
