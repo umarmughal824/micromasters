@@ -12,6 +12,7 @@ import _ from 'lodash';
 import moment from 'moment';
 
 import { generateNewWorkHistory, userPrivilegeCheck } from '../util/util';
+import { sortWorkEntriesByDate } from '../util/sorting';
 import { employmentValidation } from '../util/validation';
 import ProfileFormFields from '../util/ProfileFormFields';
 import ConfirmDeletion from './ConfirmDeletion';
@@ -120,7 +121,8 @@ class EmploymentForm extends ProfileFormFields {
     if ( ui.workHistoryEdit === true ) {
       let workHistoryRows = [];
       if ( !_.isUndefined(work_history) ) {
-        workHistoryRows = Object.entries(work_history).filter(([,entry]: [string, WorkHistoryEntry]) =>
+        let sorted = sortWorkEntriesByDate(work_history);
+        workHistoryRows = Object.entries(sorted).filter(([,entry]: [string, WorkHistoryEntry]) =>
           entry.id !== undefined
         ).map(([i, entry]) => this.jobRow(entry, i));
       }
