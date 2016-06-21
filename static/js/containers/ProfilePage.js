@@ -23,7 +23,7 @@ class ProfilePage extends ProfileFormContainer {
       profile = profiles[SETTINGS.username];
     }
 
-    let text = `Welcome ${getPreferredName(profile)}, let's
+    let text = `Welcome ${getPreferredName(profile.profile)}, let's
     complete your enrollment to MIT MicroMaster’s.`;
 
     let childrenWithProps = this.childrenWithProps(profile);
