@@ -79,8 +79,8 @@ class ProgramPage(Page):
         FieldPanel('background_image'),
         FieldPanel('contact_us'),
         FieldPanel('title_over_image'),
+        InlinePanel('courses', label='Program Courses'),
         InlinePanel('faqs', label='Frequently Asked Questions'),
-        InlinePanel('courses', label='Program Courses')
     ]
 
     def get_context(self, request):
