@@ -8,9 +8,7 @@ import {
   combineValidators,
   personalValidation,
   educationValidation,
-  educationUiValidation,
   employmentValidation,
-  employmentUiValidation,
   privacyValidation,
 } from '../util/validation';
 import type { Profile } from '../flow/profileTypes';
@@ -50,9 +48,7 @@ class PrivacyTab extends ProfileFormFields {
                 combineValidators(
                   personalValidation,
                   educationValidation,
-                  educationUiValidation,
                   employmentValidation,
-                  employmentUiValidation,
                   privacyValidation
                 )
               }

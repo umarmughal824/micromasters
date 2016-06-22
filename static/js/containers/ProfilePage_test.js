@@ -387,7 +387,7 @@ describe("ProfilePage", function() {
     });
   });
 
-  it(`validates education and employment switches when saving the ${lastPage}`, () => {
+  it('does not validate education and employment switches when saving the privacy page', () => {
     return renderComponent(lastPage).then(([, div]) => {
       // close all switches and remove all education so we don't get validation errors
       let receivedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
@@ -408,10 +408,7 @@ describe("ProfilePage", function() {
       });
 
       return confirmSaveButtonBehavior(updatedProfile, {button: button}, true).then(state => {
-        assert.deepEqual(state.profiles[SETTINGS.username].edit.errors, {
-          [`education_${HIGH_SCHOOL}_required`]: `High school is required if switch is set`,
-          work_history_required: "Work history is required if switch is set"
-        });
+        assert.deepEqual(state.profiles[SETTINGS.username].edit.errors, {});
       });
     });
   });
