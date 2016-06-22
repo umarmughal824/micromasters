@@ -18,5 +18,5 @@ static3==0.5.1
 tox==2.3.1
 uwsgi==2.0.12
 Pillow==3.1.1
-wagtail==1.4.3
+wagtail==1.5.2
 edx-api-client==0.2.0
