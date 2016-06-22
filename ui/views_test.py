@@ -252,6 +252,29 @@ class TestViews(TestCase):
             assert response.context['authenticated'] is False
             assert response.context['name'] == ""
 
+    def test_500_error_context_logged_in(self):
+        """
+        Assert context values for 500 error page when logged in
+        """
+        with mute_signals(post_save):
+            profile = ProfileFactory.create()
+            self.client.force_login(profile.user)
+
+        response = self.client.get('/500/')
+        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        assert response.context['authenticated'] is True
+        assert response.context['name'] == profile.preferred_name
+
+    def test_500_error_context_logged_out(self):
+        """
+        Assert context values for 500 error page when logged out
+        """
+        # case with specific page
+        response = self.client.get('/500/')
+        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        assert response.context['authenticated'] is False
+        assert response.context['name'] == ""
+
 
 class TestProgramPage(TestCase):
     """

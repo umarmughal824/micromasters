@@ -83,3 +83,24 @@ def page_404(request):
     )
     response.status_code = 404
     return response
+
+
+def page_500(request):
+    """
+    Overridden handler for the 500 error pages.
+    """
+    name = request.user.profile.preferred_name if not request.user.is_anonymous() else ""
+
+    response = render(
+        request,
+        "500.html",
+        context={
+            "style_src": get_bundle_url(request, "style.js"),
+            "dashboard_src": get_bundle_url(request, "dashboard.js"),
+            "js_settings_json": "{}",
+            "authenticated": not request.user.is_anonymous(),
+            "name": name,
+        }
+    )
+    response.status_code = 500
+    return response

@@ -12,6 +12,7 @@ from ui.url_utils import (
 from ui.views import (
     dashboard,
     page_404,
+    page_500,
 )
 
 dashboard_urlpatterns = [
@@ -27,4 +28,5 @@ dashboard_urlpatterns = [
 urlpatterns = [
     url(r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'}),
     url(r'^404/$', page_404, name='ui-404'),
+    url(r'^500/$', page_500, name='ui-500'),
 ] + dashboard_urlpatterns
