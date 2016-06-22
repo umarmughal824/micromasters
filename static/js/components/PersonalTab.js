@@ -20,8 +20,8 @@ class PersonalTab extends React.Component {
     return <div>
       <Grid className="profile-splash">
         <Cell col={12}>
-          Please tell us more about yourself so you can participate in the MicroMaster’s
-          community and qualify for your MicroMaster’s credential.
+          Please tell us more about yourself so you can participate in the MicroMasters
+          community and qualify for your MicroMasters credential.
         </Cell>
       </Grid>
       <Grid className="profile-tab-grid">

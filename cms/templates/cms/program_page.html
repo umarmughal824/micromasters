@@ -19,9 +19,10 @@
             <div class="container-fluid">
               <div class="navbar-header">
                 <a class="navbar-brand" href="javascript:void(0)"><img
-                        src="/static/images/logo-mit-micromasters-whitered.png"
+                        src="{% static 'images/logo-mit-micromasters-whitered.png' %}"
                         width="215" height="40"
-                        alt="MIT Micromasters"/></a>
+                        alt="MIT Micromasters"/>
+                </a>
                 <div class="nav-utility pull-right">
                   {% if authenticated %}
                     <a class="btn btn-danger" href="/logout">
@@ -198,7 +199,7 @@
           <div class="modal-body">
             <h2>Micromasters is a new credential</h2>
             <p>
-              MIT has created a new credential for online learners: the “MicroMaster’s,” which will be
+              MIT has created a new credential for online learners: the “MicroMasters,” which will be
               granted by MITx (MIT’s online learning initiative) to students who do exceptionally well in
               a given set of graduate-level online courses and do well in a subsequent exam. The
               credential will first be available to students who register for the SCM program’s online
@@ -214,7 +215,7 @@
             <p>
               Use your edX.org account to enroll in a Micromasters program and share your grades and
               progress with MIT. When you complete all the requirements and earn a Micromasters
-              credential, you can use it to apply for a Masters degree at MIT.
+              credential, you can use it to apply for a Master’s degree at MIT.
             </p>
           </div>
           <!--
