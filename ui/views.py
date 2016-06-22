@@ -5,9 +5,11 @@ import json
 import logging
 
 from django.conf import settings
-from django.contrib.staticfiles.templatetags.staticfiles import static
-from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.contrib.staticfiles.templatetags.staticfiles import static
+from django.shortcuts import (
+    render,
+)
 
 from backends.edxorg import EdxOrgOAuth2
 from micromasters.utils import webpack_dev_server_host, webpack_dev_server_url
@@ -52,10 +54,32 @@ def dashboard(request, *args):  # pylint: disable=unused-argument
     }
 
     return render(
-        request, "dashboard.html",
+        request,
+        "dashboard.html",
         context={
             "style_src": get_bundle_url(request, "style.js"),
             "dashboard_src": get_bundle_url(request, "dashboard.js"),
             "js_settings_json": json.dumps(js_settings),
         }
     )
+
+
+def page_404(request):
+    """
+    Overridden handler for the 404 error pages.
+    """
+    name = request.user.profile.preferred_name if not request.user.is_anonymous() else ""
+
+    response = render(
+        request,
+        "404.html",
+        context={
+            "style_src": get_bundle_url(request, "style.js"),
+            "dashboard_src": get_bundle_url(request, "dashboard.js"),
+            "js_settings_json": "{}",
+            "authenticated": not request.user.is_anonymous(),
+            "name": name,
+        }
+    )
+    response.status_code = 404
+    return response

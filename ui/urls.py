@@ -9,7 +9,10 @@ from ui.url_utils import (
     TERMS_OF_SERVICE_URL,
     USERS_URL,
 )
-from ui.views import dashboard
+from ui.views import (
+    dashboard,
+    page_404,
+)
 
 dashboard_urlpatterns = [
     url(r'^{}'.format(dashboard_url.lstrip("/")), dashboard, name='ui-dashboard')
@@ -22,6 +25,6 @@ dashboard_urlpatterns = [
 ]
 
 urlpatterns = [
-    url(r'^logout/$', 'django.contrib.auth.views.logout',
-        {'next_page': '/'})
+    url(r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'}),
+    url(r'^404/$', page_404, name='ui-404'),
 ] + dashboard_urlpatterns

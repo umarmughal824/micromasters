@@ -8,6 +8,7 @@ from django.test import TestCase
 from django.test.client import Client
 from factory.django import mute_signals
 from factory.fuzzy import FuzzyText
+from rest_framework import status
 
 from cms.models import HomePage, ProgramPage
 from courses.models import Program
@@ -212,6 +213,44 @@ class TestViews(TestCase):
 
                 js_settings = json.loads(response.context['js_settings_json'])
                 assert js_settings['host'] == 'foo_server'
+
+    def test_404_error_context_logged_in(self):
+        """
+        Assert context values for 404 error page when logged in
+        """
+        with mute_signals(post_save):
+            profile = ProfileFactory.create()
+            self.client.force_login(profile.user)
+
+        # case with specific page
+        response = self.client.get('/404/')
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.context['authenticated'] is True
+        assert response.context['name'] == profile.preferred_name
+
+        # case with a fake page
+        with self.settings(DEBUG=False):
+            response = self.client.get('/gfh0o4n8741387jfmnub134fn348fr38f348f/')
+            assert response.status_code == status.HTTP_404_NOT_FOUND
+            assert response.context['authenticated'] is True
+            assert response.context['name'] == profile.preferred_name
+
+    def test_404_error_context_logged_out(self):
+        """
+        Assert context values for 404 error page when logged out
+        """
+        # case with specific page
+        response = self.client.get('/404/')
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.context['authenticated'] is False
+        assert response.context['name'] == ""
+
+        # case with a fake page
+        with self.settings(DEBUG=False):
+            response = self.client.get('/gfh0o4n8741387jfmnub134fn348fr38f348f/')
+            assert response.status_code == status.HTTP_404_NOT_FOUND
+            assert response.context['authenticated'] is False
+            assert response.context['name'] == ""
 
 
 class TestProgramPage(TestCase):
