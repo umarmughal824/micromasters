@@ -15,6 +15,11 @@ if (!Object.entries) {
 // Make sure window and document are available for testing
 require('jsdom-global')();
 
+// cleanup document after each test run
+afterEach(function (){
+  document.body.innerHTML = '';
+});
+
 // required for interacting with react-mdl components
 require('react-mdl/extra/material.js');
 
@@ -22,3 +27,8 @@ require('react-mdl/extra/material.js');
 process.on('unhandledRejection', reason => {
   throw reason;
 });
+
+// enable chai-as-promised
+import chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
+chai.use(chaiAsPromised);

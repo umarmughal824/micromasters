@@ -1,3 +1,6 @@
+// @flow
+/* global SETTINGS: false */
+import { RECEIVE_GET_USER_PROFILE_SUCCESS } from '../actions';
 import {
   CLEAR_UI,
   UPDATE_DIALOG_TEXT,
@@ -16,27 +19,52 @@ import {
   SET_EDUCATION_DEGREE_INCLUSIONS,
 
   SET_USER_PAGE_DIALOG_VISIBILITY,
+
+  SET_SHOW_EDUCATION_DELETE_DIALOG,
+  SET_SHOW_WORK_DELETE_DIALOG,
+  SET_DELETION_INDEX,
 } from '../actions/ui';
 import { HIGH_SCHOOL, ASSOCIATE, BACHELORS, MASTERS, DOCTORATE } from '../constants';
+import { calculateDegreeInclusions } from '../util/util';
+import type { Action } from '../flow/generalTypes';
 
-export const INITIAL_UI_STATE = {
+export type UIState = {
+  workHistoryEdit:            boolean;
+  workDialogVisibility:       boolean;
+  dashboardExpander:          {};
+  educationDialogVisibility:  boolean;
+  educationDialogIndex:       ?number;
+  educationDegreeLevel:       string;
+  educationDegreeInclusions: {};
+  userPageDialogVisibility: boolean;
+  showWorkDeleteDialog: boolean;
+  showEducationDeleteDialog: boolean;
+  deletionIndex: ?number;
+  dialog: {};
+};
+
+export const INITIAL_UI_STATE: UIState = {
   workHistoryEdit:            true,
   workDialogVisibility:       false,
   dashboardExpander:          {},
   educationDialogVisibility:  false,
   educationDialogIndex:       null,
   educationDegreeLevel:       '',
-  educationDegreeInclusions:  {
-    [HIGH_SCHOOL]: true,
-    [ASSOCIATE]: true,
-    [BACHELORS]: true,
+  educationDegreeInclusions: {
+    [HIGH_SCHOOL]: false,
+    [ASSOCIATE]: false,
+    [BACHELORS]: false,
     [MASTERS]: false,
     [DOCTORATE]: false,
   },
   userPageDialogVisibility: false,
+  showWorkDeleteDialog: false,
+  showEducationDeleteDialog: false,
+  deletionIndex: null,
+  dialog: {},
 };
 
-export const ui = (state = INITIAL_UI_STATE, action) => {
+export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
   switch (action.type) {
   case UPDATE_DIALOG_TEXT:
     return Object.assign({}, state, {
@@ -103,6 +131,30 @@ export const ui = (state = INITIAL_UI_STATE, action) => {
     return Object.assign({}, state, {
       userPageDialogVisibility: action.payload
     });
+  }
+  case SET_SHOW_EDUCATION_DELETE_DIALOG: {
+    return Object.assign({}, state, {
+      showEducationDeleteDialog: action.payload
+    });
+  }
+  case SET_SHOW_WORK_DELETE_DIALOG: {
+    return Object.assign({}, state, {
+      showWorkDeleteDialog: action.payload
+    });
+  }
+  case SET_DELETION_INDEX: {
+    return Object.assign({}, state, {
+      deletionIndex: action.payload
+    });
+  }
+  case RECEIVE_GET_USER_PROFILE_SUCCESS: {
+    const { profile, username } = action.payload;
+    if (SETTINGS.username === username) {
+      return Object.assign({}, state, {
+        educationDegreeInclusions: calculateDegreeInclusions(profile)
+      });
+    }
+    return state;
   }
   default:
     return state;

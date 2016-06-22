@@ -45,28 +45,33 @@ class IntegrationTestHelper {
     this.sandbox.restore();
   }
 
-  renderComponent(url = "/", extraTypesToAssert = []) {
-    return new Promise(resolve => {
-      let expectedTypes = [
-        REQUEST_DASHBOARD,
-        RECEIVE_DASHBOARD_SUCCESS,
-        REQUEST_GET_USER_PROFILE,
-        RECEIVE_GET_USER_PROFILE_SUCCESS
-      ];
+  renderComponent(url = "/", extraTypesToAssert = [], isSuccessExpected = true) {
+    let expectedTypes = [
+      REQUEST_DASHBOARD,
+      REQUEST_GET_USER_PROFILE
+    ];
+    let expectedSuccessTypes = [
+      RECEIVE_DASHBOARD_SUCCESS,
+      RECEIVE_GET_USER_PROFILE_SUCCESS
+    ];
 
-      expectedTypes.push(...extraTypesToAssert);
-      let component, div;
+    // if the success is expected  update the list with the success types
+    if (isSuccessExpected) {
+      expectedTypes.push(...expectedSuccessTypes);
+    }
+    expectedTypes.push(...extraTypesToAssert);
 
-      this.listenForActions(expectedTypes, () => {
-        this.browserHistory.push(url);
-        div = document.createElement("div");
-        component = ReactDOM.render(
-          makeDashboardRoutes(this.browserHistory, this.store, () => null),
-          div
-        );
-      }).then(() => {
-        resolve([component, div]);
-      });
+    let component, div;
+
+    return this.listenForActions(expectedTypes, () => {
+      this.browserHistory.push(url);
+      div = document.createElement("div");
+      component = ReactDOM.render(
+        makeDashboardRoutes(this.browserHistory, this.store, () => null),
+        div
+      );
+    }).then(() => {
+      return Promise.resolve([component, div]);
     });
   }
 }

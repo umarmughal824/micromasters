@@ -1,23 +1,37 @@
-import assert from 'assert';
+import { assert } from 'chai';
 import _ from 'lodash';
+import sinon from 'sinon';
+import moment from 'moment';
 
 import {
   personalValidation,
   educationValidation,
+  educationUiValidation,
   employmentValidation,
+  employmentUiValidation,
   privacyValidation,
-  validateProfile,
   validateProfileComplete,
   validateDay,
   validateMonth,
   validateYear,
+  combineValidators,
 } from './validation';
 import {
   USER_PROFILE_RESPONSE,
+  EDUCATION_LEVELS,
+  BACHELORS,
   HIGH_SCHOOL,
 } from '../constants';
 
 describe('Profile validation functions', () => {
+  let sandbox;
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+  afterEach(() => {
+    sandbox.restore();
+  });
+
   describe('Personal validation', () => {
     it('should return an empty object when all fields are present', () => {
       assert.deepEqual({}, personalValidation(USER_PROFILE_RESPONSE));
@@ -27,6 +41,48 @@ describe('Profile validation functions', () => {
       let clone = Object.assign({}, USER_PROFILE_RESPONSE);
       clone.first_name = '';
       assert.deepEqual({first_name: "Given name is required"}, personalValidation(clone));
+    });
+
+    it('validates required fields', () => {
+      let requiredFields = [
+        ['first_name'],
+        ['last_name'],
+        ['preferred_name'],
+        ['gender'],
+        ['preferred_language'],
+        ['city'],
+        ['country'],
+        ['birth_city'],
+        ['birth_country'],
+      ];
+
+      let profile = {};
+      for (let key of requiredFields) {
+        profile[key[0]] = '';
+      }
+
+      let errors = personalValidation(profile);
+      for (let key of requiredFields) {
+        let error = errors[key];
+        assert.ok(error.indexOf("is required") !== -1);
+      }
+    });
+
+    it('correctly validates fields with 0', () => {
+      let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
+      profile.first_name = 0;
+      let errors = personalValidation(profile);
+      assert.deepEqual({}, errors);
+    });
+
+    it('should error if date of birth is in the future', () => {
+      let profile = Object.assign({}, USER_PROFILE_RESPONSE, {
+        date_of_birth: "2077-01-01"
+      });
+      let errors = {
+        date_of_birth: "Please enter a valid date of birth"
+      };
+      assert.deepEqual(personalValidation(profile), errors);
     });
   });
 
@@ -66,6 +122,26 @@ describe('Profile validation functions', () => {
         }]
       }, educationValidation(clone));
     });
+
+    it('should complain about switches being on if there are no elements in the list', () => {
+      let profile = Object.assign({}, USER_PROFILE_RESPONSE, {
+        education: [{
+          degree_name: BACHELORS
+        }]
+      });
+      let ui = {
+        educationDegreeInclusions: {
+          [HIGH_SCHOOL]: true,
+          [BACHELORS]: true
+        }
+      };
+
+      let errors = educationUiValidation(profile, ui);
+      let highSchoolLabel = EDUCATION_LEVELS.find(education => education.value === HIGH_SCHOOL).label;
+      assert.deepEqual(errors, {
+        [`education_${HIGH_SCHOOL}_required`]: `${highSchoolLabel} is required if switch is set`
+      });
+    });
   });
 
   describe('Employment validation', () => {
@@ -97,6 +173,89 @@ describe('Profile validation functions', () => {
         }]
       }, employmentValidation(clone));
     });
+
+    it('should complain about the switch being on if there are no elements in the list', () => {
+      let profile = Object.assign({}, USER_PROFILE_RESPONSE, {
+        work_history: []
+      });
+      let ui = {
+        workHistoryEdit: true
+      };
+
+      let errors = employmentUiValidation(profile, ui);
+      assert.deepEqual(errors, {
+        work_history_required: `Work history is required if switch is set`
+      });
+    });
+
+    it('should reject end date before start date', () => {
+      let errors = {
+        work_history: [, // eslint-disable-line no-sparse-arrays
+          {
+            end_date: "End date cannot be before start date"
+          }
+        ]
+      };
+      let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
+      profile.work_history[1].end_date = moment(profile.work_history[1].start_date).subtract(1, 'months');
+      assert.deepEqual(errors, employmentValidation(profile));
+    });
+
+    it('should not error if end_date is blank', () => {
+      let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
+      profile.work_history[1].end_date = null;
+      assert.deepEqual({}, employmentValidation(profile));
+    });
+
+
+    for (let field of ['year', 'month']) {
+      let errors = {
+        work_history: [, // eslint-disable-line no-sparse-arrays
+          {
+            end_date: "Please enter a valid end date or leave it blank"
+          }
+        ]
+      };
+
+      it(`should error if end_date has an edit value in ${field}`, () => {
+        let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
+        profile.work_history[1].end_date = null;
+        profile.work_history[1].end_date_edit = Object.assign({
+          year: "",
+          month: ""
+        }, {
+          [field]: "field"
+        });
+        assert.deepEqual(errors, employmentValidation(profile));
+      });
+    }
+
+    it(`should error if end_date has a number in year`, () => {
+      let errors = {
+        work_history: [, // eslint-disable-line no-sparse-arrays
+          {
+            end_date: "Please enter a valid end date or leave it blank"
+          }
+        ]
+      };
+      let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
+      profile.work_history[1].end_date = null;
+      profile.work_history[1].end_date_edit = {
+        year: 1943,
+        month: ""
+      };
+      assert.deepEqual(errors, employmentValidation(profile));
+    });
+
+    it('should not error if end_date has an edit value which is blank', () => {
+      let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
+      profile.work_history[1].end_date = null;
+      profile.work_history[1].end_date_edit = {
+        year: "",
+        month: ""
+      };
+      assert.deepEqual({}, employmentValidation(profile));
+    });
   });
 
   describe('Privacy validation', () => {
@@ -108,66 +267,6 @@ describe('Profile validation functions', () => {
       let clone = Object.assign({}, USER_PROFILE_RESPONSE, {account_privacy: ''});
       let expectation = {account_privacy: 'Privacy level is required'};
       assert.deepEqual(expectation, privacyValidation(clone));
-    });
-  });
-
-  describe("validateProfile", () => {
-    let requiredFields = [
-      ['first_name'],
-      ['last_name'],
-      ['preferred_name'],
-      ['gender'],
-      ['preferred_language'],
-      ['city'],
-      ['country'],
-      ['birth_city'],
-      ['birth_country'],
-      ['date_of_birth'],
-    ];
-
-    let messages = {
-      'first_name': 'First Name',
-      'last_name': 'Last Name',
-      'preferred_name': 'Preferred Name',
-      'gender': 'Gender',
-      'preferred_language': 'Preferred language',
-      'city': 'City',
-      'country': 'Country',
-      'birth_city': 'Birth City',
-      'birth_country': 'Birth Country',
-      'date_of_birth': 'Birth Date',
-    };
-
-    it('validates the test profile successfully', () => {
-      let errors = validateProfile(USER_PROFILE_RESPONSE);
-      assert.deepEqual(errors, {});
-    });
-
-    it('validates required fields', () => {
-      let profile = {};
-      for (let key of requiredFields) {
-        profile[key[0]] = '';
-      }
-
-      let errors = validateProfile(profile, requiredFields, messages);
-      for (let key of requiredFields) {
-        let error = errors[key];
-        assert.ok(error.indexOf("is required") !== -1);
-      }
-    });
-
-    it('validates nested fields', () => {
-      let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
-      _.set(profile, ['work_history', 0, 'city'], '');
-      let errors = validateProfile(profile);
-      assert.deepEqual({work_history: [ { city: "City is required" } ] }, errors);
-    });
-
-    it('correctly validates fields with 0', () => {
-      let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
-      profile.first_name = 0;
-      let errors = validateProfile(profile);
-      assert.deepEqual({}, errors);
     });
   });
 
@@ -190,8 +289,8 @@ describe('Profile validation functions', () => {
         'birth_city': 'City',
         'birth_state_or_territory': 'State or Territory',
         'birth_country': "Country",
-        'date_of_birth': "Date of birth"
       }).map(([k,v]) => ({[k]: `${v} is required`})));
+      errors.date_of_birth = "Please enter a valid date of birth";
       const expectation = [false, "/profile/personal", errors];
       assert.deepEqual(validateProfileComplete(profile), expectation);
     });
@@ -247,17 +346,16 @@ describe('Profile validation functions', () => {
 
   describe('validateYear', () => {
     it('handles years starting with 0 without treating as octal', () => {
-      assert.equal(999, validateYear("0999"));
+      assert.equal(1999, validateYear("01999"));
     });
     it('converts strings to numbers', () => {
-      assert.equal(3, validateYear("3"));
+      assert.equal(1943, validateYear("1943"));
     });
     it('returns undefined for invalid years', () => {
       assert.equal(undefined, validateYear("-3"));
       assert.equal(undefined, validateYear("0"));
-      assert.equal(1, validateYear("1"));
-      assert.equal(9999, validateYear("9999"));
-      assert.equal(undefined, validateYear("10000"));
+      assert.equal(undefined, validateYear("1799"));
+      assert.equal(undefined, validateYear("2100"));
     });
     it('returns undefined if the text is not an integer number', () => {
       assert.equal(undefined, validateYear(""));
@@ -294,6 +392,24 @@ describe('Profile validation functions', () => {
       assert.equal(undefined, validateDay("2e0"));
       assert.equal(undefined, validateDay("3-4"));
       assert.equal(undefined, validateDay("3.4"));
+    });
+  });
+
+  describe('combineValidators', () => {
+    it('uses _.merge on the output of a series of functions', () => {
+      let mergeStub = sandbox.stub(_, 'merge');
+      const mergeResult = "mergeResult";
+      mergeStub.returns(mergeResult);
+      const args = ["some", "args"];
+
+      let func1 = sandbox.stub().returns("ret1");
+      let func2 = sandbox.stub().returns("ret2");
+
+      let result = combineValidators(func1, func2)(args);
+      assert(func1.calledWith(args));
+      assert(func2.calledWith(args));
+      assert(mergeStub.calledWith({}, "ret1", "ret2"));
+      assert.equal(result, mergeResult);
     });
   });
 });

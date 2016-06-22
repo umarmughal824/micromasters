@@ -18,7 +18,7 @@ class Footer extends React.Component {
                </div>
                <div className="col-md-4 text-right">
                   <div className="footer-cta">
-                     <a href="https://giving.mit.edu/explore/campus-student-life/digital-learning"
+                     <a href="https://giving.mit.edu/explore/campus-student-life/digital-learning" target="_blank"
                        className="btn btn-primary">Give to MIT</a>
                   </div>
                   <div className="footer-copy">&copy; 2016, Massachusetts Institute of Technology</div>

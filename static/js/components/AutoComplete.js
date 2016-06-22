@@ -151,6 +151,10 @@ class AutoComplete extends Component {
      */
     openOnFocus: PropTypes.bool,
     /**
+     * If true, all options will be shown to the user when the input text is blank.
+     */
+    showOptionsWhenBlank: PropTypes.bool,
+    /**
      * Text being input to auto complete.
      */
     searchText: PropTypes.string,
@@ -179,6 +183,7 @@ class AutoComplete extends Component {
     fullWidth: false,
     open: false,
     openOnFocus: false,
+    showOptionsWhenBlank: true,
     onUpdateInput: () => {},
     onNewRequest: () => {},
     searchText: '',
@@ -300,12 +305,14 @@ class AutoComplete extends Component {
 
       case 'down':
         event.preventDefault();
-        this.setState({
-          open: true,
-          focusTextField: false,
-          skipFocusHandler: true,
-          anchorEl: ReactDOM.findDOMNode(this.refs.searchTextField),
-        });
+        if (this.props.showOptionsWhenBlank || this.state.searchText !== '') {
+          this.setState({
+            open: true,
+            focusTextField: false,
+            skipFocusHandler: true,
+            anchorEl: ReactDOM.findDOMNode(this.refs.searchTextField),
+          });
+        }
         break;
 
       default:
@@ -353,7 +360,7 @@ class AutoComplete extends Component {
 
     this.setState({
       focusTextField: true,
-      skipFilter: true
+      skipFilter: this.props.showOptionsWhenBlank
     });
 
     if (this.props.onFocus) {

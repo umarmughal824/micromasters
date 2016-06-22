@@ -9,9 +9,10 @@ from django.test.client import Client
 from factory.django import mute_signals
 from factory.fuzzy import FuzzyText
 
-from cms.models import HomePage
-from backends.edxorg import EdxOrgOAuth2
+from cms.models import HomePage, ProgramPage
+from courses.models import Program
 from courses.factories import ProgramFactory
+from backends.edxorg import EdxOrgOAuth2
 from profiles.factories import ProfileFactory
 from ui.urls import DASHBOARD_URL
 
@@ -57,6 +58,29 @@ class TestViews(TestCase):
         self.assertNotContains(
             response,
             program_live_false.title,
+            status_code=200
+        )
+
+    def test_program_link(self):
+        """Verify that program links are present in home page if ProgramPage is set"""
+        program = ProgramFactory.create(live=True)
+        program_page = ProgramPage(program=program, title="Test Program")
+
+        response = self.client.get('/')
+        self.assertNotContains(
+            response,
+            program_page.url,
+            status_code=200
+        )
+
+        homepage = HomePage.objects.first()
+        homepage.add_child(instance=program_page)
+        program_page.save_revision().publish()
+
+        response = self.client.get('/')
+        self.assertContains(
+            response,
+            program_page.url,
             status_code=200
         )
 
@@ -188,3 +212,62 @@ class TestViews(TestCase):
 
                 js_settings = json.loads(response.context['js_settings_json'])
                 assert js_settings['host'] == 'foo_server'
+
+
+class TestProgramPage(TestCase):
+    """
+    Test that the ProgramPage view work as expected.
+    """
+    def setUp(self):
+        self.client = Client()
+        homepage = HomePage.objects.first()
+        program = Program(title="Test Program Title", live=True)
+        program.save()
+        self.program_page = ProgramPage(program=program, title="Test Program")
+        homepage.add_child(instance=self.program_page)
+        self.program_page.save_revision().publish()
+
+    def create_and_login_user(self):
+        """
+        Create and login a user
+        """
+        with mute_signals(post_save):
+            profile = ProfileFactory.create(
+                agreed_to_terms_of_service=True,
+                filled_out=True,
+            )
+        profile.user.social_auth.create(
+            provider='not_edx',
+        )
+        profile.user.social_auth.create(
+            provider=EdxOrgOAuth2.name,
+            uid="{}_edx".format(profile.user.username),
+        )
+        self.client.force_login(profile.user)
+        return profile.user
+
+    def test_program_page_context_anonymous(self):
+        """
+        Assert context values when anonymous
+        """
+        ga_tracking_id = FuzzyText().fuzz()
+        with self.settings(
+            GA_TRACKING_ID=ga_tracking_id,
+        ):
+            response = self.client.get(self.program_page.url)
+            assert response.context['authenticated'] is False
+            assert response.context['username'] is None
+            assert response.context['title'] == "Test Program"
+            js_settings = json.loads(response.context['js_settings_json'])
+            assert js_settings['gaTrackingID'] == ga_tracking_id
+
+    def test_login_button(self):
+        """Verify that we see a login button if not logged in"""
+        response = self.client.get(self.program_page.url)
+        self.assertContains(response, "Sign in with edX.org")
+
+    def test_sign_out_button(self):
+        """Verify that we see a sign out button if logged in"""
+        self.create_and_login_user()
+        response = self.client.get(self.program_page.url)
+        self.assertContains(response, 'Sign out')

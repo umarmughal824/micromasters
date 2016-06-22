@@ -1,25 +1,29 @@
+// @flow
 import React from 'react';
 import Dialog from 'material-ui/Dialog';
 import Button from 'react-mdl/lib/Button';
 
-import { saveProfileStep } from '../util/profile_edit';
+import { personalValidation } from '../util/validation';
 import PersonalForm from './PersonalForm';
 
 export default class UserPagePersonalDialog extends React.Component {
   static propTypes = {
     setUserPageDialogVisibility:  React.PropTypes.func,
     ui:                           React.PropTypes.object,
+    profile:                      React.PropTypes.object,
+    saveProfile:                  React.PropTypes.func,
     clearProfileEdit:             React.PropTypes.func,
   };
 
-  closePersonalDialog = () => {
+  closePersonalDialog: Function = (): void => {
     const { setUserPageDialogVisibility, clearProfileEdit } = this.props;
     setUserPageDialogVisibility(false);
     clearProfileEdit();
   };
 
-  savePersonalInfo = () => {
-    saveProfileStep.call(this).then(() => {
+  savePersonalInfo: Function = (): void => {
+    const { profile, ui, saveProfile } = this.props;
+    saveProfile(personalValidation, profile, ui).then(() => {
       this.closePersonalDialog();
     });
   };

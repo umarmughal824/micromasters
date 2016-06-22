@@ -69,6 +69,9 @@
 
               {% for program in programs %}
               <li class="col-sm-6">
+                {% if program.programpage %}
+                  <a href="{{ program.programpage.url }}" class="program-link">
+                {% endif %}
                 <div class="media-item">
                   <div class="media-top">
                     <div class="image-wrap">
@@ -76,13 +79,7 @@
                     </div>
                   </div>
                   <div class="info-wrap">
-                    {% if program.programpage %}
-                    <a href="{{ program.programpage.url }}">
-                      <div class="title">{{ program }}</div>
-                    </a>
-                    {% else %}
                     <div class="title">{{ program }}</div>
-                    {% endif %}
                     <div class="description">
                       {% if program.description %}
                       {{ program.description }}
@@ -99,6 +96,9 @@
                     </div>
                   </div>
                 </div>
+                {% if program.programpage %}
+                  </a>
+                {% endif %}
               </li>
               {% endfor %}
               <li class="col-sm-6">
@@ -115,7 +115,7 @@
                     <div class="row">
                       <div class="col-sm-12">
                         <button class="btn btn-danger button-subscribe-alerts center-block"  data-toggle="modal"
-                       data-target="#subscribeAlert">Yes, tell me when Micromasters are available</button>
+                       data-target="#subscribeAlert">Yes, tell me when MicroMaster’s are available</button>
                       </div>
                     </div>
                   </div>
@@ -128,30 +128,8 @@
     </section>
   </div>
 
-  <footer>
-     <div class="container">
-        <div class="row">
-           <div class="col-md-8">
-              <img src="/static/images/mit-logo-ltgray-white@72x38.svg" alt="MicroMaster’s">
-              <div class="footer-links">
-                  <a href="https://www.edx.org/" target="_blank">edX</a>
-                  <a href="https://odl.mit.edu/" target="_blank">Office of Digital Learning</a>
-              </div>
-              <div class="footer-address">
-                 Massachusetts Institute of Technology<br/> Cambridge, MA 02139
-              </div>
-           </div>
-           <div class="col-md-4 text-right">
-              <div class="footer-cta">
-                  <a href="https://giving.mit.edu/explore/campus-student-life/digital-learning"
-                      class="btn btn-primary">Give to MIT
-                  </a>
-              </div>
-              <div class="footer-copy">&copy; 2016, Massachusetts Institute of Technology</div>
-           </div>
-        </div>
-     </div>
-  </footer>
+  {% include "cms/footer.html" %}
+
   <div class="modal fade modal-fade-in-scale-up" id="modal-about" aria-hidden="true" aria-labelledby="modal-about"
                                                                                      role="dialog" tabindex="-1">
     <div class="modal-dialog modal-center">
@@ -264,7 +242,4 @@
   </div>
 </div>
 <script type="text/javascript" src="{{ public_src }}"></script>
-<script type="text/javascript" src="{{ wow_src }}"></script>
-<script type="text/javascript" src="{{ ajaxchimp_src }}"></script>
-<script type="text/javascript" src="{{ custom_src }}"></script>
 {% endblock %}

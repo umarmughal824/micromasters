@@ -1,4 +1,4 @@
-import assert from 'assert';
+import { assert } from 'chai';
 import moment from 'moment';
 import React from 'react';
 
@@ -22,6 +22,7 @@ describe('courseList functions', () => {
     let yesterday = '2016-03-30';
     let today = '2016-03-31';
     let tomorrow = '2016-04-01';
+    let edxCourseKey = "edx course key";
 
     let renderCourseStatusDisplay = (course, ...args) => {
       if (course.runs === undefined) {
@@ -110,10 +111,11 @@ describe('courseList functions', () => {
         renderCourseStatusDisplay({
           status: STATUS_ENROLLED_NOT_VERIFIED,
           runs: [{
-            verification_date: tomorrow
-          }]
+            verification_date: tomorrow,
+            title: "Run title"
+          }],
         }, moment(today)),
-        "UPGRADE TO VERIFIED"
+        "UPGRADE TO VERIFIED for Run title"
       );
     });
 
@@ -158,10 +160,12 @@ describe('courseList functions', () => {
         renderCourseStatusDisplay({
           status: STATUS_OFFERED_NOT_ENROLLED,
           runs: [{
-            enrollment_start_date: today
+            course_id: edxCourseKey,
+            enrollment_start_date: today,
+            title: "Run title"
           }]
         }, moment(today)),
-        "ENROLL"
+        "ENROLL in Run title"
       );
     });
 
@@ -170,10 +174,23 @@ describe('courseList functions', () => {
         renderCourseStatusDisplay({
           status: STATUS_OFFERED_NOT_ENROLLED,
           runs: [{
+            course_id: edxCourseKey,
+            enrollment_start_date: yesterday,
+            title: "Run title"
+          }]
+        }, moment(today)),
+        "ENROLL in Run title"
+      );
+    });
+    it("is an offered course with valid enrollment date and no edx_course_key", () => {
+      assert.equal(
+        renderCourseStatusDisplay({
+          status: STATUS_OFFERED_NOT_ENROLLED,
+          runs: [{
             enrollment_start_date: yesterday
           }]
         }, moment(today)),
-        "ENROLL"
+        ""
       );
     });
 

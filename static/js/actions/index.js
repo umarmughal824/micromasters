@@ -1,7 +1,4 @@
-import _ from 'lodash';
-
 import * as api from '../util/api';
-import * as validation from '../util/validation';
 
 // user profile actions
 export const REQUEST_GET_USER_PROFILE = 'REQUEST_GET_USER_PROFILE';
@@ -76,10 +73,9 @@ export const saveProfile = (username, profile) => {
     dispatch(requestPatchUserProfile(username));
     return api.patchUserProfile(username, profile).
       then(newProfile => dispatch(receivePatchUserProfileSuccess(username, newProfile))).
-      catch(e => {
+      catch(() => {
         dispatch(receivePatchUserProfileFailure(username));
-        // propagate exception
-        return Promise.reject(e);
+        // the exception is assumed handled and will not be propagated
       });
   };
 };
@@ -88,27 +84,14 @@ export const updateProfileValidation = (username, errors) => ({
   payload: { errors, username }
 });
 
-export const validateProfile = (username, profile) => {
-  return dispatch => {
-    let errors = validation.validateProfile(profile);
-    dispatch(updateProfileValidation(username, errors));
-    if (_.isEmpty(errors)) {
-      return Promise.resolve();
-    } else {
-      return Promise.reject();
-    }
-  };
-};
-
 export function fetchUserProfile(username) {
   return dispatch => {
     dispatch(requestGetUserProfile(username));
     return api.getUserProfile(username).
       then(json => dispatch(receiveGetUserProfileSuccess(username, json))).
-      catch(e => {
+      catch(() => {
         dispatch(receiveGetUserProfileFailure(username));
-        // propagate exception
-        return Promise.reject(e);
+        // the exception is assumed handled and will not be propagated
       });
   };
 }
@@ -124,7 +107,10 @@ export const receiveDashboardSuccess = programs => ({
   type: RECEIVE_DASHBOARD_SUCCESS,
   payload: { programs }
 });
-const receiveDashboardFailure = () => ({ type: RECEIVE_DASHBOARD_FAILURE });
+export const receiveDashboardFailure = errorInfo => ({
+  type: RECEIVE_DASHBOARD_FAILURE,
+  payload: { errorInfo }
+});
 export const clearDashboard = () => ({ type: CLEAR_DASHBOARD });
 
 export function fetchDashboard() {
@@ -132,10 +118,9 @@ export function fetchDashboard() {
     dispatch(requestDashboard());
     return api.getDashboard().
       then(dashboard => dispatch(receiveDashboardSuccess(dashboard))).
-      catch(e => {
-        dispatch(receiveDashboardFailure());
-        // propagate exception
-        return Promise.reject(e);
+      catch(error => {
+        dispatch(receiveDashboardFailure(error));
+        // the exception is assumed handled and will not be propagated
       });
   };
 }

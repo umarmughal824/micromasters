@@ -1,5 +1,5 @@
 /* global SETTINGS: false */
-import assert from 'assert';
+import { assert } from 'chai';
 import React from 'react';
 
 import {
@@ -9,7 +9,18 @@ import {
   generateNewWorkHistory,
   getPreferredName,
   makeProfileProgressDisplay,
+  userPrivilegeCheck,
+  calculateDegreeInclusions,
 } from '../util/util';
+import {
+  EDUCATION_LEVELS,
+  USER_PROFILE_RESPONSE,
+  HIGH_SCHOOL,
+  ASSOCIATE,
+  BACHELORS,
+  DOCTORATE,
+  MASTERS,
+} from '../constants';
 
 /* eslint-disable camelcase */
 describe('utility functions', () => {
@@ -102,19 +113,108 @@ describe('utility functions', () => {
         let desc = svg.props.children[0];
         assert.equal(desc.props.children.join(""), `Profile progress: ${expected[i]}`);
 
-        for (let child of svg.props.children) {
+        let foundCircle = false, foundCircleText = false, foundText = false;
+        for (let child of svg.props.children[1]) {
           if (child.key === `circle_${i}`) {
             // the white circle should be the currently selected one
             assert.equal(child.props.fill, "white");
+            foundCircle = true;
           }
           if (child.key === `circletext_${i}`) {
             assert.equal(child.props.children, `${i + 1}`);
+            foundCircleText = true;
           }
           if (child.key === `text_${i}`) {
             assert.equal(child.props.children, expected[i]);
+            foundText = true;
           }
         }
+        if (!foundCircle || !foundCircleText || !foundText) {
+          assert(false,
+            `Unable to find one of circle: ${foundCircle} circleText: ${foundCircleText} text: ${foundText}`
+          );
+        }
       }
+    });
+  });
+
+  describe('User privilege check', () => {
+    it('should return the value of the first function if the profile username matches', () => {
+      let profile = { username: SETTINGS.username };
+      let privilegedCallback = () => "hi";
+      assert.equal(userPrivilegeCheck(profile, privilegedCallback), "hi");
+    });
+
+    it('should return the second argument if the profile username matches', () => {
+      let profile = { username: SETTINGS.username };
+      let privilegedString = "hi";
+      assert.equal(userPrivilegeCheck(profile, privilegedString), "hi");
+    });
+
+    it('should return the value of the second function if the profile username does not match', () => {
+      let profile = { username: "another_user" };
+      let privilegedCallback = () => "vim";
+      let unprivilegedCallback = () => "emacs";
+      assert.equal(userPrivilegeCheck(profile, privilegedCallback, unprivilegedCallback), "emacs");
+    });
+
+    it('should return the value of the second argument if the profile username does not match', () => {
+      let profile = { username: "another_user" };
+      let privilegedCallback = () => "vim";
+      let unprivilegedString = "emacs";
+      assert.equal(userPrivilegeCheck(profile, privilegedCallback, unprivilegedString), "emacs");
+    });
+  });
+
+  describe('calculateDegreeInclusions', () => {
+    for (const { value: outerValue, label } of EDUCATION_LEVELS) {
+      it(`turns on all switches before and including ${label}`, () => {
+        let copy = {};
+        let found = false;
+        for (const { value: innerValue } of EDUCATION_LEVELS) {
+          copy[innerValue] = !found;
+          if (innerValue === outerValue) {
+            found = true;
+          }
+        }
+
+        let clone = Object.assign({}, USER_PROFILE_RESPONSE, {
+          edx_level_of_education: outerValue,
+          education: []
+        });
+        assert.deepEqual(copy, calculateDegreeInclusions(clone));
+      });
+    }
+
+    it('turns on all switches if there is no edx_level_of_education', () => {
+      let defaults = {};
+      for (const { value } of EDUCATION_LEVELS) {
+        defaults[value] = true;
+      }
+
+      let clone = Object.assign({}, USER_PROFILE_RESPONSE, {
+        edx_level_of_education: null,
+        education: []
+      });
+      assert.deepEqual(defaults, calculateDegreeInclusions(clone));
+    });
+
+    it('turns on the switch if there is at least one education of that level', () => {
+      let clone = Object.assign({}, USER_PROFILE_RESPONSE, {
+        edx_level_of_education: HIGH_SCHOOL,
+        education: [{
+          degree_name: HIGH_SCHOOL
+        }, {
+          degree_name: DOCTORATE
+        }]
+      });
+      assert.deepEqual(calculateDegreeInclusions(clone), {
+        [HIGH_SCHOOL]: true,
+        [DOCTORATE]: true,
+        [BACHELORS]: false,
+        [MASTERS]: false,
+        [ASSOCIATE]: false
+      });
     });
   });
 });

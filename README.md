@@ -31,24 +31,34 @@ you get it running locally. It's obviously more configurable that way, and you'l
 likely need to run it locally for other projects in the future.
 
 #### 1) Install edX
-Run through the
-[instructions provided by edX](https://edx-installing-configuring-and-running.readthedocs.io/en/latest/installation/devstack/install_devstack.html)
-up to and including the **LMS Workflow** section. Note that this section mentions
-some helpful dummy accounts that edX devstack comes preloaded with (eg: staff@example.com).
 
-#### 2) Run the machine and SSH into it
+Download the edX Vagrant box according to
+[these instructions provided by edX](https://edx-installing-configuring-and-running.readthedocs.io/en/latest/installation/devstack/install_devstack.html#installing-devstack-with-a-direct-vagrant-box-download)
 
-    # Start the VM
+#### 2) Connect to the VM and run the LMS server
+
+edX has [instructions for this as well](https://edx-installing-configuring-and-running.readthedocs.io/en/latest/installation/devstack/start_devstack.html#connect-to-devstack-vm).
+More concisely, these are the commands you should run to connect to the VM and run the LMS server:
+
+    # In your local edx_devstack/ directory, start the VM
     vagrant up
     # Once that's done, ssh into the running VM
     vagrant ssh
     # Switch to the edxapp account within SSH session
     sudo su edxapp
+    # Run the LMS server
+    paver devstack lms
+    # To run the server without updating requirements and compiling assets, add the '--fast' parameter
+    # eg: paver devstack --fast lms
 
-Switching to the edxapp account sources the edxapp environment and sets the
-current working directory to the edx-platform repository. If you get the error
-_"Unknown task: devstack, the working directory has not been updated properly"_,
-simply run ``cd /edx/app/edxapp/edx-platform`` and re-run the command.
+A few notes:
+
+- Switching to the edxapp account sources the edxapp environment and sets the
+ current working directory to the edx-platform repository.
+- "LMS" stands for "Learning Management System". The Open edX platform has
+ [several different components](http://edx.readthedocs.io/projects/edx-developer-guide/en/latest/architecture.html#overview);
+ MicroMaster's only depends on LMS.
+
 
 #### 3) Set up a user with superuser permissions
 
@@ -58,7 +68,7 @@ need to use Django admin for the next step anyway.
 
 - **In Django admin**
 
-    Run the server (``paver devstack --fast lms``) and navigate to Django admin
+    Run the server (discussed in step 2) and navigate to Django admin
     (eg: http://192.168.33.10:8000/admin). In the **Authentication and Authorization**
     section, select a **User**, or add one then select it. In the **Permissions**
     section, check the **Superuser status** box and save.
@@ -78,16 +88,17 @@ need to use Django admin for the next step anyway.
 #### 4) Add an OAuth client
 
 Run Django admin (see "In Django admin" section from step 2), navigate to the
-OAuth2 clients section (eg: http://192.168.33.10:8000/admin/oauth2/client/), and add a
-new client. Fill in the values as follows:
+Django OAuth Toolkit section (/admin/oauth2_provider/), and add a
+new Application. Fill in the values as follows:
 
 - **User**: Use the lookup (magnifying glass) to find your superuser
-- **Name**: Anything you want. Something like 'micromasters-local'
-- **Url**: The URL where MicroMaster’s will be running. If you're running it via
-Docker, run ``docker-machine ip`` from the host machine to get the container IP.
-MicroMaster’s runs on port ``8079`` by default, so this value should be something
-like ``http://192.168.99.100:8079``
-- **Redirect uri**: Your **Url** value with "/complete/edxorg/" at the end
+- **Redirect uris**: The URL where MicroMaster’s will be running, followed by "/complete/edxorg/".
+If you're running it via Docker, run ``docker-machine ip`` from the host machine to get the
+container IP. MicroMaster’s runs on port ``8079`` by default, so this value should be something
+like ``http://192.168.99.100:8079/complete/edxorg/``
+- **Client type**: Set to '_Confidential_'.
+- **Authorization grant type**: Set to '_Authorization Code_'.
+- **Name**: Anything you want. Something like 'mm-local' would do fine here.
 
 #### 5) Copy relevant values to use in the MicroMaster’s .env file
 
@@ -101,10 +112,28 @@ a template to create your ``.env`` file. For MicroMaster’s to work, it needs 3
     on port ``8000`` by default.
 - ``EDXORG_CLIENT_ID`` and ``EDXORG_CLIENT_SECRET``
 
-    These values can be found in Django admin OAuth client section discussed above.
+    These values can be found in the Django OAuth Toolkit Application you created above.
     **Client id:** and **Client secret:** values should be auto-generated for
-    your new client. Use those values for the corresponding ``EDXORG_``
-    variables in the ``.env`` file
+    that new Application. Use those values for the corresponding ``EDXORG_``
+    variables in the ``.env`` file.
+
+#### General edX devstack debugging notes
+
+- To update your devstack with important changes from edX, run `vagrant provision` in
+your edx_devstack directory. This will pull down the latest release and run migrations, among
+other things.
+- If you get an error related to Mongo locking while ssh'ed into the Vagrant VM, run the following
+ **as the default 'vagrant' user, NOT as the 'edxapp' user**:
+
+       function mongo_unlock {
+           sudo rm /edx/var/mongo/mongodb/mongod.lock
+           sudo mongod -repair --config /etc/mongod.conf
+           sudo chown -R mongodb:mongodb /edx/var/mongo/.
+           sudo /etc/init.d/mongod start
+       }
+       mongo_unlock
+- If you get the error  _"Unknown task: devstack, the working directory has not been updated
+properly"_, simply run ``cd /edx/app/edxapp/edx-platform`` and re-run the command.
 
 ## Docker Container Configuration and Start-up
 
@@ -179,6 +208,6 @@ Tests should be run in the Docker container, not the host machine. They can be r
     # run the JS tests without coverage report
     docker-compose run watch npm test
     # run a single JS test file
-    docker-compose run watch npm run-script singleTest /path/to/test.js
+    docker-compose run watch npm test /path/to/test.js
     # Run the JS linter
     docker-compose run watch npm run-script lint

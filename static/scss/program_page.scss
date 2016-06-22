@@ -1,0 +1,102 @@
+/* Programs */
+
+.banner-sub {
+	background-image:none; /* reset */
+	margin-top:18px;
+	border-bottom:1px solid #fff;
+}
+
+.banner-program-1 {
+	background-size: cover;
+}
+
+.banner-sub nav {
+	background-color:transparent;
+	box-shadow:none!important;
+}
+
+.banner-sub .banner-wrapper-content h1 {
+	text-align: center;
+	font-weight:100;
+}
+
+.banner-sub .banner-wrapper-content h1 span {
+	color:#F8E71C;
+	font-weight: 700;
+}
+
+.nav-programs {
+	text-transform: uppercase;
+}
+
+.nav-programs li a {
+	color:#699AAE;
+}
+
+.nav-programs li.active a, .nav-programs li.active a:focus, .nav-programs li a:focus {
+	color:#000;
+}
+
+
+.tab-content-programs {
+	padding-bottom:50px;
+}
+
+/* common */
+
+.panel-body {
+	font-size:18px;
+	color:#4A4A4A;
+	line-height: 1.9em;
+}
+
+blockquote {
+	font-family:Georgia, Times, Serif;
+	font-style:italic;
+	color:#999;
+	font-weight:100;
+	border:0;
+	padding:14px 40px 14px 40px;
+}
+
+blockquote:before {
+	content:'“';
+	font-family:Georgia, Times, Serif;
+	font-weight:700;
+	font-size:30px;
+	margin-left:-18px;
+	color:rgba(174,72,75,.24);
+}
+
+.quote-author {
+	color:#AE484B;
+	text-align: right;
+	font-family:Roboto, sans-serif;
+	font-style: normal;
+	font-weight: 700;
+}
+
+.panel-body h4 {
+	text-transform: uppercase;
+	color:#000;
+	font-weight: 700;
+}
+
+.sidebar-content {
+	background: url(/static/images/bg-tile-1.png);
+	padding:20px 20px 40px 20px;
+	border:1px solid #eee;
+	border-left:4px solid #eee;
+}
+
+.sidebar-content p {
+	margin:0 0 5px 0;
+	padding:0;
+}
+
+.panel-body h5 {
+	color:#C64A5A;
+	text-transform: uppercase;
+	font-weight: 700;
+	margin:20px 0 10px 0;
+}

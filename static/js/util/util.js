@@ -1,11 +1,20 @@
+// @flow
 /* global SETTINGS:false */
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ga from 'react-ga';
 import striptags from 'striptags';
+import _ from 'lodash';
 
-export function sendGoogleAnalyticsEvent(category, action, label, value) {
-  let event = {
+import { EDUCATION_LEVELS } from '../constants';
+import type {
+  Profile,
+  EducationEntry,
+  WorkHistoryEntry
+} from '../flow/profileTypes';
+
+export function sendGoogleAnalyticsEvent(category: any, action: any, label: any, value: any) {
+  let event: any = {
     category: category,
     action: action,
     label: label,
@@ -16,8 +25,15 @@ export function sendGoogleAnalyticsEvent(category, action, label, value) {
   ga.event(event);
 }
 
+export function userPrivilegeCheck (profile: Profile, privileged: any, unPrivileged: any): any {
+  if ( profile.username === SETTINGS.username ) {
+    return _.isFunction(privileged) ? privileged() : privileged;
+  } else {
+    return _.isFunction(unPrivileged) ? unPrivileged() : unPrivileged;
+  }
+}
 
-export function makeProfileProgressDisplay(active) {
+export function makeProfileProgressDisplay(active: number) {
   const width = 750, height = 100, radius = 20, paddingX = 40, paddingY = 5;
   const tabNames = ["Personal", "Education", "Professional", "Profile Privacy"];
   const numCircles = tabNames.length;
@@ -131,11 +147,8 @@ export function makeProfileProgressDisplay(active) {
 /* eslint-disable camelcase */
 /**
  * Generate new education object 
- *
- * @param {String} level The select degree level
- * @returns {Object} New empty education object
  */
-export function generateNewEducation(level) {
+export function generateNewEducation(level: string): EducationEntry {
   return {
     'degree_name': level,
     'graduation_date': null,
@@ -150,10 +163,8 @@ export function generateNewEducation(level) {
 
 /**
  * Generate new work history object
- * 
- * @returns {Object} New empty work history object
  */
-export function generateNewWorkHistory() {
+export function generateNewWorkHistory(): WorkHistoryEntry {
   return {
     position: null,
     industry: null,
@@ -170,10 +181,8 @@ export function generateNewWorkHistory() {
 
 /**
  * Converts string to int using base 10. Stricter in what is accepted than parseInt
- * @param value {String} A value to be parsed
- * @returns {Number|undefined} Either an integer or undefined if parsing didn't work.
  */
-export const filterPositiveInt = value => {
+export const filterPositiveInt = (value: string): number|void => {
   if(/^[0-9]+$/.test(value)) {
     return Number(value);
   }
@@ -182,9 +191,8 @@ export const filterPositiveInt = value => {
 
 /**
  * Returns the string with any HTML rendered and then its tags stripped
- * @return {String} rendered text stripped of HTML
  */
-export function makeStrippedHtml(textOrElement) {
+export function makeStrippedHtml(textOrElement: any): string {
   if (React.isValidElement(textOrElement)) {
     let container = document.createElement("div");
     ReactDOM.render(textOrElement, container);
@@ -194,7 +202,7 @@ export function makeStrippedHtml(textOrElement) {
   }
 }
 
-export function makeProfileImageUrl(profile) {
+export function makeProfileImageUrl(profile: Profile) {
   let imageUrl = `${SETTINGS.edx_base_url}/static/images/profiles/default_120.png`.
   //replacing multiple "/" with a single forward slash, excluding the ones following the colon
     replace(/([^:]\/)\/+/g, "$1");
@@ -207,9 +215,27 @@ export function makeProfileImageUrl(profile) {
 
 /**
  * Returns the preferred name or else the username
- * @param profile {Object} The user profile
- * @returns {string}
  */
-export function getPreferredName(profile) {
+export function getPreferredName(profile: Profile): string {
   return profile.preferred_name || SETTINGS.name || SETTINGS.username;
+}
+
+export function calculateDegreeInclusions(profile: Profile) {
+  let highestLevelFound = false;
+  let inclusions = {};
+  for (const { value } of EDUCATION_LEVELS) {
+    inclusions[value] = highestLevelFound ? false : true;
+    if (value === profile.edx_level_of_education) {
+      // every level after this point is higher than the user has attained according to edx
+      highestLevelFound = true;
+    }
+  }
+
+  // turn on all switches where the user has data
+  for (const { value } of EDUCATION_LEVELS) {
+    if (profile.education.filter(education => education.degree_name === value).length > 0) {
+      inclusions[value] = true;
+    }
+  }
+  return inclusions;
 }

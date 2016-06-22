@@ -1,7 +1,15 @@
+// @flow
 import _ from 'lodash';
+import moment from 'moment';
 
+import type {
+  Profile,
+  WorkHistoryEntry,
+  ValidationErrors
+} from '../flow/profileTypes';
+import type { UIState } from '../reducers/ui';
 import { filterPositiveInt } from './util';
-import { HIGH_SCHOOL } from '../constants';
+import { HIGH_SCHOOL, EDUCATION_LEVELS } from '../constants';
 
 let handleNestedValidation = (profile, keys, nestedKey) => {
   let nestedFields = index => (
@@ -10,19 +18,24 @@ let handleNestedValidation = (profile, keys, nestedKey) => {
   return _.flatten(profile[nestedKey].map((v, i) => nestedFields(i)));
 };
 
-let checkFieldPresence = (profile, requiredFields, messages) => {
+let isNilOrEmptyString = val => _.isNil(val) || val === "";
+
+let checkFieldPresence = (profile, requiredFields, messages: any): ValidationErrors => {
   let errors = {};
 
   for (let keySet of requiredFields) {
     let val = _.get(profile, keySet);
-    if (_.isUndefined(val) || _.isNull(val) || val === "" ) {
-      _.set(errors, keySet,  `${messages[keySet.slice(-1)[0]]} is required`);
+    if (isNilOrEmptyString(val)) {
+      _.set(errors, keySet,  messages[keySet.slice(-1)[0]]);
     }
   }
   return errors;
 };
 
-export function personalValidation(profile) {
+export type Validator = (a: Profile) => ValidationErrors;
+export type UIValidator = (a: Profile, b: UIState) => ValidationErrors;
+
+export function personalValidation(profile: Profile): ValidationErrors {
   let requiredFields = [
     ['first_name'],
     ['last_name'],
@@ -38,32 +51,37 @@ export function personalValidation(profile) {
     ['date_of_birth'],
   ];
   let validationMessages = {
-    'first_name': "Given name",
-    'last_name': "Family name",
-    'preferred_name': "Preferred name",
-    'gender': "Gender",
-    'preferred_language': "Preferred language",
-    'city': "City",
-    'state_or_territory': 'State or Territory',
-    'country': "Country",
-    'birth_city': 'City',
-    'birth_state_or_territory': 'State or Territory',
-    'birth_country': "Country",
-    'date_of_birth': "Date of birth"
+    'first_name': "Given name is required",
+    'last_name': "Family name is required",
+    'preferred_name': "Preferred name is required",
+    'gender': "Gender is required",
+    'preferred_language': "Preferred language is required",
+    'city': "City is required",
+    'state_or_territory': 'State or Territory is required',
+    'country': "Country is required",
+    'birth_city': 'City is required',
+    'birth_state_or_territory': 'State or Territory is required',
+    'birth_country': "Country is required",
+    'date_of_birth': 'Please enter a valid date of birth'
   };
-  return checkFieldPresence(profile, requiredFields, validationMessages);
+  let errors = checkFieldPresence(profile, requiredFields, validationMessages);
+  if (!moment(profile.date_of_birth).isBefore(moment(), 'day')) {
+    // birthdays must be before today
+    errors.date_of_birth = validationMessages.date_of_birth;
+  }
+  return errors;
 }
 
-export function educationValidation(profile) {
+export function educationValidation(profile: Profile): ValidationErrors {
   let messages = {
-    'degree_name': 'Degree level',
-    'graduation_date': 'Graduation Date',
-    'field_of_study': 'Field of study',
-    'online_degree': 'Online Degree',
-    'school_name': 'School name',
-    'school_city': 'City',
-    'school_state_or_territory': 'State',
-    'school_country': 'Country'
+    'degree_name': 'Degree level is required',
+    'graduation_date': 'Please enter a valid graduation date',
+    'field_of_study': 'Field of study is required',
+    'online_degree': 'Online Degree is required',
+    'school_name': 'School name is required',
+    'school_city': 'City is required',
+    'school_state_or_territory': 'State is required',
+    'school_country': 'Country is required'
   };
   let nestedKeys = [
     'degree_name',
@@ -75,7 +93,7 @@ export function educationValidation(profile) {
     'school_state_or_territory',
     'school_country'
   ];
-  if ( !_.isEmpty(profile.education) ) {
+  if (!_.isEmpty(profile.education)) {
     let requiredFields = handleNestedValidation(profile, nestedKeys, 'education');
     requiredFields = requiredFields.filter(([, index, key]) =>
       // don't require field of study for high school students
@@ -87,15 +105,33 @@ export function educationValidation(profile) {
   }
 }
 
-export function employmentValidation(profile) {
+export function educationUiValidation(profile: Profile, ui: UIState): ValidationErrors {
+  if (profile.education === undefined) {
+    profile = Object.assign({}, profile, {
+      education: []
+    });
+  }
+
+  let errors = {};
+  for (let {value, label} of EDUCATION_LEVELS) {
+    let items = profile.education.filter(education => education.degree_name === value);
+    if (ui.educationDegreeInclusions[value] && items.length === 0) {
+      errors[`education_${value}_required`] = `${label} is required if switch is set`;
+    }
+  }
+  return errors;
+}
+
+export type WorkEntry = [string, WorkHistoryEntry];
+export function employmentValidation(profile: Profile): ValidationErrors {
   let messages = {
-    'position': 'Position',
-    'industry': 'Industry',
-    'company_name': 'Company Name',
-    'start_date': 'Start Date',
-    'city': 'City',
-    'country': 'Country',
-    'state_or_territory': 'State or Territory',
+    'position': 'Position is required',
+    'industry': 'Industry is required',
+    'company_name': 'Company Name is required',
+    'start_date': 'Please enter a valid start date',
+    'city': 'City is required',
+    'country': 'Country is required',
+    'state_or_territory': 'State or Territory is required',
   };
   let nestedKeys = [
     'position',
@@ -106,50 +142,61 @@ export function employmentValidation(profile) {
     'country',
     'state_or_territory',
   ];
-  if ( !_.isEmpty(profile.work_history) ) {
+  if (!_.isEmpty(profile.work_history)) {
     let requiredFields = handleNestedValidation(profile, nestedKeys, 'work_history');
-    return checkFieldPresence(profile, requiredFields, messages);
+    let errors = checkFieldPresence(profile, requiredFields, messages);
+
+    for (let entry: WorkEntry of Object.entries(profile.work_history)) {
+      let [index, workHistory] = entry;
+      if (!isNilOrEmptyString(workHistory.end_date) &&
+        moment(workHistory.end_date).isBefore(workHistory.start_date, 'month')) {
+        _.set(errors, ['work_history', index, 'end_date'], "End date cannot be before start date");
+      }
+      let editIsEmpty = _.isEmpty(workHistory.end_date_edit) || (
+        isNilOrEmptyString(workHistory.end_date_edit.year) &&
+        isNilOrEmptyString(workHistory.end_date_edit.month)
+      );
+      if (isNilOrEmptyString(workHistory.end_date) && !editIsEmpty) {
+        _.set(errors, ['work_history', index, 'end_date'], "Please enter a valid end date or leave it blank");
+      }
+    }
+
+    return errors;
   } else {
     return {};
   }
 }
 
-export function privacyValidation(profile) {
+export function employmentUiValidation(profile: Profile, ui: UIState): ValidationErrors {
+  if (ui.workHistoryEdit && _.isEmpty(profile.work_history)) {
+    return {
+      work_history_required: "Work history is required if switch is set"
+    };
+  } else {
+    return {};
+  }
+}
+
+export function privacyValidation(profile: Profile): ValidationErrors {
   let requiredFields = [
     ['account_privacy']
   ];
   let messages = {
-    'account_privacy': 'Privacy level'
+    'account_privacy': 'Privacy level is required'
   };
   return checkFieldPresence(profile, requiredFields, messages);
 }
 
-/* eslint-disable camelcase */
-/**
- * Validates the profile
- *
- * @param {Object} profile The user profile
- * @returns {Object} Validation errors or an empty object if no errors
- */
-export function validateProfile(profile) {
-  return Object.assign(
-    {},
-    personalValidation(profile),
-    educationValidation(profile),
-    employmentValidation(profile),
-    privacyValidation(profile),
-  );
-}
-
-/* eslint-enable camelcase */
 /*
 check that the profile is complete. we make the assumption that a
 complete profile consists of:
   - a valid personal tab
-  - an entry for 'currently employed', and a work history entry if
-    `currently employed == 'yes'`
+  - one or more education items, for the education types the user has marked
+  - one or more work items if the user has marked any work history
+  - a valid privacy level
 */
-export function validateProfileComplete(profile) {
+export type ProfileComplete = [boolean, ?string, ?ValidationErrors];
+export function validateProfileComplete(profile: Profile): ProfileComplete {
   let errors = {};
 
   // check personal tab
@@ -185,10 +232,8 @@ export function validateProfileComplete(profile) {
 
 /**
  * Validate a day of month
- * @param {String} string The input string
- * @returns {Number|undefined} The valid date if a valid date value or undefined if not valid
  */
-export function validateDay(string) {
+export function validateDay(string: string): ?number {
   let date = filterPositiveInt(string);
   if (date === undefined) {
     return undefined;
@@ -202,10 +247,8 @@ export function validateDay(string) {
 
 /**
  * Validate a month number
- * @param {String} string The input string
- * @returns {Number|undefined} The valid month if a valid month value or undefined if not valid
  */
-export function validateMonth(string) {
+export function validateMonth(string: string): ?number {
   let month = filterPositiveInt(string);
   if (month === undefined) {
     return undefined;
@@ -218,17 +261,24 @@ export function validateMonth(string) {
 
 /**
  * Validate a year string is an integer and fits into YYYY
- * @param {String} string The input string
- * @returns {Number|undefined} The valid year if a valid year value or undefined if not valid
  */
-export function validateYear(string) {
+export function validateYear(string: string): ?number {
   let year = filterPositiveInt(string);
   if (year === undefined) {
     return undefined;
   }
-  if (year < 1 || year > 9999) {
+  if (year < 1800 || year >= 2100) {
     // fit into YYYY format
     return undefined;
   }
   return year;
+}
+
+/**
+ * Returns a function which merges the results of the given functions on a set of arguments
+ */
+export function combineValidators(...validators: Array<UIValidator|Validator>): UIValidator|Validator {
+  return (...args: Array<Profile|UIState>) => _.merge({}, ...validators.map(
+    validator => validator(...args)
+  ));
 }

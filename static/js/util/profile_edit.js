@@ -1,9 +1,7 @@
+// @flow
 import React from 'react';
 import moment from 'moment';
-import iso3166 from 'iso-3166-2';
 import _ from 'lodash';
-import AutoComplete from '../components/AutoComplete';
-import MenuItem from 'material-ui/MenuItem';
 import TextField from 'material-ui/TextField';
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
 
@@ -13,6 +11,9 @@ import {
   validateYear,
   validateDay,
 } from '../util/validation';
+import type { Validator, UIValidator } from './validation';
+import type { Profile } from '../flow/profileTypes';
+import type { Option } from '../flow/generalTypes';
 
 // utility functions for pushing changes to profile forms back to the
 // redux store.
@@ -23,13 +24,8 @@ import {
  * bind this to this.boundRadioGroupField in the constructor of a form component
  * to update radio buttons.
  * pass in the name (used as placeholder), key for profile, and the options.
- *
- * @param keySet {String[]} Path to the field
- * @param label {String} Label for the field
- * @param options {Object[]} A list of options for the select field
- * @returns {ReactElement}
  */
-export function boundRadioGroupField(keySet, label, options) {
+export function boundRadioGroupField(keySet: string[], label: string, options: Option[]): React$Element {
   const { profile, updateProfile, errors } = this.props;
   const styles = {
     labelStyle: {
@@ -46,11 +42,12 @@ export function boundRadioGroupField(keySet, label, options) {
   const radioButtons = options.map(obj => {
     let helper = "";
     if (obj.helper) {
-      helper = `- ${obj.helper}`;
+      helper = `${obj.helper}`;
     }
     let label = (
       <span className="radio-label">
-        {obj.label}<span className="radio-label-hint">{helper}</span>
+        {obj.label}
+        <p className="radio-label-hint">{helper}</p>
       </span>
     );
 
@@ -92,12 +89,8 @@ export function boundRadioGroupField(keySet, label, options) {
  * we pass in a keyset looking like this:
  *
  * ["top-level-key", index, "nested_object_key"] or just ["top_level_key"]
- *
- * @param keySet {String[]} Path to the field
- * @param label {String} Label for the field
- * @returns {ReactElement}
  */
-export function boundTextField(keySet, label) {
+export function boundTextField(keySet: string[], label: string): React$Element {
   const {
     profile,
     errors,
@@ -127,178 +120,11 @@ export function boundTextField(keySet, label) {
 }
 
 /**
- * bind this to this.boundSelectField in the constructor of a form component
- * to update select fields
- * pass in the name (used as placeholder), key for profile, and the options.
- *
- * @param keySet {String[]} Path to the field
- * @param label {String} Label for the field
- * @param options {Object[]} A list of options for the select field
- * @param onChange {func} Handler which is called when the state changes or is cleared.
- * Takes the updated profile as argument
- * @returns {ReactElement}
- */
-export function boundSelectField(keySet, label, options, onChange) {
-  const {
-    profile,
-    errors,
-    updateProfile,
-  } = this.props;
-
-  // use a temporary edit value to store text currently in the textbox
-  let editKeySet = keySet.concat();
-  editKeySet[editKeySet.length - 1] = `${editKeySet[editKeySet.length - 1]}_edit`;
-
-  let caseInsensitivePrefixFilter = (searchText, key) => {
-    let index = key.toLowerCase().indexOf(searchText.toLowerCase());
-    return index === 0;
-  };
-
-  let onNewRequest = (optionOrString, index) => {
-    let clone = _.cloneDeep(profile);
-    let toStore;
-    if (index === -1) {
-      // enter was pressed and optionOrString is a string
-      // select first item in dropdown if any are present
-      let filteredOptionValues = options.
-        map(option => option.label).
-        filter(caseInsensitivePrefixFilter.bind(this, optionOrString));
-      if (filteredOptionValues.length > 0) {
-        let option = options.find(option => option.label === filteredOptionValues[0]);
-        toStore = option.value;
-      }
-    } else {
-      // user selected an item in the menu
-      toStore = _.get(optionOrString, ['value', 'props', 'value']);
-    }
-
-    if (toStore !== undefined) {
-      _.set(clone, keySet, toStore);
-    } // else we couldn't figure out what the user wanted to select, so leave it as is
-    _.set(clone, editKeySet, undefined);
-
-    updateProfile(clone);
-    if (_.isFunction(onChange)) {
-      onChange(clone);
-    }
-  };
-
-  let selectedValue = _.get(profile, keySet);
-  let selectedOption = options.find(option => option.value === selectedValue);
-  let onUpdateInput = searchText => {
-    let clone = _.cloneDeep(profile);
-    _.set(clone, editKeySet, searchText);
-    _.set(clone, keySet, null);
-    updateProfile(clone);
-  };
-  let onBlur = () => {
-    // clear the edit value when we lose focus. In its place we will display
-    // the selected option label if one is selected, or an empty string
-    let clone = _.cloneDeep(profile);
-    _.set(clone, editKeySet, undefined);
-    updateProfile(clone);
-  };
-
-  let convertOption = option => ({
-    text: option.label,
-    value: <MenuItem key={option.value} primaryText={option.label} value={option.value}/>
-  });
-
-  let searchText;
-  let editText = _.get(profile, editKeySet);
-  if (editText !== undefined) {
-    searchText = editText;
-  } else if (selectedOption) {
-    searchText = selectedOption.label;
-  } else {
-    searchText = "";
-  }
-
-
-  return (
-    <AutoComplete
-      ref="autocomplete"
-      animated={false}
-      menuCloseDelay={0}
-      filter={caseInsensitivePrefixFilter}
-      dataSource={options.map(convertOption)}
-      searchText={searchText}
-      floatingLabelText={label}
-      openOnFocus={true}
-      menuStyle={{maxHeight: 300}}
-      fullWidth={true}
-      onNewRequest={onNewRequest}
-      onUpdateInput={onUpdateInput}
-      onBlur={onBlur}
-      errorText={_.get(errors, keySet)}
-    />
-  );
-}
-
-// HACK: we need to import the function above to allow us to mock it for testing
-import { boundSelectField as mockedBoundSelectField } from './profile_edit';
-
-/**
- * Bind this to this.boundStateSelectField in the constructor of a form component
- * to update select fields
- *
- * @param stateKeySet {String[]} Path to the state field
- * @param countryKeySet {String[]} Path to the country field
- * @param label {String} The label of the field
- * @returns {ReactElement}
- */
-export function boundStateSelectField(stateKeySet, countryKeySet, label) {
-  const {
-    profile,
-  } = this.props;
-  let options = [];
-  let country = _.get(profile, countryKeySet);
-  if (iso3166.data[country] !== undefined) {
-    options = Object.keys(iso3166.data[country].sub).map(code => ({
-      value: code,
-      label: iso3166.data[country].sub[code].name
-    }));
-    options = _.sortBy(options, 'label');
-  }
-
-  return mockedBoundSelectField.call(this, stateKeySet, label, options);
-}
-
-/**
- * Bind this to this.boundCountrySelectField in the constructor of a form component
- * to update select fields
- *
- * @param stateKeySet {String[]} Path to the state field
- * @param countryKeySet {String[]} Path to the country field
- * @param label {String} The label of the field
- * @returns {ReactElement}
- */
-export function boundCountrySelectField(stateKeySet, countryKeySet, label) {
-  const {
-    updateProfile,
-  } = this.props;
-
-  const onChange = newProfile => {
-    // clear state field when country field changes
-    let clone = _.cloneDeep(newProfile);
-    _.set(clone, stateKeySet, null);
-    updateProfile(clone);
-  };
-
-  return mockedBoundSelectField.call(this, countryKeySet, label, this.countryOptions, onChange);
-}
-
-/**
  * bind this to this.boundDateField in the constructor of a form component
  * to update date fields
  * pass in the name (used as placeholder), key for profile.
- *
- * @param keySet {String[]} Path to look up and set a field
- * @param label {String} Label for the field
- * @param omitDay {bool} If false, there is a date textbox in addition to month and year
- * @returns {ReactElement}
  */
-export function boundDateField(keySet, label, omitDay) {
+export function boundDateField(keySet: string[], label: string, omitDay: boolean): React$Element {
   const {
     profile,
     errors,
@@ -438,13 +264,12 @@ export function boundDateField(keySet, label, omitDay) {
 }
 
 /**
-   * Saves the profile and returns a promise, taking an optional function
- * to retrieve keys for validation of nested fields (e.g. profile.work_history)
- *
- * @param isLastStep {bool} If true, this is the last tab in the profile
+ * Validates the profile then PATCHes the profile if validation succeeded.
+ * Returns a promise which resolves with the new profile if validation and PATCH succeeded,
+ * or rejects if either failed
  */
-export function saveProfileStep(isLastStep=false) {
-  const { saveProfile, profile } = this.props;
+export function saveProfileStep(validator: Validator|UIValidator, isLastStep: boolean = false): Promise<Profile> {
+  const { saveProfile, profile, ui } = this.props;
   let clone = Object.assign({}, profile, {
     filled_out: profile.filled_out || isLastStep
   });
@@ -452,5 +277,5 @@ export function saveProfileStep(isLastStep=false) {
     // user has also seen email consent message at this point
     clone.email_optin = true;
   }
-  return saveProfile(clone);
+  return saveProfile(validator, clone, ui);
 }

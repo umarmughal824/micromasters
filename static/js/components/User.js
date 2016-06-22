@@ -1,3 +1,4 @@
+// @flow
 import React from 'react';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 import { Card, CardMenu } from 'react-mdl/lib/Card';
@@ -6,8 +7,9 @@ import iso3166 from 'iso-3166-2';
 
 import { makeProfileImageUrl } from '../util/util';
 import EmploymentForm from './EmploymentForm';
-import EducationForm from './EducationForm';
+import EducationDisplay from './EducationDisplay';
 import UserPagePersonalDialog from './UserPagePersonalDialog.js';
+import { userPrivilegeCheck } from '../util/util';
 
 export default class User extends React.Component {
   static propTypes = {
@@ -16,13 +18,13 @@ export default class User extends React.Component {
     ui:                           React.PropTypes.object,
   };
 
-  toggleShowPersonalDialog = () => {
+  toggleShowPersonalDialog: Function = (): void => {
     const {
       setUserPageDialogVisibility,
       ui: { userPageDialogVisibility }
     } = this.props;
     setUserPageDialogVisibility(!userPageDialogVisibility);
-  }
+  };
 
   render() {
     const { profile } = this.props;
@@ -62,16 +64,16 @@ export default class User extends React.Component {
           { profile.city }, { getStateName() }
         </span>
         <CardMenu>
-          <IconButton name="edit" onClick={this.toggleShowPersonalDialog}/>
+          {userPrivilegeCheck(profile, () => <IconButton name="edit" onClick={this.toggleShowPersonalDialog}/>)}
         </CardMenu>
       </Card>
 
       <Grid className="user-cards-grid">
         <Cell col={6}>
-          <EmploymentForm {...this.props} />
+          <EmploymentForm {...this.props} showSwitch={false} />
         </Cell>
         <Cell col={6}>
-          <EducationForm {...this.props} />
+          <EducationDisplay {...this.props} />
         </Cell>
       </Grid>
     </div>;

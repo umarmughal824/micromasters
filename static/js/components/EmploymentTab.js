@@ -1,14 +1,24 @@
+// @flow
 import React from 'react';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 
 import EmploymentForm from './EmploymentForm';
-import ProfileFormFields from '../util/ProfileFormFields';
+import ProfileProgressControls from './ProfileProgressControls';
+import {
+  employmentValidation,
+  employmentUiValidation,
+  combineValidators,
+} from '../util/validation';
 
-class EmploymentTab extends ProfileFormFields {
-  prevUrl = "/profile/education";
-  nextUrl = "/profile/privacy";
+class EmploymentTab extends React.Component {
+  static propTypes = {
+    saveProfile: React.PropTypes.func,
+    profile: React.PropTypes.object,
+    ui: React.PropTypes.object
+  };
 
   render () {
+    const { saveProfile, profile, ui } = this.props;
     return (
       <div>
         <Grid className="profile-splash">
@@ -19,12 +29,19 @@ class EmploymentTab extends ProfileFormFields {
         <Grid className="profile-tab-grid">
           <Cell col={1}></Cell>
           <Cell col={10}>
-            <EmploymentForm {...this.props} />
+            <EmploymentForm {...this.props} showSwitch={true} />
           </Cell>
           <Cell col={1}></Cell>
           <Cell col={1}></Cell>
           <Cell col={10}>
-            {this.progressControls()}
+            <ProfileProgressControls
+              prevUrl="/profile/education"
+              nextUrl="/profile/privacy"
+              saveProfile={saveProfile}
+              profile={profile}
+              ui={ui}
+              validator={combineValidators(employmentValidation, employmentUiValidation)}
+            />
           </Cell>
           <Cell col={1}></Cell>
         </Grid>
