@@ -92,10 +92,11 @@ Django OAuth Toolkit section (/admin/oauth2_provider/), and add a
 new Application. Fill in the values as follows:
 
 - **User**: Use the lookup (magnifying glass) to find your superuser
-- **Redirect uris**: The URL where MicroMasters will be running, followed by "/complete/edxorg/".
-If you're running it via Docker, run ``docker-machine ip`` from the host machine to get the
-container IP. MicroMasters runs on port ``8079`` by default, so this value should be something
-like ``http://192.168.99.100:8079/complete/edxorg/``
+- **Redirect uris**: The URL where MicroMaster’s will be running, followed by "/complete/edxorg/".
+ **Linux users:** the MicroMaster’s URL will be `http://localhost:8079`. **OSX users:** The MicroMaster's
+ IP can be found by running ``docker-machine ip <machine_name>`` from the host machine. MicroMaster’s runs on port
+ ``8079`` by default, so the full URL should be something like
+ ``http://192.168.99.100:8079/complete/edxorg/``
 - **Client type**: Set to '_Confidential_'.
 - **Authorization grant type**: Set to '_Authorization Code_'.
 - **Name**: Anything you want. Something like 'mm-local' would do fine here.
@@ -211,3 +212,5 @@ Tests should be run in the Docker container, not the host machine. They can be r
     docker-compose run watch npm test /path/to/test.js
     # Run the JS linter
     docker-compose run watch npm run-script lint
+    # Run JS type-checking
+    docker-compose run watch npm run-script flow
