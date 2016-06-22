@@ -204,9 +204,9 @@ describe("UserPage", function() {
             modifyTextField(inputs[0], "High School");
 
             // fill out graduation date, school name
-            modifyTextField(inputs[1], "12");
-            modifyTextField(inputs[2], "1999");
-            modifyTextField(inputs[3], "A School");
+            modifyTextField(inputs[1], "A School");
+            modifyTextField(inputs[2], "12");
+            modifyTextField(inputs[3], "1999");
 
             // set country, state, and city
             modifyTextField(inputs[4], "Afghanistan");

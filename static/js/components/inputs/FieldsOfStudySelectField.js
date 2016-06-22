@@ -19,9 +19,10 @@ export default class FieldsOfStudySelectField extends React.Component {
   };
 
   static autocompleteStyleProps = {
-    menuStyle: {maxHeight: 300, width: 600},
+    menuStyle: {maxHeight: 300},
     listStyle: {width: '100%'},
-    fullWidth: false
+    menuHeight: 300,
+    fullWidth: true
   };
 
   render() {
