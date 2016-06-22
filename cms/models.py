@@ -63,6 +63,11 @@ class ProgramPage(Page):
     """
     description = RichTextField(blank=True)
     program = models.OneToOneField('courses.Program', null=True, on_delete=models.SET_NULL)
+    external_program_page_url = models.URLField(
+        blank=True,
+        null=True,
+        help_text="Use this field to directly link an external web page for this program."
+    )
     background_image = models.ForeignKey(
         Image,
         null=True,
@@ -76,6 +81,7 @@ class ProgramPage(Page):
     content_panels = Page.content_panels + [
         FieldPanel('description', classname="full"),
         FieldPanel('program'),
+        FieldPanel('external_program_page_url'),
         FieldPanel('background_image'),
         FieldPanel('contact_us'),
         FieldPanel('title_over_image'),
