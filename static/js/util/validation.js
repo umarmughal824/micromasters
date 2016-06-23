@@ -154,7 +154,7 @@ export function employmentValidation(profile: Profile): ValidationErrors {
     profile.work_history.forEach((workHistory, index) => {
       if (!isNilOrEmptyString(workHistory.end_date) && workHistory.end_date !== undefined &&
         moment(workHistory.end_date).isBefore(workHistory.start_date, 'month')) {
-        _.set(errors, ['work_history', index, 'end_date'], "End date cannot be before start date");
+        _.set(errors, ['work_history', String(index), 'end_date'], "End date cannot be before start date");
       }
       let editIsEmpty = _.isEmpty(workHistory.end_date_edit) || (
         workHistory.end_date_edit !== undefined &&
@@ -162,7 +162,7 @@ export function employmentValidation(profile: Profile): ValidationErrors {
           isNilOrEmptyString(workHistory.end_date_edit.month)
       );
       if (isNilOrEmptyString(workHistory.end_date) && !editIsEmpty) {
-        _.set(errors, ['work_history', index, 'end_date'], "Please enter a valid end date or leave it blank");
+        _.set(errors, ['work_history', String(index), 'end_date'], "Please enter a valid end date or leave it blank");
       }
     });
 

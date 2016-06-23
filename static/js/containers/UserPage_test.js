@@ -30,7 +30,8 @@ import {
 } from '../util/util';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../util/api';
-import { USER_PROFILE_RESPONSE, HIGH_SCHOOL } from '../constants';
+import { USER_PROFILE_RESPONSE, HIGH_SCHOOL, DOCTORATE } from '../constants';
+import { workEntriesByDate, educationEntriesByDate } from '../util/sorting';
 
 describe("UserPage", function() {
   this.timeout(5000);
@@ -48,6 +49,42 @@ describe("UserPage", function() {
     return [...document.getElementsByClassName('deletion-confirmation')].find(dialog => (
       dialog.style["left"] === "0px"
     ));
+  };
+
+  const confirmResumeOrder = (
+    editButton,
+    profileProperty,
+    sortFunc,
+    editActions,
+    dialogIndexProperty
+  ) => {
+    let state = helper.store.getState();
+    let sorted = sortFunc(state.profiles[SETTINGS.username].profile[profileProperty]);
+
+    // sorted entries should not equal unsorted entries
+    assert.notDeepEqual(
+      state.profiles[SETTINGS.username].profile[profileProperty],
+      sorted.map(([,entry]) => entry)
+    );
+
+    return listenForActions(editActions, () => {
+      TestUtils.Simulate.click(editButton);
+    }).then(() => {
+      state = helper.store.getState();
+      let stateIndex = state.ui[dialogIndexProperty];
+      let [sortIndex, sortEntry] = sorted[0];
+      // the dialog index dispatched to the store should be the same index
+      // as the index (into the unsorted list) of the first element in our sorted list
+      // since we clicked on the first entry in the UI
+      assert.equal(stateIndex, sortIndex);
+      // this index should not be equal to 0, since the first element in the sorted list
+      // should not be the first item in the unsorted list
+      assert.notEqual(stateIndex, 0);
+      // the entry the index in the state points to should be the same element
+      // in the unsorted array that we have in the sorted array
+      let entries = state.profiles[SETTINGS.username].profile[profileProperty];
+      assert.deepEqual(sortEntry, entries[stateIndex]);
+    });
   };
 
   describe ("Authenticated user page", () => {
@@ -77,10 +114,49 @@ describe("UserPage", function() {
           getElementsByClassName('delete-button')[0];
       };
 
+      beforeEach(() => {
+        let userProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
+          username: SETTINGS.username
+        });
+        userProfile.education.push({
+          "id": 3,
+          "degree_name": DOCTORATE,
+          "graduation_date": "2015-12-01",
+          "field_of_study": "Philosophy",
+          "school_name": "Harvard",
+          "school_city": "Cambridge",
+          "school_state_or_territory": "US-MA",
+          "school_country": "US",
+          "online_degree": false
+        });
+        helper.profileGetStub.
+          withArgs(SETTINGS.username).
+          returns(Promise.resolve(userProfile));
+      });
+
       it('shows the education component', () => {
         return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
           let title = div.getElementsByClassName('profile-card-title')[1];
           assert.equal(title.textContent, 'Education');
+        });
+      });
+
+      it('should show the entries in resume order', () => {
+        return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
+          let editButton = div.querySelector('#education-card').
+            querySelector('.edit-button');
+
+          return confirmResumeOrder(
+            editButton,
+            'education',
+            educationEntriesByDate,
+            [
+              SET_EDUCATION_DIALOG_INDEX,
+              SET_EDUCATION_DIALOG_VISIBILITY,
+              SET_EDUCATION_DEGREE_LEVEL,
+            ],
+            'educationDialogIndex'
+          );
         });
       });
 
@@ -230,6 +306,25 @@ describe("UserPage", function() {
         return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
           let title = div.getElementsByClassName('profile-card-title')[0];
           assert.equal(title.textContent, 'Employment');
+        });
+      });
+
+      it('should show the entries in resume order', () => {
+        return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
+          let editButton = div.getElementsByClassName('profile-tab-card')[0].
+            getElementsByClassName('profile-row-icons')[0].
+            getElementsByClassName('mdl-button')[0];
+
+          return confirmResumeOrder(
+            editButton,
+            'work_history',
+            workEntriesByDate,
+            [
+              SET_WORK_DIALOG_INDEX,
+              SET_WORK_DIALOG_VISIBILITY
+            ],
+            'workDialogIndex'
+          );
         });
       });
 

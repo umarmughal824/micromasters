@@ -7,6 +7,8 @@
 
 [libs]
 ./static/js/flow/declarations.js
+node_modules/iflow-lodash/index.js.flow
+node_modules/iflow-moment/index.js.flow
 
 [options]
 esproposal.class_static_fields=enable

@@ -18,6 +18,7 @@ import {
   deleteEducationEntry,
 } from '../util/editEducation';
 import { educationValidation } from '../util/validation';
+import { educationEntriesByDate } from '../util/sorting';
 import type { Option } from '../flow/generalTypes';
 import type {
   EducationEntry,
@@ -61,9 +62,10 @@ class EducationForm extends ProfileFormFields {
     if (educationDegreeInclusions[level.value]) {
       let rows: Array<React$Element|void> = [];
       if (education !== undefined) {
-        rows = education.map((entry, index) => (
-          entry.degree_name === level.value ? this.educationRow(entry, index) : undefined
-        ));
+        let sorted = educationEntriesByDate(education);
+        rows = sorted.filter(([,entry]) => (
+          entry.degree_name === level.value
+        )).map(([index, entry]) => this.educationRow(entry, index));
       }
       rows.push(
         <FABButton
@@ -89,7 +91,7 @@ class EducationForm extends ProfileFormFields {
     let deleteEntry = () => this.openEducationDeleteDialog(index);
     let editEntry = () => this.openEditEducationForm(index);
     let validationAlert = () => {
-      if (_.get(errors, ['education', index])) {
+      if (_.get(errors, ['education', String(index)])) {
         return <IconButton name="error" onClick={editEntry} />;
       }
     };

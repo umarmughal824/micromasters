@@ -12,7 +12,7 @@ import _ from 'lodash';
 import moment from 'moment';
 
 import { generateNewWorkHistory, userPrivilegeCheck } from '../util/util';
-import { sortWorkEntriesByDate } from '../util/sorting';
+import { workEntriesByDate } from '../util/sorting';
 import { employmentValidation } from '../util/validation';
 import ProfileFormFields from '../util/ProfileFormFields';
 import ConfirmDeletion from './ConfirmDeletion';
@@ -138,8 +138,8 @@ class EmploymentForm extends ProfileFormFields {
     if ( ui.workHistoryEdit === true ) {
       let workHistoryRows = [];
       if ( !_.isUndefined(work_history) ) {
-        let sorted = sortWorkEntriesByDate(work_history);
-        workHistoryRows = sorted.map((entry, index) => (
+        let sorted = workEntriesByDate(work_history);
+        workHistoryRows = sorted.map(([index, entry]) => (
           entry.id === undefined ? undefined : this.jobRow(entry, index)
         ));
       }
@@ -170,7 +170,7 @@ class EmploymentForm extends ProfileFormFields {
       setWorkDialogVisibility(true);
     };
     let validationAlert = () => {
-      if (_.get(errors, ['work_history', index])) {
+      if (_.get(errors, ['work_history', String(index)])) {
         return <IconButton name="error" onClick={editCallback} />;
       }
     };
