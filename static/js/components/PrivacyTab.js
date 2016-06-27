@@ -12,19 +12,20 @@ import {
   employmentValidation,
   privacyValidation,
 } from '../util/validation';
-import type { Profile } from '../flow/profileTypes';
+import type { Profile, BoundSaveProfile } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 
 class PrivacyTab extends ProfileFormFields {
   props: {
     profile:        Profile,
-    saveProfile:    () => void,
+    saveProfile:    BoundSaveProfile,
     updateProfile:  () => void,
     ui:             UIState,
+    nextStep:       () => void,
+    prevStep:       () => void,
   };
 
   render() {
-    const { saveProfile, profile, ui } = this.props;
     return (
       <div>
         <Grid className="profile-splash">
@@ -38,13 +39,9 @@ class PrivacyTab extends ProfileFormFields {
           </Cell>
           <Cell col={12}>
             <ProfileProgressControls
+              {...this.props}
               nextBtnLabel="I'm Done!"
-              prevUrl="/profile/professional"
-              nextUrl="/dashboard"
               isLastTab={true}
-              saveProfile={saveProfile}
-              profile={profile}
-              ui={ui}
               validator={
                 combineValidators(
                   personalValidation,

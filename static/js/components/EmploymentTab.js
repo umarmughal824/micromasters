@@ -9,18 +9,19 @@ import {
   employmentUiValidation,
   combineValidators,
 } from '../util/validation';
-import type { Profile } from '../flow/profileTypes';
+import type { Profile, BoundSaveProfile } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 
 class EmploymentTab extends React.Component {
   props: {
-    saveProfile:  Function,
+    saveProfile:  BoundSaveProfile,
     profile:      Profile,
     ui:           UIState,
+    nextStep:     () => void,
+    prevStep:     () => void,
   };
 
   render () {
-    const { saveProfile, profile, ui } = this.props;
     return (
       <div>
         <Grid className="profile-splash">
@@ -37,12 +38,9 @@ class EmploymentTab extends React.Component {
           <Cell col={1}></Cell>
           <Cell col={10}>
             <ProfileProgressControls
+              {...this.props}
               nextBtnLabel="Save and Continue"
-              prevUrl="/profile/education"
-              nextUrl="/profile/privacy"
-              saveProfile={saveProfile}
-              profile={profile}
-              ui={ui}
+              isLastTab={false}
               validator={combineValidators(employmentValidation, employmentUiValidation)}
             />
           </Cell>

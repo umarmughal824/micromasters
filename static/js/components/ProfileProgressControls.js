@@ -3,44 +3,41 @@ import React from 'react';
 import Button from 'react-mdl/lib/Button';
 
 import { saveProfileStep } from '../util/profile_edit';
+import type { Profile, BoundSaveProfile } from '../flow/profileTypes';
+import type { UIState } from '../reducers/ui';
 
 export default class ProfileProgressControls extends React.Component {
-  static propTypes = {
-    nextBtnLabel: React.PropTypes.string,
-    nextUrl: React.PropTypes.string,
-    prevUrl: React.PropTypes.string,
-    isLastTab: React.PropTypes.bool,
-    saveProfile: React.PropTypes.func.isRequired,
-    profile: React.PropTypes.object,
-    ui: React.PropTypes.object.isRequired,
-    validator: React.PropTypes.func.isRequired
-  };
-
-  stepBack: Function = (): void => {
-    const { prevUrl } = this.props;
-    this.context.router.push(prevUrl);
+  props: {
+    nextStep:     () => void,
+    prevStep:     () => void,
+    nextBtnLabel: string,
+    isLastTab:    boolean,
+    validator:    Function,
+    profile:      Profile,
+    ui:           UIState,
+    saveProfile:  BoundSaveProfile,
   };
 
   saveAndContinue: Function = (): void => {
-    const { nextUrl, isLastTab, validator } = this.props;
+    const { nextStep, isLastTab, validator } = this.props;
     saveProfileStep.call(this, validator, isLastTab).then(() => {
-      this.context.router.push(nextUrl);
+      nextStep();
     });
   };
 
   render() {
-    const { prevUrl, nextUrl, nextBtnLabel } = this.props;
+    const { nextStep, prevStep, nextBtnLabel } = this.props;
 
     let prevButton, nextButton;
-    if(prevUrl) {
+    if(prevStep) {
       prevButton = <Button
         raised
         className="progress-button previous"
-        onClick={this.stepBack}>
+        onClick={prevStep}>
         <span>Previous</span>
       </Button>;
     }
-    if(nextUrl) {
+    if(nextStep) {
       nextButton = <Button
         raised
         colored

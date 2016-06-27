@@ -5,20 +5,21 @@ import Grid, { Cell } from 'react-mdl/lib/Grid';
 import PersonalForm from './PersonalForm';
 import ProfileProgressControls from './ProfileProgressControls';
 import { personalValidation } from '../util/validation';
-import type { Profile, ValidationErrors } from '../flow/profileTypes';
+import type { Profile, BoundSaveProfile, ValidationErrors } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 
 class PersonalTab extends React.Component {
   props: {
     profile:        Profile,
     errors:         ValidationErrors,
-    saveProfile:    () => void,
+    saveProfile:    BoundSaveProfile,
     updateProfile:  () => void,
     ui:             UIState,
+    nextStep:       () => void,
+    prevStep:       () => void,
   };
 
   render() {
-    const { saveProfile, profile, ui } = this.props;
     return <div>
       <Grid className="profile-splash">
         <Cell col={12}>
@@ -35,11 +36,9 @@ class PersonalTab extends React.Component {
         <Cell col={1} />
         <Cell col={10}>
           <ProfileProgressControls
+            {...this.props}
             nextBtnLabel="Save and Continue"
-            nextUrl="/profile/education"
-            profile={profile}
-            saveProfile={saveProfile}
-            ui={ui}
+            isLastTab={false}
             validator={personalValidation}
           />
         </Cell>

@@ -9,7 +9,14 @@ import type {
 } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 import { filterPositiveInt } from './util';
-import { HIGH_SCHOOL, EDUCATION_LEVELS } from '../constants';
+import {
+  HIGH_SCHOOL,
+  EDUCATION_LEVELS,
+  PERSONAL_STEP,
+  EDUCATION_STEP,
+  EMPLOYMENT_STEP,
+  PRIVACY_STEP,
+} from '../constants';
 
 let handleNestedValidation = (profile: Profile, keys, nestedKey: string) => {
   let nestedFields = index => (
@@ -201,21 +208,21 @@ complete profile consists of:
   - one or more work items if the user has marked any work history
   - a valid privacy level
 */
-export type ProfileComplete = [boolean, ?string, ?ValidationErrors];
+export type ProfileComplete = [boolean, string|null, ?ValidationErrors];
 export function validateProfileComplete(profile: Profile): ProfileComplete {
   let errors = {};
 
   // check personal tab
   errors = personalValidation(profile);
   if (!_.isEqual(errors, {})) {
-    return [false, '/profile/personal', errors];
+    return [false, PERSONAL_STEP, errors];
   }
 
   // check professional tab
   if (_.isArray(profile.work_history) && !_.isEmpty(profile.work_history)) {
     errors = employmentValidation(profile);
     if (!_.isEqual(errors, {})) {
-      return [false, '/profile/professional', errors];
+      return [false, EMPLOYMENT_STEP, errors];
     }
   }
 
@@ -223,14 +230,14 @@ export function validateProfileComplete(profile: Profile): ProfileComplete {
   if (_.isArray(profile.education) && !_.isEmpty(profile.education)) {
     errors = educationValidation(profile);
     if (!_.isEqual(errors, {})) {
-      return [false, '/profile/education', errors];
+      return [false, EDUCATION_STEP, errors];
     }
   }
 
   // check privacy tab
   errors = privacyValidation(profile);
   if (!_.isEqual(errors, {})) {
-    return [false, '/profile/privacy', errors];
+    return [false, PRIVACY_STEP, errors];
   }
 
   return [true, null, null];

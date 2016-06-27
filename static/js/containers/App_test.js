@@ -13,9 +13,14 @@ import {
 } from '../actions';
 import {
   CLEAR_UI,
+  SET_PROFILE_STEP,
 } from '../actions/ui';
 import {
-  USER_PROFILE_RESPONSE
+  USER_PROFILE_RESPONSE,
+  PERSONAL_STEP,
+  EDUCATION_STEP,
+  EMPLOYMENT_STEP,
+  PRIVACY_STEP,
 } from '../constants';
 import IntegrationTestHelper from '../util/integration_test_helper';
 
@@ -29,7 +34,8 @@ describe('App', () => {
     renderComponent = helper.renderComponent.bind(helper);
     editProfileActions = [
       START_PROFILE_EDIT,
-      UPDATE_PROFILE_VALIDATION
+      UPDATE_PROFILE_VALIDATION,
+      SET_PROFILE_STEP,
     ];
   });
 
@@ -46,6 +52,8 @@ describe('App', () => {
   });
 
   describe('profile completeness', () => {
+    let checkStep = () => helper.store.getState().ui.profileStep;
+
     it('redirects to /profile if profile is not complete', () => {
       let response = Object.assign({}, USER_PROFILE_RESPONSE, {
         first_name: undefined
@@ -53,7 +61,8 @@ describe('App', () => {
       helper.profileGetStub.returns(Promise.resolve(response));
 
       return renderComponent("/dashboard", editProfileActions).then(() => {
-        assert.equal(helper.currentLocation.pathname, "/profile/personal");
+        assert.equal(helper.currentLocation.pathname, "/profile");
+        assert.equal(checkStep(), PERSONAL_STEP);
       });
     });
 
@@ -64,38 +73,42 @@ describe('App', () => {
       helper.profileGetStub.returns(Promise.resolve(response));
 
       return renderComponent("/dashboard").then(() => {
-        assert.equal(helper.currentLocation.pathname, "/profile/personal");
+        assert.equal(helper.currentLocation.pathname, "/profile");
+        assert.equal(checkStep(), PERSONAL_STEP);
       });
     });
 
-    it('redirects to /profile/professional if a field is missing there', () => {
+    it('redirects to /profile and goes to the employment step if a field is missing there', () => {
       let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
       profile.work_history[1].city = "";
 
       helper.profileGetStub.returns(Promise.resolve(profile));
       return renderComponent("/dashboard", editProfileActions).then(() => {
-        assert.equal(helper.currentLocation.pathname, "/profile/professional");
+        assert.equal(helper.currentLocation.pathname, "/profile");
+        assert.equal(checkStep(), EMPLOYMENT_STEP);
       });
     });
 
-    it('redirects to /profile/privacy if a field is missing there', () => {
+    it('redirects to /profile and goes to the privacy step if a field is missing there', () => {
       let response = Object.assign({}, USER_PROFILE_RESPONSE, {
         account_privacy: ''
       });
       helper.profileGetStub.returns(Promise.resolve(response));
 
       return renderComponent("/dashboard", editProfileActions).then(() => {
-        assert.equal(helper.currentLocation.pathname, "/profile/privacy");
+        assert.equal(helper.currentLocation.pathname, "/profile");
+        assert.equal(checkStep(), PRIVACY_STEP);
       });
     });
 
-    it('redirects to /profile/education if a field is missing there', () => {
+    it('redirects to /profile and goes to the education step if a field is missing there', () => {
       let response = _.cloneDeep(USER_PROFILE_RESPONSE);
       response.education[0].school_name = '';
       helper.profileGetStub.returns(Promise.resolve(response));
 
       return renderComponent("/dashboard", editProfileActions).then(() => {
-        assert.equal(helper.currentLocation.pathname, "/profile/education");
+        assert.equal(helper.currentLocation.pathname, "/profile");
+        assert.equal(checkStep(), EDUCATION_STEP);
       });
     });
   });

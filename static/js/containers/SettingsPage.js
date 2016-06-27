@@ -18,16 +18,8 @@ import {
     privacyValidation,
 } from '../util/validation';
 import { getPreferredName } from '../util/util';
-import type { Profile } from '../flow/profileTypes';
-import type { UIState } from '../reducers/ui';
 
 class SettingsPage extends ProfileFormContainer {
-  props: {
-    profiles: {[key: string]: Profile},
-    dispatch: Function,
-    ui:       UIState,
-  };
-
   componentWillMount() {
     this.startSettingsEdit();
   }
@@ -38,49 +30,33 @@ class SettingsPage extends ProfileFormContainer {
   }
 
   render() {
-    const { profiles, ui } = this.props;
-    let profile;
-    let errors;
-    let isEdit = true;
+    const { profiles } = this.props;
+    let props = Object.assign({}, this.profileProps(profiles[SETTINGS.username]), {
+      nextStep: () => this.context.router.push('/dashboard'),
+      prevStep: undefined
+    });
     let loaded = false;
     let username = SETTINGS.username;
-    let preferredName = SETTINGS.name;
-    
+    let preferredName = getPreferredName(props.profile);
+
     if (profiles[username] !== undefined) {
       let profileFromStore = profiles[username];
       loaded = profileFromStore.getStatus !== FETCH_PROCESSING;
-      if (profileFromStore.edit !== undefined) {
-        errors = profileFromStore.edit.errors;
-        profile = profileFromStore.edit.profile;
-      } else {
-        profile = profileFromStore.profile;
-        errors = {};
-        isEdit = false;
-      }
-      preferredName = getPreferredName(profile);
     }
 
     return (
       <Loader loaded={loaded}>
-        <Jumbotron profile={profile} text={preferredName}>
+        <Jumbotron {...props} text={preferredName}>
           <div className="card-copy">
             <Grid className="profile-tab-grid privacy-form">
               <Cell col={12}>
-                <PrivacyForm
-                  {...this.props}
-                  errors={errors}
-                  profile={profile}
-                  updateProfile={this.updateProfile.bind(this, isEdit)}
-                />
+                <PrivacyForm {...props} />
               </Cell>
               <Cell col={12}>
                 <ProfileProgressControls
                   nextBtnLabel="Save"
-                  nextUrl="/dashboard"
+                  {...props}
                   isLastTab={true}
-                  saveProfile={this.saveProfile.bind(this, isEdit)}
-                  profile={profile}
-                  ui={ui}
                   validator={
                     combineValidators(privacyValidation)
                   }

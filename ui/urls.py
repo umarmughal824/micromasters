@@ -17,7 +17,7 @@ from ui.views import (
 )
 
 dashboard_urlpatterns = [
-    url(r'^{}'.format(dashboard_url.lstrip("/")), DashboardView.as_view(), name='ui-dashboard')
+    url(r'^{}$'.format(dashboard_url.lstrip("/")), DashboardView.as_view(), name='ui-dashboard')
     for dashboard_url in [
         DASHBOARD_URL,
         PROFILE_URL,

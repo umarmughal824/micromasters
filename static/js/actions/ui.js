@@ -93,3 +93,8 @@ export const SET_SHOW_EDUCATION_DELETE_ALL_DIALOG = 'SET_SHOW_EDUCATION_DELETE_A
 export const setShowEducationDeleteAllDialog = (bool: boolean): Action => (
   { type: SET_SHOW_EDUCATION_DELETE_ALL_DIALOG, payload: bool }
 );
+
+export const SET_PROFILE_STEP = 'SET_PROFILE_STEP';
+export const setProfileStep = (step: string): Action => (
+  { type: SET_PROFILE_STEP, payload: step }
+);

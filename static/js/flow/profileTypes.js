@@ -1,4 +1,7 @@
 // @flow
+import type { Validator, UIValidator } from '../util/validation';
+import type { UIState } from '../reducers/ui';
+
 export type EducationEntry = {
   id?: ?number;
   degree_name: string;
@@ -48,3 +51,5 @@ export type Profile = {
   pretty_printed_student_id: string;
   city: string;
 };
+
+export type BoundSaveProfile = (validator: Validator|UIValidator, profile: Profile, ui: UIState) => Promise<Profile>;

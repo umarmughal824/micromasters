@@ -24,6 +24,7 @@ import type {
   EducationEntry,
   Profile,
   ValidationErrors,
+  BoundSaveProfile,
 } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 
@@ -32,7 +33,7 @@ class EducationForm extends ProfileFormFields {
     profile:                          Profile,
     ui:                               UIState;
     updateProfile:                    () => void,
-    saveProfile:                      () => void,
+    saveProfile:                      BoundSaveProfile,
     clearProfileEdit:                 () => void,
     errors:                           ValidationErrors,
     setEducationDialogVisibility:     () => void,

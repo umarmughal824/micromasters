@@ -21,6 +21,9 @@ import {
   EDUCATION_LEVELS,
   BACHELORS,
   HIGH_SCHOOL,
+  PERSONAL_STEP,
+  EMPLOYMENT_STEP,
+  PRIVACY_STEP,
 } from '../constants';
 import { INITIAL_UI_STATE } from '../reducers/ui';
 
@@ -290,14 +293,14 @@ describe('Profile validation functions', () => {
         'birth_country': "Country",
       }).map(([k,v]) => ({[k]: `${v} is required`})));
       errors.date_of_birth = "Please enter a valid date of birth";
-      const expectation = [false, "/profile/personal", errors];
+      const expectation = [false, PERSONAL_STEP, errors];
       assert.deepEqual(validateProfileComplete(profile), expectation);
     });
 
     it('should return appropriate fields when a field is missing', () => {
       profile = _.cloneDeep(USER_PROFILE_RESPONSE);
       profile['account_privacy'] = '';
-      let expectation = [false, "/profile/privacy", {
+      let expectation = [false, PRIVACY_STEP, {
         account_privacy: 'Privacy level is required'
       }];
       assert.deepEqual(validateProfileComplete(profile), expectation);
@@ -310,7 +313,7 @@ describe('Profile validation functions', () => {
     it('should return fields for dialog when a nested field is missing', () => {
       profile = _.cloneDeep(USER_PROFILE_RESPONSE);
       _.set(profile, ['work_history', 0, 'country'], '');
-      let expectation = [false, "/profile/professional", {
+      let expectation = [false, EMPLOYMENT_STEP, {
         work_history: [{country: "Country is required"}]
       }];
       assert.deepEqual(validateProfileComplete(profile), expectation);

@@ -18,6 +18,7 @@ import {
   SET_DELETION_INDEX,
   SET_SHOW_WORK_DELETE_ALL_DIALOG,
   SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
+  SET_PROFILE_STEP,
 
   clearUI,
   updateDialogText,
@@ -37,6 +38,7 @@ import {
   setDeletionIndex,
   setShowWorkDeleteAllDialog,
   setShowEducationDeleteAllDialog,
+  setProfileStep,
 } from '../actions/ui';
 import { receiveGetUserProfileSuccess } from '../actions';
 import { INITIAL_UI_STATE } from '../reducers/ui';
@@ -47,6 +49,7 @@ import {
   MASTERS,
   DOCTORATE,
   USER_PROFILE_RESPONSE,
+  PROFILE_STEP_LABELS,
 } from '../constants';
 import rootReducer from '../reducers';
 import * as util from '../util/util';
@@ -268,6 +271,16 @@ describe('ui reducers', () => {
           return dispatchThen(actionCreator(bool), [action]).then(state => {
             assert.deepEqual(accessor(state), bool);
           });
+        });
+      });
+    });
+  });
+
+  describe("profile step", () => {
+    PROFILE_STEP_LABELS.forEach((label, step) =>{
+      it(`should let you set the profile step to ${label}`, () => {
+        return dispatchThen(setProfileStep(step), [SET_PROFILE_STEP]).then(state => {
+          assert.deepEqual(state.profileStep, step);
         });
       });
     });

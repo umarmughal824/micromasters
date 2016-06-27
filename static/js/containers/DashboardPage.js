@@ -5,17 +5,20 @@ import { connect } from 'react-redux';
 import Loader from 'react-loader';
 
 import { FETCH_PROCESSING } from '../actions';
+import type { Dispatch } from 'redux';
+
 import Jumbotron from '../components/Jumbotron';
 import CourseList from '../components/CourseList';
 import ErrorMessage from '../components/ErrorMessage';
 import { getPreferredName } from '../util/util';
+import type { Profile } from '../flow/profileTypes';
 
 class DashboardPage extends React.Component {
-  static propTypes = {
-    profile:    React.PropTypes.object.isRequired,
-    dashboard:  React.PropTypes.object.isRequired,
-    dispatch:   React.PropTypes.func.isRequired,
-    expander: React.PropTypes.object.isRequired,
+  props: {
+    profile:    {profile: Profile},
+    dashboard:  Object,
+    dispatch:   Dispatch,
+    expander:   Object,
   };
 
   render() {

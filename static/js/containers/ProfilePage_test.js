@@ -21,6 +21,7 @@ import {
 
   setEducationDegreeInclusions,
   setWorkHistoryEdit,
+  setProfileStep,
 } from '../actions/ui';
 import {
   USER_PROFILE_RESPONSE,
@@ -30,6 +31,10 @@ import {
   HIGH_SCHOOL,
   BACHELORS,
   MASTERS,
+  PERSONAL_STEP,
+  EDUCATION_STEP,
+  EMPLOYMENT_STEP,
+  PRIVACY_STEP,
 } from '../constants';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../util/api';
@@ -38,19 +43,20 @@ describe("ProfilePage", function() {
   this.timeout(5000);  // eslint-disable-line no-invalid-this
 
   let listenForActions, renderComponent, helper, patchUserProfileStub;
-  let pageUrlStubs = [
-    '/profile/personal',
-    '/profile/education',
-    '/profile/professional',
-    '/profile/privacy'
+  let profileSteps = [
+    PERSONAL_STEP,
+    EDUCATION_STEP,
+    EMPLOYMENT_STEP,
+    PRIVACY_STEP,
   ];
-  let lastPage = pageUrlStubs[pageUrlStubs.length - 1];
   let prevButtonSelector = '.progress-button.previous';
   let nextButtonSelector = '.progress-button.next';
   let noInclusions = {};
   for (const { value } of EDUCATION_LEVELS) {
     noInclusions[value] = false;
   }
+
+  const setStep = step => helper.store.dispatch(setProfileStep(step));
 
   beforeEach(() => {
     helper = new IntegrationTestHelper();
@@ -103,7 +109,8 @@ describe("ProfilePage", function() {
     });
 
     it('should confirm and let you cancel when toggling the switch on work history', () => {
-      return renderComponent(pageUrlStubs[2]).then(([, div]) => {
+      setStep(EMPLOYMENT_STEP);
+      return renderComponent('/profile').then(([, div]) => {
         let toggle = div.querySelector('#profile-tab-professional-switch');
 
         return listenForActions([
@@ -122,7 +129,8 @@ describe("ProfilePage", function() {
     });
 
     it('should confirm and let you delete when toggling the switch on work history', () => {
-      return renderComponent(pageUrlStubs[2]).then(([, div]) => {
+      setStep(EMPLOYMENT_STEP);
+      return renderComponent('/profile').then(([, div]) => {
         let updateProfile = _.cloneDeep(USER_PROFILE_RESPONSE);
         updateProfile.username = SETTINGS.username;
         updateProfile.work_history = [];
@@ -157,7 +165,8 @@ describe("ProfilePage", function() {
     });
 
     it('shouldnt confirm when toggling the switch on work history if there are no entries', () => {
-      return renderComponent(pageUrlStubs[2]).then(([, div]) => {
+      setStep(EMPLOYMENT_STEP);
+      return renderComponent('/profile').then(([, div]) => {
         let emptyWorkHistory = Object.assign({}, USER_PROFILE_RESPONSE, {
           work_history: []
         });
@@ -212,7 +221,8 @@ describe("ProfilePage", function() {
 
     educationSwitchSelectors.forEach( ({label, value, selector}) => {
       it(`should confirm and let you cancel when toggling the ${label} switch on education`, () => {
-        return renderComponent(pageUrlStubs[1]).then(([, div]) => {
+        setStep(EDUCATION_STEP);
+        return renderComponent('/profile').then(([, div]) => {
           helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, fullEducation()));
 
           let toggle = div.querySelector(selector);
@@ -237,7 +247,8 @@ describe("ProfilePage", function() {
 
     educationSwitchSelectors.forEach( ({label, value, selector}) => {
       it(`should confirm and let you delete when toggling the ${label} switch on education`, () => {
-        return renderComponent(pageUrlStubs[1]).then(([, div]) => {
+        setStep(EDUCATION_STEP);
+        return renderComponent('/profile').then(([, div]) => {
           helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, fullEducation()));
 
           let updateProfile = fullEducation();
@@ -279,7 +290,8 @@ describe("ProfilePage", function() {
 
     educationSwitchSelectors.forEach( ({label, selector}) => {
       it(`shouldnt confirm when toggling the ${label} switch on education if there are no entries`, () => {
-        return renderComponent(pageUrlStubs[1]).then(([, div]) => {
+        setStep(EDUCATION_STEP);
+        return renderComponent('/profile').then(([, div]) => {
           let noEducation = _.cloneDeep(USER_PROFILE_RESPONSE);
           noEducation.education = [];
           helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, noEducation));
@@ -297,25 +309,26 @@ describe("ProfilePage", function() {
   });
 
   it('should show the pretty-printed MM id', () => {
-    return renderComponent(pageUrlStubs[0]).then(([, div]) => {
+    return renderComponent('/profile').then(([, div]) => {
       let id = div.querySelector('.card-student-id');
       assert.equal(`ID: ${USER_PROFILE_RESPONSE.pretty_printed_student_id}`, id.textContent);
     });
   });
 
   it('navigates backward when Previous button is clicked', () => {
-    let firstPage = pageUrlStubs[0];
-    let secondPage = pageUrlStubs[1];
-    return renderComponent(secondPage).then(([, div]) => {
+    setStep(EDUCATION_STEP);
+    const checkStep = () => helper.store.getState().ui.profileStep;
+    return renderComponent('/profile').then(([, div]) => {
       let button = div.querySelector(prevButtonSelector);
-      assert.equal(helper.currentLocation.pathname, secondPage);
+      assert.equal(checkStep(), EDUCATION_STEP);
       TestUtils.Simulate.click(button);
-      assert.equal(helper.currentLocation.pathname, firstPage);
+      assert.equal(checkStep(), PERSONAL_STEP);
     });
   });
 
-  it(`marks email_optin and filled_out when saving ${lastPage}`, () => {
-    return renderComponent(lastPage).then(([, div]) => {
+  it(`marks email_optin and filled_out when saving on privacy`, () => {
+    setStep(PRIVACY_STEP);
+    return renderComponent('/profile').then(([, div]) => {
       // close all switches and remove all education so we don't get validation errors
       let receivedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
         education: []
@@ -335,7 +348,8 @@ describe("ProfilePage", function() {
   });
 
   it("validates education switches on the education page", () => {
-    return renderComponent('/profile/education').then(([, div]) => {
+    setStep(EDUCATION_STEP);
+    return renderComponent('/profile').then(([, div]) => {
       // close all switches and remove all education so we don't get validation errors
       let receivedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
         education: []
@@ -365,7 +379,8 @@ describe("ProfilePage", function() {
   });
 
   it(`validates employment switches when saving the employment page`, () => {
-    return renderComponent('/profile/professional').then(([, div]) => {
+    setStep(EMPLOYMENT_STEP);
+    return renderComponent('/profile').then(([, div]) => {
       // close all switches and remove all education so we don't get validation errors
       let receivedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
         work_history: []
@@ -389,7 +404,8 @@ describe("ProfilePage", function() {
   });
 
   it('does not validate education and employment switches when saving the privacy page', () => {
-    return renderComponent(lastPage).then(([, div]) => {
+    setStep(PRIVACY_STEP);
+    return renderComponent('/profile').then(([, div]) => {
       // close all switches and remove all education so we don't get validation errors
       let receivedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
         education: [],
@@ -414,15 +430,16 @@ describe("ProfilePage", function() {
     });
   });
 
-  for (let pageUrlStub of pageUrlStubs.slice(0,3)) {
+  for (let step of profileSteps.slice(0,3)) {
     for (let filledOutValue of [true, false]) {
-      it(`respects the current value (${filledOutValue}) when saving on ${pageUrlStub}`, () => {
+      it(`respects the current value (${filledOutValue}) when saving on ${step}`, () => {
+        setStep(step);
         let updatedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
           filled_out: filledOutValue,
           education: []
         });
         helper.profileGetStub.returns(Promise.resolve(updatedProfile));
-        return renderComponent(pageUrlStub).then(([, div]) => {
+        return renderComponent('/profile').then(([, div]) => {
           // close all switches
           helper.store.dispatch(setEducationDegreeInclusions(noInclusions));
           return confirmSaveButtonBehavior(updatedProfile, {div: div});

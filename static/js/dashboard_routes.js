@@ -10,10 +10,6 @@ import App from './containers/App';
 import DashboardPage from './containers/DashboardPage';
 import SettingsPage from './containers/SettingsPage';
 import ProfilePage from './containers/ProfilePage';
-import PersonalTab from './components/PersonalTab';
-import EmploymentTab from './components/EmploymentTab';
-import PrivacyTab from './components/PrivacyTab';
-import EducationTab from './components/EducationTab';
 import TermsOfServicePage from './containers/TermsOfServicePage';
 import UserPage from './containers/UserPage';
 import User from './components/User';
@@ -33,13 +29,7 @@ export function makeDashboardRoutes(browserHistory: Object, store: Object, onRou
         <Router history={browserHistory} onUpdate={onRouteUpdate}>
           <Route path="/" component={App}>
             <Route path="dashboard" component={DashboardPage} />
-            <Route path="profile" component={ProfilePage}>
-              <IndexRedirect to="personal" />
-              <Route path="personal" component={PersonalTab} />
-              <Route path="education" component={EducationTab}/>
-              <Route path="professional" component={EmploymentTab} />
-              <Route path="privacy" component={PrivacyTab} />
-            </Route>
+            <Route path="profile" component={ProfilePage} />
             <Route path="/terms_of_service" component={TermsOfServicePage} />
             <Route path="/settings" component={SettingsPage}  />
             <Route path="/users" component={UserPage} >
