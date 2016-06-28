@@ -99,42 +99,16 @@ describe('courseList functions', () => {
       }, moment(today)), "33%");
     });
 
-    it("is an enrolled course with no verification date", () => {
-      assert.equal(renderCourseStatusDisplay({
-        status: STATUS_ENROLLED_NOT_VERIFIED,
-        runs: []
-      }, moment(today)), "");
-    });
-
-    it("is an enrolled course with a verification date of tomorrow", () => {
+    it("is an enrolled course but not verified", () => {
       assert.equal(
         renderCourseStatusDisplay({
           status: STATUS_ENROLLED_NOT_VERIFIED,
           runs: [{
-            verification_date: tomorrow,
             title: "Run title"
           }],
         }, moment(today)),
         "UPGRADE TO VERIFIED for Run title"
       );
-    });
-
-    it("is an enrolled course with a verification date of today", () => {
-      assert.equal(renderCourseStatusDisplay({
-        status: STATUS_ENROLLED_NOT_VERIFIED,
-        runs: [{
-          verification_date: today
-        }]
-      }, moment(today)), "");
-    });
-
-    it("is an enrolled course with a verification date of yesterday", () => {
-      assert.equal(renderCourseStatusDisplay({
-        status: STATUS_ENROLLED_NOT_VERIFIED,
-        runs: [{
-          verification_date: yesterday
-        }]
-      }, moment(today)), "");
     });
 
     it("is an offered course with no enrollment start date", () => {
@@ -224,7 +198,7 @@ describe('courseList functions', () => {
 
   describe("makeRunStatusDisplay", () => {
     it('shows Course passed when a course is passed', () => {
-      assert.equal("Passed", makeRunStatusDisplay({ 
+      assert.equal("Passed", makeRunStatusDisplay({
         status: STATUS_PASSED,
         runs: []
       }));
