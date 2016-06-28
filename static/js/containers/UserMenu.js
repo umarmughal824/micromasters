@@ -8,7 +8,7 @@ import MenuItem from 'react-bootstrap/lib/MenuItem';
 
 import { getPreferredName } from '../util/util';
 
-class LoginButton extends React.Component {
+class UserMenu extends React.Component {
   static propTypes = {
     dispatch: React.PropTypes.func.isRequired,
     profile:  React.PropTypes.object.isRequired,
@@ -30,7 +30,12 @@ class LoginButton extends React.Component {
           <SplitButton
             title={title}
             bsStyle="danger"
-            id="logout-button">
+            id="user-menu">
+            <LinkContainer to={{ pathname: `/users/${profile.username}` }} active={false}>
+              <MenuItem>
+                Profile
+              </MenuItem>
+            </LinkContainer>
             <LinkContainer to={{ pathname: '/settings' }} active={false}>
               <MenuItem>
                 Settings
@@ -63,4 +68,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps)(LoginButton);
+export default connect(mapStateToProps)(UserMenu);
