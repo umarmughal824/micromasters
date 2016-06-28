@@ -35,6 +35,7 @@ class PersonalTab extends React.Component {
         <Cell col={1} />
         <Cell col={10}>
           <ProfileProgressControls
+            nextBtnLabel="Save and Continue"
             nextUrl="/profile/education"
             profile={profile}
             saveProfile={saveProfile}

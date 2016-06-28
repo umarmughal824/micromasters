@@ -34,6 +34,7 @@ class EducationTab extends React.Component {
         <Cell col={1} />
         <Cell col={10}>
           <ProfileProgressControls
+            nextBtnLabel="Save and Continue"
             prevUrl="/profile/personal"
             nextUrl="/profile/professional"
             saveProfile={saveProfile}

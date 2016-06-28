@@ -75,6 +75,7 @@ class SettingsPage extends ProfileFormContainer {
               </Cell>
               <Cell col={12}>
                 <ProfileProgressControls
+                  nextBtnLabel="Save"
                   nextUrl="/dashboard"
                   isLastTab={true}
                   saveProfile={this.saveProfile.bind(this, isEdit)}

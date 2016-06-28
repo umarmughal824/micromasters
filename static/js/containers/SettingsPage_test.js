@@ -82,7 +82,7 @@ describe("SettingsPage", function() {
 
           helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, receivedProfile));
 
-          assert(button.innerHTML.includes("I'm Done!"));
+          assert(button.innerHTML.includes("Save"));
           let updatedProfile = Object.assign({}, receivedProfile, {
             email_optin: true,
             filled_out: true
