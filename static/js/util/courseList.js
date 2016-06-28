@@ -70,23 +70,11 @@ export function makeCourseStatusDisplay(course: Course, now: moment = moment()):
     </span>;
   }
   case STATUS_ENROLLED_NOT_VERIFIED: {
-    if (!firstRun.verification_date) {
-      // Invalid case, API should always send a valid verification date
-      return "";
-    }
-
     let courseUpgradeUrl = `${SETTINGS.edx_base_url}/course_modes/choose/${firstRun.course_id}/`;
-
-    let verificationDate = moment(firstRun.verification_date);
-    if (verificationDate.isAfter(now, 'day')) {
-      return <Button bsStyle="success" href={courseUpgradeUrl} target="_blank">
-        UPGRADE TO VERIFIED
-        <span className="sr-only"> for {firstRun.title}</span>
-      </Button>;
-    } else {
-      // User cannot verify anymore
-      return "";
-    }
+    return <Button bsStyle="success" href={courseUpgradeUrl} target="_blank">
+      UPGRADE TO VERIFIED
+      <span className="sr-only"> for {firstRun.title}</span>
+    </Button>;
   }
   case STATUS_OFFERED_NOT_ENROLLED: {
     if (!firstRun.enrollment_start_date && firstRun.fuzzy_enrollment_start_date !== undefined ) {
