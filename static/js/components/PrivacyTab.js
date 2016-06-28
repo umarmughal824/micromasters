@@ -38,6 +38,7 @@ class PrivacyTab extends ProfileFormFields {
           </Cell>
           <Cell col={12}>
             <ProfileProgressControls
+              nextBtnLabel="I'm Done!"
               prevUrl="/profile/professional"
               nextUrl="/dashboard"
               isLastTab={true}

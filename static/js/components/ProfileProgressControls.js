@@ -6,6 +6,7 @@ import { saveProfileStep } from '../util/profile_edit';
 
 export default class ProfileProgressControls extends React.Component {
   static propTypes = {
+    nextBtnLabel: React.PropTypes.string,
     nextUrl: React.PropTypes.string,
     prevUrl: React.PropTypes.string,
     isLastTab: React.PropTypes.bool,
@@ -28,7 +29,7 @@ export default class ProfileProgressControls extends React.Component {
   };
 
   render() {
-    const { prevUrl, nextUrl, isLastTab } = this.props;
+    const { prevUrl, nextUrl, nextBtnLabel } = this.props;
 
     let prevButton, nextButton;
     if(prevUrl) {
@@ -45,7 +46,7 @@ export default class ProfileProgressControls extends React.Component {
         colored
         className="progress-button next"
         onClick={this.saveAndContinue}>
-        <span>{isLastTab ? "I'm Done!" : "Save and Continue"}</span>
+        <span>{nextBtnLabel}</span>
       </Button>;
     }
     return <div>

@@ -37,6 +37,7 @@ class EmploymentTab extends React.Component {
           <Cell col={1}></Cell>
           <Cell col={10}>
             <ProfileProgressControls
+              nextBtnLabel="Save and Continue"
               prevUrl="/profile/education"
               nextUrl="/profile/privacy"
               saveProfile={saveProfile}
