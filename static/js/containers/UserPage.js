@@ -9,11 +9,13 @@ import ProfileFormContainer from './ProfileFormContainer';
 
 class UserPage extends ProfileFormContainer {
   componentDidMount() {
-    this.fetchProfile();
+    const { params: { username } } = this.props;
+    this.fetchProfile(username);
   }
 
   componentDidUpdate() {
-    this.fetchProfile();
+    const { params: { username } } = this.props;
+    this.fetchProfile(username);
   }
 
   componentWillUnmount() {

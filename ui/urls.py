@@ -8,6 +8,7 @@ from ui.url_utils import (
     PROFILE_URL,
     TERMS_OF_SERVICE_URL,
     USERS_URL,
+    SETTINGS_URL,
 )
 from ui.views import (
     dashboard,
@@ -22,6 +23,7 @@ dashboard_urlpatterns = [
         PROFILE_URL,
         TERMS_OF_SERVICE_URL,
         USERS_URL,
+        SETTINGS_URL,
     ]
 ]
 

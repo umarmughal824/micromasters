@@ -2,6 +2,7 @@
 import React from 'react';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 
+import PrivacyForm from './PrivacyForm';
 import ProfileProgressControls from './ProfileProgressControls';
 import ProfileFormFields from '../util/ProfileFormFields';
 import {
@@ -31,10 +32,9 @@ class PrivacyTab extends ProfileFormFields {
             We care about your privacy.
           </Cell>
         </Grid>
-        <Grid className="profile-tab-grid">
+        <Grid className="profile-tab-grid privacy-form">
           <Cell col={12}>
-            <h4>Who can see your profile?</h4>
-            { this.boundRadioGroupField(['account_privacy'], '', this.privacyOptions) } <br />
+            <PrivacyForm {...this.props} />
           </Cell>
           <Cell col={12}>
             <ProfileProgressControls

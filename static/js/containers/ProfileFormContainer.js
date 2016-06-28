@@ -49,16 +49,16 @@ class ProfileFormContainer extends React.Component {
       profiles: state.profiles,
       ui: state.ui,
     };
-  }
+  };
 
-  fetchProfile: Function = (): void => {
-    const { dispatch, profiles, params: { username } } = this.props;
+  fetchProfile: Function = (username: string): void => {
+    const { dispatch, profiles } = this.props;
     if (profiles[username] === undefined || profiles[username].getStatus === undefined) {
       dispatch(fetchUserProfile(username));
     }
-  };
+  }
 
-  updateProfile(isEdit: boolean, profile: Profile) {
+  updateProfile: Function = (isEdit: boolean, profile: Profile): void => {
     const { dispatch } = this.props;
     const username = SETTINGS.username;
 

@@ -10,7 +10,7 @@ export default class ProfileProgressControls extends React.Component {
     prevUrl: React.PropTypes.string,
     isLastTab: React.PropTypes.bool,
     saveProfile: React.PropTypes.func.isRequired,
-    profile: React.PropTypes.object.isRequired,
+    profile: React.PropTypes.object,
     ui: React.PropTypes.object.isRequired,
     validator: React.PropTypes.func.isRequired
   };
