@@ -42,7 +42,7 @@ class ViewsTests(TestCase):
             uid="{}_edx".format(profile.user.username),
         )
         self.client.force_login(profile.user)
-        return profile.user
+        return profile
 
 
 class TestHomePage(ViewsTests):
@@ -119,7 +119,8 @@ class TestHomePage(ViewsTests):
         """
         Assert context values when logged in as social auth user
         """
-        user = self.create_and_login_user()
+        profile = self.create_and_login_user()
+        user = profile.user
         ga_tracking_id = FuzzyText().fuzz()
         with self.settings(
             GA_TRACKING_ID=ga_tracking_id,
@@ -159,7 +160,8 @@ class DashboardTests(ViewsTests):
         """
         Assert settings we pass to dashboard
         """
-        user = self.create_and_login_user()
+        profile = self.create_and_login_user()
+        user = profile.user
 
         ga_tracking_id = FuzzyText().fuzz()
         react_ga_debug = FuzzyText().fuzz()
@@ -211,7 +213,7 @@ class HandlerTests(ViewsTests):
         Assert context values for 404 error page when logged in
         """
         with mute_signals(post_save):
-            profile = ProfileFactory.create()
+            profile = self.create_and_login_user()
             self.client.force_login(profile.user)
 
         # case with specific page
@@ -249,8 +251,9 @@ class HandlerTests(ViewsTests):
         Assert context values for 500 error page when logged in
         """
         with mute_signals(post_save):
-            profile = ProfileFactory.create()
-            self.client.force_login(profile.user)
+            profile = self.create_and_login_user()
+            user = profile.user
+            self.client.force_login(user)
 
         response = self.client.get('/500/')
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR

@@ -105,6 +105,8 @@ class UsersView(ReactView):
 
 def standard_error_page(request, status_code, template_url):
     name = request.user.profile.preferred_name if not request.user.is_anonymous() else ""
+    authenticated = not request.user.is_anonymous()
+    username = None if not authenticated else request.user.social_auth.get(provider=EdxOrgOAuth2.name).uid
     response = render(
         request,
         template_url,
@@ -112,9 +114,9 @@ def standard_error_page(request, status_code, template_url):
             "style_src": get_bundle_url(request, "style.js"),
             "dashboard_src": get_bundle_url(request, "dashboard.js"),
             "js_settings_json": "{}",
-            "authenticated": not request.user.is_anonymous(),
+            "authenticated": authenticated,
             "name": name,
-            "username": request.user.social_auth.get(provider=EdxOrgOAuth2.name).uid
+            "username": username
         }
     )
     response.status_code = status_code
