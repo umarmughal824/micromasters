@@ -103,13 +103,16 @@ class UsersView(ReactView):
         return super(UsersView, self).get(request, *args, **kwargs)
 
 
-def standard_error_page(request, status_code, template_url):
+def standard_error_page(request, status_code, template_filename):
+    """
+    Returns an error page with a given template filename and provides necessary context variables
+    """
     name = request.user.profile.preferred_name if not request.user.is_anonymous() else ""
     authenticated = not request.user.is_anonymous()
     username = None if not authenticated else request.user.social_auth.get(provider=EdxOrgOAuth2.name).uid
     response = render(
         request,
-        template_url,
+        template_filename,
         context={
             "style_src": get_bundle_url(request, "style.js"),
             "dashboard_src": get_bundle_url(request, "dashboard.js"),
