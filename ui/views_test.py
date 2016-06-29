@@ -252,8 +252,7 @@ class HandlerTests(ViewsTests):
         """
         with mute_signals(post_save):
             profile = self.create_and_login_user()
-            user = profile.user
-            self.client.force_login(user)
+            self.client.force_login(profile.user)
 
         response = self.client.get('/500/')
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -350,7 +349,8 @@ class TestUsersPage(ViewsTests):
         """
         Assert settings we pass to dashboard
         """
-        user = self.create_and_login_user()
+        profile = self.create_and_login_user()
+        user = profile.user
         username = user.social_auth.get(provider=EdxOrgOAuth2.name).uid
 
         ga_tracking_id = FuzzyText().fuzz()
@@ -384,7 +384,8 @@ class TestUsersPage(ViewsTests):
         """
         Assert settings we pass to dashboard
         """
-        user = self.create_and_login_user()
+        profile = self.create_and_login_user()
+        user = profile.user
         self.client.logout()
         username = user.social_auth.get(provider=EdxOrgOAuth2.name).uid
 
