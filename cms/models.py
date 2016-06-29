@@ -143,7 +143,7 @@ class FrequentlyAskedQuestion(Orderable):
     """
     program_page = ParentalKey(ProgramPage, related_name='faqs')
     question = models.TextField()
-    answer = models.TextField()
+    answer = RichTextField()
 
     content_panels = [
         MultiFieldPanel(
