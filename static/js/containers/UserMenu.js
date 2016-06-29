@@ -43,7 +43,8 @@ class UserMenu extends React.Component {
             </LinkContainer>
             <MenuItem
               href="/logout"
-              eventKey="logout">
+              eventKey="logout"
+              id="logout-link">
               Logout
             </MenuItem>
           </SplitButton>
