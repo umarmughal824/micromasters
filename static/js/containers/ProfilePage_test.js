@@ -73,23 +73,25 @@ describe("ProfilePage", function() {
     helper.cleanup();
   });
 
-  let confirmSaveButtonBehavior = (updatedProfile, pageElements, validationFailure=false) => {
+  let confirmSaveButtonBehavior = (updatedProfile, pageElements, validationFailure=false, actions = []) => {
     let { div, button } = pageElements;
     button = button || div.querySelector(nextButtonSelector);
     patchUserProfileStub.throws("Invalid arguments");
     patchUserProfileStub.withArgs(SETTINGS.username, updatedProfile).returns(Promise.resolve(updatedProfile));
 
-    let actions = [];
-    if (!validationFailure) {
+    if ( actions.length === 0 ) {
+      if (!validationFailure) {
+        actions.push(
+          REQUEST_PATCH_USER_PROFILE,
+          RECEIVE_PATCH_USER_PROFILE_SUCCESS,
+        );
+      }
       actions.push(
-        REQUEST_PATCH_USER_PROFILE,
-        RECEIVE_PATCH_USER_PROFILE_SUCCESS,
+        START_PROFILE_EDIT,
+        UPDATE_PROFILE_VALIDATION
       );
     }
-    actions.push(
-      START_PROFILE_EDIT,
-      UPDATE_PROFILE_VALIDATION
-    );
+
     return listenForActions(actions, () => {
       TestUtils.Simulate.click(button);
     });
@@ -301,7 +303,10 @@ describe("ProfilePage", function() {
           helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, noEducation));
 
           let toggle = div.querySelector(selector);
-          return listenForActions([SET_EDUCATION_DEGREE_INCLUSIONS], () => {
+          return listenForActions([
+            SET_EDUCATION_DEGREE_INCLUSIONS,
+            SET_EDUCATION_DEGREE_INCLUSIONS,
+          ], () => {
             TestUtils.Simulate.change(toggle);
             assert.equal(openDialog(), undefined);
             TestUtils.Simulate.change(toggle);
@@ -428,8 +433,16 @@ describe("ProfilePage", function() {
         filled_out: true
       });
 
-      return confirmSaveButtonBehavior(updatedProfile, {button: button}, true).then(state => {
-        assert.deepEqual(state.profiles[SETTINGS.username].edit.errors, {});
+      let actions = [
+        START_PROFILE_EDIT,
+        UPDATE_PROFILE_VALIDATION,
+        REQUEST_PATCH_USER_PROFILE,
+        RECEIVE_PATCH_USER_PROFILE_SUCCESS,
+        CLEAR_PROFILE_EDIT,
+      ];
+
+      return confirmSaveButtonBehavior(updatedProfile, {button: button}, true, actions).then(state => {
+        assert.deepEqual(state.profiles[SETTINGS.username].profile.edit, undefined);
       });
     });
   });

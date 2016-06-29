@@ -29,17 +29,17 @@ import {
   setProfileStep,
 } from '../actions/ui';
 import type { Validator, UIValidator } from '../util/validation';
-import type { Profile } from '../flow/profileTypes';
+import type { Profile, Profiles, ProfileGetResult } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 
 class ProfileFormContainer extends React.Component {
   props: {
-    profiles:   {[k: string]: {profile: Profile}},
+    profiles:   Profiles,
     children:   React$Element[],
     dispatch:   Dispatch,
     history:    Object,
     ui:         UIState,
-    params:     Object,
+    params:     {[k: string]: string},
   };
 
   static contextTypes = {
@@ -164,7 +164,7 @@ class ProfileFormContainer extends React.Component {
     }
   }
 
-  profileProps: Function = (profileFromStore: {profile: Profile}) => {
+  profileProps: Function = (profileFromStore: ProfileGetResult) => {
     let { ui } = this.props;
     let errors, isEdit, profile;
 
@@ -208,7 +208,7 @@ class ProfileFormContainer extends React.Component {
     });
   };
 
-  childrenWithProps: Function = (profileFromStore: {profile: Profile}) => {
+  childrenWithProps: Function = (profileFromStore: ProfileGetResult) => {
     return React.Children.map(this.props.children, (child) => (
       React.cloneElement(child, this.profileProps(profileFromStore))
     ));

@@ -25,7 +25,7 @@ import {
 } from '../actions';
 import { ui } from './ui';
 import type { Action } from '../flow/generalTypes';
-import type { Profile } from '../flow/profileTypes';
+import type { ProfileGetResult } from '../flow/profileTypes';
 
 export const INITIAL_PROFILES_STATE = {};
 type ProfileState = {};
@@ -41,8 +41,7 @@ export const profiles = (state: ProfileState = INITIAL_PROFILES_STATE, action: A
     return clone;
   };
 
-  type GetProfileReturn = { profile: Profile, getStatus: string }|void;
-  let getProfile = (): GetProfileReturn => {
+  let getProfile = (): ProfileGetResult|void => {
     if (state[action.payload.username] !== undefined) {
       return state[action.payload.username];
     }
@@ -107,7 +106,8 @@ export const profiles = (state: ProfileState = INITIAL_PROFILES_STATE, action: A
     });
   case RECEIVE_PATCH_USER_PROFILE_FAILURE:
     return patchProfile({
-      patchStatus: FETCH_FAILURE
+      patchStatus: FETCH_FAILURE,
+      errorInfo: action.payload.errorInfo
     });
   case UPDATE_PROFILE_VALIDATION:
     profile = getProfile();

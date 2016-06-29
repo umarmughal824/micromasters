@@ -12,6 +12,10 @@ import {
   UPDATE_PROFILE_VALIDATION,
   REQUEST_PATCH_USER_PROFILE,
   RECEIVE_PATCH_USER_PROFILE_SUCCESS,
+  RECEIVE_GET_USER_PROFILE_FAILURE,
+  RECEIVE_PATCH_USER_PROFILE_FAILURE,
+  RECEIVE_DASHBOARD_SUCCESS,
+  CLEAR_PROFILE_EDIT,
 } from '../actions';
 import {
   SET_WORK_DIALOG_VISIBILITY,
@@ -106,6 +110,75 @@ describe("UserPage", function() {
 
     afterEach(() => {
       helper.cleanup();
+    });
+
+    describe('error handling', () => {
+      let errorString = `Sorry, we were unable to load the data necessary
+      to process your request. Please reload the page.`;
+      errorString = errorString.replace(/\s\s+/g, ' ');
+
+      let contactExpectation = `If the error persists, please contact 
+      mitx-support@mit.edu specifying this entire error message.`;
+      contactExpectation = contactExpectation.replace(/\s\s+/g, ' ');
+
+      const confirmErrorMessage = (div, expectedMessageText) => {
+        let alert = div.querySelector('.alert-message');
+        let messages = alert.getElementsByTagName('p');
+        assert.deepEqual(messages[0].textContent, expectedMessageText[0]);
+        assert.deepEqual(messages[1].textContent, expectedMessageText[1]);
+        assert.deepEqual(messages[2].textContent, contactExpectation);
+      };
+
+      it('should show an error for profile GET', () => {
+        let fourOhFour = {
+          errorStatusCode: 404,
+          detail: "some error messsage"
+        };
+        helper.profileGetStub.
+          withArgs(SETTINGS.username).
+          returns(Promise.reject(fourOhFour));
+        let actions = [
+          REQUEST_GET_USER_PROFILE,
+          RECEIVE_DASHBOARD_SUCCESS,
+          RECEIVE_GET_USER_PROFILE_FAILURE,
+        ];
+        return renderComponent(`/users/${SETTINGS.username}`, actions, false).then(([, div]) => {
+          confirmErrorMessage(div, [
+            `404 ${errorString}`,
+            `Additional info: ${fourOhFour.detail}`
+          ]);
+        });
+      });
+
+      it('should show an error for profile PATCH', () => {
+        patchUserProfileStub.returns(Promise.reject({errorStatusCode: 500}));
+        let userPageActions = [
+          REQUEST_GET_USER_PROFILE,
+          RECEIVE_DASHBOARD_SUCCESS,
+          RECEIVE_GET_USER_PROFILE_SUCCESS,
+          RECEIVE_GET_USER_PROFILE_SUCCESS,
+        ];
+        return renderComponent(`/users/${SETTINGS.username}`, userPageActions, false).then(([, div]) => {
+          let editButton = div.querySelector('.mdl-card').querySelector('.mdl-button--icon');
+          listenForActions([
+            SET_USER_PAGE_DIALOG_VISIBILITY,
+            START_PROFILE_EDIT,
+            UPDATE_PROFILE_VALIDATION,
+            REQUEST_PATCH_USER_PROFILE,
+            RECEIVE_PATCH_USER_PROFILE_FAILURE,
+            CLEAR_PROFILE_EDIT,
+            SET_USER_PAGE_DIALOG_VISIBILITY,
+            CLEAR_PROFILE_EDIT,
+          ], () => {
+            TestUtils.Simulate.click(editButton);
+            let dialog = document.querySelector('.personal-dialog');
+            let save = dialog.querySelector('.save-button');
+            TestUtils.Simulate.click(save);
+          }).then(() => {
+            confirmErrorMessage(div, [`500 ${errorString}`, '']);
+          });
+        });
+      });
     });
 
     it('should have a logout button', () => {

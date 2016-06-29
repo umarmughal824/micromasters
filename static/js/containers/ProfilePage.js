@@ -22,6 +22,7 @@ import {
   EMPLOYMENT_STEP,
   PRIVACY_STEP,
 } from '../constants';
+import type { Profile } from '../flow/profileTypes';
 
 class ProfilePage extends ProfileFormContainer {
   currentStep: Function = (): string => {
@@ -62,13 +63,13 @@ class ProfilePage extends ProfileFormContainer {
   render() {
     const { profiles } = this.props;
     const profileInfo = profiles[SETTINGS.username];
-    let props, text, profile;
+    let props, text;
     let [prev, next] = this.stepTransitions();
     props = Object.assign({}, this.profileProps(profileInfo), {
       prevStep: prev,
       nextStep: next
     });
-    profile = props.profile;
+    let profile: Profile = props.profile;
     text = `Welcome ${getPreferredName(profile)}, let's
       complete your enrollment to MIT MicroMasters.`;
 

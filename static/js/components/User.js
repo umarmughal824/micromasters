@@ -10,7 +10,7 @@ import EmploymentForm from './EmploymentForm';
 import EducationDisplay from './EducationDisplay';
 import UserPagePersonalDialog from './UserPagePersonalDialog.js';
 import { userPrivilegeCheck } from '../util/util';
-import type { Profile } from '../flow/profileTypes';
+import type { Profile, BoundSaveProfile } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 
 export default class User extends React.Component {
@@ -19,7 +19,7 @@ export default class User extends React.Component {
     setUserPageDialogVisibility:  () => void,
     ui:                           UIState,
     clearProfileEdit:             () => void,
-    saveProfile:                  () => Promise,
+    saveProfile:                  BoundSaveProfile,
   };
 
   toggleShowPersonalDialog: Function = (): void => {

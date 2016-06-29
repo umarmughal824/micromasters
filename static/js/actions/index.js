@@ -63,9 +63,9 @@ const receivePatchUserProfileSuccess = (username, profile) => ({
   payload: { profile, username }
 });
 
-const receivePatchUserProfileFailure = username => ({
+const receivePatchUserProfileFailure = (username, errorInfo) => ({
   type: RECEIVE_PATCH_USER_PROFILE_FAILURE,
-  payload: { username }
+  payload: { username, errorInfo }
 });
 
 export const saveProfile = (username, profile) => {
@@ -73,8 +73,8 @@ export const saveProfile = (username, profile) => {
     dispatch(requestPatchUserProfile(username));
     return api.patchUserProfile(username, profile).
       then(newProfile => dispatch(receivePatchUserProfileSuccess(username, newProfile))).
-      catch(() => {
-        dispatch(receivePatchUserProfileFailure(username));
+      catch(error => {
+        dispatch(receivePatchUserProfileFailure(username, error));
         // the exception is assumed handled and will not be propagated
       });
   };

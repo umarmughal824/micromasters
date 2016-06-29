@@ -6,13 +6,17 @@ import CountrySelectField from './inputs/CountrySelectField';
 import StateSelectField from './inputs/StateSelectField';
 
 import ProfileFormFields from '../util/ProfileFormFields';
-import type { Profile, ValidationErrors } from '../flow/profileTypes';
+import type {
+  Profile,
+  BoundSaveProfile,
+  ValidationErrors
+} from '../flow/profileTypes';
 
 export default class PersonalForm extends ProfileFormFields {
   props: {
     profile:        Profile,
     errors:         ValidationErrors,
-    saveProfile:    () => void,
+    saveProfile:    BoundSaveProfile,
     updateProfile:  () => void,
   };
 

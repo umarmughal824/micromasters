@@ -42,7 +42,6 @@ export type Profile = {
   first_name: string;
   education: EducationEntry[];
   work_history: WorkHistoryEntry[];
-  edit: Object;
   getStatus: string;
   date_of_birth: string;
   edx_level_of_education: string;
@@ -52,4 +51,22 @@ export type Profile = {
   city: string;
 };
 
+export type Profiles = {
+  [username: string]: ProfileGetResult,
+};
+
+export type ProfileGetResult = {
+  profile?: Profile,
+  errorInfo?: APIErrorInfo,
+  getStatus: string,
+  edit?: Object;
+};
+
 export type BoundSaveProfile = (validator: Validator|UIValidator, profile: Profile, ui: UIState) => Promise<Profile>;
+
+export type APIErrorInfo = {
+  error_code?: string,
+  user_message?: string,
+  detail?: string,
+  errorStatusCode: number,
+};

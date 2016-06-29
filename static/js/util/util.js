@@ -252,6 +252,6 @@ export function calculateDegreeInclusions(profile: Profile) {
 /**
  * Calls an array of functions in series with a given argument and returns an array of the results
  */
-export function callFunctionArray(functionArray: Function[], arg: any): any[] {
+export function callFunctionArray<T,R>(functionArray: Array<(t: T) => R>, arg: T): R[] {
   return functionArray.map((func) => func(arg));
 }
