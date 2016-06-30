@@ -110,7 +110,7 @@ describe("UserPage", function() {
 
     it('should have a logout button', () => {
       return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-        let button = div.querySelector("#logout-button");
+        let button = div.querySelector("#logout-link");
         assert.ok(button);
       });
     });
