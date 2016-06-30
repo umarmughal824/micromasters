@@ -103,43 +103,38 @@ class UsersView(ReactView):
         return super(UsersView, self).get(request, *args, **kwargs)
 
 
+def standard_error_page(request, status_code, template_filename):
+    """
+    Returns an error page with a given template filename and provides necessary context variables
+    """
+    name = request.user.profile.preferred_name if not request.user.is_anonymous() else ""
+    authenticated = not request.user.is_anonymous()
+    username = None if not authenticated else request.user.social_auth.get(provider=EdxOrgOAuth2.name).uid
+    response = render(
+        request,
+        template_filename,
+        context={
+            "style_src": get_bundle_url(request, "style.js"),
+            "dashboard_src": get_bundle_url(request, "dashboard.js"),
+            "js_settings_json": "{}",
+            "authenticated": authenticated,
+            "name": name,
+            "username": username
+        }
+    )
+    response.status_code = status_code
+    return response
+
+
 def page_404(request):
     """
     Overridden handler for the 404 error pages.
     """
-    name = request.user.profile.preferred_name if not request.user.is_anonymous() else ""
-
-    response = render(
-        request,
-        "404.html",
-        context={
-            "style_src": get_bundle_url(request, "style.js"),
-            "dashboard_src": get_bundle_url(request, "dashboard.js"),
-            "js_settings_json": "{}",
-            "authenticated": not request.user.is_anonymous(),
-            "name": name,
-        }
-    )
-    response.status_code = 404
-    return response
+    return standard_error_page(request, 404, "404.html")
 
 
 def page_500(request):
     """
-    Overridden handler for the 500 error pages.
+    Overridden handler for the 404 error pages.
     """
-    name = request.user.profile.preferred_name if not request.user.is_anonymous() else ""
-
-    response = render(
-        request,
-        "500.html",
-        context={
-            "style_src": get_bundle_url(request, "style.js"),
-            "dashboard_src": get_bundle_url(request, "dashboard.js"),
-            "js_settings_json": "{}",
-            "authenticated": not request.user.is_anonymous(),
-            "name": name,
-        }
-    )
-    response.status_code = 500
-    return response
+    return standard_error_page(request, 500, "500.html")
