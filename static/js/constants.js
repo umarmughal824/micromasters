@@ -382,5 +382,7 @@ export const PROFILE_STEP_LABELS = new Map([
   [PERSONAL_STEP, "Personal"],
   [EDUCATION_STEP, "Education"],
   [EMPLOYMENT_STEP, "Professional"],
-  [PRIVACY_STEP, "Profile Privacy"],
+  [PRIVACY_STEP, "Profile Privacy"]
 ]);
+
+export const DEFAULT_OPTION_LIMIT_COUNT = 10;

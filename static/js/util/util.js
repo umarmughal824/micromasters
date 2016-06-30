@@ -245,3 +245,10 @@ export function calculateDegreeInclusions(profile: Profile) {
   }
   return inclusions;
 }
+
+/**
+ * Calls an array of functions in series with a given argument and returns an array of the results
+ */
+export function callFunctionArray(functionArray, arg) {
+  return functionArray.map((func) => func(arg));
+}

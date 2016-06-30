@@ -11,6 +11,7 @@ import {
   makeProfileProgressDisplay,
   userPrivilegeCheck,
   calculateDegreeInclusions,
+  callFunctionArray,
 } from '../util/util';
 import {
   EDUCATION_LEVELS,
@@ -217,6 +218,25 @@ describe('utility functions', () => {
         [MASTERS]: false,
         [ASSOCIATE]: false
       });
+    });
+  });
+
+  describe('callFunctionArray', () => {
+    it('should take an array of functions, call them in series with given args, and return list of results', () => {
+      let testFunctionA = (arg) => (`testFunctionA ${arg}`),
+        testFunctionB = (arg) => (`testFunctionB ${arg}`),
+        arg = 'arg';
+      let testFunctionArray = [
+        testFunctionA,
+        testFunctionA,
+        testFunctionB
+      ];
+      let results = callFunctionArray(testFunctionArray, arg);
+      assert.deepEqual(results, [
+        'testFunctionA arg',
+        'testFunctionA arg',
+        'testFunctionB arg'
+      ]);
     });
   });
 });
