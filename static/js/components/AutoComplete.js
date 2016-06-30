@@ -2,7 +2,13 @@
 // adapted from https://github.com/callemall/material-ui/blob/8e80a35e8d2cdb410c3727333e8518cadc08783b/src/AutoComplete/AutoComplete.js
 import React, {Component, PropTypes} from 'react';
 import ReactDOM from 'react-dom';
+import _ from 'lodash';
 import keycode from 'keycode';
+import { 
+  defaultFilter, 
+  defaultMenuItemRender,
+  noFilter
+} from './utils/AutoCompleteSettings';
 import TextField from 'material-ui/TextField';
 import Menu from './Menu';
 import MenuItem from 'material-ui/MenuItem';
@@ -109,6 +115,10 @@ class AutoComplete extends Component {
      */
     menuStyle: PropTypes.object,
     /**
+     * Function to use to render MenuItems
+     */
+    menuItemRenderer: PropTypes.func,
+    /**
      * Callback function that is fired when the `TextField` loses focus.
      *
      * @param {object} event `blur` event targeting the `TextField`.
@@ -177,7 +187,8 @@ class AutoComplete extends Component {
     },
     animated: true,
     disableFocusRipple: true,
-    filter: (searchText, key) => searchText !== '' && key.indexOf(searchText) !== -1,
+    filter: defaultFilter,
+    menuItemRenderer: defaultMenuItemRender,
     fullWidth: false,
     open: false,
     openOnFocus: false,
@@ -231,6 +242,11 @@ class AutoComplete extends Component {
     });
   }
 
+  menuShouldShow(searchText) {
+    searchText = (searchText === undefined) ? this.state.searchText : searchText;
+    return this.props.showOptionsWhenBlank || searchText !== '';
+  }
+
   handleRequestClose = () => {
     // Only take into account the Popover clickAway when we are
     // not focusing the TextField.
@@ -267,7 +283,7 @@ class AutoComplete extends Component {
   getFilter = () => {
     const { filter } = this.props;
     if (this.state.skipFilter) {
-      return AutoComplete.noFilter;
+      return noFilter;
     } else {
       return filter;
     }
@@ -300,12 +316,11 @@ class AutoComplete extends Component {
   };
 
   handleKeyDown = (event) => {
+    const { searchText } = this.state;
     if (this.props.onKeyDown) this.props.onKeyDown(event);
-
     switch (keycode(event)) {
       case 'enter': {
         this.close();
-        const searchText = this.state.searchText;
         if (searchText !== '') {
           this.props.onNewRequest(searchText, -1);
         }
@@ -314,10 +329,9 @@ class AutoComplete extends Component {
       case 'esc':
         this.close();
         break;
-
       case 'down':
         event.preventDefault();
-        if (this.props.showOptionsWhenBlank || this.state.searchText !== '') {
+        if (this.menuShouldShow(searchText)) {
           this.setState({
             open: true,
             focusTextField: false,
@@ -326,7 +340,6 @@ class AutoComplete extends Component {
           });
         }
         break;
-
       default:
         this.setState({ skipFilter: false });
         break;
@@ -341,10 +354,9 @@ class AutoComplete extends Component {
     if (searchText === this.state.searchText) {
       return;
     }
-
     this.setState({
       searchText: searchText,
-      open: true,
+      open: this.menuShouldShow(searchText),
       anchorEl: ReactDOM.findDOMNode(this.refs.searchTextField),
     }, () => {
       this.props.onUpdateInput(searchText, this.props.dataSource);
@@ -387,6 +399,19 @@ class AutoComplete extends Component {
     }
   };
 
+  getMenuItemSettings() {
+    const { disableFocusRipple } = this.props;
+    const { searchText } = this.state;
+    const styles = getStyles(this.props, this.context, this.state);
+    return {
+      props: {
+        disableFocusRipple: disableFocusRipple,
+        innerDivStyle: styles.innerDiv
+      },
+      searchText: searchText
+    };
+  }
+
   blur() {
     this.refs.searchTextField.blur();
   }
@@ -394,19 +419,6 @@ class AutoComplete extends Component {
   focus() {
     this.refs.searchTextField.focus();
   }
-
-  renderMenuItem = option => {
-    const { disableFocusRipple } = this.props;
-    const styles = getStyles(this.props, this.context, this.state);
-
-    return <MenuItem
-      key={option.value}
-      primaryText={option.label}
-      value={option.value}
-      disableFocusRipple={disableFocusRipple}
-      innerDivStyle={styles.innerDiv}
-    />;
-  };
 
   render() {
     const {
@@ -420,6 +432,7 @@ class AutoComplete extends Component {
       menuHeight,
       menuStyle,
       menuProps,
+      menuItemRenderer,
       listStyle,
       targetOrigin,
       disableFocusRipple, // eslint-disable-line no-unused-vars
@@ -445,7 +458,10 @@ class AutoComplete extends Component {
       requestsList = requestsList.slice(0, maxSearchResults);
     }
 
-    this.requestsList = requestsList;
+    // 'renderItem' in Material-UI's Menu is only passed an option object when it is called downstream.
+    // This line prepares that 'renderItem' function ahead of time with some values that all MenuItems need and can't
+    // be determined by the option object alone.
+    let preparedMenuItemRenderer = _.partial(menuItemRenderer, this.getMenuItemSettings());
 
     const menu = open && requestsList.length > 0 && (
       <Menu
@@ -461,7 +477,7 @@ class AutoComplete extends Component {
         menuHeight={menuHeight}
         listStyle={Object.assign(styles.list, listStyle)}
         requestsList={requestsList}
-        renderItem={this.renderMenuItem}
+        renderItem={preparedMenuItemRenderer}
       />
     );
     return (
@@ -498,60 +514,6 @@ class AutoComplete extends Component {
     );
   }
 }
-
-AutoComplete.levenshteinDistance = (searchText, key) => {
-  const current = [];
-  let prev;
-  let value;
-
-  for (let i = 0; i <= key.length; i++) {
-    for (let j = 0; j <= searchText.length; j++) {
-      if (i && j) {
-        if (searchText.charAt(j - 1) === key.charAt(i - 1)) value = prev;
-        else value = Math.min(current[j], current[j - 1], prev) + 1;
-      } else {
-        value = i + j;
-      }
-      prev = current[j];
-      current[j] = value;
-    }
-  }
-  return current.pop();
-};
-
-AutoComplete.noFilter = () => true;
-
-AutoComplete.defaultFilter = AutoComplete.caseSensitiveFilter = (searchText, key) => {
-  return searchText !== '' && key.indexOf(searchText) !== -1;
-};
-
-AutoComplete.caseInsensitiveFilter = (searchText, key) => {
-  return key.toLowerCase().indexOf(searchText.toLowerCase()) !== -1;
-};
-
-AutoComplete.levenshteinDistanceFilter = (distanceLessThan) => {
-  if (distanceLessThan === undefined) {
-    return AutoComplete.levenshteinDistance;
-  } else if (typeof distanceLessThan !== 'number') {
-    throw 'Error: AutoComplete.levenshteinDistanceFilter is a filter generator, not a filter!';
-  }
-
-  return (s, k) => AutoComplete.levenshteinDistance(s, k) < distanceLessThan;
-};
-
-AutoComplete.fuzzyFilter = (searchText, key) => {
-  const compareString = key.toLowerCase();
-  searchText = searchText.toLowerCase();
-
-  let searchTextIndex = 0;
-  for (let index = 0; index < key.length; index++) {
-    if (compareString[index] === searchText[searchTextIndex]) {
-      searchTextIndex += 1;
-    }
-  }
-
-  return searchTextIndex === searchText.length;
-};
 
 AutoComplete.Item = MenuItem;
 AutoComplete.Divider = Divider;
