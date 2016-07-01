@@ -225,8 +225,12 @@ export function makeProfileImageUrl(profile: Profile): string {
 /**
  * Returns the preferred name or else the username
  */
-export function getPreferredName(profile: Profile): string {
-  return profile.preferred_name || SETTINGS.name || SETTINGS.username;
+export function getPreferredName(profile: Profile, last: boolean = true): string {
+  let first = profile.preferred_name || SETTINGS.name || SETTINGS.username;
+  if ( last ) {
+    return profile.last_name ? `${first} ${profile.last_name}` : first;
+  }
+  return first;
 }
 
 export function calculateDegreeInclusions(profile: Profile) {

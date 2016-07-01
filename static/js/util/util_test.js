@@ -104,6 +104,26 @@ describe('utility functions', () => {
       SETTINGS.name = '';
       assert.equal(SETTINGS.username, getPreferredName({}));
     });
+
+    it('shows the last name by default', () => {
+      assert.equal('First Last', getPreferredName({
+        preferred_name: 'First',
+        last_name: 'Last'
+      }));
+    });
+
+    it('does not show the last name if `last === false`', () => {
+      assert.equal('First', getPreferredName({
+        preferred_name: 'First',
+        last_name: 'Last',
+      }, false));
+    });
+
+    [true, false].forEach(bool => {
+      it(`shows just the first name if 'last === ${bool}' and 'profile.last_name === undefined'`, () => {
+        assert.equal('First', getPreferredName({preferred_name: 'First'}, bool));
+      });
+    });
   });
 
   describe('makeProfileProgressDisplay', () => {

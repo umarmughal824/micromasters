@@ -21,7 +21,7 @@ class UserMenu extends React.Component {
     // and React 15. React 15 removed span tags but react-bootstrap still expects
     // them.
     let title = <span>
-      {getPreferredName(profile)}
+      {getPreferredName(profile, false)}
     </span>;
 
     if (SETTINGS.authenticated) {
