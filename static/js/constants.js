@@ -214,7 +214,6 @@ export const DASHBOARD_RESPONSE = [
             "id": 7,
             "status": STATUS_ENROLLED_NOT_VERIFIED,
             "title": "Not verified run",
-            "verification_date": "2200-01-01T03:00:00Z",
             "course_id": "not-verified",
             "position": 0
           }
@@ -254,36 +253,6 @@ export const DASHBOARD_RESPONSE = [
             "position": 0,
             "course_id": "course_id",
             "id": 10
-          }
-        ]
-      },
-      {
-        "id": 13,
-        "status": STATUS_ENROLLED_NOT_VERIFIED,
-        "title": "Enrolled, no verification date - no status text",
-        "position_in_program": 7,
-        "runs": [
-          {
-            "title": "Enrolled no verification date",
-            "status": STATUS_ENROLLED_NOT_VERIFIED,
-            "position": 0,
-            "course_id": "course_id",
-            "id": 11
-          }
-        ]
-      },
-      {
-        "id": 14,
-        "position_in_program": 8,
-        "title": "enrolled not verified, verification date passed - no status text",
-        "status": STATUS_ENROLLED_NOT_VERIFIED,
-        "runs": [
-          {
-            "position": 0,
-            "id": 12,
-            "status": STATUS_ENROLLED_NOT_VERIFIED,
-            "title": "enrolled not verified, verification date passed",
-            "verification_date": "2000-01-01"
           }
         ]
       },
