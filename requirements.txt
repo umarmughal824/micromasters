@@ -20,4 +20,3 @@ uwsgi==2.0.12
 Pillow==3.1.1
 wagtail==1.5.2
 edx-api-client==0.2.1
-
