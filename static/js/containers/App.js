@@ -109,6 +109,7 @@ class App extends React.Component {
     if (
       userProfile.getStatus === FETCH_SUCCESS &&
       profile.agreed_to_terms_of_service &&
+      !TERMS_OF_SERVICE_REGEX.test(pathname) &&
       !PROFILE_REGEX.test(pathname) &&
       !complete
     ) {

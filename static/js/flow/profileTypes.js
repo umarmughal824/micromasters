@@ -59,7 +59,7 @@ export type ProfileGetResult = {
   profile?: Profile,
   errorInfo?: APIErrorInfo,
   getStatus: string,
-  edit?: Object;
+  edit?: {errors: ValidationErrors, profile: Profile},
 };
 
 export type BoundSaveProfile = (validator: Validator|UIValidator, profile: Profile, ui: UIState) => Promise<Profile>;
