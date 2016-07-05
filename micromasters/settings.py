@@ -285,6 +285,7 @@ else:
 # Logging configuration
 LOG_LEVEL = get_var('MICROMASTERS_LOG_LEVEL', 'DEBUG')
 DJANGO_LOG_LEVEL = get_var('DJANGO_LOG_LEVEL', 'DEBUG')
+ES_LOG_LEVEL = get_var('ES_LOG_LEVEL', 'INFO')
 
 # For logging to a remote syslog host
 LOG_HOST = get_var('MICROMASTERS_LOG_HOST', 'localhost')
@@ -351,7 +352,10 @@ LOGGING = {
         },
         'urllib3': {
             'level': 'INFO',
-        }
+        },
+        'elasticsearch': {
+            'level': ES_LOG_LEVEL,
+        },
     },
 }
 
@@ -364,7 +368,7 @@ if get_var('MICROMASTERS_BYPASS_SYSLOG', False):
 
 # server-status
 STATUS_TOKEN = get_var("STATUS_TOKEN", "")
-HEALTH_CHECK = ['POSTGRES']
+HEALTH_CHECK = ['CELERY', 'REDIS', 'POSTGRES', 'ELASTIC_SEARCH']
 
 GA_TRACKING_ID = get_var("GA_TRACKING_ID", "")
 REACT_GA_DEBUG = get_var("REACT_GA_DEBUG", False)
@@ -395,3 +399,13 @@ else:
     # by default use django.core.files.storage.FileSystemStorage with
     # overwrite feature
     DEFAULT_FILE_STORAGE = 'storages.backends.overwrite.OverwriteStorage'
+
+# Celery
+USE_CELERY = True
+BROKER_URL = get_var("BROKER_URL", get_var("REDISCLOUD_URL", None))
+CELERY_RESULT_BACKEND = get_var(
+    "CELERY_RESULT_BACKEND", get_var("REDISCLOUD_URL", None)
+)
+CELERY_ALWAYS_EAGER = get_var("CELERY_ALWAYS_EAGER", True)
+CELERY_EAGER_PROPAGATES_EXCEPTIONS = get_var(
+    "CELERY_EAGER_PROPAGATES_EXCEPTIONS", True)
