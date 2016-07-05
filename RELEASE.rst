@@ -1,6 +1,49 @@
 Release Notes
 =============
 
+Version 0.11.0
+--------------
+
+- Updated field of study select to use JSON data
+- Increased test timeout (#566)
+- Tightened up spacing for education and work history forms
+- Made enroll and upgrade buttons accessible (#556)
+- Fixed bug with MM id in Jumbotron
+- Hid work history switch on user page
+- Added end-to-end ui tests for adding education and work entries
+- Added flow typechecking for JS
+- Removed popover from EducationDisplay on /users
+- Set work history switch to be on by default
+- Made all footer links open in new tab
+- Fixed Button style (#537)
+- Added error handling in the dashboard.
+- Moved program link from title to entire card (#525)
+- Used chai to assert Promise behavior (#535)
+- Added extra validation for dates (#523)
+- Added validation for employment and education switches (#504)
+- Fixed punctuation for button (#526)
+- Condensed EducationForm on `/users`
+- Used level of attainment from edX to set default switch values (#508)
+- Set default value of account_privacy set to &#39;public to other MicroMaster’s students&#39;
+- Added check to only show edit buttons for a user&#39;s own profile
+- Fixed missed test assertions (#511)
+- Added contanct_us and title to ProgramPage
+- Added background_image to ProgramsPage
+- Moved profile privacy hint below the radio buttons
+- Added confirmation dialog when deleting education and work entries
+- Removed singleTest command, allow test with parameter to run arbitrary files (#505)
+- Removed python3-dev which points to a python 3.4 branch (#499)
+- Added Roboto font everywhere
+- Fixed bug: no enroll button if edx_course_key is not defined
+- Refactored profile classes (#501)
+- Made npm install quieter (#497)
+- Fixing path for JS assets on Mailchimp form
+- change safe tag to richtext
+- replced smaller mit logo
+- test program page context
+- addressing comments
+- Updated Programs page
+
 Version 0.10.0
 --------------
 
