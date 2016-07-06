@@ -69,6 +69,7 @@ class ReactView(View):  # pylint: disable=unused-argument
             "host": webpack_dev_server_host(request),
             "edx_base_url": settings.EDXORG_BASE_URL,
             "roles": roles,
+            "search_url": settings.CLIENT_ELASTICSEARCH_URL,
         }
 
         return render(

@@ -13,6 +13,7 @@ import ProfilePage from './containers/ProfilePage';
 import TermsOfServicePage from './containers/TermsOfServicePage';
 import UserPage from './containers/UserPage';
 import User from './components/User';
+import LearnerSearchPage from './containers/LearnerSearchPage';
 
 /**
  * Create the dashboard routes (the root React elements to be rendered into our container)
@@ -36,6 +37,7 @@ export function makeDashboardRoutes(browserHistory: Object, store: Object, onRou
               <IndexRedirect to={`${SETTINGS.username}`} />
               <Route path=":username" component={User} />
             </Route>
+            <Route path="/learners" component={LearnerSearchPage} />
           </Route>
         </Router>
       </Provider>

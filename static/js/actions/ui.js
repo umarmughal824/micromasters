@@ -109,3 +109,8 @@ export const SET_USER_MENU_OPEN = 'SET_USER_MENU_OPEN';
 export const setUserMenuOpen = (open: boolean): Action => (
   { type: SET_USER_MENU_OPEN, payload: open }
 );
+
+export const SET_SEARCH_FILTER_VISIBILITY = 'SET_SEARCH_FILTER_VISIBILITY';
+export const setSearchFilterVisibility = (visibility: {[s: string]: boolean}): Action => (
+  { type: SET_SEARCH_FILTER_VISIBILITY, payload: visibility }
+);

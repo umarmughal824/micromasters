@@ -174,7 +174,8 @@ class DashboardTests(ViewsTests):
             GA_TRACKING_ID=ga_tracking_id,
             REACT_GA_DEBUG=react_ga_debug,
             EDXORG_BASE_URL=edx_base_url,
-            WEBPACK_DEV_SERVER_HOST=host
+            WEBPACK_DEV_SERVER_HOST=host,
+            CLIENT_ELASTICSEARCH_URL="http://localhost:9200",
         ):
             resp = self.client.get(DASHBOARD_URL)
             js_settings = json.loads(resp.context['js_settings_json'])
@@ -186,7 +187,8 @@ class DashboardTests(ViewsTests):
                 'username': get_social_username(user),
                 'host': host,
                 'edx_base_url': edx_base_url,
-                'roles': []
+                'roles': [],
+                'search_url': 'http://localhost:9200',
             }
 
     def test_roles_setting(self):
@@ -389,7 +391,8 @@ class TestUsersPage(ViewsTests):
             GA_TRACKING_ID=ga_tracking_id,
             REACT_GA_DEBUG=react_ga_debug,
             EDXORG_BASE_URL=edx_base_url,
-            WEBPACK_DEV_SERVER_HOST=host
+            WEBPACK_DEV_SERVER_HOST=host,
+            CLIENT_ELASTICSEARCH_URL="http://localhost:9200",
         ):
             # Mock has_permission so we don't worry about testing permissions here
             has_permission = Mock(return_value=True)
@@ -406,6 +409,7 @@ class TestUsersPage(ViewsTests):
                     'host': host,
                     'edx_base_url': edx_base_url,
                     'roles': [],
+                    'search_url': 'http://localhost:9200',
                 }
                 assert has_permission.called
 
@@ -426,7 +430,8 @@ class TestUsersPage(ViewsTests):
             GA_TRACKING_ID=ga_tracking_id,
             REACT_GA_DEBUG=react_ga_debug,
             EDXORG_BASE_URL=edx_base_url,
-            WEBPACK_DEV_SERVER_HOST=host
+            WEBPACK_DEV_SERVER_HOST=host,
+            CLIENT_ELASTICSEARCH_URL="http://localhost:9200",
         ):
             # Mock has_permission so we don't worry about testing permissions here
             has_permission = Mock(return_value=True)
@@ -443,6 +448,7 @@ class TestUsersPage(ViewsTests):
                     'host': host,
                     'edx_base_url': edx_base_url,
                     'roles': [],
+                    'search_url': 'http://localhost:9200'
                 }
                 assert has_permission.called
 

@@ -4,6 +4,142 @@ export const BACHELORS = 'b';
 export const MASTERS = 'm';
 export const DOCTORATE = 'p';
 
+export const ELASTICSEARCH_RESPONSE = {
+  "took": 22,
+  "timed_out": false,
+  "_shards": {
+    "total": 5,
+    "successful": 5,
+    "failed": 0
+  },
+  "hits": {
+    "total": 1,
+    "max_score": 1,
+    "hits": [
+      {
+        "_index": "micromasters",
+        "_type": "user",
+        "_id": "3",
+        "_score": 1,
+        "_source": {
+          "profile": {
+            "username": "test_user",
+            "filled_out": true,
+            "agreed_to_terms_of_service": true,
+            "account_privacy": "public",
+            "email_optin": true,
+            "first_name": "Test",
+            "last_name": "User",
+            "preferred_name": "Test",
+            "country": "AF",
+            "state_or_territory": "AF-BDS",
+            "city": "Kabul",
+            "birth_country": "AF",
+            "birth_state_or_territory": "AF-BDS",
+            "birth_city": "Kabul",
+            "has_profile_image": false,
+            "profile_url_full": "https://www.gravatar.com/avatar/3149fb060c93eaff7bd33583e209b5df?r=PG&s=800&d=https%3A%2F%2Fs3.amazonaws.com%2Fodl-micromasters-production%2Favatar_default.png", // eslint-disable-line max-len
+            "profile_url_large": "https://www.gravatar.com/avatar/3149fb060c93eaff7bd33583e209b5df?r=PG&s=500&d=https%3A%2F%2Fs3.amazonaws.com%2Fodl-micromasters-production%2Favatar_default.png", // eslint-disable-line max-len
+            "profile_url_medium": "https://www.gravatar.com/avatar/3149fb060c93eaff7bd33583e209b5df?r=PG&s=250&d=https%3A%2F%2Fs3.amazonaws.com%2Fodl-micromasters-production%2Favatar_default.png", // eslint-disable-line max-len
+            "profile_url_small": "https://www.gravatar.com/avatar/3149fb060c93eaff7bd33583e209b5df?r=PG&s=100&d=https%3A%2F%2Fs3.amazonaws.com%2Fodl-micromasters-production%2Favatar_default.png", // eslint-disable-line max-len
+            "date_of_birth": "1986-08-12",
+            "preferred_language": "ab",
+            "gender": "f",
+            "pretty_printed_student_id": "MMM000003",
+            "work_history": [
+              {
+                "id": 15,
+                "city": "Kabul",
+                "state_or_territory": "AF-BDS",
+                "country": "AF",
+                "company_name": "Test Corp",
+                "position": "Assistant Foobar",
+                "industry": "Accounting",
+                "end_date": null,
+                "start_date": "1999-12-01"
+              }
+            ],
+            "edx_level_of_education": "jhs",
+            "education": [
+              {
+                "id": 12,
+                "degree_name": "hs",
+                "graduation_date": "1998-07-12",
+                "field_of_study": null,
+                "online_degree": false,
+                "school_name": " High School",
+                "school_city": "Kabul",
+                "school_state_or_territory": "AF-BDS",
+                "school_country": "AF"
+              }
+            ]
+          },
+          "id": 3
+        }
+      }
+    ]
+  },
+  "aggregations": {
+    "profile.birth_country3": {
+      "doc_count": 2,
+      "inner": {
+        "doc_count": 2,
+        "profile.birth_country_count": {
+          "value": 1
+        },
+        "profile.birth_country": {
+          "doc_count_error_upper_bound": 0,
+          "sum_other_doc_count": 0,
+          "buckets": [
+            {
+              "key": "AF",
+              "doc_count": 2
+            }
+          ]
+        }
+      }
+    },
+    "profile.country4": {
+      "doc_count": 2,
+      "inner": {
+        "doc_count": 2,
+        "profile.country": {
+          "doc_count_error_upper_bound": 0,
+          "sum_other_doc_count": 0,
+          "buckets": [
+            {
+              "key": "AF",
+              "doc_count": 2
+            }
+          ]
+        },
+        "profile.country_count": {
+          "value": 1
+        }
+      }
+    },
+    "profile.gender2": {
+      "doc_count": 2,
+      "inner": {
+        "doc_count": 2,
+        "profile.gender": {
+          "doc_count_error_upper_bound": 0,
+          "sum_other_doc_count": 0,
+          "buckets": [
+            {
+              "key": "f",
+              "doc_count": 2
+            }
+          ]
+        },
+        "profile.gender_count": {
+          "value": 1
+        }
+      }
+    }
+  }
+};
+
 export const USER_PROFILE_RESPONSE = {
   "filled_out": true,
   "agreed_to_terms_of_service": true,

@@ -5,6 +5,7 @@ import ReactDOM from 'react-dom';
 import ga from 'react-ga';
 import striptags from 'striptags';
 import _ from 'lodash';
+import iso3166 from 'iso-3166-2';
 
 import {
   EDUCATION_LEVELS,
@@ -226,11 +227,33 @@ export function makeProfileImageUrl(profile: Profile): string {
  * Returns the preferred name or else the username
  */
 export function getPreferredName(profile: Profile, last: boolean = true): string {
-  let first = profile.preferred_name || SETTINGS.name || SETTINGS.username;
+  let first;
+  if ( profile.username === SETTINGS.username ) {
+    first = profile.preferred_name || SETTINGS.name || SETTINGS.username;
+  } else {
+    first = profile.preferred_name || profile.first_name;
+  }
   if ( last ) {
     return profile.last_name ? `${first} ${profile.last_name}` : first;
   }
   return first;
+}
+
+/**
+ * returns the users location
+ */
+export function getLocation(profile: Profile): string {
+  let { country, state_or_territory, city } = profile;
+  let subCountryLocation, countryLocation;
+  if ( country === 'US' ) {
+    let state = state_or_territory.replace(/^\D{2}-/, '');
+    subCountryLocation = `${city}, ${state}`;
+    countryLocation = 'US';
+  } else {
+    subCountryLocation = city;
+    countryLocation = iso3166.country(country).name;
+  }
+  return `${subCountryLocation}, ${countryLocation}`;
 }
 
 export function calculateDegreeInclusions(profile: Profile) {

@@ -17,6 +17,7 @@ class Navbar extends React.Component {
 
   tabs: Object[] = [
     { label: 'Dashboard', path: '/dashboard', regex: /dashboard/ },
+    { label: 'Learners', path: '/learners', regex: /learners/ },
   ];
 
   activeTab: Function = (path: string): number => (

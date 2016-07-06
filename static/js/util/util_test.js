@@ -12,6 +12,7 @@ import {
   userPrivilegeCheck,
   calculateDegreeInclusions,
   callFunctionArray,
+  getLocation,
 } from '../util/util';
 import {
   EDUCATION_LEVELS,
@@ -90,39 +91,91 @@ describe('utility functions', () => {
       Object.assign(SETTINGS, settingsBackup);
     });
 
-    it('shows profile.preferred_name', () => {
-      assert.equal('profile preferred name', getPreferredName({
-        preferred_name: 'profile preferred name'
-      }));
-    });
+    describe('profile is logged-in users profile', () => {
+      let profile;
 
-    it('uses SETTINGS.name if profile.preferred_name is not available', () => {
-      assert.equal(SETTINGS.name, getPreferredName({}));
-    });
-
-    it('uses SETTINGS.username if SETTINGS.name and profile.preferred_name are not available', () => {
-      SETTINGS.name = '';
-      assert.equal(SETTINGS.username, getPreferredName({}));
-    });
-
-    it('shows the last name by default', () => {
-      assert.equal('First Last', getPreferredName({
-        preferred_name: 'First',
-        last_name: 'Last'
-      }));
-    });
-
-    it('does not show the last name if `last === false`', () => {
-      assert.equal('First', getPreferredName({
-        preferred_name: 'First',
-        last_name: 'Last',
-      }, false));
-    });
-
-    [true, false].forEach(bool => {
-      it(`shows just the first name if 'last === ${bool}' and 'profile.last_name === undefined'`, () => {
-        assert.equal('First', getPreferredName({preferred_name: 'First'}, bool));
+      beforeEach(() => {
+        profile = {
+          username: SETTINGS.username,
+        };
       });
+
+      it('shows profile.preferred_name', () => {
+        profile.preferred_name = 'profile preferred name';
+        assert.equal('profile preferred name', getPreferredName(profile));
+      });
+
+      it('uses SETTINGS.name if profile.preferred_name is not available', () => {
+        assert.equal(SETTINGS.name, getPreferredName(profile));
+      });
+
+      it('uses SETTINGS.username if SETTINGS.name and profile.preferred_name are not available', () => {
+        SETTINGS.name = '';
+        assert.equal(SETTINGS.username, getPreferredName(profile));
+      });
+
+    });
+
+    describe("profile is not logged-in user's profile", () => {
+      let profile;
+      beforeEach(() => {
+        profile = {
+          first_name: "First",
+          username: "not_the_same"
+        };
+      });
+
+      it('uses preferred_name if it is available', () => {
+        profile.preferred_name = 'PREFERENCE';
+        assert.equal(getPreferredName(profile), 'PREFERENCE');
+      });
+
+      it('falls back to first_name if there is no prefered name', () => {
+        assert.equal(getPreferredName(profile), "First");
+      });
+    });
+
+    describe('last name behavior', () => {
+      it('shows the last name by default', () => {
+        assert.equal('First Last', getPreferredName({
+          preferred_name: 'First',
+          last_name: 'Last'
+        }));
+      });
+
+      it('does not show the last name if `last === false`', () => {
+        assert.equal('First', getPreferredName({
+          preferred_name: 'First',
+          last_name: 'Last',
+        }, false));
+      });
+
+      [true, false].forEach(bool => {
+        it(`shows just the first name if 'last === ${bool}' and 'profile.last_name === undefined'`, () => {
+          assert.equal('First', getPreferredName({preferred_name: 'First'}, bool));
+        });
+      });
+    });
+
+  });
+
+  describe('getLocation', () => {
+    it('should return `${city}, ${country}` for a non-us location', () => {
+      let nonUS = {
+        country: 'AF',
+        state_or_territory: 'AF-KAB',
+        city: 'Kabul'
+      };
+      assert.equal(getLocation(nonUS), 'Kabul, Afghanistan');
+    });
+
+    it('should return `${city}, ${state}, US` for a US location', () => {
+      let us = {
+        country: 'US',
+        state_or_territory: 'US-ME',
+        city: 'Portland'
+      };
+      assert.equal(getLocation(us), 'Portland, ME, US');
     });
   });
 

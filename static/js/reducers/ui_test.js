@@ -20,6 +20,7 @@ import {
   SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
   SET_PROFILE_STEP,
   SET_USER_MENU_OPEN,
+  SET_SEARCH_FILTER_VISIBILITY,
 
   clearUI,
   updateDialogText,
@@ -41,6 +42,7 @@ import {
   setShowEducationDeleteAllDialog,
   setProfileStep,
   setUserMenuOpen,
+  setSearchFilterVisibility,
 } from '../actions/ui';
 import { receiveGetUserProfileSuccess } from '../actions';
 import { INITIAL_UI_STATE } from '../reducers/ui';
@@ -293,6 +295,36 @@ describe('ui reducers', () => {
       it(`should let you set the user menu open state to ${bool}`, () => {
         return dispatchThen(setUserMenuOpen(bool), [SET_USER_MENU_OPEN]).then(state => {
           assert.deepEqual(state.userMenuOpen, bool);
+        });
+      });
+    });
+  });
+
+  describe('search filter visibility', () => {
+    let filterName = 'my_filter';
+
+    [true, false].forEach(bool => {
+      let visibility = {[filterName]: bool};
+      it(`should let you set a new filter to ${bool}`, () => {
+        return dispatchThen(setSearchFilterVisibility(visibility), [
+          SET_SEARCH_FILTER_VISIBILITY
+        ]).then(state => {
+          assert.deepEqual(state.searchFilterVisibility, visibility);
+        });
+      });
+
+      it(`should let you change an existing filter from ${bool} to ${!bool}`, () => {
+        store.dispatch(setSearchFilterVisibility(visibility));
+        assert.deepEqual(
+          store.getState().ui.searchFilterVisibility,
+          visibility
+        );
+
+        let newVisibility = {[filterName]: !bool};
+        return dispatchThen(setSearchFilterVisibility(newVisibility), [
+          SET_SEARCH_FILTER_VISIBILITY
+        ]).then(state => {
+          assert.deepEqual(state.searchFilterVisibility, newVisibility);
         });
       });
     });

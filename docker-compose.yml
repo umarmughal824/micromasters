@@ -10,9 +10,9 @@ redis:
 
 elastic:
   image: elasticsearch
-  command: elasticsearch -Des.network.host=0.0.0.0
+  command: elasticsearch -Des.network.host=0.0.0.0 -Des.http.cors.enabled=true -Des.http.cors.allow-origin=*
   ports:
-    - "9200"
+    - "9100:9200"
 
 web:
   build: .
