@@ -100,14 +100,18 @@ INSTALLED_APPS = (
     'modelcluster',
     'taggit',
 
+    # other third party APPS
+    'rolepermissions',
+
     # Our INSTALLED_APPS
-    'ui',
+    'backends',
     'cms',
     'courses',
-    'backends',
-    'profiles',
     'dashboard',
+    'profiles',
+    'roles',
     'search',
+    'ui',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -414,3 +418,6 @@ CELERY_EAGER_PROPAGATES_EXCEPTIONS = get_var(
 # Elasticsearch
 ELASTICSEARCH_URL = get_var("ELASTICSEARCH_URL", None)
 ELASTICSEARCH_INDEX = get_var('ELASTICSEARCH_INDEX', 'micromasters')
+
+# django-role-permissions
+ROLEPERMISSIONS_MODULE = 'roles.roles'
