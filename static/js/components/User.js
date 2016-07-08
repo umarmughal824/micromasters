@@ -10,7 +10,8 @@ import EmploymentForm from './EmploymentForm';
 import EducationDisplay from './EducationDisplay';
 import UserPagePersonalDialog from './UserPagePersonalDialog.js';
 import { userPrivilegeCheck } from '../util/util';
-import type { Profile, BoundSaveProfile } from '../flow/profileTypes';
+import { employmentValidation } from '../util/validation';
+import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 
 export default class User extends React.Component {
@@ -19,7 +20,7 @@ export default class User extends React.Component {
     setUserPageDialogVisibility:  () => void,
     ui:                           UIState,
     clearProfileEdit:             () => void,
-    saveProfile:                  BoundSaveProfile,
+    saveProfile:                  SaveProfileFunc,
   };
 
   toggleShowPersonalDialog: Function = (): void => {
@@ -74,7 +75,7 @@ export default class User extends React.Component {
 
       <Grid className="user-cards-grid">
         <Cell col={6}>
-          <EmploymentForm {...this.props} showSwitch={false} />
+          <EmploymentForm {...this.props} showSwitch={false} validator={employmentValidation} />
         </Cell>
         <Cell col={6}>
           <EducationDisplay {...this.props} />

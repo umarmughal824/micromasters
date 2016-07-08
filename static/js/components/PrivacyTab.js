@@ -12,14 +12,14 @@ import {
   employmentValidation,
   privacyValidation,
 } from '../util/validation';
-import type { Profile, BoundSaveProfile } from '../flow/profileTypes';
+import type { Profile, SaveProfileFunc, UpdateProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 
 class PrivacyTab extends ProfileFormFields {
   props: {
     profile:        Profile,
-    saveProfile:    BoundSaveProfile,
-    updateProfile:  () => void,
+    saveProfile:    SaveProfileFunc,
+    updateProfile:  UpdateProfileFunc,
     ui:             UIState,
     nextStep:       () => void,
     prevStep:       () => void,

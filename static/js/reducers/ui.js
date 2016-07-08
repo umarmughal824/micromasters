@@ -40,21 +40,22 @@ import { calculateDegreeInclusions } from '../util/util';
 import type { Action } from '../flow/generalTypes';
 
 export type UIState = {
-  workHistoryEdit:            boolean;
-  workDialogVisibility:       boolean;
-  dashboardExpander:          {};
-  educationDialogVisibility:  boolean;
-  educationDialogIndex:       ?number;
-  educationDegreeLevel:       string;
-  educationDegreeInclusions: {[key: string]: boolean};
-  userPageDialogVisibility: boolean;
-  showWorkDeleteDialog: boolean;
-  showEducationDeleteDialog: boolean;
-  deletionIndex: ?number;
-  dialog: {};
-  showWorkDeleteAllDialog: boolean;
+  workHistoryEdit:              boolean;
+  workDialogVisibility:         boolean;
+  dashboardExpander:            {};
+  educationDialogVisibility:    boolean;
+  educationDialogIndex:         number;
+  educationDegreeLevel:         string;
+  educationDegreeInclusions:    {[key: string]: boolean};
+  userPageDialogVisibility:     boolean;
+  showWorkDeleteDialog:         boolean;
+  showEducationDeleteDialog:    boolean;
+  deletionIndex:                ?number;
+  dialog:                       {};
+  showWorkDeleteAllDialog:      boolean;
   showEducationDeleteAllDialog: boolean;
-  profileStep: string;
+  profileStep:                  string;
+  workDialogIndex:              ?number;
 };
 
 export const INITIAL_UI_STATE: UIState = {
@@ -62,7 +63,7 @@ export const INITIAL_UI_STATE: UIState = {
   workDialogVisibility:       false,
   dashboardExpander:          {},
   educationDialogVisibility:  false,
-  educationDialogIndex:       null,
+  educationDialogIndex:       -1,
   educationDegreeLevel:       '',
   educationDegreeInclusions: {
     [HIGH_SCHOOL]: false,
@@ -79,6 +80,7 @@ export const INITIAL_UI_STATE: UIState = {
   showWorkDeleteAllDialog: false,
   showEducationDeleteAllDialog: false,
   profileStep: PERSONAL_STEP,
+  workDialogIndex:  null,
 };
 
 export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {

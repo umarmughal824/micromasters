@@ -31,6 +31,9 @@ import {
 import type { Validator, UIValidator } from '../util/validation';
 import type { Profile, Profiles, ProfileGetResult } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
+import type { AsyncActionHelper } from '../flow/generalTypes';
+
+type UpdateProfile = (isEdit: boolean, profile: Profile, validator: Validator|UIValidator) => void;
 
 class ProfileFormContainer extends React.Component {
   props: {
@@ -58,9 +61,18 @@ class ProfileFormContainer extends React.Component {
     if (profiles[username] === undefined || profiles[username].getStatus === undefined) {
       dispatch(fetchUserProfile(username));
     }
+  };
+
+  updateProfileValidation(props: Object, profile: Profile, validator: Validator|UIValidator): void {
+    const username = SETTINGS.username;
+    const { dispatch, profiles, ui } = props;
+    if ( profiles[username].edit && !_.isEmpty(profiles[username].edit.errors) ) {
+      let errors = validator(profile, ui);
+      dispatch(updateProfileValidation(username, errors));
+    }
   }
 
-  updateProfile: Function = (isEdit: boolean, profile: Profile): void => {
+  updateProfile: UpdateProfile = (isEdit, profile, validator) => {
     const { dispatch } = this.props;
     const username = SETTINGS.username;
 
@@ -68,6 +80,7 @@ class ProfileFormContainer extends React.Component {
       dispatch(startProfileEdit(username));
     }
     dispatch(updateProfile(username, profile));
+    this.updateProfileValidation(this.props, profile, validator);
   }
 
   setProfileStep: Function = (step: string): void => {
@@ -103,11 +116,11 @@ class ProfileFormContainer extends React.Component {
   setUserPageDialogVisibility: Function = (bool: boolean): void => {
     const { dispatch } = this.props;
     dispatch(setUserPageDialogVisibility(bool));
-  }
+  };
 
-  setWorkHistoryEdit: Function = (bool: boolean): void => {
+  setWorkHistoryEdit: AsyncActionHelper = (bool: boolean) => {
     const { dispatch } = this.props;
-    dispatch(setWorkHistoryEdit(bool));
+    return dispatch(setWorkHistoryEdit(bool));
   }
 
   setWorkDialogVisibility: Function = (bool: boolean): void => {
@@ -140,9 +153,9 @@ class ProfileFormContainer extends React.Component {
     dispatch(setEducationDegreeLevel(level));
   };
 
-  setEducationDegreeInclusions: Function = (inclusions: Object): void => {
+  setEducationDegreeInclusions: AsyncActionHelper = (inclusions: Object) => {
     const { dispatch } = this.props;
-    dispatch(setEducationDegreeInclusions(inclusions));
+    return dispatch(setEducationDegreeInclusions(inclusions));
   };
 
   saveProfile(isEdit: boolean, validator: Validator|UIValidator, profile: Profile, ui: UIState) {

@@ -153,7 +153,7 @@ describe('ui reducers', () => {
     it('has a default state', () => {
       return dispatchThen({type: "undefined"}, []).then(state => {
         assert.deepEqual(state.educationDialogVisibility, false);
-        assert.deepEqual(state.educationDialogIndex, null);
+        assert.deepEqual(state.educationDialogIndex, -1);
         assert.deepEqual(state.educationDegreeLevel, '');
         assert.deepEqual(
           state.educationDegreeInclusions, {

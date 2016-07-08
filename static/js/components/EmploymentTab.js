@@ -9,12 +9,12 @@ import {
   employmentUiValidation,
   combineValidators,
 } from '../util/validation';
-import type { Profile, BoundSaveProfile } from '../flow/profileTypes';
+import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 
 class EmploymentTab extends React.Component {
   props: {
-    saveProfile:  BoundSaveProfile,
+    saveProfile:  SaveProfileFunc,
     profile:      Profile,
     ui:           UIState,
     nextStep:     () => void,
@@ -22,6 +22,7 @@ class EmploymentTab extends React.Component {
   };
 
   render () {
+    const validator = combineValidators(employmentValidation, employmentUiValidation);
     return (
       <div>
         <Grid className="profile-splash">
@@ -32,7 +33,7 @@ class EmploymentTab extends React.Component {
         <Grid className="profile-tab-grid">
           <Cell col={1}></Cell>
           <Cell col={10}>
-            <EmploymentForm {...this.props} showSwitch={true} />
+            <EmploymentForm {...this.props} showSwitch={true} validator={validator} />
           </Cell>
           <Cell col={1}></Cell>
           <Cell col={1}></Cell>
@@ -41,7 +42,7 @@ class EmploymentTab extends React.Component {
               {...this.props}
               nextBtnLabel="Save and Continue"
               isLastTab={false}
-              validator={combineValidators(employmentValidation, employmentUiValidation)}
+              validator={validator}
             />
           </Cell>
           <Cell col={1}></Cell>

@@ -12,6 +12,9 @@ import SelectField from './inputs/SelectField';
 import CountrySelectField from './inputs/CountrySelectField';
 import StateSelectField from './inputs/StateSelectField';
 import FieldsOfStudySelectField from './inputs/FieldsOfStudySelectField';
+import type { UIState } from '../reducers/ui';
+import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
+import type { Validator, UIValidator } from '../util/validation';
 
 export default class EducationDialog extends ProfileFormFields {
   constructor(props: Object) {
@@ -23,11 +26,16 @@ export default class EducationDialog extends ProfileFormFields {
   }
   educationLevelLabels: Object;
 
-  static propTypes = {
-    open:           React.PropTypes.bool,
-    onClose:        React.PropTypes.func,
-    onSave:         React.PropTypes.func,
-    showLevelForm:  React.PropTypes.bool,
+  props: {
+    ui:                           UIState,
+    setEducationDialogVisibility: () => void,
+    setEducationDegreeLevel:      () => void,
+    setEducationDialogIndex:      () => void,
+    clearProfileEdit:             () => void,
+    saveProfile:                  SaveProfileFunc,
+    profile:                      Profile,
+    showLevelForm:                boolean,
+    validator:                    Validator|UIValidator,
   };
 
   clearEducationEdit: Function = (): void => {
@@ -57,7 +65,7 @@ export default class EducationDialog extends ProfileFormFields {
       profile: { education },
     } = this.props;
 
-    let educationDegreeLevel = _.get(education, [educationDialogIndex, "degree_name"]) || BACHELORS;
+    let educationDegreeLevel = _.get(education[educationDialogIndex], "degree_name") || BACHELORS;
     let keySet = (key) => ['education', educationDialogIndex, key];
 
     let fieldOfStudy = () => {

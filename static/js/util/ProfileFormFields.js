@@ -62,7 +62,8 @@ export default class ProfileFormFields extends React.Component {
       profile: this.props.profile,
       updateProfile: this.props.updateProfile,
       saveProfile: this.props.saveProfile,
-      errors: this.props.errors
+      errors: this.props.errors,
+      validator: this.props.validator,
     };
   };
 
@@ -78,7 +79,8 @@ export default class ProfileFormFields extends React.Component {
     setDeletionIndex:             React.PropTypes.func,
     setShowWorkDeleteDialog:      React.PropTypes.func,
     setShowEducationDeleteDialog: React.PropTypes.func,
-    showSwitch:                   React.PropTypes.bool
+    showSwitch:                   React.PropTypes.bool,
+    validator:                    React.PropTypes.func,
   };
 
   closeConfirmDeleteDialog: Function = (): void => {

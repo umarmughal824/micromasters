@@ -25,6 +25,7 @@ export function openNewEducationForm(level: string, index: number) {
     setEducationDialogIndex,
     setEducationDegreeLevel,
     setEducationDialogVisibility,
+    validator,
   } = this.props;
   let newIndex = index;
   if (index === null){
@@ -33,7 +34,7 @@ export function openNewEducationForm(level: string, index: number) {
   /* add empty education */
   let clone = Object.assign({}, profile);
   clone['education'] = clone['education'].concat(generateNewEducation(level));
-  updateProfile(clone);
+  updateProfile(clone, validator);
   setEducationDialogIndex(newIndex);
   setEducationDegreeLevel(level);
   setEducationDialogVisibility(true);

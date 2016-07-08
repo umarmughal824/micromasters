@@ -20,8 +20,35 @@ import SelectField from './inputs/SelectField';
 import CountrySelectField from './inputs/CountrySelectField';
 import StateSelectField from './inputs/StateSelectField';
 import type { WorkHistoryEntry } from '../flow/profileTypes';
+import type { Validator, UIValidator } from '../util/validation';
+import type {
+  Profile,
+  SaveProfileFunc,
+  ValidationErrors,
+  UpdateProfileFunc,
+} from '../flow/profileTypes';
+import type { UIState } from '../reducers/ui';
+import type { AsyncActionHelper } from '../flow/generalTypes';
 
 class EmploymentForm extends ProfileFormFields {
+  props: {
+    profile:                          Profile,
+    ui:                               UIState;
+    updateProfile:                    UpdateProfileFunc,
+    saveProfile:                      SaveProfileFunc,
+    clearProfileEdit:                 () => void,
+    errors:                           ValidationErrors,
+    setWorkDialogVisibility:          () => void,
+    setWorkDialogIndex:               () => void,
+    setWorkDegreeLevel:               () => void,
+    setWorkDegreeInclusions:          () => void,
+    setWorkHistoryEdit:               AsyncActionHelper,
+    deletionIndex:                    number,
+    setShowWorkDeleteAllDialog:       (foo: boolean) => void,
+    showSwitch:                       boolean,
+    validator:                        Validator|UIValidator,
+  };
+
   saveWorkHistoryEntry: Function = (): void => {
     const { saveProfile, profile, ui } = this.props;
     saveProfile(employmentValidation, profile, ui).then(() => {
@@ -30,9 +57,19 @@ class EmploymentForm extends ProfileFormFields {
   };
 
   changeSwitchState: Function = (): void => {
-    const { ui, setWorkHistoryEdit, profile, setShowWorkDeleteAllDialog } = this.props;
+    const {
+      ui,
+      setWorkHistoryEdit,
+      profile,
+      setShowWorkDeleteAllDialog,
+      validator,
+      updateProfile,
+    } = this.props;
     if ( _.isEmpty(profile.work_history) ) {
-      setWorkHistoryEdit(!ui.workHistoryEdit);
+      setWorkHistoryEdit(!ui.workHistoryEdit).then(() => {
+        let clone = _.cloneDeep(profile);
+        updateProfile(clone, validator);
+      });
     } else {
       setShowWorkDeleteAllDialog(true);
     }
@@ -50,11 +87,12 @@ class EmploymentForm extends ProfileFormFields {
       profile,
       setWorkDialogIndex,
       setWorkDialogVisibility,
+      validator,
     } = this.props;
     let clone = Object.assign({}, profile, {
       work_history: profile.work_history.concat(generateNewWorkHistory())
     });
-    updateProfile(clone);
+    updateProfile(clone, validator);
     setWorkDialogIndex(clone.work_history.length - 1);
     setWorkDialogVisibility(true);
   };

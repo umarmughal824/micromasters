@@ -35,7 +35,8 @@ export type WorkHistoryEntry = {
 };
 
 export type ValidationErrors = {
-  date_of_birth?: string;
+  date_of_birth?:         string;
+  work_history_required?: string;
 };
 
 export type Profile = {
@@ -62,7 +63,8 @@ export type ProfileGetResult = {
   edit?: {errors: ValidationErrors, profile: Profile},
 };
 
-export type BoundSaveProfile = (validator: Validator|UIValidator, profile: Profile, ui: UIState) => Promise<Profile>;
+export type SaveProfileFunc = (validator: Validator|UIValidator, profile: Profile, ui: UIState) => Promise<Profile>;
+export type UpdateProfileFunc = (profile: Profile, validator: Validator|UIValidator) => void;
 
 export type APIErrorInfo = {
   error_code?: string,

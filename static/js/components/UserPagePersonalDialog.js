@@ -5,7 +5,7 @@ import Button from 'react-mdl/lib/Button';
 
 import { personalValidation } from '../util/validation';
 import PersonalForm from './PersonalForm';
-import type { Profile, BoundSaveProfile } from '../flow/profileTypes';
+import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 
 export default class UserPagePersonalDialog extends React.Component {
@@ -13,7 +13,7 @@ export default class UserPagePersonalDialog extends React.Component {
     setUserPageDialogVisibility:  () => void,
     ui:                           UIState,
     profile:                      Profile,
-    saveProfile:                  BoundSaveProfile,
+    saveProfile:                  SaveProfileFunc,
     clearProfileEdit:             () => void,
   };
 
@@ -56,7 +56,7 @@ export default class UserPagePersonalDialog extends React.Component {
         onRequestClose={this.closePersonalDialog}
         actions={actions}
         autoScrollBodyContent={true}>
-        <PersonalForm {...this.props} />
+        <PersonalForm {...this.props} validator={personalValidation} />
       </Dialog>
     );
   }

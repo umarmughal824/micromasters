@@ -5,15 +5,20 @@ import Grid, { Cell } from 'react-mdl/lib/Grid';
 import PersonalForm from './PersonalForm';
 import ProfileProgressControls from './ProfileProgressControls';
 import { personalValidation } from '../util/validation';
-import type { Profile, BoundSaveProfile, ValidationErrors } from '../flow/profileTypes';
+import type {
+  Profile,
+  SaveProfileFunc,
+  ValidationErrors,
+  UpdateProfileFunc,
+} from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 
 class PersonalTab extends React.Component {
   props: {
     profile:        Profile,
     errors:         ValidationErrors,
-    saveProfile:    BoundSaveProfile,
-    updateProfile:  () => void,
+    saveProfile:    SaveProfileFunc,
+    updateProfile:  UpdateProfileFunc,
     ui:             UIState,
     nextStep:       () => void,
     prevStep:       () => void,
@@ -30,7 +35,7 @@ class PersonalTab extends React.Component {
       <Grid className="profile-tab-grid">
         <Cell col={1} />
         <Cell col={10}>
-          <PersonalForm {...this.props} />
+          <PersonalForm {...this.props} validator={personalValidation} />
         </Cell>
         <Cell col={1} />
         <Cell col={1} />

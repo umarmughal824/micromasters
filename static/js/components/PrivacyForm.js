@@ -3,14 +3,14 @@
 import React from 'react';
 
 import ProfileFormFields from '../util/ProfileFormFields';
-import type { Profile, ValidationErrors } from '../flow/profileTypes';
+import type { Profile, ValidationErrors, UpdateProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 
 class PrivacyForm extends ProfileFormFields {
   props: {
     profile:        Profile,
     ui:             UIState,
-    updateProfile:  Function,
+    updateProfile:  UpdateProfileFunc,
     errors:         ValidationErrors,
   };
 

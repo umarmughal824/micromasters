@@ -3,7 +3,7 @@ import React from 'react';
 import Button from 'react-mdl/lib/Button';
 
 import { saveProfileStep } from '../util/profile_edit';
-import type { Profile, BoundSaveProfile } from '../flow/profileTypes';
+import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 
 export default class ProfileProgressControls extends React.Component {
@@ -15,7 +15,7 @@ export default class ProfileProgressControls extends React.Component {
     validator:    Function,
     profile:      Profile,
     ui:           UIState,
-    saveProfile:  BoundSaveProfile,
+    saveProfile:  SaveProfileFunc,
   };
 
   saveAndContinue: Function = (): void => {
