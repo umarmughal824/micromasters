@@ -4,16 +4,25 @@ Apis for the dashboard
 import datetime
 import logging
 
-import pytz
+from edx_api.certificates import (
+    Certificate,
+    Certificates,
+)
+from edx_api.enrollments import Enrollments
 from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
+import pytz
+
+from courses.models import CourseRun
+from dashboard import models
+from profiles.api import get_social_username
 
 log = logging.getLogger(__name__)
 
 # pylint: disable=too-many-branches
 
 
-class CourseStatus():
+class CourseStatus:
     """
     Possible statuses for a course for a user
     """
@@ -31,7 +40,7 @@ class CourseStatus():
                 cls.UPGRADE, cls.NOT_OFFERED, cls.OFFERED]
 
 
-class CourseRunStatus():
+class CourseRunStatus:
     """
     Possible statuses for a course run for a user
     """
@@ -43,7 +52,7 @@ class CourseRunStatus():
     NOT_PASSED = 'not-passed'
 
 
-class CourseFormatConditionalFields():
+class CourseFormatConditionalFields:
     """
     The formatting of a course run is dependent
     on the CourseStatus status passed on the function.
@@ -84,7 +93,7 @@ class CourseFormatConditionalFields():
         return cls.ASSOCIATED_FIELDS.get(course_status, [])
 
 
-class CourseRunUserStatus():
+class CourseRunUserStatus:
     """
     Representation of a course run status for a specific user
     """
@@ -367,3 +376,107 @@ def format_courserun_for_dashboard(course_run, status_for_user, certificate=None
         # TODO: here goes the logic to pull the current grade  # pylint: disable=fixme
         pass
     return formatted_run
+
+
+def get_student_enrollments(user, edx_client, course_ids):
+    """
+    Return cached enrollment data or fetch enrollment data first if necessary. Only enrollments with a course key in
+    course_ids are updated on the database, others are left alone.
+
+    Args:
+        user (django.contrib.auth.models.User): A user
+        edx_client (EdxApi): EdX client to retrieve enrollments
+        course_ids (list of str): List of course keys
+    Returns:
+        Enrollments: an Enrollments object from edx_api. This may contain more enrollments than correspond to
+            course_ids if more exist from edX, or it may contain fewer enrollments if they
+            don't exist for the course id.
+    """
+    # Data in database is refreshed after 5 minutes
+    now = datetime.datetime.now(tz=pytz.utc)
+    five_minutes_ago = now - datetime.timedelta(0, 0, 0, 0, 5)
+    enrollments_list = list(models.Enrollment.objects.filter(
+        user=user,
+        last_request__gt=five_minutes_ago,
+        course_run__edx_course_key__in=course_ids,
+    ))
+    if len(enrollments_list) == len(course_ids):
+        return Enrollments([
+            enrollment.data for enrollment in enrollments_list
+        ])
+
+    # Data is not available in database or it's expired. Fetch new data.
+    enrollments = edx_client.enrollments.get_student_enrollments()
+
+    # Make sure all enrollments are updated atomically. It's still possible that this function executes twice and
+    # we fetch the data from edX twice, but the data shouldn't be half modified at any point.
+    with transaction.atomic():
+        # Remove course ids which don't have corresponding course runs.
+        course_ids = CourseRun.objects.filter(edx_course_key__in=course_ids).values_list("edx_course_key", flat=True)
+        course_ids = set(course_ids)
+        # Delete all enrollments corresponding to course_ids
+        models.Enrollment.objects.filter(user=user, course_run__edx_course_key__in=course_ids).delete()
+
+        for enrollment in enrollments.enrollments.values():
+            if enrollment.course_id in course_ids:
+                models.Enrollment.objects.create(
+                    user=user,
+                    course_run=CourseRun.objects.get(edx_course_key=enrollment.course_id),
+                    data=enrollment.json,
+                    last_request=now,
+                )
+
+        return enrollments
+
+
+def get_student_certificates(user, edx_client, course_ids):
+    """
+    Return cached certificate data or fetch certificate data first if necessary. Only certificates with a course key in
+    course_ids are updated on the database, others are left alone.
+
+    Args:
+        user (django.contrib.auth.models.User): A user
+        edx_client (EdxApi): EdX client to retrieve enrollments
+        course_ids (list of str): A list of course keys
+    Returns:
+        Certificates: a Certificates object from edx_api. This may contain more certificates than correspond to
+            course_ids if more exist from edX, or it may contain fewer certificates if they
+            don't exist for the course id.
+    """
+    # Certificates in database are refreshed after 6 hours
+    now = datetime.datetime.now(tz=pytz.utc)
+    six_hours_ago = now - datetime.timedelta(0, 0, 0, 0, 0, 6)
+    certificates_list = list(models.Certificate.objects.filter(
+        user=user,
+        last_request__gt=six_hours_ago,
+        course_run__edx_course_key__in=course_ids,
+    ))
+
+    if len(certificates_list) == len(course_ids):
+        return Certificates([
+            Certificate(certificate.data) for certificate in certificates_list
+        ])
+
+    # Certificates are out of date, so fetch new data from edX.
+    certificates = edx_client.certificates.get_student_certificates(
+        get_social_username(user), course_ids
+    )
+
+    # This must be done atomically so the database is not half modified at any point. It's still possible to fetch
+    # from edX twice though.
+    with transaction.atomic():
+        # Filter out course ids where we don't have a CourseRun in our database
+        course_ids = CourseRun.objects.filter(edx_course_key__in=course_ids).values_list("edx_course_key", flat=True)
+        course_ids = set(course_ids)
+        models.Certificate.objects.filter(user=user, course_run__edx_course_key__in=course_ids).delete()
+
+        for certificate in certificates.certificates.values():
+            if certificate.course_id in course_ids:
+                models.Certificate.objects.create(
+                    user=user,
+                    course_run=CourseRun.objects.get(edx_course_key=certificate.course_id),
+                    data=certificate.json,
+                    last_request=now,
+                )
+
+        return certificates

@@ -17,11 +17,12 @@ from courses.factories import (
     CourseRunFactory,
     ProgramFactory,
 )
-from dashboard import api
+from dashboard import api, models
 from profiles.factories import UserFactory
 from search.base import ESTestCase
 
 
+# pylint: disable=too-many-lines
 class StatusTest(ESTestCase):
     """
     Tests for the different status classes
@@ -799,3 +800,357 @@ class InfoProgramTest(ESTestCase):
             "courses": []
         }
         self.assertEqual(res, expected_data)
+
+
+class CertificatesTests(ESTestCase):
+    """Tests get_student_certificates"""
+
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Set up certificate
+        """
+        with open(os.path.join(os.path.dirname(__file__),
+                               'fixtures/certificates.json')) as file_obj:
+            certificates_json = json.loads(file_obj.read())
+
+        cls.certificates = Certificates([Certificate(cert_json) for cert_json in certificates_json])
+
+        for certificate in cls.certificates.all_certs:
+            CourseRunFactory.create(edx_course_key=certificate.course_id)
+
+        cls.user = UserFactory.create()
+
+    def assert_certificates_in_db(self, expected_timestamp, course_ids, certificates=None):
+        """
+        Check that self.certificates matches what's in the database
+        """
+        if certificates is None:
+            certificates = self.certificates
+
+        one_minute_before = expected_timestamp - timedelta(0, 0, 0, 0, 1)
+        one_minute_after = expected_timestamp + timedelta(0, 0, 0, 0, 1)
+
+        certificate_list = list(models.Certificate.objects.filter(
+            user=self.user,
+            course_run__edx_course_key__in=course_ids,
+        ))
+        assert len(certificate_list) == len(course_ids)
+        for certificate_obj in certificate_list:
+            assert one_minute_before < certificate_obj.last_request < one_minute_after
+            certificate = certificates.get_cert(certificate_obj.course_run.edx_course_key)
+            assert certificate.json == certificate_obj.data
+
+    def test_new(self):
+        """
+        Get new student certificates from edX
+        """
+        mocked_get_student_certificates = MagicMock(
+            return_value=self.certificates
+        )
+        edx_client = MagicMock(
+            certificates=MagicMock(
+                get_student_certificates=mocked_get_student_certificates
+            )
+        )
+
+        username = 'fake_username'
+        course_ids = self.certificates.all_courses_certs
+        with patch('dashboard.api.get_social_username', autospec=True, return_value=username):
+            ret = api.get_student_certificates(self.user, edx_client, course_ids)
+        # Test that the certificates object returned by the edx_api function is exactly the same
+        # object as what our function tests
+        assert ret is self.certificates
+        assert mocked_get_student_certificates.call_args[0] == (username, course_ids)
+        self.assert_certificates_in_db(datetime.now(tz=pytz.utc), course_ids)
+
+    def test_cached(self):
+        """
+        If our copy of the certificate data is in the database, don't fetch from edX
+        """
+        now = datetime.now(tz=pytz.utc)
+        five_hours_ago = now - timedelta(0, 0, 0, 0, 0, 5)
+
+        mocked_get_student_certificates = MagicMock(
+            return_value=self.certificates
+        )
+        edx_client = MagicMock(
+            certificates=MagicMock(
+                get_student_certificates=mocked_get_student_certificates
+            )
+        )
+
+        all_courses_ids = list(self.certificates.all_courses_certs)
+
+        # Call get_student_certificates once to populate database
+        username = 'fake_username'
+        with patch('dashboard.api.get_social_username', autospec=True, return_value=username):
+            api.get_student_certificates(self.user, edx_client, all_courses_ids)
+        self.assert_certificates_in_db(now, all_courses_ids)
+
+        models.Certificate.objects.filter(user=self.user).update(last_request=five_hours_ago)
+
+        # Assert that this second call doesn't update the database
+        assert mocked_get_student_certificates.call_count == 1
+        with patch('dashboard.api.get_social_username', autospec=True, return_value=username):
+            api.get_student_certificates(self.user, edx_client, all_courses_ids)
+        assert mocked_get_student_certificates.call_count == 1
+        self.assert_certificates_in_db(five_hours_ago, all_courses_ids)
+
+    def test_expired(self):
+        """
+        If our copy of the certificate data is expired, fetch from edX again
+        """
+        now = datetime.now(tz=pytz.utc)
+        six_hour_1_min_ago = now - timedelta(0, 0, 0, 0, 1, 6)
+
+        mocked_get_student_certificates = MagicMock(
+            return_value=self.certificates
+        )
+        edx_client = MagicMock(
+            certificates=MagicMock(
+                get_student_certificates=mocked_get_student_certificates
+            )
+        )
+
+        all_courses_ids = list(self.certificates.all_courses_certs)
+        assert len(all_courses_ids) >= 2
+        first_set = all_courses_ids[0:1]
+        second_set = all_courses_ids[1:]
+
+        # Call get_student_certificates once to populate database
+        username = 'fake_username'
+        with patch('dashboard.api.get_social_username', autospec=True, return_value=username):
+            api.get_student_certificates(self.user, edx_client, first_set)
+        self.assert_certificates_in_db(now, first_set)
+
+        models.Certificate.objects.filter(user=self.user).update(last_request=six_hour_1_min_ago)
+
+        # Assert that this second call updates the database
+        assert mocked_get_student_certificates.call_count == 1
+        with patch('dashboard.api.get_social_username', autospec=True, return_value=username):
+            api.get_student_certificates(self.user, edx_client, second_set)
+        assert mocked_get_student_certificates.call_count == 2
+        self.assert_certificates_in_db(now, second_set)
+
+        # Make sure we leave existing data alone
+        self.assert_certificates_in_db(six_hour_1_min_ago, first_set)
+
+    def test_update(self):
+        """
+        Ensure that we replace existing data.
+        """
+        now = datetime.now(tz=pytz.utc)
+        six_hour_1_min_ago = now - timedelta(0, 0, 0, 0, 1, 6)
+
+        mocked_get_student_certificates = MagicMock(
+            return_value=self.certificates
+        )
+        edx_client = MagicMock(
+            certificates=MagicMock(
+                get_student_certificates=mocked_get_student_certificates
+            )
+        )
+
+        all_courses_ids = list(self.certificates.all_courses_certs)
+
+        # Call get_student_certificates once to populate database
+        username = 'fake_username'
+        with patch('dashboard.api.get_social_username', autospec=True, return_value=username):
+            api.get_student_certificates(self.user, edx_client, all_courses_ids)
+        self.assert_certificates_in_db(now, all_courses_ids)
+
+        models.Certificate.objects.filter(user=self.user).update(last_request=six_hour_1_min_ago)
+
+        # update certificate
+        first_cert = list(self.certificates.all_certs)[0]
+        cert_data = dict(first_cert.json)
+        cert_data['grade'] = 123
+        updated_certs = Certificates([Certificate(cert_data)])
+        course_ids = [cert_data['course_id']]
+
+        # Get certificates
+        mocked_get_student_certificates = MagicMock(
+            return_value=updated_certs
+        )
+        edx_client = MagicMock(
+            certificates=MagicMock(
+                get_student_certificates=mocked_get_student_certificates
+            )
+        )
+        with patch('dashboard.api.get_social_username', autospec=True, return_value=username):
+            api.get_student_certificates(self.user, edx_client, course_ids)
+        assert mocked_get_student_certificates.call_count == 1
+        self.assert_certificates_in_db(now, course_ids, updated_certs)
+
+
+class EnrollmentsTests(ESTestCase):
+    """Tests get_student_enrollments"""
+
+    @classmethod
+    def setUpTestData(cls):
+        """
+        Set up enrollments
+        """
+        with open(os.path.join(os.path.dirname(__file__),
+                               'fixtures/user_enrollments.json')) as file_obj:
+
+            enrollments_json = json.loads(file_obj.read())
+
+        cls.enrollments = Enrollments([enrollment_json for enrollment_json in enrollments_json])
+
+        for enrollment in cls.enrollments.enrolled_courses:
+            CourseRunFactory.create(edx_course_key=enrollment.course_id)
+
+        cls.user = UserFactory.create()
+
+    def assert_enrollments_in_db(self, expected_timestamp, course_ids, enrollments=None):
+        """
+        Check that self.enrollments matches what's in the database
+        """
+        if enrollments is None:
+            enrollments = self.enrollments
+
+        one_minute_before = expected_timestamp - timedelta(0, 0, 0, 0, 1)
+        one_minute_after = expected_timestamp + timedelta(0, 0, 0, 0, 1)
+
+        enrollments_list = list(models.Enrollment.objects.filter(
+            user=self.user,
+            course_run__edx_course_key__in=course_ids,
+        ))
+        assert len(enrollments_list) == len(course_ids)
+        for enrollment_obj in enrollments_list:
+            assert one_minute_before < enrollment_obj.last_request < one_minute_after
+            enrollment = enrollments.enrollments[enrollment_obj.course_run.edx_course_key]
+            assert enrollment.json == enrollment_obj.data
+
+    def test_new(self):
+        """
+        Get new student enrollments from edX
+        """
+        mocked_get_student_enrollments = MagicMock(
+            return_value=self.enrollments
+        )
+        edx_client = MagicMock(
+            enrollments=MagicMock(
+                get_student_enrollments=mocked_get_student_enrollments
+            )
+        )
+
+        course_ids = self.enrollments.enrollments.keys()
+        ret = api.get_student_enrollments(self.user, edx_client, course_ids)
+        # Test that the enrollments object returned by the edx_api function is exactly the same
+        # object as what our function tests
+        assert ret is self.enrollments
+        assert mocked_get_student_enrollments.call_args[0] == ()
+        self.assert_enrollments_in_db(datetime.now(tz=pytz.utc), course_ids)
+
+    def test_cached(self):
+        """
+        If our copy of the enrollment data is in the database, don't fetch from edX
+        """
+        now = datetime.now(tz=pytz.utc)
+        four_minutes_ago = now - timedelta(0, 0, 0, 0, 4)
+
+        mocked_get_student_enrollments = MagicMock(
+            return_value=self.enrollments
+        )
+        edx_client = MagicMock(
+            enrollments=MagicMock(
+                get_student_enrollments=mocked_get_student_enrollments
+            )
+        )
+
+        all_courses_ids = self.enrollments.enrollments.keys()
+
+        # Call get_student_enrollments once to populate database
+        api.get_student_enrollments(self.user, edx_client, all_courses_ids)
+        self.assert_enrollments_in_db(now, all_courses_ids)
+
+        models.Enrollment.objects.filter(user=self.user).update(last_request=four_minutes_ago)
+
+        # Assert that this second call doesn't update the database
+        assert mocked_get_student_enrollments.call_count == 1
+        api.get_student_enrollments(self.user, edx_client, all_courses_ids)
+        assert mocked_get_student_enrollments.call_count == 1
+        self.assert_enrollments_in_db(four_minutes_ago, all_courses_ids)
+
+    def test_expired(self):
+        """
+        If our copy of the enrollment data is expired, fetch from edX again
+        """
+        now = datetime.now(tz=pytz.utc)
+        six_hour_1_min_ago = now - timedelta(0, 0, 0, 0, 1, 6)
+
+        mocked_get_student_enrollments = MagicMock(
+            return_value=self.enrollments
+        )
+        edx_client = MagicMock(
+            enrollments=MagicMock(
+                get_student_enrollments=mocked_get_student_enrollments
+            )
+        )
+
+        all_courses_ids = list(self.enrollments.enrollments.keys())
+        assert len(all_courses_ids) >= 2
+        first_set = all_courses_ids[0:1]
+        second_set = all_courses_ids[1:]
+
+        # Call get_student_enrollments once to populate database
+        api.get_student_enrollments(self.user, edx_client, first_set)
+        self.assert_enrollments_in_db(now, first_set)
+
+        models.Enrollment.objects.filter(user=self.user).update(last_request=six_hour_1_min_ago)
+
+        # Assert that this second call updates the database
+        assert mocked_get_student_enrollments.call_count == 1
+        api.get_student_enrollments(self.user, edx_client, second_set)
+        assert mocked_get_student_enrollments.call_count == 2
+        self.assert_enrollments_in_db(now, second_set)
+
+        # Make sure we leave existing data alone
+        self.assert_enrollments_in_db(six_hour_1_min_ago, first_set)
+
+    def test_update(self):
+        """
+        Ensure that we replace existing data.
+        """
+        now = datetime.now(tz=pytz.utc)
+        six_hour_1_min_ago = now - timedelta(0, 0, 0, 0, 1, 6)
+
+        mocked_get_student_enrollments = MagicMock(
+            return_value=self.enrollments
+        )
+        edx_client = MagicMock(
+            enrollments=MagicMock(
+                get_student_enrollments=mocked_get_student_enrollments
+            )
+        )
+
+        all_courses_ids = self.enrollments.enrollments.keys()
+
+        # Call get_student_enrollments once to populate database
+        api.get_student_enrollments(self.user, edx_client, all_courses_ids)
+        self.assert_enrollments_in_db(now, all_courses_ids)
+
+        models.Enrollment.objects.filter(user=self.user).update(last_request=six_hour_1_min_ago)
+
+        # update enrollment
+        first_enrollment = list(self.enrollments.enrollments.values())[0]
+        enrollment_data = dict(first_enrollment.json)
+        enrollment_data['course_details']['mode'] = 'modified'
+        updated_enrollments = Enrollments([enrollment_data])
+        course_ids = [enrollment_data['course_details']['course_id']]
+
+        # Get enrollments
+        mocked_get_student_enrollments = MagicMock(
+            return_value=updated_enrollments
+        )
+        edx_client = MagicMock(
+            enrollments=MagicMock(
+                get_student_enrollments=mocked_get_student_enrollments
+            )
+        )
+        api.get_student_enrollments(self.user, edx_client, course_ids)
+        assert mocked_get_student_enrollments.call_count == 1
+        self.assert_enrollments_in_db(now, course_ids, updated_enrollments)

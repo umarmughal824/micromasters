@@ -14,6 +14,7 @@ from django.core.urlresolvers import reverse
 from requests.exceptions import HTTPError
 from rest_framework import status
 from rest_framework.test import APITestCase
+from edx_api.certificates.models import Certificates
 from edx_api.enrollments.models import Enrollments
 
 from backends.edxorg import EdxOrgOAuth2
@@ -79,11 +80,12 @@ class DashboardTest(APITestCase):
         self.client.force_login(self.user)
         self.now = datetime.now(pytz.utc)
 
-    def create_run(self, course=None, start=None, end=None, enr_start=None, enr_end=None, edx_key=None):
+    def create_run(self, course, start=None, end=None,  # pylint: disable=no-self-use
+                   enr_start=None, enr_end=None, edx_key=None):
         """helper function to create course runs"""
         # pylint: disable=too-many-arguments
         run = CourseRunFactory.create(
-            course=course or self.course,
+            course=course,
             title="Title Run",
             start_date=start,
             end_date=end,
@@ -174,6 +176,23 @@ class DashboardTest(APITestCase):
                         assert course_data['runs'][0]['status'] == CourseStatus.CURRENT_GRADE
                     if course_data['runs'][0]['course_id'] == "course-v1:MITx+8.MechCX+2014_T1":
                         assert course_data['runs'][0]['status'] == CourseStatus.UPGRADE
+
+    @patch('backends.utils.refresh_user_token', autospec=True)
+    def test_certificates_enrollments(self, mocked_refresh):
+        """
+        Make sure we call the proper api functions
+        """
+        certificates = Certificates([])
+        enrollments = Enrollments([])
+        run = self.create_run(course=self.courses_1[0])
+
+        with patch('dashboard.views.get_student_certificates', autospec=True, return_value=certificates) as cert:
+            with patch('dashboard.views.get_student_enrollments', autospec=True, return_value=enrollments) as enroll:
+                resp = self.client.get(self.url)
+                assert resp.status_code == 200, resp.content.decode('utf-8')
+        assert list(cert.call_args[0][2]) == [run.edx_course_key]
+        assert list(enroll.call_args[0][2]) == [run.edx_course_key]
+        assert mocked_refresh.called
 
 
 class DashboardTokensTest(APITestCase):
