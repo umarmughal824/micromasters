@@ -37,7 +37,7 @@ import {
   PERSONAL_STEP,
 } from '../constants';
 import { calculateDegreeInclusions } from '../util/util';
-import type { Action } from '../flow/generalTypes';
+import type { Action } from '../flow/reduxTypes';
 
 export type UIState = {
   workHistoryEdit:              boolean;

@@ -1,6 +1,6 @@
 // @flow
 // general UI actions
-import type { Action, Dispatcher } from '../flow/generalTypes';
+import type { Action, Dispatcher } from '../flow/reduxTypes';
 
 export const CLEAR_UI = 'CLEAR_UI';
 export const clearUI = () => ({ type: CLEAR_UI });

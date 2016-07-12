@@ -28,7 +28,7 @@ import type {
   UpdateProfileFunc,
 } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
-import type { AsyncActionHelper } from '../flow/generalTypes';
+import type { AsyncActionHelper } from '../flow/reduxTypes';
 
 class EmploymentForm extends ProfileFormFields {
   props: {

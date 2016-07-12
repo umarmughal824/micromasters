@@ -29,7 +29,7 @@ import type {
 } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 import type { Validator, UIValidator } from '../util/validation';
-import type { AsyncActionHelper } from '../flow/generalTypes';
+import type { AsyncActionHelper } from '../flow/reduxTypes';
 
 class EducationForm extends ProfileFormFields {
   props: {

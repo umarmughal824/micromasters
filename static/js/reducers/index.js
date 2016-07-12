@@ -24,7 +24,7 @@ import {
   FETCH_SUCCESS,
 } from '../actions';
 import { ui } from './ui';
-import type { Action } from '../flow/generalTypes';
+import type { Action } from '../flow/reduxTypes';
 import type { ProfileGetResult } from '../flow/profileTypes';
 
 export const INITIAL_PROFILES_STATE = {};

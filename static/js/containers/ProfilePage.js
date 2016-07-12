@@ -9,6 +9,7 @@ import {
   makeProfileProgressDisplay,
 } from '../util/util';
 import { FETCH_PROCESSING } from '../actions';
+import { setProfileStep } from '../actions/ui';
 import Jumbotron from '../components/Jumbotron';
 import ErrorMessage from '../components/ErrorMessage';
 import ProfileFormContainer from './ProfileFormContainer';
@@ -22,6 +23,7 @@ import {
   EMPLOYMENT_STEP,
   PRIVACY_STEP,
 } from '../constants';
+import { createActionHelper } from '../util/redux';
 import type { Profile } from '../flow/profileTypes';
 
 class ProfilePage extends ProfileFormContainer {
@@ -31,19 +33,21 @@ class ProfilePage extends ProfileFormContainer {
   }
 
   stepTransitions: Function = (): [void|() => void, () => void] => {
-    let setStep = step => () => this.setProfileStep(step);
+    const { dispatch } = this.props;
+    let setStep = createActionHelper(dispatch, setProfileStep);
+    let createStepFunc = step => () => setStep(step);
     switch ( this.currentStep() ) {
     case EDUCATION_STEP:
-      return [setStep(PERSONAL_STEP), setStep(EMPLOYMENT_STEP)];
+      return [createStepFunc(PERSONAL_STEP), createStepFunc(EMPLOYMENT_STEP)];
     case EMPLOYMENT_STEP:
-      return [setStep(EDUCATION_STEP), setStep(PRIVACY_STEP)];
+      return [createStepFunc(EDUCATION_STEP), createStepFunc(PRIVACY_STEP)];
     case PRIVACY_STEP:
       return [
-        setStep(EMPLOYMENT_STEP),
+        createStepFunc(EMPLOYMENT_STEP),
         () => this.context.router.push('/dashboard')
       ];
     default:
-      return [undefined, setStep(EDUCATION_STEP)];
+      return [undefined, createStepFunc(EDUCATION_STEP)];
     }
   };
 
