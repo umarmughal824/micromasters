@@ -11,6 +11,10 @@ from factory.django import mute_signals
 from rest_framework.fields import DateTimeField
 from requests import get
 
+from dashboard.factories import (
+    CertificateFactory,
+    EnrollmentFactory,
+)
 from profiles.api import get_social_username
 from profiles.factories import (
     EducationFactory,
@@ -35,6 +39,7 @@ from search.api import (
 )
 from search.base import ESTestCase
 from search.exceptions import ReindexException
+from search.util import traverse_mapping
 
 
 def remove_key(dictionary, key):
@@ -58,6 +63,24 @@ def search():
         "{}/{}".format(settings.ELASTICSEARCH_INDEX, "_search")
     )
     return get(url).json()['hits']
+
+
+def mappings():
+    """
+    Retrieve the current mapping
+    """
+    # Refresh the index so we can read current data
+    refresh_index()
+
+    elasticsearch_url = settings.ELASTICSEARCH_URL
+    elasticsearch_index = settings.ELASTICSEARCH_INDEX
+    if not elasticsearch_url.startswith("http"):
+        elasticsearch_url = "http://{}".format(elasticsearch_url)
+    url = urljoin(
+        elasticsearch_url,
+        "{}/{}".format(elasticsearch_index, "_mapping")
+    )
+    return get(url).json()[elasticsearch_index]['mappings']
 
 
 def assert_search(results, users):
@@ -176,7 +199,7 @@ class IndexTests(ESTestCase):
 
     def test_index_users(self):
         """
-        Test that index_profiles indexes an iterable of profiles
+        Test that index_users indexes an iterable of users
         """
         for _ in range(10):
             with mute_signals(post_save):
@@ -190,6 +213,83 @@ class IndexTests(ESTestCase):
         assert_search(search(), [])
         index_users(User.objects.iterator(), chunk_size=4)
         assert_search(search(), list(User.objects.all()))
+
+    def test_add_certificate(self):
+        """
+        Test that Certificate is indexed after being added
+        """
+        user = UserFactory.create()
+        assert search()['total'] == 1
+        CertificateFactory.create(user=user)
+        assert_search(search(), [user])
+
+    def test_update_certificate(self):
+        """
+        Test that Certificate is reindexed after being updated
+        """
+        user = UserFactory.create()
+        assert search()['total'] == 1
+        certificate = CertificateFactory.create(user=user)
+        certificate.data = [{'new': 'data'}]
+        certificate.save()
+        assert_search(search(), [user])
+
+    def test_delete_certificate(self):
+        """
+        Test that Certificate is removed from index after being deleted
+        """
+        user = UserFactory.create()
+        certificate = CertificateFactory.create(user=user)
+        assert_search(search(), [user])
+        certificate.delete()
+        assert_search(search(), [user])
+
+    def test_add_enrollment(self):
+        """
+        Test that Enrollment is indexed after being added
+        """
+        user = UserFactory.create()
+        CertificateFactory.create(user=user)
+        assert_search(search(), [user])
+
+    def test_update_enrollment(self):
+        """
+        Test that Enrollment is reindexed after being updated
+        """
+        user = UserFactory.create()
+        assert search()['total'] == 1
+        enrollment = EnrollmentFactory.create(user=user)
+        enrollment.data = {'new': 'data'}
+        enrollment.save()
+        assert_search(search(), [user])
+
+    def test_delete_enrollment(self):
+        """
+        Test that Enrollment is removed from index after being deleted
+        """
+        user = UserFactory.create()
+        enrollment = EnrollmentFactory.create(user=user)
+        assert_search(search(), [user])
+        enrollment.delete()
+        assert_search(search(), [user])
+
+    def test_not_analyzed(self):
+        """
+        At the moment no string fields in the mapping should be 'analyzed' since there's no field
+        supporting full text search.
+        """
+        with mute_signals(post_save):
+            profile = ProfileFactory.create()
+        EducationFactory.create(profile=profile)
+        EmploymentFactory.create(profile=profile)
+        CertificateFactory.create(user=profile.user)
+        EnrollmentFactory.create(user=profile.user)
+
+        mapping = mappings()
+        nodes = list(traverse_mapping(mapping))
+        for node in nodes:
+            if node.get('type') == 'string':
+                assert node['index'] == 'not_analyzed'
 
 
 class SerializerTests(ESTestCase):
@@ -205,6 +305,8 @@ class SerializerTests(ESTestCase):
             profile = ProfileFactory.create()
         EducationFactory.create(profile=profile)
         EmploymentFactory.create(profile=profile)
+        certificate = CertificateFactory.create(user=profile.user)
+        enrollment = EnrollmentFactory.create(user=profile.user)
 
         assert serialize_user(profile.user) == {
             '_id': profile.user.id,
@@ -241,7 +343,9 @@ class SerializerTests(ESTestCase):
                     EmploymentSerializer().to_representation(work_history) for work_history in
                     profile.work_history.all()
                 ]
-            }
+            },
+            'certificates': [certificate.data],
+            'enrollments': [enrollment.data],
         }
 
 

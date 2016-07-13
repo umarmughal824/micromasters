@@ -12,26 +12,32 @@ from profiles.models import (
     Employment,
     Profile,
 )
+from dashboard.models import (
+    Certificate,
+    Enrollment,
+)
 from search.tasks import index_users, remove_user
 
 log = logging.getLogger(__name__)
 
 
 @receiver(post_save)
-def handle_profile_update(sender, **kwargs):  # pylint: disable=unused-argument
-    """Update index when a Profile, Education, or Employment is updated."""
+def handle_update(sender, **kwargs):  # pylint: disable=unused-argument
+    """Update index when a relevant model is updated."""
     instance = kwargs["instance"]
-    if isinstance(instance, Profile):
+    if isinstance(instance, (Certificate, Enrollment, Profile)):
         index_users.delay([instance.user])
     elif isinstance(instance, (Education, Employment)):
         index_users.delay([instance.profile.user])
 
 
 @receiver(post_delete)
-def handle_profile_delete(sender, **kwargs):  # pylint: disable=unused-argument
-    """Update index when a Profile, Education, or Employment is deleted."""
+def handle_delete(sender, **kwargs):  # pylint: disable=unused-argument
+    """Update index when a relevant model is deleted."""
     instance = kwargs['instance']
     if isinstance(instance, Profile):
         remove_user.delay(instance.user)
     elif isinstance(instance, (Education, Employment)):
         index_users.delay([instance.profile.user])
+    elif isinstance(instance, (Certificate, Enrollment)):
+        index_users.delay([instance.user])
