@@ -4,7 +4,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import type { Dispatch } from 'redux';
 
-import Header from '../components/Header';
+import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import {
   FETCH_SUCCESS,
@@ -124,19 +124,28 @@ class App extends React.Component {
 
   render() {
     const { children, location: { pathname } } = this.props;
+    const { router } = this.context;
 
     let empty = false;
     if (TERMS_OF_SERVICE_REGEX.test(pathname)) {
       empty = true;
     }
+    let pushUrl = url => router.push(url);
 
     return (
-      <div className="app-media layout-boxed">
-        <Header empty={empty} />
-        <div className="main-content">
-          {children}
-        </div>
-        <Footer />
+      <div>
+        <Navbar
+          empty={empty}
+          changeUrl={pushUrl}
+          pathname={pathname}
+        >
+          <div className="app-media layout-boxed">
+            <div className="main-content">
+              {children}
+            </div>
+            <Footer />
+          </div>
+        </Navbar>
       </div>
     );
   }
