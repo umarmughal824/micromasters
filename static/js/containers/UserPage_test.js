@@ -110,10 +110,10 @@ describe("UserPage", function() {
     });
 
 
-    it('should have a logout button', () => {
+    it('should have a logout link', () => {
       return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-        let button = div.querySelector("#logout-link");
-        assert.ok(button);
+        let logout = [...div.getElementsByTagName('a')].find(link => link.textContent === 'Logout');
+        assert.ok(logout);
       });
     });
 
@@ -121,7 +121,9 @@ describe("UserPage", function() {
       const inputs = dialog => [...dialog.getElementsByTagName('input')];
       const confirmClearValidation = (actions, getInput, validationExpectation, removeErrorValue) => {
         return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let editPersonalButton = div.querySelector('.material-icons');
+          let editPersonalButton = div.
+            querySelector('.main-content').
+            querySelector('.material-icons');
 
           return listenForActions(actions, () => {
             TestUtils.Simulate.click(editPersonalButton);
@@ -570,7 +572,8 @@ describe("UserPage", function() {
 
       it('should let you edit personal info', () => {
         return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let personalButton = div.getElementsByClassName('material-icons')[0];
+          let personalButton = div.querySelector('.main-content').
+            getElementsByClassName('material-icons')[0];
 
           return listenForActions([SET_USER_PAGE_DIALOG_VISIBILITY], () => {
             TestUtils.Simulate.click(personalButton);

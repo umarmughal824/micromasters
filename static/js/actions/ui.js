@@ -104,3 +104,8 @@ export const SET_PROFILE_STEP = 'SET_PROFILE_STEP';
 export const setProfileStep = (step: string): Action => (
   { type: SET_PROFILE_STEP, payload: step }
 );
+
+export const SET_USER_MENU_OPEN = 'SET_USER_MENU_OPEN';
+export const setUserMenuOpen = (open: boolean): Action => (
+  { type: SET_USER_MENU_OPEN, payload: open }
+);

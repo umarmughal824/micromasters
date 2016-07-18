@@ -19,6 +19,7 @@ import {
   SET_SHOW_WORK_DELETE_ALL_DIALOG,
   SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
   SET_PROFILE_STEP,
+  SET_USER_MENU_OPEN,
 
   clearUI,
   updateDialogText,
@@ -39,6 +40,7 @@ import {
   setShowWorkDeleteAllDialog,
   setShowEducationDeleteAllDialog,
   setProfileStep,
+  setUserMenuOpen,
 } from '../actions/ui';
 import { receiveGetUserProfileSuccess } from '../actions';
 import { INITIAL_UI_STATE } from '../reducers/ui';
@@ -277,10 +279,20 @@ describe('ui reducers', () => {
   });
 
   describe("profile step", () => {
-    PROFILE_STEP_LABELS.forEach((label, step) =>{
+    PROFILE_STEP_LABELS.forEach((label, step) => {
       it(`should let you set the profile step to ${label}`, () => {
         return dispatchThen(setProfileStep(step), [SET_PROFILE_STEP]).then(state => {
           assert.deepEqual(state.profileStep, step);
+        });
+      });
+    });
+  });
+
+  describe("user menu", () => {
+    [true, false].forEach(bool => {
+      it(`should let you set the user menu open state to ${bool}`, () => {
+        return dispatchThen(setUserMenuOpen(bool), [SET_USER_MENU_OPEN]).then(state => {
+          assert.deepEqual(state.userMenuOpen, bool);
         });
       });
     });

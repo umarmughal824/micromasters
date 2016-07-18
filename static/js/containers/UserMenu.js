@@ -2,59 +2,86 @@
 /* global SETTINGS: false */
 import React from 'react';
 import { connect } from 'react-redux';
-import SplitButton from 'react-bootstrap/lib/SplitButton';
-import LinkContainer from 'react-router-bootstrap/lib/LinkContainer';
-import MenuItem from 'react-bootstrap/lib/MenuItem';
+import { Icon } from 'react-mdl';
+import { Link } from 'react-router';
+import { ReactPageClick } from 'react-page-click';
+import type { Dispatch } from 'redux';
 
 import { getPreferredName } from '../util/util';
+import { createActionHelper } from '../util/redux';
+import { setUserMenuOpen } from '../actions/ui';
+import ProfileImage from '../components/ProfileImage';
+import type { Profile } from '../flow/profileTypes';
+import type { UIState } from '../reducers/ui';
 
 class UserMenu extends React.Component {
-  static propTypes = {
-    dispatch: React.PropTypes.func.isRequired,
-    profile:  React.PropTypes.object.isRequired,
+  props: {
+    profile:  Profile,
+    dispatch: Dispatch,
+    ui:       UIState,
   };
 
-  render() {
-    const { profile } = this.props;
+  openStateIcon: Function = (): React$Element => {
+    const { ui: { userMenuOpen } } = this.props;
+    return <Icon name={`${userMenuOpen ? "arrow_drop_up" : "arrow_drop_down"}`} />;
+  };
 
+  toggleMenuOpen: Function = (): void => {
+    const { ui: { userMenuOpen }, dispatch } = this.props;
+    const setMenuOpenState = createActionHelper(dispatch, setUserMenuOpen);
+    setMenuOpenState(!userMenuOpen);
+  };
+
+  linkMenu: Function = (): React$Element => {
+    const { profile, ui: { userMenuOpen } } = this.props;
+    return (
+      <div className={`user-menu-dropdown ${userMenuOpen ? "open" : ""}`}>
+        <Link to={`/users/${profile.username}`}>
+          View Profile
+        </Link>
+        <Link to="/settings">
+          Settings
+        </Link>
+        <a href="/logout">
+          Logout
+        </a>
+      </div>
+    );
+  };
+
+
+  render() {
+    const { profile, ui: { userMenuOpen } } = this.props;
     // span tags are a workaround for weird indentation with react-bootstrap
     // and React 15. React 15 removed span tags but react-bootstrap still expects
     // them.
     let title = <span>
-      {getPreferredName(profile, false)}
+      {getPreferredName(profile)}
     </span>;
 
     if (SETTINGS.authenticated) {
-      return (
-        <LinkContainer to={{ pathname: '/dashboard' }} active={false}>
-          <SplitButton
-            title={title}
-            bsStyle="danger"
-            id="user-menu">
-            <LinkContainer to={{ pathname: `/users/${profile.username}` }} active={false}>
-              <MenuItem>
-                Profile
-              </MenuItem>
-            </LinkContainer>
-            <LinkContainer to={{ pathname: '/settings' }} active={false}>
-              <MenuItem>
-                Settings
-              </MenuItem>
-            </LinkContainer>
-            <MenuItem
-              href="/logout"
-              eventKey="logout"
-              id="logout-link">
-              Logout
-            </MenuItem>
-          </SplitButton>
-        </LinkContainer>
-      );
-    } else {
-      return <div className="pull-right">
-        <span>Get Started Today!</span>
-        <a className="btn btn-danger" href="/login/edxorg/">Sign in with edX.org</a>
+      let menuContents = <div className="user-menu" onClick={this.toggleMenuOpen}>
+        <ProfileImage profile={profile} />
+        { title }
+        { this.openStateIcon() }
+        { this.linkMenu() }
       </div>;
+
+      if ( userMenuOpen ) {
+        return (
+          <ReactPageClick notify={this.toggleMenuOpen}>
+            { menuContents }
+          </ReactPageClick>
+        );
+      } else {
+        return menuContents;
+      }
+    } else {
+      return (
+        <div className="user-menu no-auth">
+          <a href="/login/edxorg/">Sign in with edX.org</a>
+        </div>
+      );
     }
   }
 }
@@ -65,7 +92,8 @@ const mapStateToProps = (state) => {
     profile = state.profiles[SETTINGS.username].profile;
   }
   return {
-    profile: profile
+    profile:  profile,
+    ui:       state.ui
   };
 };
 

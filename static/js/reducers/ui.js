@@ -27,6 +27,7 @@ import {
   SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
 
   SET_PROFILE_STEP,
+  SET_USER_MENU_OPEN,
 } from '../actions/ui';
 import {
   HIGH_SCHOOL,
@@ -56,6 +57,7 @@ export type UIState = {
   showEducationDeleteAllDialog: boolean;
   profileStep:                  string;
   workDialogIndex:              ?number;
+  userMenuOpen:                 boolean;
 };
 
 export const INITIAL_UI_STATE: UIState = {
@@ -81,6 +83,7 @@ export const INITIAL_UI_STATE: UIState = {
   showEducationDeleteAllDialog: false,
   profileStep: PERSONAL_STEP,
   workDialogIndex:  null,
+  userMenuOpen: false,
 };
 
 export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
@@ -188,6 +191,11 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
   case SET_PROFILE_STEP: {
     return Object.assign({}, state, {
       profileStep: action.payload
+    });
+  }
+  case SET_USER_MENU_OPEN: {
+    return Object.assign({}, state, {
+      userMenuOpen: action.payload
     });
   }
   default:
