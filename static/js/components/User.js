@@ -5,7 +5,7 @@ import { Card, CardMenu } from 'react-mdl/lib/Card';
 import IconButton from 'react-mdl/lib/IconButton';
 import iso3166 from 'iso-3166-2';
 
-import { makeProfileImageUrl } from '../util/util';
+import ProfileImage from './ProfileImage';
 import EmploymentForm from './EmploymentForm';
 import EducationDisplay from './EducationDisplay';
 import UserPagePersonalDialog from './UserPagePersonalDialog.js';
@@ -42,22 +42,12 @@ export default class User extends React.Component {
       }
     };
 
-    let imageUrl = makeProfileImageUrl(profile);
     return <div className="card">
       <UserPagePersonalDialog {...this.props} />
       <Grid className="card-user">
         <Cell col={5} />
-        <Cell col={2} className="card-image-box">
-          <img
-            src={imageUrl}
-            alt={`Profile image for ${profile.preferred_name}`}
-            className="card-image"
-            style={{
-              top: "50%",
-              position: "relative",
-              zIndex: 2
-            }}
-          />
+        <Cell col={2} className="card-image-box user-page-image">
+          <ProfileImage profile={profile} />
         </Cell>
       </Grid>
       <Card shadow={0} style={{width: "100%"}}>
