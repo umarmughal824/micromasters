@@ -180,19 +180,20 @@ class DashboardTest(APITestCase):
     @patch('backends.utils.refresh_user_token', autospec=True)
     def test_certificates_enrollments(self, mocked_refresh):
         """
-        Make sure we call the proper api functions
+        Make sure we call the right functions to
+        retrieve student certificates and enrollments whenever
+        user dashboard data is fetched
         """
         certificates = Certificates([])
         enrollments = Enrollments([])
-        run = self.create_run(course=self.courses_1[0])
 
-        with patch('dashboard.views.get_student_certificates', autospec=True, return_value=certificates) as cert:
-            with patch('dashboard.views.get_student_enrollments', autospec=True, return_value=enrollments) as enroll:
-                resp = self.client.get(self.url)
-                assert resp.status_code == 200, resp.content.decode('utf-8')
-        assert list(cert.call_args[0][2]) == [run.edx_course_key]
-        assert list(enroll.call_args[0][2]) == [run.edx_course_key]
-        assert mocked_refresh.called
+        with patch('dashboard.views.get_student_certificates', autospec=True, return_value=certificates) as cert,\
+                patch('dashboard.views.get_student_enrollments', autospec=True, return_value=enrollments) as enroll:
+            resp = self.client.get(self.url)
+            assert resp.status_code == 200, resp.content.decode('utf-8')
+        assert cert.call_count == 1
+        assert enroll.call_count == 1
+        assert mocked_refresh.call_count == 1
 
 
 class DashboardTokensTest(APITestCase):

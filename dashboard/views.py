@@ -17,7 +17,6 @@ from backends import utils
 from backends.edxorg import EdxOrgOAuth2
 
 from courses.models import (
-    CourseRun,
     Program,
 )
 from dashboard.api import (
@@ -55,10 +54,9 @@ class UserDashboard(APIView):
         # create an instance of the client to query edX
         edx_client = EdxApi(user_social.extra_data, settings.EDXORG_BASE_URL)
         # get an enrollments client for the student
-        course_keys = CourseRun.objects.filter(course__program__live=True).values_list("edx_course_key", flat=True)
-        enrollments = get_student_enrollments(request.user, edx_client, course_keys)
+        enrollments = get_student_enrollments(request.user, edx_client)
         # get a certificates client for the student
-        certificates = get_student_certificates(request.user, edx_client, course_keys)
+        certificates = get_student_certificates(request.user, edx_client)
 
         response_data = []
         for program in Program.objects.filter(live=True):
