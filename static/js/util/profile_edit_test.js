@@ -21,7 +21,8 @@ describe('Profile Editing utility functions', () => {
           "first_name": "",
           "date_of_birth": "",
           "gender": undefined,
-          "date_field": ""
+          "date_field": "",
+          "email_optin": false
         },
         errors: {
           "first_name": "First name is required",

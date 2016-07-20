@@ -50,6 +50,7 @@ export type Profile = {
   preferred_name: string;
   pretty_printed_student_id: string;
   city: string;
+  email_optin: boolean;
 };
 
 export type Profiles = {
