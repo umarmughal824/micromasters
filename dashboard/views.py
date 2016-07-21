@@ -21,6 +21,8 @@ from courses.models import (
 )
 from dashboard.api import (
     get_info_for_program,
+    get_student_certificates,
+    get_student_enrollments,
 )
 
 
@@ -52,11 +54,9 @@ class UserDashboard(APIView):
         # create an instance of the client to query edX
         edx_client = EdxApi(user_social.extra_data, settings.EDXORG_BASE_URL)
         # get an enrollments client for the student
-        enrollments = edx_client.enrollments.get_student_enrollments()
+        enrollments = get_student_enrollments(request.user, edx_client)
         # get a certificates client for the student
-        certificates = edx_client.certificates.get_student_certificates(
-            user_social.uid, enrollments.get_enrolled_course_ids()
-        )
+        certificates = get_student_certificates(request.user, edx_client)
 
         response_data = []
         for program in Program.objects.filter(live=True):
