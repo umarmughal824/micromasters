@@ -3,10 +3,10 @@
 
 def traverse_mapping(mapping):
     """
-    Traverse a mapping, yielding each node
+    Traverse a mapping, yielding each nested dict
 
     Args:
-        mapping (dict): A dictionary within the mapping
+        mapping (dict): The mapping itself, or a nested dict
     Returns:
         generator: A generator of dicts within the mapping
     """

@@ -12,8 +12,8 @@ from rest_framework.fields import DateTimeField
 from requests import get
 
 from dashboard.factories import (
-    CertificateFactory,
-    EnrollmentFactory,
+    CachedCertificateFactory,
+    CachedEnrollmentFactory,
 )
 from profiles.api import get_social_username
 from profiles.factories import (
@@ -65,7 +65,7 @@ def search():
     return get(url).json()['hits']
 
 
-def mappings():
+def get_es_mappings():
     """
     Retrieve the current mapping
     """
@@ -220,7 +220,7 @@ class IndexTests(ESTestCase):
         """
         user = UserFactory.create()
         assert search()['total'] == 1
-        CertificateFactory.create(user=user)
+        CachedCertificateFactory.create(user=user)
         assert_search(search(), [user])
 
     def test_update_certificate(self):
@@ -229,8 +229,8 @@ class IndexTests(ESTestCase):
         """
         user = UserFactory.create()
         assert search()['total'] == 1
-        certificate = CertificateFactory.create(user=user)
-        certificate.data = [{'new': 'data'}]
+        certificate = CachedCertificateFactory.create(user=user)
+        certificate.data = {'new': 'data'}
         certificate.save()
         assert_search(search(), [user])
 
@@ -239,7 +239,7 @@ class IndexTests(ESTestCase):
         Test that Certificate is removed from index after being deleted
         """
         user = UserFactory.create()
-        certificate = CertificateFactory.create(user=user)
+        certificate = CachedCertificateFactory.create(user=user)
         assert_search(search(), [user])
         certificate.delete()
         assert_search(search(), [user])
@@ -249,7 +249,7 @@ class IndexTests(ESTestCase):
         Test that Enrollment is indexed after being added
         """
         user = UserFactory.create()
-        CertificateFactory.create(user=user)
+        CachedCertificateFactory.create(user=user)
         assert_search(search(), [user])
 
     def test_update_enrollment(self):
@@ -258,7 +258,7 @@ class IndexTests(ESTestCase):
         """
         user = UserFactory.create()
         assert search()['total'] == 1
-        enrollment = EnrollmentFactory.create(user=user)
+        enrollment = CachedEnrollmentFactory.create(user=user)
         enrollment.data = {'new': 'data'}
         enrollment.save()
         assert_search(search(), [user])
@@ -268,7 +268,7 @@ class IndexTests(ESTestCase):
         Test that Enrollment is removed from index after being deleted
         """
         user = UserFactory.create()
-        enrollment = EnrollmentFactory.create(user=user)
+        enrollment = CachedEnrollmentFactory.create(user=user)
         assert_search(search(), [user])
         enrollment.delete()
         assert_search(search(), [user])
@@ -282,10 +282,10 @@ class IndexTests(ESTestCase):
             profile = ProfileFactory.create()
         EducationFactory.create(profile=profile)
         EmploymentFactory.create(profile=profile)
-        CertificateFactory.create(user=profile.user)
-        EnrollmentFactory.create(user=profile.user)
+        CachedCertificateFactory.create(user=profile.user)
+        CachedEnrollmentFactory.create(user=profile.user)
 
-        mapping = mappings()
+        mapping = get_es_mappings()
         nodes = list(traverse_mapping(mapping))
         for node in nodes:
             if node.get('type') == 'string':
@@ -305,8 +305,8 @@ class SerializerTests(ESTestCase):
             profile = ProfileFactory.create()
         EducationFactory.create(profile=profile)
         EmploymentFactory.create(profile=profile)
-        certificate = CertificateFactory.create(user=profile.user)
-        enrollment = EnrollmentFactory.create(user=profile.user)
+        certificate = CachedCertificateFactory.create(user=profile.user)
+        enrollment = CachedEnrollmentFactory.create(user=profile.user)
 
         assert serialize_user(profile.user) == {
             '_id': profile.user.id,

@@ -25,6 +25,16 @@ class CachedEnrollment(Model):
     class Meta:
         unique_together = (('user', 'course_run'), )
 
+    def __str__(self):
+        """
+        String representation of the model object
+        """
+        return 'user "{0}", run "{1}", has_data={2}'.format(
+            self.user.username,
+            self.course_run.edx_course_key,
+            self.data is not None,
+        )
+
 
 class CachedCertificate(Model):
     """
@@ -37,3 +47,13 @@ class CachedCertificate(Model):
 
     class Meta:
         unique_together = (('user', 'course_run'), )
+
+    def __str__(self):
+        """
+        String representation of the model object
+        """
+        return 'user "{0}", run "{1}", has_data={2}'.format(
+            self.user.username,
+            self.course_run.edx_course_key,
+            self.data is not None,
+        )

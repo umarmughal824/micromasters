@@ -161,8 +161,12 @@ def serialize_user(user):
     except Profile.DoesNotExist:
         # Just in case
         pass
-    serialized['certificates'] = [certificate.data for certificate in user.certificate_set.all()]
-    serialized['enrollments'] = [enrollment.data for enrollment in user.enrollment_set.all()]
+    serialized['certificates'] = [
+        certificate.data for certificate in user.cachedcertificate_set.all().exclude(data__isnull=True)
+    ]
+    serialized['enrollments'] = [
+        enrollment.data for enrollment in user.cachedenrollment_set.all().exclude(data__isnull=True)
+    ]
     return serialized
 
 
