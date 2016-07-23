@@ -337,7 +337,8 @@ describe("ProfilePage", function() {
     return renderComponent('/profile').then(([, div]) => {
       // close all switches and remove all education so we don't get validation errors
       let receivedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
-        education: []
+        education: [],
+        email_optin: true,
       });
       helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, receivedProfile));
       helper.store.dispatch(setEducationDegreeInclusions(noInclusions));
@@ -358,7 +359,8 @@ describe("ProfilePage", function() {
     return renderComponent('/profile').then(([, div]) => {
       // close all switches and remove all education so we don't get validation errors
       let receivedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
-        education: []
+        education: [],
+        email_optin: true,
       });
       helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, receivedProfile));
       helper.store.dispatch(setEducationDegreeInclusions(
@@ -389,7 +391,8 @@ describe("ProfilePage", function() {
     return renderComponent('/profile').then(([, div]) => {
       // close all switches and remove all education so we don't get validation errors
       let receivedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
-        work_history: []
+        work_history: [],
+        email_optin: true,
       });
       helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, receivedProfile));
       helper.store.dispatch(setWorkHistoryEdit(true));
@@ -415,7 +418,8 @@ describe("ProfilePage", function() {
       // close all switches and remove all education so we don't get validation errors
       let receivedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
         education: [],
-        work_history: []
+        work_history: [],
+        email_optin: true,
       });
       helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, receivedProfile));
       helper.store.dispatch(setEducationDegreeInclusions({

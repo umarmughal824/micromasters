@@ -35,7 +35,13 @@ export function boundRadioGroupField(keySet: string[], label: string, options: O
 
   let onChange = e => {
     let clone = _.cloneDeep(profile);
-    _.set(clone, keySet, e.target.value);
+    let value = e.target.value;
+    if (value === "true") {
+      value = true;
+    } else if (value === "false") {
+      value = false;
+    }
+    _.set(clone, keySet, value);
     updateProfile(clone, validator);
   };
 
@@ -62,7 +68,7 @@ export function boundRadioGroupField(keySet: string[], label: string, options: O
     );
   });
 
-  const value = _.get(profile, keySet);
+  const value = String(_.get(profile, keySet));
   return (
     <div>
       <span className="profile-radio-group-label">
@@ -282,8 +288,8 @@ export function saveProfileStep(validator: Validator|UIValidator, isLastStep: bo
   let clone = Object.assign({}, profile, {
     filled_out: profile.filled_out || isLastStep
   });
-  if (isLastStep) {
-    // user has also seen email consent message at this point
+
+  if (isLastStep && !profile.filled_out) {
     clone.email_optin = true;
   }
   return saveProfile(validator, clone, ui);
