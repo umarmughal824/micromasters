@@ -14,7 +14,10 @@ from django.core.urlresolvers import reverse
 from requests.exceptions import HTTPError
 from rest_framework import status
 from rest_framework.test import APITestCase
-from edx_api.certificates.models import Certificates
+from edx_api.certificates.models import (
+    Certificate,
+    Certificates
+)
 from edx_api.enrollments.models import Enrollments
 
 from backends.edxorg import EdxOrgOAuth2
@@ -49,6 +52,12 @@ class DashboardTest(APITestCase):
                                'fixtures/user_enrollments.json')) as file_obj:
             cls.enrollments_json = json.loads(file_obj.read())
         cls.enrollments = Enrollments(cls.enrollments_json)
+
+        with open(os.path.join(os.path.dirname(__file__),
+                               'fixtures/certificates.json')) as file_obj:
+            certificates_json = json.loads(file_obj.read())
+
+        cls.certificates = Certificates([Certificate(cert_json) for cert_json in certificates_json])
 
         # create the programs
         cls.program_1 = ProgramFactory.create(live=True)
@@ -97,11 +106,10 @@ class DashboardTest(APITestCase):
             run.save()
         return run
 
-    def get_with_mocked_enrollment(self):
+    def get_with_mocked_enrollment_certificates(self):
         """Helper function to permorm get request with mocked enrollments"""
-        with patch(
-            'edx_api.enrollments.CourseEnrollments.get_student_enrollments',
-            autospec=True,
+        with patch('dashboard.views.get_student_certificates', autospec=True, return_value=self.certificates), patch(
+            'edx_api.enrollments.CourseEnrollments.get_student_enrollments', autospec=True,
             return_value=self.enrollments
         ):
             return self.client.get(self.url)
@@ -115,7 +123,7 @@ class DashboardTest(APITestCase):
     @patch('backends.utils.refresh_user_token', autospec=True)
     def test_programs(self, mocked_refresh):
         """Test for GET"""
-        res = self.get_with_mocked_enrollment()
+        res = self.get_with_mocked_enrollment_certificates()
         assert mocked_refresh.called
         assert res.status_code == status.HTTP_200_OK
         data = res.data
@@ -128,7 +136,7 @@ class DashboardTest(APITestCase):
     @patch('backends.utils.refresh_user_token', autospec=True)
     def test_no_run_available(self, mocked_refresh):
         """Test for GET"""
-        res = self.get_with_mocked_enrollment()
+        res = self.get_with_mocked_enrollment_certificates()
         assert mocked_refresh.called
         assert res.status_code == status.HTTP_200_OK
         data = res.data
@@ -159,7 +167,7 @@ class DashboardTest(APITestCase):
             enr_end=self.now+timedelta(weeks=1),
             edx_key="course-v1:MITx+8.MechCX+2014_T1"
         )
-        res = self.get_with_mocked_enrollment()
+        res = self.get_with_mocked_enrollment_certificates()
         assert mocked_refresh.called
         assert res.status_code == status.HTTP_200_OK
         data = res.data
