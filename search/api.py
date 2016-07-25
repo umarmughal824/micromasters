@@ -161,6 +161,12 @@ def serialize_user(user):
     except Profile.DoesNotExist:
         # Just in case
         pass
+    serialized['certificates'] = [
+        certificate.data for certificate in user.cachedcertificate_set.all().exclude(data__isnull=True)
+    ]
+    serialized['enrollments'] = [
+        enrollment.data for enrollment in user.cachedenrollment_set.all().exclude(data__isnull=True)
+    ]
     return serialized
 
 
@@ -182,6 +188,7 @@ def create_user_mapping():
         conn.indices.delete_mapping(index=index_name, doc_type=USER_DOC_TYPE)
 
     mapping = Mapping(USER_DOC_TYPE)
+
     mapping.field("id", "long")
     mapping.field("profile", "nested", properties={
         'account_privacy': NOT_ANALYZED_STRING_TYPE,
@@ -228,6 +235,27 @@ def create_user_mapping():
             'state_or_territory': NOT_ANALYZED_STRING_TYPE,
         }},
     })
+    mapping.field('enrollments', 'nested', properties={
+        'course_details': {
+            'type': 'object',
+            'properties': {
+                'course_modes': {
+                    'type': 'nested',
+                }
+            }
+        }
+    })
+    mapping.field('certificates', 'nested')
+
+    # Make strings not_analyzed by default
+    mapping.meta('dynamic_templates', [{
+        "notanalyzed": {
+            "match": "*",
+            "match_mapping_type": "string",
+            "mapping": NOT_ANALYZED_STRING_TYPE
+        }
+    }])
+
     mapping.save(index_name)
 
 
