@@ -10,7 +10,7 @@ from django.db.models import (
 )
 from jsonfield import JSONField
 
-from courses.models import CourseRun
+from courses.models import CourseRun, Program
 
 
 class CachedEnrollment(Model):
@@ -57,3 +57,11 @@ class CachedCertificate(Model):
             self.course_run.edx_course_key,
             self.data is not None,
         )
+
+
+class ProgramEnrollment(Model):
+    """
+    Model for student enrollments in Programs
+    """
+    user = ForeignKey(User)
+    program = ForeignKey(Program)
