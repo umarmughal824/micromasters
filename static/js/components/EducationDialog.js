@@ -44,11 +44,12 @@ export default class EducationDialog extends ProfileFormFields {
       setEducationDegreeLevel,
       setEducationDialogIndex,
       clearProfileEdit,
+      profile: { username },
     } = this.props;
     setEducationDialogVisibility(false);
     setEducationDegreeLevel('');
     setEducationDialogIndex(null);
-    clearProfileEdit();
+    clearProfileEdit(username);
   };
 
   saveEducationForm: Function = (): void => {

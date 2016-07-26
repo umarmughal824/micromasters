@@ -76,9 +76,13 @@ class EmploymentForm extends ProfileFormFields {
   };
 
   closeWorkDialog: Function = (): void => {
-    const { setWorkDialogVisibility, clearProfileEdit } = this.props;
+    const {
+      setWorkDialogVisibility,
+      clearProfileEdit,
+      profile: { username }
+    } = this.props;
     setWorkDialogVisibility(false);
-    clearProfileEdit();
+    clearProfileEdit(username);
   };
 
   addWorkHistoryEntry: Function = (): void => {

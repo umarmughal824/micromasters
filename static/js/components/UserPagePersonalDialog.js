@@ -18,9 +18,13 @@ export default class UserPagePersonalDialog extends React.Component {
   };
 
   closePersonalDialog: Function = (): void => {
-    const { setUserPageDialogVisibility, clearProfileEdit } = this.props;
+    const {
+      setUserPageDialogVisibility,
+      clearProfileEdit,
+      profile: { username }
+    } = this.props;
     setUserPageDialogVisibility(false);
-    clearProfileEdit();
+    clearProfileEdit(username);
   };
 
   savePersonalInfo: Function = (): void => {
