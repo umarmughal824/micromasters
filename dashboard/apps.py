@@ -1,5 +1,5 @@
 """
-AppConfig
+AppConfig for dashboard app
 """
 from django.apps import AppConfig
 

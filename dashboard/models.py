@@ -65,3 +65,15 @@ class ProgramEnrollment(Model):
     """
     user = ForeignKey(User)
     program = ForeignKey(Program)
+
+    class Meta:
+        unique_together = (('user', 'program'), )
+
+    def __str__(self):
+        """
+        String representation of the model object
+        """
+        return 'user "{0}" enrolled in program "{1}"'.format(
+            self.user.username,
+            self.program.title
+        )
