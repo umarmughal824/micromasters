@@ -208,7 +208,7 @@ complete profile consists of:
   - one or more work items if the user has marked any work history
   - a valid privacy level
 */
-export type ProfileComplete = [boolean, string|null, ?ValidationErrors];
+export type ProfileComplete = [boolean, string|null, ValidationErrors];
 export function validateProfileComplete(profile: Profile): ProfileComplete {
   let errors = {};
 
@@ -240,7 +240,7 @@ export function validateProfileComplete(profile: Profile): ProfileComplete {
     return [false, PRIVACY_STEP, errors];
   }
 
-  return [true, null, null];
+  return [true, null, {}];
 }
 
 /**
