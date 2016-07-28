@@ -19,6 +19,8 @@ import ConfirmDeletion from './ConfirmDeletion';
 import SelectField from './inputs/SelectField';
 import CountrySelectField from './inputs/CountrySelectField';
 import StateSelectField from './inputs/StateSelectField';
+import ValidationAlert from './ValidationAlert';
+
 import type { WorkHistoryEntry } from '../flow/profileTypes';
 import type { Validator, UIValidator } from '../util/validation';
 import type {
@@ -257,22 +259,20 @@ class EmploymentForm extends ProfileFormFields {
       errors,
       showSwitch,
     } = this.props;
-    const actions = [
+    const actions = <ValidationAlert {...this.props}>
       <Button
         type='button'
-        key='cancel'
         className="cancel-button"
         onClick={this.closeWorkDialog}>
         Cancel
-      </Button>,
+      </Button>
       <Button
-        key='save'
         type='button'
         className="save-button"
         onClick={this.saveWorkHistoryEntry}>
         Save
-      </Button>,
-    ];
+      </Button>
+    </ValidationAlert>;
     let workSwitch = () => {
       if ( showSwitch ) {
         return (

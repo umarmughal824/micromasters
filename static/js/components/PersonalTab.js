@@ -5,6 +5,7 @@ import Grid, { Cell } from 'react-mdl/lib/Grid';
 import PersonalForm from './PersonalForm';
 import ProfileProgressControls from './ProfileProgressControls';
 import { personalValidation } from '../util/validation';
+import ValidationAlert  from './ValidationAlert';
 import type {
   Profile,
   SaveProfileFunc,
@@ -40,6 +41,7 @@ class PersonalTab extends React.Component {
         <Cell col={1} />
         <Cell col={1} />
         <Cell col={10}>
+          <ValidationAlert {...this.props} />
           <ProfileProgressControls
             {...this.props}
             nextBtnLabel="Save and Continue"

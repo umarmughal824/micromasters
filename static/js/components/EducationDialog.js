@@ -12,6 +12,8 @@ import SelectField from './inputs/SelectField';
 import CountrySelectField from './inputs/CountrySelectField';
 import StateSelectField from './inputs/StateSelectField';
 import FieldsOfStudySelectField from './inputs/FieldsOfStudySelectField';
+import ValidationAlert from './ValidationAlert';
+
 import type { UIState } from '../reducers/ui';
 import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { Validator, UIValidator } from '../util/validation';
@@ -130,22 +132,20 @@ export default class EducationDialog extends ProfileFormFields {
   render () {
     const { ui: {educationDialogVisibility } } = this.props;
 
-    let actions = [
+    let actions = <ValidationAlert {...this.props}>
       <Button
         type='button'
-        key='cancel'
         className="cancel-button"
         onClick={this.clearEducationEdit}>
         Cancel
-      </Button>,
+      </Button>
       <Button
-        key='save'
         type='button'
         className="save-button"
         onClick={this.saveEducationForm}>
         Save
-      </Button>,
-    ];
+      </Button>
+    </ValidationAlert>;
 
     return (
       <Dialog

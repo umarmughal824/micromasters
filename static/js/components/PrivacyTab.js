@@ -5,6 +5,7 @@ import Grid, { Cell } from 'react-mdl/lib/Grid';
 import PrivacyForm from './PrivacyForm';
 import ProfileProgressControls from './ProfileProgressControls';
 import ProfileFormFields from '../util/ProfileFormFields';
+import ValidationAlert from './ValidationAlert';
 import {
   combineValidators,
   personalValidation,
@@ -38,6 +39,7 @@ class PrivacyTab extends ProfileFormFields {
             <PrivacyForm {...this.props} />
           </Cell>
           <Cell col={12}>
+            <ValidationAlert {...this.props} />
             <ProfileProgressControls
               {...this.props}
               nextBtnLabel="I'm Done!"

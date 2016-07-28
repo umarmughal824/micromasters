@@ -33,6 +33,7 @@ import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../util/api';
 import { USER_PROFILE_RESPONSE, HIGH_SCHOOL, DOCTORATE } from '../constants';
 import { workEntriesByDate, educationEntriesByDate } from '../util/sorting';
+import ValidationAlert from '../components/ValidationAlert';
 
 describe("UserPage", function() {
   this.timeout(5000);
@@ -135,6 +136,9 @@ describe("UserPage", function() {
             TestUtils.Simulate.click(save);
             let state = helper.store.getState();
             assert.deepEqual(state.profiles.jane.edit.errors, validationExpectation);
+            let validationInfoText = document.querySelector('.validation-alert').
+              querySelector('.message').textContent;
+            assert.equal(validationInfoText, ValidationAlert.message);
             modifyTextField(input, removeErrorValue);
           }).then(() => {
             let state = helper.store.getState();
