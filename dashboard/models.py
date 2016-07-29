@@ -10,7 +10,7 @@ from django.db.models import (
 )
 from jsonfield import JSONField
 
-from courses.models import CourseRun
+from courses.models import CourseRun, Program
 
 
 class CachedEnrollment(Model):
@@ -56,4 +56,24 @@ class CachedCertificate(Model):
             self.user.username,
             self.course_run.edx_course_key,
             self.data is not None,
+        )
+
+
+class ProgramEnrollment(Model):
+    """
+    Model for student enrollments in Programs
+    """
+    user = ForeignKey(User)
+    program = ForeignKey(Program)
+
+    class Meta:
+        unique_together = (('user', 'program'), )
+
+    def __str__(self):
+        """
+        String representation of the model object
+        """
+        return 'user "{0}" enrolled in program "{1}"'.format(
+            self.user.username,
+            self.program.title
         )
