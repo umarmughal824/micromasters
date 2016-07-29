@@ -4,6 +4,7 @@ import TestUtils from 'react-addons-test-utils';
 import { assert } from 'chai';
 import _ from 'lodash';
 import moment from 'moment';
+import sinon from 'sinon';
 
 import { 
   RECEIVE_GET_USER_PROFILE_SUCCESS,
@@ -13,6 +14,9 @@ import {
   UPDATE_PROFILE_VALIDATION,
   REQUEST_PATCH_USER_PROFILE,
   RECEIVE_PATCH_USER_PROFILE_SUCCESS,
+
+  startProfileEdit,
+  updateProfile,
 } from '../actions';
 import {
   SET_WORK_DIALOG_VISIBILITY,
@@ -120,32 +124,13 @@ describe("UserPage", function() {
 
     describe("validation", () => {
       const inputs = dialog => [...dialog.getElementsByTagName('input')];
-      const confirmClearValidation = (actions, getInput, validationExpectation, removeErrorValue) => {
-        return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let editPersonalButton = div.
-            querySelector('.main-content').
-            querySelector('.material-icons');
+      const getEditPersonalButton = div => div.querySelector('.main-content .material-icons');
+      const getDialog = () => document.querySelector('.personal-dialog');
+      const getSave = () => getDialog().querySelector('.save-button');
 
-          return listenForActions(actions, () => {
-            TestUtils.Simulate.click(editPersonalButton);
-
-            let dialog = document.querySelector('.personal-dialog');
-            let save = dialog.querySelector('.save-button');
-            let input = getInput(dialog);
-            modifyTextField(input, "");
-            TestUtils.Simulate.click(save);
-            let state = helper.store.getState();
-            assert.deepEqual(state.profiles.jane.edit.errors, validationExpectation);
-            let validationInfoText = document.querySelector('.validation-alert').
-              querySelector('.message').textContent;
-            assert.equal(validationInfoText, ValidationAlert.message);
-            modifyTextField(input, removeErrorValue);
-          }).then(() => {
-            let state = helper.store.getState();
-            assert.deepEqual(state.profiles.jane.edit.errors, {});
-          });
-        });
-      };
+      beforeEach(() => {
+        HTMLDivElement.prototype.scrollIntoView = sinon.stub();
+      });
 
       let userProfileActions = [
         SET_USER_PAGE_DIALOG_VISIBILITY,
@@ -156,39 +141,137 @@ describe("UserPage", function() {
         UPDATE_PROFILE_VALIDATION,
       ];
 
-      it('should clear validation errors when a required text field is filled out', () => {
-        const preferredName = dialog => inputs(dialog).find(i => i.name === "Preferred name");
+      let scrollActions = [
+        SET_USER_PAGE_DIALOG_VISIBILITY,
+        START_PROFILE_EDIT,
+        UPDATE_PROFILE,
+        UPDATE_PROFILE_VALIDATION,
+      ];
 
-        return confirmClearValidation(
+
+      const clearValidation = (actions, getInput, validationExpectation, removeErrorValue) => {
+        return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
+          return listenForActions(actions, () => {
+            TestUtils.Simulate.click(getEditPersonalButton(div));
+
+            let input;
+            // run the 'getInput' function if 'removeErrorValue' is also a function (radio buttons)
+            if ( _.isFunction(removeErrorValue) ) {
+              getInput(getDialog());
+            } else {
+              input = getInput(getDialog());
+              modifyTextField(input, "");
+            }
+
+            // check that validation error has propagated
+            TestUtils.Simulate.click(getSave());
+            let state = helper.store.getState();
+            assert.deepEqual(state.profiles.jane.edit.errors, validationExpectation);
+            let validationInfoText = document.querySelector('.validation-alert').
+              querySelector('.message').textContent;
+            assert.equal(validationInfoText, ValidationAlert.message);
+
+            // run the 'remove error' function if it's a function
+            if ( _.isFunction(removeErrorValue) ) {
+              removeErrorValue(getDialog());
+            } else {
+              modifyTextField(input, removeErrorValue);
+            }
+
+          }).then(() => {
+            let state = helper.store.getState();
+            assert.deepEqual(state.profiles.jane.edit.errors, {});
+          });
+        });
+      };
+
+      const scrollIntoView = (actions, getInput) => {
+        return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
+          return listenForActions(scrollActions, () => {
+            TestUtils.Simulate.click(getEditPersonalButton(div));
+            let input = getInput(getDialog());
+            modifyTextField(input, "");
+            TestUtils.Simulate.click(getSave());
+          }).then(() => {
+            return new Promise(resolve => {
+              setTimeout(() => { // ensure that the DOM update after clicking 'save' has finished
+                assert(HTMLDivElement.prototype.scrollIntoView.called, "Not called yet");
+                resolve();
+              }, 100);
+            });
+          });
+        });
+      };
+
+      [clearValidation, scrollIntoView].forEach(testFunc => {
+        it(`should ${testFunc.name} when filling out a required text field`, () => {
+          const preferredName = dialog => inputs(dialog).find(i => i.name === "Preferred name");
+
+          return testFunc(
+            userProfileActions,
+            preferredName,
+            { preferred_name: 'Preferred name is required' },
+            USER_PROFILE_RESPONSE.preferred_name
+          );
+        });
+
+        it(`should ${testFunc.name} when filling out a required select field`, () => {
+          const languageField = dialog => inputs(dialog).find(i => i.id.includes('Preferredlanguage'));
+
+          return testFunc(
+            userProfileActions.concat(UPDATE_PROFILE, UPDATE_PROFILE_VALIDATION),
+            languageField,
+            { preferred_language: "Preferred language is required" },
+            USER_PROFILE_RESPONSE.preferred_language
+          );
+        });
+
+        it(`should ${testFunc.name} when filling out a required date field`, () => {
+          const dobMonth = dialog => inputs(dialog).find(i => i.id.includes('Dateofbirth'));
+
+          return testFunc(
+            userProfileActions,
+            dobMonth,
+            { date_of_birth: "Please enter a valid date of birth" },
+            String(moment(USER_PROFILE_RESPONSE.date_of_birth).month())
+          );
+        });
+      });
+
+      it(`should clearValidationErrors when filling out a required radio field`, () => {
+        const createValidationError = () => {
+          helper.store.dispatch(startProfileEdit(SETTINGS.username));
+          let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
+          profile.gender = undefined;
+          helper.store.dispatch(updateProfile(SETTINGS.username, profile));
+        };
+
+        const removeErrorValue = dialog => {
+          let genderField = inputs(dialog).find(i => i.name === "Gender");
+          genderField.click();
+        };
+
+        return clearValidation(
           userProfileActions,
-          preferredName,
-          { preferred_name: 'Preferred name is required' },
-          USER_PROFILE_RESPONSE.preferred_name
+          createValidationError,
+          { gender: "Gender is required" },
+          removeErrorValue,
         );
       });
 
-      it('should clear validation errors when a required select field is filled out', () => {
-        const languageField = dialog => inputs(dialog).find(i => i.id.includes('Preferredlanguage'));
+      it(`should scrollIntoView when filling out a required radio field`, () => {
+        const genderField = dialog => inputs(dialog).find(i => i.name === "Gender");
+        const removeErrorValue = dialog => TestUtils.Simulate.click(genderField(dialog));
 
-        return confirmClearValidation(
-          userProfileActions.concat(UPDATE_PROFILE, UPDATE_PROFILE_VALIDATION),
-          languageField,
-          { preferred_language: "Preferred language is required" },
-          USER_PROFILE_RESPONSE.preferred_language
-        );
-      });
-
-      it('should clear validation errors when a required date field is filled out', () => {
-        const dobMonth = dialog => inputs(dialog).find(i => i.id.includes('Dateofbirth'));
-
-        return confirmClearValidation(
+        return scrollIntoView(
           userProfileActions,
-          dobMonth,
-          { date_of_birth: "Please enter a valid date of birth" },
-          String(moment(USER_PROFILE_RESPONSE.date_of_birth).month())
+          genderField,
+          { gender: "Gender is required" },
+          removeErrorValue,
         );
       });
     });
+
 
     describe("Education History", () => {
       let deleteButton = div => {

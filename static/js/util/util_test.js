@@ -13,6 +13,7 @@ import {
   calculateDegreeInclusions,
   callFunctionArray,
   getLocation,
+  validationErrorSelector,
 } from '../util/util';
 import {
   EDUCATION_LEVELS,
@@ -310,6 +311,28 @@ describe('utility functions', () => {
         'testFunctionA arg',
         'testFunctionB arg'
       ]);
+    });
+  });
+
+  describe('validationErrorSelector', () => {
+    const invalid = "invalid-input";
+
+    it('should return invalid-input if keySet matches an error', () => {
+      let errors = { foo: "WARNING" };
+      let keySet = ['foo'];
+      assert.equal(validationErrorSelector(errors, keySet), invalid);
+    });
+
+    it('should not return invalid-input if keySet does not match an error', () => {
+      let errors = { foo: "WARNING" };
+      let keySet = ['bar'];
+      assert.equal(validationErrorSelector(errors, keySet), "");
+    });
+
+    it('should not return invalid-input if there are no errors', () => {
+      let errors = {};
+      let keySet = ['bar'];
+      assert.equal(validationErrorSelector(errors, keySet), "");
     });
   });
 });

@@ -14,7 +14,8 @@ import {
 import type {
   Profile,
   EducationEntry,
-  WorkHistoryEntry
+  WorkHistoryEntry,
+  ValidationErrors,
 } from '../flow/profileTypes';
 
 export function sendGoogleAnalyticsEvent(category: any, action: any, label: any, value: any) {
@@ -281,4 +282,12 @@ export function calculateDegreeInclusions(profile: Profile) {
  */
 export function callFunctionArray<T,R>(functionArray: Array<(t: T) => R>, arg: T): R[] {
   return functionArray.map((func) => func(arg));
+}
+
+/**
+ * takes an 'error' object and a keyset, and returns a class selector if an
+ * error is present
+ */
+export function validationErrorSelector(errors: ValidationErrors, keySet: string[]) {
+  return _.get(errors, keySet) ? "invalid-input" : "";
 }

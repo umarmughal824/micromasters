@@ -1,4 +1,5 @@
 import ReactDOM from 'react-dom';
+import React from 'react';
 import configureTestStore from 'redux-asserts';
 import sinon from 'sinon';
 import { createMemoryHistory } from 'react-router';
@@ -67,7 +68,9 @@ class IntegrationTestHelper {
       this.browserHistory.push(url);
       div = document.createElement("div");
       component = ReactDOM.render(
-        makeDashboardRoutes(this.browserHistory, this.store, () => null),
+        <div>
+          { makeDashboardRoutes(this.browserHistory, this.store, () => null) }
+        </div>,
         div
       );
     }).then(() => {

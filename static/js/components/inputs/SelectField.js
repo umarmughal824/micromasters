@@ -3,7 +3,7 @@ import React from 'react';
 import _ from 'lodash';
 import AutoComplete from '../AutoComplete';
 import { defaultFilter, showAllOptions } from '../utils/AutoCompleteSettings';
-import { callFunctionArray } from '../../util/util';
+import { callFunctionArray, validationErrorSelector } from '../../util/util';
 import type { Option } from '../../flow/generalTypes';
 import type { Validator, UIValidator } from '../../util/validation';
 import type {
@@ -159,8 +159,10 @@ class SelectField extends React.Component {
   };
   
   render() {
+    const { errors, keySet } = this.props;
     return (
       <AutoComplete
+        className={validationErrorSelector(errors, keySet)}
         searchText={this.getSearchText()}
         {...this.getAutocompleteProps()}
       />

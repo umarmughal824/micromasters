@@ -11,6 +11,7 @@ import {
   validateYear,
   validateDay,
 } from '../util/validation';
+import { validationErrorSelector } from './util';
 import type { Validator, UIValidator } from './validation';
 import type { Profile } from '../flow/profileTypes';
 import type { Option } from '../flow/generalTypes';
@@ -70,7 +71,7 @@ export function boundRadioGroupField(keySet: string[], label: string, options: O
 
   const value = String(_.get(profile, keySet));
   return (
-    <div>
+    <div className={validationErrorSelector(errors, keySet)}>
       <span className="profile-radio-group-label">
         {label}
       </span>
@@ -118,6 +119,7 @@ export function boundTextField(keySet: string[], label: string): React$Element {
   return (
     <TextField
       name={label}
+      className={validationErrorSelector(errors, keySet)}
       floatingLabelText={label}
       value={getValue()}
       fullWidth={true}
@@ -242,7 +244,7 @@ export function boundDateField(keySet: string[], label: string, omitDay: boolean
     />;
   }
 
-  return <div>
+  return <div className={validationErrorSelector(errors, keySet)}>
     <TextField
       floatingLabelText={label}
       floatingLabelFixed={true}
