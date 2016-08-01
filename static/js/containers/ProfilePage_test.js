@@ -50,8 +50,8 @@ describe("ProfilePage", function() {
     EMPLOYMENT_STEP,
     PRIVACY_STEP,
   ];
-  let prevButtonSelector = '.progress-button.previous';
-  let nextButtonSelector = '.progress-button.next';
+  let prevButtonSelector = '.mm-button-action.prev';
+  let nextButtonSelector = '.mm-button-action.next';
   let noInclusions = {};
   for (const { value } of EDUCATION_LEVELS) {
     noInclusions[value] = false;
@@ -100,6 +100,8 @@ describe("ProfilePage", function() {
     ));
   };
 
+  let radioToggles = (div, selector) => div.querySelector(selector).getElementsByTagName('input');
+
   describe('switch toggling behavior', () => {
     beforeEach(() => {
       helper.profileGetStub.
@@ -114,13 +116,13 @@ describe("ProfilePage", function() {
     it('should confirm and let you cancel when toggling the switch on work history', () => {
       setStep(EMPLOYMENT_STEP);
       return renderComponent('/profile').then(([, div]) => {
-        let toggle = div.querySelector('#profile-tab-professional-switch');
+        let toggle = radioToggles(div, '.profile-radio-switch');
 
         return listenForActions([
           SET_SHOW_WORK_DELETE_ALL_DIALOG,
           SET_SHOW_WORK_DELETE_ALL_DIALOG,
         ], () => {
-          TestUtils.Simulate.change(toggle);
+          TestUtils.Simulate.change(toggle[1]);
           let dialog = openDialog();
           let cancelButton = dialog.querySelector('.cancel-button');
           TestUtils.Simulate.click(cancelButton);
@@ -143,7 +145,7 @@ describe("ProfilePage", function() {
           Promise.resolve(updateProfile)
         );
 
-        let toggle = div.querySelector('#profile-tab-professional-switch');
+        let toggle = radioToggles(div, '.profile-radio-switch');
         return listenForActions([
           SET_SHOW_WORK_DELETE_ALL_DIALOG,
           START_PROFILE_EDIT,
@@ -154,7 +156,7 @@ describe("ProfilePage", function() {
           RECEIVE_PATCH_USER_PROFILE_SUCCESS,
           CLEAR_PROFILE_EDIT,
         ], () => {
-          TestUtils.Simulate.change(toggle);
+          TestUtils.Simulate.change(toggle[1]);
           let dialog = openDialog();
           let deleteButton = dialog.querySelector('.delete-button');
           TestUtils.Simulate.click(deleteButton);
@@ -175,13 +177,13 @@ describe("ProfilePage", function() {
         });
         helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, emptyWorkHistory));
 
-        let toggle = div.querySelector('#profile-tab-professional-switch');
+        let toggle = radioToggles(div, '.profile-radio-switch');
 
         return listenForActions([
         ], () => {
-          TestUtils.Simulate.change(toggle);
+          TestUtils.Simulate.change(toggle[0]);
           assert.equal(openDialog(), undefined);
-          TestUtils.Simulate.change(toggle);
+          TestUtils.Simulate.change(toggle[1]);
           assert.equal(openDialog(), undefined);
         });
       });
@@ -189,7 +191,7 @@ describe("ProfilePage", function() {
 
 
     let educationSwitchSelectors = EDUCATION_LEVELS.map(level => (
-      { value: level.value, label: level.label, selector: `#profile-tab-education-switch-${level.value}` }
+      { value: level.value, label: level.label, selector: `.profile-radio-switch.${level.value}` }
     ));
 
     let educationEntries = (level, profile) => (
@@ -228,14 +230,14 @@ describe("ProfilePage", function() {
         return renderComponent('/profile').then(([, div]) => {
           helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, fullEducation()));
 
-          let toggle = div.querySelector(selector);
+          let toggle = radioToggles(div, selector);
           return listenForActions([
             SET_EDUCATION_DEGREE_LEVEL,
             SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
             SET_EDUCATION_DEGREE_LEVEL,
             SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
           ], () => {
-            TestUtils.Simulate.change(toggle);
+            TestUtils.Simulate.change(toggle[1]);
             let dialog = openDialog();
             let cancelButton = dialog.querySelector('.cancel-button');
             TestUtils.Simulate.click(cancelButton);
@@ -263,7 +265,7 @@ describe("ProfilePage", function() {
             Promise.resolve(updateProfile)
           );
 
-          let toggle = div.querySelector(selector);
+          let toggle = radioToggles(div, selector);
           return listenForActions([
             SET_EDUCATION_DEGREE_LEVEL,
             SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
@@ -276,7 +278,7 @@ describe("ProfilePage", function() {
             RECEIVE_PATCH_USER_PROFILE_SUCCESS,
             CLEAR_PROFILE_EDIT,
           ], () => {
-            TestUtils.Simulate.change(toggle);
+            TestUtils.Simulate.change(toggle[1]);
             let dialog = openDialog();
             let deleteButton = dialog.querySelector('.delete-button');
             TestUtils.Simulate.click(deleteButton);
@@ -299,25 +301,19 @@ describe("ProfilePage", function() {
           noEducation.education = [];
           helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, noEducation));
 
-          let toggle = div.querySelector(selector);
+          let toggle = radioToggles(div, selector);
+
           return listenForActions([
             SET_EDUCATION_DEGREE_INCLUSIONS,
             SET_EDUCATION_DEGREE_INCLUSIONS,
           ], () => {
-            TestUtils.Simulate.change(toggle);
+            TestUtils.Simulate.change(toggle[1]);
             assert.equal(openDialog(), undefined);
-            TestUtils.Simulate.change(toggle);
+            TestUtils.Simulate.change(toggle[0]);
             assert.equal(openDialog(), undefined);
           });
         });
       });
-    });
-  });
-
-  it('should show the pretty-printed MM id', () => {
-    return renderComponent('/profile').then(([, div]) => {
-      let id = div.querySelector('.card-student-id');
-      assert.equal(`ID: ${USER_PROFILE_RESPONSE.pretty_printed_student_id}`, id.textContent);
     });
   });
 
@@ -371,7 +367,7 @@ describe("ProfilePage", function() {
       helper.store.dispatch(setWorkHistoryEdit(true));
 
       let button = div.querySelector(nextButtonSelector);
-      assert(button.innerHTML.includes("Save and Continue"));
+      assert(button.innerHTML.includes("Next"));
       let updatedProfile = Object.assign({}, receivedProfile, {
         email_optin: true,
         filled_out: true
@@ -398,7 +394,7 @@ describe("ProfilePage", function() {
       helper.store.dispatch(setWorkHistoryEdit(true));
 
       let button = div.querySelector(nextButtonSelector);
-      assert(button.innerHTML.includes("Save and Continue"));
+      assert(button.innerHTML.includes("Next"));
       let updatedProfile = Object.assign({}, receivedProfile, {
         email_optin: true,
         filled_out: true

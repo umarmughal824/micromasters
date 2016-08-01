@@ -1,10 +1,10 @@
 // @flow
 import React from 'react';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
+
 import SelectField from './inputs/SelectField';
 import CountrySelectField from './inputs/CountrySelectField';
 import StateSelectField from './inputs/StateSelectField';
-
 import ProfileFormFields from '../util/ProfileFormFields';
 import type {
   Profile,
@@ -25,7 +25,7 @@ export default class PersonalForm extends ProfileFormFields {
 
   render() {
     return (
-      <Grid className="profile-tab-card-grid">
+      <Grid className="profile-form-grid">
         <Cell col={6}>
           {this.boundTextField(["first_name"], "Given name")}
         </Cell>
@@ -50,7 +50,9 @@ export default class PersonalForm extends ProfileFormFields {
           />
         </Cell>
         <Cell col={12}>
-          <h4>Currently Living</h4>
+          <div className="section-header">
+            Where are you currently living?
+          </div>
         </Cell>
         <Cell col={4}>
           <CountrySelectField
@@ -72,7 +74,9 @@ export default class PersonalForm extends ProfileFormFields {
           {this.boundTextField(['city'], 'City')}
         </Cell>
         <Cell col={12}>
-          <h4>Where were you born?</h4>
+          <div className="section-header">
+            Where are you from?
+          </div>
         </Cell>
         <Cell col={4}>
           <CountrySelectField

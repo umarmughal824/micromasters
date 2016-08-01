@@ -133,19 +133,16 @@ class App extends React.Component {
     let pushUrl = url => router.push(url);
 
     return (
-      <div>
+      <div id="app">
         <Navbar
           empty={empty}
           changeUrl={pushUrl}
           pathname={pathname}
-        >
-          <div className="app-media layout-boxed">
-            <div className="main-content">
-              {children}
-            </div>
-            <Footer />
-          </div>
-        </Navbar>
+        />
+        <div className="page-content">
+          { children }
+        </div>
+        <Footer />
       </div>
     );
   }

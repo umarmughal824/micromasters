@@ -1,13 +1,14 @@
 .micromasters-navbar {
-  margin-bottom: 5px;
+  padding-bottom: 5px;
+  background-color: $page-background !important;
 }
 
 .micromasters-nav, .micromasters-nav > * {
-  background-color: $micromasters-brand-bg !important;
+  background-color: $mm-brand-bg !important;
 }
 
 .mdl-layout__tab-bar-container * {
-  background-color: $micromasters-brand-bg !important;
+  background-color: $mm-brand-bg !important;
 }
 
 .micromasters-nav {

@@ -74,7 +74,7 @@ export default class LearnerSearch extends SearchkitComponent {
                   <div
                     role="button"
                     id="email-selected"
-                    className="micromasters-button"
+                    className="mm-button"
                   >
                     <span>
                       New Group from Selected
@@ -83,7 +83,7 @@ export default class LearnerSearch extends SearchkitComponent {
                   <div
                     role="button"
                     id="download csv"
-                    className="micromasters-button"
+                    className="mm-button"
                   >
                     Email Selected
                   </div>

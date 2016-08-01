@@ -1,0 +1,87 @@
+.profile-form {
+  min-height: 0 !important;
+  width: 100% !important;
+  font-weight: 400 !important;
+  font-size: 16px !important;
+  margin: 0 0 15px 0;
+  padding: 0 15px;
+
+  i.material-icons {
+    color: $mm-brand-blue;
+  }
+
+  .section-header {
+    font-weight: 600;
+    font-size: 18px;
+    padding-top: 20px;
+  }
+
+  label {
+    font-weight: 500;
+  }
+
+  .profile-radio-switch {
+    display: flex;
+    flex-direction: row;
+    color: $lightgrey !important;
+    text-transform: uppercase;
+
+    div:first-child {
+      margin-right: 15px;
+    }
+  }
+
+  .profile-radio-switch, .profile-radio-group {
+    svg:last-child {
+      fill: $mm-brand-blue !important;
+    }
+  }
+
+  .profile-radio-group-label {
+    color: grey;
+    font-weight: 700;
+    font-size: 9pt;
+  }
+
+  .profile-radio-switch > div {
+    width: 0 !important;
+  }
+
+  .profile-form-grid {
+    width: 100%;
+
+    .profile-form-row, .profile-form-row > .basic-info {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .profile-form-row > .basic-info {
+      width: 50%;
+      .school-type {
+        font-size: 12px;
+        font-weight: 400;
+        text-transform: lowercase;
+      }
+    }
+
+    .profile-card-header {
+      > span {
+        font-size: 18px;
+      }
+    }
+  }
+}
+
+.profile-form.collapsed {
+  height: 60px;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-top: 10px;
+
+  .profile-form-grid {
+    margin-top: 6px;
+  }
+}

@@ -53,6 +53,7 @@ export type Profile = {
   country: string;
   state_or_territory: string;
   email_optin: boolean;
+  agreed_to_terms_of_service: boolean;
 };
 
 export type Profiles = {

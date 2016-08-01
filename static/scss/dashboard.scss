@@ -9,8 +9,9 @@ c.validation-wrapper {
   color: #DA0000;
   font-size: smaller;
 }
-.main-content {
-  padding: 20px 0px;
+.page-content {
+  background-color: $page-background;
+
 
   .jumbotron img {
      margin-left: 50px;
