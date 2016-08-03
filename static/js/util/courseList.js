@@ -37,7 +37,7 @@ export type CourseRun = {
   status?: string;
   enrollment_start_date?: string;
 };
-export function makeCourseStatusDisplay(course: Course, now: moment = moment()): string|React$Element {
+export function makeCourseStatusDisplay(course: Course, now: moment = moment()): string|React$Element<*> {
   let firstRun = {};
   if (course.runs.length > 0) {
     firstRun = course.runs[0];

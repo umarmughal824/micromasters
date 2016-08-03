@@ -57,13 +57,13 @@ class EducationForm extends ProfileFormFields {
     deleteEducationEntry.call(this);
   };
 
-  renderEducationLevel(level: Option): Array<React$Element|void>|void {
+  renderEducationLevel(level: Option): Array<React$Element<*>|void>|void {
     const {
       ui: { educationDegreeInclusions },
       profile: { education },
     } = this.props;
     if (educationDegreeInclusions[level.value]) {
-      let rows: Array<React$Element|void> = [];
+      let rows: Array<React$Element<*>|void> = [];
       if (education !== undefined) {
         let sorted = educationEntriesByDate(education);
         rows = sorted.filter(([,entry]) => (

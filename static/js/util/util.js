@@ -156,7 +156,7 @@ export function makeProfileProgressDisplay(active: string) {
 export function generateNewEducation(level: string): EducationEntry {
   return {
     'degree_name': level,
-    'graduation_date': null,
+    'graduation_date': "",
     'field_of_study': null,
     'online_degree': false,
     'school_name': null,
@@ -171,12 +171,12 @@ export function generateNewEducation(level: string): EducationEntry {
  */
 export function generateNewWorkHistory(): WorkHistoryEntry {
   return {
-    position: null,
-    industry: null,
-    company_name: null,
-    start_date: null,
+    position: "",
+    industry: "",
+    company_name: "",
+    start_date: "",
     end_date: null,
-    city: null,
+    city: "",
     country: null,
     state_or_territory: null,
   };
@@ -280,7 +280,7 @@ export function calculateDegreeInclusions(profile: Profile) {
 /**
  * Calls an array of functions in series with a given argument and returns an array of the results
  */
-export function callFunctionArray<T,R>(functionArray: Array<(t: T) => R>, arg: T): R[] {
+export function callFunctionArray<R: any, F: (a: any) => R>(functionArray: Array<F>, arg: any): R[] {
   return functionArray.map((func) => func(arg));
 }
 

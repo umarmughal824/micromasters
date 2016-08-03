@@ -5,6 +5,8 @@ import _ from 'lodash';
 import TextField from 'material-ui/TextField';
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
 import Checkbox from 'material-ui/Checkbox';
+import S, { Maybe } from 'sanctuary';
+import R from 'ramda';
 
 import { ISO_8601_FORMAT } from '../constants';
 import {
@@ -13,6 +15,7 @@ import {
   validateDay,
 } from '../util/validation';
 import { validationErrorSelector } from './util';
+import { mstr, allJust } from './sanctuary';
 import type { Validator, UIValidator } from './validation';
 import type { Profile } from '../flow/profileTypes';
 import type { Option } from '../flow/generalTypes';
@@ -27,7 +30,7 @@ import type { Option } from '../flow/generalTypes';
  * to update radio buttons.
  * pass in the name (used as placeholder), key for profile, and the options.
  */
-export function boundRadioGroupField(keySet: string[], label: string, options: Option[]): React$Element {
+export function boundRadioGroupField(keySet: string[], label: string, options: Option[]): React$Element<*> {
   const { profile, updateProfile, errors, validator } = this.props;
   const styles = {
     labelStyle: {
@@ -98,7 +101,7 @@ export function boundRadioGroupField(keySet: string[], label: string, options: O
  *
  * ["top-level-key", index, "nested_object_key"] or just ["top_level_key"]
  */
-export function boundTextField(keySet: string[], label: string): React$Element {
+export function boundTextField(keySet: string[], label: string): React$Element<*> {
   const {
     profile,
     errors,
@@ -134,7 +137,7 @@ export function boundTextField(keySet: string[], label: string): React$Element {
  * to update date fields
  * pass in the name (used as placeholder), key for profile.
  */
-export function boundDateField(keySet: string[], label: string, omitDay: boolean): React$Element {
+export function boundDateField(keySet: string[], label: string, omitDay: boolean): React$Element<*> {
   const {
     profile,
     errors,
@@ -192,37 +195,40 @@ export function boundDateField(keySet: string[], label: string, omitDay: boolean
       day: day !== undefined ? day : edit.day
     });
 
-    // these functions return undefined if a month, day, or year is invalid, and converts the value to a number
-    // except if the input value is an empty string, in which case an empty string is returned
-    let validatedDay = 1;
+    let validatedDay = Maybe.of(1);
     if (!omitDay) {
       validatedDay = validateDay(newEdit.day);
-      newEdit.day = validatedDay === undefined ? '' : String(validatedDay);
+      newEdit.day = mstr(validatedDay);
     }
 
     let validatedMonth = validateMonth(newEdit.month);
-    newEdit.month = validatedMonth === undefined ? '' : String(validatedMonth);
+    newEdit.month = mstr(validatedMonth);
 
     let validatedYear = validateYear(newEdit.year);
-    newEdit.year = validatedYear === undefined ? '' : String(validatedYear);
+    newEdit.year = mstr(validatedYear);
 
     // keep text up to date
     _.set(clone, editKeySet, newEdit);
 
-    if ([validatedDay, validatedMonth, validatedYear].includes(undefined)) {
-      // store the edit value and make the formatted date undefined so it doesn't pass validation
+    let padYear = s => _.padStart(s, 4, '0');
+
+    let dateList = [validatedYear, validatedMonth, validatedDay];
+
+    let stringifyDates = R.compose(
+      R.join("-"), R.map(mstr), R.adjust(x => x.map(padYear), 0)
+    );
+
+    let dateString = S.maybe("", stringifyDates, allJust(dateList));
+
+    let rawDate = Maybe.of(moment(dateString, ISO_8601_FORMAT));
+
+    let validatedDate = rawDate.filter(date => date.isValid()).
+      filter(date => date.isAfter(moment("1800", "YYYY")));
+
+    if ( validatedDate.isNothing ) {
       _.set(clone, keySet, null);
     } else {
-      let formattedYear = _.padStart(String(validatedYear), 4, '0');
-      let momentDate = moment(`${formattedYear}-${validatedMonth}-${validatedDay}`, ISO_8601_FORMAT);
-      if (!momentDate.isValid() || momentDate.isBefore(moment("1800", "YYYY"))) {
-        // date is invalid according to moment.js so make the formatted date undefined so it
-        // doesn't pass validation
-        _.set(clone, keySet, null);
-      } else {
-        // format date and store it
-        _.set(clone, keySet, momentDate.format(ISO_8601_FORMAT));
-      }
+      _.set(clone, keySet, validatedDate.value.format(ISO_8601_FORMAT));
     }
     updateProfile(clone, validator);
   };

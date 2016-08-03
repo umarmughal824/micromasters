@@ -48,7 +48,7 @@ class ProfilePage extends ProfileFormContainer {
     }
   };
 
-  currentComponent: Function = (props): React$Element => {
+  currentComponent: Function = (props): React$Element<*> => {
     switch ( this.currentStep() ) {
     case EDUCATION_STEP:
       return <EducationTab {...props} />;

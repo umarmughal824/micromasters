@@ -5,8 +5,8 @@ import type { UIState } from '../reducers/ui';
 export type EducationEntry = {
   id?: ?number;
   degree_name: string;
-  graduation_date: ?string|DateEdit;
-  graduation_date_edit?: ?string;
+  graduation_date: string;
+  graduation_date_edit?: DateEdit;
   field_of_study: ?string;
   online_degree: boolean;
   school_name: ?string;
@@ -22,12 +22,12 @@ export type DateEdit = {
 
 export type WorkHistoryEntry = {
   id?: ?number;
-  position?: ?string;
-  industry?: ?string;
-  company_name?: ?string;
-  start_date?: ?string|DateEdit;
-  start_date_edit?: ?string|DateEdit;
-  end_date?: ?string|DateEdit;
+  position: string;
+  industry: string;
+  company_name: string;
+  start_date: string;
+  start_date_edit?: string|DateEdit;
+  end_date: ?string;
   end_date_edit?: DateEdit;
   city?: ?string;
   country?: ?string;

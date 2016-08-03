@@ -24,7 +24,7 @@ const PROFILE_REGEX = /^\/profile\/?[a-z]?/;
 
 class App extends React.Component {
   props: {
-    children:     React$Element[],
+    children:     React$Element<*>[],
     userProfile:  {profile: Profile, getStatus: string},
     location:     Object,
     dispatch:     Dispatch,

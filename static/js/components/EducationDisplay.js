@@ -77,7 +77,7 @@ export default class EducationDisplay extends ProfileFormFields {
     );
   };
 
-  renderEducationEntries: Function = (): React$Element[] => {
+  renderEducationEntries: Function = (): React$Element<*>[] => {
     const { profile, profile: { education }} = this.props;
     let rows = [];
     if (education !== undefined) {

@@ -6,9 +6,9 @@ export type Action = {
   payload: any
 };
 
-export type Dispatcher = (d: Dispatch) => Promise;
+export type Dispatcher = (d: Dispatch) => Promise<*>;
 
-export type AsyncActionHelper = (...a: any) => Promise;
+export type AsyncActionHelper = (...a: any) => Promise<*>;
 
 export type ActionCreator = (...a: any) => Action;
 

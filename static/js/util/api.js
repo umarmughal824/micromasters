@@ -37,7 +37,7 @@ export function csrfSafeMethod(method: string): boolean {
  *  - non 2xx status codes will reject the promise returned
  *  - response JSON is returned in place of response
  */
-export function fetchJSONWithCSRF(input: string, init: Object|void, loginOnError: ?boolean): Promise {
+export function fetchJSONWithCSRF(input: string, init: Object|void, loginOnError: ?boolean): Promise<*> {
   if (init === undefined) {
     init = {};
   }

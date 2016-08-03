@@ -40,12 +40,12 @@ describe('utility functions', () => {
   describe('generateNewWorkHistory', () => {
     it('generates a new work history object', () => {
       assert.deepEqual(generateNewWorkHistory(), {
-        position: null,
-        industry: null,
-        company_name: null,
-        start_date: null,
+        position: "",
+        industry: "",
+        company_name: "",
+        start_date: "",
         end_date: null,
-        city: null,
+        city: "",
         country: null,
         state_or_territory: null,
       });
@@ -57,7 +57,7 @@ describe('utility functions', () => {
       let level = 'level';
       assert.deepEqual(generateNewEducation(level), {
         'degree_name': level,
-        'graduation_date': null,
+        'graduation_date': "",
         'field_of_study': null,
         'online_degree': false,
         'school_name': null,

@@ -121,7 +121,7 @@ class EmploymentForm extends ProfileFormFields {
     setShowWorkDeleteAllDialog(false);
   };
 
-  editWorkHistoryForm(): React$Element {
+  editWorkHistoryForm(): React$Element<*> {
     const { ui } = this.props;
     let keySet = (key) => ['work_history', ui.workDialogIndex, key];
     return (
@@ -175,7 +175,7 @@ class EmploymentForm extends ProfileFormFields {
     );
   }
 
-  renderWorkHistory(): Array<React$Element|void>|void {
+  renderWorkHistory(): Array<React$Element<*>|void>|void {
     const { ui, profile, profile: { work_history } } = this.props;
     if ( ui.workHistoryEdit === true ) {
       let workHistoryRows = [];

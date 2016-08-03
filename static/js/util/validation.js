@@ -1,6 +1,7 @@
 // @flow
 import _ from 'lodash';
 import moment from 'moment';
+import { Maybe, Nothing } from 'sanctuary';
 
 import type {
   Profile,
@@ -249,17 +250,17 @@ export function validateProfileComplete(profile: Profile): ProfileComplete {
 /**
  * Validate a day of month
  */
-export function validateDay(input: string): ?number {
+export function validateDay(input: string): Maybe<number> {
   let sanitized = sanitizeDate(input, 2);
   let date = filterPositiveInt(sanitized);
   if (date === undefined) {
-    return undefined;
+    return Nothing();
   }
   // More complicated cases like Feb 29 are handled in moment.js isValid
   if (date > 31) {
-    return 31;
+    return Maybe.of(31);
   }
-  return date;
+  return Maybe.of(date);
 }
 
 /**
@@ -284,40 +285,40 @@ export function sanitizeDate(input: string|number, length: number): string {
 /**
  * Validate a month number
  */
-export function validateMonth(input: string|number): number|void {
+export function validateMonth(input: string|number): Maybe<number> {
   let sanitized = sanitizeDate(input, 2);
   let month = filterPositiveInt(sanitized);
   if (month === undefined) {
-    return undefined;
+    return Nothing();
   }
   if (month > 12) {
-    return 12;
+    return Maybe.of(12);
   }
-  return month;
+  return Maybe.of(month);
 }
 
 /**
  * Validate a year string is an integer and fits into YYYY
  */
-export function validateYear(input: string|number|null): ?number {
+export function validateYear(input: string|number|null): Maybe<number> {
   if ( input === null ) {
-    return undefined;
+    return Nothing();
   }
   let sanitized = sanitizeDate(input, 4);
   let year = filterPositiveInt(sanitized);
   if (year === undefined) {
-    return undefined;
+    return Nothing();
   }
   if ( year < 1800 ) {
     if ( String(year).length < 4 ) {
-      return year;
+      return Maybe.of(year);
     }
-    return 1800;
+    return Maybe.of(1800);
   }
   if ( year >= 2100) {
-    return 2100;
+    return Maybe.of(2100);
   }
-  return year;
+  return Maybe.of(year);
 }
 
 /**

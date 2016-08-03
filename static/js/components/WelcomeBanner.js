@@ -10,7 +10,7 @@ export default class WelcomeBanner extends React.Component {
   props: {
     profile:      Profile,
     text:         string,
-    children?:    React$Element[],
+    children?:    React$Element<*>[],
   };
 
   render() {

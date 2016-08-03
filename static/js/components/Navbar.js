@@ -6,11 +6,12 @@ import { HeaderTabs, Header, HeaderRow, Tab } from 'react-mdl';
 class Navbar extends React.Component {
   props: {
     empty:      boolean,
+    children?:  React$Element<*>[],
     pathname:   string,
     changeUrl:  (i: number) => void,
   };
 
-  makeTabs: Function = (): React$Element[] => {
+  makeTabs: Function = (): React$Element<*>[] => {
     const { empty } = this.props;
     return empty ? [] : this.tabs.map((tab, i) => <Tab key={i}>{tab.label}</Tab>);
   };
@@ -24,7 +25,7 @@ class Navbar extends React.Component {
     this.tabs.findIndex(tab => tab.regex.test(path))
   );
 
-  userMenu: Function = (): void|React$Element => {
+  userMenu: Function = (): void|React$Element<*> => {
     const { empty } = this.props;
     return empty === true ? undefined : <UserMenu />;
   };
