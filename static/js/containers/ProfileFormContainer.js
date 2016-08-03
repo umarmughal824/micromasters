@@ -105,26 +105,26 @@ class ProfileFormContainer extends React.Component {
   simpleActionHelpers: Function = (): ActionHelpers => {
     const { dispatch } = this.props;
     return createSimpleActionHelpers(dispatch, [
-      setWorkDialogVisibility,
-      setWorkDialogIndex,
-      clearProfileEdit,
-      setEducationDialogVisibility,
-      setEducationDialogIndex,
-      setEducationDegreeLevel,
-      setUserPageDialogVisibility,
-      setShowEducationDeleteDialog,
-      setShowWorkDeleteDialog,
-      setDeletionIndex,
-      setShowWorkDeleteAllDialog,
-      setShowEducationDeleteAllDialog,
+      ['setWorkDialogVisibility', setWorkDialogVisibility],
+      ['setWorkDialogIndex', setWorkDialogIndex],
+      ['clearProfileEdit', clearProfileEdit],
+      ['setEducationDialogVisibility', setEducationDialogVisibility],
+      ['setEducationDialogIndex', setEducationDialogIndex],
+      ['setEducationDegreeLevel', setEducationDegreeLevel],
+      ['setUserPageDialogVisibility', setUserPageDialogVisibility],
+      ['setShowEducationDeleteDialog', setShowEducationDeleteDialog],
+      ['setShowWorkDeleteDialog', setShowWorkDeleteDialog],
+      ['setDeletionIndex', setDeletionIndex],
+      ['setShowWorkDeleteAllDialog', setShowWorkDeleteAllDialog],
+      ['setShowEducationDeleteAllDialog', setShowEducationDeleteAllDialog],
     ]);
   };
 
   asyncActionHelpers: Function = (): AsyncActionHelpers => {
     const { dispatch } = this.props;
     return createAsyncActionHelpers(dispatch, [
-      setEducationDegreeInclusions,
-      setWorkHistoryEdit
+      ['setEducationDegreeInclusions', setEducationDegreeInclusions],
+      ['setWorkHistoryEdit', setWorkHistoryEdit],
     ]);
   };
 

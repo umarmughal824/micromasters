@@ -39,7 +39,9 @@ describe('redux helpers', () => {
   });
 
   describe('createSimpleActionHelpers', () => {
-    let actionList = [actionCreator];
+    let actionList = [
+      ['actionCreator', actionCreator],
+    ];
 
     let actions;
     beforeEach(() => {
@@ -66,7 +68,10 @@ describe('redux helpers', () => {
     let asyncActionCreator = arg => (dispatch => dispatch({
       type: MY_ASYNC_ACTION, payload: arg
     }));
-    let actionList = [asyncActionCreator];
+    let actionList = [
+      ['asyncActionCreator', asyncActionCreator],
+    ];
+
     let dispatchSpy = sinon.stub().returns(Promise.resolve());
     let asyncDispatch = (createdActionFunc) => {
       if ( typeof(createdActionFunc) === 'function' ) {
