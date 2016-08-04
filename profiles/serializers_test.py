@@ -2,13 +2,13 @@
 Tests for profile serializers
 """
 
-from django.test import TestCase
 from django.db.models.signals import post_save
 from factory.django import mute_signals
 from rest_framework.fields import DateTimeField
 from rest_framework.exceptions import ValidationError
 
 from backends.edxorg import EdxOrgOAuth2
+from profiles.api import get_social_username
 from profiles.factories import (
     EmploymentFactory,
     EducationFactory,
@@ -29,10 +29,11 @@ from profiles.util import (
     GravatarImgSize,
     format_gravatar_url,
 )
+from search.base import ESTestCase
 
 
 # pylint: disable=no-self-use
-class ProfileTests(TestCase):
+class ProfileTests(ESTestCase):
     """
     Tests for profile serializers
     """
@@ -55,7 +56,7 @@ class ProfileTests(TestCase):
         """
         profile = self.create_profile()
         assert ProfileSerializer().to_representation(profile) == {
-            'username': profile.user.social_auth.get(provider=EdxOrgOAuth2.name).uid,
+            'username': get_social_username(profile.user),
             'first_name': profile.first_name,
             'filled_out': profile.filled_out,
             'agreed_to_terms_of_service': profile.agreed_to_terms_of_service,
@@ -94,7 +95,7 @@ class ProfileTests(TestCase):
         """
         profile = self.create_profile()
         assert ProfileLimitedSerializer().to_representation(profile) == {
-            'username': profile.user.social_auth.get(provider=EdxOrgOAuth2.name).uid,
+            'username': get_social_username(profile.user),
             'first_name': profile.first_name,
             'last_name': profile.last_name,
             'preferred_name': profile.preferred_name,

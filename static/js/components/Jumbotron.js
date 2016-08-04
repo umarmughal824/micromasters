@@ -3,7 +3,7 @@
 import React from 'react';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 
-import { makeProfileImageUrl } from '../util/util';
+import ProfileImage from './ProfileImage';
 import type { Profile } from '../flow/profileTypes';
 
 class Jumbotron extends React.Component {
@@ -15,18 +15,10 @@ class Jumbotron extends React.Component {
 
   render() {
     const { profile, text } = this.props;
-    let imageUrl = makeProfileImageUrl(profile);
-    return <div className="card">
+    return <div className="card jumbotron">
       <Grid className="card-user">
         <Cell col={2} className="card-image-box">
-          <img
-            src={imageUrl}
-            alt={`Profile image for ${SETTINGS.name}`}
-            className="card-image"
-            style={{
-              marginLeft: "50px"
-            }}
-          />
+          <ProfileImage profile={profile} />
         </Cell>
         <Cell col={5} className="card-name">
           { text }

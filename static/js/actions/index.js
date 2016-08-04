@@ -1,17 +1,9 @@
-import * as api from '../util/api';
+// @flow
+import type { Dispatch } from 'redux';
 
-// user profile actions
-export const REQUEST_GET_USER_PROFILE = 'REQUEST_GET_USER_PROFILE';
-export const RECEIVE_GET_USER_PROFILE_SUCCESS = 'RECEIVE_GET_USER_PROFILE_SUCCESS';
-export const RECEIVE_GET_USER_PROFILE_FAILURE = 'RECEIVE_GET_USER_PROFILE_FAILURE';
-export const CLEAR_PROFILE = 'CLEAR_PROFILE';
-export const UPDATE_PROFILE = 'UPDATE_PROFILE';
-export const START_PROFILE_EDIT = 'START_PROFILE_EDIT';
-export const CLEAR_PROFILE_EDIT = 'CLEAR_PROFILE_EDIT';
-export const REQUEST_PATCH_USER_PROFILE = 'REQUEST_PATCH_USER_PROFILE';
-export const RECEIVE_PATCH_USER_PROFILE_SUCCESS = 'RECEIVE_PATCH_USER_PROFILE_SUCCESS';
-export const RECEIVE_PATCH_USER_PROFILE_FAILURE = 'RECEIVE_PATCH_USER_PROFILE_FAILURE';
-export const UPDATE_PROFILE_VALIDATION = 'UPDATE_PROFILE_VALIDATION';
+import * as api from '../util/api';
+import type { ProfileGetResult, Profile, ValidationErrors } from '../flow/profileTypes';
+import type { Action, Dispatcher } from '../flow/reduxTypes';
 
 // constants for fetch status (these are not action types)
 export const FETCH_FAILURE = 'FETCH_FAILURE';
@@ -19,57 +11,68 @@ export const FETCH_SUCCESS = 'FETCH_SUCCESS';
 export const FETCH_PROCESSING = 'FETCH_PROCESSING';
 
 // actions for user profile
-const requestGetUserProfile = username => ({
+export const REQUEST_GET_USER_PROFILE = 'REQUEST_GET_USER_PROFILE';
+const requestGetUserProfile = (username: string): Action => ({
   type: REQUEST_GET_USER_PROFILE,
   payload: { username }
 });
 
-export const receiveGetUserProfileSuccess = (username, profile) => ({
+export const RECEIVE_GET_USER_PROFILE_SUCCESS = 'RECEIVE_GET_USER_PROFILE_SUCCESS';
+export const receiveGetUserProfileSuccess = (username: string, profile: ProfileGetResult) => ({
   type: RECEIVE_GET_USER_PROFILE_SUCCESS,
   payload: { profile, username }
 });
 
-const receiveGetUserProfileFailure = (username, errorInfo) => ({
+export const RECEIVE_GET_USER_PROFILE_FAILURE = 'RECEIVE_GET_USER_PROFILE_FAILURE';
+const receiveGetUserProfileFailure = (username: string, errorInfo: string): Action => ({
   type: RECEIVE_GET_USER_PROFILE_FAILURE,
   payload: { username, errorInfo }
 });
 
-export const clearProfile = username => ({
+export const CLEAR_PROFILE = 'CLEAR_PROFILE';
+export const clearProfile = (username: string): Action => ({
   type: CLEAR_PROFILE,
   payload: { username }
 });
 
-export const updateProfile = (username, profile) => ({
+export const UPDATE_PROFILE = 'UPDATE_PROFILE';
+export const updateProfile = (username: string, profile: Profile): Action => ({
   type: UPDATE_PROFILE,
   payload: { profile, username }
 });
 
-export const startProfileEdit = username => ({
+export const START_PROFILE_EDIT = 'START_PROFILE_EDIT';
+export const startProfileEdit = (username: string): Action => ({
   type: START_PROFILE_EDIT,
   payload: { username }
 });
-export const clearProfileEdit = username => ({
+
+export const CLEAR_PROFILE_EDIT = 'CLEAR_PROFILE_EDIT';
+export const clearProfileEdit = (username: string): Action => ({
   type: CLEAR_PROFILE_EDIT,
   payload: { username }
 });
 
-const requestPatchUserProfile = username => ({
+export const REQUEST_PATCH_USER_PROFILE = 'REQUEST_PATCH_USER_PROFILE';
+const requestPatchUserProfile = (username: string): Action => ({
   type: REQUEST_PATCH_USER_PROFILE,
   payload: { username }
 });
 
-const receivePatchUserProfileSuccess = (username, profile) => ({
+export const RECEIVE_PATCH_USER_PROFILE_SUCCESS = 'RECEIVE_PATCH_USER_PROFILE_SUCCESS';
+const receivePatchUserProfileSuccess = (username: string, profile: ProfileGetResult): Action => ({
   type: RECEIVE_PATCH_USER_PROFILE_SUCCESS,
   payload: { profile, username }
 });
 
-const receivePatchUserProfileFailure = (username, errorInfo) => ({
+export const RECEIVE_PATCH_USER_PROFILE_FAILURE = 'RECEIVE_PATCH_USER_PROFILE_FAILURE';
+const receivePatchUserProfileFailure = (username, errorInfo): Action => ({
   type: RECEIVE_PATCH_USER_PROFILE_FAILURE,
   payload: { username, errorInfo }
 });
 
-export const saveProfile = (username, profile) => {
-  return dispatch => {
+export const saveProfile = (username: string, profile: Profile): Dispatcher => {
+  return (dispatch: Dispatch) => {
     dispatch(requestPatchUserProfile(username));
     return api.patchUserProfile(username, profile).
       then(newProfile => dispatch(receivePatchUserProfileSuccess(username, newProfile))).
@@ -79,13 +82,15 @@ export const saveProfile = (username, profile) => {
       });
   };
 };
-export const updateProfileValidation = (username, errors) => ({
+
+export const UPDATE_PROFILE_VALIDATION = 'UPDATE_PROFILE_VALIDATION';
+export const updateProfileValidation = (username: string, errors: ValidationErrors): Action => ({
   type: UPDATE_PROFILE_VALIDATION,
   payload: { errors, username }
 });
 
-export function fetchUserProfile(username) {
-  return dispatch => {
+export function fetchUserProfile(username: string): Dispatcher {
+  return (dispatch: Dispatch) => {
     dispatch(requestGetUserProfile(username));
     return api.getUserProfile(username).
       then(json => dispatch(receiveGetUserProfileSuccess(username, json))).
@@ -98,23 +103,25 @@ export function fetchUserProfile(username) {
 
 // dashboard list actions
 export const REQUEST_DASHBOARD = 'REQUEST_DASHBOARD';
-export const RECEIVE_DASHBOARD_SUCCESS = 'RECEIVE_DASHBOARD_SUCCESS';
-export const RECEIVE_DASHBOARD_FAILURE = 'RECEIVE_DASHBOARD_FAILURE';
-export const CLEAR_DASHBOARD = 'CLEAR_DASHBOARD';
-
 const requestDashboard = () => ({ type: REQUEST_DASHBOARD });
-export const receiveDashboardSuccess = programs => ({
+
+export const RECEIVE_DASHBOARD_SUCCESS = 'RECEIVE_DASHBOARD_SUCCESS';
+export const receiveDashboardSuccess = (programs: Object[]): Action => ({
   type: RECEIVE_DASHBOARD_SUCCESS,
   payload: { programs }
 });
-export const receiveDashboardFailure = errorInfo => ({
+
+export const RECEIVE_DASHBOARD_FAILURE = 'RECEIVE_DASHBOARD_FAILURE';
+export const receiveDashboardFailure = (errorInfo: string): Action => ({
   type: RECEIVE_DASHBOARD_FAILURE,
   payload: { errorInfo }
 });
+
+export const CLEAR_DASHBOARD = 'CLEAR_DASHBOARD';
 export const clearDashboard = () => ({ type: CLEAR_DASHBOARD });
 
-export function fetchDashboard() {
-  return dispatch => {
+export function fetchDashboard(): Dispatcher {
+  return (dispatch: Dispatch) => {
     dispatch(requestDashboard());
     return api.getDashboard().
       then(dashboard => dispatch(receiveDashboardSuccess(dashboard))).

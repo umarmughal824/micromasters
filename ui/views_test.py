@@ -4,12 +4,12 @@ Test end to end django views.
 import json
 
 from django.db.models.signals import post_save
-from django.test import TestCase
 from django.core.urlresolvers import reverse
 from factory.django import mute_signals
 from factory.fuzzy import FuzzyText
 from mock import patch, Mock
 from rest_framework import status
+from rolepermissions.shortcuts import available_perm_status
 from wagtail.wagtailimages.models import Image
 from wagtail.wagtailimages.tests.utils import get_test_image_file
 
@@ -17,11 +17,14 @@ from cms.models import HomePage, ProgramPage
 from courses.models import Program
 from courses.factories import ProgramFactory
 from backends.edxorg import EdxOrgOAuth2
+from profiles.api import get_social_username
 from profiles.factories import ProfileFactory
+from roles.models import Role
+from search.base import ESTestCase
 from ui.urls import DASHBOARD_URL
 
 
-class ViewsTests(TestCase):
+class ViewsTests(ESTestCase):
     """
     Test that the views work as expected.
     """
@@ -127,7 +130,7 @@ class TestHomePage(ViewsTests):
         ):
             response = self.client.get('/')
             assert response.context['authenticated'] is True
-            assert response.context['username'] == user.social_auth.get(provider=EdxOrgOAuth2.name).uid
+            assert response.context['username'] == get_social_username(user)
             assert response.context['title'] == HomePage.objects.first().title
             js_settings = json.loads(response.context['js_settings_json'])
             assert js_settings['gaTrackingID'] == ga_tracking_id
@@ -171,7 +174,8 @@ class DashboardTests(ViewsTests):
             GA_TRACKING_ID=ga_tracking_id,
             REACT_GA_DEBUG=react_ga_debug,
             EDXORG_BASE_URL=edx_base_url,
-            WEBPACK_DEV_SERVER_HOST=host
+            WEBPACK_DEV_SERVER_HOST=host,
+            CLIENT_ELASTICSEARCH_URL="http://localhost:9200",
         ):
             resp = self.client.get(DASHBOARD_URL)
             js_settings = json.loads(resp.context['js_settings_json'])
@@ -180,10 +184,35 @@ class DashboardTests(ViewsTests):
                 'reactGaDebug': react_ga_debug,
                 'authenticated': True,
                 'name': user.profile.preferred_name,
-                'username': user.social_auth.get(provider=EdxOrgOAuth2.name).uid,
+                'username': get_social_username(user),
                 'host': host,
-                'edx_base_url': edx_base_url
+                'edx_base_url': edx_base_url,
+                'roles': [],
+                'search_url': 'http://localhost:9200',
             }
+
+    def test_roles_setting(self):
+        """
+        Assert SETTINGS when a user has roles assigned to them
+        """
+        profile = self.create_and_login_user()
+
+        for role in Role.ASSIGNABLE_ROLES:
+            Role.objects.create(
+                program=ProgramFactory.create(),
+                user=profile.user,
+                role=role,
+            )
+
+        resp = self.client.get(DASHBOARD_URL)
+        js_settings = json.loads(resp.context['js_settings_json'])
+        assert js_settings['roles'] == [
+            {
+                'program': role.program.id,
+                'role': role.role,
+                'permissions': [key for key, value in available_perm_status(profile.user).items()],
+            } for role in profile.user.role_set.all()
+        ]
 
     def test_unauthenticated_user_redirect(self):
         """Verify that an unauthenticated user can't visit '/dashboard'"""
@@ -275,6 +304,7 @@ class TestProgramPage(ViewsTests):
     Test that the ProgramPage view work as expected.
     """
     def setUp(self):
+        super(TestProgramPage, self).setUp()
         homepage = HomePage.objects.first()
         program = Program(title="Test Program Title", live=True)
         program.save()
@@ -351,7 +381,7 @@ class TestUsersPage(ViewsTests):
         """
         profile = self.create_and_login_user()
         user = profile.user
-        username = user.social_auth.get(provider=EdxOrgOAuth2.name).uid
+        username = get_social_username(user)
 
         ga_tracking_id = FuzzyText().fuzz()
         react_ga_debug = FuzzyText().fuzz()
@@ -361,7 +391,8 @@ class TestUsersPage(ViewsTests):
             GA_TRACKING_ID=ga_tracking_id,
             REACT_GA_DEBUG=react_ga_debug,
             EDXORG_BASE_URL=edx_base_url,
-            WEBPACK_DEV_SERVER_HOST=host
+            WEBPACK_DEV_SERVER_HOST=host,
+            CLIENT_ELASTICSEARCH_URL="http://localhost:9200",
         ):
             # Mock has_permission so we don't worry about testing permissions here
             has_permission = Mock(return_value=True)
@@ -376,7 +407,9 @@ class TestUsersPage(ViewsTests):
                     'name': user.profile.preferred_name,
                     'username': username,
                     'host': host,
-                    'edx_base_url': edx_base_url
+                    'edx_base_url': edx_base_url,
+                    'roles': [],
+                    'search_url': 'http://localhost:9200',
                 }
                 assert has_permission.called
 
@@ -387,7 +420,7 @@ class TestUsersPage(ViewsTests):
         profile = self.create_and_login_user()
         user = profile.user
         self.client.logout()
-        username = user.social_auth.get(provider=EdxOrgOAuth2.name).uid
+        username = get_social_username(user)
 
         ga_tracking_id = FuzzyText().fuzz()
         react_ga_debug = FuzzyText().fuzz()
@@ -397,7 +430,8 @@ class TestUsersPage(ViewsTests):
             GA_TRACKING_ID=ga_tracking_id,
             REACT_GA_DEBUG=react_ga_debug,
             EDXORG_BASE_URL=edx_base_url,
-            WEBPACK_DEV_SERVER_HOST=host
+            WEBPACK_DEV_SERVER_HOST=host,
+            CLIENT_ELASTICSEARCH_URL="http://localhost:9200",
         ):
             # Mock has_permission so we don't worry about testing permissions here
             has_permission = Mock(return_value=True)
@@ -412,7 +446,9 @@ class TestUsersPage(ViewsTests):
                     'name': "",
                     'username': None,
                     'host': host,
-                    'edx_base_url': edx_base_url
+                    'edx_base_url': edx_base_url,
+                    'roles': [],
+                    'search_url': 'http://localhost:9200'
                 }
                 assert has_permission.called
 

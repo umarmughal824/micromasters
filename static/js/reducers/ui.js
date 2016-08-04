@@ -27,6 +27,8 @@ import {
   SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
 
   SET_PROFILE_STEP,
+  SET_USER_MENU_OPEN,
+  SET_SEARCH_FILTER_VISIBILITY,
 } from '../actions/ui';
 import {
   HIGH_SCHOOL,
@@ -37,24 +39,27 @@ import {
   PERSONAL_STEP,
 } from '../constants';
 import { calculateDegreeInclusions } from '../util/util';
-import type { Action } from '../flow/generalTypes';
+import type { Action } from '../flow/reduxTypes';
 
 export type UIState = {
-  workHistoryEdit:            boolean;
-  workDialogVisibility:       boolean;
-  dashboardExpander:          {};
-  educationDialogVisibility:  boolean;
-  educationDialogIndex:       ?number;
-  educationDegreeLevel:       string;
-  educationDegreeInclusions: {[key: string]: boolean};
-  userPageDialogVisibility: boolean;
-  showWorkDeleteDialog: boolean;
-  showEducationDeleteDialog: boolean;
-  deletionIndex: ?number;
-  dialog: {};
-  showWorkDeleteAllDialog: boolean;
+  workHistoryEdit:              boolean;
+  workDialogVisibility:         boolean;
+  dashboardExpander:            {};
+  educationDialogVisibility:    boolean;
+  educationDialogIndex:         number;
+  educationDegreeLevel:         string;
+  educationDegreeInclusions:    {[key: string]: boolean};
+  userPageDialogVisibility:     boolean;
+  showWorkDeleteDialog:         boolean;
+  showEducationDeleteDialog:    boolean;
+  deletionIndex:                ?number;
+  dialog:                       {};
+  showWorkDeleteAllDialog:      boolean;
   showEducationDeleteAllDialog: boolean;
-  profileStep: string;
+  profileStep:                  string;
+  workDialogIndex:              ?number;
+  userMenuOpen:                 boolean;
+  searchFilterVisibility:       {[s: string]: boolean};
 };
 
 export const INITIAL_UI_STATE: UIState = {
@@ -62,7 +67,7 @@ export const INITIAL_UI_STATE: UIState = {
   workDialogVisibility:       false,
   dashboardExpander:          {},
   educationDialogVisibility:  false,
-  educationDialogIndex:       null,
+  educationDialogIndex:       -1,
   educationDegreeLevel:       '',
   educationDegreeInclusions: {
     [HIGH_SCHOOL]: false,
@@ -79,6 +84,9 @@ export const INITIAL_UI_STATE: UIState = {
   showWorkDeleteAllDialog: false,
   showEducationDeleteAllDialog: false,
   profileStep: PERSONAL_STEP,
+  workDialogIndex:  null,
+  userMenuOpen: false,
+  searchFilterVisibility: {},
 };
 
 export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
@@ -186,6 +194,16 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
   case SET_PROFILE_STEP: {
     return Object.assign({}, state, {
       profileStep: action.payload
+    });
+  }
+  case SET_USER_MENU_OPEN: {
+    return Object.assign({}, state, {
+      userMenuOpen: action.payload
+    });
+  }
+  case SET_SEARCH_FILTER_VISIBILITY: {
+    return Object.assign({}, state, {
+      searchFilterVisibility: action.payload
     });
   }
   default:

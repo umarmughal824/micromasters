@@ -5,6 +5,7 @@ import ReactDOM from 'react-dom';
 import ga from 'react-ga';
 import striptags from 'striptags';
 import _ from 'lodash';
+import iso3166 from 'iso-3166-2';
 
 import {
   EDUCATION_LEVELS,
@@ -13,7 +14,8 @@ import {
 import type {
   Profile,
   EducationEntry,
-  WorkHistoryEntry
+  WorkHistoryEntry,
+  ValidationErrors,
 } from '../flow/profileTypes';
 
 export function sendGoogleAnalyticsEvent(category: any, action: any, label: any, value: any) {
@@ -225,8 +227,34 @@ export function makeProfileImageUrl(profile: Profile): string {
 /**
  * Returns the preferred name or else the username
  */
-export function getPreferredName(profile: Profile): string {
-  return profile.preferred_name || SETTINGS.name || SETTINGS.username;
+export function getPreferredName(profile: Profile, last: boolean = true): string {
+  let first;
+  if ( profile.username === SETTINGS.username ) {
+    first = profile.preferred_name || SETTINGS.name || SETTINGS.username;
+  } else {
+    first = profile.preferred_name || profile.first_name;
+  }
+  if ( last ) {
+    return profile.last_name ? `${first} ${profile.last_name}` : first;
+  }
+  return first;
+}
+
+/**
+ * returns the users location
+ */
+export function getLocation(profile: Profile): string {
+  let { country, state_or_territory, city } = profile;
+  let subCountryLocation, countryLocation;
+  if ( country === 'US' ) {
+    let state = state_or_territory.replace(/^\D{2}-/, '');
+    subCountryLocation = `${city}, ${state}`;
+    countryLocation = 'US';
+  } else {
+    subCountryLocation = city;
+    countryLocation = iso3166.country(country).name;
+  }
+  return `${subCountryLocation}, ${countryLocation}`;
 }
 
 export function calculateDegreeInclusions(profile: Profile) {
@@ -254,4 +282,12 @@ export function calculateDegreeInclusions(profile: Profile) {
  */
 export function callFunctionArray<T,R>(functionArray: Array<(t: T) => R>, arg: T): R[] {
   return functionArray.map((func) => func(arg));
+}
+
+/**
+ * takes an 'error' object and a keyset, and returns a class selector if an
+ * error is present
+ */
+export function validationErrorSelector(errors: ValidationErrors, keySet: string[]) {
+  return _.get(errors, keySet) ? "invalid-input" : "";
 }

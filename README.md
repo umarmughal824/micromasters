@@ -168,20 +168,32 @@ updates, you can run this without the ``--install`` flag: ``./webpack_dev_server
 **DEBUGGING NOTE:** If you see an error related to node-sass when you run this script, try running
 ``npm rebuild node-sass``
 
+#### 3) Build the containers
+Run this command:
 
-#### 3) Run the container
+    docker-compose build
 
-For first-time container start-up, start it with a full build:
+You will also need to run this command whenever ``requirements.txt`` or ``test_requirements.txt`` change.
 
-    docker-compose up --build
+#### 4) Create an Elasticsearch index
+To do this, run this command:
+
+    docker-compose run web ./manage.py recreate_index
+
+This is required to initialize the Elasticsearch index and mappings. This command should only need
+to be run when the Elasticsearch container is first created. It may also be run afterwards to clear and recreate
+existing indexes, and to reindex relevant documents.
+
+#### 5) Run the container
+
+Start Django, PostgreSQL, and other related services:
+
+    docker-compose up
 
 In another terminal tab, navigate the the MicroMasters directory
 and add a superuser in the now-running Docker container:
 
-    docker-compose run web python3 manage.py createsuperuser
-
-Starting the container after this can be done without the ``--build``
-param: ``docker-compose up``
+    docker-compose run web ./manage.py createsuperuser
 
 You should now be able to do the following:
 
@@ -191,12 +203,42 @@ You should now be able to do the following:
 1. Click "Sign in with edX.org" and sign in by authorizing an edX client. If you're
  running edX locally, this will be the client you created in the steps above.
 
+## Wagtail CMS (Content Management System)
+
+The CMS can be found at `/cms/`. Use the CMS to manage the content of the program pages and, by extension, the home 
+page.  
+
+#### Adding a new MicroMasters program
+
+1. Login to the cms with an admin account. If you don't have one, you can use the superuser account created earlier.
+
+2. Click on the `Explorer` menu in the left nav to find the home page (labelled "MIT credentials are...")
+
+3. Click on `+ Add Child Page`
+
+4. Choose Program Page. Complete the form. Don't forget to save. 
+
+#### Adding CMS users
+
+1. Don't create new users from the CMS. Ask users to log in and fill out a MicroMasters profile first.  
+
+2. Login to the cms with an existing account. If you don't have one, you can use the superuser account created earlier.
+
+3. From the Settings menu in the left nav, choose users.
+
+4. You can use the search box to locate users who already exist. If the user already exists, click on the username and 
+skip to step 5.
+
+5. Click on the Roles tab. 
+
+6. Check the box for the editors group. This will allow the user to view and edit all pages in the CMS. 
+
 ## Running Commands and Testing
 
 As shown above, manage commands can be executed on the Docker-contained
 MicroMasters app. For example, you can run a Python shell with the following command:
 
-    docker-compose run web python3 manage.py shell
+    docker-compose run web ./manage.py shell
 
 Tests should be run in the Docker container, not the host machine. They can be run with the following commands:
 

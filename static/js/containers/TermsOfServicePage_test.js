@@ -62,28 +62,46 @@ describe("TermsOfService", () => {
     });
   });
 
-  it("agrees to terms of service", () => {
-    let profileActions = [
-      REQUEST_PATCH_USER_PROFILE,
-      RECEIVE_PATCH_USER_PROFILE_SUCCESS
-    ];
-    let response = Object.assign({}, USER_PROFILE_RESPONSE, {
-      agreed_to_terms_of_service: false
+  describe("agreeing to the terms of service", () => {
+    let profileActions, response, updatedProfile, profilePatchStub;
+
+    beforeEach(() => {
+      profileActions = [
+        REQUEST_PATCH_USER_PROFILE,
+        RECEIVE_PATCH_USER_PROFILE_SUCCESS
+      ];
+      response = Object.assign({}, USER_PROFILE_RESPONSE, {
+        agreed_to_terms_of_service: false
+      });
+      helper.profileGetStub.returns(Promise.resolve(response));
+
+      updatedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
+        agreed_to_terms_of_service: true
+      });
+      profilePatchStub = helper.sandbox.stub(api, 'patchUserProfile');
+      profilePatchStub.throws("Invalid arguments");
+      profilePatchStub.withArgs(SETTINGS.username, updatedProfile).returns(Promise.resolve(updatedProfile));
     });
-    helper.profileGetStub.returns(Promise.resolve(response));
 
-    let updatedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
-      agreed_to_terms_of_service: true
+
+    it("agrees to terms of service", () => {
+      return renderComponent("/terms_of_service").then(([component]) => {
+        return listenForActions(profileActions, () => {
+          let button = component.querySelector(".btn-success");
+          TestUtils.Simulate.click(button);
+        });
+      });
     });
-    let profilePatchStub = helper.sandbox.stub(api, 'patchUserProfile');
-    profilePatchStub.throws("Invalid arguments");
-    profilePatchStub.withArgs(SETTINGS.username, updatedProfile).returns(Promise.resolve(updatedProfile));
 
-    return renderComponent("/terms_of_service").then(([component]) => {
-      return listenForActions(profileActions, () => {
-        let button = component.querySelector(".btn-success");
-
-        TestUtils.Simulate.click(button);
+    it("doesn't trigger validation checks on `/profile` after the user agrees", () => {
+      return renderComponent("/terms_of_service").then(([component]) => {
+        return listenForActions(profileActions, () => {
+          let button = component.querySelector(".btn-success");
+          TestUtils.Simulate.click(button);
+        }).then(() => {
+          let profile = helper.store.getState().profiles.jane;
+          assert.equal(profile.edit, undefined);
+        });
       });
     });
   });

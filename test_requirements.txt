@@ -1,4 +1,5 @@
 ipython
+bpython
 mock==1.3.0
 pylint==1.5.4
 pylint-django==0.7.1
@@ -8,5 +9,6 @@ pytest-pep8==1.0.6
 pytest-pylint==0.4.0
 pytest==2.8.2
 semantic-version==2.4.2
+testfixtures==4.10.0
 ipdb
 pdbpp

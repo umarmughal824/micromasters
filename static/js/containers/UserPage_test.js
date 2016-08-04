@@ -3,6 +3,8 @@ import '../global_init';
 import TestUtils from 'react-addons-test-utils';
 import { assert } from 'chai';
 import _ from 'lodash';
+import moment from 'moment';
+import sinon from 'sinon';
 
 import { 
   RECEIVE_GET_USER_PROFILE_SUCCESS,
@@ -12,10 +14,9 @@ import {
   UPDATE_PROFILE_VALIDATION,
   REQUEST_PATCH_USER_PROFILE,
   RECEIVE_PATCH_USER_PROFILE_SUCCESS,
-  RECEIVE_GET_USER_PROFILE_FAILURE,
-  RECEIVE_PATCH_USER_PROFILE_FAILURE,
-  RECEIVE_DASHBOARD_SUCCESS,
-  CLEAR_PROFILE_EDIT,
+
+  startProfileEdit,
+  updateProfile,
 } from '../actions';
 import {
   SET_WORK_DIALOG_VISIBILITY,
@@ -36,6 +37,7 @@ import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../util/api';
 import { USER_PROFILE_RESPONSE, HIGH_SCHOOL, DOCTORATE } from '../constants';
 import { workEntriesByDate, educationEntriesByDate } from '../util/sorting';
+import ValidationAlert from '../components/ValidationAlert';
 
 describe("UserPage", function() {
   this.timeout(5000);
@@ -112,81 +114,164 @@ describe("UserPage", function() {
       helper.cleanup();
     });
 
-    describe('error handling', () => {
-      let errorString = `Sorry, we were unable to load the data necessary
-      to process your request. Please reload the page.`;
-      errorString = errorString.replace(/\s\s+/g, ' ');
 
-      let contactExpectation = `If the error persists, please contact 
-      mitx-support@mit.edu specifying this entire error message.`;
-      contactExpectation = contactExpectation.replace(/\s\s+/g, ' ');
+    it('should have a logout link', () => {
+      return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
+        let logout = [...div.getElementsByTagName('a')].find(link => link.textContent === 'Logout');
+        assert.ok(logout);
+      });
+    });
 
-      const confirmErrorMessage = (div, expectedMessageText) => {
-        let alert = div.querySelector('.alert-message');
-        let messages = alert.getElementsByTagName('p');
-        assert.deepEqual(messages[0].textContent, expectedMessageText[0]);
-        assert.deepEqual(messages[1].textContent, expectedMessageText[1]);
-        assert.deepEqual(messages[2].textContent, contactExpectation);
-      };
+    describe("validation", () => {
+      const inputs = dialog => [...dialog.getElementsByTagName('input')];
+      const getEditPersonalButton = div => div.querySelector('.main-content .material-icons');
+      const getDialog = () => document.querySelector('.personal-dialog');
+      const getSave = () => getDialog().querySelector('.save-button');
 
-      it('should show an error for profile GET', () => {
-        let fourOhFour = {
-          errorStatusCode: 404,
-          detail: "some error messsage"
-        };
-        helper.profileGetStub.
-          withArgs(SETTINGS.username).
-          returns(Promise.reject(fourOhFour));
-        let actions = [
-          REQUEST_GET_USER_PROFILE,
-          RECEIVE_DASHBOARD_SUCCESS,
-          RECEIVE_GET_USER_PROFILE_FAILURE,
-        ];
-        return renderComponent(`/users/${SETTINGS.username}`, actions, false).then(([, div]) => {
-          confirmErrorMessage(div, [
-            `404 ${errorString}`,
-            `Additional info: ${fourOhFour.detail}`
-          ]);
-        });
+      beforeEach(() => {
+        HTMLDivElement.prototype.scrollIntoView = sinon.stub();
       });
 
-      it('should show an error for profile PATCH', () => {
-        patchUserProfileStub.returns(Promise.reject({errorStatusCode: 500}));
-        let userPageActions = [
-          REQUEST_GET_USER_PROFILE,
-          RECEIVE_DASHBOARD_SUCCESS,
-          RECEIVE_GET_USER_PROFILE_SUCCESS,
-          RECEIVE_GET_USER_PROFILE_SUCCESS,
-        ];
-        return renderComponent(`/users/${SETTINGS.username}`, userPageActions, false).then(([, div]) => {
-          let editButton = div.querySelector('.mdl-card').querySelector('.mdl-button--icon');
-          listenForActions([
-            SET_USER_PAGE_DIALOG_VISIBILITY,
-            START_PROFILE_EDIT,
-            UPDATE_PROFILE_VALIDATION,
-            REQUEST_PATCH_USER_PROFILE,
-            RECEIVE_PATCH_USER_PROFILE_FAILURE,
-            CLEAR_PROFILE_EDIT,
-            SET_USER_PAGE_DIALOG_VISIBILITY,
-            CLEAR_PROFILE_EDIT,
-          ], () => {
-            TestUtils.Simulate.click(editButton);
-            let dialog = document.querySelector('.personal-dialog');
-            let save = dialog.querySelector('.save-button');
-            TestUtils.Simulate.click(save);
+      let userProfileActions = [
+        SET_USER_PAGE_DIALOG_VISIBILITY,
+        START_PROFILE_EDIT,
+        UPDATE_PROFILE,
+        UPDATE_PROFILE_VALIDATION,
+        UPDATE_PROFILE,
+        UPDATE_PROFILE_VALIDATION,
+      ];
+
+      let scrollActions = [
+        SET_USER_PAGE_DIALOG_VISIBILITY,
+        START_PROFILE_EDIT,
+        UPDATE_PROFILE,
+        UPDATE_PROFILE_VALIDATION,
+      ];
+
+
+      const clearValidation = (actions, getInput, validationExpectation, removeErrorValue) => {
+        return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
+          return listenForActions(actions, () => {
+            TestUtils.Simulate.click(getEditPersonalButton(div));
+
+            let input;
+            // run the 'getInput' function if 'removeErrorValue' is also a function (radio buttons)
+            if ( _.isFunction(removeErrorValue) ) {
+              getInput(getDialog());
+            } else {
+              input = getInput(getDialog());
+              modifyTextField(input, "");
+            }
+
+            // check that validation error has propagated
+            TestUtils.Simulate.click(getSave());
+            let state = helper.store.getState();
+            assert.deepEqual(state.profiles.jane.edit.errors, validationExpectation);
+            let validationInfoText = document.querySelector('.validation-alert').
+              querySelector('.message').textContent;
+            assert.equal(validationInfoText, ValidationAlert.message);
+
+            // run the 'remove error' function if it's a function
+            if ( _.isFunction(removeErrorValue) ) {
+              removeErrorValue(getDialog());
+            } else {
+              modifyTextField(input, removeErrorValue);
+            }
+
           }).then(() => {
-            confirmErrorMessage(div, [`500 ${errorString}`, '']);
+            let state = helper.store.getState();
+            assert.deepEqual(state.profiles.jane.edit.errors, {});
           });
         });
+      };
+
+      const scrollIntoView = (actions, getInput) => {
+        return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
+          return listenForActions(scrollActions, () => {
+            TestUtils.Simulate.click(getEditPersonalButton(div));
+            let input = getInput(getDialog());
+            modifyTextField(input, "");
+            TestUtils.Simulate.click(getSave());
+          }).then(() => {
+            return new Promise(resolve => {
+              setTimeout(() => { // ensure that the DOM update after clicking 'save' has finished
+                assert(HTMLDivElement.prototype.scrollIntoView.called, "Not called yet");
+                resolve();
+              }, 100);
+            });
+          });
+        });
+      };
+
+      [clearValidation, scrollIntoView].forEach(testFunc => {
+        it(`should ${testFunc.name} when filling out a required text field`, () => {
+          const preferredName = dialog => inputs(dialog).find(i => i.name === "Preferred name");
+
+          return testFunc(
+            userProfileActions,
+            preferredName,
+            { preferred_name: 'Preferred name is required' },
+            USER_PROFILE_RESPONSE.preferred_name
+          );
+        });
+
+        it(`should ${testFunc.name} when filling out a required select field`, () => {
+          const languageField = dialog => inputs(dialog).find(i => i.id.includes('Preferredlanguage'));
+
+          return testFunc(
+            userProfileActions.concat(UPDATE_PROFILE, UPDATE_PROFILE_VALIDATION),
+            languageField,
+            { preferred_language: "Preferred language is required" },
+            USER_PROFILE_RESPONSE.preferred_language
+          );
+        });
+
+        it(`should ${testFunc.name} when filling out a required date field`, () => {
+          const dobMonth = dialog => inputs(dialog).find(i => i.id.includes('Dateofbirth'));
+
+          return testFunc(
+            userProfileActions,
+            dobMonth,
+            { date_of_birth: "Please enter a valid date of birth" },
+            String(moment(USER_PROFILE_RESPONSE.date_of_birth).month())
+          );
+        });
+      });
+
+      it(`should clearValidationErrors when filling out a required radio field`, () => {
+        const createValidationError = () => {
+          helper.store.dispatch(startProfileEdit(SETTINGS.username));
+          let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
+          profile.gender = undefined;
+          helper.store.dispatch(updateProfile(SETTINGS.username, profile));
+        };
+
+        const removeErrorValue = dialog => {
+          let genderField = inputs(dialog).find(i => i.name === "Gender");
+          genderField.click();
+        };
+
+        return clearValidation(
+          userProfileActions,
+          createValidationError,
+          { gender: "Gender is required" },
+          removeErrorValue,
+        );
+      });
+
+      it(`should scrollIntoView when filling out a required radio field`, () => {
+        const genderField = dialog => inputs(dialog).find(i => i.name === "Gender");
+        const removeErrorValue = dialog => TestUtils.Simulate.click(genderField(dialog));
+
+        return scrollIntoView(
+          userProfileActions,
+          genderField,
+          { gender: "Gender is required" },
+          removeErrorValue,
+        );
       });
     });
 
-    it('should have a logout button', () => {
-      return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-        let button = div.querySelector("#logout-link");
-        assert.ok(button);
-      });
-    });
 
     describe("Education History", () => {
       let deleteButton = div => {
@@ -574,7 +659,8 @@ describe("UserPage", function() {
 
       it('should let you edit personal info', () => {
         return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let personalButton = div.getElementsByClassName('material-icons')[0];
+          let personalButton = div.querySelector('.main-content').
+            getElementsByClassName('material-icons')[0];
 
           return listenForActions([SET_USER_PAGE_DIALOG_VISIBILITY], () => {
             TestUtils.Simulate.click(personalButton);

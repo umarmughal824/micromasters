@@ -1,6 +1,6 @@
 // @flow
 // general UI actions
-import type { Action } from '../flow/generalTypes';
+import type { Action, Dispatcher } from '../flow/reduxTypes';
 
 export const CLEAR_UI = 'CLEAR_UI';
 export const clearUI = () => ({ type: CLEAR_UI });
@@ -22,9 +22,12 @@ export const setDialogVisibility = (bool: boolean): Action => (
 
 // work history actions
 export const SET_WORK_HISTORY_EDIT = 'SET_WORK_HISTORY_EDIT';
-export const setWorkHistoryEdit = (bool: boolean): Action => (
-  { type: SET_WORK_HISTORY_EDIT, payload: bool }
-);
+export const setWorkHistoryEdit = (bool: boolean): Dispatcher => {
+  return dispatch => {
+    dispatch({ type: SET_WORK_HISTORY_EDIT, payload: bool});
+    return Promise.resolve();
+  };
+};
 
 export const SET_WORK_DIALOG_VISIBILITY = 'SET_WORK_DIALOG_VISIBILITY';
 export const setWorkDialogVisibility = (bool: boolean): Action => (
@@ -60,9 +63,12 @@ export const setEducationDegreeLevel = (level: string): Action => (
 );
 
 export const SET_EDUCATION_DEGREE_INCLUSIONS = 'SET_EDUCATION_DEGREE_INCLUSIONS';
-export const setEducationDegreeInclusions = (degreeInclusions: Object): Action => (
-  { type: SET_EDUCATION_DEGREE_INCLUSIONS, payload: degreeInclusions }
-);
+export const setEducationDegreeInclusions = (degreeInclusions: Object): Dispatcher => {
+  return dispatch => {
+    dispatch({ type: SET_EDUCATION_DEGREE_INCLUSIONS, payload: degreeInclusions });
+    return Promise.resolve();
+  };
+};
 
 export const SET_USER_PAGE_DIALOG_VISIBILITY = 'SET_USER_PAGE_DIALOG_VISIBILITY';
 export const setUserPageDialogVisibility = (bool: boolean): Action => (
@@ -97,4 +103,14 @@ export const setShowEducationDeleteAllDialog = (bool: boolean): Action => (
 export const SET_PROFILE_STEP = 'SET_PROFILE_STEP';
 export const setProfileStep = (step: string): Action => (
   { type: SET_PROFILE_STEP, payload: step }
+);
+
+export const SET_USER_MENU_OPEN = 'SET_USER_MENU_OPEN';
+export const setUserMenuOpen = (open: boolean): Action => (
+  { type: SET_USER_MENU_OPEN, payload: open }
+);
+
+export const SET_SEARCH_FILTER_VISIBILITY = 'SET_SEARCH_FILTER_VISIBILITY';
+export const setSearchFilterVisibility = (visibility: {[s: string]: boolean}): Action => (
+  { type: SET_SEARCH_FILTER_VISIBILITY, payload: visibility }
 );

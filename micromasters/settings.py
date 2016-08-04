@@ -18,7 +18,7 @@ import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 import yaml
 
-VERSION = "0.12.0"
+VERSION = "0.13.0"
 
 CONFIG_PATHS = [
     os.environ.get('MICROMASTERS_CONFIG', ''),
@@ -100,13 +100,18 @@ INSTALLED_APPS = (
     'modelcluster',
     'taggit',
 
+    # other third party APPS
+    'rolepermissions',
+
     # Our INSTALLED_APPS
-    'ui',
+    'backends',
     'cms',
     'courses',
-    'backends',
-    'profiles',
     'dashboard',
+    'profiles',
+    'roles',
+    'search',
+    'ui',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -285,6 +290,7 @@ else:
 # Logging configuration
 LOG_LEVEL = get_var('MICROMASTERS_LOG_LEVEL', 'DEBUG')
 DJANGO_LOG_LEVEL = get_var('DJANGO_LOG_LEVEL', 'DEBUG')
+ES_LOG_LEVEL = get_var('ES_LOG_LEVEL', 'INFO')
 
 # For logging to a remote syslog host
 LOG_HOST = get_var('MICROMASTERS_LOG_HOST', 'localhost')
@@ -351,7 +357,10 @@ LOGGING = {
         },
         'urllib3': {
             'level': 'INFO',
-        }
+        },
+        'elasticsearch': {
+            'level': ES_LOG_LEVEL,
+        },
     },
 }
 
@@ -364,7 +373,7 @@ if get_var('MICROMASTERS_BYPASS_SYSLOG', False):
 
 # server-status
 STATUS_TOKEN = get_var("STATUS_TOKEN", "")
-HEALTH_CHECK = ['POSTGRES']
+HEALTH_CHECK = ['CELERY', 'REDIS', 'POSTGRES', 'ELASTIC_SEARCH']
 
 GA_TRACKING_ID = get_var("GA_TRACKING_ID", "")
 REACT_GA_DEBUG = get_var("REACT_GA_DEBUG", False)
@@ -395,3 +404,21 @@ else:
     # by default use django.core.files.storage.FileSystemStorage with
     # overwrite feature
     DEFAULT_FILE_STORAGE = 'storages.backends.overwrite.OverwriteStorage'
+
+# Celery
+USE_CELERY = True
+BROKER_URL = get_var("BROKER_URL", get_var("REDISCLOUD_URL", None))
+CELERY_RESULT_BACKEND = get_var(
+    "CELERY_RESULT_BACKEND", get_var("REDISCLOUD_URL", None)
+)
+CELERY_ALWAYS_EAGER = get_var("CELERY_ALWAYS_EAGER", True)
+CELERY_EAGER_PROPAGATES_EXCEPTIONS = get_var(
+    "CELERY_EAGER_PROPAGATES_EXCEPTIONS", True)
+
+# Elasticsearch
+ELASTICSEARCH_URL = get_var("ELASTICSEARCH_URL", None)
+ELASTICSEARCH_INDEX = get_var('ELASTICSEARCH_INDEX', 'micromasters')
+CLIENT_ELASTICSEARCH_URL = get_var("CLIENT_ELASTICSEARCH_URL", "http://localhost:9100")
+
+# django-role-permissions
+ROLEPERMISSIONS_MODULE = 'roles.roles'

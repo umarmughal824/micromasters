@@ -9,7 +9,7 @@ import {
   educationValidation,
   combineValidators,
 } from '../util/validation';
-import type { Profile, BoundSaveProfile } from '../flow/profileTypes';
+import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 
 class EducationTab extends React.Component {
@@ -18,10 +18,11 @@ class EducationTab extends React.Component {
     prevStep:     () => void,
     profile:      Profile,
     ui:           UIState,
-    saveProfile:  BoundSaveProfile,
+    saveProfile:  SaveProfileFunc,
   };
 
   render() {
+    let validator = combineValidators(educationValidation, educationUiValidation);
     return <div>
       <Grid className="profile-splash">
         <Cell col={12}>
@@ -31,7 +32,7 @@ class EducationTab extends React.Component {
       <Grid className="profile-tab-grid">
         <Cell col={1}></Cell>
         <Cell col={10}>
-          <EducationForm {...this.props} />
+          <EducationForm {...this.props} validator={validator} />
         </Cell>
         <Cell col={1}></Cell>
         <Cell col={1} />
@@ -40,7 +41,7 @@ class EducationTab extends React.Component {
             {...this.props}
             nextBtnLabel="Save and Continue"
             isLastTab={false}
-            validator={combineValidators(educationValidation, educationUiValidation)}
+            validator={validator}
           />
         </Cell>
         <Cell col={1} />

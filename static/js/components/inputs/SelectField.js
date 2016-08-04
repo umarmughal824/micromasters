@@ -3,8 +3,14 @@ import React from 'react';
 import _ from 'lodash';
 import AutoComplete from '../AutoComplete';
 import { defaultFilter, showAllOptions } from '../utils/AutoCompleteSettings';
-import { callFunctionArray } from '../../util/util';
+import { callFunctionArray, validationErrorSelector } from '../../util/util';
 import type { Option } from '../../flow/generalTypes';
+import type { Validator, UIValidator } from '../../util/validation';
+import type {
+  Profile,
+  ValidationErrors,
+  UpdateProfileFunc,
+} from '../../flow/profileTypes';
 
 class SelectField extends React.Component {
   constructor(props: Object) {
@@ -15,17 +21,18 @@ class SelectField extends React.Component {
   // type declarations
   editKeySet: string[];
 
-  static propTypes = {
-    profile:                  React.PropTypes.object.isRequired,
-    autocompleteStyleProps:   React.PropTypes.object,
-    autocompleteBehaviors:    React.PropTypes.array,
-    errors:                   React.PropTypes.object,
-    label:                    React.PropTypes.node,
-    onChange:                 React.PropTypes.func,
-    updateProfile:            React.PropTypes.func,
-    maxSearchResults:         React.PropTypes.number,
-    keySet:                   React.PropTypes.array,
-    options:                  React.PropTypes.array
+  props: {
+    profile:                  Profile,
+    autocompleteStyleProps:   Object,
+    autocompleteBehaviors:    Array<any>,
+    errors:                   ValidationErrors,
+    label:                    Node,
+    onChange:                 Function,
+    updateProfile:            UpdateProfileFunc,
+    maxSearchResults:         number,
+    keySet:                   Array<string>,
+    options:                  Array<Option>,
+    validator:                Validator|UIValidator,
   };
 
   static defaultProps = {
@@ -48,21 +55,22 @@ class SelectField extends React.Component {
     const {
       profile,
       updateProfile,
-      keySet
+      keySet,
+      validator,
     } = this.props;
     let clone = _.cloneDeep(profile);
     _.set(clone, this.editKeySet, searchText);
     _.set(clone, keySet, null);
-    updateProfile(clone);
+    updateProfile(clone, validator);
   };
 
   onBlur: Function = (): void => {
     // clear the edit value when we lose focus. In its place we will display
     // the selected option label if one is selected, or an empty string
-    const { profile, updateProfile } = this.props;
+    const { profile, updateProfile, validator } = this.props;
     let clone = _.cloneDeep(profile);
     _.set(clone, this.editKeySet, undefined);
-    updateProfile(clone);
+    updateProfile(clone, validator);
   };
 
   onNewRequest: Function = (optionOrString: Option|string, index: number): void => {
@@ -71,7 +79,8 @@ class SelectField extends React.Component {
       updateProfile,
       keySet,
       options,
-      onChange
+      onChange,
+      validator,
     } = this.props;
     let clone = _.cloneDeep(profile);
     let toStore;
@@ -98,7 +107,7 @@ class SelectField extends React.Component {
     } // else we couldn't figure out what the user wanted to select, so leave it as is
     _.set(clone, this.editKeySet, undefined);
 
-    updateProfile(clone);
+    updateProfile(clone, validator);
     if (_.isFunction(onChange)) {
       onChange(clone);
     }
@@ -150,8 +159,10 @@ class SelectField extends React.Component {
   };
   
   render() {
+    const { errors, keySet } = this.props;
     return (
       <AutoComplete
+        className={validationErrorSelector(errors, keySet)}
         searchText={this.getSearchText()}
         {...this.getAutocompleteProps()}
       />

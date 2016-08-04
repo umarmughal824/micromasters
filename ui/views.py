@@ -13,9 +13,10 @@ from django.shortcuts import (
     Http404,
 )
 from django.utils.decorators import method_decorator
+from rolepermissions.shortcuts import available_perm_status
 
-from backends.edxorg import EdxOrgOAuth2
 from micromasters.utils import webpack_dev_server_host, webpack_dev_server_url
+from profiles.api import get_social_username
 from profiles.permissions import CanSeeIfNotPrivate
 from ui.decorators import (
     require_mandatory_urls,
@@ -45,23 +46,30 @@ class ReactView(View):  # pylint: disable=unused-argument
         """
         Handle GET requests to templates using React
         """
-        username = None
+        user = request.user
+        username = get_social_username(user)
         name = ""
-        if not request.user.is_anonymous():
-            name = request.user.profile.preferred_name
-            social_auths = request.user.social_auth.filter(
-                provider=EdxOrgOAuth2.name)
-            if social_auths.exists():
-                username = social_auths.first().uid
+        roles = []
+        if not user.is_anonymous():
+            name = user.profile.preferred_name
+            roles = [
+                {
+                    'program': role.program.id,
+                    'role': role.role,
+                    'permissions': [perm for perm, value in available_perm_status(user).items() if value is True]
+                } for role in user.role_set.all()
+            ]
 
         js_settings = {
             "gaTrackingID": settings.GA_TRACKING_ID,
             "reactGaDebug": settings.REACT_GA_DEBUG,
-            "authenticated": not request.user.is_anonymous(),
+            "authenticated": not user.is_anonymous(),
             "name": name,
             "username": username,
             "host": webpack_dev_server_host(request),
-            "edx_base_url": settings.EDXORG_BASE_URL
+            "edx_base_url": settings.EDXORG_BASE_URL,
+            "roles": roles,
+            "search_url": settings.CLIENT_ELASTICSEARCH_URL,
         }
 
         return render(
@@ -109,7 +117,7 @@ def standard_error_page(request, status_code, template_filename):
     """
     name = request.user.profile.preferred_name if not request.user.is_anonymous() else ""
     authenticated = not request.user.is_anonymous()
-    username = None if not authenticated else request.user.social_auth.get(provider=EdxOrgOAuth2.name).uid
+    username = get_social_username(request.user)
     response = render(
         request,
         template_filename,

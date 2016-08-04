@@ -69,6 +69,9 @@ describe("SettingsPage", function() {
       return renderComponent("/settings", userActions).then(([, div]) => {
         let question = div.getElementsByClassName('privacy-form-heading')[0];
         assert.equal(question.textContent, 'Who can see your profile?');
+
+        let emailPrefHeading = div.getElementsByClassName('privacy-form-heading')[1];
+        assert.equal(emailPrefHeading.textContent, 'Email Preferences');
       });
     });
 
@@ -77,7 +80,8 @@ describe("SettingsPage", function() {
         return renderComponent("/settings", userActions).then(([, div]) => {
           let button = div.querySelector(nextButtonSelector);
           let receivedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
-            account_privacy: 'public'
+            account_privacy: 'public',
+            email_optin: true
           });
 
           helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, receivedProfile));

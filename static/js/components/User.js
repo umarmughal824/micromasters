@@ -5,12 +5,13 @@ import { Card, CardMenu } from 'react-mdl/lib/Card';
 import IconButton from 'react-mdl/lib/IconButton';
 import iso3166 from 'iso-3166-2';
 
-import { makeProfileImageUrl } from '../util/util';
+import ProfileImage from './ProfileImage';
 import EmploymentForm from './EmploymentForm';
 import EducationDisplay from './EducationDisplay';
 import UserPagePersonalDialog from './UserPagePersonalDialog.js';
 import { userPrivilegeCheck } from '../util/util';
-import type { Profile, BoundSaveProfile } from '../flow/profileTypes';
+import { employmentValidation } from '../util/validation';
+import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 
 export default class User extends React.Component {
@@ -19,7 +20,7 @@ export default class User extends React.Component {
     setUserPageDialogVisibility:  () => void,
     ui:                           UIState,
     clearProfileEdit:             () => void,
-    saveProfile:                  BoundSaveProfile,
+    saveProfile:                  SaveProfileFunc,
   };
 
   toggleShowPersonalDialog: Function = (): void => {
@@ -41,22 +42,12 @@ export default class User extends React.Component {
       }
     };
 
-    let imageUrl = makeProfileImageUrl(profile);
     return <div className="card">
       <UserPagePersonalDialog {...this.props} />
       <Grid className="card-user">
         <Cell col={5} />
-        <Cell col={2} className="card-image-box">
-          <img
-            src={imageUrl}
-            alt={`Profile image for ${profile.preferred_name}`}
-            className="card-image"
-            style={{
-              top: "50%",
-              position: "relative",
-              zIndex: 2
-            }}
-          />
+        <Cell col={2} className="card-image-box user-page-image">
+          <ProfileImage profile={profile} />
         </Cell>
       </Grid>
       <Card shadow={0} style={{width: "100%"}}>
@@ -74,7 +65,7 @@ export default class User extends React.Component {
 
       <Grid className="user-cards-grid">
         <Cell col={6}>
-          <EmploymentForm {...this.props} showSwitch={false} />
+          <EmploymentForm {...this.props} showSwitch={false} validator={employmentValidation} />
         </Cell>
         <Cell col={6}>
           <EducationDisplay {...this.props} />

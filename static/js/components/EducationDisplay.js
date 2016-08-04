@@ -21,6 +21,7 @@ import { userPrivilegeCheck } from '../util/util';
 import { HIGH_SCHOOL } from '../constants';
 import { educationEntriesByDate } from '../util/sorting';
 import type { EducationEntry } from '../flow/profileTypes';
+import { educationValidation } from '../util/validation';
 
 export default class EducationDisplay extends ProfileFormFields {
   openEditEducationForm: Function = (index: number): void => {
@@ -107,7 +108,11 @@ export default class EducationDisplay extends ProfileFormFields {
           close={this.closeConfirmDeleteDialog}
           confirmText="Delete this entry?"
         />
-        <EducationDialog {...this.props} showLevelForm={true} />
+        <EducationDialog
+          {...this.props}
+          showLevelForm={true}
+          validator={educationValidation}
+        />
         <Card shadow={1} className="profile-tab-card" id="education-card">
           <Grid className="profile-tab-card-grid">
             <Cell col={4} className="profile-card-title">

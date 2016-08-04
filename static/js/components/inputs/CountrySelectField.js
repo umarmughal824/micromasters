@@ -3,7 +3,9 @@ import React from 'react';
 import _ from 'lodash';
 import iso3166 from 'iso-3166-2';
 import SelectField from './SelectField';
-import type { Profile } from '../../flow/profileTypes';
+import type { Profile, UpdateProfileFunc, ValidationErrors } from '../../flow/profileTypes';
+import type { Validator, UIValidator } from '../../util/validation';
+import type { Option } from '../../flow/generalTypes';
 
 let countryOptions = _(iso3166.data)
   .map((countryInfoObj, countryCode) => ({
@@ -13,18 +15,25 @@ let countryOptions = _(iso3166.data)
   .sortBy('label').value();
 
 export default class CountrySelectField extends React.Component {
-  static propTypes = {
-    updateProfile:            React.PropTypes.func,
-    stateKeySet:              React.PropTypes.array,
-    countryKeySet:            React.PropTypes.array
+  props: {
+    updateProfile:            UpdateProfileFunc,
+    stateKeySet:              Array<string>,
+    countryKeySet:            Array<string>,
+    errors:                   ValidationErrors,
+    label:                    Node,
+    maxSearchResults:         number,
+    keySet:                   Array<string>,
+    options:                  Array<Option>,
+    validator:                Validator|UIValidator,
+    profile:                  Profile,
   };
 
   onChange: Function = (newProfile: Profile): void => {
-    const { stateKeySet, updateProfile } = this.props;
+    const { stateKeySet, updateProfile, validator } = this.props;
     // clear state field when country field changes
     let clone = _.cloneDeep(newProfile);
     _.set(clone, stateKeySet, null);
-    updateProfile(clone);
+    updateProfile(clone, validator);
   };
 
   render() {

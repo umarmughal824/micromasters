@@ -11,6 +11,7 @@ import {
   validateYear,
   validateDay,
 } from '../util/validation';
+import { validationErrorSelector } from './util';
 import type { Validator, UIValidator } from './validation';
 import type { Profile } from '../flow/profileTypes';
 import type { Option } from '../flow/generalTypes';
@@ -26,7 +27,7 @@ import type { Option } from '../flow/generalTypes';
  * pass in the name (used as placeholder), key for profile, and the options.
  */
 export function boundRadioGroupField(keySet: string[], label: string, options: Option[]): React$Element {
-  const { profile, updateProfile, errors } = this.props;
+  const { profile, updateProfile, errors, validator } = this.props;
   const styles = {
     labelStyle: {
       left: -10,
@@ -35,8 +36,14 @@ export function boundRadioGroupField(keySet: string[], label: string, options: O
 
   let onChange = e => {
     let clone = _.cloneDeep(profile);
-    _.set(clone, keySet, e.target.value);
-    updateProfile(clone);
+    let value = e.target.value;
+    if (value === "true") {
+      value = true;
+    } else if (value === "false") {
+      value = false;
+    }
+    _.set(clone, keySet, value);
+    updateProfile(clone, validator);
   };
 
   const radioButtons = options.map(obj => {
@@ -62,9 +69,9 @@ export function boundRadioGroupField(keySet: string[], label: string, options: O
     );
   });
 
-  const value = _.get(profile, keySet);
+  const value = String(_.get(profile, keySet));
   return (
-    <div>
+    <div className={validationErrorSelector(errors, keySet)}>
       <span className="profile-radio-group-label">
         {label}
       </span>
@@ -94,12 +101,13 @@ export function boundTextField(keySet: string[], label: string): React$Element {
   const {
     profile,
     errors,
-    updateProfile
+    updateProfile,
+    validator,
   } = this.props;
   let onChange = e => {
     let clone = _.cloneDeep(profile);
     _.set(clone, keySet, e.target.value);
-    updateProfile(clone);
+    updateProfile(clone, validator);
   };
   let getValue = () => {
     let value = _.get(profile, keySet, "");
@@ -111,6 +119,7 @@ export function boundTextField(keySet: string[], label: string): React$Element {
   return (
     <TextField
       name={label}
+      className={validationErrorSelector(errors, keySet)}
       floatingLabelText={label}
       value={getValue()}
       fullWidth={true}
@@ -129,6 +138,7 @@ export function boundDateField(keySet: string[], label: string, omitDay: boolean
     profile,
     errors,
     updateProfile,
+    validator,
   } = this.props;
 
   // make a copy of keySet with a slightly different key for temporary storage of the textfields being edited
@@ -213,7 +223,7 @@ export function boundDateField(keySet: string[], label: string, omitDay: boolean
         _.set(clone, keySet, momentDate.format(ISO_8601_FORMAT));
       }
     }
-    updateProfile(clone);
+    updateProfile(clone, validator);
   };
 
   let edit = getEditObject();
@@ -234,7 +244,7 @@ export function boundDateField(keySet: string[], label: string, omitDay: boolean
     />;
   }
 
-  return <div>
+  return <div className={validationErrorSelector(errors, keySet)}>
     <TextField
       floatingLabelText={label}
       floatingLabelFixed={true}
@@ -280,8 +290,8 @@ export function saveProfileStep(validator: Validator|UIValidator, isLastStep: bo
   let clone = Object.assign({}, profile, {
     filled_out: profile.filled_out || isLastStep
   });
-  if (isLastStep) {
-    // user has also seen email consent message at this point
+
+  if (isLastStep && !profile.filled_out) {
     clone.email_optin = true;
   }
   return saveProfile(validator, clone, ui);

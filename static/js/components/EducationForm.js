@@ -24,23 +24,27 @@ import type {
   EducationEntry,
   Profile,
   ValidationErrors,
-  BoundSaveProfile,
+  SaveProfileFunc,
+  UpdateProfileFunc,
 } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
+import type { Validator, UIValidator } from '../util/validation';
+import type { AsyncActionHelper } from '../flow/reduxTypes';
 
 class EducationForm extends ProfileFormFields {
   props: {
     profile:                          Profile,
     ui:                               UIState;
-    updateProfile:                    () => void,
-    saveProfile:                      BoundSaveProfile,
+    updateProfile:                    UpdateProfileFunc,
+    saveProfile:                      SaveProfileFunc,
     clearProfileEdit:                 () => void,
     errors:                           ValidationErrors,
     setEducationDialogVisibility:     () => void,
     setEducationDialogIndex:          () => void,
     setEducationDegreeLevel:          () => void,
-    setEducationDegreeInclusions:     () => void,
+    setEducationDegreeInclusions:     AsyncActionHelper,
     setShowEducationDeleteAllDialog:  (bool: boolean) => void,
+    validator:                        Validator|UIValidator,
   };
 
   openEditEducationForm: Function = (index: number): void => {
@@ -147,12 +151,18 @@ class EducationForm extends ProfileFormFields {
       setEducationDegreeLevel,
       setShowEducationDeleteAllDialog,
       profile: { education },
+      profile,
+      validator,
+      updateProfile,
     } = this.props;
     if ( !education.find(entry => entry.degree_name === level) ) {
       let newState = Object.assign({}, educationDegreeInclusions, {
         [level]: !educationDegreeInclusions[level]
       });
-      setEducationDegreeInclusions(newState);
+      setEducationDegreeInclusions(newState).then(() => {
+        let clone = _.cloneDeep(profile);
+        updateProfile(clone, validator);
+      });
     } else {
       setEducationDegreeLevel(level);
       setShowEducationDeleteAllDialog(true);

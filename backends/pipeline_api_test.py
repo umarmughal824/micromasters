@@ -4,18 +4,19 @@ Tests for the pipeline APIs
 
 from urllib.parse import urljoin
 
-from django.test import TestCase
 import mock
 
 from backends import pipeline_api, edxorg
 from backends.pipeline_api import update_from_linkedin
+from profiles.api import get_social_username
 from profiles.models import Profile
 from profiles.factories import UserFactory
 from profiles.util import split_name
+from search.base import ESTestCase
 
 
 # pylint: disable=no-self-use
-class EdxPipelineApiTest(TestCase):
+class EdxPipelineApiTest(ESTestCase):
     """
     Test class for APIs run during the Python Social Auth
     authentication pipeline.
@@ -51,6 +52,7 @@ class EdxPipelineApiTest(TestCase):
         """
         Set up class
         """
+        super(EdxPipelineApiTest, self).setUp()
         self.user = UserFactory()
         self.user.social_auth.create(
             provider='not_edx',
@@ -82,7 +84,7 @@ class EdxPipelineApiTest(TestCase):
                 'image_url_small': 'https://edx.org/small.jpg'
             },
             'requires_parental_consent': False,
-            'username': self.user.social_auth.get(provider=edxorg.EdxOrgOAuth2.name).uid,
+            'username': get_social_username(self.user),
             'year_of_birth': 1986,
             "work_history": [
                 {
@@ -164,9 +166,7 @@ class EdxPipelineApiTest(TestCase):
         mocked_get_json.assert_called_once_with(
             urljoin(
                 edxorg.EdxOrgOAuth2.EDXORG_BASE_URL,
-                '/api/user/v1/accounts/{0}'.format(
-                    self.user.social_auth.get(provider=edxorg.EdxOrgOAuth2.name).uid
-                )
+                '/api/user/v1/accounts/{0}'.format(get_social_username(self.user))
             ),
             headers={'Authorization': 'Bearer foo_token'}
         )
@@ -214,7 +214,7 @@ class EdxPipelineApiTest(TestCase):
             assert self.user_profile.edx_language_proficiencies == proficiencies
 
 
-class LinkedInPipelineTests(TestCase):
+class LinkedInPipelineTests(ESTestCase):
     """Tests for the LinkedIn pipline entry"""
 
     def test_saves_linkedin_response(self):

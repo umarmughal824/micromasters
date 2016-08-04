@@ -12,6 +12,16 @@ c.validation-wrapper {
 .main-content {
   padding: 20px 0px;
 
+  .jumbotron img {
+     margin-left: 50px;
+   }
+
+   .user-page-image img {
+     top: 50%;
+     position: relative;
+     z-index: 2;
+   }
+
   .card {
     border: 1px solid #dddddd;
     border-radius: 5px;

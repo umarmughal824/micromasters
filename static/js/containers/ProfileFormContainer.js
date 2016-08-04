@@ -26,11 +26,14 @@ import {
   setDeletionIndex,
   setShowWorkDeleteAllDialog,
   setShowEducationDeleteAllDialog,
-  setProfileStep,
 } from '../actions/ui';
+import { createSimpleActionHelpers, createAsyncActionHelpers } from '../util/redux';
+import type { ActionHelpers, AsyncActionHelpers } from '../util/redux';
 import type { Validator, UIValidator } from '../util/validation';
 import type { Profile, Profiles, ProfileGetResult } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
+
+type UpdateProfile = (isEdit: boolean, profile: Profile, validator: Validator|UIValidator) => void;
 
 class ProfileFormContainer extends React.Component {
   props: {
@@ -58,9 +61,18 @@ class ProfileFormContainer extends React.Component {
     if (profiles[username] === undefined || profiles[username].getStatus === undefined) {
       dispatch(fetchUserProfile(username));
     }
+  };
+
+  updateProfileValidation(props: Object, profile: Profile, validator: Validator|UIValidator): void {
+    const username = SETTINGS.username;
+    const { dispatch, profiles, ui } = props;
+    if ( profiles[username].edit && !_.isEmpty(profiles[username].edit.errors) ) {
+      let errors = validator(profile, ui);
+      dispatch(updateProfileValidation(username, errors));
+    }
   }
 
-  updateProfile: Function = (isEdit: boolean, profile: Profile): void => {
+  updateProfile: UpdateProfile = (isEdit, profile, validator) => {
     const { dispatch } = this.props;
     const username = SETTINGS.username;
 
@@ -68,81 +80,7 @@ class ProfileFormContainer extends React.Component {
       dispatch(startProfileEdit(username));
     }
     dispatch(updateProfile(username, profile));
-  }
-
-  setProfileStep: Function = (step: string): void => {
-    const { dispatch } = this.props;
-    dispatch(setProfileStep(step));
-  };
-
-  setDeletionIndex: Function = (index: number): void => {
-    const { dispatch } = this.props;
-    dispatch(setDeletionIndex(index));
-  }
-
-  setShowEducationDeleteDialog: Function = (bool: boolean): void => {
-    const { dispatch } = this.props;
-    dispatch(setShowEducationDeleteDialog(bool));
-  }
-
-  setShowWorkDeleteDialog: Function = (bool: boolean): void => {
-    const { dispatch } = this.props;
-    dispatch(setShowWorkDeleteDialog(bool));
-  }
-
-  setShowWorkDeleteAllDialog: Function = (bool: boolean): void => {
-    const { dispatch } = this.props;
-    dispatch(setShowWorkDeleteAllDialog(bool));
-  };
-
-  setShowEducationDeleteAllDialog: Function = (bool: boolean): void => {
-    const { dispatch } = this.props;
-    dispatch(setShowEducationDeleteAllDialog(bool));
-  };
-
-  setUserPageDialogVisibility: Function = (bool: boolean): void => {
-    const { dispatch } = this.props;
-    dispatch(setUserPageDialogVisibility(bool));
-  }
-
-  setWorkHistoryEdit: Function = (bool: boolean): void => {
-    const { dispatch } = this.props;
-    dispatch(setWorkHistoryEdit(bool));
-  }
-
-  setWorkDialogVisibility: Function = (bool: boolean): void => {
-    const { dispatch } = this.props;
-    dispatch(setWorkDialogVisibility(bool));
-  }
-
-  setWorkDialogIndex: Function = (index: number): void => {
-    const { dispatch } = this.props;
-    dispatch(setWorkDialogIndex(index));
-  }
-
-  clearProfileEdit: Function = (): void => {
-    const { dispatch } = this.props;
-    dispatch(clearProfileEdit(SETTINGS.username));
-  }
-
-  setEducationDialogVisibility: Function = (bool: boolean): void => {
-    const { dispatch } = this.props;
-    dispatch(setEducationDialogVisibility(bool));
-  }
-
-  setEducationDialogIndex: Function = (index: number): void => {
-    const { dispatch } = this.props;
-    dispatch(setEducationDialogIndex(index));
-  }
-
-  setEducationDegreeLevel: Function = (level: string): void => {
-    const { dispatch } = this.props;
-    dispatch(setEducationDegreeLevel(level));
-  };
-
-  setEducationDegreeInclusions: Function = (inclusions: Object): void => {
-    const { dispatch } = this.props;
-    dispatch(setEducationDegreeInclusions(inclusions));
+    this.updateProfileValidation(this.props, profile, validator);
   };
 
   saveProfile(isEdit: boolean, validator: Validator|UIValidator, profile: Profile, ui: UIState) {
@@ -160,9 +98,44 @@ class ProfileFormContainer extends React.Component {
         dispatch(clearProfileEdit(username));
       });
     } else {
+      // `setState` is being called here because we want to guarantee that
+      // the callback executes after the `dispatch` call above. A callback
+      // passed to `setState` executes when the component next re-renders.
+      this.setState({}, () => {
+        let invalidField = document.querySelector('.invalid-input');
+        if ( invalidField !== null ) {
+          invalidField.scrollIntoView();
+        }
+      });
       return Promise.reject(errors);
     }
   }
+
+  simpleActionHelpers: Function = (): ActionHelpers => {
+    const { dispatch } = this.props;
+    return createSimpleActionHelpers(dispatch, [
+      ['setWorkDialogVisibility', setWorkDialogVisibility],
+      ['setWorkDialogIndex', setWorkDialogIndex],
+      ['clearProfileEdit', clearProfileEdit],
+      ['setEducationDialogVisibility', setEducationDialogVisibility],
+      ['setEducationDialogIndex', setEducationDialogIndex],
+      ['setEducationDegreeLevel', setEducationDegreeLevel],
+      ['setUserPageDialogVisibility', setUserPageDialogVisibility],
+      ['setShowEducationDeleteDialog', setShowEducationDeleteDialog],
+      ['setShowWorkDeleteDialog', setShowWorkDeleteDialog],
+      ['setDeletionIndex', setDeletionIndex],
+      ['setShowWorkDeleteAllDialog', setShowWorkDeleteAllDialog],
+      ['setShowEducationDeleteAllDialog', setShowEducationDeleteAllDialog],
+    ]);
+  };
+
+  asyncActionHelpers: Function = (): AsyncActionHelpers => {
+    const { dispatch } = this.props;
+    return createAsyncActionHelpers(dispatch, [
+      ['setEducationDegreeInclusions', setEducationDegreeInclusions],
+      ['setWorkHistoryEdit', setWorkHistoryEdit],
+    ]);
+  };
 
   profileProps: Function = (profileFromStore: ProfileGetResult) => {
     let { ui } = this.props;
@@ -190,22 +163,9 @@ class ProfileFormContainer extends React.Component {
       ui: ui,
       updateProfile: this.updateProfile.bind(this, isEdit),
       saveProfile: this.saveProfile.bind(this, isEdit),
-      setWorkHistoryEdit: this.setWorkHistoryEdit,
-      setWorkDialogVisibility: this.setWorkDialogVisibility,
-      setWorkDialogIndex: this.setWorkDialogIndex,
-      clearProfileEdit: this.clearProfileEdit,
-      setEducationDialogVisibility: this.setEducationDialogVisibility,
-      setEducationDialogIndex: this.setEducationDialogIndex,
-      setEducationDegreeLevel: this.setEducationDegreeLevel,
-      setEducationDegreeInclusions: this.setEducationDegreeInclusions,
       fetchProfile: this.fetchProfile,
-      setUserPageDialogVisibility: this.setUserPageDialogVisibility,
-      setShowEducationDeleteDialog: this.setShowEducationDeleteDialog,
-      setShowWorkDeleteDialog: this.setShowWorkDeleteDialog,
-      setDeletionIndex: this.setDeletionIndex,
-      setShowWorkDeleteAllDialog: this.setShowWorkDeleteAllDialog,
-      setShowEducationDeleteAllDialog: this.setShowEducationDeleteAllDialog
-    });
+    }, ...this.simpleActionHelpers(), ...this.asyncActionHelpers()
+    );
   };
 
   childrenWithProps: Function = (profileFromStore: ProfileGetResult) => {

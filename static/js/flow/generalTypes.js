@@ -1,14 +1,9 @@
 // @flow
+
 export type Option = {
   value: string;
   label: string;
 };
-
-export type Action = {
-  type: string;
-  payload: any
-};
-
 export type Settings = {
   gaTrackingID: string;
   reactGaDebug: boolean;

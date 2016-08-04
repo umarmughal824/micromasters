@@ -308,7 +308,7 @@ describe('Profile validation functions', () => {
     });
 
     it('should return true when all fields are filled in', () => {
-      assert.deepEqual(validateProfileComplete(USER_PROFILE_RESPONSE), [true, null, null]);
+      assert.deepEqual(validateProfileComplete(USER_PROFILE_RESPONSE), [true, null, {}]);
     });
 
     it('should return fields for dialog when a nested field is missing', () => {

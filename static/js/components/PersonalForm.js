@@ -8,16 +8,19 @@ import StateSelectField from './inputs/StateSelectField';
 import ProfileFormFields from '../util/ProfileFormFields';
 import type {
   Profile,
-  BoundSaveProfile,
-  ValidationErrors
+  SaveProfileFunc,
+  ValidationErrors,
+  UpdateProfileFunc,
 } from '../flow/profileTypes';
+import type { Validator, UIValidator } from '../util/validation';
 
 export default class PersonalForm extends ProfileFormFields {
   props: {
     profile:        Profile,
     errors:         ValidationErrors,
-    saveProfile:    BoundSaveProfile,
-    updateProfile:  () => void,
+    saveProfile:    SaveProfileFunc,
+    updateProfile:  UpdateProfileFunc,
+    validator:      Validator|UIValidator,
   };
 
   render() {

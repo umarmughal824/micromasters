@@ -1,9 +1,13 @@
 @import "grid-settings";
 @import "variables";
-@import "header";
+@import "navbar";
 @import "dashboard";
 @import "homepage";
 @import "program_page";
+@import "user_menu";
+@import "validation-alert";
+@import "search_page";
+@import "button";
 
 $border-box-sizing: true !global;
 

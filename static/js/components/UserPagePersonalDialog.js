@@ -5,7 +5,8 @@ import Button from 'react-mdl/lib/Button';
 
 import { personalValidation } from '../util/validation';
 import PersonalForm from './PersonalForm';
-import type { Profile, BoundSaveProfile } from '../flow/profileTypes';
+import ValidationAlert from './ValidationAlert';
+import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 
 export default class UserPagePersonalDialog extends React.Component {
@@ -13,14 +14,18 @@ export default class UserPagePersonalDialog extends React.Component {
     setUserPageDialogVisibility:  () => void,
     ui:                           UIState,
     profile:                      Profile,
-    saveProfile:                  BoundSaveProfile,
+    saveProfile:                  SaveProfileFunc,
     clearProfileEdit:             () => void,
   };
 
   closePersonalDialog: Function = (): void => {
-    const { setUserPageDialogVisibility, clearProfileEdit } = this.props;
+    const {
+      setUserPageDialogVisibility,
+      clearProfileEdit,
+      profile: { username }
+    } = this.props;
     setUserPageDialogVisibility(false);
-    clearProfileEdit();
+    clearProfileEdit(username);
   };
 
   savePersonalInfo: Function = (): void => {
@@ -32,22 +37,20 @@ export default class UserPagePersonalDialog extends React.Component {
 
   render () {
     const { ui: { userPageDialogVisibility } } = this.props;
-    const actions = [
+    const actions = <ValidationAlert {...this.props}>
       <Button
         type='button'
-        key='cancel'
         className='cancel-button'
         onClick={this.closePersonalDialog}>
         Cancel
-      </Button>,
+      </Button>
       <Button
-        key='save'
         type='button'
         className='save-button'
         onClick={this.savePersonalInfo}>
         Save
       </Button>
-    ];
+    </ValidationAlert>;
 
     return (
       <Dialog
@@ -56,7 +59,7 @@ export default class UserPagePersonalDialog extends React.Component {
         onRequestClose={this.closePersonalDialog}
         actions={actions}
         autoScrollBodyContent={true}>
-        <PersonalForm {...this.props} />
+        <PersonalForm {...this.props} validator={personalValidation} />
       </Dialog>
     );
   }
