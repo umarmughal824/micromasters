@@ -1,6 +1,44 @@
 Release Notes
 =============
 
+Version 0.13.0
+--------------
+
+- Added celery start command to Procfile
+- Added &#39;jump to error&#39; on profile forms
+- Removed .name call on anonymous functions for createActionHelper
+- Installed Searchkit and implemented basic learners search
+- Added roles to SETTINGS (#783)
+- Implemented ValidationAlert to alert user to problems in form dialogs
+- Refactored `actions/index.js`
+- Changed ProgramEnrollment with more efficient update
+- Fixed a bug with clearProfileEdit
+- Implemented new design for user menu
+- Added bpython to test_requirements.txt
+- Added ProgramEnrollments to dashboard
+- Created management command to generated realistic-looking fake users
+- Fixed signals for indexing Cached ceritficates and enrollments
+- Mocked certificate to api in test suit to run even if edx instance is close/shutdown
+- Added e-mail opt-in to user settings
+- Added indexing for Certificate and Enrollment
+- Modified caching logic: now all runs get an entry in the cache
+- Added models for Enrollment and Certificate and code to populate them on dashboard load
+- Added custom roles definition.
+- Removed box-shadow from Navbar
+- Implemented new navbar design
+- Added new ProfileImage component
+- Update to Django 1.9.8
+- Refactored ProfileFormContainer to remove boilerplate
+- Pinned html5lib to fix build (#722)
+- Added Elasticsearch index, indexing for Profile and related models (#706)
+- Updated validation state when editing fields
+- Moved ErrorMessage tests into separate file
+- Added get_social_username, updated existing code to use it (#705)
+- Fixed bug where validation errors showed up on first login
+- Changed getPreferredName to show last name
+- Updated README with basic CMS docs (#688)
+- Added celery, elasticsearch, redis
+
 Version 0.12.0
 --------------
 
