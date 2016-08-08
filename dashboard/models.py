@@ -25,6 +25,16 @@ class CachedEnrollment(Model):
     class Meta:
         unique_together = (('user', 'course_run'), )
 
+    @classmethod
+    def active_count(cls, user, program):
+        """
+        Returns the number of active CachedEnrollments for a User/Program pair
+        """
+        return cls.objects.filter(
+            user=user,
+            course_run__course__program=program
+        ).exclude(data__isnull=True).count()
+
     def __str__(self):
         """
         String representation of the model object

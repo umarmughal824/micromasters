@@ -2,25 +2,29 @@
 Tests for search API functions.
 """
 
-from urllib.parse import urljoin
-
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from factory.django import mute_signals
 from rest_framework.fields import DateTimeField
 from requests import get
+from mock import patch
 
 from dashboard.factories import (
     CachedCertificateFactory,
     CachedEnrollmentFactory,
+    ProgramEnrollmentFactory
+)
+from dashboard.models import ProgramEnrollment
+from courses.factories import (
+    ProgramFactory,
+    CourseFactory,
+    CourseRunFactory,
 )
 from profiles.api import get_social_username
 from profiles.factories import (
     EducationFactory,
     EmploymentFactory,
     ProfileFactory,
-    UserFactory,
 )
 from profiles.serializers import (
     EducationSerializer,
@@ -32,65 +36,56 @@ from profiles.util import (
 )
 from search.api import (
     get_conn,
-    index_users,
+    recreate_index,
     refresh_index,
-    remove_user,
-    serialize_user,
+    index_program_enrolled_users,
+    remove_program_enrolled_user,
+    serialize_program_enrolled_user,
+    USER_DOC_TYPE
 )
 from search.base import ESTestCase
 from search.exceptions import ReindexException
 from search.util import traverse_mapping
+from micromasters.utils import dict_without_key
 
 
-def remove_key(dictionary, key):
-    """Helper method to remove a key from a dict and return the dict"""
-    del dictionary[key]
-    return dictionary
-
-
-def search():
+class ESTestActions:
     """
-    Execute a search and get results
+    Provides helper functions for tests to communicate with ES
     """
-    # Refresh the index so we can read current data
-    refresh_index()
+    def __init__(self):
+        self.index = settings.ELASTICSEARCH_INDEX
+        self.url = "{}/{}".format(settings.ELASTICSEARCH_URL, self.index)
+        if not self.url.startswith("http"):
+            self.url = "http://{}".format(self.url)
+        self.search_url = "{}/{}".format(self.url, "_search")
+        self.mapping_url = "{}/{}".format(self.url, "_mapping")
 
-    elasticsearch_url = settings.ELASTICSEARCH_URL
-    if not elasticsearch_url.startswith("http"):
-        elasticsearch_url = "http://{}".format(elasticsearch_url)
-    url = urljoin(
-        elasticsearch_url,
-        "{}/{}".format(settings.ELASTICSEARCH_INDEX, "_search")
-    )
-    return get(url).json()['hits']
+    def search(self):
+        """Gets full index data from the _search endpoint"""
+        refresh_index()
+        return get(self.search_url).json()['hits']
+
+    def get_mappings(self):
+        """Gets mapping data"""
+        refresh_index()
+        return get(self.mapping_url).json()[self.index]['mappings']
 
 
-def get_es_mappings():
+es = ESTestActions()
+
+
+def assert_search(results, program_enrollments):
     """
-    Retrieve the current mapping
+    Assert that search results match program-enrolled users
     """
-    # Refresh the index so we can read current data
-    refresh_index()
-
-    elasticsearch_url = settings.ELASTICSEARCH_URL
-    elasticsearch_index = settings.ELASTICSEARCH_INDEX
-    if not elasticsearch_url.startswith("http"):
-        elasticsearch_url = "http://{}".format(elasticsearch_url)
-    url = urljoin(
-        elasticsearch_url,
-        "{}/{}".format(elasticsearch_index, "_mapping")
-    )
-    return get(url).json()[elasticsearch_index]['mappings']
-
-
-def assert_search(results, users):
-    """
-    Assert that search results match users
-    """
-    assert results['total'] == len(users)
+    assert results['total'] == len(program_enrollments)
     sources = sorted([hit['_source'] for hit in results['hits']], key=lambda hit: hit['id'])
-    sorted_users = sorted(users, key=lambda user: user.id)
-    serialized = [remove_key(serialize_user(user), "_id") for user in sorted_users]
+    sorted_program_enrollments = sorted(program_enrollments, key=lambda program_enrollment: program_enrollment.id)
+    serialized = [
+        dict_without_key(serialize_program_enrolled_user(program_enrollment), "_id")
+        for program_enrollment in sorted_program_enrollments
+    ]
     assert serialized == sources
 
 
@@ -100,192 +95,172 @@ class IndexTests(ESTestCase):
     Tests for indexing
     """
 
-    def test_user_add(self):
+    def test_program_enrollment_add(self):
         """
-        Test that a newly created User is indexed properly
+        Test that a newly created ProgramEnrollment is indexed properly
         """
-        assert search()['total'] == 0
-        user = UserFactory.create()
-        assert_search(search(), [user])
+        assert es.search()['total'] == 0
+        program_enrollment = ProgramEnrollmentFactory.create()
+        assert_search(es.search(), [program_enrollment])
 
-    def test_user_update(self):
+    def test_program_enrollment_delete(self):
         """
-        Test that User is reindexed after being updated
+        Test that ProgramEnrollment is removed from index after the user is removed
         """
-        user = UserFactory.create()
-        assert search()['total'] == 1
-        profile = user.profile
+        program_enrollment = ProgramEnrollmentFactory.create()
+        assert es.search()['total'] == 1
+        program_enrollment.user.delete()
+        assert es.search()['total'] == 0
+
+    def test_profile_update(self):
+        """
+        Test that ProgramEnrollment is reindexed after the User's Profile has been updated
+        """
+        program_enrollment = ProgramEnrollmentFactory.create()
+        assert es.search()['total'] == 1
+        profile = program_enrollment.user.profile
         profile.first_name = 'updated'
         profile.save()
-        assert_search(search(), [user])
+        assert_search(es.search(), [program_enrollment])
 
-    def test_user_delete(self):
+    def test_program_enrollment_clear_upon_profile_deletion(self):
         """
-        Test that User is removed from index after being updated
+        Test that all ProgramEnrollments are cleared from the index after the User's Profile has been deleted
         """
-        user = UserFactory.create()
-        assert search()['total'] == 1
-        user.profile.delete()
-        assert search()['total'] == 0
+        with mute_signals(post_save):
+            profile = ProfileFactory.create()
+        ProgramEnrollmentFactory.create(user=profile.user)
+        ProgramEnrollmentFactory.create(user=profile.user)
+        assert es.search()['total'] == 2
+        profile.delete()
+        assert es.search()['total'] == 0
 
     def test_education_add(self):
         """
         Test that Education is indexed after being added
         """
-        user = UserFactory.create()
-        assert search()['total'] == 1
-        EducationFactory.create(profile=user.profile)
-        assert_search(search(), [user])
+        program_enrollment = ProgramEnrollmentFactory.create()
+        assert es.search()['total'] == 1
+        EducationFactory.create(profile=program_enrollment.user.profile)
+        assert_search(es.search(), [program_enrollment])
 
     def test_education_update(self):
         """
         Test that Education is reindexed after being updated
         """
-        user = UserFactory.create()
-        assert search()['total'] == 1
-        education = EducationFactory.create(profile=user.profile)
+        program_enrollment = ProgramEnrollmentFactory.create()
+        assert es.search()['total'] == 1
+        education = EducationFactory.create(profile=program_enrollment.user.profile)
         education.school_city = 'city'
         education.save()
-        assert_search(search(), [user])
+        assert_search(es.search(), [program_enrollment])
 
     def test_education_delete(self):
         """
         Test that Education is removed from index after being deleted
         """
-        user = UserFactory.create()
-        education = EducationFactory.create(profile=user.profile)
-        assert_search(search(), [user])
+        program_enrollment = ProgramEnrollmentFactory.create()
+        education = EducationFactory.create(profile=program_enrollment.user.profile)
+        assert_search(es.search(), [program_enrollment])
         education.delete()
-        assert_search(search(), [user])
+        assert_search(es.search(), [program_enrollment])
 
     def test_employment_add(self):
         """
         Test that Employment is indexed after being added
         """
-        user = UserFactory.create()
-        assert search()['total'] == 1
-        EmploymentFactory.create(profile=user.profile)
-        assert_search(search(), [user])
+        program_enrollment = ProgramEnrollmentFactory.create()
+        assert es.search()['total'] == 1
+        EmploymentFactory.create(profile=program_enrollment.user.profile)
+        assert_search(es.search(), [program_enrollment])
 
     def test_employment_update(self):
         """
         Test that Employment is reindexed after being updated
         """
-        user = UserFactory.create()
-        assert search()['total'] == 1
-        employment = EmploymentFactory.create(profile=user.profile)
+        program_enrollment = ProgramEnrollmentFactory.create()
+        assert es.search()['total'] == 1
+        employment = EmploymentFactory.create(profile=program_enrollment.user.profile)
         employment.city = 'city'
         employment.save()
-        assert_search(search(), [user])
+        assert_search(es.search(), [program_enrollment])
 
     def test_employment_delete(self):
         """
         Test that Employment is removed from index after being deleted
         """
-        user = UserFactory.create()
-        employment = EmploymentFactory.create(profile=user.profile)
-        assert_search(search(), [user])
+        program_enrollment = ProgramEnrollmentFactory.create()
+        employment = EmploymentFactory.create(profile=program_enrollment.user.profile)
+        assert_search(es.search(), [program_enrollment])
         employment.delete()
-        assert_search(search(), [user])
+        assert_search(es.search(), [program_enrollment])
 
-    def test_remove_profile(self):
+    def test_remove_program_enrolled_user(self):
         """
-        Test that remove_profile removes the profile from the index
+        Test that remove_program_enrolled_user removes the user from the index for that program
         """
-        user = UserFactory.create()
-        assert_search(search(), [user])
-        remove_user(user)
-        assert_search(search(), [])
+        program_enrollment = ProgramEnrollmentFactory.create()
+        assert_search(es.search(), [program_enrollment])
+        remove_program_enrolled_user(program_enrollment)
+        assert_search(es.search(), [])
 
-    def test_index_users(self):
+    def test_index_program_enrolled_users(self):
         """
-        Test that index_users indexes an iterable of users
+        Test that index_program_enrolled_users indexes an iterable of program-enrolled users
         """
-        for _ in range(10):
-            with mute_signals(post_save):
-                # using ProfileFactory instead of UserFactory here since UserFactory will not fill in any
-                # fields on Profile
-                profile = ProfileFactory.create()
-            # Not strictly necessary, the muted post_save will prevent indexing
-            remove_user(profile.user)
+        with mute_signals(post_save):
+            program_enrollments = [ProgramEnrollmentFactory.build() for _ in range(10)]
+        with patch('search.api._index_program_enrolled_users_chunk', autospec=True, return_value=0) as index_chunk:
+            index_program_enrolled_users(program_enrollments, chunk_size=4)
+            assert index_chunk.call_count == 3
+            index_chunk.assert_any_call(program_enrollments[0:4])
 
-        # Confirm nothing in index
-        assert_search(search(), [])
-        index_users(User.objects.iterator(), chunk_size=4)
-        assert_search(search(), list(User.objects.all()))
+    def test_add_edx_record(self):
+        """
+        Test that cached edX records are indexed after being added
+        """
+        program_enrollment = ProgramEnrollmentFactory.create()
+        for edx_cached_model_factory in [CachedCertificateFactory, CachedEnrollmentFactory]:
+            assert es.search()['total'] == 1
+            course_run = CourseRunFactory.create(program=program_enrollment.program)
+            edx_cached_model_factory.create(user=program_enrollment.user, course_run=course_run)
+            assert_search(es.search(), [program_enrollment])
 
-    def test_add_certificate(self):
+    def test_update_edx_record(self):
         """
-        Test that Certificate is indexed after being added
+        Test that a cached edX record is reindexed after being updated
         """
-        user = UserFactory.create()
-        assert search()['total'] == 1
-        CachedCertificateFactory.create(user=user)
-        assert_search(search(), [user])
+        program_enrollment = ProgramEnrollmentFactory.create()
+        for edx_cached_model_factory in [CachedCertificateFactory, CachedEnrollmentFactory]:
+            assert es.search()['total'] == 1
+            course_run = CourseRunFactory.create(program=program_enrollment.program)
+            edx_record = edx_cached_model_factory.create(user=program_enrollment.user, course_run=course_run)
+            edx_record.data = {'new': 'data'}
+            edx_record.save()
+            assert_search(es.search(), [program_enrollment])
 
-    def test_update_certificate(self):
+    def test_delete_edx_record(self):
         """
-        Test that Certificate is reindexed after being updated
+        Test that a cached edX record is removed from index after being deleted
         """
-        user = UserFactory.create()
-        assert search()['total'] == 1
-        certificate = CachedCertificateFactory.create(user=user)
-        certificate.data = {'new': 'data'}
-        certificate.save()
-        assert_search(search(), [user])
-
-    def test_delete_certificate(self):
-        """
-        Test that Certificate is removed from index after being deleted
-        """
-        user = UserFactory.create()
-        certificate = CachedCertificateFactory.create(user=user)
-        assert_search(search(), [user])
-        certificate.delete()
-        assert_search(search(), [user])
-
-    def test_add_enrollment(self):
-        """
-        Test that Enrollment is indexed after being added
-        """
-        user = UserFactory.create()
-        CachedCertificateFactory.create(user=user)
-        assert_search(search(), [user])
-
-    def test_update_enrollment(self):
-        """
-        Test that Enrollment is reindexed after being updated
-        """
-        user = UserFactory.create()
-        assert search()['total'] == 1
-        enrollment = CachedEnrollmentFactory.create(user=user)
-        enrollment.data = {'new': 'data'}
-        enrollment.save()
-        assert_search(search(), [user])
-
-    def test_delete_enrollment(self):
-        """
-        Test that Enrollment is removed from index after being deleted
-        """
-        user = UserFactory.create()
-        enrollment = CachedEnrollmentFactory.create(user=user)
-        assert_search(search(), [user])
-        enrollment.delete()
-        assert_search(search(), [user])
+        program_enrollment = ProgramEnrollmentFactory.create()
+        for edx_cached_model_factory in [CachedCertificateFactory, CachedEnrollmentFactory]:
+            course_run = CourseRunFactory.create(program=program_enrollment.program)
+            edx_record = edx_cached_model_factory.create(user=program_enrollment.user, course_run=course_run)
+            assert_search(es.search(), [program_enrollment])
+            edx_record.delete()
+            assert_search(es.search(), [program_enrollment])
 
     def test_not_analyzed(self):
         """
         At the moment no string fields in the mapping should be 'analyzed' since there's no field
         supporting full text search.
         """
-        with mute_signals(post_save):
-            profile = ProfileFactory.create()
-        EducationFactory.create(profile=profile)
-        EmploymentFactory.create(profile=profile)
-        CachedCertificateFactory.create(user=profile.user)
-        CachedEnrollmentFactory.create(user=profile.user)
+        program_enrollment = ProgramEnrollmentFactory.create()
+        EducationFactory.create(profile=program_enrollment.user.profile)
+        EmploymentFactory.create(profile=program_enrollment.user.profile)
 
-        mapping = get_es_mappings()
+        mapping = es.get_mappings()
         nodes = list(traverse_mapping(mapping))
         for node in nodes:
             if node.get('type') == 'string':
@@ -294,23 +269,28 @@ class IndexTests(ESTestCase):
 
 class SerializerTests(ESTestCase):
     """
-    Tests for profile serializer
+    Tests for document serializers
     """
 
-    def test_profile_serializer(self):  # pylint: disable=no-self-use
+    def test_program_enrolled_user_serializer(self):  # pylint: disable=no-self-use
         """
-        Asserts the output of the profile serializer
+        Asserts the output of the serializer for program-enrolled users (ProgramEnrollments)
         """
         with mute_signals(post_save):
             profile = ProfileFactory.create()
         EducationFactory.create(profile=profile)
         EmploymentFactory.create(profile=profile)
-        certificate = CachedCertificateFactory.create(user=profile.user)
-        enrollment = CachedEnrollmentFactory.create(user=profile.user)
+        program = ProgramFactory.create()
+        course = CourseFactory.create(program=program)
+        course_run = CourseRunFactory.create(course=course)
+        certificate = CachedCertificateFactory.create(user=profile.user, course_run=course_run)
+        enrollment = CachedEnrollmentFactory.create(user=profile.user, course_run=course_run)
+        program_enrollment = ProgramEnrollment.objects.get(user=profile.user, program=program)
 
-        assert serialize_user(profile.user) == {
-            '_id': profile.user.id,
-            'id': profile.user.id,
+        assert serialize_program_enrolled_user(program_enrollment) == {
+            '_id': program_enrollment.id,
+            'id': program_enrollment.id,
+            'user_id': profile.user.id,
             'profile': {
                 'username': get_social_username(profile.user),
                 'first_name': profile.first_name,
@@ -344,8 +324,11 @@ class SerializerTests(ESTestCase):
                     profile.work_history.all()
                 ]
             },
-            'certificates': [certificate.data],
-            'enrollments': [enrollment.data],
+            'program': {
+                'id': program.id,
+                'certificates': [certificate.data],
+                'enrollments': [enrollment.data]
+            }
         }
 
 
@@ -385,4 +368,39 @@ class GetConnTests(ESTestCase):
 
         with self.assertRaises(ReindexException) as ex:
             get_conn()
-        assert str(ex.exception) == "Mapping user not found"
+        assert str(ex.exception) == "Mapping {} not found".format(USER_DOC_TYPE)
+
+
+class RecreateIndexTests(ESTestCase):
+    """
+    Tests for management commands
+    """
+    def setUp(self):
+        """
+        Start without any index
+        """
+        super(RecreateIndexTests, self).setUp()
+        conn = get_conn(verify=False)
+        index_name = settings.ELASTICSEARCH_INDEX
+        if conn.indices.exists(index_name):
+            conn.indices.delete(index_name)
+
+    def test_create_index(self):  # pylint: disable=no-self-use
+        """
+        Test that recreate_index will create an index and let search successfully
+        """
+        recreate_index()
+        assert es.search()['total'] == 0
+
+    def test_update_index(self):  # pylint: disable=no-self-use
+        """
+        Test that recreate_index will clear old data and index all profiles
+        """
+        recreate_index()
+        program_enrollment = ProgramEnrollmentFactory.create()
+        assert_search(es.search(), [program_enrollment])
+        remove_program_enrolled_user(program_enrollment)
+        assert_search(es.search(), [])
+        # recreate_index should index the program-enrolled user
+        recreate_index()
+        assert_search(es.search(), [program_enrollment])

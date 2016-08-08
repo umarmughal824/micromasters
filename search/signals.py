@@ -12,10 +12,6 @@ from profiles.models import (
     Employment,
     Profile,
 )
-from dashboard.models import (
-    CachedCertificate,
-    CachedEnrollment,
-)
 from search.tasks import index_users, remove_user
 
 log = logging.getLogger(__name__)
@@ -25,17 +21,6 @@ log = logging.getLogger(__name__)
 # The reason why there is one function per sender is
 # because each signal handler needs to be hooked to a single sender
 # otherwise it would run for any `post_save`/`post_delete` coming from any model
-
-@receiver(post_save, sender=CachedCertificate, dispatch_uid="cachedcertificate_post_save_index")
-def handle_update_certificate(sender, instance, **kwargs):  # pylint: disable=unused-argument
-    """Update index when a CachedCertificate model is updated."""
-    index_users.delay([instance.user])
-
-
-@receiver(post_save, sender=CachedEnrollment, dispatch_uid="cachedenrollment_post_save_index")
-def handle_update_enrollment(sender, instance, **kwargs):  # pylint: disable=unused-argument
-    """Update index when CachedEnrollment model is updated."""
-    index_users.delay([instance.user])
 
 
 @receiver(post_save, sender=Profile, dispatch_uid="profile_post_save_index")
@@ -72,15 +57,3 @@ def handle_delete_education(sender, instance, **kwargs):  # pylint: disable=unus
 def handle_delete_employment(sender, instance, **kwargs):  # pylint: disable=unused-argument
     """Update index when Employment model instance is deleted."""
     index_users.delay([instance.profile.user])
-
-
-@receiver(post_delete, sender=CachedCertificate, dispatch_uid="cachedcertificate_post_delete_index")
-def handle_delete_certificate(sender, instance, **kwargs):  # pylint: disable=unused-argument
-    """Update index when CachedCertificate model instance is deleted."""
-    index_users.delay([instance.user])
-
-
-@receiver(post_delete, sender=CachedEnrollment, dispatch_uid="cachedenrollment_post_delete_index")
-def handle_delete_enrollment(sender, instance, **kwargs):  # pylint: disable=unused-argument
-    """Update index when CachedEnrollment model instance is deleted."""
-    index_users.delay([instance.user])

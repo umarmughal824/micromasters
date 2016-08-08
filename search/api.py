@@ -5,7 +5,6 @@ from itertools import islice
 import logging
 
 from django.conf import settings
-from django.contrib.auth.models import User
 from elasticsearch.helpers import bulk
 from elasticsearch.exceptions import NotFoundError
 from elasticsearch_dsl import Mapping
@@ -13,11 +12,12 @@ from elasticsearch_dsl.connections import connections
 
 from profiles.models import Profile
 from profiles.serializers import ProfileSerializer
+from dashboard.models import ProgramEnrollment
 from search.exceptions import ReindexException
 
 log = logging.getLogger(__name__)
 
-USER_DOC_TYPE = 'user'
+USER_DOC_TYPE = 'program_user'
 DOC_TYPES = (USER_DOC_TYPE, )
 _CONN = None
 # When we create the connection, check to make sure all appropriate mappings exist
@@ -75,13 +75,13 @@ def get_conn(verify=True):
     return _CONN
 
 
-def _index_users_chunk(users):
+def _index_program_enrolled_users_chunk(program_enrollments):
     """
-    Add/update a small number of user records in Elasticsearch
+    Add/update a list of ProgramEnrollment records in Elasticsearch
 
     Args:
-        users (list of User):
-            List of users
+        program_enrollments (list of ProgramEnrollments):
+            List of ProgramEnrollments to serialize and index
 
     Returns:
         int: Number of items inserted into Elasticsearch
@@ -90,27 +90,25 @@ def _index_users_chunk(users):
     conn = get_conn()
     insert_count, errors = bulk(
         conn,
-        (serialize_user(user) for user in users),
+        (serialize_program_enrolled_user(program_enrollment) for program_enrollment in program_enrollments),
         index=settings.ELASTICSEARCH_INDEX,
         doc_type=USER_DOC_TYPE,
     )
-
     if len(errors) > 0:
         raise ReindexException("Error during bulk insert: {errors}".format(
             errors=errors
         ))
     refresh_index()
-
     return insert_count
 
 
-def index_users(users, chunk_size=100):
+def index_program_enrolled_users(program_enrollments, chunk_size=100):
     """
-    Add/update profile records in Elasticsearch.
+    Add/update ProgramEnrollment records in Elasticsearch.
 
     Args:
-        users (iterable of User):
-            Iterable of users
+        program_enrollments (iterable of ProgramEnrollments):
+            Iterable of ProgramEnrollments to serialize and index
         chunk_size (int):
             How many users to index at once.
 
@@ -118,55 +116,80 @@ def index_users(users, chunk_size=100):
         int: Number of indexed items
     """
     # Use an iterator so we can keep track of what's been indexed already
-    users = iter(users)
-
+    program_enrollments = iter(program_enrollments)
     count = 0
-    chunk = list(islice(users, chunk_size))
+    chunk = list(islice(program_enrollments, chunk_size))
     while len(chunk) > 0:
-        count += _index_users_chunk(chunk)
-        chunk = list(islice(users, chunk_size))
-
+        count += _index_program_enrolled_users_chunk(chunk)
+        chunk = list(islice(program_enrollments, chunk_size))
     refresh_index()
-
     return count
+
+
+def index_users(users, chunk_size=100):
+    """
+    Indexes a list of users via their ProgramEnrollments
+    """
+    program_enrollments = ProgramEnrollment.objects.filter(user__in=users).select_related('user', 'program').all()
+    return index_program_enrolled_users(program_enrollments, chunk_size)
+
+
+def remove_program_enrolled_user(program_enrollment):
+    """
+    Remove a program-enrolled user from Elasticsearch.
+    """
+    conn = get_conn()
+    try:
+        conn.delete(index=settings.ELASTICSEARCH_INDEX, doc_type=USER_DOC_TYPE, id=program_enrollment.id)
+    except NotFoundError:
+        # Item is already gone
+        pass
 
 
 def remove_user(user):
     """
     Remove a user from Elasticsearch.
     """
-    conn = get_conn()
-    try:
-        conn.delete(index=settings.ELASTICSEARCH_INDEX, doc_type=USER_DOC_TYPE, id=user.id)
-    except NotFoundError:
-        # Item is already gone
-        pass
+    program_enrollments = ProgramEnrollment.objects.filter(user=user).select_related('user', 'program').all()
+    for program_enrollment in program_enrollments:
+        remove_program_enrolled_user(program_enrollment)
 
 
-def serialize_user(user):
+def serialize_program_enrolled_user(program_enrollment):
     """
-    Serializes user for use with Elasticsearch.
+    Serializes a program-enrolled user for use with Elasticsearch.
 
     Args:
-        user (User): A user to serialize
+        program_enrollment (ProgramEnrollment): A program_enrollment to serialize
     Returns:
         dict: The data to be sent to Elasticsearch
     """
+    user = program_enrollment.user
+    program = program_enrollment.program
     serialized = {
-        'id': user.id,
-        '_id': user.id,
+        'id': program_enrollment.id,
+        '_id': program_enrollment.id,
+        'user_id': user.id
     }
     try:
         serialized['profile'] = ProfileSerializer().to_representation(user.profile)
     except Profile.DoesNotExist:
         # Just in case
         pass
-    serialized['certificates'] = [
-        certificate.data for certificate in user.cachedcertificate_set.all().exclude(data__isnull=True)
-    ]
-    serialized['enrollments'] = [
-        enrollment.data for enrollment in user.cachedenrollment_set.all().exclude(data__isnull=True)
-    ]
+
+    serialized['program'] = {
+        'id': program.id,
+        'certificates': [
+            certificate.data for certificate in user.cachedcertificate_set.filter(
+                course_run__course__program=program
+            ).exclude(data__isnull=True)
+        ],
+        'enrollments': [
+            enrollment.data for enrollment in user.cachedenrollment_set.filter(
+                course_run__course__program=program
+            ).exclude(data__isnull=True)
+        ]
+    }
     return serialized
 
 
@@ -177,19 +200,13 @@ def refresh_index():
     get_conn().indices.refresh(index=settings.ELASTICSEARCH_INDEX)
 
 
-def create_user_mapping():
+def program_enrolled_user_mapping():
     """
-    Create a mapping for profiles. If one already exists, delete it first.
+    Builds the raw mapping data for the program-enrolled user doc type
     """
-    conn = get_conn(verify=False)
-
-    index_name = settings.ELASTICSEARCH_INDEX
-    if conn.indices.exists_type(index=index_name, doc_type=USER_DOC_TYPE):
-        conn.indices.delete_mapping(index=index_name, doc_type=USER_DOC_TYPE)
-
     mapping = Mapping(USER_DOC_TYPE)
-
     mapping.field("id", "long")
+    mapping.field("user_id", "long")
     mapping.field("profile", "nested", properties={
         'account_privacy': NOT_ANALYZED_STRING_TYPE,
         'agreed_to_terms_of_service': BOOL_TYPE,
@@ -235,18 +252,21 @@ def create_user_mapping():
             'state_or_territory': NOT_ANALYZED_STRING_TYPE,
         }},
     })
-    mapping.field('enrollments', 'nested', properties={
-        'course_details': {
-            'type': 'object',
-            'properties': {
-                'course_modes': {
-                    'type': 'nested',
+    mapping.field("program", "nested", properties={
+        'id': LONG_TYPE,
+        'grade_average': LONG_TYPE,
+        'enrollments': {'type': 'nested', 'properties': {
+            'course_details': {
+                'type': 'object',
+                'properties': {
+                    'course_modes': {
+                        'type': 'nested',
+                    }
                 }
             }
-        }
+        }},
+        'certificates': {'type': 'nested'}
     })
-    mapping.field('certificates', 'nested')
-
     # Make strings not_analyzed by default
     mapping.meta('dynamic_templates', [{
         "notanalyzed": {
@@ -255,7 +275,18 @@ def create_user_mapping():
             "mapping": NOT_ANALYZED_STRING_TYPE
         }
     }])
+    return mapping
 
+
+def create_program_enrolled_user_mapping():
+    """
+    Save the mapping for a program user. If one already exists, delete it first.
+    """
+    conn = get_conn(verify=False)
+    index_name = settings.ELASTICSEARCH_INDEX
+    if conn.indices.exists_type(index=index_name, doc_type=USER_DOC_TYPE):
+        conn.indices.delete_mapping(index=index_name, doc_type=USER_DOC_TYPE)
+    mapping = program_enrolled_user_mapping()
     mapping.save(index_name)
 
 
@@ -263,7 +294,7 @@ def create_mappings():
     """
     Create all mappings, deleting existing mappings if they exist.
     """
-    create_user_mapping()
+    create_program_enrolled_user_mapping()
 
 
 def clear_index():
@@ -284,4 +315,4 @@ def recreate_index():
     Wipe and recreate index and mapping, and index all items.
     """
     clear_index()
-    index_users(User.objects.iterator())
+    index_program_enrolled_users(ProgramEnrollment.objects.iterator())
