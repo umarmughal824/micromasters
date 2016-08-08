@@ -59,3 +59,12 @@ class CourseRunFactory(DjangoModelFactory):
 
     class Meta:  # pylint: disable=missing-docstring
         model = CourseRun
+
+    @classmethod
+    def create(cls, **kwargs):
+        # If 'program' is provided, build a Course from it first
+        if 'program' in kwargs:
+            kwargs['course'] = CourseFactory.create(program=kwargs.pop('program'))
+        # Create the CourseRun as normal
+        attrs = cls.attributes(create=True, extra=kwargs)
+        return cls._generate(True, attrs)
