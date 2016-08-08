@@ -58,7 +58,7 @@ export default class ProgressWidget extends React.Component {
         </text>
       </svg>
     );
-  }
+  };
 
   render() {
     const { actual, total } = this.props;

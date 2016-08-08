@@ -29,6 +29,8 @@ import {
   SET_PROFILE_STEP,
   SET_USER_MENU_OPEN,
   SET_SEARCH_FILTER_VISIBILITY,
+
+  SET_TOS_DIALOG_VISIBILITY,
 } from '../actions/ui';
 import {
   HIGH_SCHOOL,
@@ -60,6 +62,7 @@ export type UIState = {
   workDialogIndex:              ?number;
   userMenuOpen:                 boolean;
   searchFilterVisibility:       {[s: string]: boolean};
+  tosDialogVisibility:          boolean;
 };
 
 export const INITIAL_UI_STATE: UIState = {
@@ -87,6 +90,7 @@ export const INITIAL_UI_STATE: UIState = {
   workDialogIndex:  null,
   userMenuOpen: false,
   searchFilterVisibility: {},
+  tosDialogVisibility: false
 };
 
 export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
@@ -204,6 +208,11 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
   case SET_SEARCH_FILTER_VISIBILITY: {
     return Object.assign({}, state, {
       searchFilterVisibility: action.payload
+    });
+  }
+  case SET_TOS_DIALOG_VISIBILITY: {
+    return Object.assign({}, state, {
+      tosDialogVisibility: action.payload
     });
   }
   default:

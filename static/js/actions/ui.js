@@ -114,3 +114,8 @@ export const SET_SEARCH_FILTER_VISIBILITY = 'SET_SEARCH_FILTER_VISIBILITY';
 export const setSearchFilterVisibility = (visibility: {[s: string]: boolean}): Action => (
   { type: SET_SEARCH_FILTER_VISIBILITY, payload: visibility }
 );
+
+export const SET_TOS_DIALOG_VISIBILITY = 'SET_TOS_DIALOG_VISIBILITY';
+export const setTOSDialogVisibility = (visibility: boolean): Action => (
+  { type: SET_TOS_DIALOG_VISIBILITY, payload: visibility }
+);

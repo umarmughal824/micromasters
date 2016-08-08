@@ -4,6 +4,7 @@ import moment from 'moment';
 import _ from 'lodash';
 import TextField from 'material-ui/TextField';
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
+import Checkbox from 'material-ui/Checkbox';
 
 import { ISO_8601_FORMAT } from '../constants';
 import {
@@ -278,6 +279,43 @@ export function boundDateField(keySet: string[], label: string, omitDay: boolean
       onChange={e => setNewDate(undefined, undefined, e.target.value)}
     />
   </div>;
+}
+
+export function boundCheckbox(keySet: string[], label: string|React$Element<*>): React$Element<*> {
+  const {
+    profile,
+    errors,
+    updateProfile,
+    validator,
+  } = this.props;
+
+  let onChange = e => {
+    let clone = _.cloneDeep(profile);
+    _.set(clone, keySet, e.target.checked);
+    updateProfile(clone, validator);
+  };
+
+  const style = {
+    'background-color': '#30BB5C'
+  };
+
+  return (
+    <div className={`bound-check-box ${validationErrorSelector(errors, keySet)}`}>
+      <div className="first-row">
+        <Checkbox
+          checked={_.get(profile, keySet)}
+          onCheck={onChange}
+          inputStyle={style}
+        />
+        <span className="label">
+          { label }
+        </span>
+      </div>
+      <span className="validation-error-text">
+        {_.get(errors, keySet)}
+      </span>
+    </div>
+  );
 }
 
 /**

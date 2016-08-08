@@ -10,7 +10,6 @@ import App from './containers/App';
 import DashboardPage from './containers/DashboardPage';
 import SettingsPage from './containers/SettingsPage';
 import ProfilePage from './containers/ProfilePage';
-import TermsOfServicePage from './containers/TermsOfServicePage';
 import UserPage from './containers/UserPage';
 import User from './components/User';
 import LearnerSearchPage from './containers/LearnerSearchPage';
@@ -31,7 +30,6 @@ export function makeDashboardRoutes(browserHistory: Object, store: Object, onRou
           <Route path="/" component={App}>
             <Route path="dashboard" component={DashboardPage} />
             <Route path="profile" component={ProfilePage} />
-            <Route path="/terms_of_service" component={TermsOfServicePage} />
             <Route path="/settings" component={SettingsPage}  />
             <Route path="/users" component={UserPage} >
               <IndexRedirect to={`${SETTINGS.username}`} />

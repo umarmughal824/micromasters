@@ -26,6 +26,7 @@ import {
   setDeletionIndex,
   setShowWorkDeleteAllDialog,
   setShowEducationDeleteAllDialog,
+  setTOSDialogVisibility,
 } from '../actions/ui';
 import { createSimpleActionHelpers, createAsyncActionHelpers } from '../util/redux';
 import type { ActionHelpers, AsyncActionHelpers } from '../util/redux';
@@ -126,6 +127,7 @@ class ProfileFormContainer extends React.Component {
       ['setDeletionIndex', setDeletionIndex],
       ['setShowWorkDeleteAllDialog', setShowWorkDeleteAllDialog],
       ['setShowEducationDeleteAllDialog', setShowEducationDeleteAllDialog],
+      ['setTOSDialogVisibility', setTOSDialogVisibility],
     ]);
   };
 

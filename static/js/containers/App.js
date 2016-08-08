@@ -20,7 +20,6 @@ import { validateProfileComplete } from '../util/validation';
 import type { Profile } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 
-const TERMS_OF_SERVICE_REGEX = /\/terms_of_service\/?/;
 const PROFILE_REGEX = /^\/profile\/?[a-z]?/;
 
 class App extends React.Component {
@@ -41,7 +40,6 @@ class App extends React.Component {
   componentDidMount() {
     this.fetchUserProfile(SETTINGS.username);
     this.fetchDashboard();
-    this.requireTermsOfService();
     this.requireProfileFilledOut();
     this.requireCompleteProfile();
   }
@@ -49,7 +47,6 @@ class App extends React.Component {
   componentDidUpdate() {
     this.fetchUserProfile(SETTINGS.username);
     this.fetchDashboard();
-    this.requireTermsOfService();
     this.requireProfileFilledOut();
     this.requireCompleteProfile();
   }
@@ -75,23 +72,11 @@ class App extends React.Component {
     }
   }
 
-  requireTermsOfService() {
-    const { userProfile, location: { pathname } } = this.props;
-    if (
-      userProfile.getStatus === FETCH_SUCCESS &&
-      !userProfile.profile.agreed_to_terms_of_service &&
-      !(TERMS_OF_SERVICE_REGEX.test(pathname))
-    ) {
-      this.context.router.push('/terms_of_service');
-    }
-  }
-
   requireProfileFilledOut() {
     const { userProfile, location: { pathname } } = this.props;
     if (
       userProfile.getStatus === FETCH_SUCCESS &&
       !userProfile.profile.filled_out &&
-      !(TERMS_OF_SERVICE_REGEX.test(pathname)) &&
       !(PROFILE_REGEX.test(pathname))
     ) {
       this.context.router.push('/profile');
@@ -109,7 +94,6 @@ class App extends React.Component {
     if (
       userProfile.getStatus === FETCH_SUCCESS &&
       profile.agreed_to_terms_of_service &&
-      !TERMS_OF_SERVICE_REGEX.test(pathname) &&
       !PROFILE_REGEX.test(pathname) &&
       !complete
     ) {
@@ -127,7 +111,7 @@ class App extends React.Component {
     const { router } = this.context;
 
     let empty = false;
-    if (TERMS_OF_SERVICE_REGEX.test(pathname)) {
+    if (PROFILE_REGEX.test(pathname)) {
       empty = true;
     }
     let pushUrl = url => router.push(url);

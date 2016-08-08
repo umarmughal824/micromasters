@@ -6,7 +6,6 @@ from django.conf.urls import url
 from ui.url_utils import (
     DASHBOARD_URL,
     PROFILE_URL,
-    TERMS_OF_SERVICE_URL,
     SETTINGS_URL,
     SEARCH_URL,
 )
@@ -22,7 +21,6 @@ dashboard_urlpatterns = [
     for dashboard_url in [
         DASHBOARD_URL,
         PROFILE_URL,
-        TERMS_OF_SERVICE_URL,
         SETTINGS_URL,
         SEARCH_URL,
     ]
