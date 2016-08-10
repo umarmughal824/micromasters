@@ -17,6 +17,7 @@ from search.api import (
     DOC_TYPES,
     get_conn
 )
+from search.permissions import UserCanSearchPermission
 
 log = logging.getLogger(__name__)
 
@@ -26,14 +27,9 @@ class ElasticProxyView(APIView):
     Elasticsearch proxy needed to enforce authentication and permissions
     """
     authentication_classes = (SessionAuthentication, )
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated, UserCanSearchPermission, )
 
-    def dispatch(self, request, *args, **kwargs):
-        # import pdb
-        # pdb.set_trace()
-        return APIView.dispatch(self, request, *args, **kwargs)
-
-    def _search_elasicsearch(self, request):
+    def _search_elasticsearch(self, request):  # pylint: disable=no-self-use
         """
         Common function that will take care of handling requests coming from different methods.
         """
@@ -47,6 +43,9 @@ class ElasticProxyView(APIView):
         # extract all the programs where the user is allowed to search
         users_allowed_programs = get_advance_searchable_programs(request.user)
         # if the user cannot search any program, return an error
+        # in theory this should never happen because `UserCanSearchPermission`
+        # takes care of doing the same check, but better to keep it to avoid
+        # that a theoretical bug exposes all the data in the index
         if not users_allowed_programs:
             return Response(
                 status=status.HTTP_403_FORBIDDEN,
@@ -55,14 +54,10 @@ class ElasticProxyView(APIView):
         # no matter what the query is, limit the programs to the allowed ones
         # if this is a superset of what searchkit sends, this will not impact the result
         query_limit = Q(
-            'nested',
-            path="program",
-            query=Q(
-                'bool',
-                should=[
-                    Q('term', **{'program.id': program.id}) for program in users_allowed_programs
-                ]
-            ),
+            'bool',
+            should=[
+                Q('term', **{'program.id': program.id}) for program in users_allowed_programs
+            ]
         )
         search = search.query(query_limit)
         # execute the query
@@ -76,10 +71,10 @@ class ElasticProxyView(APIView):
         """
         Handler for GET requests
         """
-        return self._search_elasicsearch(request)
+        return self._search_elasticsearch(request)
 
     def post(self, request, *args, **kwargs):
         """
         Handler for POST requests
         """
-        return self._search_elasicsearch(request)
+        return self._search_elasticsearch(request)
