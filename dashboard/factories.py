@@ -2,6 +2,7 @@
 Factories for dashboard
 """
 from datetime import datetime, timedelta
+from random import randint
 import pytz
 
 from factory import SubFactory
@@ -31,7 +32,9 @@ FAKE = faker.Factory.create()
 class CachedCertificateFactory(DjangoModelFactory):
     """Factory for Certificate"""
     user = SubFactory(UserFactory)
-    data = FuzzyAttribute(lambda: {'key{}'.format(i): FAKE.text() for i in range(3)})
+    data = FuzzyAttribute(lambda: dict(
+        grade=randint(60, 100), **{'key{}'.format(i): FAKE.text() for i in range(3)}
+    ))
     course_run = SubFactory(CourseRunFactory)
     # certificates expire after 6 hours, this generates a last request between 6:15 hours ago and now
     last_request = FuzzyDateTime(datetime.now(tz=pytz.utc) - timedelta(hours=6, minutes=15))

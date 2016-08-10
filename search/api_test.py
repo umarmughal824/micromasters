@@ -5,7 +5,6 @@ Tests for search API functions.
 from django.conf import settings
 from django.db.models.signals import post_save
 from factory.django import mute_signals
-from rest_framework.fields import DateTimeField
 from requests import get
 from mock import patch
 
@@ -15,24 +14,19 @@ from dashboard.factories import (
     ProgramEnrollmentFactory
 )
 from dashboard.models import ProgramEnrollment
+from dashboard.serializers import UserProgramSerializer
 from courses.factories import (
     ProgramFactory,
     CourseFactory,
     CourseRunFactory,
 )
-from profiles.api import get_social_username
 from profiles.factories import (
     EducationFactory,
     EmploymentFactory,
     ProfileFactory,
 )
 from profiles.serializers import (
-    EducationSerializer,
-    EmploymentSerializer,
-)
-from profiles.util import (
-    GravatarImgSize,
-    format_gravatar_url,
+    ProfileSerializer
 )
 from search.api import (
     get_conn,
@@ -235,7 +229,7 @@ class IndexTests(ESTestCase):
             assert es.search()['total'] == 1
             course_run = CourseRunFactory.create(program=program_enrollment.program)
             edx_record = edx_cached_model_factory.create(user=program_enrollment.user, course_run=course_run)
-            edx_record.data = {'new': 'data'}
+            edx_record.data.update({'new': 'data'})
             edx_record.save()
             assert_search(es.search(), [program_enrollment])
 
@@ -282,53 +276,18 @@ class SerializerTests(ESTestCase):
         EmploymentFactory.create(profile=profile)
         program = ProgramFactory.create()
         course = CourseFactory.create(program=program)
-        course_run = CourseRunFactory.create(course=course)
-        certificate = CachedCertificateFactory.create(user=profile.user, course_run=course_run)
-        enrollment = CachedEnrollmentFactory.create(user=profile.user, course_run=course_run)
+        course_runs = [CourseRunFactory.create(course=course) for _ in range(2)]
+        for course_run in course_runs:
+            CachedCertificateFactory.create(user=profile.user, course_run=course_run)
+            CachedEnrollmentFactory.create(user=profile.user, course_run=course_run)
         program_enrollment = ProgramEnrollment.objects.get(user=profile.user, program=program)
 
         assert serialize_program_enrolled_user(program_enrollment) == {
             '_id': program_enrollment.id,
             'id': program_enrollment.id,
             'user_id': profile.user.id,
-            'profile': {
-                'username': get_social_username(profile.user),
-                'first_name': profile.first_name,
-                'filled_out': profile.filled_out,
-                'agreed_to_terms_of_service': profile.agreed_to_terms_of_service,
-                'last_name': profile.last_name,
-                'preferred_name': profile.preferred_name,
-                'email_optin': profile.email_optin,
-                'gender': profile.gender,
-                'date_of_birth': DateTimeField().to_representation(profile.date_of_birth),
-                'account_privacy': profile.account_privacy,
-                'has_profile_image': profile.has_profile_image,
-                'profile_url_full': format_gravatar_url(profile.user.email, GravatarImgSize.FULL),
-                'profile_url_large': format_gravatar_url(profile.user.email, GravatarImgSize.LARGE),
-                'profile_url_medium': format_gravatar_url(profile.user.email, GravatarImgSize.MEDIUM),
-                'profile_url_small': format_gravatar_url(profile.user.email, GravatarImgSize.SMALL),
-                'country': profile.country,
-                'state_or_territory': profile.state_or_territory,
-                'city': profile.city,
-                'birth_country': profile.birth_country,
-                'birth_state_or_territory': profile.birth_state_or_territory,
-                'birth_city': profile.birth_city,
-                'preferred_language': profile.preferred_language,
-                'pretty_printed_student_id': profile.pretty_printed_student_id,
-                'edx_level_of_education': profile.edx_level_of_education,
-                'education': [
-                    EducationSerializer().to_representation(education) for education in profile.education.all()
-                ],
-                'work_history': [
-                    EmploymentSerializer().to_representation(work_history) for work_history in
-                    profile.work_history.all()
-                ]
-            },
-            'program': {
-                'id': program.id,
-                'certificates': [certificate.data],
-                'enrollments': [enrollment.data]
-            }
+            'profile': ProfileSerializer().to_representation(profile),
+            'program': UserProgramSerializer.serialize(program_enrollment)
         }
 
 
