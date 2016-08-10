@@ -1,4 +1,4 @@
-.micromasters-button {
+.mm-button {
   background-color: #F1F1F1;
   border-radius: 2px;
   padding: 6px 12px;
@@ -8,4 +8,26 @@
   flex-direction: row;
   vertical-align: middle;
   white-space: nowrap;
+}
+
+.mm-minor-action {
+  color: $mm-brand-blue;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer
+}
+
+.mm-button-action {
+  border-radius: 2px;
+  border: 0;
+  padding: 10px 15px;
+  min-width: 120px;
+  text-transform: uppercase;
+  box-shadow: 2px 2px 8px grey;
+  font-weight: 600;
+}
+
+.mm-button-action.main-action {
+  background-color: $mm-brand-bg;
+  color: white;
 }

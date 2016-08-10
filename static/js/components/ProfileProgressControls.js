@@ -1,6 +1,5 @@
 // @flow
 import React from 'react';
-import Button from 'react-mdl/lib/Button';
 
 import { saveProfileStep } from '../util/profile_edit';
 import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
@@ -30,25 +29,23 @@ export default class ProfileProgressControls extends React.Component {
 
     let prevButton, nextButton;
     if(prevStep) {
-      prevButton = <Button
-        raised
-        className="progress-button previous"
+      prevButton = <button
+        className="mm-button-action prev"
         onClick={prevStep}>
-        <span>Previous</span>
-      </Button>;
+        <span>Go Back</span>
+      </button>;
     }
     if(nextStep) {
-      nextButton = <Button
-        raised
-        colored
-        className="progress-button next"
+      nextButton = <button
+        role="button"
+        className="mm-button-action main-action next"
         onClick={this.saveAndContinue}>
         <span>{nextBtnLabel}</span>
-      </Button>;
+      </button>;
     }
-    return <div>
-      {prevButton}
+    return <div className="profile-progress-controls">
       {nextButton}
+      {prevButton}
     </div>;
   }
 

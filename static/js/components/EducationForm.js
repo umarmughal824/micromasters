@@ -2,12 +2,10 @@
 import React from 'react';
 import IconButton from 'react-mdl/lib/IconButton';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
-import Switch from 'react-mdl/lib/Switch';
-import FABButton from 'react-mdl/lib/FABButton';
-import Icon from 'react-mdl/lib/Icon';
 import { Card } from 'react-mdl/lib/Card';
 import _ from 'lodash';
 import moment from 'moment';
+import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
 
 import ProfileFormFields from '../util/ProfileFormFields';
 import ConfirmDeletion from './ConfirmDeletion';
@@ -73,14 +71,14 @@ class EducationForm extends ProfileFormFields {
         )).map(([index, entry]) => this.educationRow(entry, index));
       }
       rows.push(
-        <FABButton
-          colored
-          onClick={() => this.openNewEducationForm(level.value, null)}
-          className="profile-add-button"
-          key="I'm unique!"
-        >
-          <Icon name="add" />
-        </FABButton>
+        <Cell col={12} className="profile-form-row" key={"I'm unique!"}>
+          <a
+            className="mm-minor-action"
+            onClick={() => this.openNewEducationForm(level.value, null)}
+          >
+            Add another
+          </a>
+        </Cell>
       );
       return rows;
     }
@@ -101,19 +99,23 @@ class EducationForm extends ProfileFormFields {
       }
     };
     let dateFormat = date => moment(date).format("MM[/]YYYY");
-    return <Grid className="profile-tab-card-grid" key={index}>
-      <Cell col={4} className="profile-row-name">
-        {education.school_name}
+    return (
+      <Cell col={12} className="profile-form-row" key={index}>
+        <div className="basic-info">
+          <div className="profile-row-name">
+            {education.school_name}
+          </div>
+          <div className="profile-row-date-range">
+            {`${dateFormat(education.graduation_date)}`}
+          </div>
+        </div>
+        <div className="profile-row-icons">
+          {validationAlert()}
+          <IconButton className="edit-button" name="edit" onClick={editEntry} />
+          <IconButton className="delete-button" name="delete" onClick={deleteEntry} />
+        </div>
       </Cell>
-      <Cell col={6} className="profile-row-date-range">
-        {`${dateFormat(education.graduation_date)}`}
-      </Cell>
-      <Cell col={2} className="profile-row-icons">
-        {validationAlert()}
-        <IconButton className="edit-button" name="edit" onClick={editEntry} />
-        <IconButton className="delete-button" name="delete" onClick={deleteEntry} />
-      </Cell>
-    </Grid>;
+    );
   };
 
   closeDeleteAllEducationDialog: Function = (): void => {
@@ -144,7 +146,22 @@ class EducationForm extends ProfileFormFields {
     saveProfile(educationValidation, clone, ui);
   };
 
-  handleSwitchClick(level: string): void {
+  educationLevelRadioSwitch: Function = (inclusions: any[], level: Object): React$Element<*> => {
+    return (
+      <RadioButtonGroup 
+        className={`profile-radio-switch ${level.value}`}
+        id={`profile-tab-education-switch-${level.value}`}
+        name={`profile-tab-education-switch-${level.value}`}
+        onChange={(event, value)=> this.handleRadioClick(value, level.value)}
+        valueSelected={String(inclusions[level.value])}
+      >
+        <RadioButton value={"true"} label="Yes" />
+        <RadioButton value={"false"} label="No" />
+      </RadioButtonGroup>
+    );
+  };
+
+  handleRadioClick(value: string, level: string): void {
     const {
       ui: { educationDegreeInclusions },
       setEducationDegreeInclusions,
@@ -155,9 +172,11 @@ class EducationForm extends ProfileFormFields {
       validator,
       updateProfile,
     } = this.props;
+
+    const stringToBool = s => s === "true";
     if ( !education.find(entry => entry.degree_name === level) ) {
       let newState = Object.assign({}, educationDegreeInclusions, {
-        [level]: !educationDegreeInclusions[level]
+        [level]: stringToBool(value)
       });
       setEducationDegreeInclusions(newState).then(() => {
         let clone = _.cloneDeep(profile);
@@ -187,28 +206,26 @@ class EducationForm extends ProfileFormFields {
 
     let cardClass = level => {
       if (!educationDegreeInclusions[level.value]) {
-        return 'profile-tab-card-greyed';
+        return 'collapsed';
       }
       return "";
     };
 
+    let prefix = label => label.toLowerCase().startsWith("a") ? "an" : "a";
+    let levelName = (label) => (
+      !label.endsWith("degree") ? `${label.toLowerCase()} degree` : label.toLowerCase()
+    );
+
     let levelsGrid = this.educationLevelOptions.map(level => (
-      <Card shadow={1} className={`profile-tab-card ${cardClass(level)}`} key={level.label}>
-        <Grid className="profile-tab-card-grid">
-          <Cell col={4} className="profile-card-title">
-            {level.label}
+      <Card shadow={1} className={`profile-form ${cardClass(level)}`} key={level.label}>
+        <Grid className="profile-form-grid">
+          <Cell col={12} className="profile-card-header profile-form-row">
+            <span>
+              {`Do you have ${prefix(level.label)} ${levelName(level.label)}?`}
+            </span>
+            { this.educationLevelRadioSwitch(educationDegreeInclusions, level) }
           </Cell>
-          <Cell col={7} />
-          <Cell col={1}>
-            <Switch
-              id={`profile-tab-education-switch-${level.value}`}
-              onChange={()=>{this.handleSwitchClick(level.value);}}
-              checked={educationDegreeInclusions[level.value]}
-            />
-          </Cell>
-        </Grid>
-        {this.renderEducationLevel(level)}
-        <Grid className="profile-tab-card-grid">
+          {this.renderEducationLevel(level)}
           <Cell col={12}>
             <span className="validation-error-text-large">
               {errors[`education_${level.value}_required`]}

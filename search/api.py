@@ -13,6 +13,7 @@ from elasticsearch_dsl.connections import connections
 from profiles.models import Profile
 from profiles.serializers import ProfileSerializer
 from dashboard.models import ProgramEnrollment
+from dashboard.serializers import UserProgramSerializer
 from search.exceptions import ReindexException
 
 log = logging.getLogger(__name__)
@@ -165,7 +166,6 @@ def serialize_program_enrolled_user(program_enrollment):
         dict: The data to be sent to Elasticsearch
     """
     user = program_enrollment.user
-    program = program_enrollment.program
     serialized = {
         'id': program_enrollment.id,
         '_id': program_enrollment.id,
@@ -177,19 +177,7 @@ def serialize_program_enrolled_user(program_enrollment):
         # Just in case
         pass
 
-    serialized['program'] = {
-        'id': program.id,
-        'certificates': [
-            certificate.data for certificate in user.cachedcertificate_set.filter(
-                course_run__course__program=program
-            ).exclude(data__isnull=True)
-        ],
-        'enrollments': [
-            enrollment.data for enrollment in user.cachedenrollment_set.filter(
-                course_run__course__program=program
-            ).exclude(data__isnull=True)
-        ]
-    }
+    serialized['program'] = UserProgramSerializer.serialize(program_enrollment)
     return serialized
 
 
@@ -207,7 +195,7 @@ def program_enrolled_user_mapping():
     mapping = Mapping(USER_DOC_TYPE)
     mapping.field("id", "long")
     mapping.field("user_id", "long")
-    mapping.field("profile", "nested", properties={
+    mapping.field("profile", "object", properties={
         'account_privacy': NOT_ANALYZED_STRING_TYPE,
         'agreed_to_terms_of_service': BOOL_TYPE,
         'birth_city': NOT_ANALYZED_STRING_TYPE,
@@ -252,7 +240,7 @@ def program_enrolled_user_mapping():
             'state_or_territory': NOT_ANALYZED_STRING_TYPE,
         }},
     })
-    mapping.field("program", "nested", properties={
+    mapping.field("program", "object", properties={
         'id': LONG_TYPE,
         'grade_average': LONG_TYPE,
         'enrollments': {'type': 'nested', 'properties': {

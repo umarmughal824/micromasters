@@ -1,6 +1,6 @@
 // @flow
 import React from 'react';
-import Grid, { Cell } from 'react-mdl/lib/Grid';
+import Card from 'react-mdl/lib/Card/Card';
 
 import PersonalForm from './PersonalForm';
 import ProfileProgressControls from './ProfileProgressControls';
@@ -26,32 +26,18 @@ class PersonalTab extends React.Component {
   };
 
   render() {
-    return <div>
-      <Grid className="profile-splash">
-        <Cell col={12}>
-          Please tell us more about yourself so you can participate in the MicroMasters
-          community and qualify for your MicroMasters credential.
-        </Cell>
-      </Grid>
-      <Grid className="profile-tab-grid">
-        <Cell col={1} />
-        <Cell col={10}>
-          <PersonalForm {...this.props} validator={personalValidation} />
-        </Cell>
-        <Cell col={1} />
-        <Cell col={1} />
-        <Cell col={10}>
-          <ValidationAlert {...this.props} />
-          <ProfileProgressControls
-            {...this.props}
-            nextBtnLabel="Save and Continue"
-            isLastTab={false}
-            validator={personalValidation}
-          />
-        </Cell>
-        <Cell col={1} />
-      </Grid>
-    </div>;
+    return (
+      <Card shadow={1} className="profile-form">
+        <PersonalForm {...this.props} validator={personalValidation} />
+        <ValidationAlert {...this.props} />
+        <ProfileProgressControls
+          {...this.props}
+          nextBtnLabel="Next"
+          isLastTab={false}
+          validator={personalValidation}
+        />
+      </Card>
+    );
   }
 }
 

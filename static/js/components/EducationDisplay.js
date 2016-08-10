@@ -3,8 +3,6 @@ import React from 'react';
 import IconButton from 'react-mdl/lib/IconButton';
 
 import Grid, { Cell } from 'react-mdl/lib/Grid';
-import FABButton from 'react-mdl/lib/FABButton';
-import Icon from 'react-mdl/lib/Icon';
 import { Card } from 'react-mdl/lib/Card';
 import _ from 'lodash';
 import moment from 'moment';
@@ -55,23 +53,27 @@ export default class EducationDisplay extends ProfileFormFields {
       level.value === entry.degree_name
     )).label;
     let icons = () => (
-      <Cell col={2} className="profile-row-icons">
+      <div className="profile-row-icons">
         {validationAlert()}
         <IconButton className="edit-button" name="edit" onClick={editEntry} />
         <IconButton className="delete-button" name="delete" onClick={deleteEntry} />
-      </Cell>
+      </div>
     );
     return (
-      <Grid className="profile-tab-card-grid user-page" key={index}>
-        <Cell col={4} className="profile-row-name">
-          <span className="school-type">{ degree }</span><br/>
-          { entry.school_name }
-        </Cell>
-        <Cell col={6} className="profile-row-date-range">
-          {`${dateFormat(entry.graduation_date)}`}
-        </Cell>
+      <Cell col={12} className="profile-form-row" key={index}>
+        <div className="basic-info">
+          <div className="profile-row-name">
+            <span className="school-type">
+              { degree }
+            </span><br/>
+            { entry.school_name }
+          </div>
+          <div className="profile-row-date-range">
+            {`${dateFormat(entry.graduation_date)}`}
+          </div>
+        </div>
         { userPrivilegeCheck(profile, icons, () => <Cell col={2} />) }
-      </Grid>
+      </Cell>
     );
   };
 
@@ -84,15 +86,14 @@ export default class EducationDisplay extends ProfileFormFields {
     }
     userPrivilegeCheck(profile, () => {
       rows.push(
-        <FABButton
-          colored
-          id="add-education-button"
-          className="profile-add-button"
-          key="I'm unique!"
-          onClick={() => this.openNewEducationForm(HIGH_SCHOOL, null)}
-        >
-          <Icon name="add" />
-        </FABButton>
+        <Cell col={12} className="profile-form-row" key={"I'm unique!"}>
+          <a
+            className="mm-minor-action"
+            onClick={() => this.openNewEducationForm(HIGH_SCHOOL, null)}
+          >
+            Add another
+          </a>
+        </Cell>
       );
     });
     return rows;
@@ -113,14 +114,15 @@ export default class EducationDisplay extends ProfileFormFields {
           showLevelForm={true}
           validator={educationValidation}
         />
-        <Card shadow={1} className="profile-tab-card" id="education-card">
-          <Grid className="profile-tab-card-grid">
-            <Cell col={4} className="profile-card-title">
-              Education
+        <Card shadow={1} className="profile-form" id="education-card">
+          <Grid className="profile-form-grid">
+            <Cell col={12} className="profile-form-row profile-card-header">
+              <span>
+                Education
+              </span>
             </Cell>
-            <Cell col={8} />
-          </Grid>
           { this.renderEducationEntries() }
+          </Grid>
         </Card>
       </div>
     );

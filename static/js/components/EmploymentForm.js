@@ -4,12 +4,10 @@ import Button from 'react-mdl/lib/Button';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 import Dialog from 'material-ui/Dialog';
 import Card from 'react-mdl/lib/Card/Card';
-import Switch from 'react-mdl/lib/Switch';
-import FABButton from 'react-mdl/lib/FABButton';
-import Icon from 'react-mdl/lib/Icon';
 import IconButton from 'react-mdl/lib/IconButton';
 import _ from 'lodash';
 import moment from 'moment';
+import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
 
 import { generateNewWorkHistory, userPrivilegeCheck } from '../util/util';
 import { workEntriesByDate } from '../util/sorting';
@@ -58,7 +56,7 @@ class EmploymentForm extends ProfileFormFields {
     });
   };
 
-  changeSwitchState: Function = (): void => {
+  handleRadioClick: Function = (): void => {
     const {
       ui,
       setWorkHistoryEdit,
@@ -189,13 +187,14 @@ class EmploymentForm extends ProfileFormFields {
       }
       userPrivilegeCheck(profile, () => {
         workHistoryRows.push(
-          <FABButton
-            colored
+        <Cell col={12} className="profile-form-row" key={"I'm unique!"}>
+          <a
+            className="mm-minor-action"
             onClick={this.addWorkHistoryEntry}
-            key="I'm unique!"
-            className="profile-add-button">
-            <Icon name="add" />
-          </FABButton>
+          >
+            Add another
+          </a>
+        </Cell>
         );
       });
       return workHistoryRows;
@@ -226,25 +225,27 @@ class EmploymentForm extends ProfileFormFields {
     let icons = () => {
       return userPrivilegeCheck(profile, 
         () => (
-          <Cell col={2} className="profile-row-icons">
+          <div className="profile-row-icons">
             {validationAlert()}
             <IconButton className="edit-button" name="edit" onClick={editCallback} />
             <IconButton className="delete-button" name="delete" onClick={deleteEntry} />
-          </Cell>
+          </div>
         ),
-        () => <Cell col={2} />
+      () => <div />
       );
     };
     return (
-      <Grid className="profile-tab-card-grid" key={index}>
-        <Cell col={4} className="profile-row-name">
-          {`${position.company_name}, ${position.position}`}
-        </Cell>
-        <Cell col={6} className="profile-row-date-range">
-          {`${dateFormat(position.start_date)} - ${endDateText()}`}
-        </Cell>
-        {icons()}
-      </Grid>
+      <Cell col={12} className="profile-form-row">
+        <div className="basic-info">
+          <div className="profile-row-name">
+            {`${position.company_name}, ${position.position}`}
+          </div>
+          <div className="profile-row-date-range">
+            {`${dateFormat(position.start_date)} - ${endDateText()}`}
+          </div>
+        </div>
+        { icons() }
+      </Cell>
     );
   }
 
@@ -276,14 +277,15 @@ class EmploymentForm extends ProfileFormFields {
     let workSwitch = () => {
       if ( showSwitch ) {
         return (
-          <div>
-            <Switch
-              ripple
-              id="profile-tab-professional-switch"
-              onChange={this.changeSwitchState}
-              checked={workHistoryEdit}>
-            </Switch>
-          </div>
+          <RadioButtonGroup 
+            className="profile-radio-switch"
+            name={"work-history-switch"}
+            onChange={(event, value)=> this.handleRadioClick(value)}
+            valueSelected={String(workHistoryEdit)}
+          >
+            <RadioButton value={"true"} label="Yes" />
+            <RadioButton value={"false"} label="No" />
+          </RadioButtonGroup>
         );
       }
     };
@@ -314,18 +316,15 @@ class EmploymentForm extends ProfileFormFields {
         >
           {this.editWorkHistoryForm()}
         </Dialog>
-        <Card shadow={1} className={`profile-tab-card ${cardClass()}`}>
-          <Grid className="profile-tab-card-grid">
-            <Cell col={4} className="profile-card-title">
-              Employment
-            </Cell>
-            <Cell col={7}></Cell>
-            <Cell col={1}>
+        <Card shadow={1} className={`profile-form ${cardClass()}`}>
+          <Grid className="profile-form-grid">
+            <Cell col={12} className="profile-form-row profile-card-header">
+              <span>
+                Employment
+              </span>
               { workSwitch() }
             </Cell>
-          </Grid>
-          {this.renderWorkHistory()}
-          <Grid className="profile-tab-card-grid">
+            {this.renderWorkHistory()}
             <Cell col={12}>
               <span className="validation-error-text-large">
                 {errors.work_history_required}
