@@ -1,0 +1,54 @@
+// Progress Widget
+.circular-progress-widget {
+  fill: none;
+  .circular-progress-widget-bg {
+    stroke: $progress-widget-bg-stroke !important;
+  }
+  .circular-progress-widget-fg {
+    transition: stroke-dashoffset .5s ease-in-out;
+    stroke: white;
+  }
+  .circular-progress-widget-txt {
+    font-family: 'Roboto', sans-serif;
+    font-size: 50px;
+    fill: white;
+  }
+}
+
+.progress-widget {
+  background-color: $mm-brand-bg !important;
+  width: 450px;
+  display: block;
+  padding: 1px;
+
+  .text {
+    font-family: 'Roboto', sans-serif;
+    color: white;
+    font-size: medium;
+    text-align: center;
+
+    &.text-course-complete {
+      font-size: 22px;
+      margin-top: 26px;
+    }
+    &.heading-text {
+      margin: 20px 0 0 25px;
+      text-align: left;
+      font-size: 23px;
+      font-weight: 500;
+      text-align: left;
+      display: block;
+    }
+    &.heading-paragraph {
+      font-style: italic;
+    }
+  }
+  .circular-progress-widget {
+    margin-top: 15px auto;
+    text-align: center;
+  }
+  .apply-master-btn {
+    margin: 15px auto 20px auto;
+    text-align: center;
+  }
+}
