@@ -55,6 +55,7 @@ export default class TermsOfServiceDialog extends React.Component {
         className="terms-of-service"
         title="Terms of Service"
         actions={actions}
+        onRequestClose={() => setTOSDialogVisibility(false)}
       >
         <div className="terms-of-service-content">
           <p>
