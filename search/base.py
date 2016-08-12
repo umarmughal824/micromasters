@@ -3,7 +3,7 @@ Base test classes for search
 """
 from django.test import TestCase
 
-from search.api import clear_index
+from search.api import recreate_index
 
 
 class ESTestCase(TestCase):
@@ -13,4 +13,4 @@ class ESTestCase(TestCase):
 
     def setUp(self):
         super(ESTestCase, self).setUp()
-        clear_index()
+        recreate_index()
