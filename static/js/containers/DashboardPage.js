@@ -3,55 +3,64 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import Loader from 'react-loader';
+import { Card, CardTitle } from 'react-mdl/lib/Card';
 
 import { FETCH_PROCESSING } from '../actions';
-import type { Dispatch } from 'redux';
-
-import Jumbotron from '../components/Jumbotron';
-import CourseList from '../components/CourseList';
+import CourseListCard from '../components/dashboard/CourseListCard';
+import DashboardUserCard from '../components/dashboard/DashboardUserCard';
 import ErrorMessage from '../components/ErrorMessage';
-import { getPreferredName } from '../util/util';
+import ProgressWidget from '../components/ProgressWidget';
 import type { Profile } from '../flow/profileTypes';
 
 class DashboardPage extends React.Component {
   props: {
     profile:    {profile: Profile},
     dashboard:  Object,
-    dispatch:   Dispatch,
-    expander:   Object,
   };
 
   render() {
     const {
       dashboard,
-      expander,
-      dispatch,
       profile: { profile },
     } = this.props;
     const loaded = dashboard.fetchStatus !== FETCH_PROCESSING;
-    let preferredName = getPreferredName(profile);
     let errorMessage;
     let dashboardContent;
     // if there are no errors coming from the backend, simply show the dashboard
-    if (dashboard.errorInfo === undefined){
-      dashboardContent = <div>
-        <div className="card-header">
-          Your Status
+    if (dashboard.errorInfo === undefined && dashboard.programs.length > 0){
+      // For now show all programs available. We should restrict this to one program later on.
+      let cards = dashboard.programs.map(program => (
+        <CourseListCard program={program} key={program.id} />
+      ));
+      // HACK: We need a program to show the title of
+      let firstProgram = dashboard.programs[0];
+      dashboardContent = (
+        <div className="double-column">
+          <div className="first-column">
+            <DashboardUserCard profile={profile} program={firstProgram}/>
+            {cards}
+          </div>
+          <div className="second-column">
+            <ProgressWidget />
+            <Card shadow={0}>
+              <CardTitle>Learners Near Me</CardTitle>
+            </Card>
+            <Card shadow={0}>
+              <CardTitle>Histogram</CardTitle>
+            </Card>
+          </div>
         </div>
-        <div className="card-copy">
-          <CourseList dashboard={dashboard} expander={expander} dispatch={dispatch} />
-        </div>
-      </div>;
+      );
     } else {
       errorMessage = <ErrorMessage errorInfo={dashboard.errorInfo} />;
     }
     return (
-      <Jumbotron profile={profile} text={preferredName}>
+      <div className="dashboard">
         <Loader loaded={loaded}>
           {errorMessage}
           {dashboardContent}
         </Loader>
-      </Jumbotron>
+      </div>
     );
   }
 }
@@ -67,7 +76,6 @@ const mapStateToProps = (state) => {
   return {
     profile: profile,
     dashboard: state.dashboard,
-    expander: state.ui.dashboardExpander
   };
 };
 

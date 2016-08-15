@@ -1,3 +1,4 @@
+/* global SETTINGS: false */
 export const HIGH_SCHOOL = 'hs';
 export const ASSOCIATE = 'a';
 export const BACHELORS = 'b';
@@ -141,13 +142,14 @@ export const ELASTICSEARCH_RESPONSE = {
 };
 
 export const USER_PROFILE_RESPONSE = {
+  "username": SETTINGS.username,
   "filled_out": true,
   "agreed_to_terms_of_service": true,
   "account_privacy": "all_users",
   "email_optin": false,
   "first_name": "Jane",
   "last_name": "Garris",
-  "preferred_name": "Jane Garris",
+  "preferred_name": "Jane",
   "country": "US",
   "state_or_territory": "MA",
   "city": "Cambridge",
@@ -215,6 +217,14 @@ export const STATUS_ENROLLED_NOT_VERIFIED = "enrolled-not-verified";
 export const STATUS_OFFERED_NOT_ENROLLED = "offered-not-enrolled";
 export const STATUS_NOT_OFFERED = 'not-offered';
 
+export const ALL_COURSE_STATUSES = [
+  STATUS_NOT_OFFERED,
+  STATUS_PASSED,
+  STATUS_OFFERED_NOT_ENROLLED,
+  STATUS_ENROLLED_NOT_VERIFIED,
+  STATUS_VERIFIED_NOT_COMPLETED,
+];
+
 export const DASHBOARD_RESPONSE = [
   {
     "title": "Empty program",
@@ -255,7 +265,7 @@ export const DASHBOARD_RESPONSE = [
           }
         ],
         "position_in_program": 0,
-        "title": "Gio Course - failed, no status text",
+        "title": "Gio Course - failed, no grade",
         "status": STATUS_NOT_OFFERED,
         "description": "",
         "id": 1
@@ -315,7 +325,7 @@ export const DASHBOARD_RESPONSE = [
         "id": 6,
         "status": STATUS_PASSED,
         "position_in_program": 5,
-        "title": "Passed course - status text is 88%",
+        "title": "Passed course - check mark, grade is 88%",
         "runs": [
           {
             "certificate_url": "www.google.com",
@@ -344,7 +354,7 @@ export const DASHBOARD_RESPONSE = [
         "id": 8,
         "status": STATUS_ENROLLED_NOT_VERIFIED,
         "position_in_program": 3,
-        "title": "Not verified course - upgrade to verified button",
+        "title": "Not verified course - upgrade button",
         "runs": [
           {
             "id": 7,
@@ -361,7 +371,7 @@ export const DASHBOARD_RESPONSE = [
         "id": 10,
         "status": STATUS_OFFERED_NOT_ENROLLED,
         "position_in_program": 4,
-        "title": "Enrollment starting course - status text says Enrollment starting",
+        "title": "Enrollment starting course - disabled enroll button, text says Enrollment begins 3/3/2106",
         "runs": [
           {
             "course_id": "course-v1:supply+chain",
@@ -379,7 +389,7 @@ export const DASHBOARD_RESPONSE = [
       {
         "id": 12,
         "status": STATUS_PASSED,
-        "title": "Passed course missing grade - no status text",
+        "title": "Passed course missing grade - check mark, no grade",
         "position_in_program": 6,
         "runs": [
           {
@@ -395,7 +405,7 @@ export const DASHBOARD_RESPONSE = [
       {
         "id": 15,
         "position_in_program": 9,
-        "title": "verified not completed, course starts in future - status text is Course starting",
+        "title": "verified not completed, course starts in future - action text is Course starting",
         "status": STATUS_VERIFIED_NOT_COMPLETED,
         "runs": [
           {
@@ -411,7 +421,7 @@ export const DASHBOARD_RESPONSE = [
         "id": 11,
         "status": STATUS_OFFERED_NOT_ENROLLED,
         "position_in_program": 0,
-        "title": "Fuzzy enrollment starting course - First in program, status text is soonish",
+        "title": "Fuzzy enrollment starting course - First in program, action text is enrollment begins soonish",
         "runs": [
           {
             "course_id": "course-v1:supply+chain",
@@ -438,7 +448,7 @@ export const DASHBOARD_RESPONSE = [
         "id": 9,
         "status": STATUS_VERIFIED_NOT_COMPLETED,
         "position_in_program": 0,
-        "title": "Course for last program, no grade - in progress, status text is 0%",
+        "title": "Course for last program in progress - no grade, action or description",
         "runs": [
           {
             "course_id": "course-v1:edX+DemoX+Demo_Course",
@@ -464,10 +474,9 @@ export const ERROR_RESPONSE = {
 };
 
 export const ISO_8601_FORMAT = 'YYYY-MM-DD';
+export const DASHBOARD_FORMAT = 'M/D/Y';
 
-export const DASHBOARD_COURSE_HEIGHT = 70;
 export const TERMS_CARD_ROW_HEIGHT = 70;
-export const DASHBOARD_RUN_HEIGHT = 40;
 
 // NOTE: this is in order of attainment
 export const EDUCATION_LEVELS = [
