@@ -9,6 +9,7 @@
 
   .fullwidth {
     width: 100%;
+    overflow: visible;
   }
 
   // remove padding and margin from MDL layout components
@@ -170,13 +171,14 @@
       border-bottom: none;
     }
 
-    .learner-result > * {
+    .learner-result .mdl-cell {
       display: flex;
     }
 
     .learner-result {
       padding: 10px 0;
       font-size: 12px;
+      position: relative;
 
       .learner-name {
         font-weight: 600;
@@ -203,7 +205,7 @@
         }
       }
 
-      .card-image {
+      .mdl-cell .card-image {
         height: 35px;
       }
     }

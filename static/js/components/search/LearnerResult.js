@@ -3,6 +3,7 @@ import React from 'react';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 
 import ProfileImage from '../ProfileImage';
+import UserChip from '../UserChip';
 import { getPreferredName, getLocation } from '../../util/util';
 import type { SearchResult } from '../../flow/searchTypes';
 
@@ -33,6 +34,7 @@ export default class LearnerResult extends React.Component {
           <span className="hint">Current grade</span>
         </Cell>
         <Cell col = {4}></Cell>
+        <UserChip profile={profile} />
       </Grid>
     );
   }

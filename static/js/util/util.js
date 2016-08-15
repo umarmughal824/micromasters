@@ -7,6 +7,7 @@ import striptags from 'striptags';
 import _ from 'lodash';
 import iso3166 from 'iso-3166-2';
 import urljoin from 'url-join';
+import { Maybe, Just, Nothing } from 'sanctuary';
 
 import {
   EDUCATION_LEVELS,
@@ -18,6 +19,7 @@ import type {
   WorkHistoryEntry,
   ValidationErrors,
 } from '../flow/profileTypes';
+import { workEntriesByDate } from './sorting';
 
 export function sendGoogleAnalyticsEvent(category: any, action: any, label: any, value: any) {
   let event: any = {
@@ -254,6 +256,21 @@ export function getLocation(profile: Profile): string {
     countryLocation = iso3166.country(country).name;
   }
   return `${subCountryLocation}, ${countryLocation}`;
+}
+
+/**
+ * returns the user's most recent (or current) employer
+*/
+export function getEmployer(profile: Profile): Maybe<string> {
+  let entries = workEntriesByDate(profile.work_history);
+  if ( _.isEmpty(entries) ) {
+    return Nothing();
+  }
+  let [, entry] = entries[0];
+  if ( entry.company_name ) {
+    return Just(entry.company_name);
+  }
+  return Nothing();
 }
 
 export function calculateDegreeInclusions(profile: Profile) {

@@ -1,6 +1,8 @@
 /* global SETTINGS: false */
 import { assert } from 'chai';
 import React from 'react';
+import { Just } from 'sanctuary';
+import R from 'ramda';
 
 import {
   makeStrippedHtml,
@@ -15,6 +17,7 @@ import {
   getLocation,
   validationErrorSelector,
   asPercent,
+  getEmployer,
 } from '../util/util';
 import {
   EDUCATION_LEVELS,
@@ -26,6 +29,7 @@ import {
   MASTERS,
   PROFILE_STEP_LABELS,
 } from '../constants';
+import { assertMaybeEquality, assertIsNothing } from './sanctuary_test';
 
 /* eslint-disable camelcase */
 describe('utility functions', () => {
@@ -158,7 +162,6 @@ describe('utility functions', () => {
         });
       });
     });
-
   });
 
   describe('getLocation', () => {
@@ -178,6 +181,27 @@ describe('utility functions', () => {
         city: 'Portland'
       };
       assert.equal(getLocation(us), 'Portland, ME, US');
+    });
+  });
+
+  describe('getEmployer', () => {
+    it('should return Nothing if the user has no job history', () => {
+      let clone = R.clone(USER_PROFILE_RESPONSE);
+      clone.work_history = [];
+      assertIsNothing(getEmployer(clone));
+    });
+
+    it('should return the current employer if the user is currently employed', () => {
+      let clone = R.clone(USER_PROFILE_RESPONSE);
+      clone.work_history.push({
+        company_name: "Foobarcorp",
+        end_date: null
+      });
+      assertMaybeEquality(Just("Foobarcorp"), getEmployer(clone));
+    });
+
+    it('should return the most recent job if the user is not currently employed', () => {
+      assertMaybeEquality(Just("Planet Express"), getEmployer(USER_PROFILE_RESPONSE));
     });
   });
 

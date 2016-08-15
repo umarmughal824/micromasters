@@ -4,10 +4,13 @@ import { assert } from 'chai';
 
 import { allJust, mstr } from './sanctuary';
 
-describe('sanctuary util functions', () => {
-  let maybeEquality = (j1, j2) => assert(j1.equals(j2), "just equality");
+export const assertMaybeEquality = (m1: Maybe, m2: Maybe) => {
+  assert(m1.equals(m2), "Maybe's should be equal");
+};
 
-  let isNothing = m => assert(m.isNothing, "should be nothing");
+export const assertIsNothing = (m: Maybe) => assert(m.isNothing, "should be nothing");
+
+describe('sanctuary util functions', () => {
 
   describe('allJust', () => {
     let maybes = [
@@ -18,11 +21,11 @@ describe('sanctuary util functions', () => {
     it('should return Just(values) if passed an array of Just values', () => {
       let checked = allJust(maybes);
       assert(S.isJust(checked));
-      checked.value.forEach((m, i) => maybeEquality(m, maybes[i]));
+      checked.value.forEach((m, i) => assertMaybeEquality(m, maybes[i]));
     });
 
     it('should return Nothing if passed an array with a Nothing in it', () => {
-      isNothing(allJust(maybes.concat(Nothing())));
+      assertIsNothing(allJust(maybes.concat(Nothing())));
     });
   });
 

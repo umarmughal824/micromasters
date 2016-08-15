@@ -28,6 +28,7 @@ import {
   PRIVACY_STEP,
 } from '../constants';
 import { INITIAL_UI_STATE } from '../reducers/ui';
+import { assertMaybeEquality, assertIsNothing } from './sanctuary_test';
 
 describe('Profile validation functions', () => {
   let sandbox;
@@ -37,10 +38,6 @@ describe('Profile validation functions', () => {
   afterEach(() => {
     sandbox.restore();
   });
-
-  let maybeEquality = (j1, j2) => assert(j1.equals(j2), "just equality");
-
-  let isNothing = m => assert(m.isNothing, "should be nothing");
 
   describe('Personal validation', () => {
     it('should return an empty object when all fields are present', () => {
@@ -392,118 +389,118 @@ describe('Profile validation functions', () => {
 
   describe('validateMonth', () => {
     it('handles months starting with 0 without treating as octal', () => {
-      maybeEquality(Just(9), validateMonth("09"));
+      assertMaybeEquality(Just(9), validateMonth("09"));
     });
 
     it('converts strings to numbers', () => {
       for (let i = 1; i < 13; i++) {
-        maybeEquality(Just(i), validateMonth(String(i)));
+        assertMaybeEquality(Just(i), validateMonth(String(i)));
       }
     });
 
     it('strips out any non-numerical characters', () => {
-      maybeEquality(Just(12), validateMonth("1e2"));
-      maybeEquality(Just(4), validateMonth("0-4"));
-      maybeEquality(Just(3), validateMonth("-3"));
+      assertMaybeEquality(Just(12), validateMonth("1e2"));
+      assertMaybeEquality(Just(4), validateMonth("0-4"));
+      assertMaybeEquality(Just(3), validateMonth("-3"));
     });
 
     it('returns 12 for any number >= 12', () => {
-      maybeEquality(Just(12), validateMonth("3.4"));
-      maybeEquality(Just(12), validateMonth("13"));
+      assertMaybeEquality(Just(12), validateMonth("3.4"));
+      assertMaybeEquality(Just(12), validateMonth("13"));
     });
 
     it('will let a user input a leading zero', () => {
-      maybeEquality(Just(0), validateMonth("0"));
-      maybeEquality(Just(8), validateMonth("08"));
+      assertMaybeEquality(Just(0), validateMonth("0"));
+      assertMaybeEquality(Just(8), validateMonth("08"));
     });
 
     it('returns Nothing if the text is not an integer number', () => {
-      isNothing(validateMonth(""));
-      isNothing(validateMonth("two"));
-      isNothing(validateMonth(null));
-      isNothing(validateMonth({}));
-      isNothing(validateMonth(undefined));
+      assertIsNothing(validateMonth(""));
+      assertIsNothing(validateMonth("two"));
+      assertIsNothing(validateMonth(null));
+      assertIsNothing(validateMonth({}));
+      assertIsNothing(validateMonth(undefined));
     });
   });
 
   describe('validateYear', () => {
     it('handles years starting with 0 without treating as octal', () => {
-      maybeEquality(Just(1999), validateYear("01999"));
+      assertMaybeEquality(Just(1999), validateYear("01999"));
     });
 
     it('converts strings to numbers', () => {
-      maybeEquality(Just(1943), validateYear("1943"));
+      assertMaybeEquality(Just(1943), validateYear("1943"));
     });
 
     it('strips non-numerical characters', () => {
-      maybeEquality(Just(2004), validateYear("2e004"));
-      maybeEquality(Just(2034), validateYear("203-4"));
+      assertMaybeEquality(Just(2004), validateYear("2e004"));
+      assertMaybeEquality(Just(2034), validateYear("203-4"));
     });
 
     it('returns values for years less than 1800 if they are less than 4 character', () => {
-      maybeEquality(Just(3), validateYear("3"));
-      maybeEquality(Just(703), validateYear("703"));
-      maybeEquality(Just(0), validateYear("0"));
-      maybeEquality(Just(20), validateYear("-20"));
+      assertMaybeEquality(Just(3), validateYear("3"));
+      assertMaybeEquality(Just(703), validateYear("703"));
+      assertMaybeEquality(Just(0), validateYear("0"));
+      assertMaybeEquality(Just(20), validateYear("-20"));
     });
 
     it('returns 1800 for 4-character years less than 1800', () => {
-      maybeEquality(Just(1800), validateYear("1799"));
-      maybeEquality(Just(1800), validateYear("1099"));
+      assertMaybeEquality(Just(1800), validateYear("1799"));
+      assertMaybeEquality(Just(1800), validateYear("1099"));
     });
 
     it('returns 2100 for years >= 2100', () => {
-      maybeEquality(Just(2100), validateYear("2100"));
-      maybeEquality(Just(2100), validateYear("2300"));
-      maybeEquality(Just(2100), validateYear("52300"));
+      assertMaybeEquality(Just(2100), validateYear("2100"));
+      assertMaybeEquality(Just(2100), validateYear("2300"));
+      assertMaybeEquality(Just(2100), validateYear("52300"));
     });
 
     it('returns an empty string if the text is not an integer number', () => {
-      isNothing(validateYear(""));
-      isNothing(validateYear("two"));
-      isNothing(validateYear(null));
-      isNothing(validateYear("@#"));
-      isNothing(validateYear({}));
-      isNothing(validateYear(undefined));
+      assertIsNothing(validateYear(""));
+      assertIsNothing(validateYear("two"));
+      assertIsNothing(validateYear(null));
+      assertIsNothing(validateYear("@#"));
+      assertIsNothing(validateYear({}));
+      assertIsNothing(validateYear(undefined));
     });
   });
 
   describe('validateDay', () => {
     it('handles dates starting with 0 without treating as octal', () => {
-      maybeEquality(Just(1), validateDay("01"));
+      assertMaybeEquality(Just(1), validateDay("01"));
     });
 
     it('converts strings to numbers', () => {
-      maybeEquality(Just(3), validateDay("3"));
+      assertMaybeEquality(Just(3), validateDay("3"));
     });
 
     it("allows leading zeros", () => {
-      maybeEquality(Just(0), validateDay("0"));
-      maybeEquality(Just(1), validateDay("01"));
+      assertMaybeEquality(Just(0), validateDay("0"));
+      assertMaybeEquality(Just(1), validateDay("01"));
     });
 
     it('disallows non-numerical input', () => {
-      maybeEquality(Just(3), validateDay("-3"));
-      maybeEquality(Just(20), validateDay("2e0"));
-      maybeEquality(Just(21), validateDay("2-1"));
-      maybeEquality(Just(22), validateDay("2.2"));
+      assertMaybeEquality(Just(3), validateDay("-3"));
+      assertMaybeEquality(Just(20), validateDay("2e0"));
+      assertMaybeEquality(Just(21), validateDay("2-1"));
+      assertMaybeEquality(Just(22), validateDay("2.2"));
     });
 
     it('returns 31 for dates greater than 31', () => {
-      maybeEquality(Just(31), validateDay("32"));
-      maybeEquality(Just(31), validateDay("71"));
+      assertMaybeEquality(Just(31), validateDay("32"));
+      assertMaybeEquality(Just(31), validateDay("71"));
     });
 
     it('truncates to the first 2 characters of input', () => {
-      maybeEquality(Just(22), validateDay("220"));
+      assertMaybeEquality(Just(22), validateDay("220"));
     });
 
     it('returns an empty string if the text is not an integer number', () => {
-      isNothing(validateDay(""));
-      isNothing(validateDay("two"));
-      isNothing(validateDay(null));
-      isNothing(validateDay({}));
-      isNothing(validateDay(undefined));
+      assertIsNothing(validateDay(""));
+      assertIsNothing(validateDay("two"));
+      assertIsNothing(validateDay(null));
+      assertIsNothing(validateDay({}));
+      assertIsNothing(validateDay(undefined));
     });
   });
 
