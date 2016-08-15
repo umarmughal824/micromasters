@@ -235,7 +235,7 @@ class EmploymentForm extends ProfileFormFields {
       );
     };
     return (
-      <Cell col={12} className="profile-form-row">
+      <Cell col={12} className="profile-form-row" key={index}>
         <div className="basic-info">
           <div className="profile-row-name">
             {`${position.company_name}, ${position.position}`}
