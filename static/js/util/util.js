@@ -52,30 +52,30 @@ export function makeProfileProgressDisplay(active: string) {
   const textY = (height - (radius * 2)) / 2 + radius * 2;
   const circleY = radius + paddingY;
 
-  const greenFill = "#00964e", greenLine = "#7dcba7";
+  const greenFill = "#30BB5C", darkGreyFill = "#626262";
   const greyStroke = "#ececec", lightGreyText = "#b7b7b7", darkGreyText = "#888888";
   const greyFill = "#eeeeee", greyCircle = "#dddddd";
   const colors = {
     completed: {
-      fill: greenFill,
+      fill: darkGreyFill,
       stroke: "white",
       circleText: "white",
-      text: greenFill,
-      line: greenLine
+      text: lightGreyText,
+      fontWeight: 300,
     },
     current: {
-      fill: "white",
+      fill: greenFill,
       stroke: greyStroke,
-      circleText: "black",
+      circleText: "white",
       text: "black",
-      line: greyStroke
+      fontWeight: 700,
     },
     future: {
       fill: greyFill,
       stroke: greyCircle,
       circleText: darkGreyText,
       text: lightGreyText,
-      line: greyStroke
+      fontWeight: 700,
     }
   };
 
@@ -94,6 +94,39 @@ export function makeProfileProgressDisplay(active: string) {
 
     const circleX = paddingX + radius + circleDistance * i;
     const nextCircleX = paddingX + radius + circleDistance * (i + 1);
+
+    let circleLabel = () => {
+      if ( i < activeTab ) {
+        return <svg
+          fill="white"
+          height="24"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+          x={circleX - 12}
+          y={circleY - 12}
+        >
+          <path d="M0 0h24v24H0z" fill="none"/>
+          <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+        </svg>;
+      } else {
+        return <text
+          key={`circletext_${i}`}
+          x={circleX}
+          y={circleY}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          style={{
+            fill: colorScheme.circleText,
+            fontWeight: 700,
+            fontSize: i < activeTab ? "16pt" : "12pt"
+          }}
+        >
+          { i + 1 }
+        </text>;
+      }
+    };
+
     elements.push(
       <circle
         key={`circle_${i}`}
@@ -110,27 +143,15 @@ export function makeProfileProgressDisplay(active: string) {
         textAnchor="middle"
         style={{
           fill: colorScheme.text,
-          fontWeight: 700,
+          fontWeight: colorScheme.fontWeight,
           fontSize: "12pt"
         }}
       >
         {label}
       </text>,
-      <text
-        key={`circletext_${i}`}
-        x={circleX}
-        y={circleY}
-        textAnchor="middle"
-        dominantBaseline="middle"
-        style={{
-          fill: colorScheme.circleText,
-          fontWeight: 700,
-          fontSize: "12pt"
-        }}
-      >
-        {i + 1}
-      </text>
+      circleLabel()
     );
+
     if (i !== numCircles - 1) {
       elements.push(
         <line
@@ -139,7 +160,7 @@ export function makeProfileProgressDisplay(active: string) {
           x2={nextCircleX - radius}
           y1={circleY}
           y2={circleY}
-          stroke={colorScheme.line}
+          stroke={"#ececec"}
           strokeWidth={2}
         />
       );
