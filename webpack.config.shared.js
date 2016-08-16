@@ -1,6 +1,10 @@
 var path = require("path");
 var webpack = require("webpack");
 
+let babelQuerySettings = {
+  presets: ['es2015', 'stage-1', 'react']
+}
+
 module.exports = {
   entry: {
     'dashboard': ['babel-polyfill', './static/js/dashboard'],
@@ -12,16 +16,12 @@ module.exports = {
     path: path.resolve('./static/bundles/'),
     filename: "[name].js"
   },
-
   module: {
     loaders: [
       {
         test: /\.jsx?$/,
         exclude: /node_modules/,
-        loader: 'babel-loader',
-        query: {
-          presets: ['es2015', 'stage-1', 'react']
-        }
+        loaders: ['react-hot', 'babel-loader?' + JSON.stringify(babelQuerySettings)],
       },  // to transform JSX into JS
       {
         test: /\.(svg|ttf|woff|woff2|eot)$/,

@@ -4,7 +4,10 @@ var sharedConfig = require(path.resolve("./webpack.config.shared.js"));
 
 module.exports = {
   context: __dirname,
-  entry: sharedConfig.entry,
+  entry: Object.assign({}, {
+    'hot':  'webpack-dev-server/client?http://0.0.0.0:3000',
+    'reload': 'webpack/hot/only-dev-server',
+  }, sharedConfig.entry ),
   output: sharedConfig.output,
   module: sharedConfig.module,
   sassLoader: sharedConfig.sassLoader,
@@ -15,7 +18,7 @@ module.exports = {
       'process.env': {
         'NODE_ENV': '"development"'
       }
-    })
+    }),
   ],
   devtool: 'source-map'
 };
