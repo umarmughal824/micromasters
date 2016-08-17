@@ -9,7 +9,8 @@ import {
   HitsStats,
   Pagination,
   ResetFilters,
-  RangeFilter
+  RangeFilter,
+  SortingSelector,
 } from 'searchkit';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 import Card from 'react-mdl/lib/Card/Card';
@@ -32,6 +33,41 @@ let makeSearchkitTranslations: () => Object = () => {
 
   return translations;
 };
+
+const sortOptions = [
+  {
+    label: "Last Name A-Z", key: "name_a_z", fields: [
+      { field: "profile.last_name", options: { order: "asc" } },
+      { field: "profile.first_name", options: { order: "asc" } }
+    ]
+  },
+  {
+    label: "Last Name Z-A", key: "name_z_a", fields: [
+      { field: "profile.last_name", options: { order: "desc" } },
+      { field: "profile.first_name", options: { order: "desc" } }
+    ]
+  },
+  {
+    label: "Grade High-to-low", field: "program.grade_average",
+    order: "desc", key: "grade-high-low"
+  },
+  {
+    label: "Grade Low-to-High", field: "program.grade_average",
+    order: "asc" , key: "grade-low-high"
+  },
+  {
+    label: "Country A-Z", key: "loc-a-z", fields: [
+      { field: "profile.country", options: { order: "asc" } },
+      { field: "profile.city", options: { order: "asc" } },
+    ]
+  },
+  {
+    label: "Country Z-A", key: "loc-z-a", fields: [
+      { field: "profile.country", options: { order: "desc" } },
+      { field: "profile.city", options: { order: "desc" } },
+    ]
+  },
+];
 
 export default class LearnerSearch extends SearchkitComponent {
   props: {
@@ -113,6 +149,7 @@ export default class LearnerSearch extends SearchkitComponent {
                 </Cell>
                 <Cell col={2}></Cell>
                 <Cell col={4} className="pagination-sort">
+                  <SortingSelector options={sortOptions} />
                   <Pagination />
                 </Cell>
                 <Cell col={12}>

@@ -132,14 +132,21 @@
 
     .pagination-sort {
       justify-content: flex-end;
+      align-items: center;
 
       .sk-pagination-navigation {
         display: flex;
         align-items: center;
+
+        .sk-toggle-option {
+          height: 33px;
+        }
       }
 
       .sk-pagination-navigation * {
         background-color: $fg-grey;
+        font-size: 16px;
+        font-weight: normal;
       }
     }
 
@@ -236,5 +243,16 @@
         height: 35px;
       }
     }
+  }
+}
+
+.sk-select {
+  > select {
+    background-color: $fg-grey;
+  }
+
+  select, option {
+    font-size: 16px;
+    font-weight: normal;
   }
 }
