@@ -8,6 +8,7 @@ import {
   RefinementListFilter,
   HitsStats,
   Pagination,
+  ResetFilters,
 } from 'searchkit';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 import Card from 'react-mdl/lib/Card/Card';
@@ -80,7 +81,7 @@ export default class LearnerSearch extends SearchkitComponent {
                 <Cell col={6} className="result-info">
                   <div
                     role="button"
-                    id="email-selected"
+                    id="new-group"
                     className="mm-button"
                   >
                     <span>
@@ -89,7 +90,7 @@ export default class LearnerSearch extends SearchkitComponent {
                   </div>
                   <div
                     role="button"
-                    id="download csv"
+                    id="email-selected"
                     className="mm-button"
                   >
                     Email Selected
@@ -102,6 +103,7 @@ export default class LearnerSearch extends SearchkitComponent {
                 </Cell>
                 <Cell col={12}>
                   <SelectedFilters />
+                  <ResetFilters />
                 </Cell>
               </Grid>
               <Hits 

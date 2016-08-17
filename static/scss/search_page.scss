@@ -100,8 +100,13 @@
     border-bottom: 2px solid $border-color;
     margin: 0;
 
-    .pagination-sort {
+    > * {
       display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .pagination-sort {
       justify-content: flex-end;
 
       .sk-pagination-navigation {
@@ -130,10 +135,7 @@
     }
 
     .result-info {
-      display: flex;
-      flex-direction: row;
       justify-content: space-around;
-      align-items: center;
       margin-left: 0;
     }
 
@@ -145,10 +147,7 @@
     }
 
     .learner-actions {
-      display: flex;
-      flex-direction: row;
       justify-content: flex-end;
-      align-items: center;
 
       div:first-child {
         margin-right: 10px;
