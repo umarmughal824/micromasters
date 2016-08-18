@@ -35,7 +35,7 @@ describe('FilterVisibilityToggle', () => {
 
   it('renders children', () => {
     let toggle = renderToggle(props, <div>Test Text</div>);
-    assert.deepEqual(toggle.includes("Test Text"), true);
+    assert.include(toggle, "Test Text");
   });
 
   it('checks for filter visibility when rendering', () => {

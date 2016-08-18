@@ -15,3 +15,7 @@ export type CourseRun = {
   status?: string;
   enrollment_start_date?: string;
 };
+
+export type UserProgram = {
+  grade_average: number
+};

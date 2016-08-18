@@ -1,11 +1,15 @@
 // @flow
 /* global SETTINGS: false */
 import React from 'react';
+import R from 'ramda';
 import { assert } from 'chai';
 
 import LearnerResult from './LearnerResult';
 import { makeStrippedHtml } from '../../util/util';
-import { USER_PROFILE_RESPONSE } from '../../constants';
+import {
+  USER_PROFILE_RESPONSE,
+  USER_PROGRAM_RESPONSE
+} from '../../constants';
 
 describe('LearnerResult', () => {
   let renderLearnerResult = props => (
@@ -13,41 +17,35 @@ describe('LearnerResult', () => {
   );
 
   let elasticHit = {
-    result: { _source: { profile: USER_PROFILE_RESPONSE } }
+    result: { _source: { profile: USER_PROFILE_RESPONSE, program: USER_PROGRAM_RESPONSE } }
   };
 
   it("should include the user's name", () => {
     let result = renderLearnerResult(elasticHit);
-    assert.deepEqual(
-      result.includes(USER_PROFILE_RESPONSE.preferred_name),
-      true
-    );
-    assert.deepEqual(
-      result.includes(USER_PROFILE_RESPONSE.last_name),
-      true
-    );
+    assert.include(result, USER_PROFILE_RESPONSE.preferred_name);
+    assert.include(result, USER_PROFILE_RESPONSE.last_name);
   });
 
   it("should include the user's location", () => {
     let result = renderLearnerResult(elasticHit);
-    assert.deepEqual(
-      result.includes(USER_PROFILE_RESPONSE.city),
-      true
-    );
-    assert.deepEqual(
-      result.includes(USER_PROFILE_RESPONSE.state_or_territory),
-      true
-    );
-    assert.deepEqual(
-      result.includes(USER_PROFILE_RESPONSE.country),
-      true
-    );
+    assert.include(result, USER_PROFILE_RESPONSE.city);
+    assert.include(result, USER_PROFILE_RESPONSE.state_or_territory);
+    assert.include(result, USER_PROFILE_RESPONSE.country);
   });
 
-  it("should include the user's current grade", () => {
-    // currently this is hardcoded, we don't have the data on the backend
+  it("should include the user's current program grade when a grade is available", () => {
     let result = renderLearnerResult(elasticHit);
-    assert.deepEqual(result.includes("75%"), true);
-    assert.deepEqual(result.includes("Current grade"), true);
+    assert.include(result, `${USER_PROGRAM_RESPONSE.grade_average}%`);
+  });
+
+  it("should show an indicator when a user has a missing/null program grade", () => {
+    let emptyGradeElasticHit = R.clone(elasticHit),
+      strippedEmptyGradeOutput = '-Current grade';
+    emptyGradeElasticHit.result._source.program.grade_average = null;
+    let result = renderLearnerResult(emptyGradeElasticHit);
+    assert.include(result, strippedEmptyGradeOutput);
+    delete emptyGradeElasticHit.result._source.program.grade_average;
+    result = renderLearnerResult(emptyGradeElasticHit);
+    assert.include(result, strippedEmptyGradeOutput);
   });
 });

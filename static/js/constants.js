@@ -210,6 +210,10 @@ export const USER_PROFILE_RESPONSE = {
   "edx_level_of_education": null
 };
 
+export const USER_PROGRAM_RESPONSE = {
+  "grade_average": 83
+};
+
 export const STATUS_PASSED = 'passed';
 export const STATUS_NOT_PASSED = 'not-passed';
 export const STATUS_VERIFIED_NOT_COMPLETED = 'verified-not-completed';

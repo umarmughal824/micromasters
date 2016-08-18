@@ -27,12 +27,12 @@ describe('CountryRefinementOption', () => {
 
   it('should render a country name, given a country code', () => {
     let option = renderCountryOption(props);
-    assert.deepEqual(option.includes('Afghanistan'), true);
+    assert.include(option, 'Afghanistan');
   });
 
   it('should display the result count for the option', () => {
     let option = renderCountryOption(props);
-    assert.deepEqual(option.includes('42'), true);
+    assert.include(option, '42');
   });
 
   it('should bind an onClick handler', () => {
