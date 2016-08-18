@@ -59,10 +59,10 @@ describe("ErrorInfo", () => {
             }
           };
           let errorMessage = renderErrorMessage(that);
-          assert.equal(true, errorMessage.includes(String(code)));
-          assert.equal(true, errorMessage.includes(errorString));
-          assert.equal(true, errorMessage.includes(contactExpectation));
-          assert.equal(true, errorMessage.includes(message));
+          assert.include(errorMessage, String(code));
+          assert.include(errorMessage, errorString);
+          assert.include(errorMessage, contactExpectation);
+          assert.include(errorMessage, message);
         });
       });
     });
