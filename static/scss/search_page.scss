@@ -87,6 +87,29 @@
         padding-top: 15px;
       }
     }
+
+    .filter--grade-average {
+      .sk-panel__content {
+        padding-right: 25px;
+      }
+
+      .sk-range-histogram > * {
+        background-color: $histogramgrey;
+      }
+
+      .rc-slider-step {
+        background-color: $medgrey;
+      }
+
+      .rc-slider-handle {
+        border-color: $medgrey;
+      }
+
+      .rc-slider-mark-text {
+        color: $medgrey;
+        background-color: transparent;
+      }
+    }
   }
 
   .search-sidebar * {
