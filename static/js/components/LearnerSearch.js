@@ -9,6 +9,7 @@ import {
   HitsStats,
   Pagination,
   ResetFilters,
+  RangeFilter
 } from 'searchkit';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 import Card from 'react-mdl/lib/Card/Card';
@@ -71,6 +72,19 @@ export default class LearnerSearch extends SearchkitComponent {
                   title="Current Location"
                   id="country"
                   translations={this.searchkitTranslations}
+                />
+              </FilterVisibilityToggle>
+              <FilterVisibilityToggle
+                {...this.props}
+                filterName="grade-average"
+              >
+                <RangeFilter
+                  field="program.grade_average"
+                  id="grade-average"
+                  min={0}
+                  max={100}
+                  showHistogram={true}
+                  title="Program Avg. Grade"
                 />
               </FilterVisibilityToggle>
             </Card>

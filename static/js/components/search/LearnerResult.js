@@ -37,7 +37,7 @@ export default class LearnerResult extends React.Component {
           <span className="percent">
             { LearnerResult.hasGrade(program) ? `${program.grade_average}%` : '-' }
           </span>
-          <span className="hint">Current grade</span>
+          <span className="hint">Program Avg. Grade</span>
         </Cell>
         <Cell col={4} />
         <UserChip profile={profile} />

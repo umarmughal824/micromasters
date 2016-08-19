@@ -40,7 +40,7 @@ describe('LearnerResult', () => {
 
   it("should show an indicator when a user has a missing/null program grade", () => {
     let emptyGradeElasticHit = R.clone(elasticHit),
-      strippedEmptyGradeOutput = '-Current grade';
+      strippedEmptyGradeOutput = '-Program Avg. Grade';
     emptyGradeElasticHit.result._source.program.grade_average = null;
     let result = renderLearnerResult(emptyGradeElasticHit);
     assert.include(result, strippedEmptyGradeOutput);
