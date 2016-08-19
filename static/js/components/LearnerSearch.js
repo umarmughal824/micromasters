@@ -1,3 +1,4 @@
+// @flow
 import React from 'react';
 import {
   SearchkitComponent,
@@ -20,7 +21,9 @@ import LearnerResult from './search/LearnerResult';
 import CountryRefinementOption from './search/CountryRefinementOption';
 import FilterVisibilityToggle from './search/FilterVisibilityToggle';
 import HitsCount from './search/HitsCount';
+import EmailCompositionDialog from './EmailCompositionDialog';
 import type { Option } from '../flow/generalTypes';
+import type { EmailEditState } from '../reducers/email';
 
 let makeSearchkitTranslations: () => Object = () => {
   let translations = {};
@@ -73,6 +76,13 @@ export default class LearnerSearch extends SearchkitComponent {
   props: {
     checkFilterVisibility:  (s: string) => boolean,
     setFilterVisibility:    (s: string, v: boolean) => void,
+    openEmailComposer:      () => void,
+    emailDialogVisibility:  boolean,
+    closeEmailDialog:       () => void,
+    updateEmailEdit:        (o: Object) => void,
+    sendEmail:              () => void,
+    email:                  EmailEditState,
+    children:               React$Element<*>[],
   };
 
   dropdownOptions: Option[] = [
@@ -83,8 +93,24 @@ export default class LearnerSearch extends SearchkitComponent {
   searchkitTranslations: Object = makeSearchkitTranslations();
 
   render () {
+    const {
+      emailDialogVisibility,
+      closeEmailDialog,
+      updateEmailEdit,
+      sendEmail,
+      email,
+      openEmailComposer,
+    } = this.props;
     return (
       <div className="learners-search">
+        <EmailCompositionDialog
+          open={emailDialogVisibility}
+          closeEmailDialog={closeEmailDialog}
+          updateEmailEdit={updateEmailEdit}
+          email={email}
+          sendEmail={sendEmail}
+          searchkit={this.searchkit}
+        />
         <Grid className="search-grid">
           <Cell col={3} className="search-sidebar">
             <Card className="fullwidth">
@@ -142,6 +168,7 @@ export default class LearnerSearch extends SearchkitComponent {
                     role="button"
                     id="email-selected"
                     className="mm-button"
+                    onClick={() => openEmailComposer(this.searchkit)}
                   >
                     Email Selected
                   </div>

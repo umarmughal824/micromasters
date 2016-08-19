@@ -29,6 +29,7 @@ import {
   SET_SEARCH_FILTER_VISIBILITY,
 
   SET_TOS_DIALOG_VISIBILITY,
+  SET_EMAIL_DIALOG_VISIBILITY,
 } from '../actions/ui';
 import {
   HIGH_SCHOOL,
@@ -60,6 +61,7 @@ export type UIState = {
   userMenuOpen:                 boolean;
   searchFilterVisibility:       {[s: string]: boolean};
   tosDialogVisibility:          boolean;
+  emailDialogVisibility:        boolean;
 };
 
 export const INITIAL_UI_STATE: UIState = {
@@ -86,7 +88,8 @@ export const INITIAL_UI_STATE: UIState = {
   workDialogIndex:  null,
   userMenuOpen: false,
   searchFilterVisibility: {},
-  tosDialogVisibility: false
+  tosDialogVisibility: false,
+  emailDialogVisibility: false,
 };
 
 export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
@@ -202,6 +205,11 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
   case SET_TOS_DIALOG_VISIBILITY: {
     return Object.assign({}, state, {
       tosDialogVisibility: action.payload
+    });
+  }
+  case SET_EMAIL_DIALOG_VISIBILITY: {
+    return Object.assign({}, state, {
+      emailDialogVisibility: action.payload
     });
   }
   default:

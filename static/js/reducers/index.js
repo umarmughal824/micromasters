@@ -24,6 +24,7 @@ import {
   FETCH_SUCCESS,
 } from '../actions';
 import { ui } from './ui';
+import { email } from './email';
 import type { Action } from '../flow/reduxTypes';
 import type { ProfileGetResult } from '../flow/profileTypes';
 
@@ -159,4 +160,5 @@ export default combineReducers({
   profiles,
   dashboard,
   ui,
+  email,
 });

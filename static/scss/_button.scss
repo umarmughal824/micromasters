@@ -31,3 +31,19 @@
   background-color: $mm-brand-bg;
   color: white;
 }
+
+.dialog-button {
+  width: 120px;
+
+  &.cancel-button {
+    color: white;
+    background-color: $medgrey;
+    margin: 0 5px 15px 5px;
+  }
+
+  &.save-button {
+    background-color: $dashboard-button-teal;
+    color: white;
+    margin: 0 15px 15px 5px;
+  }
+}

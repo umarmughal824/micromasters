@@ -119,3 +119,8 @@ export const SET_TOS_DIALOG_VISIBILITY = 'SET_TOS_DIALOG_VISIBILITY';
 export const setTOSDialogVisibility = (visibility: boolean): Action => (
   { type: SET_TOS_DIALOG_VISIBILITY, payload: visibility }
 );
+
+export const SET_EMAIL_DIALOG_VISIBILITY = 'SET_EMAIL_DIALOG_VISIBILITY';
+export const setEmailDialogVisibility = (visibility: boolean): Action => (
+  { type: SET_EMAIL_DIALOG_VISIBILITY, payload: visibility }
+);

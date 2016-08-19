@@ -38,18 +38,13 @@ import * as api from '../util/api';
 import { USER_PROFILE_RESPONSE, HIGH_SCHOOL, DOCTORATE } from '../constants';
 import { workEntriesByDate, educationEntriesByDate } from '../util/sorting';
 import ValidationAlert from '../components/ValidationAlert';
+import { modifyTextField } from '../util/test_utils';
 
 describe("UserPage", function() {
   this.timeout(5000);
 
   let listenForActions, renderComponent, helper, patchUserProfileStub;
   let userActions = [RECEIVE_GET_USER_PROFILE_SUCCESS, REQUEST_GET_USER_PROFILE];
-
-  let modifyTextField = (field, text) => {
-    field.value = text;
-    TestUtils.Simulate.change(field);
-    TestUtils.Simulate.keyDown(field, {key: "Enter", keyCode: 13, which: 13});
-  };
 
   let openDialog = () => {
     return [...document.getElementsByClassName('deletion-confirmation')].find(dialog => (

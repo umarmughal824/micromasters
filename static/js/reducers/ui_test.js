@@ -21,6 +21,7 @@ import {
   SET_USER_MENU_OPEN,
   SET_SEARCH_FILTER_VISIBILITY,
   SET_TOS_DIALOG_VISIBILITY,
+  SET_EMAIL_DIALOG_VISIBILITY,
 
   clearUI,
   updateDialogText,
@@ -43,6 +44,7 @@ import {
   setUserMenuOpen,
   setSearchFilterVisibility,
   setTOSDialogVisibility,
+  setEmailDialogVisibility,
 } from '../actions/ui';
 import { receiveGetUserProfileSuccess } from '../actions';
 import { INITIAL_UI_STATE } from '../reducers/ui';
@@ -325,4 +327,17 @@ describe('ui reducers', () => {
       });
     });
   });
+
+  describe('Email dialog visibility', () => {
+    [true, false].forEach(bool => {
+      it(`should let you set email dialog visibility to ${bool}`, () => {
+        return dispatchThen(setEmailDialogVisibility(bool), [
+          SET_EMAIL_DIALOG_VISIBILITY
+        ]).then(state => {
+          assert.equal(state.emailDialogVisibility, bool);
+        });
+      });
+    });
+  });
+
 });

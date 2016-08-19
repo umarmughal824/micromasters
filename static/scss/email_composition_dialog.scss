@@ -1,0 +1,25 @@
+.email-composition-dialog {
+  .email-composition-contents {
+    display: flex;
+    flex-direction: column;
+
+    .user-count {
+      padding-bottom: 20px;
+      font-style: italic;
+    }
+
+    textarea {
+      padding: 15px;
+      border-color: $border-color;
+
+      &.email-subject {
+        border-bottom: none;
+        border-radius: 5px 5px 0 0;
+      }
+
+      &.email-body {
+        border-radius: 0 0 5px 5px;
+      }
+    }
+  }
+}
