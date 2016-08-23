@@ -11,3 +11,6 @@ export const updateEmailEdit = actionCreatorGenerator(UPDATE_EMAIL_EDIT);
 
 export const CLEAR_EMAIL_EDIT = 'CLEAR_EMAIL_EDIT';
 export const clearEmailEdit = actionCreatorGenerator(CLEAR_EMAIL_EDIT);
+
+export const UPDATE_EMAIL_VALIDATION = 'UPDATE_EMAIL_VALIDATION';
+export const updateEmailValidation = actionCreatorGenerator(UPDATE_EMAIL_VALIDATION);

@@ -9,6 +9,7 @@ import type {
   ValidationErrors
 } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
+import type { Email } from '../reducers/email';
 import { filterPositiveInt } from './util';
 import {
   HIGH_SCHOOL,
@@ -170,6 +171,18 @@ export function privacyValidation(profile: Profile): ValidationErrors {
     'account_privacy': 'Privacy level is required'
   };
   return checkFieldPresence(profile, requiredFields, messages);
+}
+
+/**
+ * validate an email for presence of the 'subject' and 'body' fields
+ */
+export function emailValidation(email: Email): ValidationErrors {
+  let requiredFields = [ ['subject'], ['body'] ];
+  let messages = {
+    'subject': 'Please fill in a subject',
+    'body': 'Please fill in a body',
+  };
+  return checkFieldPresence(email, requiredFields, messages);
 }
 
 /*

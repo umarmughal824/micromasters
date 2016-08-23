@@ -12,7 +12,13 @@ import R from 'ramda';
 
 import LearnerSearch from '../components/LearnerSearch';
 import { setSearchFilterVisibility, setEmailDialogVisibility } from '../actions/ui';
-import { startEmailEdit, updateEmailEdit, clearEmailEdit } from '../actions/email';
+import {
+  startEmailEdit,
+  updateEmailEdit,
+  clearEmailEdit,
+  updateEmailValidation,
+} from '../actions/email';
+import { emailValidation } from '../util/validation';
 import type { UIState } from '../reducers/ui';
 import type { EmailEditState } from '../reducers/email';
 import { getCookie } from '../util/api';
@@ -51,23 +57,31 @@ class LearnerSearchPage extends React.Component {
   };
 
   closeEmailComposeAndSend: Function = () => {
-    const { dispatch, email } = this.props;
-    console.log(email); // eslint-disable-line no-console
-    dispatch(clearEmailEdit());
-    dispatch(setEmailDialogVisibility(false));
+    const { dispatch, email: { email } } = this.props;
+    let errors = emailValidation(email);
+    dispatch(updateEmailValidation(errors));
+    if ( R.isEmpty(errors) ) {
+      console.log(email); // eslint-disable-line no-console
+      dispatch(clearEmailEdit());
+      dispatch(setEmailDialogVisibility(false));
+    }
   };
 
   updateEmailEdit: Function = R.curry((fieldName, e) => {
-    const { email, dispatch } = this.props;
+    const { email: { email, errors }, dispatch } = this.props;
     let emailClone = R.clone(email);
     emailClone[fieldName] = e.target.value;
     dispatch(updateEmailEdit(emailClone));
+    if ( ! R.isEmpty(errors) ) {
+      let cloneErrors = emailValidation(emailClone);
+      dispatch(updateEmailValidation(cloneErrors));
+    }
   });
 
   render () {
     const {
       ui: { emailDialogVisibility },
-      email,
+      email: { email, errors }
     } = this.props;
 
     let searchKit = new SearchkitManager(SETTINGS.search_url, {
@@ -87,6 +101,7 @@ class LearnerSearchPage extends React.Component {
             updateEmailEdit={this.updateEmailEdit}
             sendEmail={this.closeEmailComposeAndSend}
             email={email}
+            errors={errors}
           />
         </SearchkitProvider>
       </div>

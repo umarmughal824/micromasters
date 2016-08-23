@@ -15,6 +15,7 @@ import {
   validateYear,
   combineValidators,
   sanitizeDate,
+  emailValidation,
 } from './validation';
 import {
   USER_PROFILE_RESPONSE,
@@ -483,5 +484,37 @@ describe('Profile validation functions', () => {
       assert(mergeStub.calledWith({}, "ret1", "ret2"));
       assert.equal(result, mergeResult);
     });
+  });
+});
+
+describe("email validation", () => {
+  let email = {
+    subject: 'a great email',
+    body: 'hi, how are you?'
+  };
+
+  let blank = field => {
+    let emailClone = _.cloneDeep(email);
+    emailClone[field] = null;
+    return emailClone;
+  };
+
+  it('should require a subject', () => {
+    assert.deepEqual(
+      emailValidation(blank('subject')),
+      { 'subject': 'Please fill in a subject' }
+    );
+  });
+
+  it('should require a body', () => {
+    assert.deepEqual(
+      emailValidation(blank('body')),
+      { 'body': 'Please fill in a body' }
+    );
+  });
+
+  it('should return no errors if all fields are filled out', () => {
+    let errors = emailValidation(email);
+    assert.deepEqual(errors, {});
   });
 });

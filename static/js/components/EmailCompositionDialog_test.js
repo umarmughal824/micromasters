@@ -5,6 +5,7 @@ import sinon from 'sinon';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import R from 'ramda';
+import TestUtils from 'react-addons-test-utils';
 
 import { NEW_EMAIL_EDIT } from '../reducers/email';
 import { modifyTextField } from '../util/test_utils';
@@ -19,10 +20,14 @@ describe('EmailCompositionDialog', () => {
     updateEmailEdit: sinon.stub().returns(updateStub),
     open: true,
     email: Object.assign({}, NEW_EMAIL_EDIT),
+    errors: {},
     searchkit: {
       getHitsCount: sinon.stub().returns(20)
-    }
+    },
+    sendEmail: sinon.stub(),
   };
+
+  const getDialog = () => document.querySelector('.email-composition-dialog');
 
   const renderDialog = (props = defaultProps) => (
     mount (
@@ -47,6 +52,12 @@ describe('EmailCompositionDialog', () => {
     );
   });
 
+  it('should fire sendEmail when the "send" button is clicked', () => {
+    renderDialog();
+    TestUtils.Simulate.click(getDialog().querySelector('.save-button'));
+    assert(defaultProps.sendEmail.called, "called sendEmail method");
+  });
+
   ['subject', 'body'].forEach(field => {
     describe(`editing ${field}`, () => {
       let getField = () => document.querySelector(`.email-${field}`);
@@ -69,6 +80,15 @@ describe('EmailCompositionDialog', () => {
         let field = getField();
         modifyTextField(field, "HI");
         assert(updateStub.called, "onChange callback was called");
+      });
+
+      it('should show an error if an error for the field is passed in', () => {
+        let errorProps = R.clone(defaultProps);
+        let errorMessage = `An error message for ${field}`;
+        errorProps.errors[field] = errorMessage;
+        renderDialog(errorProps);
+        let message = getDialog().querySelector('.validation-error').textContent;
+        assert.equal(message, errorMessage);
       });
     });
   });
