@@ -157,15 +157,6 @@ export default class LearnerSearch extends SearchkitComponent {
                 <Cell col={6} className="result-info">
                   <div
                     role="button"
-                    id="new-group"
-                    className="mm-button"
-                  >
-                    <span>
-                      New Group from Selected
-                    </span>
-                  </div>
-                  <div
-                    role="button"
                     id="email-selected"
                     className="mm-button"
                     onClick={() => openEmailComposer(this.searchkit)}
