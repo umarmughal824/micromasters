@@ -71,6 +71,7 @@ celery:
     BROKER_URL: redis://redis:6379/4
     CELERY_RESULT_BACKEND: redis://redis:6379/4
     ELASTICSEARCH_URL: elastic:9200
+  env_file: .env
   links:
     - db
     - elastic
