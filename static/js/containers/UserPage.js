@@ -4,7 +4,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Loader from 'react-loader';
 
-import { FETCH_PROCESSING, clearProfile } from '../actions';
+import { FETCH_PROCESSING } from '../actions';
+import { clearProfile } from '../actions/profile';
 import ProfileFormContainer from './ProfileFormContainer';
 import ErrorMessage from '../components/ErrorMessage';
 

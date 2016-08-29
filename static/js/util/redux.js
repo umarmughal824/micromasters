@@ -6,6 +6,10 @@ import type {
 } from '../flow/reduxTypes';
 import type { Dispatch } from 'redux';
 
+/**
+* takes an actionCreator and dispatch and returns a function that
+* dispatches the action created by that actionCreator to the store
+*/
 export function createActionHelper(dispatch: Dispatch, actionCreator: Function): (...args: any) => void {
   return (...args) => dispatch(actionCreator(...args));
 }

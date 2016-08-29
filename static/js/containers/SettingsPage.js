@@ -6,10 +6,8 @@ import Loader from 'react-loader';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 
 import Jumbotron from '../components/Jumbotron';
-import {
-  startProfileEdit,
-  FETCH_PROCESSING,
-} from '../actions/index';
+import { startProfileEdit } from '../actions/profile';
+import { FETCH_PROCESSING } from '../actions/index';
 import ProfileFormContainer from './ProfileFormContainer';
 import PrivacyForm from '../components/PrivacyForm';
 import ProfileProgressControls from '../components/ProfileProgressControls';

@@ -19,7 +19,8 @@ import {
   REQUEST_PATCH_USER_PROFILE,
   RECEIVE_PATCH_USER_PROFILE_SUCCESS,
   RECEIVE_PATCH_USER_PROFILE_FAILURE,
-
+} from '../actions/profile';
+import {
   fetchDashboard,
   clearDashboard,
   REQUEST_DASHBOARD,

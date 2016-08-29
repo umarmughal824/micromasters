@@ -13,9 +13,11 @@ import {
 import {
   REQUEST_DASHBOARD,
   RECEIVE_DASHBOARD_SUCCESS,
+} from '../actions';
+import {
   REQUEST_GET_USER_PROFILE,
   RECEIVE_GET_USER_PROFILE_SUCCESS,
-} from '../actions';
+} from '../actions/profile';
 import {
   REQUEST_GET_PROGRAM_ENROLLMENTS,
   RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,

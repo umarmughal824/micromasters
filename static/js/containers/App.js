@@ -8,13 +8,15 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import {
   FETCH_SUCCESS,
-  fetchUserProfile,
-  clearProfile,
   fetchDashboard,
   clearDashboard,
+} from '../actions';
+import {
+  fetchUserProfile,
+  clearProfile,
   startProfileEdit,
   updateProfileValidation,
-} from '../actions/index';
+} from '../actions/profile';
 import {
   clearEnrollments,
   fetchProgramEnrollments,

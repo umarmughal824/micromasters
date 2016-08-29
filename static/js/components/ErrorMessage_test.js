@@ -6,17 +6,19 @@ import _ from 'lodash';
 
 import {
   RECEIVE_DASHBOARD_FAILURE,
+  RECEIVE_DASHBOARD_SUCCESS,
+} from '../actions';
+import { SET_USER_PAGE_DIALOG_VISIBILITY } from '../actions/ui';
+import {
   RECEIVE_GET_USER_PROFILE_SUCCESS,
   REQUEST_GET_USER_PROFILE,
-  RECEIVE_DASHBOARD_SUCCESS,
   RECEIVE_GET_USER_PROFILE_FAILURE,
-  SET_USER_PAGE_DIALOG_VISIBILITY,
   START_PROFILE_EDIT,
   UPDATE_PROFILE_VALIDATION,
   REQUEST_PATCH_USER_PROFILE,
   RECEIVE_PATCH_USER_PROFILE_FAILURE,
   CLEAR_PROFILE_EDIT,
-} from '../actions';
+} from '../actions/profile';
 import { RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS } from '../actions/enrollments';
 import {
   DASHBOARD_RESPONSE,
@@ -28,7 +30,7 @@ import { makeStrippedHtml } from '../util/util';
 import * as api from '../util/api';
 import ErrorMessage from './ErrorMessage';
 
-describe("ErrorInfo", () => {
+describe("ErrorMessage", () => {
   let errorString = `Sorry, we were unable to load the data necessary
       to process your request. Please reload the page.`;
   errorString = errorString.replace(/\s\s+/g, ' ');

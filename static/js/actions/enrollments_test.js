@@ -1,6 +1,4 @@
 // @flow
-import { assert } from 'chai';
-
 import {
   requestGetProgramEnrollments,
   receiveGetProgramEnrollmentsSuccess,
@@ -18,19 +16,10 @@ import {
   RECEIVE_ADD_PROGRAM_ENROLLMENT_FAILURE,
   CLEAR_ENROLLMENTS,
 } from './enrollments';
+import { assertCreatedActionHelper } from './util';
 
 describe('enrollment actions', () => {
-  describe('enrollment action helpers', () => {
-    const assertCreatedActionHelper = ([actionHelper, actionType]) => {
-      it(`should create the ${actionType} simple action helper correctly`, () => {
-        assert.deepEqual(actionHelper(), {type: actionType});
-      });
-
-      it(`should create the ${actionType} action helper with args correctly`, () => {
-        assert.deepEqual(actionHelper({foo: "bar"}), { type: actionType, payload: { foo: "bar" } });
-      });
-    };
-
+  it('should create all action creators', () => {
     [
       [requestGetProgramEnrollments, REQUEST_GET_PROGRAM_ENROLLMENTS],
       [receiveGetProgramEnrollmentsSuccess, RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS],

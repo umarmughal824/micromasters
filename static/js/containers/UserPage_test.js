@@ -17,7 +17,7 @@ import {
 
   startProfileEdit,
   updateProfile,
-} from '../actions';
+} from '../actions/profile';
 import {
   SET_WORK_DIALOG_VISIBILITY,
   SET_WORK_DIALOG_INDEX,

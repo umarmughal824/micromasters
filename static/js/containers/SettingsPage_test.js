@@ -11,7 +11,7 @@ import {
   CLEAR_PROFILE_EDIT,
 
   receiveGetUserProfileSuccess
-} from '../actions';
+} from '../actions/profile';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../util/api';
 import { USER_PROFILE_RESPONSE } from '../constants';

@@ -1,6 +1,6 @@
 // @flow
 /* global SETTINGS: false */
-import { RECEIVE_GET_USER_PROFILE_SUCCESS } from '../actions';
+import { RECEIVE_GET_USER_PROFILE_SUCCESS } from '../actions/profile';
 import {
   CLEAR_UI,
   UPDATE_DIALOG_TEXT,

@@ -46,7 +46,7 @@ import {
   setTOSDialogVisibility,
   setEmailDialogVisibility,
 } from '../actions/ui';
-import { receiveGetUserProfileSuccess } from '../actions';
+import { receiveGetUserProfileSuccess } from '../actions/profile';
 import { INITIAL_UI_STATE } from '../reducers/ui';
 import {
   HIGH_SCHOOL,

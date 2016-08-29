@@ -11,7 +11,7 @@ import {
   clearProfileEdit,
   fetchUserProfile,
   saveProfile,
-} from '../actions';
+} from '../actions/profile';
 import {
   setWorkHistoryEdit,
   setWorkDialogVisibility,

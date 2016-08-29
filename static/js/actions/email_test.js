@@ -1,6 +1,4 @@
 // @flow
-import { assert } from 'chai';
-
 import {
   startEmailEdit,
   updateEmailEdit,
@@ -12,19 +10,10 @@ import {
   CLEAR_EMAIL_EDIT,
   UPDATE_EMAIL_VALIDATION,
 } from './email';
+import { assertCreatedActionHelper } from './util';
 
-describe('email actions', () => {
-  describe('email action helpers', () => {
-    const assertCreatedActionHelper = ([actionHelper, actionType]) => {
-      it(`should create the ${actionType} simple action helper correctly`, () => {
-        assert.deepEqual(actionHelper(), {type: actionType});
-      });
-
-      it(`should create the ${actionType} action helper with args correctly`, () => {
-        assert.deepEqual(actionHelper({foo: "bar"}), { type: actionType, payload: { foo: "bar" } });
-      });
-    };
-
+describe('generated email action helpers', () => {
+  it('should create all action creators', () => {
     [
       [startEmailEdit, START_EMAIL_EDIT],
       [updateEmailEdit, UPDATE_EMAIL_EDIT],

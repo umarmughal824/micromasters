@@ -5,12 +5,12 @@ import ReactDOM from 'react-dom';
 import { assert } from 'chai';
 import _ from 'lodash';
 
+import { CLEAR_DASHBOARD } from '../actions';
 import {
-  CLEAR_DASHBOARD,
   CLEAR_PROFILE,
   START_PROFILE_EDIT,
   UPDATE_PROFILE_VALIDATION,
-} from '../actions';
+} from '../actions/profile';
 import {
   CLEAR_ENROLLMENTS,
 } from '../actions/enrollments';

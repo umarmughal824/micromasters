@@ -12,7 +12,7 @@ import {
   CLEAR_PROFILE_EDIT,
 
   receiveGetUserProfileSuccess,
-} from '../actions';
+} from '../actions/profile';
 import {
   SET_SHOW_WORK_DELETE_ALL_DIALOG,
   SET_EDUCATION_DEGREE_LEVEL,

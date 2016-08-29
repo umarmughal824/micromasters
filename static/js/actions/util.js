@@ -1,4 +1,8 @@
 // @flow
-export const actionCreatorGenerator = (type: string) => (
-  (args: any) => args === undefined ? { type: type } : { type: type, payload: args }
-);
+import { assert } from 'chai';
+
+type ActionHelperManifest = [Function, string];
+export const assertCreatedActionHelper = ([actionHelper, actionType]: ActionHelperManifest) => {
+  assert.deepEqual(actionHelper(), {type: actionType});
+  assert.deepEqual(actionHelper({foo: "bar"}), { type: actionType, payload: { foo: "bar" } });
+};
