@@ -135,6 +135,20 @@ def standard_error_page(request, status_code, template_filename):
     return response
 
 
+def terms_of_service(request):
+    """
+    Handles the terms of service page
+    """
+    return render(
+        request,
+        "terms_of_service.html",
+        context={
+            "style_src": get_bundle_url(request, "style.js"),
+            "js_settings_json": "{}",
+        }
+    )
+
+
 def page_404(request):
     """
     Overridden handler for the 404 error pages.

@@ -21,7 +21,7 @@ from profiles.api import get_social_username
 from profiles.factories import ProfileFactory
 from roles.models import Role
 from search.base import ESTestCase
-from ui.urls import DASHBOARD_URL
+from ui.urls import DASHBOARD_URL, TERMS_OF_SERVICE_URL
 
 
 class ViewsTests(ESTestCase):
@@ -473,3 +473,17 @@ class TestUsersPage(ViewsTests):
         """
         resp = self.client.get(reverse('ui-users'))
         assert resp.status_code == 404
+
+
+class TestTermsOfService(ViewsTests):
+    """
+    tests for the ToS page
+    """
+
+    def test_tos_settings(self):
+        """
+        test the settings we pass to the ToS page
+        """
+        response = self.client.get(TERMS_OF_SERVICE_URL)
+        js_settings = json.loads(response.context['js_settings_json'])
+        assert js_settings == {}
