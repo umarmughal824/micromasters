@@ -20,13 +20,14 @@ export default class LearnerResult extends React.Component {
     const { result: { _source: { profile, program } } } = this.props;
     return (
       <Grid className="search-grid learner-result">
-        <Cell col={2}>
+        <Cell col={1}>
           <ProfileImage profile={profile} />
         </Cell>
-        <Cell col={2} className="learner-name centered">
+        <Cell col={3} className="learner-name centered">
           <span>
             { getPreferredName(profile) }
           </span>
+          <UserChip profile={profile} />
         </Cell>
         <Cell col={2} className="centered">
           <span>
@@ -40,7 +41,6 @@ export default class LearnerResult extends React.Component {
           <span className="hint">Program Avg. Grade</span>
         </Cell>
         <Cell col={4} />
-        <UserChip profile={profile} />
       </Grid>
     );
   }

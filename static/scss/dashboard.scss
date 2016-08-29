@@ -10,8 +10,6 @@ c.validation-wrapper {
   font-size: smaller;
 }
 .page-content {
-  background-color: $page-background;
-
 
   .jumbotron img {
      margin-left: 50px;
@@ -78,20 +76,10 @@ c.validation-wrapper {
 .dashboard {
   .card-image {
     height: auto;
-    width: 125px;
+    width: 112px;
     border-radius: 50%;
-  }
-
-  .mdl-card {
-    padding: 20px;
-    margin: 25px 0;
-    min-height: 150px;
-    width: 100%;
-
-    .mdl-card__title-text {
-      font-weight: 500;
-      font-size: 15pt;
-    }
+    border: 1px solid #eee;
+    border-color: rgba(0,0,0,.15);
   }
 
   .dashboard-user-card {
@@ -109,11 +97,18 @@ c.validation-wrapper {
       }
 
       .mdl-card__supporting-text {
+        padding: 0 0 16px 16px;
         color: $medgrey;
       }
 
       .mdl-card__title {
         padding-bottom: 0 !important;
+        padding: 10px 0 0 16px;
+
+        .mdl-card__title-text {
+          font-size: 22px;
+          font-weight: 400;
+        }
       }
     }
   }
@@ -183,10 +178,11 @@ c.validation-wrapper {
           }
 
           .dashboard-button {
-            background-color: $dashboard-button-teal;
+            background-color: $mm-brand-bg;
             color: white;
             box-shadow: none;
             text-decoration: none;
+            border-radius: 2px;
 
             &[disabled] {
               background-color: adjust-color($dashboard-button-teal, $alpha: -0.5);
@@ -348,9 +344,9 @@ c.validation-wrapper {
 }
 
 .profile-radio-group-label {
-  color: grey;
-  font-weight: 700;
-  font-size: 9pt;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.498039);
+  margin-bottom: 10px;
 }
 
 .radio-label {
@@ -416,6 +412,7 @@ c.validation-wrapper {
   .profile-radio-button {
     width: unset !important;
     display: inline-block !important;
+    margin-right: 8px;
     label {
       width: unset !important;
     }

@@ -68,14 +68,14 @@ export default class ProgressWidget extends React.Component {
       <Card className="progress-widget" shadow={0}>
         <CardTitle className="progress-title">Progress</CardTitle>
         <div className="circular-progress-widget">
-          {this.circularProgressWidget(80, 9, actual, total)}
+          {this.circularProgressWidget(63, 7, actual, total)}
         </div>
         <p className="text-course-complete">Courses complete</p>
         <p className="heading-paragraph">
           On completion, you can apply for <br/>
           the Masters Degree Program</p>
         <div className="apply-master-btn">
-           <Button disabled className="mm-button-action progress-button">
+           <Button disabled className="progress-button">
              Apply for Masters
            </Button>
         </div>
