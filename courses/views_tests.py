@@ -1,8 +1,15 @@
 """Tests for the API"""
 # pylint: disable=no-self-use
-from django.core.urlresolvers import reverse
+from collections import OrderedDict
 
-from .factories import ProgramFactory, CourseFactory
+from django.core.urlresolvers import reverse
+from rest_framework import status
+from rest_framework.test import APITestCase
+
+from courses.factories import ProgramFactory, CourseFactory
+from courses.serializers import ProgramSerializer
+from dashboard.factories import ProgramEnrollmentFactory
+from profiles.factories import UserFactory
 from search.base import ESTestCase
 
 
@@ -48,3 +55,49 @@ class CourseTests(ESTestCase):
         resp = self.client.get(reverse('course-list'))
 
         assert len(resp.json) == 0
+
+
+class ProgramEnrollmentTests(ESTestCase, APITestCase):
+    """Tests for the ProgramEnrollment API"""
+
+    @classmethod
+    def setUpTestData(cls):
+        super(ProgramEnrollmentTests, cls).setUpTestData()
+
+        cls.user1 = UserFactory.create()
+        cls.user2 = UserFactory.create()
+        cls.program1 = ProgramFactory.create(live=True)
+        cls.program2 = ProgramFactory.create(live=True)
+        cls.program3 = ProgramFactory.create(live=True)
+        for program in (cls.program1, cls.program2,):
+            ProgramEnrollmentFactory(
+                user=cls.user1,
+                program=program,
+            )
+        cls.url = reverse('user_program_enrollment')
+
+    def test_anonymous(self):
+        """Anonymous user cannot access the endpoint"""
+        resp = self.client.get(self.url)
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_no_enrollments(self):
+        """Requests for a user with no program enrollments result in an empty list"""
+        self.client.force_login(self.user2)
+        resp = self.client.get(self.url)
+        assert resp.status_code == status.HTTP_200_OK
+        assert resp.data == []
+
+    def test_enrollments(self):
+        """Only the programs where the user is enrolled in are returned"""
+        self.client.force_login(self.user1)
+        resp = self.client.get(self.url)
+        assert resp.status_code == status.HTTP_200_OK
+        expected_data = sorted(
+            [
+             OrderedDict(sorted(program.data.items(), key=lambda t: t[0]))
+             for program in (ProgramSerializer(self.program1), ProgramSerializer(self.program2),)
+            ],
+            key=lambda x: x['title'],
+        )
+        assert resp.data == expected_data
