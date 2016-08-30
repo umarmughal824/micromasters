@@ -52,7 +52,7 @@ export const addProgramEnrollment = (programId: number): Dispatcher<ProgramEnrol
       catch(error => {
         dispatch(receiveAddProgramEnrollmentFailure(error));
         dispatch(setEnrollMessage(`There was an error during enrollment`));
-        // the exception is assumed handled and will not be propagated
+        return Promise.reject(error);
       });
   };
 };

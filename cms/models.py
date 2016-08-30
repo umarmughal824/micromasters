@@ -13,9 +13,15 @@ from wagtail.wagtailadmin.edit_handlers import FieldPanel, InlinePanel, MultiFie
 
 
 from courses.models import Program
+from courses.serializers import ProgramSerializer
 from micromasters.utils import webpack_dev_server_host
 from profiles.api import get_social_username
 from ui.views import get_bundle_url
+
+
+def programs_for_sign_up(programs):
+    """formats program info for the signup dialogs"""
+    return [ProgramSerializer().to_representation(p) for p in programs]
 
 
 class HomePage(Page):
@@ -33,18 +39,21 @@ class HomePage(Page):
     ]
 
     def get_context(self, request):
+        programs = Program.objects.filter(live=True)
         js_settings = {
             "gaTrackingID": settings.GA_TRACKING_ID,
-            "host": webpack_dev_server_host(request)
+            "host": webpack_dev_server_host(request),
+            "programs": programs_for_sign_up(programs),
         }
 
         username = get_social_username(request.user)
         context = super(HomePage, self).get_context(request)
 
-        context["programs"] = Program.objects.filter(live=True)
+        context["programs"] = programs
         context["style_src"] = get_bundle_url(request, "style.js")
         context["public_src"] = get_bundle_url(request, "public.js")
         context["style_public_src"] = get_bundle_url(request, "style_public.js")
+        context["signup_dialog_src"] = get_bundle_url(request, "signup_dialog.js")
         context["authenticated"] = not request.user.is_anonymous()
         context["username"] = username
         context["js_settings_json"] = json.dumps(js_settings)
@@ -95,9 +104,12 @@ class ProgramPage(Page):
     ]
 
     def get_context(self, request):
+        programs = Program.objects.filter(live=True)
         js_settings = {
             "gaTrackingID": settings.GA_TRACKING_ID,
-            "host": webpack_dev_server_host(request)
+            "host": webpack_dev_server_host(request),
+            "programId": self.program.id,
+            "programs": programs_for_sign_up(programs),
         }
         username = get_social_username(request.user)
         context = super(ProgramPage, self).get_context(request)
@@ -106,6 +118,7 @@ class ProgramPage(Page):
         context["public_src"] = get_bundle_url(request, "public.js")
         context["style_public_src"] = get_bundle_url(request, "style_public.js")
         context["authenticated"] = not request.user.is_anonymous()
+        context["signup_dialog_src"] = get_bundle_url(request, "signup_dialog.js")
         context["username"] = username
         context["js_settings_json"] = json.dumps(js_settings)
         context["title"] = self.title

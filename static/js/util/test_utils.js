@@ -1,5 +1,6 @@
 import TestUtils from 'react-addons-test-utils';
 import { assert } from 'chai';
+import sinon from 'sinon';
 
 export const modifyTextField = (field, text) => {
   field.value = text;
@@ -34,3 +35,43 @@ export const activeDeleteDialog = () => (
 export const noActiveDeleteDialogs = () => (
   noActiveDialogs('deletion-confirmation')
 );
+
+export const localStorageMock = (init = {}) => {
+  let storage = init;
+
+  const sandbox = sinon.sandbox.create();
+
+  const getItem = sandbox.spy(key => storage[key] || null);
+
+  const setItem = sandbox.spy((key, value) => {
+    storage[key] = value || "";
+  });
+
+  const removeItem = sandbox.spy(key => {
+    delete storage[key];
+  });
+
+  const reset = () => {
+    sandbox.reset();
+    storage = {};
+  };
+
+  return {
+    getItem: getItem,
+    setItem: setItem,
+    removeItem: removeItem,
+    reset: reset,
+  };
+};
+
+export const findReact = (dom) => {
+  for (let [key, val] of Object.entries(dom)) {
+    if (key.startsWith("__reactInternalInstance$")) {
+      let compInternals = val._currentElement;
+      let compWrapper = compInternals._owner;
+      let comp = compWrapper._instance;
+      return comp;
+    }
+  }
+  return null;
+};

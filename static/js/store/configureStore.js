@@ -3,30 +3,59 @@
 import { compose, createStore, applyMiddleware } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 import createLogger from 'redux-logger';
-import persistState from 'redux-localstorage';
-import rootReducer from '../reducers';
+import persistState, { mergePersistedState }  from 'redux-localstorage';
+import filter from 'redux-localstorage-filter';
+import adapter from 'redux-localstorage/lib/adapters/localStorage';
+import configureTestStore from 'redux-asserts';
+import { combineReducers } from 'redux';
+import type { Reducer } from 'redux';
 
-let createStoreWithMiddleware;
-if (process.env.NODE_ENV !== "production") {
-  createStoreWithMiddleware = compose(
-    applyMiddleware(
-      thunkMiddleware,
-      createLogger()
-    ),
-    persistState("currentProgramEnrollment"),
-    window.devToolsExtension ? window.devToolsExtension() : f => f
-  )(createStore);
-} else {
-  createStoreWithMiddleware = compose(
-    applyMiddleware(
-      thunkMiddleware
-    ),
-    persistState("currentProgramEnrollment")
-  )(createStore);
-}
+import rootReducer from '../reducers';
+import {
+  signupDialog,
+  INITIAL_SIGNUP_STATE
+} from '../reducers/signup_dialog';
+
+const notProd = () => process.env.NODE_ENV !== "production";
+
+const middleware = () =>  {
+  let ware = [ thunkMiddleware ];
+  if ( notProd() ) {
+    ware.push(createLogger());
+  }
+  return applyMiddleware(...ware);
+};
+
+const devTools = () => (
+  notProd() && window.devToolsExtension ? window.devToolsExtension() : f => f
+);
+
+const storage = paths => (
+  compose(filter(paths))(adapter(window.localStorage))
+);
+
+const createPersistentStore = persistence => compose(
+  persistence,
+  middleware(),
+  devTools()
+)(createStore);
+
+const createPersistentTestStore = persistence => compose(
+  persistence,
+)(configureTestStore);
 
 export default function configureStore(initialState: ?Object) {
-  const store = createStoreWithMiddleware(rootReducer, initialState);
+  const persistence = persistState(
+    storage([ 'currentProgramEnrollment', 'signupDialog' ]), 'redux'
+  );
+
+  const reducer = compose(
+    mergePersistedState()
+  )(rootReducer);
+
+  const store = createPersistentStore(persistence)(
+    reducer, initialState
+  );
 
   if (module.hot) {
     // Enable Webpack hot module replacement for reducers
@@ -39,3 +68,33 @@ export default function configureStore(initialState: ?Object) {
 
   return store;
 }
+
+export const configureMainTestStore = (reducer: Reducer<*>) => {
+  const persistence = persistState(
+    storage([ 'currentProgramEnrollment', 'signupDialog' ]), 'redux'
+  );
+
+  return createPersistentTestStore(persistence)(
+    reducer
+  );
+};
+
+export const signupDialogStore = (test: boolean = false) => {
+  const persistence = persistState(
+    storage([ 'signupDialog' ]), 'redux'
+  );
+
+  const reducer = compose(
+    mergePersistedState()
+  )(combineReducers({ signupDialog }));
+
+  if ( test ) {
+    return createPersistentTestStore(persistence)(
+      reducer, { signupDialog: INITIAL_SIGNUP_STATE }
+    );
+  } else {
+    return createPersistentStore(persistence)(
+      reducer, { signupDialog: INITIAL_SIGNUP_STATE }
+    );
+  }
+};
