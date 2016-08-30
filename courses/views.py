@@ -29,7 +29,7 @@ class ProgramEnrollmentListView(ListAPIView):
 
     def get_queryset(self):
         """
-        Filter coursed by repository
+        Filter programs by the user enrollment
         """
         queryset = Program.objects.filter(programenrollment__user=self.request.user)
         return queryset.order_by('title')
