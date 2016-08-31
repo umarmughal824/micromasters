@@ -4,6 +4,7 @@ from rest_framework import (
     viewsets,
     status,
 )
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.exceptions import (
     APIException,
     NotFound,
@@ -12,7 +13,6 @@ from rest_framework.exceptions import (
 from rest_framework.generics import ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
 
 from courses.models import (
     CourseRun,
@@ -47,6 +47,9 @@ class ProgramEnrollmentListView(ListCreateAPIView):
     """API for the User Program Enrollments"""
 
     serializer_class = ProgramSerializer
+    authentication_classes = (
+        SessionAuthentication,
+    )
     permission_classes = (
         IsAuthenticated,
     )
@@ -70,14 +73,17 @@ class ProgramEnrollmentListView(ListCreateAPIView):
         if ProgramEnrollment.objects.filter(user=request.user, program__pk=program_id).exists():
             raise ResourceConflict('The enrollment for the specified program already exists')
 
-        program_queryset = Program.objects.filter(live=True, pk=program_id)
-        if not program_queryset.exists():
+        try:
+            program = Program.objects.get(live=True, pk=program_id)
+        except Program.DoesNotExist:
             raise NotFound('The specified program has not been found or it is not live yet')
 
-        program = program_queryset.first()
         ProgramEnrollment.objects.create(
             user=request.user,
             program=program,
         )
         serializer = self.get_serializer_class()
-        return Response(serializer(program).data)
+        return Response(
+            status=status.HTTP_201_CREATED,
+            data=serializer(program).data
+        )
