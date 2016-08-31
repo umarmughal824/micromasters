@@ -3,7 +3,7 @@ Celery tasks for search
 """
 
 from micromasters.celery import async
-from search.api import (
+from search.indexing_api import (
     index_program_enrolled_users as _index_program_enrolled_users,
     remove_program_enrolled_user as _remove_program_enrolled_user,
     index_users as _index_users,

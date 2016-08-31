@@ -281,6 +281,11 @@ EMAIL_HOST_PASSWORD = get_var('MICROMASTERS_EMAIL_PASSWORD', '')
 EMAIL_USE_TLS = get_var('MICROMASTERS_EMAIL_TLS', False)
 EMAIL_SUPPORT = get_var('MICROMASTERS_SUPPORT_EMAIL', 'support@example.com')
 DEFAULT_FROM_EMAIL = get_var('MICROMASTERS_FROM_EMAIL', 'webmaster@localhost')
+MAILGUN_URL = get_var('MAILGUN_URL', 'https://api.mailgun.net/v3/micromasters.mit.edu')
+MAILGUN_KEY = get_var('MAILGUN_KEY', None)
+MAILGUN_RECIPIENT_OVERRIDE = get_var('MAILGUN_RECIPIENT_OVERRIDE', None)
+MAILGUN_FROM_EMAIL = get_var('MAILGUN_FROM_EMAIL', 'no-reply@micromasters.mit.edu')
+MAILGUN_BCC_TO_EMAIL = get_var('MAILGUN_BCC_TO_EMAIL', 'no-reply@micromasters.mit.edu')
 
 # e-mail configurable admins
 ADMIN_EMAIL = get_var('MICROMASTERS_ADMIN_EMAIL', '')
