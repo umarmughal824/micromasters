@@ -17,6 +17,7 @@ from dashboard.views import UserDashboard
 from ecommerce.views import CheckoutView
 from profiles.views import ProfileViewSet
 from search.views import ElasticProxyView
+from mail.views import MailView
 
 router = routers.DefaultRouter()
 router.register(r'programs', ProgramViewSet)
@@ -32,8 +33,8 @@ urlpatterns = [
     url(r'^api/v0/search/(?P<elastic_url>.*)', ElasticProxyView.as_view(), name='search_api'),
     url(r'^api/v0/checkout/$', CheckoutView.as_view(), name='checkout'),
     url(r'^api/v0/enrolledprograms/$', ProgramEnrollmentListView.as_view(), name='user_program_enrollments'),
+    url(r'^api/v0/mail/$', MailView.as_view(), name='mail_api'),
     url(r'^status/', include('server_status.urls')),
-
     # Wagtail
     url(r'^cms/', include(wagtailadmin_urls)),
     url(r'^documents/', include(wagtaildocs_urls)),

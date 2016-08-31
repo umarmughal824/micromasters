@@ -26,6 +26,7 @@ FAKE = faker.Factory.create()
 class UserFactory(DjangoModelFactory):
     """Factory for Users"""
     username = Sequence(lambda n: "user_%d" % n)
+    email = FuzzyText(suffix='@example.com')
 
     class Meta:  # pylint: disable=missing-docstring,no-init,too-few-public-methods,old-style-class
         model = User

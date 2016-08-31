@@ -11,7 +11,7 @@ from roles.models import Role
 from roles.roles import Staff
 from micromasters.utils import load_json_from_file
 from backends.edxorg import EdxOrgOAuth2
-from search.api import recreate_index
+from search.indexing_api import recreate_index
 
 
 USER_DATA_PATH = 'profiles/management/realistic_user_data.json'

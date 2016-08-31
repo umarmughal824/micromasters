@@ -60,8 +60,9 @@ docs/_build/
 # PyBuilder
 target/
 
-#Ipython Notebook
+#Ipython/Jupyter Notebook
 .ipynb_checkpoints
+*.ipynb
 
 # Heroku/Foreman
 .env
