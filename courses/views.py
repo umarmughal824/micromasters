@@ -59,7 +59,7 @@ class ProgramEnrollmentListView(ListCreateAPIView):
         return queryset.order_by('title')
 
     @transaction.atomic
-    def create(self, request, *args, **kwargs):  # noqa pylint: disable=unused-argument
+    def create(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """
         Create an enrollment for the current user
         """
