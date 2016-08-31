@@ -31,7 +31,7 @@ urlpatterns = [
     url(r'^api/v0/dashboard/$', UserDashboard.as_view(), name='dashboard_api'),
     url(r'^api/v0/search/(?P<elastic_url>.*)', ElasticProxyView.as_view(), name='search_api'),
     url(r'^api/v0/checkout/$', CheckoutView.as_view(), name='checkout'),
-    url(r'^api/v0/enrolledprogram/$', ProgramEnrollmentListView.as_view(), name='user_program_enrollment'),
+    url(r'^api/v0/enrolledprograms/$', ProgramEnrollmentListView.as_view(), name='user_program_enrollments'),
     url(r'^status/', include('server_status.urls')),
 
     # Wagtail
