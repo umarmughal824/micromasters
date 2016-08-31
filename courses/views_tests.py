@@ -95,8 +95,8 @@ class ProgramEnrollmentTests(ESTestCase, APITestCase):
         assert resp.status_code == status.HTTP_200_OK
         expected_data = sorted(
             [
-             OrderedDict(sorted(program.data.items(), key=lambda t: t[0]))
-             for program in (ProgramSerializer(self.program1), ProgramSerializer(self.program2),)
+                OrderedDict(sorted(program.data.items(), key=lambda t: t[0]))
+                for program in (ProgramSerializer(self.program1), ProgramSerializer(self.program2),)
             ],
             key=lambda x: x['title'],
         )
