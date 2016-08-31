@@ -26,6 +26,7 @@ from dashboard.models import ProgramEnrollment
 
 
 class ResourceConflict(APIException):
+    """Custom exception for Conflict Status Code"""
     status_code = status.HTTP_409_CONFLICT
     default_detail = 'The resource already exists.'
 

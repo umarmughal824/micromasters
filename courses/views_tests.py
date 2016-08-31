@@ -1,18 +1,15 @@
 """Tests for the API"""
 # pylint: disable=no-self-use
-from collections import OrderedDict
 
 from django.core.urlresolvers import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from courses.factories import ProgramFactory, CourseFactory
-from courses.serializers import ProgramSerializer
 from dashboard.factories import ProgramEnrollmentFactory
 from dashboard.models import ProgramEnrollment
 from profiles.factories import UserFactory
 from search.base import ESTestCase
-from rest_framework.status import HTTP_409_CONFLICT
 
 
 class ProgramTests(ESTestCase):
