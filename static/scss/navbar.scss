@@ -17,6 +17,11 @@
 .micromasters-nav {
   box-shadow: none !important;
 
+  a.micromasters-title {
+    text-decoration: none;
+    color: white;
+  }
+
   .micromasters-title {
     display: flex;
     flex-direction: row;
