@@ -8,7 +8,11 @@ from wagtail.wagtailadmin import urls as wagtailadmin_urls
 from wagtail.wagtaildocs import urls as wagtaildocs_urls
 from wagtail.wagtailcore import urls as wagtail_urls
 
-from courses.views import ProgramViewSet, CourseRunViewSet
+from courses.views import (
+    CourseRunViewSet,
+    ProgramEnrollmentListView,
+    ProgramViewSet,
+)
 from dashboard.views import UserDashboard
 from ecommerce.views import CheckoutView
 from profiles.views import ProfileViewSet
@@ -27,6 +31,7 @@ urlpatterns = [
     url(r'^api/v0/dashboard/$', UserDashboard.as_view(), name='dashboard_api'),
     url(r'^api/v0/search/(?P<elastic_url>.*)', ElasticProxyView.as_view(), name='search_api'),
     url(r'^api/v0/checkout/$', CheckoutView.as_view(), name='checkout'),
+    url(r'^api/v0/enrolledprograms/$', ProgramEnrollmentListView.as_view(), name='user_program_enrollments'),
     url(r'^status/', include('server_status.urls')),
 
     # Wagtail
