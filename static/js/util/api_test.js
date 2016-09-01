@@ -10,6 +10,7 @@ import {
   fetchJSONWithCSRF,
   csrfSafeMethod,
   checkout,
+  sendSearchResultMail
 } from './api';
 import * as api from './api';
 import {
@@ -128,6 +129,34 @@ describe('api', function() {
           method: 'POST',
           body: JSON.stringify({course_id: 'course_id'})
         }));
+      });
+    });
+
+    describe('for email', () => {
+      let MAIL_RESPONSE = {errorStatusCode: 200};
+      let searchRequest = {size: 50};
+
+      it('returns expected values when a POST to send email succeeds', () => {
+        fetchStub.returns(Promise.resolve(MAIL_RESPONSE));
+        fetchMock.mock('/api/v0/mail/', (url, opts) => {  // eslint-disable-line no-unused-vars
+          return {status: 200};
+        });
+        return sendSearchResultMail('subject', 'body', searchRequest).then(mailResp => {
+          assert.ok(fetchStub.calledWith('/api/v0/mail/', {
+            method: 'POST',
+            body: JSON.stringify({
+              email_subject: 'subject',
+              email_body: 'body',
+              searchRequest: searchRequest
+            })
+          }));
+          assert.deepEqual(mailResp, MAIL_RESPONSE);
+        });
+      });
+
+      it('returns a rejected Promise when a POST to send email fails', () => {
+        fetchStub.returns(Promise.reject());
+        return assert.isRejected(sendSearchResultMail('subject', 'body', searchRequest));
       });
     });
   });

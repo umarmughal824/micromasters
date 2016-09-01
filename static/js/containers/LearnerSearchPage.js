@@ -17,16 +17,17 @@ import {
   updateEmailEdit,
   clearEmailEdit,
   updateEmailValidation,
+  sendSearchResultMail
 } from '../actions/email';
 import { emailValidation } from '../util/validation';
 import type { UIState } from '../reducers/ui';
-import type { EmailEditState } from '../reducers/email';
+import type { EmailState } from '../flow/emailTypes';
 import { getCookie } from '../util/api';
 
 class LearnerSearchPage extends React.Component {
   props: {
     ui:       UIState,
-    email:    EmailEditState,
+    email:    EmailState,
     dispatch: Dispatch,
   };
 
@@ -43,9 +44,9 @@ class LearnerSearchPage extends React.Component {
     dispatch(setSearchFilterVisibility(clone));
   };
 
-  openEmailComposer: Function = (sk) => {
+  openEmailComposer: Function = (searchkit) => {
     const { dispatch } = this.props;
-    const query = JSON.stringify(sk.query);
+    const query = searchkit.query.query;
     dispatch(startEmailEdit(query));
     dispatch(setEmailDialogVisibility(true));
   };
@@ -61,18 +62,24 @@ class LearnerSearchPage extends React.Component {
     let errors = emailValidation(email);
     dispatch(updateEmailValidation(errors));
     if ( R.isEmpty(errors) ) {
-      console.log(email); // eslint-disable-line no-console
+      dispatch(
+        sendSearchResultMail(
+          email.subject,
+          email.body,
+          email.query
+        )
+      );
       dispatch(clearEmailEdit());
       dispatch(setEmailDialogVisibility(false));
     }
   };
 
   updateEmailEdit: Function = R.curry((fieldName, e) => {
-    const { email: { email, errors }, dispatch } = this.props;
+    const { email: { email, validationErrors }, dispatch } = this.props;
     let emailClone = R.clone(email);
     emailClone[fieldName] = e.target.value;
     dispatch(updateEmailEdit(emailClone));
-    if ( ! R.isEmpty(errors) ) {
+    if ( ! R.isEmpty(validationErrors) ) {
       let cloneErrors = emailValidation(emailClone);
       dispatch(updateEmailValidation(cloneErrors));
     }
@@ -81,7 +88,7 @@ class LearnerSearchPage extends React.Component {
   render () {
     const {
       ui: { emailDialogVisibility },
-      email: { email, errors }
+      email
     } = this.props;
 
     let searchKit = new SearchkitManager(SETTINGS.search_url, {
@@ -101,7 +108,6 @@ class LearnerSearchPage extends React.Component {
             updateEmailEdit={this.updateEmailEdit}
             sendEmail={this.closeEmailComposeAndSend}
             email={email}
-            errors={errors}
           />
         </SearchkitProvider>
       </div>

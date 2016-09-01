@@ -7,7 +7,7 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import R from 'ramda';
 import TestUtils from 'react-addons-test-utils';
 
-import { NEW_EMAIL_EDIT } from '../reducers/email';
+import { INITIAL_EMAIL_STATE, NEW_EMAIL_EDIT } from '../reducers/email';
 import { modifyTextField } from '../util/test_utils';
 
 import EmailCompositionDialog from './EmailCompositionDialog';
@@ -19,8 +19,10 @@ describe('EmailCompositionDialog', () => {
     closeEmailDialog: sinon.stub().returns(updateStub),
     updateEmailEdit: sinon.stub().returns(updateStub),
     open: true,
-    email: Object.assign({}, NEW_EMAIL_EDIT),
-    errors: {},
+    email: {
+      ...INITIAL_EMAIL_STATE,
+      email: NEW_EMAIL_EDIT
+    },
     searchkit: {
       getHitsCount: sinon.stub().returns(20)
     },
@@ -52,10 +54,10 @@ describe('EmailCompositionDialog', () => {
     );
   });
 
-  it('should fire sendEmail when the "send" button is clicked', () => {
+  it('should fire sendSearchResultMail when the "send" button is clicked', () => {
     renderDialog();
     TestUtils.Simulate.click(getDialog().querySelector('.save-button'));
-    assert(defaultProps.sendEmail.called, "called sendEmail method");
+    assert(defaultProps.sendEmail.called, "called sendSearchResultMail method");
   });
 
   ['subject', 'body'].forEach(field => {
@@ -69,8 +71,7 @@ describe('EmailCompositionDialog', () => {
 
       it('should display the value from the store', () => {
         let newProps = R.clone(defaultProps);
-
-        newProps.email[field] = "a field value!";
+        newProps.email.email[field] = "a field value!";
         renderDialog(newProps);
         assert.equal(getField().value, "a field value!");
       });
@@ -83,10 +84,11 @@ describe('EmailCompositionDialog', () => {
       });
 
       it('should show an error if an error for the field is passed in', () => {
-        let errorProps = R.clone(defaultProps);
+        let props = R.clone(defaultProps);
+        let validationErrors = props.email.validationErrors;
         let errorMessage = `An error message for ${field}`;
-        errorProps.errors[field] = errorMessage;
-        renderDialog(errorProps);
+        validationErrors[field] = errorMessage;
+        renderDialog(props);
         let message = getDialog().querySelector('.validation-error').textContent;
         assert.equal(message, errorMessage);
       });

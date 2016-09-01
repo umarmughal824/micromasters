@@ -23,7 +23,7 @@ import FilterVisibilityToggle from './search/FilterVisibilityToggle';
 import HitsCount from './search/HitsCount';
 import EmailCompositionDialog from './EmailCompositionDialog';
 import type { Option } from '../flow/generalTypes';
-import type { Email, EmailValidationErrors } from '../reducers/email';
+import type { Email } from '../flow/emailTypes';
 
 let makeSearchkitTranslations: () => Object = () => {
   let translations = {};
@@ -82,7 +82,6 @@ export default class LearnerSearch extends SearchkitComponent {
     updateEmailEdit:        (o: Object) => void,
     sendEmail:              () => void,
     email:                  Email,
-    errors:                 EmailValidationErrors,
     children:               React$Element<*>[],
   };
 
@@ -100,7 +99,6 @@ export default class LearnerSearch extends SearchkitComponent {
       updateEmailEdit,
       sendEmail,
       email,
-      errors,
       openEmailComposer,
     } = this.props;
     return (
@@ -110,7 +108,6 @@ export default class LearnerSearch extends SearchkitComponent {
           closeEmailDialog={closeEmailDialog}
           updateEmailEdit={updateEmailEdit}
           email={email}
-          errors={errors}
           sendEmail={sendEmail}
           searchkit={this.searchkit}
         />
