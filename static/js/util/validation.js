@@ -9,7 +9,7 @@ import type {
   ValidationErrors
 } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
-import type { Email } from '../reducers/email';
+import type { Email } from '../flow/emailTypes';
 import { filterPositiveInt } from './util';
 import {
   HIGH_SCHOOL,

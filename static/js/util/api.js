@@ -6,6 +6,7 @@ import _ from 'lodash';
 import type { Profile, ProfileGetResult, ProfilePatchResult } from '../flow/profileTypes';
 import type { CheckoutResponse } from '../flow/checkoutTypes';
 import type { Dashboard } from '../flow/dashboardTypes';
+import type { EmailSendResponse } from '../flow/emailTypes';
 
 export function getCookie(name: string): string|null {
   let cookieValue = null;
@@ -126,6 +127,17 @@ export function checkout(courseId: string): Promise<CheckoutResponse> {
     method: 'POST',
     body: JSON.stringify({
       course_id: courseId
+    })
+  });
+}
+
+export function sendSearchResultMail(subject: string, body: string, searchRequest: Object): Promise<EmailSendResponse> {
+  return mockableFetchJSONWithCSRF('/api/v0/mail/', {
+    method: 'POST',
+    body: JSON.stringify({
+      email_subject: subject,
+      email_body: body,
+      searchRequest: searchRequest
     })
   });
 }

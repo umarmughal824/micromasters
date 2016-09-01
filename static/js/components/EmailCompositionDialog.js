@@ -3,7 +3,10 @@ import React from 'react';
 import Dialog from 'material-ui/Dialog';
 import Button from 'react-mdl/lib/Button';
 import R from 'ramda';
-import type { Email, EmailValidationErrors } from '../reducers/email';
+import type {
+  Email,
+  EmailValidationErrors
+} from '../flow/emailTypes';
 
 const createDialogActions = (close, send) => ([
   <Button
@@ -24,7 +27,7 @@ const createDialogActions = (close, send) => ([
   </Button>
 ]);
 
-const showValidationError = R.curry((getter, object) => {
+const showValidationError = R.curry((getter, object: EmailValidationErrors) => {
   let val = getter(object);
   if ( val !== undefined ) {
     return <span className="validation-error">{ val }</span>;
@@ -42,7 +45,6 @@ type EmailDialogProps = {
   updateEmailEdit:  Function,
   open:             boolean,
   email:            Email,
-  errors:           EmailValidationErrors,
   searchkit:        Object,
   sendEmail:        (e: Email) => void,
 };
@@ -52,8 +54,7 @@ const EmailCompositionDialog = (props: EmailDialogProps) => {
     closeEmailDialog,
     updateEmailEdit,
     open,
-    email,
-    errors,
+    email: { email, validationErrors },
     searchkit,
     sendEmail,
   } = props;
@@ -76,7 +77,7 @@ const EmailCompositionDialog = (props: EmailDialogProps) => {
         value={email.subject || ""}
         onChange={updateEmailEdit('subject')}
       />
-      { showSubjectError(errors) }
+      { showSubjectError(validationErrors) }
       <textarea
         rows="7"
         className="email-body"
@@ -84,7 +85,7 @@ const EmailCompositionDialog = (props: EmailDialogProps) => {
         value={email.body || ""}
         onChange={updateEmailEdit('body')}
       />
-      { showBodyError(errors) }
+      { showBodyError(validationErrors) }
     </div>
   </Dialog>;
 };
