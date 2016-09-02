@@ -150,7 +150,7 @@ describe('api', function() {
             body: JSON.stringify({
               email_subject: 'subject',
               email_body: 'body',
-              searchRequest: searchRequest
+              search_request: searchRequest
             })
           }));
           assert.deepEqual(mailResp, MAIL_RESPONSE);

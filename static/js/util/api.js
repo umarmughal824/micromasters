@@ -138,7 +138,7 @@ export function sendSearchResultMail(subject: string, body: string, searchReques
     body: JSON.stringify({
       email_subject: subject,
       email_body: body,
-      searchRequest: searchRequest
+      search_request: searchRequest
     })
   });
 }
