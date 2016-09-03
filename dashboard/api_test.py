@@ -21,6 +21,7 @@ from dashboard import (
     api,
     models,
 )
+from ecommerce.factories import CoursePriceFactory
 from profiles.factories import UserFactory
 from search.base import ESTestCase
 
@@ -144,6 +145,25 @@ class FormatRunTest(CourseTests):
         self.assertIsNone(
             api.format_courserun_for_dashboard(None, api.CourseStatus.PASSED)
         )
+
+    def test_price_in_course_run(self):
+        """Assert that price appears in course run for offered and upgrade."""
+        crun = self.create_run()
+        course_price = 50
+        CoursePriceFactory.create(course_run=crun, is_valid=True, price=course_price)
+
+        format_courserun_offered_course = api.format_courserun_for_dashboard(crun, api.CourseStatus.OFFERED)
+        self.assertIn('price', format_courserun_offered_course)
+        self.assertEqual(format_courserun_offered_course['price'], course_price)
+
+        format_courserun_no_verified_course = api.format_courserun_for_dashboard(crun, api.CourseStatus.UPGRADE)
+        self.assertIn('price', format_courserun_no_verified_course)
+        self.assertEqual(format_courserun_no_verified_course['price'], course_price)
+
+        self.assertNotIn('price', api.format_courserun_for_dashboard(crun, api.CourseStatus.PASSED))
+        self.assertNotIn('price', api.format_courserun_for_dashboard(crun, api.CourseStatus.NOT_PASSED))
+        self.assertNotIn('price', api.format_courserun_for_dashboard(crun, api.CourseStatus.CURRENT_GRADE))
+        self.assertNotIn('price', api.format_courserun_for_dashboard(crun, api.CourseStatus.NOT_OFFERED))
 
     def test_format_run(self):
         """Test for format_courserun_for_dashboard with passed run and position"""
