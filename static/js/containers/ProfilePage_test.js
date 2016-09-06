@@ -19,7 +19,6 @@ import {
   SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
   SET_EDUCATION_DEGREE_INCLUSIONS,
   SET_WORK_HISTORY_EDIT,
-  SET_TOS_DIALOG_VISIBILITY,
 
   setEducationDegreeInclusions,
   setWorkHistoryEdit,
@@ -416,55 +415,6 @@ describe("ProfilePage", function() {
       });
 
       assert(div.querySelector(".spinner"), "Unable to find spinner");
-    });
-  });
-
-  describe('terms of service', () => {
-    beforeEach(() => {
-      setStep(PERSONAL_STEP);
-
-      helper.profileGetStub.
-        withArgs(SETTINGS.username).
-        returns(
-          Promise.resolve(Object.assign({}, USER_PROFILE_RESPONSE, {
-            username: SETTINGS.username,
-            agreed_to_terms_of_service: false,
-          }))
-        );
-    });
-
-    it('should have a terms of service checkbox on the personal step', () => {
-      return renderComponent('/profile').then(([, div]) => {
-        assert.isNotNull(div.querySelector('.bound-check-box'));
-      });
-    });
-
-    it('should provide a link to read the terms of service', () => {
-      return renderComponent('/profile').then(([, div]) => {
-        let link = div.querySelector('.bound-check-box a');
-
-        return listenForActions([SET_TOS_DIALOG_VISIBILITY], () => {
-          TestUtils.Simulate.click(link);
-          let dialog = document.querySelector('.terms-of-service');
-          assert.equal(dialog.querySelector('h3').textContent, "Terms of Service");
-        });
-      });
-    });
-
-    it('should show a validation error if you do not accept', () => {
-      return renderComponent('/profile').then(([, div]) => {
-        return listenForActions([
-          START_PROFILE_EDIT,
-          UPDATE_PROFILE_VALIDATION,
-        ], () =>{
-          let next = div.querySelector(nextButtonSelector);
-          TestUtils.Simulate.click(next);
-          assert.equal(
-            div.querySelector('.bound-check-box .validation-error-text').textContent,
-            "You must agree to the terms of service to continue"
-          );
-        });
-      });
     });
   });
 });

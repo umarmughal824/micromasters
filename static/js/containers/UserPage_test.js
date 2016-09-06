@@ -661,18 +661,6 @@ describe("UserPage", function() {
           });
         });
       });
-
-      it('should not show the terms of service checkbox', () => {
-        return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let personalButton = div.querySelector('.page-content').
-            getElementsByClassName('material-icons')[0];
-
-          return listenForActions([SET_USER_PAGE_DIALOG_VISIBILITY], () => {
-            TestUtils.Simulate.click(personalButton);
-            assert.isNull(document.querySelector('.tos-checkbox'));
-          });
-        });
-      });
     });
 
     it("should show all edit, delete icons for an authenticated user's own page" , () => {

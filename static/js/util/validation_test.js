@@ -87,16 +87,6 @@ describe('Profile validation functions', () => {
       };
       assert.deepEqual(personalValidation(profile), errors);
     });
-
-    it('should return an error if the user has not agreed to ToS', () => {
-      let profile = Object.assign({}, USER_PROFILE_RESPONSE, {
-        agreed_to_terms_of_service: false
-      });
-      let errors = {
-        agreed_to_terms_of_service: 'You must agree to the terms of service to continue'
-      };
-      assert.deepEqual(personalValidation(profile), errors);
-    });
   });
 
   describe('Education validation', () => {
@@ -268,7 +258,6 @@ describe('Profile validation functions', () => {
         'nationality': "Nationality",
         'birth_country': "Country",
       }).map(([k,v]) => ({[k]: `${v} is required`})));
-      errors.agreed_to_terms_of_service = 'You must agree to the terms of service to continue';
       errors.date_of_birth = "Please enter a valid date of birth";
       const expectation = [false, PERSONAL_STEP, errors];
       assert.deepEqual(validateProfileComplete(profile), expectation);

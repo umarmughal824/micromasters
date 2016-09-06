@@ -7,7 +7,6 @@ import SelectField from './inputs/SelectField';
 import CountrySelectField from './inputs/CountrySelectField';
 import StateSelectField from './inputs/StateSelectField';
 import ProfileFormFields from '../util/ProfileFormFields';
-import TermsOfServiceDialog from './TermsOfServiceDialog';
 import type {
   Profile,
   SaveProfileFunc,
@@ -24,42 +23,15 @@ export default class PersonalForm extends ProfileFormFields {
     saveProfile:            SaveProfileFunc,
     updateProfile:          UpdateProfileFunc,
     validator:              Validator|UIValidator,
-    setTOSDialogVisibility: (b: boolean) => void,
-    showTOSInputs:          boolean,
     ui:                     UIState,
   };
 
   render() {
-    const {
-      setTOSDialogVisibility,
-      ui: { tosDialogVisibility },
-      showTOSInputs,
-    } = this.props;
-    let toggleTOSDialog = () => setTOSDialogVisibility(!tosDialogVisibility);
-
-    let tosCheckboxLabel = <span>
-      By clicking "Next" I certify that I agree with
-      <a onClick={toggleTOSDialog}>
-        {" MIT MicroMasters Terms of Service."}
-      </a>
-    </span>;
-
-    let tosDialog = <TermsOfServiceDialog
-      open={tosDialogVisibility}
-      toggleTOSDialog={toggleTOSDialog}
-      {...this.props}
-    />;
-
-    let tosCheckbox = <Cell col={12} className="tos-checkbox">
-      {this.boundCheckbox(['agreed_to_terms_of_service'], tosCheckboxLabel)}
-    </Cell>;
-
     const whyWeAskThis = 'Some program sponsors and employers offer benefits or scholarships ' +
       'to learners with specific backgrounds.';
 
     return (
       <Grid className="profile-form-grid">
-        { showTOSInputs ? tosDialog : null }
         <Cell col={6}>
           {this.boundTextField(["first_name"], "Given name")}
         </Cell>
@@ -134,7 +106,6 @@ export default class PersonalForm extends ProfileFormFields {
             {...this.defaultInputComponentProps()}
           />
         </Cell>
-        { showTOSInputs ? tosCheckbox : null }
       </Grid>
     );
   }
