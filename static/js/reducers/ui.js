@@ -28,7 +28,6 @@ import {
   SET_USER_MENU_OPEN,
   SET_SEARCH_FILTER_VISIBILITY,
 
-  SET_TOS_DIALOG_VISIBILITY,
   SET_EMAIL_DIALOG_VISIBILITY,
 } from '../actions/ui';
 import {
@@ -200,11 +199,6 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
   case SET_SEARCH_FILTER_VISIBILITY: {
     return Object.assign({}, state, {
       searchFilterVisibility: action.payload
-    });
-  }
-  case SET_TOS_DIALOG_VISIBILITY: {
-    return Object.assign({}, state, {
-      tosDialogVisibility: action.payload
     });
   }
   case SET_EMAIL_DIALOG_VISIBILITY: {

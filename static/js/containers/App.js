@@ -112,7 +112,6 @@ class App extends React.Component {
     const [ complete, step, errors] = validateProfileComplete(profile);
     if (
       userProfile.getStatus === FETCH_SUCCESS &&
-      profile.agreed_to_terms_of_service &&
       !PROFILE_REGEX.test(pathname) &&
       !complete
     ) {

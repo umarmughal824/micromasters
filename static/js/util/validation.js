@@ -77,9 +77,6 @@ export function personalValidation(profile: Profile): ValidationErrors {
     // birthdays must be before today
     errors.date_of_birth = validationMessages.date_of_birth;
   }
-  if ( profile.agreed_to_terms_of_service !== true ) {
-    errors.agreed_to_terms_of_service = 'You must agree to the terms of service to continue';
-  }
   return errors;
 }
 

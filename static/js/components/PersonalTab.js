@@ -29,7 +29,7 @@ class PersonalTab extends React.Component {
     return (
       <div>
         <Card shadow={1} className="profile-form">
-          <PersonalForm {...this.props} validator={personalValidation} showTOSInputs={true} />
+          <PersonalForm {...this.props} validator={personalValidation} />
           <ValidationAlert {...this.props} />
         </Card>
         <ProfileProgressControls

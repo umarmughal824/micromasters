@@ -26,7 +26,6 @@ export const ELASTICSEARCH_RESPONSE = {
           "profile": {
             "username": "test_user",
             "filled_out": true,
-            "agreed_to_terms_of_service": true,
             "account_privacy": "public",
             "email_optin": true,
             "first_name": "Test",
@@ -481,8 +480,6 @@ export const ERROR_RESPONSE = {
 
 export const ISO_8601_FORMAT = 'YYYY-MM-DD';
 export const DASHBOARD_FORMAT = 'M/D/Y';
-
-export const TERMS_CARD_ROW_HEIGHT = 70;
 
 // NOTE: this is in order of attainment
 export const EDUCATION_LEVELS = [

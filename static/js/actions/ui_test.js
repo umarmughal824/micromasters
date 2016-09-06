@@ -17,7 +17,6 @@ import {
   SET_PROFILE_STEP,
   SET_USER_MENU_OPEN,
   SET_SEARCH_FILTER_VISIBILITY,
-  SET_TOS_DIALOG_VISIBILITY,
   SET_EMAIL_DIALOG_VISIBILITY,
 
   clearUI,
@@ -38,7 +37,6 @@ import {
   setProfileStep,
   setUserMenuOpen,
   setSearchFilterVisibility,
-  setTOSDialogVisibility,
   setEmailDialogVisibility,
 } from '../actions/ui';
 import { assertCreatedActionHelper } from './util';
@@ -64,7 +62,6 @@ describe('generated UI action helpers', () => {
       [setProfileStep, SET_PROFILE_STEP],
       [setUserMenuOpen, SET_USER_MENU_OPEN],
       [setSearchFilterVisibility, SET_SEARCH_FILTER_VISIBILITY],
-      [setTOSDialogVisibility, SET_TOS_DIALOG_VISIBILITY],
       [setEmailDialogVisibility, SET_EMAIL_DIALOG_VISIBILITY]
     ].forEach(assertCreatedActionHelper);
   });

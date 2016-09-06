@@ -38,7 +38,6 @@ export type WorkHistoryEntry = {
 export type ValidationErrors = {
   date_of_birth?:         string;
   work_history_required?: string;
-  agreed_to_terms_of_service?: string;
 };
 
 export type Profile = {

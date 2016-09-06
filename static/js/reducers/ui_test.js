@@ -20,7 +20,6 @@ import {
   SET_PROFILE_STEP,
   SET_USER_MENU_OPEN,
   SET_SEARCH_FILTER_VISIBILITY,
-  SET_TOS_DIALOG_VISIBILITY,
   SET_EMAIL_DIALOG_VISIBILITY,
 
   clearUI,
@@ -43,7 +42,6 @@ import {
   setProfileStep,
   setUserMenuOpen,
   setSearchFilterVisibility,
-  setTOSDialogVisibility,
   setEmailDialogVisibility,
 } from '../actions/ui';
 import { receiveGetUserProfileSuccess } from '../actions/profile';
@@ -311,18 +309,6 @@ describe('ui reducers', () => {
           SET_SEARCH_FILTER_VISIBILITY
         ]).then(state => {
           assert.deepEqual(state.searchFilterVisibility, newVisibility);
-        });
-      });
-    });
-  });
-
-  describe('TOS dialog visibility', () => {
-    [true, false].forEach(bool => {
-      it(`should let you set TOS dialog visibility to ${bool}`, () => {
-        return dispatchThen(setTOSDialogVisibility(bool), [
-          SET_TOS_DIALOG_VISIBILITY
-        ]).then(state => {
-          assert.deepEqual(state.tosDialogVisibility, bool);
         });
       });
     });

@@ -79,8 +79,5 @@ export const setUserMenuOpen = createAction(SET_USER_MENU_OPEN);
 export const SET_SEARCH_FILTER_VISIBILITY = 'SET_SEARCH_FILTER_VISIBILITY';
 export const setSearchFilterVisibility = createAction(SET_SEARCH_FILTER_VISIBILITY);
 
-export const SET_TOS_DIALOG_VISIBILITY = 'SET_TOS_DIALOG_VISIBILITY';
-export const setTOSDialogVisibility = createAction(SET_TOS_DIALOG_VISIBILITY);
-
 export const SET_EMAIL_DIALOG_VISIBILITY = 'SET_EMAIL_DIALOG_VISIBILITY';
 export const setEmailDialogVisibility = createAction(SET_EMAIL_DIALOG_VISIBILITY);
