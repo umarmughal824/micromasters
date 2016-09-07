@@ -6,7 +6,6 @@ import ga from 'react-ga';
 import striptags from 'striptags';
 import _ from 'lodash';
 import iso3166 from 'iso-3166-2';
-import urljoin from 'url-join';
 import { Maybe, Just, Nothing } from 'sanctuary';
 
 import {
@@ -234,7 +233,7 @@ export function makeStrippedHtml(textOrElement: any): string {
 }
 
 export function makeProfileImageUrl(profile: Profile): string {
-  let imageUrl = urljoin(SETTINGS.edx_base_url, 'static/images/profiles/default_120.png');
+  let imageUrl = '/static/images/avatar_default.png';
   if (profile !== undefined && profile.profile_url_large) {
     imageUrl = profile.profile_url_large;
   }

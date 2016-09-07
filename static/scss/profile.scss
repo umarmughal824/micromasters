@@ -6,6 +6,13 @@
   margin: 12px auto 15px;
   padding: 15px 25px;
 
+  .card-image {
+    height: auto;
+    width: 125px;
+    border-radius: 50%;
+    margin-left: 15px;
+  }
+
   i.material-icons {
     color: $mm-brand-blue;
   }
@@ -50,24 +57,104 @@
     width: 100%;
     padding: 0;
 
-    .profile-form-row, .profile-form-row > .basic-info {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .profile-form-row > .basic-info {
-      width: 50%;
-      .school-type {
-        font-size: 12px;
-        font-weight: 400;
-        text-transform: lowercase;
-      }
+    .title {
+      font-weight: 600;
+      margin-top: 15px;
     }
 
     .profile-card-header {
-      > span {
+      justify-content: space-between;
+
+      .title, span {
+        font-weight: 600;
         font-size: 18px;
+      }
+    }
+  }
+
+  .profile-form-row {
+    display: flex;
+    flex-direction: row;
+
+    .basic-info {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      width: 50%;
+    }
+
+    &.row-padding {
+      padding: 13px 0 0;
+      margin: 0 ;
+    }
+
+    &.add {
+      margin-bottom: 17px;
+    }
+
+    &:nth-last-child(2) {
+      .user-credentials {
+        border-bottom: none !important;
+      }
+    }
+
+    .profile-row-icons {
+      text-align: right;
+      color: #898989;
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+
+      &.row-width {
+        width: 50%;
+      }
+    }
+
+    .col {
+      &.user-credentials {
+        width: 50%;
+        border-bottom: 1px #E2E2E2 solid;
+        margin-right: 10px;
+        vertical-align: middle;
+        padding-bottom: 13px;
+
+        &.row-padding {
+          padding-top: 30px;
+        }
+      }
+
+      &.user-info {
+        width: 250% !important;
+        margin-left: 15px;
+      }
+
+      .profile-row-name {
+        font-size: 16px;
+        color: #404040;
+        padding: 12px;
+
+        .school-type {
+          font-weight: 600;
+          text-transform: capitalize;
+        }
+
+        .school-name {
+          margin-top: 10px;
+        }
+      }
+
+      .profile-row-date-range {
+        font-size: 16px;
+        font-weight: 300;
+        color: #b7b7b7;
+        float: left;
+        position: relative;
+        margin-top: 7px;
+      }
+
+      .profile-row-new-line {
+        display: block;
+        width: 100%;
       }
     }
   }

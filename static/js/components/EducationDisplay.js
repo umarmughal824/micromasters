@@ -60,19 +60,19 @@ export default class EducationDisplay extends ProfileFormFields {
       </div>
     );
     return (
-      <Cell col={12} className="profile-form-row" key={index}>
-        <div className="basic-info">
+      <Cell col={12} className="profile-form-row row-padding" key={index}>
+        <div className="col user-credentials">
           <div className="profile-row-name">
-            <span className="school-type">
-              { degree }
-            </span><br/>
-            { entry.school_name }
+            <div className="school-type">{ degree }</div>
+            <div className="school-name">{ entry.school_name }</div>
           </div>
+        </div>
+        <div className="col user-credentials row-padding">
           <div className="profile-row-date-range">
             {`${dateFormat(entry.graduation_date)}`}
           </div>
+          { userPrivilegeCheck(profile, icons, () => <div />) }
         </div>
-        { userPrivilegeCheck(profile, icons, () => <Cell col={2} />) }
       </Cell>
     );
   };
@@ -86,7 +86,7 @@ export default class EducationDisplay extends ProfileFormFields {
     }
     userPrivilegeCheck(profile, () => {
       rows.push(
-        <Cell col={12} className="profile-form-row" key={"I'm unique!"}>
+        <Cell col={12} className="profile-form-row add" key={"I'm unique!"}>
           <a
             className="mm-minor-action"
             onClick={() => this.openNewEducationForm(HIGH_SCHOOL, null)}
@@ -117,7 +117,7 @@ export default class EducationDisplay extends ProfileFormFields {
         <Card shadow={1} className="profile-form" id="education-card">
           <Grid className="profile-form-grid">
             <Cell col={12} className="profile-form-row profile-card-header">
-              <span>
+              <span className="title">
                 Education
               </span>
             </Cell>

@@ -187,7 +187,7 @@ class EmploymentForm extends ProfileFormFields {
       }
       userPrivilegeCheck(profile, () => {
         workHistoryRows.push(
-        <Cell col={12} className="profile-form-row" key={"I'm unique!"}>
+        <Cell col={12} className="profile-form-row add" key={"I'm unique!"}>
           <a
             className="mm-minor-action"
             onClick={this.addWorkHistoryEntry}
@@ -235,16 +235,18 @@ class EmploymentForm extends ProfileFormFields {
       );
     };
     return (
-      <Cell col={12} className="profile-form-row" key={index}>
-        <div className="basic-info">
+      <Cell col={12} className="profile-form-row row-padding" key={index}>
+        <div className="col user-credentials">
           <div className="profile-row-name">
             {`${position.company_name}, ${position.position}`}
           </div>
+        </div>
+        <div className="col user-credentials">
           <div className="profile-row-date-range">
             {`${dateFormat(position.start_date)} - ${endDateText()}`}
           </div>
+          { userPrivilegeCheck(profile, icons, () => <div />) }
         </div>
-        { icons() }
       </Cell>
     );
   }
@@ -318,7 +320,7 @@ class EmploymentForm extends ProfileFormFields {
         <Card shadow={1} className={`profile-form ${cardClass()}`}>
           <Grid className="profile-form-grid">
             <Cell col={12} className="profile-form-row profile-card-header">
-              <span>
+              <span className="title">
                 Employment
               </span>
               { workSwitch() }

@@ -6,7 +6,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import sinon from 'sinon';
 
-import { 
+import {
   RECEIVE_GET_USER_PROFILE_SUCCESS,
   REQUEST_GET_USER_PROFILE,
   START_PROFILE_EDIT,
@@ -32,6 +32,7 @@ import {
 import {
   generateNewEducation,
   generateNewWorkHistory,
+  getPreferredName
 } from '../util/util';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../util/api';
@@ -119,7 +120,7 @@ describe("UserPage", function() {
 
     describe("validation", () => {
       const inputs = dialog => [...dialog.getElementsByTagName('input')];
-      const getEditPersonalButton = div => div.querySelector('.page-content .material-icons');
+      const getEditPersonalButton = div => div.querySelector('.edit-profile-holder .mdl-button');
       const getDialog = () => document.querySelector('.personal-dialog');
       const getSave = () => getDialog().querySelector('.save-button');
 
@@ -296,7 +297,7 @@ describe("UserPage", function() {
 
       it('shows the education component', () => {
         return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let title = div.getElementsByClassName('profile-card-header')[1];
+          let title = div.getElementsByClassName('profile-card-header')[0];
           assert.equal(title.textContent, 'Education');
         });
       });
@@ -457,21 +458,21 @@ describe("UserPage", function() {
 
     describe("Employment History", () => {
       let deleteButton = div => {
-        return div.getElementsByClassName('profile-form')[0].
+        return div.getElementsByClassName('profile-form')[2].
           getElementsByClassName('profile-row-icons')[0].
           getElementsByClassName('mdl-button')[1];
       };
 
       it('shows the employment history component', () => {
         return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let title = div.getElementsByClassName('profile-card-header')[0];
+          let title = div.getElementsByClassName('profile-card-header')[1];
           assert.equal(title.textContent, 'Employment');
         });
       });
 
       it('should show the entries in resume order', () => {
         return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let editButton = div.getElementsByClassName('profile-form')[0].
+          let editButton = div.getElementsByClassName('profile-form')[2].
             getElementsByClassName('profile-row-icons')[0].
             getElementsByClassName('mdl-button')[0];
 
@@ -518,7 +519,7 @@ describe("UserPage", function() {
             Promise.resolve(updatedProfile)
           );
 
-          let deleteButton = div.getElementsByClassName('profile-form')[0].
+          let deleteButton = div.getElementsByClassName('profile-form')[2].
             getElementsByClassName('profile-row-icons')[0].
             getElementsByClassName('mdl-button')[1];
 
@@ -544,7 +545,7 @@ describe("UserPage", function() {
       it('should let you edit a work history entry', () => {
         return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
 
-          let editButton = div.getElementsByClassName('profile-form')[0].
+          let editButton = div.getElementsByClassName('profile-form')[2].
             getElementsByClassName('profile-row-icons')[0].
             getElementsByClassName('mdl-button')[0];
 
@@ -559,7 +560,7 @@ describe("UserPage", function() {
 
       it('should let you add a work history entry', () => {
         return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let addButton = div.getElementsByClassName('profile-form')[0].querySelector('.mm-minor-action');
+          let addButton = div.getElementsByClassName('profile-form')[2].querySelector('.mm-minor-action');
 
           let updatedProfile = _.cloneDeep(USER_PROFILE_RESPONSE);
           updatedProfile.username = SETTINGS.username;
@@ -642,22 +643,30 @@ describe("UserPage", function() {
     describe('Personal Info', () => {
       it('should show name and location', () => {
         return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let name = div.getElementsByClassName('users-name')[0].textContent;
-          assert.deepEqual(name, USER_PROFILE_RESPONSE.preferred_name);
-
-          let location = div.getElementsByClassName('users-location')[0].textContent;
-
-          assert.deepEqual(location, `${USER_PROFILE_RESPONSE.city}, `);
+          let name = div.getElementsByClassName('profile-title')[0].textContent;
+          assert.deepEqual(name, getPreferredName(USER_PROFILE_RESPONSE));
         });
       });
 
       it('should let you edit personal info', () => {
         return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let personalButton = div.querySelector('.page-content').
-            getElementsByClassName('material-icons')[0];
+          let personalButton = div.querySelector('.edit-profile-holder').
+            getElementsByClassName('mdl-button')[0];
 
           return listenForActions([SET_USER_PAGE_DIALOG_VISIBILITY], () => {
             TestUtils.Simulate.click(personalButton);
+          });
+        });
+      });
+
+      it('should not show the terms of service checkbox', () => {
+        return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
+          let personalButton = div.querySelector('.edit-profile-holder').
+            getElementsByClassName('mdl-button')[0];
+
+          return listenForActions([SET_USER_PAGE_DIALOG_VISIBILITY], () => {
+            TestUtils.Simulate.click(personalButton);
+            assert.isNull(document.querySelector('.tos-checkbox'));
           });
         });
       });
