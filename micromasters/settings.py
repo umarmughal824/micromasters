@@ -433,6 +433,7 @@ CELERY_TIMEZONE = 'UTC'
 # Elasticsearch
 ELASTICSEARCH_URL = get_var("ELASTICSEARCH_URL", None)
 ELASTICSEARCH_INDEX = get_var('ELASTICSEARCH_INDEX', 'micromasters')
+ELASTICSEARCH_X_API_KEY = get_var("ELASTICSEARCH_X_API_KEY", None)
 
 # django-role-permissions
 ROLEPERMISSIONS_MODULE = 'roles.roles'
