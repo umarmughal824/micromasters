@@ -15,23 +15,13 @@ import {
 } from '../actions/profile';
 import {
   SET_SHOW_WORK_DELETE_ALL_DIALOG,
-  SET_EDUCATION_DEGREE_LEVEL,
-  SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
-  SET_EDUCATION_DEGREE_INCLUSIONS,
   SET_WORK_HISTORY_EDIT,
 
-  setEducationDegreeInclusions,
   setWorkHistoryEdit,
   setProfileStep,
 } from '../actions/ui';
 import {
   USER_PROFILE_RESPONSE,
-  EDUCATION_LEVELS,
-  ASSOCIATE,
-  DOCTORATE,
-  HIGH_SCHOOL,
-  BACHELORS,
-  MASTERS,
   PERSONAL_STEP,
   EDUCATION_STEP,
   EMPLOYMENT_STEP,
@@ -39,6 +29,11 @@ import {
 } from '../constants';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../util/api';
+import {
+  activeDialog,
+  activeDeleteDialog,
+  noActiveDeleteDialogs
+} from '../util/test_utils';
 
 describe("ProfilePage", function() {
   this.timeout(5000);  // eslint-disable-line no-invalid-this
@@ -52,10 +47,6 @@ describe("ProfilePage", function() {
   ];
   let prevButtonSelector = '.mm-button.prev';
   let nextButtonSelector = '.mm-button.next';
-  let noInclusions = {};
-  for (const { value } of EDUCATION_LEVELS) {
-    noInclusions[value] = false;
-  }
 
   const setStep = step => helper.store.dispatch(setProfileStep(step));
 
@@ -94,12 +85,6 @@ describe("ProfilePage", function() {
     });
   };
 
-  let openDialog = () => {
-    return [...document.getElementsByClassName('deletion-confirmation')].find(dialog => (
-      dialog.style["left"] === "0px"
-    ));
-  };
-
   let radioToggles = (div, selector) => div.querySelector(selector).getElementsByTagName('input');
 
   describe('switch toggling behavior', () => {
@@ -113,7 +98,16 @@ describe("ProfilePage", function() {
         );
     });
 
-    it('should confirm and let you cancel when toggling the switch on work history', () => {
+    it('should launch a dialog to add an entry when an education switch is set to Yes', () => {
+      setStep(EDUCATION_STEP);
+      return renderComponent('/profile').then(([, div]) => {
+        let toggle = radioToggles(div, '.profile-radio-switch');
+        TestUtils.Simulate.change(toggle[0]);
+        activeDialog('education-dashboard-dialog');
+      });
+    });
+
+    it('should let you cancel deletion when toggling work history to No', () => {
       setStep(EMPLOYMENT_STEP);
       return renderComponent('/profile').then(([, div]) => {
         let toggle = radioToggles(div, '.profile-radio-switch');
@@ -123,7 +117,7 @@ describe("ProfilePage", function() {
           SET_SHOW_WORK_DELETE_ALL_DIALOG,
         ], () => {
           TestUtils.Simulate.change(toggle[1]);
-          let dialog = openDialog();
+          let dialog = activeDeleteDialog();
           let cancelButton = dialog.querySelector('.cancel-button');
           TestUtils.Simulate.click(cancelButton);
           let state = helper.store.getState();
@@ -157,7 +151,7 @@ describe("ProfilePage", function() {
           CLEAR_PROFILE_EDIT,
         ], () => {
           TestUtils.Simulate.change(toggle[1]);
-          let dialog = openDialog();
+          let dialog = activeDeleteDialog();
           let deleteButton = dialog.querySelector('.delete-button');
           TestUtils.Simulate.click(deleteButton);
         }).then(() => {
@@ -182,136 +176,9 @@ describe("ProfilePage", function() {
         return listenForActions([
         ], () => {
           TestUtils.Simulate.change(toggle[0]);
-          assert.equal(openDialog(), undefined);
+          assert.isTrue(noActiveDeleteDialogs());
           TestUtils.Simulate.change(toggle[1]);
-          assert.equal(openDialog(), undefined);
-        });
-      });
-    });
-
-
-    let educationSwitchSelectors = EDUCATION_LEVELS.map(level => (
-      { value: level.value, label: level.label, selector: `.profile-radio-switch.${level.value}` }
-    ));
-
-    let educationEntries = (level, profile) => (
-      profile.education.filter(entry => entry.degree_name === level)
-    );
-
-    let fullEducation = () => {
-      let clone = _.cloneDeep(USER_PROFILE_RESPONSE);
-      [
-        DOCTORATE,
-        ASSOCIATE,
-        BACHELORS,
-        MASTERS,
-        DOCTORATE,
-        MASTERS,
-        HIGH_SCHOOL,
-        ASSOCIATE,
-      ].forEach((level, index) => clone.education.push({
-        "id": index + 10,
-        "degree_name": level,
-        "graduation_date": "1975-12-01",
-        "field_of_study": "Philosophy",
-        "school_name": "Harvard",
-        "school_city": "Cambridge",
-        "school_state_or_territory": "US-MA",
-        "school_country": "US",
-        "online_degree": false
-      }));
-      clone.username = SETTINGS.username;
-      return clone;
-    };
-
-    educationSwitchSelectors.forEach( ({label, value, selector}) => {
-      it(`should confirm and let you cancel when toggling the ${label} switch on education`, () => {
-        setStep(EDUCATION_STEP);
-        return renderComponent('/profile').then(([, div]) => {
-          helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, fullEducation()));
-
-          let toggle = radioToggles(div, selector);
-          return listenForActions([
-            SET_EDUCATION_DEGREE_LEVEL,
-            SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
-            SET_EDUCATION_DEGREE_LEVEL,
-            SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
-          ], () => {
-            TestUtils.Simulate.change(toggle[1]);
-            let dialog = openDialog();
-            let cancelButton = dialog.querySelector('.cancel-button');
-            TestUtils.Simulate.click(cancelButton);
-            let state = helper.store.getState();
-            let profile = state.profiles.jane.profile;
-            let entries = educationEntries(value, profile);
-            assert.equal(_.isEmpty(entries), false);
-          });
-        });
-      });
-    });
-
-    educationSwitchSelectors.forEach( ({label, value, selector}) => {
-      it(`should confirm and let you delete when toggling the ${label} switch on education`, () => {
-        setStep(EDUCATION_STEP);
-        return renderComponent('/profile').then(([, div]) => {
-          helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, fullEducation()));
-
-          let updateProfile = fullEducation();
-          updateProfile.education = updateProfile.education.filter(entry => entry.degree_name !== value);
-          updateProfile.username = SETTINGS.username;
-
-          patchUserProfileStub.throws("Invalid arguments");
-          patchUserProfileStub.withArgs(SETTINGS.username, updateProfile).returns(
-            Promise.resolve(updateProfile)
-          );
-
-          let toggle = radioToggles(div, selector);
-          return listenForActions([
-            SET_EDUCATION_DEGREE_LEVEL,
-            SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
-            SET_EDUCATION_DEGREE_INCLUSIONS,
-            START_PROFILE_EDIT,
-            UPDATE_PROFILE_VALIDATION,
-            REQUEST_PATCH_USER_PROFILE,
-            SET_EDUCATION_DEGREE_LEVEL,
-            SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
-            RECEIVE_PATCH_USER_PROFILE_SUCCESS,
-            CLEAR_PROFILE_EDIT,
-          ], () => {
-            TestUtils.Simulate.change(toggle[1]);
-            let dialog = openDialog();
-            let deleteButton = dialog.querySelector('.delete-button');
-            TestUtils.Simulate.click(deleteButton);
-          }).then(() => {
-            let state = helper.store.getState();
-            let degreesIncluded = state.profiles.jane.profile.education.map(entry => (
-              entry.degree_name
-            ));
-            assert.notInclude(degreesIncluded, value);
-          });
-        });
-      });
-    });
-
-    educationSwitchSelectors.forEach( ({label, selector}) => {
-      it(`shouldnt confirm when toggling the ${label} switch on education if there are no entries`, () => {
-        setStep(EDUCATION_STEP);
-        return renderComponent('/profile').then(([, div]) => {
-          let noEducation = _.cloneDeep(USER_PROFILE_RESPONSE);
-          noEducation.education = [];
-          helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, noEducation));
-
-          let toggle = radioToggles(div, selector);
-
-          return listenForActions([
-            SET_EDUCATION_DEGREE_INCLUSIONS,
-            SET_EDUCATION_DEGREE_INCLUSIONS,
-          ], () => {
-            TestUtils.Simulate.change(toggle[1]);
-            assert.equal(openDialog(), undefined);
-            TestUtils.Simulate.change(toggle[0]);
-            assert.equal(openDialog(), undefined);
-          });
+          assert.isTrue(noActiveDeleteDialogs());
         });
       });
     });
@@ -337,7 +204,6 @@ describe("ProfilePage", function() {
         email_optin: true,
       });
       helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, receivedProfile));
-      helper.store.dispatch(setEducationDegreeInclusions(noInclusions));
 
       let button = div.querySelector(nextButtonSelector);
       assert(button.innerHTML.includes("I'm Done!"));
@@ -360,9 +226,6 @@ describe("ProfilePage", function() {
         email_optin: true,
       });
       helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, receivedProfile));
-      helper.store.dispatch(setEducationDegreeInclusions({
-        [HIGH_SCHOOL]: true
-      }));
       helper.store.dispatch(setWorkHistoryEdit(true));
 
       let button = div.querySelector(nextButtonSelector);
@@ -397,7 +260,6 @@ describe("ProfilePage", function() {
         helper.profileGetStub.returns(Promise.resolve(updatedProfile));
         return renderComponent('/profile').then(([, div]) => {
           // close all switches
-          helper.store.dispatch(setEducationDegreeInclusions(noInclusions));
           return confirmSaveButtonBehavior(updatedProfile, {div: div});
         });
       });

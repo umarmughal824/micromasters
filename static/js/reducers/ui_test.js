@@ -10,13 +10,11 @@ import {
   SET_EDUCATION_DIALOG_VISIBILITY,
   SET_EDUCATION_DIALOG_INDEX,
   SET_EDUCATION_DEGREE_LEVEL,
-  SET_EDUCATION_DEGREE_INCLUSIONS,
   SET_USER_PAGE_DIALOG_VISIBILITY,
   SET_SHOW_EDUCATION_DELETE_DIALOG,
   SET_SHOW_WORK_DELETE_DIALOG,
   SET_DELETION_INDEX,
   SET_SHOW_WORK_DELETE_ALL_DIALOG,
-  SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
   SET_PROFILE_STEP,
   SET_USER_MENU_OPEN,
   SET_SEARCH_FILTER_VISIBILITY,
@@ -32,31 +30,19 @@ import {
   setEducationDialogVisibility,
   setEducationDialogIndex,
   setEducationDegreeLevel,
-  setEducationDegreeInclusions,
   setUserPageDialogVisibility,
   setShowEducationDeleteDialog,
   setShowWorkDeleteDialog,
   setDeletionIndex,
   setShowWorkDeleteAllDialog,
-  setShowEducationDeleteAllDialog,
   setProfileStep,
   setUserMenuOpen,
   setSearchFilterVisibility,
   setEmailDialogVisibility,
 } from '../actions/ui';
-import { receiveGetUserProfileSuccess } from '../actions/profile';
 import { INITIAL_UI_STATE } from '../reducers/ui';
-import {
-  HIGH_SCHOOL,
-  ASSOCIATE,
-  BACHELORS,
-  MASTERS,
-  DOCTORATE,
-  USER_PROFILE_RESPONSE,
-  PROFILE_STEP_LABELS,
-} from '../constants';
+import { PROFILE_STEP_LABELS } from '../constants';
 import rootReducer from '../reducers';
-import * as util from '../util/util';
 
 import configureTestStore from 'redux-asserts';
 import { assert } from 'chai';
@@ -143,41 +129,7 @@ describe('ui reducers', () => {
         assert.deepEqual(state.educationDialogVisibility, false);
         assert.deepEqual(state.educationDialogIndex, -1);
         assert.deepEqual(state.educationDegreeLevel, '');
-        assert.deepEqual(
-          state.educationDegreeInclusions, {
-            [HIGH_SCHOOL]: false,
-            [ASSOCIATE]: false,
-            [BACHELORS]: false,
-            [MASTERS]: false,
-            [DOCTORATE]: false,
-          });
       });
-    });
-
-    it('has gets inclusions from the profile API, only if the username matches', () => {
-      const inclusions = {
-        [HIGH_SCHOOL]: false,
-        [ASSOCIATE]: false,
-        [BACHELORS]: false,
-        [MASTERS]: true,
-        [DOCTORATE]: false,
-      };
-
-      let calculateDegreeInclusionsStub = sandbox.stub(util, 'calculateDegreeInclusions');
-      calculateDegreeInclusionsStub.returns(inclusions);
-
-      store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, USER_PROFILE_RESPONSE));
-      assert(calculateDegreeInclusionsStub.calledWith(USER_PROFILE_RESPONSE));
-      assert.deepEqual(
-        store.getState().ui.educationDegreeInclusions,
-        inclusions
-      );
-    });
-
-    it("does not use inclusions from the API if username isn't SETTINGS.username", () => {
-      let calculateDegreeInclusionsStub = sandbox.stub(util, 'calculateDegreeInclusions');
-      store.dispatch(receiveGetUserProfileSuccess("other username", USER_PROFILE_RESPONSE));
-      assert(!calculateDegreeInclusionsStub.called);
     });
 
     it('should let you set education dialog visibility', () => {
@@ -195,22 +147,6 @@ describe('ui reducers', () => {
     it('should let you set education dialog index', () => {
       return dispatchThen(setEducationDialogIndex(3), [SET_EDUCATION_DIALOG_INDEX]).then(state => {
         assert.deepEqual(state.educationDialogIndex, 3);
-      });
-    });
-
-    it('should let you set degree inclusions', () => {
-      let newInclusions = {
-        [HIGH_SCHOOL]: true,
-        [ASSOCIATE]: false,
-        [BACHELORS]: true,
-        [MASTERS]: true,
-        [DOCTORATE]: true,
-      };
-      return dispatchThen(
-        setEducationDegreeInclusions(newInclusions),
-        [SET_EDUCATION_DEGREE_INCLUSIONS]
-      ).then(state => {
-        assert.deepEqual(state.educationDegreeInclusions, newInclusions);
       });
     });
   });
@@ -250,15 +186,14 @@ describe('ui reducers', () => {
   });
 
   describe('confirm delete all dialog', () => {
-    [
-      [setShowEducationDeleteAllDialog, SET_SHOW_EDUCATION_DELETE_ALL_DIALOG, s => s.showEducationDeleteAllDialog],
-      [setShowWorkDeleteAllDialog, SET_SHOW_WORK_DELETE_ALL_DIALOG, s => s.showWorkDeleteAllDialog],
-    ].forEach( ([actionCreator, action, accessor]) => {
-      [true, false].forEach( bool => {
-        it(`should let you ${action} to ${bool}`, () => {
-          return dispatchThen(actionCreator(bool), [action]).then(state => {
-            assert.deepEqual(accessor(state), bool);
-          });
+    let actionCreator = setShowWorkDeleteAllDialog,
+      action = SET_SHOW_WORK_DELETE_ALL_DIALOG,
+      accessor = s => s.showWorkDeleteAllDialog;
+
+    [true, false].forEach( bool => {
+      it(`should let you ${action} to ${bool}`, () => {
+        return dispatchThen(actionCreator(bool), [action]).then(state => {
+          assert.deepEqual(accessor(state), bool);
         });
       });
     });

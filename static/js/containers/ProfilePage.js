@@ -27,7 +27,7 @@ class ProfilePage extends ProfileFormContainer {
   currentStep: Function = (): string => {
     const { ui: { profileStep } } = this.props;
     return profileStep;
-  }
+  };
 
   stepTransitions: Function = (): [void|() => void, () => void] => {
     const { dispatch } = this.props;

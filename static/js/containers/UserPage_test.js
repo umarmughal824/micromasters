@@ -29,6 +29,7 @@ import {
   SET_SHOW_WORK_DELETE_DIALOG,
   SET_SHOW_EDUCATION_DELETE_DIALOG,
 } from '../actions/ui';
+import { USER_PROFILE_RESPONSE, HIGH_SCHOOL, DOCTORATE } from '../constants';
 import {
   generateNewEducation,
   generateNewWorkHistory,
@@ -36,22 +37,15 @@ import {
 } from '../util/util';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../util/api';
-import { USER_PROFILE_RESPONSE, HIGH_SCHOOL, DOCTORATE } from '../constants';
 import { workEntriesByDate, educationEntriesByDate } from '../util/sorting';
+import { modifyTextField, activeDeleteDialog } from '../util/test_utils';
 import ValidationAlert from '../components/ValidationAlert';
-import { modifyTextField } from '../util/test_utils';
 
 describe("UserPage", function() {
   this.timeout(5000);
 
   let listenForActions, renderComponent, helper, patchUserProfileStub;
   let userActions = [RECEIVE_GET_USER_PROFILE_SUCCESS, REQUEST_GET_USER_PROFILE];
-
-  let openDialog = () => {
-    return [...document.getElementsByClassName('deletion-confirmation')].find(dialog => (
-      dialog.style["left"] === "0px"
-    ));
-  };
 
   const confirmResumeOrder = (
     editButton,
@@ -89,7 +83,7 @@ describe("UserPage", function() {
     });
   };
 
-  describe ("Authenticated user page", () => {
+  describe("Authenticated user page", () => {
     beforeEach(() => {
       helper = new IntegrationTestHelper();
       listenForActions = helper.listenForActions.bind(helper);
@@ -270,13 +264,14 @@ describe("UserPage", function() {
 
 
     describe("Education History", () => {
+      let userProfile;
       let deleteButton = div => {
         return div.getElementsByClassName('profile-form')[1].
           getElementsByClassName('delete-button')[0];
       };
 
       beforeEach(() => {
-        let userProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
+        userProfile = Object.assign({}, _.cloneDeep(USER_PROFILE_RESPONSE), {
           username: SETTINGS.username
         });
         userProfile.education.push({
@@ -333,7 +328,7 @@ describe("UserPage", function() {
             SET_DELETION_INDEX
           ], () => {
             TestUtils.Simulate.click(button);
-            let dialog = openDialog();
+            let dialog = activeDeleteDialog();
             let cancelButton = dialog.getElementsByClassName('cancel-button')[0];
             TestUtils.Simulate.click(cancelButton);
           });
@@ -342,16 +337,17 @@ describe("UserPage", function() {
 
       it('should confirm deletion and let you continue', () => {
         return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let updatedProfile = _.cloneDeep(USER_PROFILE_RESPONSE);
-          updatedProfile.username = SETTINGS.username;
-          updatedProfile.education.splice(0,1);
+          let expectedProfile = _.cloneDeep(userProfile);
+          let sortedEducationEntries = educationEntriesByDate(expectedProfile.education);
+          let indexOfFirstEntry = sortedEducationEntries[0][0];
+          expectedProfile.education.splice(indexOfFirstEntry,1);
 
           patchUserProfileStub.throws("Invalid arguments");
-          patchUserProfileStub.withArgs(SETTINGS.username, updatedProfile).returns(
-            Promise.resolve(updatedProfile)
-          );
+          patchUserProfileStub.
+            withArgs(expectedProfile.username, expectedProfile).
+            returns(Promise.resolve(expectedProfile));
 
-          let button = deleteButton(div);
+          let firstEducationDeleteButton = deleteButton(div);
 
           return listenForActions([
             SET_DELETION_INDEX,
@@ -364,10 +360,10 @@ describe("UserPage", function() {
             REQUEST_PATCH_USER_PROFILE,
             RECEIVE_PATCH_USER_PROFILE_SUCCESS,
           ], () => {
-            TestUtils.Simulate.click(button);
-            let dialog = openDialog();
-            button = dialog.getElementsByClassName('delete-button')[0];
-            TestUtils.Simulate.click(button);
+            TestUtils.Simulate.click(firstEducationDeleteButton);
+            let dialog = activeDeleteDialog();
+            let confirmButton = dialog.getElementsByClassName('delete-button')[0];
+            TestUtils.Simulate.click(confirmButton);
           });
         });
       });
@@ -394,8 +390,7 @@ describe("UserPage", function() {
           let addButton = div.getElementsByClassName('profile-form')[1].
             querySelector('.mm-minor-action');
 
-          let updatedProfile = _.cloneDeep(USER_PROFILE_RESPONSE);
-          updatedProfile.username = SETTINGS.username;
+          let expectedProfile = _.cloneDeep(userProfile);
           let entry = Object.assign({}, generateNewEducation(HIGH_SCHOOL), {
             graduation_date: "1999-12-01",
             graduation_date_edit: {
@@ -411,12 +406,12 @@ describe("UserPage", function() {
             school_state_or_territory_edit: undefined,
             school_city: "FoobarVille"
           });
-          updatedProfile.education.push(entry);
+          expectedProfile.education.push(entry);
 
           patchUserProfileStub.throws("Invalid arguments");
-          patchUserProfileStub.withArgs(SETTINGS.username, updatedProfile).returns(
-            Promise.resolve(updatedProfile)
-          );
+          patchUserProfileStub.
+            withArgs(expectedProfile.username, expectedProfile).
+            returns(Promise.resolve(expectedProfile));
 
           let expectedActions = [
             START_PROFILE_EDIT,
@@ -501,7 +496,7 @@ describe("UserPage", function() {
             SET_DELETION_INDEX,
           ], () => {
             TestUtils.Simulate.click(button);
-            let dialog = openDialog();
+            let dialog = activeDeleteDialog();
             let cancelButton = dialog.getElementsByClassName('cancel-button')[0];
             TestUtils.Simulate.click(cancelButton);
           });
@@ -535,7 +530,7 @@ describe("UserPage", function() {
             RECEIVE_PATCH_USER_PROFILE_SUCCESS,
           ], () => {
             TestUtils.Simulate.click(deleteButton);
-            let dialog = openDialog();
+            let dialog = activeDeleteDialog();
             let button = dialog.getElementsByClassName('delete-button')[0];
             TestUtils.Simulate.click(button);
           });
@@ -655,18 +650,6 @@ describe("UserPage", function() {
 
           return listenForActions([SET_USER_PAGE_DIALOG_VISIBILITY], () => {
             TestUtils.Simulate.click(personalButton);
-          });
-        });
-      });
-
-      it('should not show the terms of service checkbox', () => {
-        return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let personalButton = div.querySelector('.edit-profile-holder').
-            getElementsByClassName('mdl-button')[0];
-
-          return listenForActions([SET_USER_PAGE_DIALOG_VISIBILITY], () => {
-            TestUtils.Simulate.click(personalButton);
-            assert.isNull(document.querySelector('.tos-checkbox'));
           });
         });
       });

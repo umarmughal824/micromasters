@@ -1,6 +1,5 @@
 // @flow
 /* global SETTINGS: false */
-import { RECEIVE_GET_USER_PROFILE_SUCCESS } from '../actions/profile';
 import {
   CLEAR_UI,
   UPDATE_DIALOG_TEXT,
@@ -14,7 +13,7 @@ import {
   SET_EDUCATION_DIALOG_VISIBILITY,
   SET_EDUCATION_DIALOG_INDEX,
   SET_EDUCATION_DEGREE_LEVEL,
-  SET_EDUCATION_DEGREE_INCLUSIONS,
+  SET_EDUCATION_LEVEL_ANSWERS,
 
   SET_USER_PAGE_DIALOG_VISIBILITY,
 
@@ -22,7 +21,6 @@ import {
   SET_SHOW_WORK_DELETE_DIALOG,
   SET_DELETION_INDEX,
   SET_SHOW_WORK_DELETE_ALL_DIALOG,
-  SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
 
   SET_PROFILE_STEP,
   SET_USER_MENU_OPEN,
@@ -30,15 +28,7 @@ import {
 
   SET_EMAIL_DIALOG_VISIBILITY,
 } from '../actions/ui';
-import {
-  HIGH_SCHOOL,
-  ASSOCIATE,
-  BACHELORS,
-  MASTERS,
-  DOCTORATE,
-  PERSONAL_STEP,
-} from '../constants';
-import { calculateDegreeInclusions } from '../util/util';
+import { PERSONAL_STEP } from '../constants';
 import type { Action } from '../flow/reduxTypes';
 
 export type UIState = {
@@ -47,7 +37,7 @@ export type UIState = {
   educationDialogVisibility:    boolean;
   educationDialogIndex:         number;
   educationDegreeLevel:         string;
-  educationDegreeInclusions:    {[key: string]: boolean};
+  educationLevelAnswers:        {};
   userPageDialogVisibility:     boolean;
   showWorkDeleteDialog:         boolean;
   showEducationDeleteDialog:    boolean;
@@ -69,13 +59,7 @@ export const INITIAL_UI_STATE: UIState = {
   educationDialogVisibility:  false,
   educationDialogIndex:       -1,
   educationDegreeLevel:       '',
-  educationDegreeInclusions: {
-    [HIGH_SCHOOL]: false,
-    [ASSOCIATE]: false,
-    [BACHELORS]: false,
-    [MASTERS]: false,
-    [DOCTORATE]: false,
-  },
+  educationLevelAnswers:      {},
   userPageDialogVisibility: false,
   showWorkDeleteDialog: false,
   showEducationDeleteDialog: false,
@@ -141,9 +125,9 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
     return Object.assign({}, state, {
       educationDegreeLevel: action.payload
     });
-  case SET_EDUCATION_DEGREE_INCLUSIONS:
+  case SET_EDUCATION_LEVEL_ANSWERS:
     return Object.assign({}, state, {
-      educationDegreeInclusions: action.payload
+      educationLevelAnswers: action.payload
     });
   case CLEAR_UI:
     return INITIAL_UI_STATE;
@@ -167,23 +151,9 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
       deletionIndex: action.payload
     });
   }
-  case RECEIVE_GET_USER_PROFILE_SUCCESS: {
-    const { profile, username } = action.payload;
-    if (SETTINGS.username === username) {
-      return Object.assign({}, state, {
-        educationDegreeInclusions: calculateDegreeInclusions(profile)
-      });
-    }
-    return state;
-  }
   case SET_SHOW_WORK_DELETE_ALL_DIALOG: {
     return Object.assign({}, state, {
       showWorkDeleteAllDialog: action.payload
-    });
-  }
-  case SET_SHOW_EDUCATION_DELETE_ALL_DIALOG: {
-    return Object.assign({}, state, {
-      showEducationDeleteAllDialog: action.payload
     });
   }
   case SET_PROFILE_STEP: {

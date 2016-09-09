@@ -63,7 +63,7 @@ export default class EducationDialog extends ProfileFormFields {
 
   editEducationForm: Function = (): void => {
     const {
-      ui: { educationDialogIndex},
+      ui: { educationDialogIndex },
       showLevelForm,
       profile: { education },
     } = this.props;

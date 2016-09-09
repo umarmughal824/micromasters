@@ -19,13 +19,12 @@ import {
   setEducationDialogVisibility,
   setEducationDialogIndex,
   setEducationDegreeLevel,
-  setEducationDegreeInclusions,
+  setEducationLevelAnswers,
   setUserPageDialogVisibility,
   setShowEducationDeleteDialog,
   setShowWorkDeleteDialog,
   setDeletionIndex,
   setShowWorkDeleteAllDialog,
-  setShowEducationDeleteAllDialog,
 } from '../actions/ui';
 import { createSimpleActionHelpers, createAsyncActionHelpers } from '../util/redux';
 import type { ActionHelpers, AsyncActionHelpers } from '../util/redux';
@@ -120,19 +119,18 @@ class ProfileFormContainer extends React.Component {
       ['setEducationDialogVisibility', setEducationDialogVisibility],
       ['setEducationDialogIndex', setEducationDialogIndex],
       ['setEducationDegreeLevel', setEducationDegreeLevel],
+      ['setEducationLevelAnswers', setEducationLevelAnswers],
       ['setUserPageDialogVisibility', setUserPageDialogVisibility],
       ['setShowEducationDeleteDialog', setShowEducationDeleteDialog],
       ['setShowWorkDeleteDialog', setShowWorkDeleteDialog],
       ['setDeletionIndex', setDeletionIndex],
       ['setShowWorkDeleteAllDialog', setShowWorkDeleteAllDialog],
-      ['setShowEducationDeleteAllDialog', setShowEducationDeleteAllDialog],
     ]);
   };
 
   asyncActionHelpers: Function = (): AsyncActionHelpers => {
     const { dispatch } = this.props;
     return createAsyncActionHelpers(dispatch, [
-      ['setEducationDegreeInclusions', setEducationDegreeInclusions],
       ['setWorkHistoryEdit', setWorkHistoryEdit],
     ]);
   };
