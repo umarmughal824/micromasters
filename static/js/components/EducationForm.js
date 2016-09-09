@@ -15,7 +15,6 @@ import {
   openNewEducationForm,
   deleteEducationEntry,
 } from '../util/editEducation';
-import { educationValidation } from '../util/validation';
 import { educationEntriesByDate } from '../util/sorting';
 import type { Option } from '../flow/generalTypes';
 import type {
@@ -27,7 +26,6 @@ import type {
 } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 import type { Validator, UIValidator } from '../util/validation';
-import type { AsyncActionHelper } from '../flow/reduxTypes';
 
 class EducationForm extends ProfileFormFields {
   props: {
@@ -40,8 +38,7 @@ class EducationForm extends ProfileFormFields {
     setEducationDialogVisibility:     () => void,
     setEducationDialogIndex:          () => void,
     setEducationDegreeLevel:          () => void,
-    setEducationDegreeInclusions:     AsyncActionHelper,
-    setShowEducationDeleteAllDialog:  (bool: boolean) => void,
+    setEducationLevelAnswers:         () => void,
     validator:                        Validator|UIValidator,
   };
 
@@ -57,30 +54,87 @@ class EducationForm extends ProfileFormFields {
     deleteEducationEntry.call(this);
   };
 
-  renderEducationLevel(level: Option): Array<React$Element<*>|void>|void {
+  educationLevelRadioSwitch: Function = (level: Object): React$Element<*> => {
     const {
-      ui: { educationDegreeInclusions },
-      profile: { education },
+      ui: { educationLevelAnswers }
     } = this.props;
-    if (educationDegreeInclusions[level.value]) {
-      let rows: Array<React$Element<*>|void> = [];
-      if (education !== undefined) {
-        let sorted = educationEntriesByDate(education);
-        rows = sorted.filter(([,entry]) => (
-          entry.degree_name === level.value
-        )).map(([index, entry]) => this.educationRow(entry, index));
+    let radioIconStyle = {'marginRight': '8px'};
+    let valueSelected = (level.value in educationLevelAnswers) ? "false" : null;
+    return (
+      <RadioButtonGroup
+        className={`profile-radio-switch ${level.value}`}
+        id={`profile-tab-education-switch-${level.value}`}
+        name={`profile-tab-education-switch-${level.value}`}
+        onChange={(event, value)=> this.handleRadioClick(value, level.value)}
+        valueSelected={valueSelected}
+      >
+        <RadioButton value={"true"} label="Yes" iconStyle={radioIconStyle} style={{'marginRight': '30px'}} />
+        <RadioButton value={"false"} label="No" iconStyle={radioIconStyle} style={{'marginRight': '15px'}} />
+      </RadioButtonGroup>
+    );
+  };
+
+  handleRadioClick(value: string, level: string): void {
+    const {
+      setEducationLevelAnswers,
+      ui: { educationLevelAnswers }
+    } = this.props;
+    if (value === "true") {
+      if (level in educationLevelAnswers) {
+        setEducationLevelAnswers(_.omit(educationLevelAnswers, [level]));
       }
-      rows.push(
-        <Cell col={12} className="profile-form-row" key={"I'm unique!"}>
-          <a
-            className="mm-minor-action"
-            onClick={() => this.openNewEducationForm(level.value, null)}
-          >
-            Add another
-          </a>
-        </Cell>
-      );
-      return rows;
+      this.openNewEducationForm(level, null);
+    } else {
+      setEducationLevelAnswers(Object.assign({}, educationLevelAnswers, {[level]: "No"}));
+    }
+  }
+
+  renderEducationQuestionForm(level: Option): React$Element<*> {
+    let label = level.label;
+    let prefix = label.toLowerCase().startsWith("a") ? "an" : "a";
+    let levelName = !label.endsWith("degree") ? `${label.toLowerCase()} degree` : label.toLowerCase();
+    return <Cell col={12} className="profile-card-header profile-form-row">
+      <span>
+        {`Do you have ${prefix} ${levelName}?`}
+      </span>
+      { this.educationLevelRadioSwitch(level) }
+    </Cell>;
+  }
+
+  renderEducationLevelEntries(level: Option): Array<React$Element<*>|void>|void {
+    const {
+      profile: { education }
+    } = this.props;
+    let rows: Array<React$Element<*>|void> = [];
+    if (education !== undefined) {
+      let sorted = educationEntriesByDate(education);
+      rows = sorted.filter(([,entry]) => (
+        entry.degree_name === level.value
+      )).map(([index, entry]) => this.educationRow(entry, index));
+    }
+    rows.unshift(
+      <Cell col={12} className="profile-form-row" key={`header-row`}>
+        <strong>{level.label}</strong>
+      </Cell>
+    );
+    rows.push(
+      <Cell col={12} className="profile-form-row" key={`add-row`}>
+        <a
+          className="mm-minor-action"
+          onClick={() => this.openNewEducationForm(level.value, null)}
+        >
+          Add degree
+        </a>
+      </Cell>
+    );
+    return rows;
+  }
+
+  renderEducationLevel(level: Option): Array<React$Element<*>|void>|React$Element<*>|void {
+    if (this.hasEducationAtLevel(level.value)) {
+      return this.renderEducationLevelEntries(level);
+    } else {
+      return this.renderEducationQuestionForm(level);
     }
   }
 
@@ -90,7 +144,6 @@ class EducationForm extends ProfileFormFields {
       // don't show new educations, wait until we saved on the server before showing them
       return;
     }
-
     let deleteEntry = () => this.openEducationDeleteDialog(index);
     let editEntry = () => this.openEditEducationForm(index);
     let validationAlert = () => {
@@ -118,124 +171,37 @@ class EducationForm extends ProfileFormFields {
     );
   };
 
-  closeDeleteAllEducationDialog: Function = (): void => {
+  hasEducationAtLevel(levelValue: string): boolean {
     const {
-      setEducationDegreeLevel,
-      setShowEducationDeleteAllDialog,
+      profile: { education }
     } = this.props;
-    setEducationDegreeLevel('');
-    setShowEducationDeleteAllDialog(false);
-  };
-
-  deleteAllEducationEntriesForLevel: Function = (): void => {
-    const {
-      profile,
-      saveProfile,
-      ui,
-      ui: { educationDegreeLevel, educationDegreeInclusions },
-      setEducationDegreeInclusions,
-    } = this.props;
-    let clone = _.cloneDeep(profile);
-    clone.education = clone.education.filter(entry => (
-      entry.degree_name !== educationDegreeLevel
-    ));
-    let newState = Object.assign({}, educationDegreeInclusions, {
-      [educationDegreeLevel]: false
-    });
-    setEducationDegreeInclusions(newState);
-    saveProfile(educationValidation, clone, ui);
-  };
-
-  educationLevelRadioSwitch: Function = (inclusions: any[], level: Object): React$Element<*> => {
-    return (
-      <RadioButtonGroup 
-        className={`profile-radio-switch ${level.value}`}
-        id={`profile-tab-education-switch-${level.value}`}
-        name={`profile-tab-education-switch-${level.value}`}
-        onChange={(event, value)=> this.handleRadioClick(value, level.value)}
-        valueSelected={String(inclusions[level.value])}
-      >
-        <RadioButton value={"true"} label="Yes" />
-        <RadioButton value={"false"} label="No" />
-      </RadioButtonGroup>
+    return !_.isUndefined(
+      education.find(entry => entry.degree_name === levelValue)
     );
-  };
-
-  handleRadioClick(value: string, level: string): void {
-    const {
-      ui: { educationDegreeInclusions },
-      setEducationDegreeInclusions,
-      setEducationDegreeLevel,
-      setShowEducationDeleteAllDialog,
-      profile: { education },
-      profile,
-      validator,
-      updateProfile,
-    } = this.props;
-
-    const stringToBool = s => s === "true";
-    if ( !education.find(entry => entry.degree_name === level) ) {
-      let newState = Object.assign({}, educationDegreeInclusions, {
-        [level]: stringToBool(value)
-      });
-      setEducationDegreeInclusions(newState).then(() => {
-        let clone = _.cloneDeep(profile);
-        updateProfile(clone, validator);
-      });
-    } else {
-      setEducationDegreeLevel(level);
-      setShowEducationDeleteAllDialog(true);
-    }
   }
 
   render() {
     let {
       profile,
-      ui: {
-        educationDegreeInclusions,
-        showEducationDeleteDialog,
-        showEducationDeleteAllDialog,
-        educationDegreeLevel,
-      }
+      ui: { showEducationDeleteDialog }
     } = this.props;
 
-    if (profile['education'] === undefined){
+    if (profile['education'] === undefined) {
       return null;
     }
 
-    let cardClass = level => {
-      if (!educationDegreeInclusions[level.value]) {
-        return 'collapsed';
-      }
-      return "";
-    };
-
-    let prefix = label => label.toLowerCase().startsWith("a") ? "an" : "a";
-    let levelName = (label) => (
-      !label.endsWith("degree") ? `${label.toLowerCase()} degree` : label.toLowerCase()
+    let cardClass = levelValue => (
+      this.hasEducationAtLevel(levelValue) ? '' : 'collapsed'
     );
 
     let levelsGrid = this.educationLevelOptions.map(level => (
-      <Card shadow={1} className={`profile-form ${cardClass(level)}`} key={level.label}>
+      <Card shadow={1} className={`profile-form ${cardClass(level.value)}`} key={level.label}>
         <Grid className="profile-form-grid">
-          <Cell col={12} className="profile-card-header profile-form-row">
-            <span>
-              {`Do you have ${prefix(level.label)} ${levelName(level.label)}?`}
-            </span>
-            { this.educationLevelRadioSwitch(educationDegreeInclusions, level) }
-          </Cell>
           {this.renderEducationLevel(level)}
         </Grid>
       </Card>
     ));
-    let levelLabel;
-    if ( educationDegreeLevel !== "" ) {
-      levelLabel = this.educationLevelOptions.find(level => (
-        level.value === educationDegreeLevel
-      )).label;
-    } else {
-      levelLabel = "";
-    }
+
     return (
       <div>
         <ConfirmDeletion
@@ -243,12 +209,6 @@ class EducationForm extends ProfileFormFields {
           open={showEducationDeleteDialog}
           close={this.closeConfirmDeleteDialog}
           confirmText="Delete this entry?"
-        />
-        <ConfirmDeletion
-          deleteFunc={this.deleteAllEducationEntriesForLevel}
-          open={showEducationDeleteAllDialog}
-          close={this.closeDeleteAllEducationDialog}
-          confirmText={`Delete all ${levelLabel} entries?`}
         />
         <EducationDialog {...this.props} showLevelForm={false} />
         {levelsGrid}

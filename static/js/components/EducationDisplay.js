@@ -69,7 +69,7 @@ export default class EducationDisplay extends ProfileFormFields {
         </div>
         <div className="col user-credentials row-padding">
           <div className="profile-row-date-range">
-            {`${dateFormat(entry.graduation_date)}`}
+            { dateFormat(entry.graduation_date) }
           </div>
           { userPrivilegeCheck(profile, icons, () => <div />) }
         </div>

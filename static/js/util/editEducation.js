@@ -41,9 +41,9 @@ export function openNewEducationForm(level: string, index: number) {
 }
 
 export function deleteEducationEntry () {
-  const { saveProfile, profile, ui, deletionIndex } = this.props;
+  const { saveProfile, profile, ui } = this.props;
   let clone = _.cloneDeep(profile);
-  clone['education'].splice(deletionIndex, 1);
+  clone['education'].splice(ui.deletionIndex, 1);
   saveProfile(educationValidation, clone, ui);
 }
 

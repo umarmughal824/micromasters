@@ -44,13 +44,8 @@ export const setEducationDialogIndex = createAction(SET_EDUCATION_DIALOG_INDEX);
 export const SET_EDUCATION_DEGREE_LEVEL = 'SET_EDUCATION_DEGREE_LEVEL';
 export const setEducationDegreeLevel = createAction(SET_EDUCATION_DEGREE_LEVEL);
 
-export const SET_EDUCATION_DEGREE_INCLUSIONS = 'SET_EDUCATION_DEGREE_INCLUSIONS';
-export const setEducationDegreeInclusions = (degreeInclusions: Object): Dispatcher<null> => {
-  return dispatch => {
-    dispatch({ type: SET_EDUCATION_DEGREE_INCLUSIONS, payload: degreeInclusions });
-    return Promise.resolve();
-  };
-};
+export const SET_EDUCATION_LEVEL_ANSWERS = 'SET_EDUCATION_LEVEL_ANSWERS';
+export const setEducationLevelAnswers = createAction(SET_EDUCATION_LEVEL_ANSWERS);
 
 export const SET_USER_PAGE_DIALOG_VISIBILITY = 'SET_USER_PAGE_DIALOG_VISIBILITY';
 export const setUserPageDialogVisibility = createAction(SET_USER_PAGE_DIALOG_VISIBILITY);
@@ -66,9 +61,6 @@ export const setDeletionIndex = createAction(SET_DELETION_INDEX);
 
 export const SET_SHOW_WORK_DELETE_ALL_DIALOG = 'SET_SHOW_WORK_DELETE_ALL_DIALOG';
 export const setShowWorkDeleteAllDialog = createAction(SET_SHOW_WORK_DELETE_ALL_DIALOG);
-
-export const SET_SHOW_EDUCATION_DELETE_ALL_DIALOG = 'SET_SHOW_EDUCATION_DELETE_ALL_DIALOG';
-export const setShowEducationDeleteAllDialog = createAction(SET_SHOW_EDUCATION_DELETE_ALL_DIALOG);
 
 export const SET_PROFILE_STEP = 'SET_PROFILE_STEP';
 export const setProfileStep = createAction(SET_PROFILE_STEP);
