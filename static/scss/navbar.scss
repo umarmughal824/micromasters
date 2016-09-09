@@ -48,13 +48,14 @@
   }
 
   a.mdl-layout__tab:hover {
-    color: white;
     border-bottom-color: white;
     border-left-color: white;
     border-right-color: whte;
     border-top-color: white;
+    color: white;
     outline-color: white;
     text-decoration: none;
+
     a:hover, a:focus {
       text-decoration: none;
     }
@@ -112,6 +113,7 @@
 
 $program_selector_border: #87ddae;
 $header_font_color: white;
+
 .program-selector {
   margin-left: 30px;
   font-size: 16px;
@@ -160,6 +162,6 @@ $header_font_color: white;
 }
 
 .navbar-collapse .btn {
+  margin: 26px 0 0 0;
   float:right;
-  margin:26px 0 0 0;
 }

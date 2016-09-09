@@ -111,7 +111,8 @@
     .col {
       &.user-credentials {
         width: 50%;
-        border-bottom: 1px #E2E2E2 solid;
+        border-bottom: 1px #e2e2e2 solid;
+
         margin-right: 10px;
         vertical-align: middle;
         padding-bottom: 13px;
@@ -169,6 +170,7 @@
   max-width: 450px;
   font-size: 14px;
 }
+
 .tooltip-link {
   color: $link-text;
   cursor: pointer;

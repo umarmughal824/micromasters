@@ -1,0 +1,36 @@
+options:
+  merge-default-rules: false
+files:
+  include: 'static/scss/**/*.scss'
+  ignore:
+    - 'static/scss/homepage.scss'
+rules:
+  extends-before-mixins: 2
+  extends-before-declarations: 2
+  placeholder-in-extend: 2
+  mixins-before-declarations:
+    - 2
+    -
+      exclude:
+        - breakpoint
+        - mq
+
+  no-warn: 1
+  no-debug: 1
+  no-important: 0
+  hex-notation:
+    - 2
+    -
+      style: lowercase
+  indentation:
+    - 2
+    -
+      size: 2
+  brace-style:
+    - 2
+    -
+      allow-single-line: false
+  empty-line-between-blocks:
+    - 2
+  space-before-brace:
+    - 2
