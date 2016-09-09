@@ -145,6 +145,24 @@ describe("ErrorMessage", () => {
           assert.equal(message, undefined);
         });
       });
+
+      it('shows an error if there are no programs', () => {
+        helper.dashboardStub.returns(Promise.resolve([]));
+
+        return renderComponent("/dashboard").then(([wrapper]) => {
+          let message = wrapper.find('.page-content').text();
+          assert(message.includes("Additional info: No program enrollment is available."));
+        });
+      });
+
+      it('shows an error if there is no matching current program enrollment', () => {
+        helper.enrollmentsGetStub.returns(Promise.resolve([]));
+
+        return renderComponent("/dashboard").then(([wrapper]) => {
+          let message = wrapper.find('.page-content').text();
+          assert(message.includes("Additional info: No program enrollment is available."));
+        });
+      });
     });
 
     describe('profile page', () => {
@@ -219,6 +237,17 @@ describe("ErrorMessage", () => {
           }).then(() => {
             confirmErrorMessage(div, `500 ${errorString}`);
           });
+        });
+      });
+    });
+
+    describe('learners page', () => {
+      it('shows an error if there is no matching current program enrollment', () => {
+        helper.enrollmentsGetStub.returns(Promise.resolve([]));
+
+        return renderComponent("/learners").then(([wrapper]) => {
+          let message = wrapper.find('.page-content').text();
+          assert(message.includes("Additional info: No program enrollment is available."));
         });
       });
     });

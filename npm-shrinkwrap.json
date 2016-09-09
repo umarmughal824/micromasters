@@ -4002,6 +4002,11 @@
         }
       }
     },
+    "react-input-autosize": {
+      "version": "1.1.0",
+      "from": "react-input-autosize@>=1.1.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/react-input-autosize/-/react-input-autosize-1.1.0.tgz"
+    },
     "react-loader": {
       "version": "2.4.0",
       "from": "react-loader@2.4.0",
@@ -4049,6 +4054,11 @@
       "from": "react-router-bootstrap@0.23.0",
       "resolved": "https://registry.npmjs.org/react-router-bootstrap/-/react-router-bootstrap-0.23.0.tgz"
     },
+    "react-select": {
+      "version": "1.0.0-rc.1",
+      "from": "react-select@latest",
+      "resolved": "https://registry.npmjs.org/react-select/-/react-select-1.0.0-rc.1.tgz"
+    },
     "react-tap-event-plugin": {
       "version": "1.0.0",
       "from": "react-tap-event-plugin@1.0.0",
@@ -4070,6 +4080,11 @@
           "resolved": "https://registry.npmjs.org/whatwg-fetch/-/whatwg-fetch-0.9.0.tgz"
         }
       }
+    },
+    "react-tooltip": {
+      "version": "3.1.6",
+      "from": "react-tooltip@>=3.1.6 <4.0.0",
+      "resolved": "https://registry.npmjs.org/react-tooltip/-/react-tooltip-3.1.6.tgz"
     },
     "react-virtualized": {
       "version": "7.11.6",
@@ -4183,6 +4198,11 @@
       "version": "0.0.8",
       "from": "redux-asserts@0.0.8",
       "resolved": "https://registry.npmjs.org/redux-asserts/-/redux-asserts-0.0.8.tgz"
+    },
+    "redux-localstorage": {
+      "version": "0.4.1",
+      "from": "redux-localstorage@latest",
+      "resolved": "https://registry.npmjs.org/redux-localstorage/-/redux-localstorage-0.4.1.tgz"
     },
     "redux-logger": {
       "version": "2.6.1",
@@ -5198,9 +5218,9 @@
       "resolved": "https://registry.npmjs.org/wowjs/-/wowjs-1.1.3.tgz",
       "dependencies": {
         "animate.css": {
-          "version": "3.5.1",
+          "version": "3.5.2",
           "from": "animate.css@latest",
-          "resolved": "https://registry.npmjs.org/animate.css/-/animate.css-3.5.1.tgz"
+          "resolved": "https://registry.npmjs.org/animate.css/-/animate.css-3.5.2.tgz"
         }
       }
     },

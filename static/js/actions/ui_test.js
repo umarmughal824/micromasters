@@ -17,6 +17,8 @@ import {
   SET_USER_MENU_OPEN,
   SET_SEARCH_FILTER_VISIBILITY,
   SET_EMAIL_DIALOG_VISIBILITY,
+  SET_ENROLL_DIALOG_VISIBILITY,
+  SET_ENROLL_SELECTED_PROGRAM,
 
   clearUI,
   updateDialogText,
@@ -36,6 +38,8 @@ import {
   setUserMenuOpen,
   setSearchFilterVisibility,
   setEmailDialogVisibility,
+  setEnrollDialogVisibility,
+  setEnrollSelectedProgram,
 } from '../actions/ui';
 import { assertCreatedActionHelper } from './util';
 
@@ -59,7 +63,9 @@ describe('generated UI action helpers', () => {
       [setProfileStep, SET_PROFILE_STEP],
       [setUserMenuOpen, SET_USER_MENU_OPEN],
       [setSearchFilterVisibility, SET_SEARCH_FILTER_VISIBILITY],
-      [setEmailDialogVisibility, SET_EMAIL_DIALOG_VISIBILITY]
+      [setEmailDialogVisibility, SET_EMAIL_DIALOG_VISIBILITY],
+      [setEnrollDialogVisibility, SET_ENROLL_DIALOG_VISIBILITY],
+      [setEnrollSelectedProgram, SET_ENROLL_SELECTED_PROGRAM],
     ].forEach(assertCreatedActionHelper);
   });
 });

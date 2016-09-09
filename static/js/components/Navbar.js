@@ -1,14 +1,29 @@
 // @flow
 import React from 'react';
-import UserMenu from '../containers/UserMenu';
 import { HeaderTabs, Header, HeaderRow, Tab } from 'react-mdl';
 
-class Navbar extends React.Component {
+import type { DashboardState } from '../flow/dashboardTypes';
+import type {
+  ProgramEnrollment,
+  ProgramEnrollmentsState,
+} from '../flow/enrollmentTypes';
+import ProgramSelector from './ProgramSelector';
+import UserMenu from '../containers/UserMenu';
+
+export default class Navbar extends React.Component {
   props: {
-    empty:      boolean,
-    children?:  React$Element<*>[],
-    pathname:   string,
-    changeUrl:  (i: number) => void,
+    empty:                       boolean,
+    children?:                   React$Element<*>[],
+    pathname:                    string,
+    changeUrl:                   (i: number) => void,
+    currentProgramEnrollment:    ProgramEnrollment,
+    dashboard:                   DashboardState,
+    enrollments:                 ProgramEnrollmentsState,
+    enrollDialogVisibility:      boolean,
+    enrollSelectedProgram:       ?number,
+    setCurrentProgramEnrollment: (enrollment: ProgramEnrollment) => void,
+    setEnrollDialogVisibility:   (open: boolean) => void,
+    setEnrollSelectedProgram:    (programId: number) => void,
   };
 
   makeTabs: Function = (): React$Element<*>[] => {
@@ -33,7 +48,15 @@ class Navbar extends React.Component {
   render () {
     const {
       changeUrl,
+      currentProgramEnrollment,
+      dashboard,
+      enrollDialogVisibility,
+      enrollSelectedProgram,
+      enrollments,
       pathname,
+      setCurrentProgramEnrollment,
+      setEnrollDialogVisibility,
+      setEnrollSelectedProgram,
     } = this.props;
     const onChange = tabId => {
       let path = this.tabs[tabId].path;
@@ -48,6 +71,16 @@ class Navbar extends React.Component {
               <span className="mdl-layout-title">
                 MicroMasters
               </span>
+              <ProgramSelector
+                currentProgramEnrollment={currentProgramEnrollment}
+                dashboard={dashboard}
+                enrollDialogVisibility={enrollDialogVisibility}
+                enrollSelectedProgram={enrollSelectedProgram}
+                enrollments={enrollments}
+                setCurrentProgramEnrollment={setCurrentProgramEnrollment}
+                setEnrollDialogVisibility={setEnrollDialogVisibility}
+                setEnrollSelectedProgram={setEnrollSelectedProgram}
+              />
             </div>
             { this.userMenu() }
           </HeaderRow>
@@ -61,5 +94,3 @@ class Navbar extends React.Component {
     );
   }
 }
-
-export default Navbar;

@@ -27,6 +27,9 @@ import {
   SET_SEARCH_FILTER_VISIBILITY,
 
   SET_EMAIL_DIALOG_VISIBILITY,
+
+  SET_ENROLL_DIALOG_VISIBILITY,
+  SET_ENROLL_SELECTED_PROGRAM,
 } from '../actions/ui';
 import { PERSONAL_STEP } from '../constants';
 import type { Action } from '../flow/reduxTypes';
@@ -51,6 +54,8 @@ export type UIState = {
   searchFilterVisibility:       {[s: string]: boolean};
   tosDialogVisibility:          boolean;
   emailDialogVisibility:        boolean;
+  enrollDialogVisibility:       boolean;
+  enrollSelectedProgram:       ?number;
 };
 
 export const INITIAL_UI_STATE: UIState = {
@@ -73,6 +78,8 @@ export const INITIAL_UI_STATE: UIState = {
   searchFilterVisibility: {},
   tosDialogVisibility: false,
   emailDialogVisibility: false,
+  enrollDialogVisibility: false,
+  enrollSelectedProgram: null,
 };
 
 export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
@@ -174,6 +181,16 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
   case SET_EMAIL_DIALOG_VISIBILITY: {
     return Object.assign({}, state, {
       emailDialogVisibility: action.payload
+    });
+  }
+  case SET_ENROLL_SELECTED_PROGRAM: {
+    return Object.assign({}, state, {
+      enrollSelectedProgram: action.payload
+    });
+  }
+  case SET_ENROLL_DIALOG_VISIBILITY: {
+    return Object.assign({}, state, {
+      enrollDialogVisibility: action.payload
     });
   }
   default:

@@ -10,6 +10,7 @@ import _ from 'lodash';
 import type { Dispatch } from 'redux';
 import R from 'ramda';
 
+import ErrorMessage from '../components/ErrorMessage';
 import LearnerSearch from '../components/LearnerSearch';
 import { setSearchFilterVisibility, setEmailDialogVisibility } from '../actions/ui';
 import {
@@ -22,13 +23,21 @@ import {
 import { emailValidation } from '../util/validation';
 import type { UIState } from '../reducers/ui';
 import type { EmailState } from '../flow/emailTypes';
+import type { ProgramEnrollment } from '../flow/enrollmentTypes';
 import { getCookie } from '../util/api';
+
+const searchKit = new SearchkitManager(SETTINGS.search_url, {
+  httpHeaders: {
+    'X-CSRFToken': getCookie('csrftoken')
+  }
+});
 
 class LearnerSearchPage extends React.Component {
   props: {
-    ui:       UIState,
-    email:    EmailState,
-    dispatch: Dispatch,
+    currentProgramEnrollment: ProgramEnrollment,
+    dispatch:                 Dispatch,
+    email:                    EmailState,
+    ui:                       UIState,
   };
 
   checkFilterVisibility: Function = (filterName: string): boolean => {
@@ -88,14 +97,14 @@ class LearnerSearchPage extends React.Component {
   render () {
     const {
       ui: { emailDialogVisibility },
+      currentProgramEnrollment,
       email
     } = this.props;
 
-    let searchKit = new SearchkitManager(SETTINGS.search_url, {
-      httpHeaders: {
-        'X-CSRFToken': getCookie('csrftoken')
-      }
-    });
+    if (_.isNil(currentProgramEnrollment)) {
+      return <ErrorMessage errorInfo={{user_message: "No program enrollment is available."}} />;
+    }
+
     return (
       <div>
         <SearchkitProvider searchkit={searchKit}>
@@ -108,6 +117,7 @@ class LearnerSearchPage extends React.Component {
             updateEmailEdit={this.updateEmailEdit}
             sendEmail={this.closeEmailComposeAndSend}
             email={email}
+            currentProgramEnrollment={currentProgramEnrollment}
           />
         </SearchkitProvider>
       </div>
@@ -117,8 +127,9 @@ class LearnerSearchPage extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    ui:     state.ui,
-    email:  state.email,
+    ui:                       state.ui,
+    email:                    state.email,
+    currentProgramEnrollment: state.currentProgramEnrollment,
   };
 };
 
