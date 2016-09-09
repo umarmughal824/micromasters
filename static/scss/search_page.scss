@@ -34,7 +34,7 @@
   .search-sidebar {
     display: flex;
     flex-direction: column;
-    background-color: $bg-light-gray;
+    background-color: none;
     
     .mdl-card {
       padding: 10px;
@@ -118,8 +118,16 @@
         background-color: $histogramgrey;
       }
 
-      .rc-slider-step {
+      .sk-range-histogram__bar {
+        background-color: $mm-brand-bg;
+      }
+
+      .is-out-of-bounds {
         background-color: $medgrey;
+      }
+
+      .rc-slider-step {
+        background-color: #d0d0d0;
       }
 
       .rc-slider-handle {
@@ -215,9 +223,8 @@
     .result-info > span {
       white-space: nowrap;
       font-size: 15px;
-      font-weight: 400;
+      font-weight: 300;
       padding-left: 15px;
-      font-style: italic; 
       color: $font-gray;
     }
 
@@ -250,7 +257,7 @@
     }
 
     .learner-result {
-      padding: 13px 0;
+      padding: 11px 0;
       font-size: 14px;
       position: relative;
 
@@ -260,12 +267,13 @@
 
       .learner-name {
         font-weight: 500;
-        font-size: 16px;
+        font-size: 15px;
       }
 
       .learner-location {
         color: $font-gray;
-        ont-size: 14px;
+        font-size: 14px;
+        font-weight: 300;
       }
 
       .learner-grade span {
@@ -278,20 +286,20 @@
         justify-content: center;
 
         .percent {
-          font-size: 22px;
-          font-weight: 600;
+          font-size: 19px;
+          font-weight: 500;
           margin-bottom: 4px;
         }
 
         .hint {
-          font-size: 14px;
-          font-weight: 400;
+          font-size: 12px;
+          font-weight: 300;
           color: $font-gray;
         }
       }
 
       .mdl-cell .card-image {
-        height: 35px;
+        height: 43px;
       }
     }
   }

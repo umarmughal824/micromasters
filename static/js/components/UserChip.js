@@ -9,7 +9,7 @@ import { mstr } from '../util/sanctuary';
 import type { Profile } from '../flow/profileTypes';
 
 const UserChip = ({ profile }: {profile: Profile}): React$Element<*> => (
-  <Card className="user-chip" shadow={2}>
+  <Card className="user-chip">
     <div className="profile-info">
       <span className="name">
         { getPreferredName(profile) }
