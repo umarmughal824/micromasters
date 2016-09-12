@@ -162,13 +162,10 @@ class App extends React.Component {
       dashboard,
     } = this.props;
     let { children } = this.props;
-    const { router } = this.context;
-
     let empty = false;
     if (PROFILE_REGEX.test(pathname)) {
       empty = true;
     }
-    let pushUrl = url => router.push(url);
 
     if (enrollments.getStatus === FETCH_FAILURE) {
       children = <ErrorMessage errorInfo={enrollments.getErrorInfo} />;
@@ -176,14 +173,12 @@ class App extends React.Component {
     }
     return <div id="app">
       <Navbar
-        changeUrl={pushUrl}
         currentProgramEnrollment={currentProgramEnrollment}
         dashboard={dashboard}
         empty={empty}
         enrollDialogVisibility={enrollDialogVisibility}
         enrollSelectedProgram={enrollSelectedProgram}
         enrollments={enrollments}
-        pathname={pathname}
         setCurrentProgramEnrollment={this.setCurrentProgramEnrollment}
         setEnrollDialogVisibility={this.setEnrollDialogVisibility}
         setEnrollSelectedProgram={this.setEnrollSelectedProgram}
