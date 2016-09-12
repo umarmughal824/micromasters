@@ -1,7 +1,6 @@
 // @flow
 import _ from 'lodash';
 import moment from 'moment';
-import { Maybe, Nothing } from 'sanctuary';
 
 import type {
   Profile,
@@ -18,6 +17,8 @@ import {
   EMPLOYMENT_STEP,
   PRIVACY_STEP,
 } from '../constants';
+import { S } from './sanctuary';
+const { Maybe, Nothing } = S;
 
 let handleNestedValidation = (profile: Profile, keys, nestedKey: string) => {
   let nestedFields = index => (

@@ -1,8 +1,8 @@
 // @flow
-import S, { Maybe, Just, Nothing } from 'sanctuary';
 import { assert } from 'chai';
 
-import { allJust, mstr } from './sanctuary';
+import { S, allJust, mstr } from './sanctuary';
+const { Maybe, Just, Nothing } = S;
 
 export const assertMaybeEquality = (m1: Maybe, m2: Maybe) => {
   assert(m1.equals(m2), "Maybe's should be equal");

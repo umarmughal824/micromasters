@@ -6,7 +6,8 @@ import ga from 'react-ga';
 import striptags from 'striptags';
 import _ from 'lodash';
 import iso3166 from 'iso-3166-2';
-import { Maybe, Just, Nothing } from 'sanctuary';
+import { S } from './sanctuary';
+const { Maybe, Just, Nothing } = S;
 
 import {
   EDUCATION_LEVELS,

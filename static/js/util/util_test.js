@@ -1,9 +1,10 @@
 /* global SETTINGS: false */
 import { assert } from 'chai';
 import React from 'react';
-import { Just } from 'sanctuary';
 import R from 'ramda';
 import _ from 'lodash';
+import { S } from './sanctuary';
+const { Just } = S;
 
 import {
   makeStrippedHtml,

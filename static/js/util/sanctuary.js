@@ -1,12 +1,15 @@
 // @flow
 import R from 'ramda';
-import S, { Maybe, Just, Nothing } from 'sanctuary';
+import { create, env } from 'sanctuary';
+
+const checkTypes = process.env.NODE_ENV !== 'production';
+export const S = create({ checkTypes: checkTypes, env: env });
 
 /*
  * returns Just(items) if all items are Just, else Nothing
  */
-export const allJust = R.curry((items: Maybe[]) => (
-  R.all(S.isJust)(items) ? Just(items) : Nothing()
+export const allJust = R.curry((items: S.Maybe[]) => (
+  R.all(S.isJust)(items) ? S.Just(items) : S.Nothing()
 ));
 
 /*

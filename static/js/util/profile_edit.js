@@ -5,7 +5,8 @@ import _ from 'lodash';
 import TextField from 'material-ui/TextField';
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
 import Checkbox from 'material-ui/Checkbox';
-import S, { Maybe } from 'sanctuary';
+import { S } from './sanctuary';
+const { Maybe } = S;
 import R from 'ramda';
 
 import { ISO_8601_FORMAT } from '../constants';

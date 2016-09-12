@@ -2,7 +2,8 @@ import { assert } from 'chai';
 import _ from 'lodash';
 import sinon from 'sinon';
 import moment from 'moment';
-import { Just } from 'sanctuary';
+import { S } from './sanctuary';
+const { Just } = S;
 
 import {
   personalValidation,
