@@ -326,15 +326,9 @@ class TestProgramPage(ViewsTests):
             assert js_settings['gaTrackingID'] == ga_tracking_id
 
     def test_login_button(self):
-        """Verify that we see a login button if not logged in"""
+        """Verify that we see a login button"""
         response = self.client.get(self.program_page.url)
-        self.assertContains(response, "Sign in with edX.org")
-
-    def test_sign_out_button(self):
-        """Verify that we see a sign out button if logged in"""
-        self.create_and_login_user()
-        response = self.client.get(self.program_page.url)
-        self.assertContains(response, 'Sign out')
+        self.assertContains(response, "Sign Up Now")
 
     def test_program_thumbnail_default(self):
         """Verify that a default thumbnail shows up for a live program"""

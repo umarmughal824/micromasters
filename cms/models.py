@@ -81,6 +81,16 @@ class ProgramPage(Page):
         null=True,
         help_text="If this field is set the program page link on the home page will go to this URL."
     )
+    program_home_page_url = models.URLField(
+        blank=True,
+        null=True,
+        help_text="A url for an external homepage. There will be a link to this url from the program page."
+    )
+    program_contact_email = models.EmailField(
+        blank=True,
+        null=True,
+        help_text="A contact email for the program."
+    )
     background_image = models.ForeignKey(
         Image,
         null=True,
@@ -89,7 +99,6 @@ class ProgramPage(Page):
         related_name='+',
         help_text='The hero image on the program page'
     )
-    contact_us = RichTextField(blank=True)
     title_over_image = RichTextField(blank=True)
 
     thumbnail_image = models.ForeignKey(
@@ -109,8 +118,9 @@ class ProgramPage(Page):
         FieldPanel('program'),
         FieldPanel('thumbnail_image'),
         FieldPanel('external_program_page_url'),
+        FieldPanel('program_home_page_url'),
+        FieldPanel('program_contact_email'),
         FieldPanel('background_image'),
-        FieldPanel('contact_us'),
         FieldPanel('title_over_image'),
         InlinePanel('courses', label='Program Courses'),
         InlinePanel('faqs', label='Frequently Asked Questions'),
