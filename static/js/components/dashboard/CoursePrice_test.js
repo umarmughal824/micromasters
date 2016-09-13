@@ -27,7 +27,7 @@ describe('CoursePrice', () => {
     let course = findCourse(course => course.status === STATUS_ENROLLED_NOT_VERIFIED);
     assert.equal(course.runs[0].price, 50.00);
 
-    const wrapper = shallow(<CoursePrice course={course}/>);
+    const wrapper = shallow(<CoursePrice course={course}  />);
     assert.equal(wrapper.find(".course-price-display").text(), "$50");
   });
 
@@ -40,4 +40,12 @@ describe('CoursePrice', () => {
       assert.equal(wrapper.find(".course-price-display").length, 0);
     });
   }
+
+  it('tooltip display for status enrolled-not-verified', () => {
+    let course = findCourse(course => course.status === STATUS_ENROLLED_NOT_VERIFIED);
+    const wrapper = shallow(<CoursePrice course={course} />);
+    let tooltip = wrapper.find(".help");
+    assert.equal(tooltip.length, 1);
+  });
+
 });

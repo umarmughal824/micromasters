@@ -22,7 +22,6 @@ describe('CourseRow', () => {
       checkout,
     });
     assert.deepEqual(wrapper.find(CourseDescription).props(), {
-      now,
       course,
     });
     assert.deepEqual(wrapper.find(CoursePrice).props(), {

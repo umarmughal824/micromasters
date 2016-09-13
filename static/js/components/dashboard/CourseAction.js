@@ -2,6 +2,7 @@
 // @flow
 import React from 'react';
 import moment from 'moment';
+import Button from 'react-mdl/lib/Button';
 
 import type { Course, CourseRun } from '../../flow/programTypes';
 import {
@@ -20,22 +21,24 @@ export default class CourseAction extends React.Component {
 
   makeEnrollButton = (text: string, run: CourseRun, disabled: boolean) => {
     const { checkout } = this.props;
-    let onClick;
+    let buttonProps = {};
+
     if (!disabled) {
-      onClick = () => {
+      buttonProps.onClick = () => {
         checkout(run.course_id);
       };
+    } else {
+      buttonProps.disabled = true;
     }
-    return <span>
-      <button
-        className="dashboard-button"
-        disabled={disabled}
-        onClick={onClick}
-      >
-        {text}
-      </button>
-      <span className="sr-only"> in {run.title}</span>
-    </span>;
+
+    return (
+      <span>
+        <Button className="dashboard-button" {...buttonProps}>
+          {text}
+        </Button>
+        <span className="sr-only"> in {run.title}</span>
+      </span>
+    );
   };
 
   render() {
