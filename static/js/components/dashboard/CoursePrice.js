@@ -1,8 +1,6 @@
 // @flow
 import React from 'react';
 import _ from 'lodash';
-import ReactTooltip from 'react-tooltip';
-import IconButton from 'react-mdl/lib/IconButton';
 
 import type {
   Course,
@@ -13,27 +11,12 @@ import {
   STATUS_OFFERED,
 } from '../../constants';
 import { formatPrice } from '../../util/util';
+import { courseListToolTip } from './util';
 
 export default class CoursePrice extends React.Component {
   props: {
     course: Course
   };
-
-  renderTooltip(text: string): React$Element<*>|void {
-    return (
-      <div>
-        <span className="tooltip-link"
-          data-tip
-          data-for='course-detail'>
-          <IconButton name="help" className="help"/>
-        </span>
-        <ReactTooltip id="course-detail" effect="solid"
-          event="click" globalEventOff="click" className="tooltip">
-          {text}
-        </ReactTooltip>
-      </div>
-    );
-  }
 
   courseTooltipText(courseStatus: string): string {
     if (courseStatus === STATUS_ENROLLED) {
@@ -72,7 +55,7 @@ export default class CoursePrice extends React.Component {
     }
 
     if (text) {
-      tooltipDisplay = this.renderTooltip(text);
+      tooltipDisplay = courseListToolTip(text, 'course-detail');
     }
 
     return (

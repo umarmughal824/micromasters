@@ -133,6 +133,7 @@ def get_info_for_program(program, user, enrollments, certificates):
         "id": program.pk,
         "description": program.description,
         "title": program.title,
+        "financial_aid_availability": program.financial_aid_availability,
         "courses": []
     }
     for course in program.course_set.all():
