@@ -36,6 +36,7 @@ export function boundRadioGroupField(keySet: string[], label: string, options: O
   const styles = {
     labelStyle: {
       left: -10,
+      width: '100%'
     }
   };
 
