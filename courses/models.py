@@ -14,6 +14,7 @@ class Program(models.Model):
     title = models.CharField(max_length=255)
     live = models.BooleanField(default=False)
     description = models.TextField(blank=True, null=True)
+    financial_aid_availability = models.BooleanField(default=False, null=False)
 
     def __str__(self):
         return self.title
