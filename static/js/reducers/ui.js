@@ -28,12 +28,19 @@ import {
 
   SET_EMAIL_DIALOG_VISIBILITY,
 
+  SET_ENROLL_DIALOG_ERROR,
   SET_ENROLL_DIALOG_VISIBILITY,
+  SET_ENROLL_MESSAGE,
   SET_ENROLL_SELECTED_PROGRAM,
 } from '../actions/ui';
 import { PERSONAL_STEP } from '../constants';
 import type { Action } from '../flow/reduxTypes';
 
+export type UIDialog = {
+  title?: string;
+  text?: string;
+  visible?: boolean;
+};
 export type UIState = {
   workHistoryEdit:              boolean;
   workDialogVisibility:         boolean;
@@ -45,7 +52,7 @@ export type UIState = {
   showWorkDeleteDialog:         boolean;
   showEducationDeleteDialog:    boolean;
   deletionIndex:                ?number;
-  dialog:                       {};
+  dialog:                       UIDialog;
   showWorkDeleteAllDialog:      boolean;
   showEducationDeleteAllDialog: boolean;
   profileStep:                  string;
@@ -54,8 +61,10 @@ export type UIState = {
   searchFilterVisibility:       {[s: string]: boolean};
   tosDialogVisibility:          boolean;
   emailDialogVisibility:        boolean;
+  enrollDialogError:            ?string;
   enrollDialogVisibility:       boolean;
-  enrollSelectedProgram:       ?number;
+  enrollMessage:                ?string;
+  enrollSelectedProgram:        ?number;
 };
 
 export const INITIAL_UI_STATE: UIState = {
@@ -78,7 +87,9 @@ export const INITIAL_UI_STATE: UIState = {
   searchFilterVisibility: {},
   tosDialogVisibility: false,
   emailDialogVisibility: false,
+  enrollDialogError: null,
   enrollDialogVisibility: false,
+  enrollMessage: null,
   enrollSelectedProgram: null,
 };
 
@@ -181,6 +192,16 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
   case SET_EMAIL_DIALOG_VISIBILITY: {
     return Object.assign({}, state, {
       emailDialogVisibility: action.payload
+    });
+  }
+  case SET_ENROLL_DIALOG_ERROR: {
+    return Object.assign({}, state, {
+      enrollDialogError: action.payload
+    });
+  }
+  case SET_ENROLL_MESSAGE: {
+    return Object.assign({}, state, {
+      enrollMessage: action.payload
     });
   }
   case SET_ENROLL_SELECTED_PROGRAM: {

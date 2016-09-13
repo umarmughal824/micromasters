@@ -3,6 +3,7 @@ import React from 'react';
 import _ from 'lodash';
 import Select from 'react-select';
 
+import NewEnrollmentDialog from './NewEnrollmentDialog';
 import type { DashboardState } from '../flow/dashboardTypes';
 import type {
   ProgramEnrollment,
@@ -14,24 +15,31 @@ const ENROLL_SENTINEL = 'enroll';
 
 export default class ProgramSelector extends React.Component {
   props: {
+    addProgramEnrollment:        (programId: number) => void,
     currentProgramEnrollment:    ProgramEnrollment,
     enrollments:                 ProgramEnrollmentsState,
+    enrollDialogError:           ?string,
     enrollDialogVisibility:      boolean,
     enrollSelectedProgram:       ?number,
     dashboard:                   DashboardState,
     setCurrentProgramEnrollment: (enrollment: ProgramEnrollment) => void,
+    setEnrollDialogError:        (error: ?string) => void,
     setEnrollDialogVisibility:   (open: boolean) => void,
-    setEnrollSelectedProgram:    (programId: number) => void,
+    setEnrollSelectedProgram:    (programId: ?number) => void,
   };
 
   selectEnrollment = (option: Option): void => {
     const {
       enrollments: { programEnrollments },
       setCurrentProgramEnrollment,
+      setEnrollDialogError,
       setEnrollDialogVisibility,
+      setEnrollSelectedProgram,
     } = this.props;
     if (option.value === ENROLL_SENTINEL) {
       setEnrollDialogVisibility(true);
+      setEnrollSelectedProgram(null);
+      setEnrollDialogError(null);
     } else {
       let selected = programEnrollments.find(enrollment => enrollment.id === option.value);
       setCurrentProgramEnrollment(selected);
@@ -46,7 +54,7 @@ export default class ProgramSelector extends React.Component {
     } = this.props;
 
     let currentId;
-    if (currentProgramEnrollment !== null) {
+    if (!_.isNil(currentProgramEnrollment)) {
       currentId = currentProgramEnrollment.id;
     }
 
@@ -70,11 +78,20 @@ export default class ProgramSelector extends React.Component {
 
   render() {
     let {
-      enrollments: { programEnrollments },
+      addProgramEnrollment,
+      dashboard,
+      enrollments,
+      enrollments: {programEnrollments},
+      enrollDialogError,
+      enrollDialogVisibility,
+      enrollSelectedProgram,
       currentProgramEnrollment,
+      setEnrollDialogError,
+      setEnrollDialogVisibility,
+      setEnrollSelectedProgram,
     } = this.props;
     let currentId;
-    if (currentProgramEnrollment !== null) {
+    if (!_.isNil(currentProgramEnrollment)) {
       currentId = currentProgramEnrollment.id;
     }
 
@@ -92,6 +109,17 @@ export default class ProgramSelector extends React.Component {
           placeholder={selected ? selected.title : ""}
           clearable={false}
           tabSelectsValue={false}
+        />
+        <NewEnrollmentDialog
+          addProgramEnrollment={addProgramEnrollment}
+          dashboard={dashboard}
+          enrollments={enrollments}
+          enrollDialogError={enrollDialogError}
+          enrollDialogVisibility={enrollDialogVisibility}
+          enrollSelectedProgram={enrollSelectedProgram}
+          setEnrollDialogError={setEnrollDialogError}
+          setEnrollDialogVisibility={setEnrollDialogVisibility}
+          setEnrollSelectedProgram={setEnrollSelectedProgram}
         />
       </div>;
     }

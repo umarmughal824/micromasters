@@ -1,10 +1,10 @@
-// @flow
 /* global SETTINGS: false */
 import React from 'react';
 import type { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import Loader from 'react-loader';
 import { Card, CardTitle } from 'react-mdl/lib/Card';
+import _ from 'lodash';
 
 import { FETCH_PROCESSING, checkout } from '../actions';
 import { createForm } from '../util/util';
@@ -48,12 +48,12 @@ class DashboardPage extends React.Component {
     let dashboardContent;
     // if there are no errors coming from the backend, simply show the dashboard
     let program;
-    if (currentProgramEnrollment !== null) {
+    if (!_.isNil(currentProgramEnrollment)) {
       program = dashboard.programs.find(program => program.id === currentProgramEnrollment.id);
     }
     if (dashboard.errorInfo !== undefined) {
       errorMessage = <ErrorMessage errorInfo={dashboard.errorInfo}/>;
-    } else if (program === null || program === undefined) {
+    } else if (_.isNil(program)) {
       errorMessage = <ErrorMessage errorInfo={{user_message: "No program enrollment is available."}} />;
     } else {
       dashboardContent = (

@@ -1,4 +1,6 @@
 // @flow
+import _ from 'lodash';
+
 import {
   REQUEST_GET_PROGRAM_ENROLLMENTS,
   RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
@@ -54,18 +56,20 @@ export const currentProgramEnrollment = (state: any = null, action: Action) => {
   case SET_CURRENT_PROGRAM_ENROLLMENT:
     return action.payload;
   case RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS:
-    if (state !== null) {
+    if (!_.isNil(state)) {
       let enrollment = action.payload.find(enrollment => enrollment.id === state.id);
       if (enrollment === undefined) {
         // current enrollment not found in list
         state = null;
       }
     }
-    if (state === null && action.payload.length > 0) {
+    if (_.isNil(state) && action.payload.length > 0) {
       // no current enrollment selected, pick first from list if there are any
       state = action.payload[0];
     }
     return state;
+  case RECEIVE_ADD_PROGRAM_ENROLLMENT_SUCCESS:
+    return action.payload;
   default:
     return state;
   }
