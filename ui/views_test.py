@@ -196,12 +196,11 @@ class DashboardTests(ViewsTests):
         """
         profile = self.create_and_login_user()
 
-        for role in Role.ASSIGNABLE_ROLES:
-            Role.objects.create(
-                program=ProgramFactory.create(),
-                user=profile.user,
-                role=role,
-            )
+        Role.objects.create(
+            program=ProgramFactory.create(),
+            user=profile.user,
+            role=Role.DEFAULT_ROLE,
+        )
 
         resp = self.client.get(DASHBOARD_URL)
         js_settings = json.loads(resp.context['js_settings_json'])
