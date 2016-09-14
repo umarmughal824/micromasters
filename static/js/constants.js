@@ -524,13 +524,11 @@ export const EDUCATION_LEVELS = [
 export const PERSONAL_STEP = 'personal';
 export const EMPLOYMENT_STEP = 'employment';
 export const EDUCATION_STEP = 'education';
-export const PRIVACY_STEP = 'privacy';
 
 export const PROFILE_STEP_LABELS = new Map([
   [PERSONAL_STEP, "Personal"],
   [EDUCATION_STEP, "Education"],
-  [EMPLOYMENT_STEP, "Professional"],
-  [PRIVACY_STEP, "Profile Privacy"]
+  [EMPLOYMENT_STEP, "Professional"]
 ]);
 
 export const DEFAULT_OPTION_LIMIT_COUNT = 10;
