@@ -552,3 +552,5 @@ export const PROGRAM_ENROLLMENTS = [
     title: DASHBOARD_RESPONSE[2].title
   },
 ];
+
+export const SEARCH_FILTER_DEFAULT_VISIBILITY = true;

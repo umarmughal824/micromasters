@@ -171,7 +171,7 @@ export default class LearnerSearch extends SearchkitComponent {
                   </button>
                   <HitsStats component={HitsCount} />
                 </Cell>
-                <Cell col={2}></Cell>
+                <Cell col={2} />
                 <Cell col={4} className="pagination-sort">
                   <SortingSelector options={sortOptions} />
                   <Pagination />
