@@ -110,6 +110,7 @@ INSTALLED_APPS = (
     'courses',
     'dashboard',
     'ecommerce',
+    'financialaid',
     'profiles',
     'roles',
     'search',
