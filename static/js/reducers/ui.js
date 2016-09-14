@@ -9,6 +9,7 @@ import {
   SET_WORK_HISTORY_EDIT,
   SET_WORK_DIALOG_VISIBILITY,
   SET_WORK_DIALOG_INDEX,
+  SET_WORK_HISTORY_ANSWER,
 
   SET_EDUCATION_DIALOG_VISIBILITY,
   SET_EDUCATION_DIALOG_INDEX,
@@ -20,7 +21,6 @@ import {
   SET_SHOW_EDUCATION_DELETE_DIALOG,
   SET_SHOW_WORK_DELETE_DIALOG,
   SET_DELETION_INDEX,
-  SET_SHOW_WORK_DELETE_ALL_DIALOG,
 
   SET_PROFILE_STEP,
   SET_USER_MENU_OPEN,
@@ -42,19 +42,18 @@ export type UIDialog = {
   visible?: boolean;
 };
 export type UIState = {
-  workHistoryEdit:              boolean;
-  workDialogVisibility:         boolean;
   educationDialogVisibility:    boolean;
   educationDialogIndex:         number;
   educationDegreeLevel:         string;
   educationLevelAnswers:        {};
+  workHistoryEdit:              boolean;
+  workDialogVisibility:         boolean;
+  workHistoryAnswer:            ?boolean;
   userPageDialogVisibility:     boolean;
   showWorkDeleteDialog:         boolean;
   showEducationDeleteDialog:    boolean;
   deletionIndex:                ?number;
   dialog:                       UIDialog;
-  showWorkDeleteAllDialog:      boolean;
-  showEducationDeleteAllDialog: boolean;
   profileStep:                  string;
   workDialogIndex:              ?number;
   userMenuOpen:                 boolean;
@@ -68,19 +67,18 @@ export type UIState = {
 };
 
 export const INITIAL_UI_STATE: UIState = {
-  workHistoryEdit:            true,
-  workDialogVisibility:       false,
   educationDialogVisibility:  false,
   educationDialogIndex:       -1,
   educationDegreeLevel:       '',
   educationLevelAnswers:      {},
+  workHistoryEdit:            true,
+  workDialogVisibility:       false,
+  workHistoryAnswer:          null,
   userPageDialogVisibility: false,
   showWorkDeleteDialog: false,
   showEducationDeleteDialog: false,
   deletionIndex: null,
   dialog: {},
-  showWorkDeleteAllDialog: false,
-  showEducationDeleteAllDialog: false,
   profileStep: PERSONAL_STEP,
   workDialogIndex:  null,
   userMenuOpen: false,
@@ -131,6 +129,10 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
     return Object.assign({}, state, {
       workDialogIndex: action.payload
     });
+  case SET_WORK_HISTORY_ANSWER:
+    return Object.assign({}, state, {
+      workHistoryAnswer: action.payload
+    });
   case SET_EDUCATION_DIALOG_VISIBILITY:
     return Object.assign({}, state, {
       educationDialogVisibility: action.payload
@@ -167,11 +169,6 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
   case SET_DELETION_INDEX: {
     return Object.assign({}, state, {
       deletionIndex: action.payload
-    });
-  }
-  case SET_SHOW_WORK_DELETE_ALL_DIALOG: {
-    return Object.assign({}, state, {
-      showWorkDeleteAllDialog: action.payload
     });
   }
   case SET_PROFILE_STEP: {

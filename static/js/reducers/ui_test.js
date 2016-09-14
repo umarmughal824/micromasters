@@ -17,7 +17,6 @@ import {
   setShowEducationDeleteDialog,
   setShowWorkDeleteDialog,
   setDeletionIndex,
-  setShowWorkDeleteAllDialog,
   setProfileStep,
   setUserMenuOpen,
   setSearchFilterVisibility,
@@ -137,12 +136,6 @@ describe('ui reducers', () => {
 
     it('should let you set a deletion index', () => {
       assertReducerResultState(setDeletionIndex, ui => ui.deletionIndex, null);
-    });
-  });
-
-  describe('confirm delete all dialog', () => {
-    it(`should let you show work history delete all dialog`, () => {
-      assertReducerResultState(setShowWorkDeleteAllDialog, ui => ui.showWorkDeleteAllDialog, false);
     });
   });
 
