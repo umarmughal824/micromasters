@@ -129,6 +129,7 @@ export default class LearnerSearch extends SearchkitComponent {
                   id="birth_location"
                   title="Place of Birth"
                   field="profile.birth_country"
+                  operator="OR"
                   itemComponent={CountryRefinementOption}
                 />
               </FilterVisibilityToggle>
