@@ -16,6 +16,14 @@ body.app-media {
   a.btn-login {
     text-decoration: none;
   }
+  .header-dashboard-link {
+    float: right;
+    margin: 33px 40px 0 0;
+    a {
+      font-weight: 400;
+      font-size: 22px;
+    }
+  }
 }
 .white-button{
   color: $mm-brand-bg !important;

@@ -19,7 +19,7 @@
         <div class="header-page-name">MIT MicroMasters</div>
         <div class="nav-utility pull-right">
           {% if authenticated %}
-          <a class="btn btn-danger" href="/logout">
+          <a class="btn btn-login white-button" href="/logout">
             Sign out
           </a>
           {% else %}
@@ -30,11 +30,10 @@
           {% endif %}
         </div>
         {% if authenticated %}
-        <ul class="nav navbar-toolbar navbar-left">
-          <li class="active">
+          <div class="header-dashboard-link">
             <a href="/dashboard">Dashboard</a>
-          </li>
-        </ul>
+          </div>
+
         {% endif %}
       </div>
     </div>
@@ -82,7 +81,7 @@
           </div>
 
           <h5>ONLINE LEARNING</h5>
-          <p>Take graduate level courses remotely, from anywhere, and meet other students from around the world.</p>
+          <p>Take graduate-level courses remotely, from anywhere, and meet other students from around the world.</p>
         </div>
         <div class="col-md-3 " style="margin:0 40px;">
           <div class="reasons-images-wrap">
@@ -90,7 +89,7 @@
           </div>
 
           <h5>BLENDED MASTERS</h5>
-          <p>The MicroMasters credential is the first step to earning a Blended Masters degree from MIT</p>
+          <p>The MicroMasters credential is the first step to earning a Blended Masters degree from MIT.</p>
 
         </div>
         <div class="col-md-3">
@@ -124,7 +123,7 @@
                         <img src="{% static 'images/course-thumbnail.png' %}"
                              alt="course image for {{ program }}" width="345" height="265"/>
                       {% endif %}
-                      <div class="program-title">{{ program }}</div>
+                      <div class="program-title">{{ program.programpage.title }}</div>
                       <div class="num-courses">
                         {% if program.course_set.count == 1 %}
                           <span class="meta-courses">{{ program.course_set.count }} course</span>
@@ -139,9 +138,7 @@
                 {% endif %}
                 <div class="program-thumbnail-description">
                   {% if program.description %}
-                    {{ program.description }}
-                  {% elif program.programpage.description %}
-                    {{ program.programpage.description|richtext }}
+                    <p>{{ program.description }}</p>
                   {% else %}
                     <p>No description available for this program.</p>
                   {% endif %}
@@ -161,9 +158,9 @@
               <h3>More Coming Soon!</h3>
             </div>
             <div class="program-thumbnail-description">
-              <p>MIT plans to bring more MicroMasters programs to motivated learnerslike you.
+              <p>MIT plans to bring more MicroMasters programs to motivated learners like you.
                 Sign up for our mailing list to hear about new MicroMasters programs.</p>
-              <button type="button" class="btn white-button">SING UP FOR MAILING LIST</button>
+              <button type="button" class="btn white-button">SIGN UP FOR MAILING LIST</button>
             </div>
           </div>
 
