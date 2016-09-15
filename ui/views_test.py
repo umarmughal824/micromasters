@@ -95,7 +95,7 @@ class TestHomePage(ViewsTests):
     def test_login_button(self):
         """Verify that we see a login button if not logged in"""
         response = self.client.get('/')
-        self.assertContains(response, "Sign in with edX.org")
+        self.assertContains(response, "SIGN UP")
 
     def test_sign_out_button(self):
         """Verify that we see a sign out button if logged in"""
@@ -366,7 +366,7 @@ class TestProgramPage(ViewsTests):
         self.program_page.save()
 
         resp = self.client.get('/')
-        self.assertContains(resp, image.get_rendition('fill-690x530').url)
+        self.assertContains(resp, image.get_rendition('fill-345x265').url)
 
 
 class TestUsersPage(ViewsTests):
