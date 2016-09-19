@@ -44,14 +44,13 @@
       <div class="double-column">
         <div class="first-column">
           {{ page.description|richtext }}
+          {% if page.faculty_members.count > 0 %}
           <div id='faculty-carousel' data-slick='{"slidesToShow": 4, "slidesToScroll": 4}'>
-            <div><h3>1</h3></div>
-            <div><h3>2</h3></div>
-            <div><h3>3</h3></div>
-            <div><h3>4</h3></div>
-            <div><h3>5</h3></div>
-            <div><h3>6</h3></div>
+            {% for faculty in page.faculty_members.all %}
+            <div><h3>{{ faculty.name }}</h3></div>
+            {% endfor %}
           </div>
+          {% endif %}
         </div>
         <div class="second-column">
           <div class="info-box course-info">

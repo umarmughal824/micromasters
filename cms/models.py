@@ -163,7 +163,7 @@ class ProgramCourse(Orderable):
     Courses listed for the program
     """
     program_page = ParentalKey(ProgramPage, related_name='courses')
-    title = models.CharField(max_length=255, default='')
+    title = models.CharField(max_length=255, blank=True)
     description = RichTextField(blank=True, null=True)
     content_panels = Page.content_panels + [
         MultiFieldPanel(
