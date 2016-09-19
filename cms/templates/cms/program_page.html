@@ -44,13 +44,6 @@
       <div class="double-column">
         <div class="first-column">
           {{ page.description|richtext }}
-          {% if page.faculty_members.count > 0 %}
-          <div id='faculty-carousel' data-slick='{"slidesToShow": 4, "slidesToScroll": 4}'>
-            {% for faculty in page.faculty_members.all %}
-            <div><h3>{{ faculty.name }}</h3></div>
-            {% endfor %}
-          </div>
-          {% endif %}
         </div>
         <div class="second-column">
           <div class="info-box course-info">
@@ -94,6 +87,30 @@
           </div>
         </div>
       </div>
+      {% if page.faculty_members.count > 0 %}
+        <div class="single-column-wide faculty-section">
+          <h3>Faculty</h3>
+          {# if page.program.faculty_description|length > 0 #}
+          <p>{{ page.faculty_description }}</p>
+          {# endif #}
+          <div id='faculty-carousel' class='faculty-carousel'>
+            {% for faculty in page.faculty_members.all %}
+            {% image faculty.image max-500x387 as faculty_photo %}
+            <div class='faculty-tile' style='background-image:url({{ faculty_photo.url }})'>
+              {# image faculty.image max-500x387 #}
+              <h4>
+                {% if faculty.title|length > 0 %}
+                  {{ faculty.name }}, {{ faculty.title }}
+                {% else %}
+                  {{ faculty.name }}
+                {% endif %}
+              </h4>
+              <p>{{ faculty.short_bio }}</p>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
     </div>
 
     <div class="mdl-tabs__panel" id="faq-panel">

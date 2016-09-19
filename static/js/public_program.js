@@ -7,5 +7,9 @@ require('slick-carousel');
 // require('slick-carousel/slick/slick-theme.scss');
 
 $(document).ready(function() {
-  $('#faculty-carousel').slick();
+  $('#faculty-carousel').slick({
+    infinite: true,
+    dots: true,
+    slidesToShow: 2
+  });
 });
