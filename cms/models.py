@@ -147,6 +147,7 @@ class ProgramPage(Page):
 
         context["style_src"] = get_bundle_url(request, "style.js")
         context["public_src"] = get_bundle_url(request, "public.js")
+        context["public_program_src"] = get_bundle_url(request, "public_program.js")
         context["style_public_src"] = get_bundle_url(request, "style_public.js")
         context["authenticated"] = not request.user.is_anonymous()
         context["signup_dialog_src"] = get_bundle_url(request, "signup_dialog.js")

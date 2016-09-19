@@ -10,6 +10,7 @@ module.exports = {
     'dashboard': ['babel-polyfill', './static/js/dashboard'],
     'signup_dialog': './static/js/signup_dialog',
     'public': ['babel-polyfill', './static/js/public'],
+    'public_program': ['babel-polyfill', './static/js/public_program'],
     'style': './static/js/style',
     'style_public': './static/js/style_public',
   },
@@ -26,8 +27,12 @@ module.exports = {
       },  // to transform JSX into JS
       {
         test: /\.(svg|ttf|woff|woff2|eot)$/,
-        exclude: /node_modules/,
         loader: 'url-loader'
+      },
+      {
+        test: /\.(gif)$/,
+        loader: "url-loader",
+        query: { mimetype: "image/gif" }
       },
       {
         test: /\.scss$/,

@@ -4,6 +4,9 @@ import 'style!css!react-mdl/extra/material.css';
 // react-virtualized requirement
 import 'style!css!react-virtualized/styles.css';
 
+import 'style!css!slick-carousel/slick/slick.css';
+import 'style!css!slick-carousel/slick/slick-theme.css';
+
 // react-select styles
 import 'style!css!react-select/dist/react-select.css';
 
