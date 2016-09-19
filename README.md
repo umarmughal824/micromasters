@@ -190,7 +190,7 @@ This is required to initialize the Elasticsearch index and mappings. This comman
 to be run when the Elasticsearch container is first created. It may also be run afterwards to clear and recreate
 existing indexes, and to reindex relevant documents.
 
-#### 5) Run the container
+#### 6) Run the container
 
 Start Django, PostgreSQL, and other related services:
 
