@@ -1,7 +1,7 @@
 """
 Models for the Financial Aid App
 """
-
+import datetime
 from django.contrib.auth.models import User
 from django.db import (
     models,
@@ -10,12 +10,55 @@ from django.db import (
 from jsonfield import JSONField
 
 from courses.models import (
-    CourseRun,
     Program,
 )
 
 
-class Tier(models.Model):
+class TimestampedModelQuerySet(models.query.QuerySet):
+    """
+    Subclassed QuerySet for TimestampedModelManager
+    """
+    def update(self, **kwargs):
+        """
+        Automatically update updated_on timestamp when .update(). This is because .update()
+        does not go through .save(), thus will not auto_now, because it happens on the
+        database level without loading objects into memory.
+        """
+        if "updated_on" not in kwargs:
+            kwargs["updated_on"] = datetime.datetime.utcnow()
+        return super().update(**kwargs)
+
+
+class TimestampedModelManager(models.Manager):
+    """
+    Subclassed manager for TimestampedModel
+    """
+    def update(self, **kwargs):
+        """
+        Allows access to TimestampedModelQuerySet's update method on the manager
+        """
+        return self.get_queryset().update(**kwargs)
+
+    def get_queryset(self):
+        """
+        Returns custom queryset
+        """
+        return TimestampedModelQuerySet(self.model, using=self._db)
+
+
+class TimestampedModel(models.Model):
+    """
+    Base model for create/update timestamps
+    """
+    objects = TimestampedModelManager()
+    created_on = models.DateTimeField(auto_now_add=True)  # UTC
+    updated_on = models.DateTimeField(auto_now=True)  # UTC
+
+    class Meta:
+        abstract = True
+
+
+class Tier(TimestampedModel):
     """
     The possible tiers to be used
     """
@@ -23,7 +66,7 @@ class Tier(models.Model):
     description = models.TextField()
 
 
-class TierProgram(models.Model):
+class TierProgram(TimestampedModel):
     """
     The tiers for discounted pricing assigned to a program
     """
@@ -51,15 +94,23 @@ class FinancialAidStatus:
     """Statuses for the Financial Aid model"""
     CREATED = 'created'
     AUTO_APPROVED = 'auto-approved'
-    PENDING_DOCS = 'pending_docs'
-    PENDING_MANUAL_APPROVAL = 'pending_manual_approval'
+    PENDING_DOCS = 'pending-docs'
+    PENDING_MANUAL_APPROVAL = 'pending-manual-approval'
     APPROVED = 'approved'
     REJECTED = 'rejected'
 
     ALL_STATUSES = [CREATED, APPROVED, AUTO_APPROVED, REJECTED, PENDING_DOCS, PENDING_MANUAL_APPROVAL]
+    STATUS_MESSAGES_DICT = {
+        CREATED: "Created Applications",
+        AUTO_APPROVED: "Auto-approved Applications",
+        PENDING_DOCS: "Incomplete Applications",
+        PENDING_MANUAL_APPROVAL: "Pending Applications",
+        APPROVED: "Approved Applications",
+        REJECTED: "Rejected Applications",
+    }
 
 
-class FinancialAid(models.Model):
+class FinancialAid(TimestampedModel):
     """
     An application for financial aid/personal pricing
     """
@@ -78,28 +129,7 @@ class FinancialAid(models.Model):
     date_exchange_rate = models.DateTimeField(null=True)
 
 
-class Coupon(models.Model):
-    """
-    Coupons stored to be used by the users who are approved to use financial aid
-    """
-    course_run = models.ForeignKey(CourseRun, null=False)
-    code = models.CharField(null=False, max_length=50)
-    url = models.TextField()
-    sku = models.CharField(null=False, max_length=50)
-    user = models.ForeignKey(User, null=True)
-    financial_aid = models.ForeignKey(FinancialAid, null=True)
-
-
-class Document(models.Model):
-    """
-    Documents to attach to a financial aid application
-    """
-    financial_aid = models.ForeignKey(FinancialAid, null=True)
-    name = models.TextField()
-    url = models.FileField()
-
-
-class FinancialAidAudit(models.Model):
+class FinancialAidAudit(TimestampedModel):
     """
     Audit table for the Financial Aid
     """

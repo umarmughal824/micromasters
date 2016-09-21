@@ -41,6 +41,7 @@ urlpatterns = [
     url(r'^api/v0/financialaid/$', IncomeValidationView.as_view(), name='financialaid_api'),
     url(r'^api/v0/order_fulfillment/$', OrderFulfillmentView.as_view(), name='order-fulfillment'),
     url(r'^status/', include('server_status.urls')),
+    url(r'^financial_aid/', include('financialaid.urls')),
     # Wagtail
     url(r'^cms/', include(wagtailadmin_urls)),
     url(r'^documents/', include(wagtaildocs_urls)),
