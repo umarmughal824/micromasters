@@ -20,17 +20,25 @@ export default class ProgressWidget extends React.Component {
     totalCourses: number
   ): React$Element<*> => {
     const radiusForMeasures = radius - strokeWidth / 2;
-    const width = radius * 2;
-    const height = radius * 2;
-    const viewBox = `0 0 ${width} ${height}`;
+    const radiusDots = radiusForMeasures + 7;
+    const width = radius * 2.5;
+    const height = radius * 2.5;
+    const viewBox = `-13 -13 ${width} ${height}`;
     const dashArray = radiusForMeasures * Math.PI * 2;
     const dashOffset = dashArray - dashArray * totalPassedCourses / (totalCourses || 1);
 
     return (
-      <svg className="circular-progress-widget"
-        width={radius * 2}
-        height={radius * 2}
+      <svg className="circular-progress-widget-svg"
+        width={radius * 2.5}
+        height={radius * 2.5}
         viewBox={viewBox}>
+        <circle
+          cx={radius}
+          cy={radius}
+          stroke="white"
+          r={radiusDots}
+          strokeWidth='5px'
+          style={{ strokeDasharray: '1, 14' }} />
         <circle
           className="circular-progress-widget-bg"
           cx={radius}
@@ -67,7 +75,7 @@ export default class ProgressWidget extends React.Component {
       <Card className="progress-widget" shadow={0}>
         <CardTitle className="progress-title">Progress</CardTitle>
         <div className="circular-progress-widget">
-          {this.circularProgressWidget(63, 7, totalPassedCourses, totalCourses)}
+          {this.circularProgressWidget(60, 6, totalPassedCourses, totalCourses)}
         </div>
         <p className="text-course-complete">Courses complete</p>
         <p className="heading-paragraph">
