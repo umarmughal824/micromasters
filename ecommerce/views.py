@@ -40,7 +40,8 @@ class CheckoutView(APIView):
             raise ValidationError("Missing course_id")
 
         order = create_unfulfilled_order(course_id, request.user)
-        payload = generate_cybersource_sa_payload(order)
+        dashboard_url = request.build_absolute_uri('/dashboard/')
+        payload = generate_cybersource_sa_payload(order, dashboard_url)
 
         return Response({
             'payload': payload,
