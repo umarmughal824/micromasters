@@ -31,17 +31,6 @@ class StatusTest(ESTestCase):
     """
     Tests for the different status classes
     """
-    # pylint: disable= no-self-use
-    def test_course_status(self):
-        """test for CourseStatus"""
-        for attr in ('PASSED', 'NOT_PASSED', 'CURRENT_GRADE', 'UPGRADE', 'OFFERED',):
-            assert hasattr(api.RunStatus, attr)
-
-    def test_course_status_all_statuses(self):
-        """test for CourseStatus.all_statuses"""
-        all_constants = [value for name, value in vars(api.RunStatus).items()
-                         if not name.startswith('_') and isinstance(value, str)]
-        assert sorted(all_constants) == sorted(api.RunStatus.all_statuses())
 
     def test_course_run_user_status(self):
         """test for CourseRunUserStatus"""
@@ -74,7 +63,6 @@ class StatusTest(ESTestCase):
         """
         assert isinstance(api.CourseFormatConditionalFields.ASSOCIATED_FIELDS, dict)
         for key in api.CourseFormatConditionalFields.ASSOCIATED_FIELDS:
-            assert key in api.RunStatus.all_statuses()
             assert isinstance(api.CourseFormatConditionalFields.ASSOCIATED_FIELDS[key], list)
             for assoc in api.CourseFormatConditionalFields.ASSOCIATED_FIELDS[key]:
                 assert isinstance(assoc, dict)
@@ -142,13 +130,13 @@ class FormatRunTest(CourseTests):
         self.assertIn('price', format_courserun_offered_course)
         self.assertEqual(format_courserun_offered_course['price'], course_price)
 
-        format_courserun_no_verified_course = api.format_courserun_for_dashboard(crun, api.RunStatus.UPGRADE)
+        format_courserun_no_verified_course = api.format_courserun_for_dashboard(crun, api.RunStatus.CAN_UPGRADE)
         self.assertIn('price', format_courserun_no_verified_course)
         self.assertEqual(format_courserun_no_verified_course['price'], course_price)
 
         self.assertNotIn('price', api.format_courserun_for_dashboard(crun, api.RunStatus.PASSED))
         self.assertNotIn('price', api.format_courserun_for_dashboard(crun, api.RunStatus.NOT_PASSED))
-        self.assertNotIn('price', api.format_courserun_for_dashboard(crun, api.RunStatus.CURRENT_GRADE))
+        self.assertNotIn('price', api.format_courserun_for_dashboard(crun, api.RunStatus.CURRENTLY_ENROLLED))
 
     def test_format_run(self):
         """Test for format_courserun_for_dashboard with passed run and position"""
@@ -269,7 +257,7 @@ class FormatRunTest(CourseTests):
 
 
 class CourseRunStatusTest(CourseTests):
-    """Tests for get_intermediate_run_status"""
+    """Tests for get_course_run_status"""
 
     @classmethod
     def setUpTestData(cls):
@@ -283,7 +271,7 @@ class CourseRunStatusTest(CourseTests):
         cls.empty_certs = MagicMock(spec=Certificates)
 
     def test_verified_grade(self):
-        """test for get_intermediate_run_status for an enrolled and verified current course"""
+        """test for get_course_run_status for an enrolled and verified current course"""
         # create a run that is current
         crun = self.create_run(
             start=self.now-timedelta(weeks=1),
@@ -292,11 +280,11 @@ class CourseRunStatusTest(CourseTests):
             enr_end=self.now+timedelta(weeks=1),
             edx_key="course-v1:edX+DemoX+Demo_Course"
         )
-        run_status = api.get_intermediate_run_status(crun, self.enrollments, self.empty_certs)
-        assert run_status == api.IntermediateRunStatus.CURRENTLY_ENROLLED
+        run_status = api.get_course_run_status(crun, self.enrollments, self.empty_certs)
+        assert run_status == api.RunStatus.CURRENTLY_ENROLLED
 
     def test_verified_read_cert(self):
-        """test for get_intermediate_run_status for a finished course"""
+        """test for get_course_run_status for a finished course"""
         # create a run that is past
         crun = self.create_run(
             start=self.now-timedelta(weeks=52),
@@ -305,11 +293,11 @@ class CourseRunStatusTest(CourseTests):
             enr_end=self.now-timedelta(weeks=53),
             edx_key="course-v1:edX+DemoX+Demo_Course"
         )
-        run_status = api.get_intermediate_run_status(crun, self.enrollments, self.empty_certs)
-        assert run_status == api.IntermediateRunStatus.COMPLETED
+        run_status = api.get_course_run_status(crun, self.enrollments, self.empty_certs)
+        assert run_status == api.RunStatus.PASSED
 
     def test_verified_read_will_attend(self):
-        """test for get_intermediate_run_status for an enrolled and verified future course"""
+        """test for get_course_run_status for an enrolled and verified future course"""
         # create a run that is future
         crun = self.create_run(
             start=self.now+timedelta(weeks=52),
@@ -318,11 +306,11 @@ class CourseRunStatusTest(CourseTests):
             enr_end=self.now+timedelta(weeks=50),
             edx_key="course-v1:edX+DemoX+Demo_Course"
         )
-        run_status = api.get_intermediate_run_status(crun, self.enrollments, self.empty_certs)
-        assert run_status == api.IntermediateRunStatus.WILL_ATTEND
+        run_status = api.get_course_run_status(crun, self.enrollments, self.empty_certs)
+        assert run_status == api.RunStatus.WILL_ATTEND
 
     def test_not_verified_upgrade(self):
-        """test for get_intermediate_run_status for present and future course with audit enrollment"""
+        """test for get_course_run_status for present and future course with audit enrollment"""
         # create a run that is future
         future_run = self.create_run(
             start=self.now+timedelta(weeks=52),
@@ -339,13 +327,13 @@ class CourseRunStatusTest(CourseTests):
             enr_end=self.now+timedelta(weeks=1),
             edx_key="course-v1:MITx+8.MechCX+2014_T1"
         )
-        run_status = api.get_intermediate_run_status(future_run, self.enrollments, self.empty_certs)
-        assert run_status == api.IntermediateRunStatus.CAN_UPGRADE
-        run_status = api.get_intermediate_run_status(current_run, self.enrollments, self.empty_certs)
-        assert run_status == api.IntermediateRunStatus.CAN_UPGRADE
+        run_status = api.get_course_run_status(future_run, self.enrollments, self.empty_certs)
+        assert run_status == api.RunStatus.CAN_UPGRADE
+        run_status = api.get_course_run_status(current_run, self.enrollments, self.empty_certs)
+        assert run_status == api.RunStatus.CAN_UPGRADE
 
     def test_not_verified_upgradable(self):
-        """test for get_intermediate_run_status with check if course can be upgraded to verified"""
+        """test for get_course_run_status with check if course can be upgraded to verified"""
         # create a run that is current with upgrade deadline None
         current_run = self.create_run(
             start=self.now-timedelta(weeks=1),
@@ -355,23 +343,23 @@ class CourseRunStatusTest(CourseTests):
             upgrade_deadline=None,
             edx_key="course-v1:MITx+8.MechCX+2014_T1"
         )
-        run_status = api.get_intermediate_run_status(current_run, self.enrollments, self.empty_certs)
-        assert run_status == api.IntermediateRunStatus.CAN_UPGRADE
+        run_status = api.get_course_run_status(current_run, self.enrollments, self.empty_certs)
+        assert run_status == api.RunStatus.CAN_UPGRADE
 
         # modify the run to have an upgrade deadline in the future
         current_run.upgrade_deadline = self.now+timedelta(weeks=1)
         current_run.save()
-        run_status = api.get_intermediate_run_status(current_run, self.enrollments, self.empty_certs)
-        assert run_status == api.IntermediateRunStatus.CAN_UPGRADE
+        run_status = api.get_course_run_status(current_run, self.enrollments, self.empty_certs)
+        assert run_status == api.RunStatus.CAN_UPGRADE
 
         # modify the run to have an upgrade deadline in the past
         current_run.upgrade_deadline = self.now-timedelta(weeks=1)
         current_run.save()
-        run_status = api.get_intermediate_run_status(current_run, self.enrollments, self.empty_certs)
-        assert run_status == api.IntermediateRunStatus.NOT_ACTIONABLE
+        run_status = api.get_course_run_status(current_run, self.enrollments, self.empty_certs)
+        assert run_status == api.RunStatus.NOT_ACTIONABLE
 
     def test_not_verified_not_passed(self):
-        """test for get_intermediate_run_status for course not upgraded to verified but that is past"""
+        """test for get_course_run_status for course not upgraded to verified but that is past"""
         # create a run that is past
         crun = self.create_run(
             start=self.now-timedelta(weeks=52),
@@ -380,8 +368,8 @@ class CourseRunStatusTest(CourseTests):
             enr_end=self.now-timedelta(weeks=53),
             edx_key="course-v1:MITx+8.MechCX+2014_T1"
         )
-        run_status = api.get_intermediate_run_status(crun, self.enrollments, self.empty_certs)
-        assert run_status == api.IntermediateRunStatus.NOT_ACTIONABLE
+        run_status = api.get_course_run_status(crun, self.enrollments, self.empty_certs)
+        assert run_status == api.RunStatus.NOT_ACTIONABLE
 
 
 class FormattedCourseTest(CourseTests):
@@ -461,9 +449,9 @@ class FormattedCourseTest(CourseTests):
             ]
         )
 
-    def create_intermediate_status_patch(self, course_run_status_map):
+    def create_course_run_status_patch(self, course_run_status_map):
         return patch(
-            'dashboard.api.get_intermediate_run_status',
+            'dashboard.api.get_course_run_status',
             autospec=True,
             side_effect=lambda course_run, *args: course_run_status_map.get(course_run)
         )
@@ -495,10 +483,10 @@ class FormattedCourseTest(CourseTests):
     def test_runs_not_passed_offered(self, mock_format):
         """test for get_formatted_course for course with a run not passed and another offered"""
         course_run_status_map = {
-            self.course_run_older: api.IntermediateRunStatus.NOT_PASSED
+            self.course_run_older: api.RunStatus.NOT_PASSED
         }
         enrollments = self.create_mock_enrollments(course_run_status_map.keys())
-        with self.create_intermediate_status_patch(course_run_status_map):
+        with self.create_course_run_status_patch(course_run_status_map):
             api.get_formatted_course(self.course, enrollments, self.empty_certs)
         mock_format.assert_any_call(self.course_run, api.RunStatus.OFFERED, None, position=1)
         mock_format.assert_any_call(self.course_run_older, api.RunStatus.NOT_PASSED, None, position=2)
@@ -507,11 +495,11 @@ class FormattedCourseTest(CourseTests):
     def test_runs_not_enrolled_not_passed_not_offered(self, mock_format):
         """test for get_formatted_course for course with runs not passed and nothing offered"""
         course_run_status_map = {
-            self.course_run: api.IntermediateRunStatus.NOT_PASSED,
-            self.course_run_older: api.IntermediateRunStatus.NOT_PASSED
+            self.course_run: api.RunStatus.NOT_PASSED,
+            self.course_run_older: api.RunStatus.NOT_PASSED
         }
         enrollments = self.create_mock_enrollments(course_run_status_map.keys())
-        with self.create_intermediate_status_patch(course_run_status_map), \
+        with self.create_course_run_status_patch(course_run_status_map), \
                 patch('courses.models.Course.get_next_run', autospec=True, return_value=None):
             api.get_formatted_course(self.course, enrollments, self.empty_certs)
         mock_format.assert_any_call(self.course_run, api.RunStatus.NOT_PASSED, None, position=1)
@@ -521,13 +509,13 @@ class FormattedCourseTest(CourseTests):
     def test_runs_enrolled_previous_not_passed(self, mock_format):
         """test for get_formatted_course for an enrolled run and a previous run that was not passed"""
         course_run_status_map = {
-            self.course_run: api.IntermediateRunStatus.CURRENTLY_ENROLLED,
-            self.course_run_older: api.IntermediateRunStatus.NOT_PASSED
+            self.course_run: api.RunStatus.CURRENTLY_ENROLLED,
+            self.course_run_older: api.RunStatus.NOT_PASSED
         }
         enrollments = self.create_mock_enrollments(course_run_status_map.keys())
-        with self.create_intermediate_status_patch(course_run_status_map):
+        with self.create_course_run_status_patch(course_run_status_map):
             api.get_formatted_course(self.course, enrollments, self.empty_certs)
-        mock_format.assert_any_call(self.course_run, api.RunStatus.CURRENT_GRADE, None, position=1)
+        mock_format.assert_any_call(self.course_run, api.RunStatus.CURRENTLY_ENROLLED, None, position=1)
         mock_format.assert_any_call(self.course_run_older, api.RunStatus.NOT_PASSED, None, position=2)
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
@@ -536,10 +524,10 @@ class FormattedCourseTest(CourseTests):
         test for get_formatted_course in case the course was taken and not passed
         """
         course_run_status_map = {
-            self.course_run_older: api.IntermediateRunStatus.NOT_PASSED
+            self.course_run_older: api.RunStatus.NOT_PASSED
         }
         enrollments = self.create_mock_enrollments(course_run_status_map.keys())
-        with self.create_intermediate_status_patch(course_run_status_map):
+        with self.create_course_run_status_patch(course_run_status_map):
             api.get_formatted_course(self.course, enrollments, self.certificates)
         mock_format.assert_any_call(self.course_run, api.RunStatus.OFFERED, None, position=1)
         mock_format.assert_any_call(self.course_run_older, api.RunStatus.NOT_PASSED, None, position=2)
@@ -550,10 +538,10 @@ class FormattedCourseTest(CourseTests):
         test for get_formatted_course in case was taken and not passed, and there is no next run
         """
         course_run_status_map = {
-            self.course_run_past: api.IntermediateRunStatus.NOT_PASSED,
+            self.course_run_past: api.RunStatus.NOT_PASSED,
         }
         enrollments = self.create_mock_enrollments(course_run_status_map.keys())
-        with self.create_intermediate_status_patch(course_run_status_map):
+        with self.create_course_run_status_patch(course_run_status_map):
             api.get_formatted_course(self.course_no_next_run, enrollments, self.certificates)
         mock_format.assert_called_once_with(self.course_run_past, api.RunStatus.NOT_PASSED, None, position=1)
 
@@ -563,10 +551,10 @@ class FormattedCourseTest(CourseTests):
         test for get_formatted_course in case the course was taken and not passed
         """
         course_run_status_map = {
-            self.course_run_older: api.IntermediateRunStatus.NOT_ACTIONABLE
+            self.course_run_older: api.RunStatus.NOT_ACTIONABLE
         }
         enrollments = self.create_mock_enrollments(course_run_status_map.keys())
-        with self.create_intermediate_status_patch(course_run_status_map):
+        with self.create_course_run_status_patch(course_run_status_map):
             api.get_formatted_course(self.course, enrollments, self.certificates)
         mock_format.assert_any_call(self.course_run, api.RunStatus.OFFERED, None, position=1)
         mock_format.assert_any_call(self.course_run_older, api.RunStatus.NOT_PASSED, None, position=2)
@@ -577,10 +565,10 @@ class FormattedCourseTest(CourseTests):
         test for get_formatted_course in case there is a certificate for the course
         """
         course_run_status_map = {
-            self.course_run_older: api.IntermediateRunStatus.COMPLETED,
+            self.course_run_older: api.RunStatus.PASSED,
         }
         enrollments = self.create_mock_enrollments(course_run_status_map.keys())
-        with self.create_intermediate_status_patch(course_run_status_map):
+        with self.create_course_run_status_patch(course_run_status_map):
             api.get_formatted_course(self.course, enrollments, self.certificates)
         mock_format.assert_called_once_with(
             self.course_run_older,
@@ -593,23 +581,23 @@ class FormattedCourseTest(CourseTests):
     def test_run_will_attend(self, mock_format):
         """test for get_formatted_course for course with enrolled run that will happen in the future"""
         course_run_status_map = {
-            self.course_run: api.IntermediateRunStatus.WILL_ATTEND,
+            self.course_run: api.RunStatus.WILL_ATTEND,
         }
         enrollments = self.create_mock_enrollments(course_run_status_map.keys())
-        with self.create_intermediate_status_patch(course_run_status_map):
+        with self.create_course_run_status_patch(course_run_status_map):
             api.get_formatted_course(self.course, enrollments, self.empty_certs)
-        mock_format.assert_called_once_with(self.course_run, api.RunStatus.CURRENT_GRADE, None, position=1)
+        mock_format.assert_called_once_with(self.course_run, api.RunStatus.CURRENTLY_ENROLLED, None, position=1)
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
     def test_run_can_upgrade(self, mock_format):
         """test for get_formatted_course for course with a run that needs to be upgraded"""
         course_run_status_map = {
-            self.course_run: api.IntermediateRunStatus.CAN_UPGRADE,
+            self.course_run: api.RunStatus.CAN_UPGRADE,
         }
         enrollments = self.create_mock_enrollments(course_run_status_map.keys())
-        with self.create_intermediate_status_patch(course_run_status_map):
+        with self.create_course_run_status_patch(course_run_status_map):
             api.get_formatted_course(self.course, enrollments, self.empty_certs)
-        mock_format.assert_called_once_with(self.course_run, api.RunStatus.UPGRADE, None, position=1)
+        mock_format.assert_called_once_with(self.course_run, api.RunStatus.CAN_UPGRADE, None, position=1)
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
     def test_run_default_should_not_happen(self, mock_format):
@@ -621,7 +609,7 @@ class FormattedCourseTest(CourseTests):
             self.course_run: 'status-that-we-should-never-have',
         }
         enrollments = self.create_mock_enrollments(course_run_status_map.keys())
-        with self.create_intermediate_status_patch(course_run_status_map):
+        with self.create_course_run_status_patch(course_run_status_map):
             api.get_formatted_course(self.course, enrollments, self.empty_certs)
         assert mock_format.call_count == 0
 
@@ -632,7 +620,7 @@ class FormattedCourseTest(CourseTests):
             self.course_run_past: 'status-that-we-should-never-have',
         }
         enrollments = self.create_mock_enrollments(course_run_status_map.keys())
-        with self.create_intermediate_status_patch(course_run_status_map):
+        with self.create_course_run_status_patch(course_run_status_map):
             api.get_formatted_course(self.course_no_next_run, enrollments, self.empty_certs)
         assert mock_format.call_count == 0
 
@@ -642,11 +630,11 @@ class FormattedCourseTest(CourseTests):
         test for get_formatted_course in case an older run was passed and a more recent one was not
         """
         course_run_status_map = {
-            self.course_run_past: api.IntermediateRunStatus.NOT_PASSED,
-            self.course_run_past_older: api.IntermediateRunStatus.COMPLETED,
+            self.course_run_past: api.RunStatus.NOT_PASSED,
+            self.course_run_past_older: api.RunStatus.PASSED,
         }
         enrollments = self.create_mock_enrollments(course_run_status_map.keys())
-        with self.create_intermediate_status_patch(course_run_status_map):
+        with self.create_course_run_status_patch(course_run_status_map):
             api.get_formatted_course(self.course_no_next_run, enrollments, self.certificates)
         mock_format.assert_any_call(self.course_run_past, api.RunStatus.NOT_PASSED, None, position=1)
         mock_format.assert_any_call(
@@ -702,7 +690,7 @@ class InfoProgramTest(ESTestCase):
     def test_program(self, mock_get_formatted_course):
         """Test happy path"""
         mock_get_formatted_course.return_value = {'position_in_program': 1}
-        res = api.get_info_for_program(
+        res = api.get_formatted_program(
             self.program, {'enrollments': None}, {'certificates': None})
         for course in self.courses:
             mock_get_formatted_course.assert_any_call(
@@ -719,7 +707,7 @@ class InfoProgramTest(ESTestCase):
     @patch('dashboard.api.get_formatted_course', autospec=True)
     def test_program_no_courses(self, mock_get_formatted_course):
         """Test program with no courses"""
-        res = api.get_info_for_program(
+        res = api.get_formatted_program(
             self.program_no_courses, {'enrollments': None}, {'certificates': None})
         assert mock_get_formatted_course.called is False
         expected_data = {

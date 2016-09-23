@@ -6,8 +6,8 @@ import _ from 'lodash';
 import {
   STATUS_NOT_PASSED,
   STATUS_PASSED,
-  STATUS_ENROLLED,
-  STATUS_VERIFIED,
+  STATUS_CAN_UPGRADE,
+  STATUS_CURRENTLY_ENROLLED,
   STATUS_OFFERED,
 } from '../../constants';
 import type { CourseRun } from '../../flow/programTypes';

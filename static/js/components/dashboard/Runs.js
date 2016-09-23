@@ -7,8 +7,8 @@ import RunRow from './RunRow';
 import {
   STATUS_NOT_PASSED,
   STATUS_PASSED,
-  STATUS_ENROLLED,
-  STATUS_VERIFIED,
+  STATUS_CAN_UPGRADE,
+  STATUS_CURRENTLY_ENROLLED,
   STATUS_OFFERED,
 } from '../../constants';
 import type { Course, CourseRun } from '../../flow/programTypes';
@@ -45,7 +45,7 @@ export default class Runs extends React.Component {
         </Grid>
       );
     }
-    if (firstRun.status === STATUS_ENROLLED) {
+    if (firstRun.status === STATUS_CAN_UPGRADE) {
       // show the upgrade button
       rows.push(
         <Grid className="run" key="auditing">
@@ -69,7 +69,7 @@ export default class Runs extends React.Component {
         // only show newly offered runs if user failed previous run
         rows.push(<RunRow run={run} key={run.id} />);
       }
-      // not checking STATUS_ENROLLED or STATUS_VERIFIED since it would imply they are taking
+      // not checking STATUS_CAN_UPGRADE or STATUS_CURRENTLY_ENROLLED since it would imply they are taking
       // two runs at the same time
     }
 

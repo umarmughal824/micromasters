@@ -37,6 +37,4 @@ describe('Runs', () => {
       "No future runs of this course are currently scheduled."
     );
   });
-
-
 });
