@@ -29,7 +29,7 @@ REFRESH_ENROLLMENT_CACHE_MINUTES = 5
 
 class RunStatus:
     """
-    Possible statuses for a course run for a user. These are used internally.
+    Possible statuses for a course run for a user
     """
     CURRENTLY_ENROLLED = 'currently-enrolled'
     PASSED = 'passed'
