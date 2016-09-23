@@ -144,7 +144,6 @@ def get_formatted_course(course, user_enrollments, user_certificates):
         dict: dictionary representing the course status for the user
     """
     # pylint: disable=too-many-statements
-    # data about the course to be returned anyway
     course_data = {
         "id": course.pk,
         "title": course.title,
@@ -177,6 +176,16 @@ def get_formatted_course(course, user_enrollments, user_certificates):
 
 
 def get_sorted_enrolled_course_runs(course, user_enrollments):
+    """
+    Gets a sorted list of course runs that the user has enrolled in
+
+    Args:
+        course (Course): a course object
+        user_enrollments (Enrollments): the user enrollments object
+
+    Returns:
+        list(CourseRun): sorted list of enrolled course runs
+    """
     user_enrollments = user_enrollments or Enrollments({})
     enrolled_edx_course_ids = user_enrollments.get_enrolled_course_ids()
     enrolled_run_query = course.courserun_set.filter(edx_course_key__in=enrolled_edx_course_ids)
@@ -191,6 +200,19 @@ def get_sorted_enrolled_course_runs(course, user_enrollments):
 
 
 def get_user_course_runs_for_response(course, enrolled_course_runs, user_enrollments, user_certificates):
+    """
+    Gets all course runs with additional information (status, etc.) that will be returned in the
+    API response
+
+    Args:
+        course (Course): a course object
+        enrolled_course_runs (list(CourseRun)): an iterable of enrolled course runs
+        user_enrollments (Enrollments): the user enrollments object
+        user_certificates (Certificates): the user certificates object
+
+    Returns:
+        list(UserCourseRun): list of UserCourseRun objects
+    """
     if not len(enrolled_course_runs):
         next_run = course.get_next_run()
         if next_run is not None:
@@ -198,20 +220,20 @@ def get_user_course_runs_for_response(course, enrolled_course_runs, user_enrollm
     runs = []
     latest_course_run = enrolled_course_runs.pop(0)
     status = get_course_run_status(latest_course_run, user_enrollments, user_certificates)
-    if status in {RunStatus.CURRENTLY_ENROLLED, RunStatus.WILL_ATTEND}:
+    if status in {RunStatus.CURRENTLY_ENROLLED, RunStatus.CAN_UPGRADE}:
+        runs.append(UserCourseRun(latest_course_run, status))
+    elif status == RunStatus.WILL_ATTEND:
         runs.append(UserCourseRun(latest_course_run, RunStatus.CURRENTLY_ENROLLED))
-    elif status == RunStatus.CAN_UPGRADE:
-        runs.append(UserCourseRun(latest_course_run, RunStatus.CAN_UPGRADE))
+    elif status == RunStatus.PASSED:
+        # pull the verified certificate for course
+        cert = user_certificates.get_verified_cert(latest_course_run.edx_course_key)
+        runs.append(UserCourseRun(latest_course_run, RunStatus.PASSED, certificate=cert))
     elif status in {RunStatus.NOT_ACTIONABLE, RunStatus.NOT_PASSED}:
         next_run = course.get_next_run()
         if next_run is not None:
             runs.append(UserCourseRun(next_run, RunStatus.OFFERED))
         if next_run is None or latest_course_run.pk != next_run.pk:
             runs.append(UserCourseRun(latest_course_run, RunStatus.NOT_PASSED))
-    elif status == RunStatus.PASSED:
-        # pull the verified certificate for course
-        cert = user_certificates.get_verified_cert(latest_course_run.edx_course_key)
-        runs.append(UserCourseRun(latest_course_run, RunStatus.PASSED, certificate=cert))
 
     # add all the other enrolled runs
     for course_run in enrolled_course_runs:
@@ -227,23 +249,35 @@ def get_user_course_runs_for_response(course, enrolled_course_runs, user_enrollm
 
 
 def get_course_run_status(course_run, user_enrollments, user_certificates):
+    """
+    Decides what status a course run is in
+
+    Args:
+        course_run (CourseRun): a course run
+        user_enrollments (Enrollments): the user enrollments object
+        user_certificates (Certificates): the user certificates object
+
+    Returns:
+        string: a status
+    """
     course_enrollment = user_enrollments.get_enrollment_for_course(course_run.edx_course_key)
+    status = None
     if course_enrollment.is_verified:
         if course_run.is_current:
-            return RunStatus.CURRENTLY_ENROLLED
+            status = RunStatus.CURRENTLY_ENROLLED
         elif course_run.is_past:
             if user_certificates.has_verified_cert(course_run.edx_course_key):
-                return RunStatus.PASSED
+                status = RunStatus.PASSED
             else:
-                return RunStatus.NOT_PASSED
+                status = RunStatus.NOT_PASSED
         elif course_run.is_future:
-            return RunStatus.WILL_ATTEND
+            status = RunStatus.WILL_ATTEND
     else:
         if (course_run.is_current or course_run.is_future) and course_run.is_upgradable:
-            return RunStatus.CAN_UPGRADE
+            status = RunStatus.CAN_UPGRADE
         else:
-            return RunStatus.NOT_ACTIONABLE
-    return None
+            status = RunStatus.NOT_ACTIONABLE
+    return status
 
 
 def format_courserun_for_dashboard(course_run, status, certificate=None, position=1):

@@ -32,7 +32,7 @@ class StatusTest(ESTestCase):
     Tests for the different status classes
     """
 
-    def test_course_run_user_status(self):
+    def test_course_run_user_status(self):  # pylint: disable=no-self-use
         """test for CourseRunUserStatus"""
         ustat = api.UserCourseRun(
             status='status',
@@ -41,7 +41,7 @@ class StatusTest(ESTestCase):
         assert ustat.status == 'status'
         assert ustat.course_run == 'run'
 
-    def test_course_run_user_status_repr(self):
+    def test_course_run_user_status_repr(self):  # pylint: disable=no-self-use
         """test for CourseRunUserStatus __repr__"""
         mock_run = MagicMock()
         mock_run.title = 'run'
@@ -56,7 +56,7 @@ class StatusTest(ESTestCase):
         obj_repr = repr(ustat)
         assert obj_repr.startswith(reps_str_start)
 
-    def test_course_format_conditional_fields_struct(self):
+    def test_course_format_conditional_fields_struct(self):  # pylint: disable=no-self-use
         """
         test for CourseFormatConditionalFields:
         checking the association has the right structure and key/value pairs
@@ -441,7 +441,8 @@ class FormattedCourseTest(CourseTests):
         del course_data_from_call['runs']
         self.assertEqual(expected_data, course_data_from_call)
 
-    def create_mock_enrollments(self, course_runs):
+    def create_mock_enrollments(self, course_runs):  # pylint: disable=no-self-use
+        """Returns a mocked Enrollments object given a list of CourseRuns"""
         return MagicMock(
             spec=Enrollments,
             get_enrolled_course_ids=lambda *args: [
@@ -449,7 +450,10 @@ class FormattedCourseTest(CourseTests):
             ]
         )
 
-    def create_course_run_status_patch(self, course_run_status_map):
+    def create_course_run_status_patch(self, course_run_status_map):  # pylint: disable=no-self-use
+        """
+        Returns patched get_course_run_status to return certain statuses for given courses
+        """
         return patch(
             'dashboard.api.get_course_run_status',
             autospec=True,
