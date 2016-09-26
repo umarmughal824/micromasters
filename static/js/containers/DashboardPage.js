@@ -21,6 +21,8 @@ import CourseListCard from '../components/dashboard/CourseListCard';
 import DashboardUserCard from '../components/dashboard/DashboardUserCard';
 import ErrorMessage from '../components/ErrorMessage';
 import ProgressWidget from '../components/ProgressWidget';
+import { setCalculatorDialogVisibility } from '../actions/ui';
+import { startCalculatorEdit } from '../actions/financial_aid';
 import type { DashboardState } from '../flow/dashboardTypes';
 import type { ProgramEnrollment } from '../flow/enrollmentTypes';
 import type { ProfileGetResult } from '../flow/profileTypes';
@@ -35,6 +37,7 @@ class DashboardPage extends React.Component {
     currentProgramEnrollment: ProgramEnrollment,
     dashboard:                DashboardState,
     dispatch:                 Dispatch,
+    setCalculatorVisibility:  (b: boolean) => void,
   };
 
   componentDidMount() {
@@ -94,6 +97,12 @@ class DashboardPage extends React.Component {
     });
   };
 
+  openFinancialAidCalculator = () => {
+    const { dispatch, currentProgramEnrollment } = this.props;
+    dispatch(setCalculatorDialogVisibility(true));
+    dispatch(startCalculatorEdit(currentProgramEnrollment.id));
+  };
+
   render() {
     const {
       dashboard,
@@ -121,6 +130,7 @@ class DashboardPage extends React.Component {
               program={program}
               key={program.id}
               checkout={this.dispatchCheckout}
+              openFinancialAidCalculator={this.openFinancialAidCalculator}
             />
           </div>
           <div className="second-column">
