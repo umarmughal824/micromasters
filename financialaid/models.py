@@ -66,6 +66,9 @@ class Tier(TimestampedModel):
     name = models.TextField()
     description = models.TextField()
 
+    def __str__(self):
+        return self.name
+
 
 class TierProgram(TimestampedModel):
     """
@@ -79,6 +82,9 @@ class TierProgram(TimestampedModel):
 
     class Meta:
         unique_together = ('program', 'tier')
+
+    def __str__(self):
+        return 'tier "{0}" for program "{1}"'.format(self.tier.name, self.program.title)
 
     @transaction.atomic
     def save(self, *args, **kwargs):
