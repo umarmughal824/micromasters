@@ -8,6 +8,20 @@
 {% block description %}{% if page.program.description %}{{ page.program.description }}{% endif %}{% endblock %}
 {% block keywords %}micromasters, MIT, {{ page.program.title }}, online masters, online courses, MOOC{% endblock %}
 
+{% block social %}
+  <meta property="og:site:name" content="{{ page.title }} MicroMasters">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ request.build_absolute_uri }}">
+  <meta property="og:title" content="{{ page.title }} MicroMasters">
+  <meta property="og:description" content="{% if page.program.description %}{{ page.program.description }}{% endif %}">
+  <meta property="og:image" content="{{ page.background_image.file.url|safe }}">
+  <meta property="og:image:secure_url" content="{{ page.background_image.file.url|safe }}">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="{{ page.background_image.width }}">
+  <meta property="og:image:height" content="{{ page.background_image.height }}">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@MITxonedX">
+{% endblock %}
 
 {% block body_class %}template-programpage{% endblock %}
 {% block content %}
