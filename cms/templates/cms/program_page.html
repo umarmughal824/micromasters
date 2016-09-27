@@ -6,6 +6,7 @@
 
 {% block title %}{% trans "MIT Micromasters" %}{% endblock %}
 
+
 {% block body_class %}template-programpage{% endblock %}
 {% block content %}
 {% include "header.html" %}
@@ -19,6 +20,8 @@
     <div class="description">
       {{ page.title_over_image|richtext }}
     </div>
+    {% if authenticated %}
+    {% else %}   
     <button class="mm-button main-action open-signup-dialog">
       Sign Up Now
     </button>
@@ -28,6 +31,7 @@
         Log In
       </a>
     </div>
+    {% endif %} 
   </div>
   <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
     <div class="mdl-tabs__tab-bar">

@@ -66,8 +66,16 @@ body.app-media {
     display:inline-block;
     color:white;
     font-size: 19px;
-    margin: 31px 20px 0 10px;
+    margin: 16px 20px 0 10px;
     font-weight: 300;
+  }
+
+  .divider-large {
+    width: 14px;
+    height: 37px;
+    margin: 20px 0 0 0;
+    border-left: 1px solid rgba(255, 255, 255, 0.5);
+    float: left;
   }
 
   .nav-utility {
