@@ -32,12 +32,17 @@ export default class ProgressWidget extends React.Component {
         width={radius * 2.5}
         height={radius * 2.5}
         viewBox={viewBox}>
+        <path d="M -3 65 h 2 -7" stroke="white" stroke-width="5" fill="white" />
+        <path d="M 120 60 h 5 1" stroke="white" stroke-width="5" fill="white" />
+        <path d="M 59 -3 v 2 -7" stroke="white" stroke-width="5" fill="white" />
+        <path d="M 55 125 v 2 -7" stroke="white" stroke-width="5" fill="white" />
         <circle
           cx={radius}
           cy={radius}
           stroke="white"
           r={radiusDots}
           strokeWidth='5px'
+          className="dashed-circle"
           style={{ strokeDasharray: '1, 14' }} />
         <circle
           className="circular-progress-widget-bg"

@@ -6,6 +6,11 @@
     fill: none;
     padding: 4px;
 
+    .dashed-circle {
+      strokeDasharray: 1, 14 !important;
+      stroke-opacity: 0.6;
+    }
+
     .circular-progress-widget-bg {
       stroke: $progress-widget-bg-stroke !important;
     }
