@@ -19,6 +19,7 @@
 
     .title {
       font-size: 36px;
+      margin-top: 0;
       margin-bottom: 31px;
       max-width: 700px;
     }
@@ -102,6 +103,7 @@
     > .title {
       font-size: 18px;
       font-weight: 600;
+      margin-top: 0;
     }
   }
 
@@ -168,6 +170,67 @@
 
     .faq:last-child {
       margin-bottom: 100px;
+    }
+  }
+
+
+  .faculty-section {
+    color: #ffffff;
+    background-color: #0c0c0c;
+    text-align: center;
+    padding-top: 20px;
+
+    .faculty-tile {
+      width: 500px;
+      height: 385px;
+      padding: 180px 40px 20px 40px;
+      color: #ffffff;
+      background-repeat: no-repeat;
+      background-position: top left;
+      text-align: left;
+      position: relative;
+
+      h4 {
+        margin-top: 0;
+        margin-bottom: 10px;
+      }
+
+      img {
+        max-width: 500px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1
+      }
+
+      h4, p {
+        position: relative;
+        z-index: 2;
+      }
+    }
+
+    .slick-prev {
+      left: -40px;
+    }
+
+    .slick-next {
+      right: -30px;
+    }
+
+    .slick-arrow:before, .slick-dots li button:before {
+      font-size: 30px;
+    }
+
+    .slick-dots li {
+      margin: 0 10px;
+
+      button:before {
+        color: $font-gray-light;
+      }
+
+      &.slick-active button:before {
+        color: #ffffff;
+      }
     }
   }
 }
