@@ -3,6 +3,7 @@ Models for the Financial Aid App
 """
 import datetime
 from django.contrib.auth.models import User
+from django.core import serializers
 from django.core.exceptions import ValidationError
 from django.db import (
     models,
@@ -129,7 +130,6 @@ class FinancialAid(TimestampedModel):
     country_of_income = models.CharField(null=True, max_length=100)
     date_exchange_rate = models.DateTimeField(null=True)
 
-    @transaction.atomic
     def save(self, *args, **kwargs):
         """
         Override save to make sure only one FinancialAid object exists for a User and the associated Program
@@ -141,13 +141,27 @@ class FinancialAid(TimestampedModel):
             raise ValidationError("Cannot have multiple FinancialAid objects for the same User and Program.")
         super().save(*args, **kwargs)
 
+    @transaction.atomic
+    def save_and_log(self, acting_user, *args, **kwargs):
+        """
+        Saves the object and creates an audit object.
+        """
+        financialaid_before = FinancialAid.objects.get(id=self.id)
+        self.save(*args, **kwargs)
+        self.refresh_from_db()
+        FinancialAidAudit.objects.create(
+            acting_user=acting_user,
+            financial_aid=self,
+            data_before=serializers.serialize("json", [financialaid_before, ]),
+            data_after=serializers.serialize("json", [self, ])
+        )
+
 
 class FinancialAidAudit(TimestampedModel):
     """
     Audit table for the Financial Aid
     """
-    user = models.ForeignKey(User, null=False)
-    table_changed = models.CharField(null=False, max_length=50)
+    acting_user = models.ForeignKey(User, null=False)
+    financial_aid = models.ForeignKey(FinancialAid, null=True, on_delete=models.SET_NULL)
     data_before = JSONField(blank=True, null=False)
     data_after = JSONField(blank=True, null=False)
-    date = models.DateTimeField(null=False)
