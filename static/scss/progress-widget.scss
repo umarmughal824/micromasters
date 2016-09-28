@@ -2,13 +2,12 @@
 .circular-progress-widget {
   margin-bottom: 8px;
 
-  .circular-progress-widget-svg {
+  svg {
     fill: none;
     padding: 4px;
 
     .dashed-circle {
-      strokeDasharray: 1, 14 !important;
-      stroke-opacity: 0.6;
+      stroke-opacity: 0.5;
     }
 
     .circular-progress-widget-bg {
