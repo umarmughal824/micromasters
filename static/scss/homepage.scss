@@ -226,6 +226,29 @@ body.app-media {
   }
 }
 
+.quote-section {
+  background: #fff;
+  padding: 120px 0;
+  .centered-content {
+    width: 47%;
+    max-width: 1150px;
+    margin: 0 auto;
+    text-align: center;
+    h2 {
+      color: #08b940;
+      font-size: 30px;
+      font-style: italic;
+      font-family: helvetica;
+      font-weight: 300;
+      line-height: 1.4em;
+    }
+    p {
+      color: #08b940;
+      font-size: 24px;
+    }
+  }
+}
+
 .current-programs-section {
   margin: 0;
   background-color: #151515;
