@@ -12,9 +12,7 @@ from django.db import (
     transaction,
 )
 
-from courses.models import (
-    Program,
-)
+from courses.models import Program
 
 
 class TimestampedModelQuerySet(models.query.QuerySet):
@@ -166,3 +164,11 @@ class FinancialAidAudit(TimestampedModel):
     financial_aid = models.ForeignKey(FinancialAid, null=True, on_delete=models.SET_NULL)
     data_before = JSONField(blank=True, null=False)
     data_after = JSONField(blank=True, null=False)
+
+
+class CurrencyExchangeRate(TimestampedModel):
+    """
+    Table of currency exchange rates for converting foreign currencies into USD
+    """
+    currency_code = models.CharField(null=False, max_length=3)
+    exchange_rate = models.FloatField(null=False)  # how much foreign currency is per 1 USD
