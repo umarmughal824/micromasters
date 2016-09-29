@@ -31,25 +31,25 @@ export default class ProgressWidget extends React.Component {
         width={radius * 2.5}
         height={radius * 2.5}
         viewBox={viewBox}>
-        <path d="M -3 65 h 2 -7" stroke="white" strokeWidth="2" />
+        <path d="M -3 65 h 2 -10" stroke="white" strokeWidth="2" />
         <path d="M 40 2 l -3 -7" stroke="white" strokeWidth="1" className="dashed-circle" />
         <path d="M 24 11 l -4 -6" stroke="white" strokeWidth="1" className="dashed-circle" />
         <path d="M 11 22 l -4 -5" stroke="white" strokeWidth="1" className="dashed-circle" />
         <path d="M 4 34 l -6 -5" stroke="white" strokeWidth="1" className="dashed-circle" />
         <path d="M 0 49 l -9 -2" stroke="white" strokeWidth="1" className="dashed-circle" />
-        <path d="M 58 -3 v 2 -7" stroke="white" strokeWidth="2"  />
+        <path d="M 58 -3 v 2 -9" stroke="white" strokeWidth="2"  />
         <path d="M 75 2 l 3 -7" stroke="white" strokeWidth="1" className="dashed-circle"/>
         <path d="M 90 8 l 5 -7" stroke="white" strokeWidth="1" className="dashed-circle" />
         <path d="M 104 19 l 6 -6" stroke="white" strokeWidth="1" className="dashed-circle" />
         <path d="M 114 32 l 8 -4" stroke="white" strokeWidth="1" className="dashed-circle" />
         <path d="M 120 50 l 8 -2" stroke="white" strokeWidth="1" className="dashed-circle" />
-        <path d="M 120 65 h 8 1" stroke="white" strokeWidth="2"  />
+        <path d="M 120 65 h 8 2" stroke="white" strokeWidth="2"  />
         <path d="M 117 80 l 8 2" stroke="white" strokeWidth="1" className="dashed-circle" />
         <path d="M 111 94 l 8 3" stroke="white" strokeWidth="1" className="dashed-circle" />
         <path d="M 103 104 l 6 6" stroke="white" strokeWidth="1" className="dashed-circle" />
         <path d="M 90 114 l 3 8" stroke="white" strokeWidth="1" className="dashed-circle" />
         <path d="M 75 120 l 2 9" stroke="white" strokeWidth="1" className="dashed-circle" />
-        <path d="M 58 128 v 2 -10" stroke="white" strokeWidth="2"  />
+        <path d="M 58 128 v 2 -9" stroke="white" strokeWidth="2"  />
         <path d="M 43 128 l 2 -10" stroke="white" strokeWidth="1" className="dashed-circle" />
         <path d="M 26 123 l 5 -10" stroke="white" strokeWidth="1" className="dashed-circle" />
         <path d="M 12 113 l 7 -7" stroke="white" strokeWidth="1" className="dashed-circle" />
