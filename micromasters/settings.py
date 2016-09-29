@@ -14,11 +14,12 @@ import ast
 import os
 import platform
 
+from celery.schedules import crontab
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 import yaml
 
-VERSION = "0.13.0"
+VERSION = "0.14.0"
 
 CONFIG_PATHS = [
     os.environ.get('MICROMASTERS_CONFIG', ''),
@@ -108,6 +109,8 @@ INSTALLED_APPS = (
     'cms',
     'courses',
     'dashboard',
+    'ecommerce',
+    'financialaid',
     'profiles',
     'roles',
     'search',
@@ -279,6 +282,12 @@ EMAIL_HOST_PASSWORD = get_var('MICROMASTERS_EMAIL_PASSWORD', '')
 EMAIL_USE_TLS = get_var('MICROMASTERS_EMAIL_TLS', False)
 EMAIL_SUPPORT = get_var('MICROMASTERS_SUPPORT_EMAIL', 'support@example.com')
 DEFAULT_FROM_EMAIL = get_var('MICROMASTERS_FROM_EMAIL', 'webmaster@localhost')
+MAILGUN_URL = get_var('MAILGUN_URL', 'https://api.mailgun.net/v3/micromasters.mit.edu')
+MAILGUN_KEY = get_var('MAILGUN_KEY', None)
+MAILGUN_BATCH_CHUNK_SIZE = get_var('MAILGUN_BATCH_CHUNK_SIZE', 1000)
+MAILGUN_RECIPIENT_OVERRIDE = get_var('MAILGUN_RECIPIENT_OVERRIDE', None)
+MAILGUN_FROM_EMAIL = get_var('MAILGUN_FROM_EMAIL', 'no-reply@micromasters.mit.edu')
+MAILGUN_BCC_TO_EMAIL = get_var('MAILGUN_BCC_TO_EMAIL', 'no-reply@micromasters.mit.edu')
 
 # e-mail configurable admins
 ADMIN_EMAIL = get_var('MICROMASTERS_ADMIN_EMAIL', '')
@@ -414,11 +423,27 @@ CELERY_RESULT_BACKEND = get_var(
 CELERY_ALWAYS_EAGER = get_var("CELERY_ALWAYS_EAGER", True)
 CELERY_EAGER_PROPAGATES_EXCEPTIONS = get_var(
     "CELERY_EAGER_PROPAGATES_EXCEPTIONS", True)
+CELERYBEAT_SCHEDULE = {
+    'batch-update-user-data-every-6-hrs': {
+        'task': 'dashboard.tasks.batch_update_user_data',
+        'schedule': crontab(minute=0, hour='*/6')
+    },
+}
+
+CELERY_TIMEZONE = 'UTC'
 
 # Elasticsearch
 ELASTICSEARCH_URL = get_var("ELASTICSEARCH_URL", None)
 ELASTICSEARCH_INDEX = get_var('ELASTICSEARCH_INDEX', 'micromasters')
-CLIENT_ELASTICSEARCH_URL = get_var("CLIENT_ELASTICSEARCH_URL", "http://localhost:9100")
+ELASTICSEARCH_HTTP_AUTH = get_var("ELASTICSEARCH_HTTP_AUTH", None)
 
 # django-role-permissions
 ROLEPERMISSIONS_MODULE = 'roles.roles'
+
+# Cybersource
+CYBERSOURCE_ACCESS_KEY = get_var("CYBERSOURCE_ACCESS_KEY", None)
+CYBERSOURCE_SECURITY_KEY = get_var("CYBERSOURCE_SECURITY_KEY", None)
+CYBERSOURCE_TRANSACTION_KEY = get_var("CYBERSOURCE_TRANSACTION_KEY", None)
+CYBERSOURCE_SECURE_ACCEPTANCE_URL = get_var("CYBERSOURCE_SECURE_ACCEPTANCE_URL", None)
+CYBERSOURCE_PROFILE_ID = get_var("CYBERSOURCE_PROFILE_ID", None)
+CYBERSOURCE_REFERENCE_PREFIX = get_var("CYBERSOURCE_REFERENCE_PREFIX", None)

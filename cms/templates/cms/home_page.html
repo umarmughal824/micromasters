@@ -10,131 +10,174 @@
 
 {% block content %}
 
-<div class="app-media layout-boxed">
 
-  <nav class="navbar navbar-default" role="navigation">
+
+  <nav class="navbar navbar-default nav-header" role="navigation">
     <div class="container-fluid">
       <div class="navbar-header">
-        <a class="navbar-brand" href="javascript:void(0)"><img src="{% static 'images/logo-micromasters.png' %}" width="215" height="40" alt="MIT MicroMasters" /></a>
+        <a class="navbar-brand" href="javascript:void(0)"><img src="{% static 'images/mit-logo-transparent.svg' %}"  height="40" alt="MIT MicroMasters" /></a>
+        <div class="header-page-name">MIT MicroMasters</div>
         <div class="nav-utility pull-right">
           {% if authenticated %}
-          <a class="btn btn-danger" href="/logout">
+          <a class="btn btn-login white-button" href="/logout">
             Sign out
           </a>
           {% else %}
-          <span>Get Started Today!</span>
-          <a class="btn btn-danger" href="{% url 'social:begin' 'edxorg' %}">
-            Sign in with edX.org
+          <div class="already-member">Already a member? <a href="{% url 'social:begin' 'edxorg' %}">Log In</a></div>
+          <a class="btn  btn-login white-button open-signup-dialog">
+            SIGN UP
           </a>
           {% endif %}
         </div>
         {% if authenticated %}
-        <ul class="nav navbar-toolbar navbar-left">
-          <li class="active">
-            <a href="/dashboard">Dashboard</a>
-          </li>
-        </ul>
+          <div class="header-dashboard-link">
+            <a href="/dashboard">My Dashboard</a>
+          </div>
+
         {% endif %}
       </div>
     </div>
   </nav>
 
-  <div class="main-content-wrapper">
+  <div class="main-content-wrapper" id="home-page">
     <section class="main-content">
 
       <div class="banner-wrapper">
         <div class="banner-wrapper-content">
           <h1>
-            <div class="banner-image">
-              <img src="{% static 'images/logo-mit-verylg@2x.png' %}" alt="MIT" />
-            </div>
-            {{ title }}
+            Learn. Challenge Yourself. Advance
           </h1>
+          <h2>
+            Top ranked programs from the #1 university in the world now delivered online. Advance your career with a fast-track master’s degree from MIT.
+          </h2>
         </div>
       </div>
 
       <div class="row sub-banner">
-        <div class="col-md-12">
-          <div class="sub-banner-content">
-            MIT has created a new credential for online learners: the MicroMasters, which will be granted by <a href="https://www.edx.org/school/mitx" target="_blank">MITx</a> to students who do exceptionally well in a given set of graduate-level online courses and do well in a subsequent exam. <a href="javascript:void()" data-target="#modal-about" data-toggle="modal">Learn more</a>.
+        <div class="col-md-12 ">
+          <div class="sub-banner-section">
+            <div class="sub-banner-text">
+            <h4>What is the MicroMasters program?</h4>
+              <p>The MicroMasters credential is a new option for online learning in which the students can earn
+                a full master's degree by taking about half the course content online and half on campus.</p>
+              <p>The MicroMasters Credential will be granted by MITx (MIT's online learning initiative)
+                to students who do exceptionally well in a set of graduate-level online courses and a subsequent exam.
+                For many learners, the MicroMasters credential can be a step toward earning an MIT master's degree at a
+                great cost saving.</p>
+            </div>
+            <div class="sub-banner-logos">
+              <div class="sub-banner-logos-text">Powered by</div>
+              <img width="100px" src="{% static 'images/edx_logo.png' %}">
+              <img width="150px" src="{% static 'images/micromasters_logo.png' %}">
+
+            </div>
           </div>
         </div>
       </div>
+      <div class="row reasons-section">
 
-      <div class="panel panel-main-content">
-        <div class="panel-body">
-          <h3>MicroMasters</h3>
-          <div class="media-list is-grid padding-bottom-50">
-            <ul class="blocks list-unstyled" data-plugin="animateList" data-child=">li">
+      <div class="centered-content">
 
-              {% for program in programs %}
-              <li class="col-sm-6">
+        <h3>Why should I enroll?</h3>
+        <div class="col-md-4">
+          <div class="reasons-images-wrap">
+             <img height="100px" src="{% static 'images/online.png' %}">
+          </div>
+
+          <h5>ONLINE LEARNING</h5>
+          <p>Take graduate-level courses remotely, from anywhere, and meet other students from around the world.</p>
+        </div>
+        <div class="col-md-4 ">
+          <div class="reasons-images-wrap">
+            <img height="90px" src="{% static 'images/blended.png' %}">
+          </div>
+
+          <h5>BLENDED MASTERS</h5>
+          <p>The MicroMasters credential is the first step to earning a Blended Masters degree from MIT.</p>
+
+        </div>
+        <div class="col-md-4">
+          <div class="reasons-images-wrap">
+            <img height="100px" src="{% static 'images/cost.png' %}">
+          </div>
+           <h5>COST SAVINGS</h5>
+          <p>A Blended Masters costs 50% less than a traditional masters for the same degree.</p>
+        </div>
+        </div>
+
+      </div>
+      <div class="row current-programs-section">
+        <div class="col-md-12">
+          <div class="row">
+            <h3>Current MicroMasters Programs</h3>
+            {% for program in programs %}
+              <div class="col-md-4">
                 {% if program.programpage %}
-                	{% if program.programpage.external_program_page_url %}
-                	<a href="{{ program.programpage.external_program_page_url }}" class="program-link">
-                	{% else %}
-                  	<a href="{{ program.programpage.url }}" class="program-link">
-                  	{% endif %}
+                  {% if program.programpage.external_program_page_url %}
+                    <a href="{{ program.programpage.external_program_page_url }}" class="program-link">
+                  {% else %}
+                    <a href="{{ program.programpage.url }}" class="program-link">
+                  {% endif %}
                 {% endif %}
-                <div class="media-item">
-                  <div class="media-top">
-                    <div class="image-wrap">
+                    <div class="program-thumbnail-image-wrap">
                       {% if program.programpage and program.programpage.thumbnail_image %}
-                      {% image program.programpage.thumbnail_image fill-378x225 as thumbnail_image %}
-                      <img class="image" src="{{ thumbnail_image.url }}" alt="course image for {{program}}"
-                           width="{{ thumbnail_image.width }}" height="{{ thumbnail_image.height }}" />
+                        {% image program.programpage.thumbnail_image fill-690x530 as thumbnail_image %}
+                        <img src="{{ thumbnail_image.url }}" alt="course image for {{ program }}"
+                             >
                       {% else %}
-                      <img class="image" src="{% static 'images/course-thumbnail.png' %}" alt="course image for {{program}}" width="378" height="225" />
+                        <img src="{% static 'images/course-thumbnail.png' %}"
+                             alt="course image for {{ program }}" style="opacity: .4">
                       {% endif %}
+                      <div class="program-bottom-info">
+                      <div class="program-title">{{ program.programpage.title }}</div>
+                      <div class="num-courses">
+                        {% if program.course_set.count == 1 %}
+                          <span class="meta-courses">{{ program.course_set.count }} course</span>
+                        {% else %}
+                          <span class="meta-courses">{{ program.course_set.count }} courses</span>
+                        {% endif %}
+                      </div>
+                      </div>
                     </div>
-                  </div>
-                  <div class="info-wrap">
-                    <div class="title">{{ program }}</div>
-                    <div class="description">
-                      {% if program.description %}
-                      {{ program.description }}
-                      {% else %}
-                      No description available for this program.
-                      {% endif %}
-                    </div>
-                    <div class="media-footer">
-                      {% if program.course_set.count == 1 %}
-                      <div class="widget-metas"><span class="meta-courses">{{ program.course_set.count }} course</span></div>
-                      {% else %}
-                      <div class="widget-metas"><span class="meta-courses">{{ program.course_set.count }} courses</span></div>
-                      {% endif %}
-                    </div>
-                  </div>
-                </div>
+
                 {% if program.programpage %}
                   </a>
                 {% endif %}
-              </li>
-              {% endfor %}
-              <li class="col-sm-6">
-                <div class="media-item placeholder-card">
-                  <br/><br/><br/>
-                  <div class="container">
-                    <div class="col-sm-12 title-coming-soon text-center">
-                      MIT has plans to bring more MicroMasters programs to motivated learners like you.
-                      Please sign up for our <a href="#" data-toggle="modal"
-                      data-target="#subscribeAlert">mailing list</a>
-                      to hear about new MicroMasters programs.
-                      Also, don't hesitate to let us know about what MicroMasters you’d like to see.
-                    </div>
-                    <div class="row">
-                      <div class="col-sm-12">
-                        <button class="btn btn-danger button-subscribe-alerts center-block"  data-toggle="modal"
-                       data-target="#subscribeAlert">Yes, tell me when MicroMasters are available</button>
-                      </div>
-                    </div>
-                  </div>
-               </div>
-              </li>
-            </ul>
+                <div class="program-thumbnail-description">
+                  {% if program.description %}
+                    <p>{{ program.description }}</p>
+                  {% else %}
+                    <p>No description available for this program.</p>
+                  {% endif %}
+
+                  {% if program.programpage %}
+                    {% if program.programpage.external_program_page_url %}
+                      <p><a href="{{ program.programpage.external_program_page_url }}" class="program-link">Learn More</a></p>
+                    {% else %}
+                      <p><a href="{{ program.programpage.url }}" class="program-link">Learn More</a></p>
+                    {% endif %}
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          <div class="col-md-4">
+            <div class="dummy-program-thumbnail">
+              <img src="{% static 'images/more-coming-soon.png' %}"
+                             alt="More programs coming soon!">
+            </div>
+            <div class="program-thumbnail-description">
+              <p>MIT plans to bring more MicroMasters programs to motivated learners like you.
+                Sign up for our mailing list to hear about new MicroMasters programs.</p>
+              <a href="#" data-toggle="modal" class="btn mailing-list" data-target="#subscribeAlert">SIGN UP FOR MAILING LIST</a>
+            </div>
           </div>
+
+          </div>
+
         </div>
       </div>
+
+
     </section>
   </div>
 
@@ -167,6 +210,10 @@
     </div>
   </div>
 
+
+
+<div id="signup-dialog">
+  <!-- signup dialog React component injected here -->
 </div>
 
 <!-- Modal subscribe alerts -->
@@ -251,4 +298,5 @@
   </div>
 </div>
 <script type="text/javascript" src="{{ public_src }}"></script>
+<script type="text/javascript" src="{{ signup_dialog_src }}"></script>
 {% endblock %}

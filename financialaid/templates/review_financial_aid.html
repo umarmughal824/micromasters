@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Review Financial Aid" %}{% endblock %}
+
+{% block content %}
+  {% include "header.html" %}
+  <div class="page-content">
+    <div class="single-column" style="max-width: 1000px;">
+      <p><h4>Financial Aid Submissions</h4></p>
+      <div class="mdl-card">
+        <!-- Sorting buttons -->
+        <div>
+          <strong>Sort by: </strong>
+          <div class="btn-group">
+          {% for field in sort_field_info %}
+            <a href="{% url 'review_financial_aid' program_id=current_program_id status=selected_status %}?sort_by={{ field.sort_field }}"
+               class="btn btn-default btn-sm">
+              {{ field.display }}
+              {% if field.direction_display == "" %}&#9650;{% endif %}
+              {% if field.direction_display == "-" %}&#9660;{% endif %}
+            </a>
+          {% endfor %}
+          </div>
+        </div>
+        <!-- /Sorting buttons -->
+        <!-- Filters -->
+        <div>
+          <select class="form-control" onchange="location = this.options[this.selectedIndex].value;">
+          {% for status, message in financial_aid_statuses %}
+            <option value="{% url 'review_financial_aid' program_id=current_program_id status=status %}"
+                    {% if selected_status == status %}selected{% endif %}>
+              {{ message }}
+            </option>
+          {% endfor %}
+          </select>​
+        </div>
+        <!-- /Filters -->
+        <!-- Pagination buttons -->
+        <div>
+          <span class="step-links">
+          {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&sort_by={{ current_sort_field }}" class="btn btn-default">
+              &lt;
+            </a>
+          {% else %}
+            <button class="btn btn-default disabled">&lt;</button>
+          {% endif %}
+          {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&sort_by={{ current_sort_field }}" class="btn btn-default">
+              &gt;
+            </a>
+          {% else %}
+            <button class="btn btn-default disabled">&gt;></button>
+          {% endif %}
+          </span>
+          <br>
+          <span class="current">Page {{ page_obj.number }} of {{ paginator.num_pages }}</span>
+        </div>
+        <!-- /Pagination buttons -->
+        
+        <table class="table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Name/Location</th>
+              <th>Adjusted Cost</th>
+              <th>Income/Yr.</th>
+              <th>Date Calculated</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for financial_aid in financial_aid_objects %}
+            <tr>
+              <td>
+                  <img src="{% static 'images/avatar_default.png' %}"
+                       style="height: 35px; border-radius: 18px; border: 1px solid rgba(180, 180, 180, 0.5)">
+              </td>
+              <td>
+                <b>{{ financial_aid.user.profile.first_name }} {{ financial_aid.user.profile.last_name }}</b>
+                <br>
+                <small>{{ financial_aid.user.profile.city }}, {{ financial_aid.user.profile.country }}</small>
+              </td>
+              <td>
+                <select class="form-control">
+                {% for tier_program in tier_programs %}
+                  <option value="{{ tier_program.id }}"
+                          {% if tier_program == financial_aid.tier_program %}selected{% endif %}>
+                    ${{ tier_program.adjusted_cost }}
+                  </option>
+                {% endfor %}
+                </select>
+              </td>
+              <td>${{ financial_aid.income_usd }}</td>
+              <td>{{ financial_aid.created_on|date:"SHORT_DATE_FORMAT" }}</td>
+              <td>
+                <button class="btn btn-default">
+                  <span class="glyphicon glyphicon-ok" style="color: #0074e1"></span>
+                </button>
+                <button class="btn btn-default">
+                  <span class="glyphicon glyphicon-remove" style="color: #0074e1"></span>
+                </button>
+                <button class="btn btn-default" onclick="alert('Send email to {{ financial_aid.user.email }}')">
+                  <span class="glyphicon glyphicon-envelope" style="color: #0074e1"></span>
+                </button>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% include "footer.html" %}
+{% endblock %}

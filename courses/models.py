@@ -14,6 +14,7 @@ class Program(models.Model):
     title = models.CharField(max_length=255)
     live = models.BooleanField(default=False)
     description = models.TextField(blank=True, null=True)
+    financial_aid_availability = models.BooleanField(default=False, null=False)
 
     def __str__(self):
         return self.title
@@ -47,16 +48,7 @@ class Course(models.Model):
         Note that it could be current as long as the enrollment window
         has not closed.
         """
-        now = datetime.now(pytz.utc)
-        next_run_set = self.courserun_set.filter(
-            # there is only the start date
-            (models.Q(enrollment_end=None) &
-             models.Q(end_date=None) & models.Q(start_date__lte=now)) |
-            # there is no enrollment date but the course has not ended yet
-            (models.Q(enrollment_end=None) & models.Q(end_date__gte=now)) |
-            # the enrollment end date is simply greater than now
-            models.Q(enrollment_end__gte=now)
-        )
+        next_run_set = self.courserun_set.filter(CourseRun.get_active_enrollment_queryset())
         if not next_run_set.count():
             return
         next_run_set = next_run_set.order_by('start_date')
@@ -124,3 +116,20 @@ class CourseRun(models.Model):
         """
         return (self.upgrade_deadline is None or
                 (self.upgrade_deadline > datetime.now(pytz.utc)))
+
+    @staticmethod
+    def get_active_enrollment_queryset():
+        """
+        Returns a Q object that encapsulates the logic for filtering for CourseRun objects
+        that are active for enrollment.
+        """
+        now = datetime.now(pytz.utc)
+        return (
+            # there is only the start date
+            (models.Q(enrollment_end=None) &
+             models.Q(end_date=None) & models.Q(start_date__lte=now)) |
+            # there is no enrollment date but the course has not ended yet
+            (models.Q(enrollment_end=None) & models.Q(end_date__gte=now)) |
+            # the enrollment end date is simply greater than now
+            models.Q(enrollment_end__gte=now)
+        )

@@ -4,24 +4,19 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Loader from 'react-loader';
 
-import {
-  getPreferredName,
-  makeProfileProgressDisplay,
-} from '../util/util';
+import { makeProfileProgressDisplay } from '../util/util';
 import { FETCH_PROCESSING } from '../actions';
 import { setProfileStep } from '../actions/ui';
-import Jumbotron from '../components/Jumbotron';
+import WelcomeBanner from '../components/WelcomeBanner';
 import ErrorMessage from '../components/ErrorMessage';
 import ProfileFormContainer from './ProfileFormContainer';
 import PersonalTab from '../components/PersonalTab';
 import EmploymentTab from '../components/EmploymentTab';
-import PrivacyTab from '../components/PrivacyTab';
 import EducationTab from '../components/EducationTab';
 import {
   PERSONAL_STEP,
   EDUCATION_STEP,
   EMPLOYMENT_STEP,
-  PRIVACY_STEP,
 } from '../constants';
 import { createActionHelper } from '../util/redux';
 import type { Profile } from '../flow/profileTypes';
@@ -30,7 +25,7 @@ class ProfilePage extends ProfileFormContainer {
   currentStep: Function = (): string => {
     const { ui: { profileStep } } = this.props;
     return profileStep;
-  }
+  };
 
   stepTransitions: Function = (): [void|() => void, () => void] => {
     const { dispatch } = this.props;
@@ -40,10 +35,8 @@ class ProfilePage extends ProfileFormContainer {
     case EDUCATION_STEP:
       return [createStepFunc(PERSONAL_STEP), createStepFunc(EMPLOYMENT_STEP)];
     case EMPLOYMENT_STEP:
-      return [createStepFunc(EDUCATION_STEP), createStepFunc(PRIVACY_STEP)];
-    case PRIVACY_STEP:
       return [
-        createStepFunc(EMPLOYMENT_STEP),
+        createStepFunc(EDUCATION_STEP),
         () => this.context.router.push('/dashboard')
       ];
     default:
@@ -51,14 +44,12 @@ class ProfilePage extends ProfileFormContainer {
     }
   };
 
-  currentComponent: Function = (props): React$Element => {
+  currentComponent: Function = (props): React$Element<*> => {
     switch ( this.currentStep() ) {
     case EDUCATION_STEP:
       return <EducationTab {...props} />;
     case EMPLOYMENT_STEP:
       return <EmploymentTab {...props} />;
-    case PRIVACY_STEP:
-      return <PrivacyTab {...props} />;
     default:
       return <PersonalTab {...props} />;
     }
@@ -74,8 +65,6 @@ class ProfilePage extends ProfileFormContainer {
       nextStep: next
     });
     let profile: Profile = props.profile;
-    text = `Welcome ${getPreferredName(profile)}, let's
-      complete your enrollment to MIT MicroMasters.`;
 
     let loaded, content, errorMessage;
     if (profileInfo !== undefined) {
@@ -83,27 +72,28 @@ class ProfilePage extends ProfileFormContainer {
       if (profileInfo.errorInfo !== undefined) {
         errorMessage = <ErrorMessage errorInfo={profileInfo.errorInfo} />;
       } else {
-        content = <Jumbotron profile={profile} text={text}>
-          <div className="card-copy">
-            <div style={{textAlign: "center"}}>
-              {makeProfileProgressDisplay(this.currentStep())}
-            </div>
-            <section>
-              {this.currentComponent(props)}
-            </section>
+        content = <div>
+          <WelcomeBanner profile={profile} text={text} />
+          <div style={{textAlign: "center"}}>
+            {makeProfileProgressDisplay(this.currentStep())}
           </div>
-        </Jumbotron>;
+          <section>
+            {this.currentComponent(props)}
+          </section>
+        </div>;
       }
     } else {
       loaded = false;
     }
 
-    return <div className="card">
-      <Loader loaded={loaded}>
-        {errorMessage}
-        {content}
-      </Loader>
-    </div>;
+    return (
+      <div className="single-column">
+        <Loader loaded={loaded}>
+          {errorMessage}
+          {content}
+        </Loader>
+      </div>
+    );
   }
 }
 

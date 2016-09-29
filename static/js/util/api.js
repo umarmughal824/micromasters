@@ -3,7 +3,11 @@
 // For mocking purposes we need to use 'fetch' defined as a global instead of importing as a local.
 import 'isomorphic-fetch';
 import _ from 'lodash';
-import type { Profile } from '../flow/profileTypes';
+import type { Profile, ProfileGetResult, ProfilePatchResult } from '../flow/profileTypes';
+import type { CheckoutResponse } from '../flow/checkoutTypes';
+import type { Dashboard } from '../flow/dashboardTypes';
+import type { ProgramEnrollment, ProgramEnrollments } from '../flow/enrollmentTypes';
+import type { EmailSendResponse } from '../flow/emailTypes';
 
 export function getCookie(name: string): string|null {
   let cookieValue = null;
@@ -37,7 +41,7 @@ export function csrfSafeMethod(method: string): boolean {
  *  - non 2xx status codes will reject the promise returned
  *  - response JSON is returned in place of response
  */
-export function fetchJSONWithCSRF(input: string, init: Object|void, loginOnError: ?boolean): Promise {
+export function fetchJSONWithCSRF(input: string, init: Object|void, loginOnError: ?boolean): Promise<*> {
   if (init === undefined) {
     init = {};
   }
@@ -104,17 +108,50 @@ export function fetchJSONWithCSRF(input: string, init: Object|void, loginOnError
 
 // import to allow mocking in tests
 import { fetchJSONWithCSRF as mockableFetchJSONWithCSRF } from './api';
-export function getUserProfile(username: string) {
+export function getUserProfile(username: string): Promise<ProfileGetResult> {
   return mockableFetchJSONWithCSRF(`/api/v0/profiles/${username}/`);
 }
 
-export function patchUserProfile(username: string, profile: Profile) {
+export function patchUserProfile(username: string, profile: Profile): Promise<ProfilePatchResult> {
   return mockableFetchJSONWithCSRF(`/api/v0/profiles/${username}/`, {
     method: 'PATCH',
     body: JSON.stringify(profile)
   });
 }
 
-export function getDashboard() {
+export function getDashboard(): Promise<Dashboard> {
   return mockableFetchJSONWithCSRF('/api/v0/dashboard/', {}, true);
+}
+
+export function checkout(courseId: string): Promise<CheckoutResponse> {
+  return mockableFetchJSONWithCSRF('/api/v0/checkout/', {
+    method: 'POST',
+    body: JSON.stringify({
+      course_id: courseId
+    })
+  });
+}
+
+export function sendSearchResultMail(subject: string, body: string, searchRequest: Object): Promise<EmailSendResponse> {
+  return mockableFetchJSONWithCSRF('/api/v0/mail/', {
+    method: 'POST',
+    body: JSON.stringify({
+      email_subject: subject,
+      email_body: body,
+      search_request: searchRequest
+    })
+  });
+}
+
+export function getProgramEnrollments(): Promise<ProgramEnrollments> {
+  return mockableFetchJSONWithCSRF('/api/v0/enrolledprograms/', {}, true);
+}
+
+export function addProgramEnrollment(programId: number): Promise<ProgramEnrollment> {
+  return mockableFetchJSONWithCSRF('/api/v0/enrolledprograms/', {
+    method: 'POST',
+    body: JSON.stringify({
+      program_id: programId
+    })
+  });
 }

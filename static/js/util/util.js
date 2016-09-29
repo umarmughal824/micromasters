@@ -6,8 +6,11 @@ import ga from 'react-ga';
 import striptags from 'striptags';
 import _ from 'lodash';
 import iso3166 from 'iso-3166-2';
+import { S } from './sanctuary';
+const { Maybe, Just, Nothing } = S;
 
 import {
+  STATUS_PASSED,
   EDUCATION_LEVELS,
   PROFILE_STEP_LABELS
 } from '../constants';
@@ -17,6 +20,12 @@ import type {
   WorkHistoryEntry,
   ValidationErrors,
 } from '../flow/profileTypes';
+import type {
+  Program,
+  Course
+} from '../flow/programTypes';
+import { workEntriesByDate } from './sorting';
+import type { CheckoutPayload } from '../flow/checkoutTypes';
 
 export function sendGoogleAnalyticsEvent(category: any, action: any, label: any, value: any) {
   let event: any = {
@@ -49,30 +58,25 @@ export function makeProfileProgressDisplay(active: string) {
   const textY = (height - (radius * 2)) / 2 + radius * 2;
   const circleY = radius + paddingY;
 
-  const greenFill = "#00964e", greenLine = "#7dcba7";
-  const greyStroke = "#ececec", lightGreyText = "#b7b7b7", darkGreyText = "#888888";
-  const greyFill = "#eeeeee", greyCircle = "#dddddd";
+  const lightGreyText = "#888";
   const colors = {
     completed: {
-      fill: greenFill,
-      stroke: "white",
+      fill: "#626262",
       circleText: "white",
-      text: greenFill,
-      line: greenLine
+      text: lightGreyText,
+      fontWeight: 400,
     },
     current: {
-      fill: "white",
-      stroke: greyStroke,
-      circleText: "black",
+      fill: "#30BB5C",
+      circleText: "white",
       text: "black",
-      line: greyStroke
+      fontWeight: 700,
     },
     future: {
-      fill: greyFill,
-      stroke: greyCircle,
-      circleText: darkGreyText,
+      fill: "#f5f5f5",
+      circleText: "#888888",
       text: lightGreyText,
-      line: greyStroke
+      fontWeight: 400,
     }
   };
 
@@ -91,13 +95,46 @@ export function makeProfileProgressDisplay(active: string) {
 
     const circleX = paddingX + radius + circleDistance * i;
     const nextCircleX = paddingX + radius + circleDistance * (i + 1);
+
+    let circleLabel = () => {
+      if ( i < activeTab ) {
+        return <svg
+          fill="white"
+          height="24"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+          x={circleX - 12}
+          y={circleY - 12}
+          key={`check_${i}`}
+        >
+          <path d="M0 0h24v24H0z" fill="none"/>
+          <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+        </svg>;
+      } else {
+        return <text
+          key={`circletext_${i}`}
+          x={circleX}
+          y={circleY}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          style={{
+            fill: colorScheme.circleText,
+            fontWeight: 700,
+            fontSize: i < activeTab ? "16pt" : "12pt"
+          }}
+        >
+          { i + 1 }
+        </text>;
+      }
+    };
+
     elements.push(
       <circle
         key={`circle_${i}`}
         cx={circleX}
         cy={circleY}
         r={radius}
-        stroke={colorScheme.stroke}
         fill={colorScheme.fill}
       />,
       <text
@@ -107,27 +144,15 @@ export function makeProfileProgressDisplay(active: string) {
         textAnchor="middle"
         style={{
           fill: colorScheme.text,
-          fontWeight: 700,
+          fontWeight: colorScheme.fontWeight,
           fontSize: "12pt"
         }}
       >
         {label}
       </text>,
-      <text
-        key={`circletext_${i}`}
-        x={circleX}
-        y={circleY}
-        textAnchor="middle"
-        dominantBaseline="middle"
-        style={{
-          fill: colorScheme.circleText,
-          fontWeight: 700,
-          fontSize: "12pt"
-        }}
-      >
-        {i + 1}
-      </text>
+      circleLabel()
     );
+
     if (i !== numCircles - 1) {
       elements.push(
         <line
@@ -136,7 +161,7 @@ export function makeProfileProgressDisplay(active: string) {
           x2={nextCircleX - radius}
           y1={circleY}
           y2={circleY}
-          stroke={colorScheme.line}
+          stroke={"#ececec"}
           strokeWidth={2}
         />
       );
@@ -156,7 +181,7 @@ export function makeProfileProgressDisplay(active: string) {
 export function generateNewEducation(level: string): EducationEntry {
   return {
     'degree_name': level,
-    'graduation_date': null,
+    'graduation_date': "",
     'field_of_study': null,
     'online_degree': false,
     'school_name': null,
@@ -171,12 +196,12 @@ export function generateNewEducation(level: string): EducationEntry {
  */
 export function generateNewWorkHistory(): WorkHistoryEntry {
   return {
-    position: null,
-    industry: null,
-    company_name: null,
-    start_date: null,
+    position: "",
+    industry: "",
+    company_name: "",
+    start_date: "",
     end_date: null,
-    city: null,
+    city: "",
     country: null,
     state_or_territory: null,
   };
@@ -214,9 +239,7 @@ export function makeStrippedHtml(textOrElement: any): string {
 }
 
 export function makeProfileImageUrl(profile: Profile): string {
-  let imageUrl = `${SETTINGS.edx_base_url}/static/images/profiles/default_120.png`.
-  //replacing multiple "/" with a single forward slash, excluding the ones following the colon
-    replace(/([^:]\/)\/+/g, "$1");
+  let imageUrl = '/static/images/avatar_default.png';
   if (profile !== undefined && profile.profile_url_large) {
     imageUrl = profile.profile_url_large;
   }
@@ -243,18 +266,33 @@ export function getPreferredName(profile: Profile, last: boolean = true): string
 /**
  * returns the users location
  */
-export function getLocation(profile: Profile): string {
+export function getLocation(profile: Profile, showState: boolean = true): string {
   let { country, state_or_territory, city } = profile;
   let subCountryLocation, countryLocation;
   if ( country === 'US' ) {
     let state = state_or_territory.replace(/^\D{2}-/, '');
-    subCountryLocation = `${city}, ${state}`;
+    subCountryLocation = showState ? `${city}, ${state}` : city;
     countryLocation = 'US';
   } else {
     subCountryLocation = city;
     countryLocation = iso3166.country(country).name;
   }
   return `${subCountryLocation}, ${countryLocation}`;
+}
+
+/**
+ * returns the user's most recent (or current) employer
+*/
+export function getEmployer(profile: Profile): Maybe<string> {
+  let entries = workEntriesByDate(profile.work_history);
+  if ( _.isEmpty(entries) ) {
+    return Nothing();
+  }
+  let [, entry] = entries[0];
+  if ( entry.company_name ) {
+    return Just(entry.company_name);
+  }
+  return Nothing();
 }
 
 export function calculateDegreeInclusions(profile: Profile) {
@@ -280,7 +318,7 @@ export function calculateDegreeInclusions(profile: Profile) {
 /**
  * Calls an array of functions in series with a given argument and returns an array of the results
  */
-export function callFunctionArray<T,R>(functionArray: Array<(t: T) => R>, arg: T): R[] {
+export function callFunctionArray<R: any, F: (a: any) => R>(functionArray: Array<F>, arg: any): R[] {
   return functionArray.map((func) => func(arg));
 }
 
@@ -290,4 +328,67 @@ export function callFunctionArray<T,R>(functionArray: Array<(t: T) => R>, arg: T
  */
 export function validationErrorSelector(errors: ValidationErrors, keySet: string[]) {
   return _.get(errors, keySet) ? "invalid-input" : "";
+}
+
+/**
+ * Formats a number between 0 and 1 as a percent, eg "57%"
+ */
+export function asPercent(number: number): string {
+  if (number === undefined || number === null) {
+    return "";
+  } else if (!isFinite(number)) {
+    return "";
+  }
+  return `${Math.round(number * 100)}%`;
+}
+
+/**
+ * Creates a POST form with hidden input fields
+ * @param url the url for the form action
+ * @param payload Each key value pair will become an input field
+ */
+export function createForm(url: string, payload: CheckoutPayload): HTMLFormElement {
+  const form = document.createElement("form");
+  form.setAttribute("action", url);
+  form.setAttribute("method", "post");
+  form.setAttribute("class", "cybersource-payload");
+
+  for (let key: string of Object.keys(payload)) {
+    const value = payload[key];
+    const input = document.createElement("input");
+    input.setAttribute("name", key);
+    input.setAttribute("value", value);
+    input.setAttribute("type", "hidden");
+    form.appendChild(input);
+  }
+  return form;
+}
+
+/**
+ * Formats course price.
+ */
+export function formatPrice(price: string): string {
+  return `$${price}`;
+}
+
+/**
+ * Returns total courses and passed courses in program.
+ */
+export function programCourseInfo(program: Program): Object {
+  let totalCourses = 0;
+  let totalPassedCourses = 0;
+  let passedCourses: Course;
+
+  if (program.courses) {
+    totalCourses = program.courses.length;
+    passedCourses = program.courses.filter(
+      course => course.runs.length > 0 && course.runs[0].status === STATUS_PASSED
+    );
+    totalPassedCourses = passedCourses.length;
+  }
+
+  return {
+    'totalPassedCourses': totalPassedCourses,
+    'totalCourses': totalCourses
+  };
 }

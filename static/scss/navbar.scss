@@ -1,22 +1,37 @@
 .micromasters-navbar {
-  margin-bottom: 5px;
+  padding-bottom: 0;
 }
 
 .micromasters-nav, .micromasters-nav > * {
-  background-color: $micromasters-brand-bg !important;
+  background-color: $mm-brand-bg !important;
+}
+
+.mdl-layout__tab {
+  font-weight: 300;
 }
 
 .mdl-layout__tab-bar-container * {
-  background-color: $micromasters-brand-bg !important;
+  background-color: $mm-brand-bg !important;
 }
 
 .micromasters-nav {
   box-shadow: none !important;
+  min-height: 80px;
+
+  a.micromasters-title {
+    text-decoration: none;
+    color: white;
+  }
 
   .micromasters-title {
     display: flex;
     flex-direction: row;
     align-items: center;
+
+    span.mdl-layout-title {
+      font-size: 18px;
+      font-weight: 200;
+    }
 
     img {
       height: 30px;
@@ -26,38 +41,12 @@
 
   .micromasters-header {
     justify-content: space-between;
-  }
-  height: 112px;
-
-  a.mdl-layout__tab.is-active {
-    color: #fff;
-  }
-
-  a.mdl-layout__tab:hover {
-    color: white;
-    border-bottom-color: white;
-    border-left-color: white;
-    border-right-color: whte;
-    border-top-color: white;
-    outline-color: white;
-  }
-
-  a.mdl-layout__tab.is-active::after {
-    height: 2px;
-    width: 100%;
-    display: block;
-    content: " ";
-    bottom: 0;
-    left: 0;
-    position: absolute;
-    background: #fff;
-    animation: border-expand .2s cubic-bezier(.4,0,.4,1) .01s alternate forwards;
-    transition: all 1s cubic-bezier(.4,0,1,1);
+    height: 75px;
   }
 }
 
 .navbar {
-  min-height:85px;
+  min-height:80px;
   margin-bottom:0;
 }
 
@@ -92,11 +81,63 @@
   margin-right:10px;
 }
 
+$program_selector_border: rgba(255,255,255,.4);
+$header_font_color: white;
+
+.program-selector {
+  margin-left: 30px;
+  font-size: 16px;
+  padding-right: 30px;
+  padding-left: 10px;
+  width: 300px;
+
+  .Select-control {
+    border: 1px solid $program_selector_border !important;
+    box-shadow: none !important;
+    cursor: pointer;
+  }
+
+  .Select-menu-outer,.Select-control,.Select-value-label,.Select-menu-outer,.Select-option {
+    background-color: $mm-brand-bg !important;
+  }
+
+  .Select-menu-outer,.Select-control,.Select-value-label,.Select-placeholder,.Select-option {
+    color: $header_font_color !important;
+  }
+
+  .Select-arrow {
+    border-color: $header_font_color transparent transparent !important;
+  }
+
+  .Select-option {
+    border: none !important;
+  }
+
+  .Select-menu-outer {
+    box-shadow: none;
+    border-top: none;
+    border-left: 1px solid $program_selector_border;
+    border-right: 1px solid $program_selector_border;
+    border-bottom: 1px solid $program_selector_border;
+    z-index: 2;
+  }
+
+  .Select-placeholder {
+    font-weight: 300;
+  }
+}
+
 .site-menu {
   border-bottom:1px solid #ececec;
 }
 
 .navbar-collapse .btn {
+  margin: 26px 0 0 0;
   float:right;
-  margin:26px 0 0 0;
+}
+
+.mdl-layout-title > a {
+  color: white;
+  text-decoration: none;
+  font-weight: 300;
 }

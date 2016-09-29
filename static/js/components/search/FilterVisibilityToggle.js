@@ -7,15 +7,15 @@ export default class FilterVisibilityToggle extends React.Component {
     filterName:             string,
     checkFilterVisibility:  (filterName: string) => boolean,
     setFilterVisibility:    (filterName: string, visibility: boolean) => void,
-    children:               React$Element[],
+    children:               React$Element<*>[],
   };
 
   openClass: Function = (): string => {
     const { filterName, checkFilterVisibility } = this.props;
     return checkFilterVisibility(filterName) ? "" : "closed";
-  }
+  };
 
-  openStateIcon: Function = (): React$Element => (
+  openStateIcon: Function = (): React$Element<*> => (
     <Icon
       name="arrow_drop_down"
       onClick={this.toggleFilterVisibility}

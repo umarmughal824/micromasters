@@ -1,6 +1,10 @@
 /* global SETTINGS: false */
 import { assert } from 'chai';
 import React from 'react';
+import R from 'ramda';
+import _ from 'lodash';
+import { S } from './sanctuary';
+const { Just } = S;
 
 import {
   makeStrippedHtml,
@@ -14,6 +18,11 @@ import {
   callFunctionArray,
   getLocation,
   validationErrorSelector,
+  asPercent,
+  getEmployer,
+  createForm,
+  formatPrice,
+  programCourseInfo,
 } from '../util/util';
 import {
   EDUCATION_LEVELS,
@@ -24,7 +33,10 @@ import {
   DOCTORATE,
   MASTERS,
   PROFILE_STEP_LABELS,
+  CHECKOUT_RESPONSE,
 } from '../constants';
+import { assertMaybeEquality, assertIsNothing } from './sanctuary_test';
+import { program } from '../components/ProgressWidget_test';
 
 /* eslint-disable camelcase */
 describe('utility functions', () => {
@@ -40,12 +52,12 @@ describe('utility functions', () => {
   describe('generateNewWorkHistory', () => {
     it('generates a new work history object', () => {
       assert.deepEqual(generateNewWorkHistory(), {
-        position: null,
-        industry: null,
-        company_name: null,
-        start_date: null,
+        position: "",
+        industry: "",
+        company_name: "",
+        start_date: "",
         end_date: null,
-        city: null,
+        city: "",
         country: null,
         state_or_territory: null,
       });
@@ -57,7 +69,7 @@ describe('utility functions', () => {
       let level = 'level';
       assert.deepEqual(generateNewEducation(level), {
         'degree_name': level,
-        'graduation_date': null,
+        'graduation_date': "",
         'field_of_study': null,
         'online_degree': false,
         'school_name': null,
@@ -76,7 +88,7 @@ describe('utility functions', () => {
     
     it('uses a default profile image if not available, removing duplicate slashes', () => {
       assert.equal(
-        `${SETTINGS.edx_base_url}static/images/profiles/default_120.png`,
+        '/static/images/avatar_default.png',
         makeProfileImageUrl({})
       );
     });
@@ -157,7 +169,6 @@ describe('utility functions', () => {
         });
       });
     });
-
   });
 
   describe('getLocation', () => {
@@ -177,6 +188,29 @@ describe('utility functions', () => {
         city: 'Portland'
       };
       assert.equal(getLocation(us), 'Portland, ME, US');
+      // assert hide state
+      assert.equal(getLocation(us, false), 'Portland, US');
+    });
+  });
+
+  describe('getEmployer', () => {
+    it('should return Nothing if the user has no job history', () => {
+      let clone = R.clone(USER_PROFILE_RESPONSE);
+      clone.work_history = [];
+      assertIsNothing(getEmployer(clone));
+    });
+
+    it('should return the current employer if the user is currently employed', () => {
+      let clone = R.clone(USER_PROFILE_RESPONSE);
+      clone.work_history.push({
+        company_name: "Foobarcorp",
+        end_date: null
+      });
+      assertMaybeEquality(Just("Foobarcorp"), getEmployer(clone));
+    });
+
+    it('should return the most recent job if the user is not currently employed', () => {
+      assertMaybeEquality(Just("Planet Express"), getEmployer(USER_PROFILE_RESPONSE));
     });
   });
 
@@ -193,8 +227,8 @@ describe('utility functions', () => {
         let foundCircle = false, foundCircleText = false, foundText = false;
         for (let child of svg.props.children[1]) {
           if (child.key === `circle_${i}`) {
-            // the white circle should be the currently selected one
-            assert.equal(child.props.fill, "white");
+            // the green circle should be the currently selected one
+            assert.equal(child.props.fill, "#30BB5C");
             foundCircle = true;
           }
           if (child.key === `circletext_${i}`) {
@@ -333,6 +367,61 @@ describe('utility functions', () => {
       let errors = {};
       let keySet = ['bar'];
       assert.equal(validationErrorSelector(errors, keySet), "");
+    });
+  });
+
+  describe('asPercent', () => {
+    it("returns an empty string for null or undefined", () => {
+      assert.equal(asPercent(undefined), "");
+      assert.equal(asPercent(null), "");
+    });
+
+    it("handles NaN, - and + inf", () => {
+      assert.equal(asPercent(Infinity), "");
+      assert.equal(asPercent(-Infinity), "");
+      assert.equal(asPercent(NaN), "");
+    });
+
+    it("formats valid numbers", () => {
+      assert.equal(asPercent(1234.567), "123457%");
+      assert.equal(asPercent(-.34), "-34%");
+      assert.equal(asPercent(.129), "13%");
+    });
+  });
+
+  describe('createForm', () => {
+    it('creates a form with hidden values corresponding to the payload', () => {
+      const { url, payload } = CHECKOUT_RESPONSE;
+      const form = createForm(url, payload);
+
+      let clone = _.clone(payload);
+      for (let hidden of form.querySelectorAll("input[type=hidden]")) {
+        const key = hidden.getAttribute('name');
+        const value = hidden.getAttribute('value');
+        assert.equal(clone[key], value);
+        delete clone[key];
+      }
+      // all keys exhausted
+      assert.deepEqual(clone, {});
+      assert.equal(form.getAttribute("action"), url);
+      assert.equal(form.getAttribute("method"), "post");
+    });
+  });
+
+  describe('formatPrice', () => {
+    it('format price', () => {
+      assert.equal(formatPrice(20), "$20");
+    });
+  });
+
+  describe('programCourseInfo', () => {
+    it('assert program info', () => {
+      const programInfoActual = programCourseInfo(program);
+
+      assert.deepEqual(programInfoActual, {
+        totalPassedCourses: 1,
+        totalCourses: 3
+      });
     });
   });
 });

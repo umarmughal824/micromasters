@@ -1,0 +1,197 @@
+.profile-form {
+  min-height: 0 !important;
+  font-weight: 400 !important;
+  font-size: 16px !important;
+
+  .card-image {
+    height: auto;
+    border-radius: 50%;
+    margin-left: 15px;
+    width: 112px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+  }
+
+  i.material-icons {
+    color: $mm-brand-blue;
+  }
+
+  .section-header {
+    font-weight: 500;
+    font-size: 16px;
+    padding-top: 30px;
+  }
+
+  label {
+    font-weight: 400;
+  }
+
+  .profile-radio-switch {
+    display: flex;
+    flex-direction: row;
+    color: $lightgrey !important;
+    text-transform: uppercase;
+
+    div:first-child {
+      margin-right: 15px;
+    }
+  }
+
+  .profile-radio-switch, .profile-radio-group {
+    font-size: 14px;
+
+    svg:last-child {
+      fill: $mm-brand-blue !important;
+    }
+  }
+
+  .profile-radio-group-label {
+    font-weight: 400;
+    font-size: 12px;
+  }
+
+  .profile-radio-switch > div {
+    width: 0 !important;
+  }
+
+  .profile-form-grid {
+    width: 100%;
+    padding: 0;
+
+    .title {
+      font-weight: 500;
+      margin-top: 0;
+    }
+
+    .profile-card-header {
+      justify-content: space-between;
+
+      .title, span {
+        font-weight: 500;
+        font-size: 18px;
+      }
+    }
+  }
+
+  .profile-form-row {
+    display: flex;
+    flex-direction: row;
+
+    .basic-info {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      width: 50%;
+    }
+
+    &.row-padding {
+      padding: 13px 0 0;
+      margin: 0 ;
+    }
+
+    &.add {
+      margin-bottom: 17px;
+    }
+
+    &:nth-last-child(2) {
+      .user-credentials {
+        border-bottom: none !important;
+      }
+    }
+
+    .profile-row-icons {
+      text-align: right;
+      color: #898989;
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+
+      &.row-width {
+        width: 50%;
+      }
+    }
+
+    .col {
+      &.user-credentials {
+        width: 50%;
+        border-bottom: 1px #e2e2e2 solid;
+
+        margin-right: 10px;
+        vertical-align: middle;
+        padding-bottom: 13px;
+
+        &.row-padding {
+          padding-top: 30px;
+        }
+      }
+
+      &.user-info {
+        width: 250% !important;
+        margin-left: 23px;
+      }
+
+      .profile-row-name {
+        font-size: 16px;
+        color: $font-black;
+        padding: 12px 9px;
+
+        .school-type {
+          font-weight: 600;
+          text-transform: capitalize;
+        }
+
+        .school-name {
+          margin-top: 10px;
+        }
+      }
+
+      .profile-row-date-range {
+        font-size: 16px;
+        font-weight: 300;
+        color: $font-gray;
+        float: left;
+        position: relative;
+        margin-top: 7px;
+      }
+
+      .profile-row-new-line {
+        display: block;
+        width: 100%;
+      }
+    }
+  }
+
+  .bound-check-box {
+    margin:  12px 0 20px;
+  }
+}
+
+.privacy-form-heading {
+  font-size: 20px;
+  font-weight: 500;
+  margin-top: 0;
+}
+
+// for the Why we ask this tooltip
+// TODO: where should this go?
+[data-id='tooltip'] {
+  max-width: 450px;
+  font-size: 14px;
+}
+
+.tooltip-link {
+  color: $link-text;
+  cursor: pointer;
+}
+
+.profile-form.collapsed {
+  height: 60px;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-top: 10px;
+
+  .profile-form-grid {
+    margin-top: 6px;
+  }
+}

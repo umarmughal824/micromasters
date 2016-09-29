@@ -1,57 +1,93 @@
 // @flow
 /* global SETTINGS: false */
 import React from 'react';
+import Icon from 'react-mdl/lib/Icon';
 import { connect } from 'react-redux';
 import type { Dispatch } from 'redux';
 
+import {
+  TOAST_SUCCESS,
+  TOAST_FAILURE,
+} from '../constants';
+import ErrorMessage from '../components/ErrorMessage';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import Toast from '../components/Toast';
 import {
   FETCH_SUCCESS,
-  fetchUserProfile,
-  clearProfile,
+  FETCH_FAILURE,
+  FETCH_PROCESSING,
   fetchDashboard,
   clearDashboard,
+} from '../actions';
+import {
+  fetchUserProfile,
+  clearProfile,
   startProfileEdit,
   updateProfileValidation,
-} from '../actions/index';
+} from '../actions/profile';
+import {
+  addProgramEnrollment,
+  clearEnrollments,
+  fetchProgramEnrollments,
+  setCurrentProgramEnrollment,
+} from '../actions/enrollments';
+import {
+  setEnrollDialogError,
+  setEnrollDialogVisibility,
+  setToastMessage,
+  setEnrollSelectedProgram,
+} from '../actions/ui';
+import {
+  setProgram,
+  setDialogVisibility,
+} from '../actions/signup_dialog';
 import { clearUI, setProfileStep } from '../actions/ui';
 import { validateProfileComplete } from '../util/validation';
-import type { Profile } from '../flow/profileTypes';
+import type { DashboardState } from '../flow/dashboardTypes';
+import type {
+  ProgramEnrollment,
+  ProgramEnrollmentsState,
+} from '../flow/enrollmentTypes';
+import type { ProfileGetResult } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
+import { filterPositiveInt } from '../util/util';
 
-const TERMS_OF_SERVICE_REGEX = /\/terms_of_service\/?/;
 const PROFILE_REGEX = /^\/profile\/?[a-z]?/;
 
 class App extends React.Component {
   props: {
-    children:     React$Element[],
-    userProfile:  {profile: Profile, getStatus: string},
-    location:     Object,
-    dispatch:     Dispatch,
-    dashboard:    Object,
-    history:      Object,
-    ui:           UIState,
+    children:                 React$Element<*>[],
+    userProfile:              ProfileGetResult,
+    location:                 Object,
+    currentProgramEnrollment: ProgramEnrollment,
+    dispatch:                 Dispatch,
+    dashboard:                DashboardState,
+    enrollments:              ProgramEnrollmentsState,
+    history:                  Object,
+    ui:                       UIState,
+    signupDialog:             Object,
   };
 
   static contextTypes = {
     router:   React.PropTypes.object.isRequired
   };
 
-  componentDidMount() {
+  updateRequirements() {
     this.fetchUserProfile(SETTINGS.username);
     this.fetchDashboard();
-    this.requireTermsOfService();
+    this.fetchEnrollments();
     this.requireProfileFilledOut();
     this.requireCompleteProfile();
+    this.updateProgramEnrollments();
+  }
+
+  componentDidMount() {
+    this.updateRequirements();
   }
 
   componentDidUpdate() {
-    this.fetchUserProfile(SETTINGS.username);
-    this.fetchDashboard();
-    this.requireTermsOfService();
-    this.requireProfileFilledOut();
-    this.requireCompleteProfile();
+    this.updateRequirements();
   }
 
   componentWillUnmount() {
@@ -59,6 +95,7 @@ class App extends React.Component {
     dispatch(clearProfile(SETTINGS.username));
     dispatch(clearDashboard());
     dispatch(clearUI());
+    dispatch(clearEnrollments());
   }
 
   fetchUserProfile(username) {
@@ -75,14 +112,34 @@ class App extends React.Component {
     }
   }
 
-  requireTermsOfService() {
-    const { userProfile, location: { pathname } } = this.props;
+  fetchEnrollments() {
+    const { enrollments, dispatch } = this.props;
+    if (enrollments.getStatus === undefined) {
+      dispatch(fetchProgramEnrollments());
+    }
+  }
+
+  updateProgramEnrollments() {
+    const { enrollments, dispatch, signupDialog: { program } } = this.props;
+    const cleanup = () => {
+      dispatch(setProgram(null));
+      dispatch(setDialogVisibility(null));
+    };
     if (
-      userProfile.getStatus === FETCH_SUCCESS &&
-      !userProfile.profile.agreed_to_terms_of_service &&
-      !(TERMS_OF_SERVICE_REGEX.test(pathname))
+      program &&
+      enrollments.getStatus === FETCH_SUCCESS &&
+      enrollments.postStatus !== FETCH_PROCESSING &&
+      enrollments.postStatus !== FETCH_FAILURE
     ) {
-      this.context.router.push('/terms_of_service');
+      let programId = filterPositiveInt(program);
+      if ( programId && !enrollments.programEnrollments.find(e => e.id === programId) ) {
+        dispatch(addProgramEnrollment(programId)).catch(e => {
+          if ( e.errorStatusCode !== 404 ) {
+            console.error("adding program enrollment failed for program: ", programId); // eslint-disable-line no-console, max-len
+          }
+        });
+      }
+      cleanup();
     }
   }
 
@@ -91,7 +148,6 @@ class App extends React.Component {
     if (
       userProfile.getStatus === FETCH_SUCCESS &&
       !userProfile.profile.filled_out &&
-      !(TERMS_OF_SERVICE_REGEX.test(pathname)) &&
       !(PROFILE_REGEX.test(pathname))
     ) {
       this.context.router.push('/profile');
@@ -108,8 +164,6 @@ class App extends React.Component {
     const [ complete, step, errors] = validateProfileComplete(profile);
     if (
       userProfile.getStatus === FETCH_SUCCESS &&
-      profile.agreed_to_terms_of_service &&
-      !TERMS_OF_SERVICE_REGEX.test(pathname) &&
       !PROFILE_REGEX.test(pathname) &&
       !complete
     ) {
@@ -122,32 +176,101 @@ class App extends React.Component {
     }
   }
 
-  render() {
-    const { children, location: { pathname } } = this.props;
-    const { router } = this.context;
+  addProgramEnrollment = (programId: number): void => {
+    const { dispatch } = this.props;
+    dispatch(addProgramEnrollment(programId));
+  };
 
+  setEnrollDialogError = (error: ?string): void => {
+    const { dispatch } = this.props;
+    dispatch(setEnrollDialogError(error));
+  };
+
+  setEnrollDialogVisibility = (visibility: boolean): void => {
+    const { dispatch } = this.props;
+    dispatch(setEnrollDialogVisibility(visibility));
+  };
+
+  setEnrollSelectedProgram = (programId: ?number): void => {
+    const { dispatch } = this.props;
+    dispatch(setEnrollSelectedProgram(programId));
+  };
+
+  setCurrentProgramEnrollment = (enrollment: ProgramEnrollment): void => {
+    const { dispatch } = this.props;
+    dispatch(setCurrentProgramEnrollment(enrollment));
+  };
+
+  clearMessage = (): void => {
+    const { dispatch } = this.props;
+    dispatch(setToastMessage(null));
+  };
+
+  render() {
+    const {
+      currentProgramEnrollment,
+      enrollments,
+      ui: {
+        enrollDialogError,
+        enrollDialogVisibility,
+        toastMessage,
+        enrollSelectedProgram,
+      },
+      location: { pathname },
+      dashboard,
+    } = this.props;
+    let { children } = this.props;
     let empty = false;
-    if (TERMS_OF_SERVICE_REGEX.test(pathname)) {
+    if (PROFILE_REGEX.test(pathname)) {
       empty = true;
     }
-    let pushUrl = url => router.push(url);
 
-    return (
-      <div>
-        <Navbar
-          empty={empty}
-          changeUrl={pushUrl}
-          pathname={pathname}
-        >
-          <div className="app-media layout-boxed">
-            <div className="main-content">
-              {children}
-            </div>
-            <Footer />
-          </div>
-        </Navbar>
+    if (enrollments.getStatus === FETCH_FAILURE) {
+      children = <ErrorMessage errorInfo={enrollments.getErrorInfo} />;
+      empty = true;
+    }
+
+    let open = false;
+    let message;
+    if (toastMessage) {
+      open = true;
+
+      let icon = "";
+      if (toastMessage.icon === TOAST_FAILURE) {
+        icon = <Icon name="error" key="icon "/>;
+      } else if (toastMessage.icon === TOAST_SUCCESS) {
+        icon = <Icon name="done" key="icon" />;
+      }
+      message = [
+        icon,
+        " ",
+        toastMessage.message,
+      ];
+    }
+
+    return <div id="app">
+      <Navbar
+        addProgramEnrollment={this.addProgramEnrollment}
+        currentProgramEnrollment={currentProgramEnrollment}
+        dashboard={dashboard}
+        empty={empty}
+        enrollDialogError={enrollDialogError}
+        enrollDialogVisibility={enrollDialogVisibility}
+        enrollSelectedProgram={enrollSelectedProgram}
+        enrollments={enrollments}
+        setCurrentProgramEnrollment={this.setCurrentProgramEnrollment}
+        setEnrollDialogError={this.setEnrollDialogError}
+        setEnrollDialogVisibility={this.setEnrollDialogVisibility}
+        setEnrollSelectedProgram={this.setEnrollSelectedProgram}
+      />
+      <Toast onTimeout={this.clearMessage} open={open}>
+        {message}
+      </Toast>
+      <div className="page-content">
+        { children }
       </div>
-    );
+      <Footer />
+    </div>;
   }
 }
 
@@ -159,9 +282,12 @@ const mapStateToProps = (state) => {
     profile = state.profiles[SETTINGS.username];
   }
   return {
-    userProfile:  profile,
-    dashboard:    state.dashboard,
-    ui:           state.ui,
+    userProfile:              profile,
+    dashboard:                state.dashboard,
+    ui:                       state.ui,
+    currentProgramEnrollment: state.currentProgramEnrollment,
+    enrollments:              state.enrollments,
+    signupDialog:             state.signupDialog,
   };
 };
 

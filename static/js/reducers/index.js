@@ -13,23 +13,37 @@ import {
   RECEIVE_PATCH_USER_PROFILE_SUCCESS,
   RECEIVE_PATCH_USER_PROFILE_FAILURE,
   UPDATE_PROFILE_VALIDATION,
-
+} from '../actions/profile';
+import {
   REQUEST_DASHBOARD,
   RECEIVE_DASHBOARD_SUCCESS,
   RECEIVE_DASHBOARD_FAILURE,
   CLEAR_DASHBOARD,
+
+  REQUEST_CHECKOUT,
+  RECEIVE_CHECKOUT_SUCCESS,
+  RECEIVE_CHECKOUT_FAILURE,
 
   FETCH_FAILURE,
   FETCH_PROCESSING,
   FETCH_SUCCESS,
 } from '../actions';
 import { ui } from './ui';
+import { email } from './email';
+import {
+  currentProgramEnrollment,
+  enrollments,
+} from './enrollments';
+import type { DashboardState } from '../flow/dashboardTypes';
 import type { Action } from '../flow/reduxTypes';
-import type { ProfileGetResult } from '../flow/profileTypes';
+import type {
+  ProfileGetResult,
+  Profiles,
+} from '../flow/profileTypes';
+import { signupDialog } from './signup_dialog';
 
 export const INITIAL_PROFILES_STATE = {};
-type ProfileState = {};
-export const profiles = (state: ProfileState = INITIAL_PROFILES_STATE, action: Action) => {
+export const profiles = (state: Profiles = INITIAL_PROFILES_STATE, action: Action) => {
   let patchProfile = newProfile => {
     let clone = Object.assign({}, state);
     let username = action.payload.username;
@@ -126,8 +140,7 @@ export const profiles = (state: ProfileState = INITIAL_PROFILES_STATE, action: A
   }
 };
 
-type DashboardState = {programs: any[]};
-const INITIAL_DASHBOARD_STATE: any = {
+const INITIAL_DASHBOARD_STATE: DashboardState = {
   programs: []
 };
 
@@ -154,9 +167,35 @@ export const dashboard = (state: DashboardState = INITIAL_DASHBOARD_STATE, actio
   }
 };
 
+type CheckoutState = {};
+const INITIAL_CHECKOUT_STATE = {};
+export const checkout = (state: CheckoutState = INITIAL_CHECKOUT_STATE, action: Action) => {
+  switch (action.type) {
+  case REQUEST_CHECKOUT:
+    return Object.assign({}, state, {
+      fetchStatus: FETCH_PROCESSING
+    });
+  case RECEIVE_CHECKOUT_SUCCESS:
+    return Object.assign({}, state, {
+      fetchStatus: FETCH_SUCCESS
+    });
+  case RECEIVE_CHECKOUT_FAILURE:
+    return Object.assign({}, state, {
+      fetchStatus: FETCH_FAILURE
+    });
+  default:
+    return state;
+  }
+};
+
 
 export default combineReducers({
   profiles,
   dashboard,
   ui,
+  email,
+  checkout,
+  enrollments,
+  currentProgramEnrollment,
+  signupDialog,
 });

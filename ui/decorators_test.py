@@ -11,7 +11,6 @@ from search.base import ESTestCase
 from ui.url_utils import (
     DASHBOARD_URL,
     PROFILE_URL,
-    TERMS_OF_SERVICE_URL,
 )
 
 
@@ -34,31 +33,6 @@ class DecoratorTests(ESTestCase):
                 uid="{}_edx".format(profile.user.username)
             )
         self.client.force_login(profile.user)
-
-    def test_redirect_to_terms_of_service(self):
-        """
-        If user has not filled out terms of service and they access the dashboard,
-        they should be redirected to /terms_of_service
-        """
-        self.create_user_and_login(
-            agreed_to_terms_of_service=False,
-            filled_out=True
-        )
-
-        resp = self.client.get(DASHBOARD_URL)
-        self.assertRedirects(resp, TERMS_OF_SERVICE_URL)
-
-    def test_no_redirect_to_terms_of_service(self):
-        """
-        If user is going to /terms_of_service anyway, don't redirect them
-        """
-        self.create_user_and_login(
-            agreed_to_terms_of_service=False,
-            filled_out=True
-        )
-
-        resp = self.client.get(TERMS_OF_SERVICE_URL)
-        assert resp.status_code == 200
 
     def test_redirect_profile(self):
         """
@@ -95,16 +69,3 @@ class DecoratorTests(ESTestCase):
 
         resp = self.client.get(DASHBOARD_URL)
         assert resp.status_code == 200
-
-    def test_redirect_to_terms_of_service_first(self):
-        """
-        If user has not filled out terms of service and not the profile,
-        they are redirected to the terms of service first
-        """
-        self.create_user_and_login(
-            agreed_to_terms_of_service=False,
-            filled_out=False
-        )
-
-        resp = self.client.get(DASHBOARD_URL)
-        self.assertRedirects(resp, TERMS_OF_SERVICE_URL)

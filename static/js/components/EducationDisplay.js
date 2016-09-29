@@ -3,8 +3,6 @@ import React from 'react';
 import IconButton from 'react-mdl/lib/IconButton';
 
 import Grid, { Cell } from 'react-mdl/lib/Grid';
-import FABButton from 'react-mdl/lib/FABButton';
-import Icon from 'react-mdl/lib/Icon';
 import { Card } from 'react-mdl/lib/Card';
 import _ from 'lodash';
 import moment from 'moment';
@@ -16,7 +14,7 @@ import {
   openEditEducationForm,
   openNewEducationForm,
   deleteEducationEntry,
-} from '../util/editEducation';
+} from '../util/profile_history_edit';
 import { userPrivilegeCheck } from '../util/util';
 import { HIGH_SCHOOL } from '../constants';
 import { educationEntriesByDate } from '../util/sorting';
@@ -55,27 +53,31 @@ export default class EducationDisplay extends ProfileFormFields {
       level.value === entry.degree_name
     )).label;
     let icons = () => (
-      <Cell col={2} className="profile-row-icons">
+      <div className="profile-row-icons">
         {validationAlert()}
         <IconButton className="edit-button" name="edit" onClick={editEntry} />
         <IconButton className="delete-button" name="delete" onClick={deleteEntry} />
-      </Cell>
+      </div>
     );
     return (
-      <Grid className="profile-tab-card-grid user-page" key={index}>
-        <Cell col={4} className="profile-row-name">
-          <span className="school-type">{ degree }</span><br/>
-          { entry.school_name }
-        </Cell>
-        <Cell col={6} className="profile-row-date-range">
-          {`${dateFormat(entry.graduation_date)}`}
-        </Cell>
-        { userPrivilegeCheck(profile, icons, () => <Cell col={2} />) }
-      </Grid>
+      <Cell col={12} className="profile-form-row row-padding" key={index}>
+        <div className="col user-credentials">
+          <div className="profile-row-name">
+            <div className="school-type">{ degree }</div>
+            <div className="school-name">{ entry.school_name }</div>
+          </div>
+        </div>
+        <div className="col user-credentials row-padding">
+          <div className="profile-row-date-range">
+            { dateFormat(entry.graduation_date) }
+          </div>
+          { userPrivilegeCheck(profile, icons, () => <div />) }
+        </div>
+      </Cell>
     );
   };
 
-  renderEducationEntries: Function = (): React$Element[] => {
+  renderEducationEntries: Function = (): React$Element<*>[] => {
     const { profile, profile: { education }} = this.props;
     let rows = [];
     if (education !== undefined) {
@@ -84,15 +86,14 @@ export default class EducationDisplay extends ProfileFormFields {
     }
     userPrivilegeCheck(profile, () => {
       rows.push(
-        <FABButton
-          colored
-          id="add-education-button"
-          className="profile-add-button"
-          key="I'm unique!"
-          onClick={() => this.openNewEducationForm(HIGH_SCHOOL, null)}
-        >
-          <Icon name="add" />
-        </FABButton>
+        <Cell col={12} className="profile-form-row add" key={"I'm unique!"}>
+          <a
+            className="mm-minor-action"
+            onClick={() => this.openNewEducationForm(HIGH_SCHOOL, null)}
+          >
+            Add degree
+          </a>
+        </Cell>
       );
     });
     return rows;
@@ -113,14 +114,15 @@ export default class EducationDisplay extends ProfileFormFields {
           showLevelForm={true}
           validator={educationValidation}
         />
-        <Card shadow={1} className="profile-tab-card" id="education-card">
-          <Grid className="profile-tab-card-grid">
-            <Cell col={4} className="profile-card-title">
-              Education
+        <Card shadow={1} className="profile-form" id="education-card">
+          <Grid className="profile-form-grid">
+            <Cell col={12} className="profile-form-row profile-card-header">
+              <span className="title">
+                Education
+              </span>
             </Cell>
-            <Cell col={8} />
-          </Grid>
           { this.renderEducationEntries() }
+          </Grid>
         </Card>
       </div>
     );

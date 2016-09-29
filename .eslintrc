@@ -20,6 +20,7 @@
         "route",
         "location"
       ]}],
+    "react/display-name" : [0],
     "no-unused-vars": [ 2, {
       "vars": "local",
       "argsIgnorePattern": "action"

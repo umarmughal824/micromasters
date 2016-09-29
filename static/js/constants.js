@@ -1,3 +1,4 @@
+/* global SETTINGS: false */
 export const HIGH_SCHOOL = 'hs';
 export const ASSOCIATE = 'a';
 export const BACHELORS = 'b';
@@ -25,7 +26,6 @@ export const ELASTICSEARCH_RESPONSE = {
           "profile": {
             "username": "test_user",
             "filled_out": true,
-            "agreed_to_terms_of_service": true,
             "account_privacy": "public",
             "email_optin": true,
             "first_name": "Test",
@@ -35,8 +35,7 @@ export const ELASTICSEARCH_RESPONSE = {
             "state_or_territory": "AF-BDS",
             "city": "Kabul",
             "birth_country": "AF",
-            "birth_state_or_territory": "AF-BDS",
-            "birth_city": "Kabul",
+            "nationality": "US",
             "has_profile_image": false,
             "profile_url_full": "https://www.gravatar.com/avatar/3149fb060c93eaff7bd33583e209b5df?r=PG&s=800&d=https%3A%2F%2Fs3.amazonaws.com%2Fodl-micromasters-production%2Favatar_default.png", // eslint-disable-line max-len
             "profile_url_large": "https://www.gravatar.com/avatar/3149fb060c93eaff7bd33583e209b5df?r=PG&s=500&d=https%3A%2F%2Fs3.amazonaws.com%2Fodl-micromasters-production%2Favatar_default.png", // eslint-disable-line max-len
@@ -141,19 +140,19 @@ export const ELASTICSEARCH_RESPONSE = {
 };
 
 export const USER_PROFILE_RESPONSE = {
+  "username": SETTINGS.username,
   "filled_out": true,
   "agreed_to_terms_of_service": true,
   "account_privacy": "all_users",
   "email_optin": false,
   "first_name": "Jane",
   "last_name": "Garris",
-  "preferred_name": "Jane Garris",
+  "preferred_name": "Jane",
   "country": "US",
   "state_or_territory": "MA",
   "city": "Cambridge",
   "birth_country": "US",
-  "birth_state_or_territory": "MA",
-  "birth_city": "Cambridge",
+  "nationality": "DE",
   "has_profile_image": true,
   "profile_url_full": "http://192.168.33.10:8000/static/images/profiles/default_500.png",
   "profile_url_large": "http://192.168.33.10:8000/static/images/profiles/default_120.png",
@@ -208,12 +207,23 @@ export const USER_PROFILE_RESPONSE = {
   "edx_level_of_education": null
 };
 
+export const USER_PROGRAM_RESPONSE = {
+  "grade_average": 83
+};
+
 export const STATUS_PASSED = 'passed';
 export const STATUS_NOT_PASSED = 'not-passed';
-export const STATUS_VERIFIED_NOT_COMPLETED = 'verified-not-completed';
-export const STATUS_ENROLLED_NOT_VERIFIED = "enrolled-not-verified";
-export const STATUS_OFFERED_NOT_ENROLLED = "offered-not-enrolled";
-export const STATUS_NOT_OFFERED = 'not-offered';
+export const STATUS_VERIFIED = 'verified';
+export const STATUS_ENROLLED = "enrolled";
+export const STATUS_OFFERED = "offered";
+
+export const ALL_COURSE_STATUSES = [
+  STATUS_PASSED,
+  STATUS_NOT_PASSED,
+  STATUS_OFFERED,
+  STATUS_ENROLLED,
+  STATUS_VERIFIED,
+];
 
 export const DASHBOARD_RESPONSE = [
   {
@@ -235,14 +245,20 @@ export const DASHBOARD_RESPONSE = [
             "title": "Gio Test Course #15",
             "course_id": "course-v1:odl+GIO101+CR-FALL15",
             "status": STATUS_NOT_PASSED,
-            "id": 1
+            "id": 1,
+            "course_start_date": "2016-09-22T11:48:27Z",
+            "fuzzy_start_date": "Fall 2016",
+            "course_end_date": "2016-09-09T10:20:10Z"
           },
           {
             "position": 2,
             "title": "Gio Test Course #14",
             "course_id": "course-v1:odl+GIO101+FALL14",
             "status": STATUS_NOT_PASSED,
-            "id": 2
+            "id": 2,
+            "course_start_date": "2016-08-22T11:48:27Z",
+            "fuzzy_start_date": "Fall 2017",
+            "course_end_date": "2016-09-09T10:20:10Z",
           },
           {
             "certificate_url": "www.google.com",
@@ -251,12 +267,14 @@ export const DASHBOARD_RESPONSE = [
             "position": 3,
             "grade": "0.66",
             "course_id": "course-v1:odl+GIO101+FALL13",
-            "id": 3
+            "id": 3,
+            "course_start_date": "2016-08-22T11:48:27Z",
+            "fuzzy_start_date": "Fall 2017",
+            "course_end_date": "2016-09-09T10:20:10Z",
           }
         ],
         "position_in_program": 0,
-        "title": "Gio Course - failed, no status text",
-        "status": STATUS_NOT_OFFERED,
+        "title": "Gio Course - failed, no grade",
         "description": "",
         "id": 1
       },
@@ -265,7 +283,6 @@ export const DASHBOARD_RESPONSE = [
         "runs": [],
         "position_in_program": 1,
         "title": "8.MechCx Advanced Introductory Classical Mechanics",
-        "status": STATUS_NOT_OFFERED,
         "description": "",
         "id": 2
       },
@@ -274,7 +291,6 @@ export const DASHBOARD_RESPONSE = [
         "runs": [],
         "position_in_program": 2,
         "title": "EDX Demo course",
-        "status": STATUS_NOT_OFFERED,
         "description": "",
         "id": 3
       },
@@ -283,7 +299,6 @@ export const DASHBOARD_RESPONSE = [
         "runs": [],
         "position_in_program": 3,
         "title": "Peter Course",
-        "status": STATUS_NOT_OFFERED,
         "description": "",
         "id": 4
       }
@@ -294,18 +309,21 @@ export const DASHBOARD_RESPONSE = [
     "courses": [
       {
         "id": 5,
-        "status": STATUS_OFFERED_NOT_ENROLLED,
         "position_in_program": 1,
         "title": "Supply Chain and Logistics Fundamentals - enroll button",
         "runs": [
           {
             "course_id": "course-v1:supply+chain",
             "id": 4,
-            "status": STATUS_OFFERED_NOT_ENROLLED,
+            "status": STATUS_OFFERED,
             "fuzzy_enrollment_start_date": null,
             "title": "Supply Chain Design",
             "enrollment_start_date": "2016-03-04T01:00:00Z",
-            "position": 0
+            "position": 0,
+            "price": 50.00,
+            "course_start_date": "2016-08-22T11:48:27Z",
+            "fuzzy_start_date": "Fall 2017",
+            "course_end_date": "2016-09-09T10:20:10Z",
           }
         ],
         "description": null,
@@ -313,9 +331,8 @@ export const DASHBOARD_RESPONSE = [
       },
       {
         "id": 6,
-        "status": STATUS_PASSED,
         "position_in_program": 5,
-        "title": "Passed course - status text is 88%",
+        "title": "Passed course - check mark, grade is 88%",
         "runs": [
           {
             "certificate_url": "www.google.com",
@@ -324,7 +341,10 @@ export const DASHBOARD_RESPONSE = [
             "status": STATUS_PASSED,
             "title": "Demo course",
             "grade": "0.88",
-            "position": 0
+            "position": 0,
+            "course_start_date": "2016-08-22T11:48:27Z",
+            "fuzzy_start_date": "Fall 2017",
+            "course_end_date": "2016-09-09T10:20:10Z",
           }
         ],
         "description": "The demo course",
@@ -332,7 +352,6 @@ export const DASHBOARD_RESPONSE = [
       },
       {
         "id": 7,
-        "status": STATUS_NOT_OFFERED,
         "position_in_program": 2,
         "title": "Empty course - no status text",
         "runs": [
@@ -342,16 +361,19 @@ export const DASHBOARD_RESPONSE = [
       },
       {
         "id": 8,
-        "status": STATUS_ENROLLED_NOT_VERIFIED,
         "position_in_program": 3,
-        "title": "Not verified course - upgrade to verified button",
+        "title": "Not verified course - upgrade button",
         "runs": [
           {
             "id": 7,
-            "status": STATUS_ENROLLED_NOT_VERIFIED,
+            "status": STATUS_ENROLLED,
             "title": "Not verified run",
             "course_id": "not-verified",
-            "position": 0
+            "position": 0,
+            "price": 50.00,
+            "course_start_date": "2016-08-22T11:48:27Z",
+            "fuzzy_start_date": "Fall 2017",
+            "course_end_date": "2016-09-09T10:20:10Z",
           }
         ],
         "description": null,
@@ -359,18 +381,21 @@ export const DASHBOARD_RESPONSE = [
       },
       {
         "id": 10,
-        "status": STATUS_OFFERED_NOT_ENROLLED,
         "position_in_program": 4,
-        "title": "Enrollment starting course - status text says Enrollment starting",
+        "title": "Enrollment starting course - disabled enroll button, text says Enrollment begins 3/3/2106",
         "runs": [
           {
             "course_id": "course-v1:supply+chain",
             "id": 8,
-            "status": STATUS_OFFERED_NOT_ENROLLED,
+            "status": STATUS_OFFERED,
             "fuzzy_enrollment_start_date": null,
             "title": "Enrollment starting run",
             "enrollment_start_date": "2106-03-04T01:00:00Z",
-            "position": 0
+            "position": 0,
+            "price": 30.00,
+            "course_start_date": "2016-08-22T11:48:27Z",
+            "fuzzy_start_date": "Fall 2017",
+            "course_end_date": "2016-09-09T10:20:10Z",
           }
         ],
         "description": null,
@@ -378,8 +403,7 @@ export const DASHBOARD_RESPONSE = [
       },
       {
         "id": 12,
-        "status": STATUS_PASSED,
-        "title": "Passed course missing grade - no status text",
+        "title": "Passed course missing grade - check mark, no grade",
         "position_in_program": 6,
         "runs": [
           {
@@ -388,38 +412,45 @@ export const DASHBOARD_RESPONSE = [
             "status": STATUS_PASSED,
             "position": 0,
             "course_id": "course_id",
-            "id": 10
+            "id": 10,
+            "course_start_date": "2016-08-22T11:48:27Z",
+            "fuzzy_start_date": "Fall 2017",
+            "course_end_date": "2016-09-09T10:20:10Z",
           }
         ]
       },
       {
         "id": 15,
         "position_in_program": 9,
-        "title": "verified not completed, course starts in future - status text is Course starting",
-        "status": STATUS_VERIFIED_NOT_COMPLETED,
+        "title": "verified not completed, course starts in future - action text is Course starting",
         "runs": [
           {
             "id": 13,
-            "status": STATUS_VERIFIED_NOT_COMPLETED,
+            "status": STATUS_VERIFIED,
             "course_start_date": "8765-03-21",
             "title": "First run",
-            "position": 0
+            "position": 0,
+            "fuzzy_start_date": "Fall 2017",
+            "course_end_date": "2016-09-09T10:20:10Z",
           }
         ]
       },
       {
         "id": 11,
-        "status": STATUS_OFFERED_NOT_ENROLLED,
         "position_in_program": 0,
-        "title": "Fuzzy enrollment starting course - First in program, status text is soonish",
+        "title": "Fuzzy enrollment starting course - First in program, action text is enrollment begins soonish",
         "runs": [
           {
             "course_id": "course-v1:supply+chain",
             "id": 9,
-            "status": STATUS_OFFERED_NOT_ENROLLED,
+            "status": STATUS_OFFERED,
             "fuzzy_enrollment_start_date": "soonish",
             "title": "Fuzzy enrollment starting run",
-            "position": 0
+            "position": 0,
+            "price": 40.00,
+            "course_start_date": "2016-08-22T11:48:27Z",
+            "fuzzy_start_date": "Fall 2017",
+            "course_end_date": "2016-09-09T10:20:10Z",
           }
         ],
         "description": null,
@@ -436,17 +467,18 @@ export const DASHBOARD_RESPONSE = [
     "courses": [
       {
         "id": 9,
-        "status": STATUS_VERIFIED_NOT_COMPLETED,
         "position_in_program": 0,
-        "title": "Course for last program, no grade - in progress, status text is 0%",
+        "title": "Course for last program in progress - no grade, action or description",
         "runs": [
           {
             "course_id": "course-v1:edX+DemoX+Demo_Course",
             "id": 6,
-            "status": STATUS_VERIFIED_NOT_COMPLETED,
+            "status": STATUS_VERIFIED,
             "title": "Course run for last program",
             "position": 0,
             "course_start_date": "2016-01-01",
+            "fuzzy_start_date": "Fall 2017",
+            "course_end_date": "2016-09-09T10:20:10Z",
           }
         ],
         "description": "Course for Last program",
@@ -464,10 +496,7 @@ export const ERROR_RESPONSE = {
 };
 
 export const ISO_8601_FORMAT = 'YYYY-MM-DD';
-
-export const DASHBOARD_COURSE_HEIGHT = 70;
-export const TERMS_CARD_ROW_HEIGHT = 70;
-export const DASHBOARD_RUN_HEIGHT = 40;
+export const DASHBOARD_FORMAT = 'M/D/Y';
 
 // NOTE: this is in order of attainment
 export const EDUCATION_LEVELS = [
@@ -481,13 +510,50 @@ export const EDUCATION_LEVELS = [
 export const PERSONAL_STEP = 'personal';
 export const EMPLOYMENT_STEP = 'employment';
 export const EDUCATION_STEP = 'education';
-export const PRIVACY_STEP = 'privacy';
 
 export const PROFILE_STEP_LABELS = new Map([
   [PERSONAL_STEP, "Personal"],
   [EDUCATION_STEP, "Education"],
-  [EMPLOYMENT_STEP, "Professional"],
-  [PRIVACY_STEP, "Profile Privacy"]
+  [EMPLOYMENT_STEP, "Professional"]
 ]);
 
 export const DEFAULT_OPTION_LIMIT_COUNT = 10;
+
+/* eslint-disable max-len */
+export const CHECKOUT_RESPONSE = {
+  "payload": {
+    "access_key": "access_key",
+    "amount": "123.45",
+    "consumer_id": "staff",
+    "currency": "USD",
+    "locale": "en-us",
+    "override_custom_cancel_page": "https://micromasters.mit.edu?cancel",
+    "override_custom_receipt_page": "https://micromasters.mit.edu?receipt",
+    "profile_id": "profile_id",
+    "reference_number": "MM-george.local-56",
+    "signature": "56ItDy52E+Ii5aXhiq89OwRsImukIQRQetaHVOM0Fug=",
+    "signed_date_time": "2016-08-24T19:07:57Z",
+    "signed_field_names": "access_key,amount,consumer_id,currency,locale,override_custom_cancel_page,override_custom_receipt_page,profile_id,reference_number,signed_date_time,signed_field_names,transaction_type,transaction_uuid,unsigned_field_names",
+    "transaction_type": "sale",
+    "transaction_uuid": "uuid",
+    "unsigned_field_names": ""
+  },
+  "url": "https://testsecureacceptance.cybersource.com/pay"
+};
+/* eslint-enable max-len */
+
+export const PROGRAM_ENROLLMENTS = [
+  {
+    id: DASHBOARD_RESPONSE[1].id,
+    title: DASHBOARD_RESPONSE[1].title
+  },
+  {
+    id: DASHBOARD_RESPONSE[2].id,
+    title: DASHBOARD_RESPONSE[2].title
+  },
+];
+
+export const SEARCH_FILTER_DEFAULT_VISIBILITY = true;
+
+export const TOAST_SUCCESS = 'success';
+export const TOAST_FAILURE = 'failure';

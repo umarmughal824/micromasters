@@ -113,13 +113,8 @@ class Profile(models.Model):
         null=True,
     )
 
-    birth_city = models.TextField(blank=True, null=True)
     birth_country = models.TextField(blank=True, null=True)
-    birth_state_or_territory = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True,
-    )
+    nationality = models.TextField(blank=True, null=True)
 
     has_profile_image = models.BooleanField(default=False)
 
@@ -165,6 +160,11 @@ class Profile(models.Model):
     def pretty_printed_student_id(self):
         """pretty prints the student id for easy display"""
         return "MMM{0:06}".format(self.student_id) if self.student_id else ""
+
+    @property
+    def email(self):
+        """email of user"""
+        return self.user.email
 
 
 class Education(models.Model):

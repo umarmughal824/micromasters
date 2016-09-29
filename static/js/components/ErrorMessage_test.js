@@ -6,17 +6,20 @@ import _ from 'lodash';
 
 import {
   RECEIVE_DASHBOARD_FAILURE,
+  RECEIVE_DASHBOARD_SUCCESS,
+} from '../actions';
+import { SET_USER_PAGE_DIALOG_VISIBILITY } from '../actions/ui';
+import {
   RECEIVE_GET_USER_PROFILE_SUCCESS,
   REQUEST_GET_USER_PROFILE,
-  RECEIVE_DASHBOARD_SUCCESS,
   RECEIVE_GET_USER_PROFILE_FAILURE,
-  SET_USER_PAGE_DIALOG_VISIBILITY,
   START_PROFILE_EDIT,
   UPDATE_PROFILE_VALIDATION,
   REQUEST_PATCH_USER_PROFILE,
   RECEIVE_PATCH_USER_PROFILE_FAILURE,
   CLEAR_PROFILE_EDIT,
-} from '../actions';
+} from '../actions/profile';
+import { RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS } from '../actions/enrollments';
 import {
   DASHBOARD_RESPONSE,
   ERROR_RESPONSE,
@@ -27,7 +30,7 @@ import { makeStrippedHtml } from '../util/util';
 import * as api from '../util/api';
 import ErrorMessage from './ErrorMessage';
 
-describe("ErrorInfo", () => {
+describe("ErrorMessage", () => {
   let errorString = `Sorry, we were unable to load the data necessary
       to process your request. Please reload the page.`;
   errorString = errorString.replace(/\s\s+/g, ' ');
@@ -59,10 +62,10 @@ describe("ErrorInfo", () => {
             }
           };
           let errorMessage = renderErrorMessage(that);
-          assert.equal(true, errorMessage.includes(String(code)));
-          assert.equal(true, errorMessage.includes(errorString));
-          assert.equal(true, errorMessage.includes(contactExpectation));
-          assert.equal(true, errorMessage.includes(message));
+          assert.include(errorMessage, String(code));
+          assert.include(errorMessage, errorString);
+          assert.include(errorMessage, contactExpectation);
+          assert.include(errorMessage, message);
         });
       });
     });
@@ -88,7 +91,8 @@ describe("ErrorInfo", () => {
 
       dashboardErrorActions = [
         RECEIVE_DASHBOARD_FAILURE,
-        RECEIVE_GET_USER_PROFILE_SUCCESS
+        RECEIVE_GET_USER_PROFILE_SUCCESS,
+        RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
       ];
 
       helper.profileGetStub.
@@ -141,6 +145,24 @@ describe("ErrorInfo", () => {
           assert.equal(message, undefined);
         });
       });
+
+      it('shows an error if there are no programs', () => {
+        helper.dashboardStub.returns(Promise.resolve([]));
+
+        return renderComponent("/dashboard").then(([wrapper]) => {
+          let message = wrapper.find('.page-content').text();
+          assert(message.includes("Additional info: No program enrollment is available."));
+        });
+      });
+
+      it('shows an error if there is no matching current program enrollment', () => {
+        helper.enrollmentsGetStub.returns(Promise.resolve([]));
+
+        return renderComponent("/dashboard").then(([wrapper]) => {
+          let message = wrapper.find('.page-content').text();
+          assert(message.includes("Additional info: No program enrollment is available."));
+        });
+      });
     });
 
     describe('profile page', () => {
@@ -152,6 +174,7 @@ describe("ErrorInfo", () => {
         const types = [
           RECEIVE_DASHBOARD_SUCCESS,
           RECEIVE_GET_USER_PROFILE_FAILURE,
+          RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
         ];
         return renderComponent("/profile", types, false).then(([, div]) => {
           confirmErrorMessage(
@@ -175,6 +198,7 @@ describe("ErrorInfo", () => {
         let actions = [
           REQUEST_GET_USER_PROFILE,
           RECEIVE_DASHBOARD_SUCCESS,
+          RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
           RECEIVE_GET_USER_PROFILE_FAILURE,
         ];
         return renderComponent(`/users/${SETTINGS.username}`, actions, false).then(([, div]) => {
@@ -213,6 +237,17 @@ describe("ErrorInfo", () => {
           }).then(() => {
             confirmErrorMessage(div, `500 ${errorString}`);
           });
+        });
+      });
+    });
+
+    describe('learners page', () => {
+      it('shows an error if there is no matching current program enrollment', () => {
+        helper.enrollmentsGetStub.returns(Promise.resolve([]));
+
+        return renderComponent("/learners").then(([wrapper]) => {
+          let message = wrapper.find('.page-content').text();
+          assert(message.includes("Additional info: No program enrollment is available."));
         });
       });
     });

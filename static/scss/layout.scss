@@ -1,20 +1,28 @@
 @import "grid-settings";
 @import "variables";
+@import "page-layout";
 @import "navbar";
 @import "dashboard";
+@import "general-styles";
 @import "homepage";
-@import "program_page";
-@import "user_menu";
+@import "program-page";
+@import "user-menu";
 @import "validation-alert";
-@import "search_page";
+@import "search-page";
 @import "button";
-
-$border-box-sizing: true !global;
-
-body {
-  background-color: #f6f6f6;
-  font-family: 'Roboto', sans-serif !important;
-}
+@import "profile";
+@import "welcome-banner";
+@import "profile-progress-controls";
+@import "progress-widget";
+@import "bound-check-box";
+@import "terms-of-service-dialog";
+@import "user-chip";
+@import "email-composition-dialog";
+@import "terms-of-service";
+@import "user-page";
+@import "responsive-styles";
+@import "signup-dialog";
+@import "footer";
 
 .selected {
   font-weight: bold;
@@ -34,22 +42,22 @@ body {
 
 // Wagtail responsive embeds
 .rich-text img {
-    max-width: 100%;
-    height: auto;
+  max-width: 100%;
+  height: auto;
 }
 
 .responsive-object {
-    position: relative;
+  position: relative;
 }
 
 .responsive-object iframe,
 .responsive-object object,
 .responsive-object embed {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .loader {
@@ -57,4 +65,17 @@ body {
   // arbitrarily chosen height
   height: 300px;
   width: 100%;
+}
+
+// hides elements so that they're visible only to screenreaders
+// from bootstrap.css
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
 }

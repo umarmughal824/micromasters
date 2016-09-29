@@ -1,46 +1,51 @@
 c.validation-wrapper {
   padding-bottom: 10px;
 }
+
 .validation-error-text-large {
-  color: #DA0000;
+  color: #da0000;
   font-size: large;
 }
+
 .validation-error-text {
-  color: #DA0000;
+  color: #da0000;
   font-size: smaller;
 }
-.main-content {
-  padding: 20px 0px;
 
+.page-content {
   .jumbotron img {
-     margin-left: 50px;
-   }
+    margin-left: 50px;
+  }
 
-   .user-page-image img {
-     top: 50%;
-     position: relative;
-     z-index: 2;
-   }
+  .user-page-image img {
+    top: 50%;
+    position: relative;
+    z-index: 2;
+  }
 
   .card {
     border: 1px solid #dddddd;
     border-radius: 5px;
     background-color: white;
+
     .card-user {
       background-color: darkslategrey;
       background-image: url(/static/images/mit-stata-center.png);
       background-position: 50% 50%;
+
       .card-image-box {
         min-width: 190px;
         height: 220px;
         padding-top: 40px;
         text-align: center;
-        .card-image{
+
+        .card-image {
           border-radius: 50%;
           height: 140px;
           width: 140px;
         }
       }
+
       .card-name {
         margin-top: 70px;
         color: white;
@@ -51,7 +56,7 @@ c.validation-wrapper {
 
         .card-student-id {
           font-size: 18px;
-          color: #DB686C;
+          color: #db686c;
           font-weight: 600;
         }
       }
@@ -74,83 +79,161 @@ c.validation-wrapper {
   }
 }
 
-.course-list {
-  border: 1px solid grey;
-  margin: 10px 0;
-
-  .mdl-grid {
-    padding: 0 !important;
+.dashboard {
+  .card-image {
+    height: auto;
+    width: 112px;
+    border-radius: 50%;
+    border: 1px solid #eee;
+    border-color: rgba(0,0,0,.15);
   }
 
-  .course-list-row {
-    border-bottom: 1px solid lightgray;
-    margin: 0px;
+  .dashboard-user-card {
+    flex-direction: row;
+
+    .dashboard-user-card-text {
+      width: 100%;
+      padding: 10px 0 0 28px;
+
+      .dashboard-user-card-text-id, .dashboard-user-card-text-program {
+        display: block;
+      }
+
+      .dashboard-user-card-text-id {
+        padding-bottom: 13px;
+      }
+
+      .mdl-card__supporting-text {
+        padding: 0;
+        color: $font-gray;
+        font-size: 15px;
+        font-weight: 400;
+      }
+
+      .mdl-card__title {
+        padding-bottom: 0 !important;
+        padding: 0;
+        margin: 0 0 12px;
+
+        .mdl-card__title-text {
+          font-size: 22px;
+          font-weight: 400;
+        }
+      }
+    }
   }
-  .course-list-row:last-child {
-    border-bottom: 0px;
-  }
 
-  .course-list-center {
-    display: flex;
+  .course-list {
+    padding: 20px 0 0 0;
 
-    .course-title {
-      align-self: center;
-      padding-left: 20px;
-    }
+    .personalized-pricing {
+      margin: 0 25px 10px 25px;
+      padding: 30px;
+      background-color: $lightgrey;
 
-    .course-status {
-      align-self: center;
-    }
+      .heading, .explanation {
+        margin-bottom: 17px;
+      }
 
-    .course-progress {
-      margin-top: 0 !important;
-      margin-bottom: 0 !important;
-    }
+      .heading {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
 
-    &.course-list-header {
-      .course-progress {
-        align-self: center;
+        i {
+          color: $font-gray-light;
+          font-size: 20px;
+        }
+      }
+
+      .explanation {
+        font-size: 14px;
+        font-weight: 300;
+
+        .price {
+          font-weight: 600;
+        }
       }
     }
 
-  }
-
-  .course-run-title {
-    padding-left: 30px;
-  }
-
-  .course-run-status {
-    text-align: right;
-  }
-
-  li {
-    display: block;
-  }
-
-  .course-list-header {
-    background-color: #eff5f7;
-    font-weight: bold;
-    font-size: larger;
-
-    .course-progress {
-      font-weight: normal;
-      font-size: small;
+    .mdl-card__title {
+      // align with course-row below which includes an extra 8px of grid cell padding
+      padding-left: 28px;
     }
-  }
 
-  .course-list-body {
-    .course-status {
-      text-align: right;
+    .course-row {
+      width: 100%;
+      font-size: 11pt;
+      min-height: 100px;
+      align-items: center;
+      padding: 0 20px;
+      border-bottom: 1px solid $lightgrey;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .course-description {
+        .course-description-title {
+          font-weight: 500;
+        }
+
+        .course-description-result {
+          font-weight: 400;
+          font-size: 10pt;
+          color: $darkgrey;
+          padding: 10px 0;
+
+          .no-runs {
+            color: black;
+          }
+        }
+
+        .course-description-enrolled {
+          color: $darkgrey;
+          padding-left: 5px;
+        }
+      }
+
+      .course-status {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        .help {
+          color: rgba(0, 0, 0, 0.4);
+        }
+
+        .price {
+          font-weight: 500;
+        }
+      }
+
+      .course-action {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+
+        .course-action-action {
+          .material-icons {
+            color: $mm-brand-fg;
+            font-size: 28pt;
+          }
+        }
+
+        .course-action-description {
+          color: $darkgrey;
+          font-size: 10pt;
+        }
+      }
     }
-  }
-
-  .course-progress {
-    text-align: center;
   }
 }
 
 .profile-splash {
-  border-bottom: 1px dashed #CCCCCC;
+  border-bottom: 1px dashed #cccccc;
+
   .mdl-cell {
     margin: 20px auto;
     text-align: center;
@@ -158,6 +241,7 @@ c.validation-wrapper {
     font-weight: 400;
   }
 }
+
 .mdl-button.progress-button {
   text-transform: none;
   font-size: 16px;
@@ -165,80 +249,98 @@ c.validation-wrapper {
   height: 50px;
   min-width: 200px;
   margin-right: 5px;
+
   span {
     padding: 10px;
   }
+
   &.previous {
-    background: #F9F9F9 !important;
+    background: #f9f9f9 !important;
   }
+
   &.next {
-    background: #4C8399 !important;
+    background: #4c8399 !important;
   }
 }
+
 .profile-tab-grid {
   max-width: 900px;
-},
+}
+
 .profile-tab-grid, .user-cards-grid {
   .mdl-textfield {
     width: 100%;
   }
+
   .profile-form-title {
     font-size: 22px;
     font-weight: 600;
   }
+
   .end-date-hint {
     font-size: 12px;
   }
+
   .profile-tab-card {
     width: 100%;
     position: relative;
     overflow: visible;
     margin-bottom: 35px;
+    padding-bottom: 25px;
+    min-height: 0;
+
     .education-add-menu {
       position: absolute;
       top: 5%;
       left: 75%;
     }
-    padding-bottom: 25px;
-    min-height: 0;
+
     .profile-tab-card-grid:first-child {
       padding-top: 15px;
     }
+
     .profile-tab-card-grid.user-page {
       .school-type {
         font-size: 12px;
         font-weight: 400;
         text-transform: lowercase;
       }
+
       .mdl-cell {
         margin: auto;
       }
     }
+
     .profile-tab-card-grid {
       margin: 0;
       padding: 6px 15px;
+      $switchColor: #00a79d;
+
       .profile-card-title {
         font-weight: 600;
         font-size: 19px;
       }
+
       .profile-row-icons {
         text-align: right;
         color: #898989;
       }
+
       .profile-row-name {
         font-size: 16px;
         font-weight: 700;
       }
+
       .profile-row-date-range {
         font-size: 16px;
         font-weight: 300;
       }
 
-      $switchColor: #00a79d;
       .mdl-switch.is-checked {
         .mdl-switch__track {
           background-color: transparentize($switchColor, 0.5) !important;
         }
+
         .mdl-switch__thumb {
           background-color: $switchColor !important;
         }
@@ -252,6 +354,7 @@ c.validation-wrapper {
       right: 45px;
     }
   }
+
   .profile-tab-card-greyed {
     min-height: 70px !important;
     padding-bottom: 0;
@@ -271,22 +374,27 @@ c.validation-wrapper {
   h3 {
     border-bottom: 0 !important;
   }
+
   .mdl-button {
     font-size: 16px;
     font-weight: 600;
     margin-bottom: 25px;
   }
+
   .cancel-button {
     color: #b7b2b2;
   }
+
   .save-button {
     color: #58b7bc;
     margin-right: 20px;
   }
 }
+
 .users-name {
   text-align: center;
 }
+
 .users-location {
   display: block;
   font-weight: 100;
@@ -294,14 +402,15 @@ c.validation-wrapper {
 }
 
 .profile-radio-group-label {
-  color: grey;
-  font-weight: 700;
-  font-size: 9pt;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.498039);
+  margin-bottom: 10px;
 }
 
 .radio-label {
-  color: #2D2D2D;
+  color: #2d2d2d;
   font-weight: 400;
+
   .radio-label-hint {
     font-size: small;
     color: #555555;
@@ -312,27 +421,33 @@ c.validation-wrapper {
   width: 75%;
   margin-left: auto;
   margin-right: auto;
+
   div.terms-card-header {
     padding: 25px 0;
     font-size: x-large;
     color: #b34a4c;
     font-weight: bold;
   }
+
   .terms-of-service-container {
     border: 1px solid grey;
     margin: 10px 0;
     height: 250px;
     overflow-y: scroll;
+
     li {
       display: list-item;
     }
+
     .terms-of-service-title-container {
       background-color: #eff5f7;
       display: flex;
+
       .terms-of-service-title-row {
         border-bottom: 1px solid lightgray;
         margin: 0px;
       }
+
       .terms-of-service-title {
         padding: 0 20px;
         font-weight: 600;
@@ -342,6 +457,7 @@ c.validation-wrapper {
         transform: translateY(-25%);
       }
     }
+
     .terms-of-service-content {
       padding: 20px;
     }
@@ -351,6 +467,7 @@ c.validation-wrapper {
 .profile-card {
   padding-bottom: 50px;
 }
+
 .profile-card-greyed {
   min-height: 100px !important;
   background-color: #f9f9f9 !important;
@@ -359,16 +476,44 @@ c.validation-wrapper {
 // CSS magic to make the radio buttons show up next to each other
 .profile-gender-group {
   display: block !important;
+
   .profile-radio-button {
     width: unset !important;
     display: inline-block !important;
+    margin-right: 8px;
+
     label {
       width: unset !important;
     }
   }
 }
 
+.toast {
+  display: none;
+  align-items: center;
+  flex-direction: row;
+  position: absolute;
+  background-color: $black-transparent;
+  color: #c5c5c5;
+  margin: 0 auto;
+  width: 500px;
+  padding: 20px;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  font-size: 16px;
+
+  &.open {
+    display: flex;
+  }
+
+  .material-icons {
+    padding: 10px;
+    font-size: 40px;
+  }
+}
+
 // IE: make x's disappear for input items
 input::-ms-clear {
-    display: none;
+  display: none;
 }

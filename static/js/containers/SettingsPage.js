@@ -3,21 +3,13 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import Loader from 'react-loader';
-import Grid, { Cell } from 'react-mdl/lib/Grid';
 
-import Jumbotron from '../components/Jumbotron';
-import {
-  startProfileEdit,
-  FETCH_PROCESSING,
-} from '../actions/index';
+import { startProfileEdit } from '../actions/profile';
+import { FETCH_PROCESSING } from '../actions/index';
 import ProfileFormContainer from './ProfileFormContainer';
 import PrivacyForm from '../components/PrivacyForm';
 import ProfileProgressControls from '../components/ProfileProgressControls';
-import {
-    combineValidators,
-    privacyValidation,
-} from '../util/validation';
-import { getPreferredName } from '../util/util';
+import { privacyValidation } from '../util/validation';
 
 class SettingsPage extends ProfileFormContainer {
   componentWillMount() {
@@ -37,7 +29,6 @@ class SettingsPage extends ProfileFormContainer {
     });
     let loaded = false;
     let username = SETTINGS.username;
-    let preferredName = getPreferredName(props.profile);
 
     if (profiles[username] !== undefined) {
       let profileFromStore = profiles[username];
@@ -46,25 +37,16 @@ class SettingsPage extends ProfileFormContainer {
 
     return (
       <Loader loaded={loaded}>
-        <Jumbotron {...props} text={preferredName}>
-          <div className="card-copy">
-            <Grid className="profile-tab-grid privacy-form">
-              <Cell col={12}>
-                <PrivacyForm {...props} />
-              </Cell>
-              <Cell col={12}>
-                <ProfileProgressControls
-                  nextBtnLabel="Save"
-                  {...props}
-                  isLastTab={true}
-                  validator={
-                    combineValidators(privacyValidation)
-                  }
-                />
-              </Cell>
-            </Grid>
-          </div>
-        </Jumbotron>
+        <div className="single-column privacy-form">
+          <h4 className="privacy-form-heading">Settings</h4>
+          <PrivacyForm {...props} />
+          <ProfileProgressControls
+            nextBtnLabel="Save"
+            {...props}
+            isLastTab={true}
+            validator={privacyValidation}
+          />
+        </div>
       </Loader>
     );
   }

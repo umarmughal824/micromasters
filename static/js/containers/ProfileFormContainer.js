@@ -11,21 +11,20 @@ import {
   clearProfileEdit,
   fetchUserProfile,
   saveProfile,
-} from '../actions';
+} from '../actions/profile';
 import {
   setWorkHistoryEdit,
   setWorkDialogVisibility,
+  setWorkHistoryAnswer,
   setWorkDialogIndex,
   setEducationDialogVisibility,
   setEducationDialogIndex,
   setEducationDegreeLevel,
-  setEducationDegreeInclusions,
+  setEducationLevelAnswers,
   setUserPageDialogVisibility,
   setShowEducationDeleteDialog,
   setShowWorkDeleteDialog,
   setDeletionIndex,
-  setShowWorkDeleteAllDialog,
-  setShowEducationDeleteAllDialog,
 } from '../actions/ui';
 import { createSimpleActionHelpers, createAsyncActionHelpers } from '../util/redux';
 import type { ActionHelpers, AsyncActionHelpers } from '../util/redux';
@@ -38,7 +37,7 @@ type UpdateProfile = (isEdit: boolean, profile: Profile, validator: Validator|UI
 class ProfileFormContainer extends React.Component {
   props: {
     profiles:   Profiles,
-    children:   React$Element[],
+    children:   React$Element<*>[],
     dispatch:   Dispatch,
     history:    Object,
     ui:         UIState,
@@ -115,24 +114,23 @@ class ProfileFormContainer extends React.Component {
     const { dispatch } = this.props;
     return createSimpleActionHelpers(dispatch, [
       ['setWorkDialogVisibility', setWorkDialogVisibility],
+      ['setWorkHistoryAnswer', setWorkHistoryAnswer],
       ['setWorkDialogIndex', setWorkDialogIndex],
       ['clearProfileEdit', clearProfileEdit],
       ['setEducationDialogVisibility', setEducationDialogVisibility],
       ['setEducationDialogIndex', setEducationDialogIndex],
       ['setEducationDegreeLevel', setEducationDegreeLevel],
+      ['setEducationLevelAnswers', setEducationLevelAnswers],
       ['setUserPageDialogVisibility', setUserPageDialogVisibility],
       ['setShowEducationDeleteDialog', setShowEducationDeleteDialog],
       ['setShowWorkDeleteDialog', setShowWorkDeleteDialog],
       ['setDeletionIndex', setDeletionIndex],
-      ['setShowWorkDeleteAllDialog', setShowWorkDeleteAllDialog],
-      ['setShowEducationDeleteAllDialog', setShowEducationDeleteAllDialog],
     ]);
   };
 
   asyncActionHelpers: Function = (): AsyncActionHelpers => {
     const { dispatch } = this.props;
     return createAsyncActionHelpers(dispatch, [
-      ['setEducationDegreeInclusions', setEducationDegreeInclusions],
       ['setWorkHistoryEdit', setWorkHistoryEdit],
     ]);
   };

@@ -8,15 +8,16 @@ import type {
   ValidationErrors
 } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
+import type { Email } from '../flow/emailTypes';
 import { filterPositiveInt } from './util';
 import {
   HIGH_SCHOOL,
-  EDUCATION_LEVELS,
   PERSONAL_STEP,
   EDUCATION_STEP,
   EMPLOYMENT_STEP,
-  PRIVACY_STEP,
 } from '../constants';
+import { S } from './sanctuary';
+const { Maybe, Nothing } = S;
 
 let handleNestedValidation = (profile: Profile, keys, nestedKey: string) => {
   let nestedFields = index => (
@@ -54,8 +55,7 @@ export function personalValidation(profile: Profile): ValidationErrors {
     ['city'],
     ['state_or_territory'],
     ['country'],
-    ['birth_city'],
-    ['birth_state_or_territory'],
+    ['nationality'],
     ['birth_country'],
     ['date_of_birth'],
   ];
@@ -68,9 +68,8 @@ export function personalValidation(profile: Profile): ValidationErrors {
     'city': "City is required",
     'state_or_territory': 'State or Territory is required',
     'country': "Country is required",
-    'birth_city': 'City is required',
-    'birth_state_or_territory': 'State or Territory is required',
     'birth_country': "Country is required",
+    'nationality': "Nationality is required",
     'date_of_birth': 'Please enter a valid date of birth'
   };
   let errors = checkFieldPresence(profile, requiredFields, validationMessages);
@@ -112,27 +111,6 @@ export function educationValidation(profile: Profile): ValidationErrors {
   } else {
     return {};
   }
-}
-
-export function educationUiValidation(profile: Profile, ui: UIState): ValidationErrors {
-  if (profile.education === undefined) {
-    profile = Object.assign({}, profile, {
-      education: []
-    });
-  }
-
-  let errors = {};
-  if ( profile.education === undefined ) {
-    return errors;
-  }
-  for (let {value, label} of EDUCATION_LEVELS) {
-    let items = profile.education.filter(education => education.degree_name === value);
-    if (ui.educationDegreeInclusions[value] && items.length === 0) {
-      errors[`education_${value}_required`] =
-        `${label} is required if switch is on. Please add a degree or switch it off.`;
-    }
-  }
-  return errors;
 }
 
 export type WorkEntry = [string, WorkHistoryEntry];
@@ -180,16 +158,6 @@ export function employmentValidation(profile: Profile): ValidationErrors {
   }
 }
 
-export function employmentUiValidation(profile: Profile, ui: UIState): ValidationErrors {
-  if (ui.workHistoryEdit && _.isEmpty(profile.work_history)) {
-    return {
-      work_history_required: "Work history is required if switch is on. Please add work history or switch it off."
-    };
-  } else {
-    return {};
-  }
-}
-
 export function privacyValidation(profile: Profile): ValidationErrors {
   let requiredFields = [
     ['account_privacy']
@@ -198,6 +166,18 @@ export function privacyValidation(profile: Profile): ValidationErrors {
     'account_privacy': 'Privacy level is required'
   };
   return checkFieldPresence(profile, requiredFields, messages);
+}
+
+/**
+ * validate an email for presence of the 'subject' and 'body' fields
+ */
+export function emailValidation(email: Email): ValidationErrors {
+  let requiredFields = [ ['subject'], ['body'] ];
+  let messages = {
+    'subject': 'Please fill in a subject',
+    'body': 'Please fill in a body',
+  };
+  return checkFieldPresence(email, requiredFields, messages);
 }
 
 /*
@@ -234,29 +214,23 @@ export function validateProfileComplete(profile: Profile): ProfileComplete {
     }
   }
 
-  // check privacy tab
-  errors = privacyValidation(profile);
-  if (!_.isEqual(errors, {})) {
-    return [false, PRIVACY_STEP, errors];
-  }
-
   return [true, null, {}];
 }
 
 /**
  * Validate a day of month
  */
-export function validateDay(input: string): ?number {
+export function validateDay(input: string): Maybe<number> {
   let sanitized = sanitizeDate(input, 2);
   let date = filterPositiveInt(sanitized);
   if (date === undefined) {
-    return undefined;
+    return Nothing();
   }
   // More complicated cases like Feb 29 are handled in moment.js isValid
   if (date > 31) {
-    return 31;
+    return Maybe.of(31);
   }
-  return date;
+  return Maybe.of(date);
 }
 
 /**
@@ -281,40 +255,40 @@ export function sanitizeDate(input: string|number, length: number): string {
 /**
  * Validate a month number
  */
-export function validateMonth(input: string|number): number|void {
+export function validateMonth(input: string|number): Maybe<number> {
   let sanitized = sanitizeDate(input, 2);
   let month = filterPositiveInt(sanitized);
   if (month === undefined) {
-    return undefined;
+    return Nothing();
   }
   if (month > 12) {
-    return 12;
+    return Maybe.of(12);
   }
-  return month;
+  return Maybe.of(month);
 }
 
 /**
  * Validate a year string is an integer and fits into YYYY
  */
-export function validateYear(input: string|number|null): ?number {
+export function validateYear(input: string|number|null): Maybe<number> {
   if ( input === null ) {
-    return undefined;
+    return Nothing();
   }
   let sanitized = sanitizeDate(input, 4);
   let year = filterPositiveInt(sanitized);
   if (year === undefined) {
-    return undefined;
+    return Nothing();
   }
   if ( year < 1800 ) {
     if ( String(year).length < 4 ) {
-      return year;
+      return Maybe.of(year);
     }
-    return 1800;
+    return Maybe.of(1800);
   }
   if ( year >= 2100) {
-    return 2100;
+    return Maybe.of(2100);
   }
-  return year;
+  return Maybe.of(year);
 }
 
 /**

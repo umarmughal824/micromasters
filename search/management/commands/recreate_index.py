@@ -4,7 +4,7 @@ Management command to recreate the Elasticsearch index
 
 from django.core.management.base import BaseCommand
 
-from search.api import (
+from search.indexing_api import (
     recreate_index,
 )
 

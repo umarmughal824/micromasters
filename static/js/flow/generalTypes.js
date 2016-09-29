@@ -1,8 +1,9 @@
 // @flow
 
 export type Option = {
-  value: string;
-  label: string;
+  value:     any;
+  label:     string;
+  disabled?: boolean;
 };
 export type Settings = {
   gaTrackingID: string;
@@ -14,3 +15,14 @@ export type Settings = {
   edx_base_url: string;
 };
 
+export type APIErrorInfo = {
+  error_code?: string,
+  user_message?: string,
+  detail?: string,
+  errorStatusCode?: number,
+};
+
+export type ToastMessage = {
+  message: string,
+  icon?: string,
+};

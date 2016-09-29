@@ -22,7 +22,7 @@ describe('Profile Editing utility functions', () => {
           "date_of_birth": "",
           "gender": undefined,
           "date_field": "",
-          "email_optin": false
+          "email_optin": false,
         },
         errors: {
           "first_name": "First name is required",

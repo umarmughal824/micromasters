@@ -1,6 +1,5 @@
 // @flow
 /* global SETTINGS: false */
-import { RECEIVE_GET_USER_PROFILE_SUCCESS } from '../actions';
 import {
   CLEAR_UI,
   UPDATE_DIALOG_TEXT,
@@ -10,83 +9,87 @@ import {
   SET_WORK_HISTORY_EDIT,
   SET_WORK_DIALOG_VISIBILITY,
   SET_WORK_DIALOG_INDEX,
-
-  TOGGLE_DASHBOARD_EXPANDER,
+  SET_WORK_HISTORY_ANSWER,
 
   SET_EDUCATION_DIALOG_VISIBILITY,
   SET_EDUCATION_DIALOG_INDEX,
   SET_EDUCATION_DEGREE_LEVEL,
-  SET_EDUCATION_DEGREE_INCLUSIONS,
+  SET_EDUCATION_LEVEL_ANSWERS,
 
   SET_USER_PAGE_DIALOG_VISIBILITY,
 
   SET_SHOW_EDUCATION_DELETE_DIALOG,
   SET_SHOW_WORK_DELETE_DIALOG,
   SET_DELETION_INDEX,
-  SET_SHOW_WORK_DELETE_ALL_DIALOG,
-  SET_SHOW_EDUCATION_DELETE_ALL_DIALOG,
 
   SET_PROFILE_STEP,
   SET_USER_MENU_OPEN,
   SET_SEARCH_FILTER_VISIBILITY,
+
+  SET_EMAIL_DIALOG_VISIBILITY,
+
+  SET_ENROLL_DIALOG_ERROR,
+  SET_ENROLL_DIALOG_VISIBILITY,
+  SET_TOAST_MESSAGE,
+  SET_ENROLL_SELECTED_PROGRAM,
 } from '../actions/ui';
-import {
-  HIGH_SCHOOL,
-  ASSOCIATE,
-  BACHELORS,
-  MASTERS,
-  DOCTORATE,
-  PERSONAL_STEP,
-} from '../constants';
-import { calculateDegreeInclusions } from '../util/util';
+import { PERSONAL_STEP } from '../constants';
+import type { ToastMessage } from '../flow/generalTypes';
 import type { Action } from '../flow/reduxTypes';
 
+export type UIDialog = {
+  title?: string;
+  text?: string;
+  visible?: boolean;
+};
 export type UIState = {
-  workHistoryEdit:              boolean;
-  workDialogVisibility:         boolean;
-  dashboardExpander:            {};
   educationDialogVisibility:    boolean;
   educationDialogIndex:         number;
   educationDegreeLevel:         string;
-  educationDegreeInclusions:    {[key: string]: boolean};
+  educationLevelAnswers:        {};
+  workHistoryEdit:              boolean;
+  workDialogVisibility:         boolean;
+  workHistoryAnswer:            ?boolean;
   userPageDialogVisibility:     boolean;
   showWorkDeleteDialog:         boolean;
   showEducationDeleteDialog:    boolean;
   deletionIndex:                ?number;
-  dialog:                       {};
-  showWorkDeleteAllDialog:      boolean;
-  showEducationDeleteAllDialog: boolean;
+  dialog:                       UIDialog;
   profileStep:                  string;
   workDialogIndex:              ?number;
   userMenuOpen:                 boolean;
   searchFilterVisibility:       {[s: string]: boolean};
+  tosDialogVisibility:          boolean;
+  emailDialogVisibility:        boolean;
+  enrollDialogError:            ?string;
+  enrollDialogVisibility:       boolean;
+  toastMessage:                 ?ToastMessage;
+  enrollSelectedProgram:        ?number;
 };
 
 export const INITIAL_UI_STATE: UIState = {
-  workHistoryEdit:            true,
-  workDialogVisibility:       false,
-  dashboardExpander:          {},
   educationDialogVisibility:  false,
   educationDialogIndex:       -1,
   educationDegreeLevel:       '',
-  educationDegreeInclusions: {
-    [HIGH_SCHOOL]: false,
-    [ASSOCIATE]: false,
-    [BACHELORS]: false,
-    [MASTERS]: false,
-    [DOCTORATE]: false,
-  },
+  educationLevelAnswers:      {},
+  workHistoryEdit:            true,
+  workDialogVisibility:       false,
+  workHistoryAnswer:          null,
   userPageDialogVisibility: false,
   showWorkDeleteDialog: false,
   showEducationDeleteDialog: false,
   deletionIndex: null,
   dialog: {},
-  showWorkDeleteAllDialog: false,
-  showEducationDeleteAllDialog: false,
   profileStep: PERSONAL_STEP,
   workDialogIndex:  null,
   userMenuOpen: false,
   searchFilterVisibility: {},
+  tosDialogVisibility: false,
+  emailDialogVisibility: false,
+  enrollDialogError: null,
+  enrollDialogVisibility: false,
+  toastMessage: null,
+  enrollSelectedProgram: null,
 };
 
 export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
@@ -127,6 +130,10 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
     return Object.assign({}, state, {
       workDialogIndex: action.payload
     });
+  case SET_WORK_HISTORY_ANSWER:
+    return Object.assign({}, state, {
+      workHistoryAnswer: action.payload
+    });
   case SET_EDUCATION_DIALOG_VISIBILITY:
     return Object.assign({}, state, {
       educationDialogVisibility: action.payload
@@ -139,19 +146,12 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
     return Object.assign({}, state, {
       educationDegreeLevel: action.payload
     });
-  case SET_EDUCATION_DEGREE_INCLUSIONS:
+  case SET_EDUCATION_LEVEL_ANSWERS:
     return Object.assign({}, state, {
-      educationDegreeInclusions: action.payload
+      educationLevelAnswers: action.payload
     });
   case CLEAR_UI:
     return INITIAL_UI_STATE;
-  case TOGGLE_DASHBOARD_EXPANDER: {
-    let clone = Object.assign({}, state.dashboardExpander);
-    clone[action.payload.courseId] = action.payload.newValue;
-    return Object.assign({}, state, {
-      dashboardExpander: clone
-    });
-  }
   case SET_USER_PAGE_DIALOG_VISIBILITY: {
     return Object.assign({}, state, {
       userPageDialogVisibility: action.payload
@@ -172,25 +172,6 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
       deletionIndex: action.payload
     });
   }
-  case RECEIVE_GET_USER_PROFILE_SUCCESS: {
-    const { profile, username } = action.payload;
-    if (SETTINGS.username === username) {
-      return Object.assign({}, state, {
-        educationDegreeInclusions: calculateDegreeInclusions(profile)
-      });
-    }
-    return state;
-  }
-  case SET_SHOW_WORK_DELETE_ALL_DIALOG: {
-    return Object.assign({}, state, {
-      showWorkDeleteAllDialog: action.payload
-    });
-  }
-  case SET_SHOW_EDUCATION_DELETE_ALL_DIALOG: {
-    return Object.assign({}, state, {
-      showEducationDeleteAllDialog: action.payload
-    });
-  }
   case SET_PROFILE_STEP: {
     return Object.assign({}, state, {
       profileStep: action.payload
@@ -204,6 +185,31 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
   case SET_SEARCH_FILTER_VISIBILITY: {
     return Object.assign({}, state, {
       searchFilterVisibility: action.payload
+    });
+  }
+  case SET_EMAIL_DIALOG_VISIBILITY: {
+    return Object.assign({}, state, {
+      emailDialogVisibility: action.payload
+    });
+  }
+  case SET_ENROLL_DIALOG_ERROR: {
+    return Object.assign({}, state, {
+      enrollDialogError: action.payload
+    });
+  }
+  case SET_TOAST_MESSAGE: {
+    return Object.assign({}, state, {
+      toastMessage: action.payload
+    });
+  }
+  case SET_ENROLL_SELECTED_PROGRAM: {
+    return Object.assign({}, state, {
+      enrollSelectedProgram: action.payload
+    });
+  }
+  case SET_ENROLL_DIALOG_VISIBILITY: {
+    return Object.assign({}, state, {
+      enrollDialogVisibility: action.payload
     });
   }
   default:

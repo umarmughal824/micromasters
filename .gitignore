@@ -52,6 +52,7 @@ coverage/
 
 # Django stuff:
 *.log
+celerybeat-schedule.db
 
 # Sphinx documentation
 docs/_build/
@@ -59,8 +60,9 @@ docs/_build/
 # PyBuilder
 target/
 
-#Ipython Notebook
+#Ipython/Jupyter Notebook
 .ipynb_checkpoints
+*.ipynb
 
 # Heroku/Foreman
 .env
@@ -89,3 +91,8 @@ staticfiles/
 
 .venv
 release-notes-checklist
+
+static/scss/material.css
+
+# Local settings
+micromasters.yml

@@ -1,287 +1,108 @@
 """
-Functions for search
+Functions for executing ES searches
 """
-from itertools import islice
-import logging
-
 from django.conf import settings
-from django.contrib.auth.models import User
-from elasticsearch.helpers import bulk
-from elasticsearch.exceptions import NotFoundError
-from elasticsearch_dsl import Mapping
-from elasticsearch_dsl.connections import connections
+from elasticsearch_dsl import Search, Q
 
-from profiles.models import Profile
-from profiles.serializers import ProfileSerializer
-from search.exceptions import ReindexException
+from roles.api import get_advance_searchable_programs
+from search.indexing_api import (
+    get_conn,
+    DOC_TYPES,
+)
+from search.exceptions import NoProgramAccessException
 
-log = logging.getLogger(__name__)
-
-USER_DOC_TYPE = 'user'
-DOC_TYPES = (USER_DOC_TYPE, )
-_CONN = None
-# When we create the connection, check to make sure all appropriate mappings exist
-_CONN_VERIFIED = False
-# A string which must be indexed exactly as is and not stemmed for full text search (the default)
-NOT_ANALYZED_STRING_TYPE = {
-    'type': 'string',
-    'index': 'not_analyzed',
-}
-BOOL_TYPE = {'type': 'boolean'}
-DATE_TYPE = {'type': 'date', 'format': 'date'}
-LONG_TYPE = {'type': 'long'}
+DEFAULT_ES_LOOP_PAGE_SIZE = 100
 
 
-def get_conn(verify=True):
+def execute_search(search_obj):
     """
-    Lazily create the connection.
-    """
-    # pylint: disable=global-statement
-    global _CONN
-    global _CONN_VERIFIED
-
-    do_verify = False
-    if _CONN is None:
-        _CONN = connections.create_connection(hosts=[settings.ELASTICSEARCH_URL])
-        # Verify connection on first connect if verify=True.
-        do_verify = verify
-
-    if verify and not _CONN_VERIFIED:
-        # If we have a connection but haven't verified before, do it now.
-        do_verify = True
-
-    if not do_verify:
-        if not verify:
-            # We only skip verification if we're reindexing or
-            # deleting the index. Make sure we verify next time we connect.
-            _CONN_VERIFIED = False
-        return _CONN
-
-    # Make sure everything exists.
-    index_name = settings.ELASTICSEARCH_INDEX
-    if not _CONN.indices.exists(index_name):
-        raise ReindexException("Unable to find index {index_name}".format(
-            index_name=index_name
-        ))
-
-    mappings = _CONN.indices.get_mapping()[index_name]["mappings"]
-    for doc_type in DOC_TYPES:
-        if doc_type not in mappings.keys():
-            raise ReindexException("Mapping {doc_type} not found".format(
-                doc_type=doc_type
-            ))
-
-    _CONN_VERIFIED = True
-    return _CONN
-
-
-def _index_users_chunk(users):
-    """
-    Add/update a small number of user records in Elasticsearch
+    Executes a search against ES after checking the connection
 
     Args:
-        users (list of User):
-            List of users
+        search_obj (Search): elasticsearch_dsl Search object
 
     Returns:
-        int: Number of items inserted into Elasticsearch
+        elasticsearch_dsl.result.Response: ES response
     """
+    # make sure there is a live connection
+    get_conn()
+    return search_obj.execute()
 
-    conn = get_conn()
-    insert_count, errors = bulk(
-        conn,
-        (serialize_user(user) for user in users),
-        index=settings.ELASTICSEARCH_INDEX,
-        doc_type=USER_DOC_TYPE,
+
+def create_program_limit_query(user):
+    """
+    Constructs and returns a query that limits a user to data for their allowed programs
+    """
+    users_allowed_programs = get_advance_searchable_programs(user)
+    # if the user cannot search any program, raise an exception.
+    # in theory this should never happen because `UserCanSearchPermission`
+    # takes care of doing the same check, but better to keep it to avoid
+    # that a theoretical bug exposes all the data in the index
+    if not users_allowed_programs:
+        raise NoProgramAccessException()
+
+    # no matter what the query is, limit the programs to the allowed ones
+    # if this is a superset of what searchkit sends, this will not impact the result
+    return Q(
+        'bool',
+        should=[
+            Q('term', **{'program.id': program.id}) for program in users_allowed_programs
+        ]
     )
 
-    if len(errors) > 0:
-        raise ReindexException("Error during bulk insert: {errors}".format(
-            errors=errors
-        ))
-    refresh_index()
 
-    return insert_count
-
-
-def index_users(users, chunk_size=100):
+def create_search_obj(user, search_param_dict=None):
     """
-    Add/update profile records in Elasticsearch.
+    Creates a search object and prepares it with metadata and query parameters that
+    we want to apply for all ES requests
 
     Args:
-        users (iterable of User):
-            Iterable of users
-        chunk_size (int):
-            How many users to index at once.
+        user (User): User object
+        search_param_dict (dict): A dict representing the body of an ES query
 
     Returns:
-        int: Number of indexed items
+        Search: elasticsearch_dsl Search object
     """
-    # Use an iterator so we can keep track of what's been indexed already
-    users = iter(users)
-
-    count = 0
-    chunk = list(islice(users, chunk_size))
-    while len(chunk) > 0:
-        count += _index_users_chunk(chunk)
-        chunk = list(islice(users, chunk_size))
-
-    refresh_index()
-
-    return count
+    search_obj = Search(index=settings.ELASTICSEARCH_INDEX, doc_type=DOC_TYPES)
+    if search_param_dict is not None:
+        search_obj.update_from_dict(search_param_dict)
+    search_obj = search_obj.query(create_program_limit_query(user))
+    return search_obj
 
 
-def remove_user(user):
+def prepare_and_execute_search(user, search_param_dict=None, search_func=execute_search):
     """
-    Remove a user from Elasticsearch.
+    Prepares a Search object and executes the search against ES
     """
-    conn = get_conn()
-    try:
-        conn.delete(index=settings.ELASTICSEARCH_INDEX, doc_type=USER_DOC_TYPE, id=user.id)
-    except NotFoundError:
-        # Item is already gone
-        pass
+    search_obj = create_search_obj(user, search_param_dict=search_param_dict)
+    return search_func(search_obj)
 
 
-def serialize_user(user):
+def get_all_query_matching_emails(search_obj, page_size=DEFAULT_ES_LOOP_PAGE_SIZE):
     """
-    Serializes user for use with Elasticsearch.
+    Retrieves all unique emails for documents that match an ES query
 
     Args:
-        user (User): A user to serialize
+        search_obj (Search): Search object
+        page_size (int): Number of docs per page of results
+
     Returns:
-        dict: The data to be sent to Elasticsearch
+        set: Set of unique emails
     """
-    serialized = {
-        'id': user.id,
-        '_id': user.id,
-    }
-    try:
-        serialized['profile'] = ProfileSerializer().to_representation(user.profile)
-    except Profile.DoesNotExist:
-        # Just in case
-        pass
-    serialized['certificates'] = [
-        certificate.data for certificate in user.cachedcertificate_set.all().exclude(data__isnull=True)
-    ]
-    serialized['enrollments'] = [
-        enrollment.data for enrollment in user.cachedenrollment_set.all().exclude(data__isnull=True)
-    ]
-    return serialized
-
-
-def refresh_index():
-    """
-    Refresh the Elasticsearch index
-    """
-    get_conn().indices.refresh(index=settings.ELASTICSEARCH_INDEX)
-
-
-def create_user_mapping():
-    """
-    Create a mapping for profiles. If one already exists, delete it first.
-    """
-    conn = get_conn(verify=False)
-
-    index_name = settings.ELASTICSEARCH_INDEX
-    if conn.indices.exists_type(index=index_name, doc_type=USER_DOC_TYPE):
-        conn.indices.delete_mapping(index=index_name, doc_type=USER_DOC_TYPE)
-
-    mapping = Mapping(USER_DOC_TYPE)
-
-    mapping.field("id", "long")
-    mapping.field("profile", "nested", properties={
-        'account_privacy': NOT_ANALYZED_STRING_TYPE,
-        'agreed_to_terms_of_service': BOOL_TYPE,
-        'birth_city': NOT_ANALYZED_STRING_TYPE,
-        'birth_country': NOT_ANALYZED_STRING_TYPE,
-        'birth_state_or_territory': NOT_ANALYZED_STRING_TYPE,
-        'city': NOT_ANALYZED_STRING_TYPE,
-        'country': NOT_ANALYZED_STRING_TYPE,
-        'date_of_birth': DATE_TYPE,
-        'education': {'type': 'nested', 'properties': {
-            'degree_name': NOT_ANALYZED_STRING_TYPE,
-            'field_of_study': NOT_ANALYZED_STRING_TYPE,
-            'graduation_date': DATE_TYPE,
-            'id': LONG_TYPE,
-            'online_degree': BOOL_TYPE,
-            'school_city': NOT_ANALYZED_STRING_TYPE,
-            'school_country': NOT_ANALYZED_STRING_TYPE,
-            'school_name': NOT_ANALYZED_STRING_TYPE,
-            'school_state_or_territory': NOT_ANALYZED_STRING_TYPE,
-        }},
-        'email_optin': BOOL_TYPE,
-        'filled_out': BOOL_TYPE,
-        'first_name': NOT_ANALYZED_STRING_TYPE,
-        'gender': NOT_ANALYZED_STRING_TYPE,
-        'has_profile_image': BOOL_TYPE,
-        'last_name': NOT_ANALYZED_STRING_TYPE,
-        'preferred_language': NOT_ANALYZED_STRING_TYPE,
-        'preferred_name': NOT_ANALYZED_STRING_TYPE,
-        'pretty_printed_student_id': NOT_ANALYZED_STRING_TYPE,
-        'profile_url_full': NOT_ANALYZED_STRING_TYPE,
-        'profile_url_large': NOT_ANALYZED_STRING_TYPE,
-        'profile_url_medium': NOT_ANALYZED_STRING_TYPE,
-        'profile_url_small': NOT_ANALYZED_STRING_TYPE,
-        'username': NOT_ANALYZED_STRING_TYPE,
-        'work_history': {'type': 'nested', 'properties': {
-            'city': NOT_ANALYZED_STRING_TYPE,
-            'company_name': NOT_ANALYZED_STRING_TYPE,
-            'country': NOT_ANALYZED_STRING_TYPE,
-            'id': LONG_TYPE,
-            'industry': NOT_ANALYZED_STRING_TYPE,
-            'position': NOT_ANALYZED_STRING_TYPE,
-            'start_date': DATE_TYPE,
-            'state_or_territory': NOT_ANALYZED_STRING_TYPE,
-        }},
-    })
-    mapping.field('enrollments', 'nested', properties={
-        'course_details': {
-            'type': 'object',
-            'properties': {
-                'course_modes': {
-                    'type': 'nested',
-                }
-            }
-        }
-    })
-    mapping.field('certificates', 'nested')
-
-    # Make strings not_analyzed by default
-    mapping.meta('dynamic_templates', [{
-        "notanalyzed": {
-            "match": "*",
-            "match_mapping_type": "string",
-            "mapping": NOT_ANALYZED_STRING_TYPE
-        }
-    }])
-
-    mapping.save(index_name)
-
-
-def create_mappings():
-    """
-    Create all mappings, deleting existing mappings if they exist.
-    """
-    create_user_mapping()
-
-
-def clear_index():
-    """
-    Wipe and recreate index and mapping. No indexing is done.
-    """
-    conn = get_conn(verify=False)
-    index_name = settings.ELASTICSEARCH_INDEX
-    if conn.indices.exists(index_name):
-        conn.indices.delete(index_name)
-    conn.indices.create(index_name)
-    conn.indices.refresh()
-    create_mappings()
-
-
-def recreate_index():
-    """
-    Wipe and recreate index and mapping, and index all items.
-    """
-    clear_index()
-    index_users(User.objects.iterator())
+    results = set()
+    # Maintaining a consistent sort on '_doc' will help prevent bugs where the
+    # index is altered during the loop.
+    # This also limits the query to only return the 'email' field.
+    search_obj = search_obj.sort('_doc').fields('email')
+    loop = 0
+    all_results_returned = False
+    while not all_results_returned:
+        from_index = loop * page_size
+        to_index = from_index + page_size
+        search_results = execute_search(search_obj[from_index: to_index])
+        # add the email for every search result hit to the set
+        for hit in search_results.hits:
+            results.add(hit.email[0])
+        all_results_returned = to_index >= search_results.hits.total
+        loop += 1
+    return results

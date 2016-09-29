@@ -21,7 +21,7 @@ from profiles.api import get_social_username
 from profiles.factories import ProfileFactory
 from roles.models import Role
 from search.base import ESTestCase
-from ui.urls import DASHBOARD_URL
+from ui.urls import DASHBOARD_URL, TERMS_OF_SERVICE_URL
 
 
 class ViewsTests(ESTestCase):
@@ -95,7 +95,7 @@ class TestHomePage(ViewsTests):
     def test_login_button(self):
         """Verify that we see a login button if not logged in"""
         response = self.client.get('/')
-        self.assertContains(response, "Sign in with edX.org")
+        self.assertContains(response, "SIGN UP")
 
     def test_sign_out_button(self):
         """Verify that we see a sign out button if logged in"""
@@ -175,7 +175,6 @@ class DashboardTests(ViewsTests):
             REACT_GA_DEBUG=react_ga_debug,
             EDXORG_BASE_URL=edx_base_url,
             WEBPACK_DEV_SERVER_HOST=host,
-            CLIENT_ELASTICSEARCH_URL="http://localhost:9200",
         ):
             resp = self.client.get(DASHBOARD_URL)
             js_settings = json.loads(resp.context['js_settings_json'])
@@ -188,7 +187,7 @@ class DashboardTests(ViewsTests):
                 'host': host,
                 'edx_base_url': edx_base_url,
                 'roles': [],
-                'search_url': 'http://localhost:9200',
+                'search_url': reverse('search_api', kwargs={"elastic_url": ""}),
             }
 
     def test_roles_setting(self):
@@ -197,12 +196,11 @@ class DashboardTests(ViewsTests):
         """
         profile = self.create_and_login_user()
 
-        for role in Role.ASSIGNABLE_ROLES:
-            Role.objects.create(
-                program=ProgramFactory.create(),
-                user=profile.user,
-                role=role,
-            )
+        Role.objects.create(
+            program=ProgramFactory.create(),
+            user=profile.user,
+            role=Role.DEFAULT_ROLE,
+        )
 
         resp = self.client.get(DASHBOARD_URL)
         js_settings = json.loads(resp.context['js_settings_json'])
@@ -210,7 +208,7 @@ class DashboardTests(ViewsTests):
             {
                 'program': role.program.id,
                 'role': role.role,
-                'permissions': [key for key, value in available_perm_status(profile.user).items()],
+                'permissions': [key for key, value in available_perm_status(profile.user).items() if value is True],
             } for role in profile.user.role_set.all()
         ]
 
@@ -328,15 +326,9 @@ class TestProgramPage(ViewsTests):
             assert js_settings['gaTrackingID'] == ga_tracking_id
 
     def test_login_button(self):
-        """Verify that we see a login button if not logged in"""
+        """Verify that we see a login button"""
         response = self.client.get(self.program_page.url)
-        self.assertContains(response, "Sign in with edX.org")
-
-    def test_sign_out_button(self):
-        """Verify that we see a sign out button if logged in"""
-        self.create_and_login_user()
-        response = self.client.get(self.program_page.url)
-        self.assertContains(response, 'Sign out')
+        self.assertContains(response, "Sign Up Now")
 
     def test_program_thumbnail_default(self):
         """Verify that a default thumbnail shows up for a live program"""
@@ -367,7 +359,7 @@ class TestProgramPage(ViewsTests):
         self.program_page.save()
 
         resp = self.client.get('/')
-        self.assertContains(resp, image.get_rendition('fill-378x225').url)
+        self.assertContains(resp, image.get_rendition('fill-690x530').url)
 
 
 class TestUsersPage(ViewsTests):
@@ -392,7 +384,6 @@ class TestUsersPage(ViewsTests):
             REACT_GA_DEBUG=react_ga_debug,
             EDXORG_BASE_URL=edx_base_url,
             WEBPACK_DEV_SERVER_HOST=host,
-            CLIENT_ELASTICSEARCH_URL="http://localhost:9200",
         ):
             # Mock has_permission so we don't worry about testing permissions here
             has_permission = Mock(return_value=True)
@@ -409,7 +400,7 @@ class TestUsersPage(ViewsTests):
                     'host': host,
                     'edx_base_url': edx_base_url,
                     'roles': [],
-                    'search_url': 'http://localhost:9200',
+                    'search_url': reverse('search_api', kwargs={"elastic_url": ""}),
                 }
                 assert has_permission.called
 
@@ -431,7 +422,6 @@ class TestUsersPage(ViewsTests):
             REACT_GA_DEBUG=react_ga_debug,
             EDXORG_BASE_URL=edx_base_url,
             WEBPACK_DEV_SERVER_HOST=host,
-            CLIENT_ELASTICSEARCH_URL="http://localhost:9200",
         ):
             # Mock has_permission so we don't worry about testing permissions here
             has_permission = Mock(return_value=True)
@@ -448,7 +438,7 @@ class TestUsersPage(ViewsTests):
                     'host': host,
                     'edx_base_url': edx_base_url,
                     'roles': [],
-                    'search_url': 'http://localhost:9200'
+                    'search_url': reverse('search_api', kwargs={"elastic_url": ""})
                 }
                 assert has_permission.called
 
@@ -476,3 +466,17 @@ class TestUsersPage(ViewsTests):
         """
         resp = self.client.get(reverse('ui-users'))
         assert resp.status_code == 404
+
+
+class TestTermsOfService(ViewsTests):
+    """
+    tests for the ToS page
+    """
+
+    def test_tos_settings(self):
+        """
+        test the settings we pass to the ToS page
+        """
+        response = self.client.get(TERMS_OF_SERVICE_URL)
+        js_settings = json.loads(response.context['js_settings_json'])
+        assert js_settings == {}

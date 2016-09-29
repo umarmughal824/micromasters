@@ -1,0 +1,29 @@
+$border-box-sizing: true !global;
+
+.page-content {
+  width: 100%;
+  padding: 27px 0 65px;
+
+  .single-column {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .double-column {
+    display: flex;
+    flex-direction: row;
+    width: 96%;
+    max-width: 1000px;
+    margin: 0 auto;
+
+    .first-column {
+      width: 65%;
+      margin: 0 10px;
+    }
+
+    .second-column {
+      width: 35%;
+      margin: 0 10px;
+    }
+  }
+}

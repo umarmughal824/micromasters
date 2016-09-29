@@ -1,388 +1,137 @@
 """
-Tests for search API functions.
+Tests for search API functionality
 """
-
-from urllib.parse import urljoin
-
-from django.conf import settings
-from django.contrib.auth.models import User
-from django.db.models.signals import post_save
+import math
+from unittest.mock import Mock, patch
+from elasticsearch_dsl import Search, Q
 from factory.django import mute_signals
-from rest_framework.fields import DateTimeField
-from requests import get
+from django.test import TestCase
+from django.db.models.signals import post_save
+from django.conf import settings
 
-from dashboard.factories import (
-    CachedCertificateFactory,
-    CachedEnrollmentFactory,
-)
-from profiles.api import get_social_username
-from profiles.factories import (
-    EducationFactory,
-    EmploymentFactory,
-    ProfileFactory,
-    UserFactory,
-)
-from profiles.serializers import (
-    EducationSerializer,
-    EmploymentSerializer,
-)
-from profiles.util import (
-    GravatarImgSize,
-    format_gravatar_url,
-)
+from courses.factories import ProgramFactory
+from profiles.factories import ProfileFactory
+from roles.models import Role
+from roles.roles import Staff
 from search.api import (
-    get_conn,
-    index_users,
-    refresh_index,
-    remove_user,
-    serialize_user,
+    execute_search,
+    create_search_obj,
+    prepare_and_execute_search,
+    get_all_query_matching_emails,
 )
-from search.base import ESTestCase
-from search.exceptions import ReindexException
-from search.util import traverse_mapping
+from search.indexing_api import (
+    DOC_TYPES,
+)
+from search.exceptions import NoProgramAccessException
 
 
-def remove_key(dictionary, key):
-    """Helper method to remove a key from a dict and return the dict"""
-    del dictionary[key]
-    return dictionary
-
-
-def search():
+class FakeEmailSearchHits:
     """
-    Execute a search and get results
+    Mocks an elasticsearch_dsl.result.Response object
     """
-    # Refresh the index so we can read current data
-    refresh_index()
+    total = 5
+    results = [
+        Mock(email=['a@example.com']),
+        Mock(email=['b@example.com']),
+        Mock(email=['c@example.com']),
+        Mock(email=['b@example.com'])
+    ]
 
-    elasticsearch_url = settings.ELASTICSEARCH_URL
-    if not elasticsearch_url.startswith("http"):
-        elasticsearch_url = "http://{}".format(elasticsearch_url)
-    url = urljoin(
-        elasticsearch_url,
-        "{}/{}".format(settings.ELASTICSEARCH_INDEX, "_search")
-    )
-    return get(url).json()['hits']
+    def __iter__(self):
+        return iter(self.results)
 
 
-def get_es_mappings():
+def create_fake_search_result(hits_cls):
     """
-    Retrieve the current mapping
+    Creates a fake elasticsearch_dsl.result.Response object
     """
-    # Refresh the index so we can read current data
-    refresh_index()
-
-    elasticsearch_url = settings.ELASTICSEARCH_URL
-    elasticsearch_index = settings.ELASTICSEARCH_INDEX
-    if not elasticsearch_url.startswith("http"):
-        elasticsearch_url = "http://{}".format(elasticsearch_url)
-    url = urljoin(
-        elasticsearch_url,
-        "{}/{}".format(elasticsearch_index, "_mapping")
-    )
-    return get(url).json()[elasticsearch_index]['mappings']
+    return Mock(hits=hits_cls())
 
 
-def assert_search(results, users):
-    """
-    Assert that search results match users
-    """
-    assert results['total'] == len(users)
-    sources = sorted([hit['_source'] for hit in results['hits']], key=lambda hit: hit['id'])
-    sorted_users = sorted(users, key=lambda user: user.id)
-    serialized = [remove_key(serialize_user(user), "_id") for user in sorted_users]
-    assert serialized == sources
+class SearchAPITests(TestCase):  # pylint: disable=missing-docstring
+    @classmethod
+    def setUpTestData(cls):
+        with mute_signals(post_save):
+            profile = ProfileFactory.create()
+        cls.user = profile.user
+        cls.program = ProgramFactory.create()
+        Role.objects.create(
+            user=cls.user,
+            program=cls.program,
+            role=Staff.ROLE_ID
+        )
 
+    def test_execute_search(self):  # pylint: disable=no-self-use
+        """
+        Test that the execute_search method invokes the right method on the Search object
+        """
+        search_obj = Search()
+        search_obj.execute = Mock(name='execute')
+        with patch('search.api.get_conn', autospec=True) as mock_get_conn:
+            execute_search(search_obj)
+            assert search_obj.execute.called
+            assert mock_get_conn.called
 
-# pylint: disable=no-self-use
-class IndexTests(ESTestCase):
-    """
-    Tests for indexing
-    """
+    def test_create_search_obj_program_limit(self):
+        """
+        Test that Search objects are created with program-limiting query parameters
+        """
+        search_obj = create_search_obj(self.user)
+        search_query_dict = search_obj.to_dict()
+        expected_program_query = Q(
+            'bool',
+            should=[
+                Q('term', **{'program.id': self.program.id})
+            ]
+        )
+        assert search_query_dict['query'] == expected_program_query.to_dict()
 
-    def test_user_add(self):
+    def test_create_search_obj_metadata(self):  # pylint: disable=no-self-use
         """
-        Test that a newly created User is indexed properly
+        Test that Search objects are created with proper metadata
         """
-        assert search()['total'] == 0
-        user = UserFactory.create()
-        assert_search(search(), [user])
+        mock_search_obj = Mock(spec=Search)
+        search_param_dict = {'size': 50}
+        with patch('search.api.Search', autospec=True, return_value=mock_search_obj) as mock_search_cls:
+            create_search_obj(self.user, search_param_dict=search_param_dict)
+            mock_search_cls.assert_called_with(
+                doc_type=DOC_TYPES,
+                index=settings.ELASTICSEARCH_INDEX
+            )
+            mock_search_obj.update_from_dict.assert_called_with(search_param_dict)
 
-    def test_user_update(self):
+    def test_user_with_no_program_access(self):
         """
-        Test that User is reindexed after being updated
-        """
-        user = UserFactory.create()
-        assert search()['total'] == 1
-        profile = user.profile
-        profile.first_name = 'updated'
-        profile.save()
-        assert_search(search(), [user])
-
-    def test_user_delete(self):
-        """
-        Test that User is removed from index after being updated
-        """
-        user = UserFactory.create()
-        assert search()['total'] == 1
-        user.profile.delete()
-        assert search()['total'] == 0
-
-    def test_education_add(self):
-        """
-        Test that Education is indexed after being added
-        """
-        user = UserFactory.create()
-        assert search()['total'] == 1
-        EducationFactory.create(profile=user.profile)
-        assert_search(search(), [user])
-
-    def test_education_update(self):
-        """
-        Test that Education is reindexed after being updated
-        """
-        user = UserFactory.create()
-        assert search()['total'] == 1
-        education = EducationFactory.create(profile=user.profile)
-        education.school_city = 'city'
-        education.save()
-        assert_search(search(), [user])
-
-    def test_education_delete(self):
-        """
-        Test that Education is removed from index after being deleted
-        """
-        user = UserFactory.create()
-        education = EducationFactory.create(profile=user.profile)
-        assert_search(search(), [user])
-        education.delete()
-        assert_search(search(), [user])
-
-    def test_employment_add(self):
-        """
-        Test that Employment is indexed after being added
-        """
-        user = UserFactory.create()
-        assert search()['total'] == 1
-        EmploymentFactory.create(profile=user.profile)
-        assert_search(search(), [user])
-
-    def test_employment_update(self):
-        """
-        Test that Employment is reindexed after being updated
-        """
-        user = UserFactory.create()
-        assert search()['total'] == 1
-        employment = EmploymentFactory.create(profile=user.profile)
-        employment.city = 'city'
-        employment.save()
-        assert_search(search(), [user])
-
-    def test_employment_delete(self):
-        """
-        Test that Employment is removed from index after being deleted
-        """
-        user = UserFactory.create()
-        employment = EmploymentFactory.create(profile=user.profile)
-        assert_search(search(), [user])
-        employment.delete()
-        assert_search(search(), [user])
-
-    def test_remove_profile(self):
-        """
-        Test that remove_profile removes the profile from the index
-        """
-        user = UserFactory.create()
-        assert_search(search(), [user])
-        remove_user(user)
-        assert_search(search(), [])
-
-    def test_index_users(self):
-        """
-        Test that index_users indexes an iterable of users
-        """
-        for _ in range(10):
-            with mute_signals(post_save):
-                # using ProfileFactory instead of UserFactory here since UserFactory will not fill in any
-                # fields on Profile
-                profile = ProfileFactory.create()
-            # Not strictly necessary, the muted post_save will prevent indexing
-            remove_user(profile.user)
-
-        # Confirm nothing in index
-        assert_search(search(), [])
-        index_users(User.objects.iterator(), chunk_size=4)
-        assert_search(search(), list(User.objects.all()))
-
-    def test_add_certificate(self):
-        """
-        Test that Certificate is indexed after being added
-        """
-        user = UserFactory.create()
-        assert search()['total'] == 1
-        CachedCertificateFactory.create(user=user)
-        assert_search(search(), [user])
-
-    def test_update_certificate(self):
-        """
-        Test that Certificate is reindexed after being updated
-        """
-        user = UserFactory.create()
-        assert search()['total'] == 1
-        certificate = CachedCertificateFactory.create(user=user)
-        certificate.data = {'new': 'data'}
-        certificate.save()
-        assert_search(search(), [user])
-
-    def test_delete_certificate(self):
-        """
-        Test that Certificate is removed from index after being deleted
-        """
-        user = UserFactory.create()
-        certificate = CachedCertificateFactory.create(user=user)
-        assert_search(search(), [user])
-        certificate.delete()
-        assert_search(search(), [user])
-
-    def test_add_enrollment(self):
-        """
-        Test that Enrollment is indexed after being added
-        """
-        user = UserFactory.create()
-        CachedCertificateFactory.create(user=user)
-        assert_search(search(), [user])
-
-    def test_update_enrollment(self):
-        """
-        Test that Enrollment is reindexed after being updated
-        """
-        user = UserFactory.create()
-        assert search()['total'] == 1
-        enrollment = CachedEnrollmentFactory.create(user=user)
-        enrollment.data = {'new': 'data'}
-        enrollment.save()
-        assert_search(search(), [user])
-
-    def test_delete_enrollment(self):
-        """
-        Test that Enrollment is removed from index after being deleted
-        """
-        user = UserFactory.create()
-        enrollment = CachedEnrollmentFactory.create(user=user)
-        assert_search(search(), [user])
-        enrollment.delete()
-        assert_search(search(), [user])
-
-    def test_not_analyzed(self):
-        """
-        At the moment no string fields in the mapping should be 'analyzed' since there's no field
-        supporting full text search.
+        Test that a user with no program permissions will raise an exception
         """
         with mute_signals(post_save):
             profile = ProfileFactory.create()
-        EducationFactory.create(profile=profile)
-        EmploymentFactory.create(profile=profile)
-        CachedCertificateFactory.create(user=profile.user)
-        CachedEnrollmentFactory.create(user=profile.user)
+        with self.assertRaises(NoProgramAccessException):
+            create_search_obj(profile.user)
 
-        mapping = get_es_mappings()
-        nodes = list(traverse_mapping(mapping))
-        for node in nodes:
-            if node.get('type') == 'string':
-                assert node['index'] == 'not_analyzed'
-
-
-class SerializerTests(ESTestCase):
-    """
-    Tests for profile serializer
-    """
-
-    def test_profile_serializer(self):  # pylint: disable=no-self-use
+    def test_prepare_and_execute_search(self):
         """
-        Asserts the output of the profile serializer
+        Test that a Search object is properly prepared and executed
         """
-        with mute_signals(post_save):
-            profile = ProfileFactory.create()
-        EducationFactory.create(profile=profile)
-        EmploymentFactory.create(profile=profile)
-        certificate = CachedCertificateFactory.create(user=profile.user)
-        enrollment = CachedEnrollmentFactory.create(user=profile.user)
+        mock_search_func = Mock(name='execute', return_value=['result1', 'result2'])
+        params = {'size': 50}
+        with patch('search.api.create_search_obj', autospec=True, return_value=None) as mock_create_search_obj:
+            results = prepare_and_execute_search(self.user, search_param_dict=params, search_func=mock_search_func)
+            mock_create_search_obj.assert_called_with(self.user, search_param_dict=params)
+            assert results == ['result1', 'result2']
 
-        assert serialize_user(profile.user) == {
-            '_id': profile.user.id,
-            'id': profile.user.id,
-            'profile': {
-                'username': get_social_username(profile.user),
-                'first_name': profile.first_name,
-                'filled_out': profile.filled_out,
-                'agreed_to_terms_of_service': profile.agreed_to_terms_of_service,
-                'last_name': profile.last_name,
-                'preferred_name': profile.preferred_name,
-                'email_optin': profile.email_optin,
-                'gender': profile.gender,
-                'date_of_birth': DateTimeField().to_representation(profile.date_of_birth),
-                'account_privacy': profile.account_privacy,
-                'has_profile_image': profile.has_profile_image,
-                'profile_url_full': format_gravatar_url(profile.user.email, GravatarImgSize.FULL),
-                'profile_url_large': format_gravatar_url(profile.user.email, GravatarImgSize.LARGE),
-                'profile_url_medium': format_gravatar_url(profile.user.email, GravatarImgSize.MEDIUM),
-                'profile_url_small': format_gravatar_url(profile.user.email, GravatarImgSize.SMALL),
-                'country': profile.country,
-                'state_or_territory': profile.state_or_territory,
-                'city': profile.city,
-                'birth_country': profile.birth_country,
-                'birth_state_or_territory': profile.birth_state_or_territory,
-                'birth_city': profile.birth_city,
-                'preferred_language': profile.preferred_language,
-                'pretty_printed_student_id': profile.pretty_printed_student_id,
-                'edx_level_of_education': profile.edx_level_of_education,
-                'education': [
-                    EducationSerializer().to_representation(education) for education in profile.education.all()
-                ],
-                'work_history': [
-                    EmploymentSerializer().to_representation(work_history) for work_history in
-                    profile.work_history.all()
-                ]
-            },
-            'certificates': [certificate.data],
-            'enrollments': [enrollment.data],
-        }
-
-
-class GetConnTests(ESTestCase):
-    """
-    Tests for get_conn
-    """
-    def setUp(self):
+    # def test_all_query_matching_results(self):
+    def test_all_query_matching_emails(self):  # pylint: disable=no-self-use
         """
-        Start without any index
+        Test that a set of search results will yield an expected set of emails
         """
-        super(GetConnTests, self).setUp()
-
-        conn = get_conn(verify=False)
-        index_name = settings.ELASTICSEARCH_INDEX
-        conn.indices.delete(index_name)
-
-        # Clear globals
-        from search import api
-        api._CONN = None  # pylint: disable=protected-access
-        api._CONN_VERIFIED = False  # pylint: disable=protected-access
-
-    def test_no_index(self):
-        """
-        Test that an error is raised if we don't have an index
-        """
-        with self.assertRaises(ReindexException) as ex:
-            get_conn()
-        assert str(ex.exception) == "Unable to find index {}".format(settings.ELASTICSEARCH_INDEX)
-
-    def test_no_mapping(self):
-        """
-        Test that error is raised if we don't have a mapping
-        """
-        conn = get_conn(verify=False)
-        conn.indices.create(settings.ELASTICSEARCH_INDEX)
-
-        with self.assertRaises(ReindexException) as ex:
-            get_conn()
-        assert str(ex.exception) == "Mapping user not found"
+        fake_search_result = create_fake_search_result(FakeEmailSearchHits)
+        mock_execute_search = Mock(spec=execute_search, return_value=fake_search_result)
+        test_es_page_size = 2
+        with patch('search.api.execute_search', mock_execute_search):
+            results = get_all_query_matching_emails(Search(), page_size=test_es_page_size)
+            assert results == set([result.email[0] for result in fake_search_result.hits.results])
+            assert mock_execute_search.call_count == math.ceil(fake_search_result.hits.total/test_es_page_size)
+            # Assert that the Search object is limited to return only the email field
+            args, kwargs = mock_execute_search.call_args  # pylint: disable=unused-variable, unpacking-non-sequence
+            assert args[0].to_dict()['fields'] == 'email'

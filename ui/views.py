@@ -7,6 +7,7 @@ import logging
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.staticfiles.templatetags.staticfiles import static
+from django.core.urlresolvers import reverse
 from django.views.generic import View
 from django.shortcuts import (
     render,
@@ -69,7 +70,7 @@ class ReactView(View):  # pylint: disable=unused-argument
             "host": webpack_dev_server_host(request),
             "edx_base_url": settings.EDXORG_BASE_URL,
             "roles": roles,
-            "search_url": settings.CLIENT_ELASTICSEARCH_URL,
+            "search_url": reverse('search_api', kwargs={"elastic_url": ""}),
         }
 
         return render(
@@ -132,6 +133,20 @@ def standard_error_page(request, status_code, template_filename):
     )
     response.status_code = status_code
     return response
+
+
+def terms_of_service(request):
+    """
+    Handles the terms of service page
+    """
+    return render(
+        request,
+        "terms_of_service.html",
+        context={
+            "style_src": get_bundle_url(request, "style.js"),
+            "js_settings_json": "{}",
+        }
+    )
 
 
 def page_404(request):

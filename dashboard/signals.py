@@ -1,51 +1,67 @@
 """
 Signals for user profiles
 """
-from django.db.models.signals import pre_save, post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
-from dashboard.models import CachedEnrollment, ProgramEnrollment
+from dashboard.models import CachedEnrollment, CachedCertificate, ProgramEnrollment
+from search.tasks import index_program_enrolled_users, remove_program_enrolled_user
 
 
-@receiver(pre_save, sender=CachedEnrollment, dispatch_uid="preupdate_programenrollment")
-def precreate_programenrollment(sender, instance, **kwargs):  # pylint: disable=unused-argument
+def _index_enrollment(user, program):
     """
-    Signal handler to delete Program enrollment when the CachedEnrollment table is updated
-    in case there are no other enrollment in the same program.
-    This is done in a pre_save handler because here it is easier to catch the proper kind
-    of update (from enrolled to not enrolled).
+    Helper function to index a ProgramEnrollment if one exists for a user and program
     """
-    # if the id is not None means this is an update
-    # if the data is None means we need to check if before was not None
-    # meaning if the student was enrolled and now she is not any more
-    if instance.data is None and instance.id is not None:
-        user = instance.user
-        program = instance.course_run.course.program
-        # checking if the instance in the db has data
-        instance_in_db = CachedEnrollment.objects.filter(id=instance.id).exclude(data__isnull=True).count()
-        # if the count is 1, it means the student unenrolled from the course run
-        if instance_in_db == 1:
-            active_enrollment_count = CachedEnrollment.objects.filter(
-                user=user,
-                course_run__course__program=program
-            ).exclude(data__isnull=True).count()
-            # if there is only one enrollment with data non None, it means that it is the
-            # current instance is the only one for the program, so the program enrollment
-            # needs to be deleted
-            if active_enrollment_count <= 1:  # theoretically this cannot be <1, but just in case
-                ProgramEnrollment.objects.filter(
-                    user=user,
-                    program=program
-                ).delete()
+    try:
+        program_enrollment = ProgramEnrollment.objects.get(user=user, program=program)
+        index_program_enrolled_users.delay([program_enrollment])
+    except ProgramEnrollment.DoesNotExist:
+        pass
 
 
-@receiver(post_save, sender=CachedEnrollment, dispatch_uid="update_programenrollment")
-def create_programenrollment(sender, instance, **kwargs):  # pylint: disable=unused-argument
+@receiver(post_save, sender=ProgramEnrollment, dispatch_uid="programenrollment_post_save")
+def handle_create_programenrollment(sender, instance, created, **kwargs):  # pylint: disable=unused-argument
     """
-    Signal handler to create Program enrollment when the CachedEnrollment table is updated
+    When a ProgramEnrollment model is created/updated, update index.
     """
-    if instance.data is not None:
-        ProgramEnrollment.objects.get_or_create(
-            user=instance.user,
-            program=instance.course_run.course.program
-        )
+    index_program_enrolled_users.delay([instance])
+
+
+@receiver(post_delete, sender=ProgramEnrollment, dispatch_uid="programenrollment_post_delete")
+def handle_delete_programenrollment(sender, instance, **kwargs):  # pylint: disable=unused-argument
+    """
+    When a ProgramEnrollment model is deleted, update index.
+    """
+    remove_program_enrolled_user.delay(instance)
+
+
+@receiver(post_save, sender=CachedEnrollment, dispatch_uid="cachedenrollment_post_save")
+def handle_update_enrollment(sender, instance, **kwargs):  # pylint: disable=unused-argument
+    """
+    Create ProgramEnrollment when a CachedEnrollment is created/updated, and update the index.
+    """
+    _index_enrollment(instance.user, instance.course_run.course.program)
+
+
+@receiver(post_save, sender=CachedCertificate, dispatch_uid="cachedcertificate_post_save")
+def handle_update_certificate(sender, instance, **kwargs):  # pylint: disable=unused-argument
+    """
+    When a CachedCertificate model is updated, update index.
+    """
+    _index_enrollment(instance.user, instance.course_run.course.program)
+
+
+@receiver(post_delete, sender=CachedEnrollment, dispatch_uid="cachedenrollment_post_delete")
+def handle_delete_enrollment(sender, instance, **kwargs):  # pylint: disable=unused-argument
+    """
+    Update index when CachedEnrollment model instance is deleted.
+    """
+    _index_enrollment(instance.user, instance.course_run.course.program)
+
+
+@receiver(post_delete, sender=CachedCertificate, dispatch_uid="cachedcertificate_post_delete")
+def handle_delete_certificate(sender, instance, **kwargs):  # pylint: disable=unused-argument
+    """
+    Update index when CachedCertificate model instance is deleted.
+    """
+    _index_enrollment(instance.user, instance.course_run.course.program)

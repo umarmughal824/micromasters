@@ -4,10 +4,15 @@ Generates a set of realistic users/programs to help us test search functionality
 from datetime import datetime, timedelta
 from django.core.management import BaseCommand
 from django.contrib.auth.models import User
+from profiles.api import get_social_username
 from profiles.models import Employment, Education
 from courses.models import Program, Course, CourseRun
-from dashboard.models import CachedCertificate, CachedEnrollment
+from dashboard.models import ProgramEnrollment, CachedCertificate, CachedEnrollment
+from roles.models import Role
+from roles.roles import Staff
 from micromasters.utils import load_json_from_file
+from backends.edxorg import EdxOrgOAuth2
+from search.indexing_api import recreate_index
 
 
 USER_DATA_PATH = 'profiles/management/realistic_user_data.json'
@@ -111,7 +116,7 @@ class CertificateDeserializer(CachedModelDeserializer):
 
     @classmethod
     def _fill_in_missing_data(cls, data, user, course_run):
-        data['username'] = user.username
+        data['username'] = get_social_username(user)
         return data
 
 
@@ -129,7 +134,7 @@ class EnrollmentDeserializer(CachedModelDeserializer):
 
     @classmethod
     def _fill_in_missing_data(cls, data, user, course_run):
-        data['user'] = user.username
+        data['user'] = get_social_username(user)
         data['course_details'].update({
             'course_start': course_run.start_date.isoformat(),
             'course_end': course_run.end_date.isoformat(),
@@ -156,6 +161,11 @@ def deserialize_user_data(user_data, course_runs):
         )
     )
     user = deserialize_model_data(User, user_model_data)
+    # Create social username
+    user.social_auth.create(
+        provider=EdxOrgOAuth2.name,
+        uid=user.username,
+    )
     # Create new cached edX data records for each type we care about and associate them with a User and CourseRun
     for cached_model_deserializer in CACHED_MODEL_DESERIALIZERS:
         if cached_model_deserializer.data_key in user_data:
@@ -164,6 +174,9 @@ def deserialize_user_data(user_data, course_runs):
                 for data in user_data[cached_model_deserializer.data_key]
             ]
             unaccounted_course_runs = set(course_runs) - set(accounted_course_runs)
+            # Add a ProgramEnrollment for this user/program combination if it doesn't exist yet
+            program = accounted_course_runs[0].course.program
+            ProgramEnrollment.objects.get_or_create(user=user, program=program)
         else:
             unaccounted_course_runs = course_runs
         # For each course run that didn't have associated cached edX data (for Enrollments, Certificates, etc),
@@ -225,13 +238,13 @@ def deserialize_program_data(program_data):
 
 def deserialize_program_data_list(program_data_list):
     """Deserializes a list of Program data"""
-    new_program_count = 0
+    programs = []
     for program_data in program_data_list:
         # Set the description to make this Program easily identifiable as a 'fake'
         program_data['description'] = FAKE_PROGRAM_DESC_PREFIX + program_data['description']
-        deserialize_program_data(program_data)
-        new_program_count += 1
-    return new_program_count
+        program_data['live'] = True
+        programs.append(deserialize_program_data(program_data))
+    return programs
 
 
 class Command(BaseCommand):
@@ -240,18 +253,45 @@ class Command(BaseCommand):
     """
     help = "Generates a set of realistic users and programs/courses to help us test search"
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--staff-user',
+            action='store',
+            dest='staff_user',
+            help='Username for a user to assign the staff role for the programs created by this script.'
+        )
+
+    @staticmethod
+    def assign_staff_user_to_programs(username, programs):
+        """
+        Assigns the 'staff' role to all given programs for a user with a given username
+        """
+        staff_user = User.objects.get(username=username)
+        for program in programs:
+            ProgramEnrollment.objects.create(user=staff_user, program=program)
+            Role.objects.create(user=staff_user, program=program, role=Staff.ROLE_ID)
+
     def handle(self, *args, **options):
         program_data_list = load_json_from_file(PROGRAM_DATA_PATH)
         user_data_list = load_json_from_file(USER_DATA_PATH)
         existing_fake_user_count = User.objects.filter(username__startswith=FAKE_USER_USERNAME_PREFIX).count()
         existing_fake_program_count = Program.objects.filter(description__startswith=FAKE_PROGRAM_DESC_PREFIX).count()
         if len(user_data_list) == existing_fake_user_count and len(program_data_list) == existing_fake_program_count:
+            fake_programs = Program.objects.filter(description__startswith=FAKE_PROGRAM_DESC_PREFIX).all()
             self.stdout.write("Realistic users and programs appear to exist already.")
         else:
-            new_program_count = deserialize_program_data_list(program_data_list)
+            fake_programs = deserialize_program_data_list(program_data_list)
             fake_course_runs = CourseRun.objects.filter(
                 course__program__description__contains=FAKE_PROGRAM_DESC_PREFIX
             ).all()
-            new_user_count = deserialize_user_data_list(user_data_list, fake_course_runs)
-            self.stdout.write("Created {} new programs from '{}'.".format(new_program_count, PROGRAM_DATA_PATH))
-            self.stdout.write("Created {} new users from '{}'.".format(new_user_count, USER_DATA_PATH))
+            fake_user_count = deserialize_user_data_list(user_data_list, fake_course_runs)
+            recreate_index()
+            self.stdout.write("Created {} new programs from '{}'.".format(len(fake_programs), PROGRAM_DATA_PATH))
+            self.stdout.write("Created {} new users from '{}'.".format(fake_user_count, USER_DATA_PATH))
+        if fake_programs and options.get('staff_user'):
+            self.assign_staff_user_to_programs(options['staff_user'], fake_programs)
+            self.stdout.write(
+                "Added enrollment and 'staff' role for user '{}' to {} programs".format(
+                    options['staff_user'], len(fake_programs)
+                )
+            )

@@ -8,52 +8,71 @@ from dateutil.parser import parse
 from django.core.urlresolvers import resolve, reverse
 from django.db.models.signals import post_save
 from factory.django import mute_signals
+from rest_framework.fields import (
+    DateField,
+    ReadOnlyField,
+    SerializerMethodField,
+)
+from rest_framework.serializers import ListSerializer
 from rest_framework.status import (
     HTTP_405_METHOD_NOT_ALLOWED,
     HTTP_404_NOT_FOUND
 )
 
 from backends.edxorg import EdxOrgOAuth2
+from courses.factories import ProgramFactory
+from dashboard.models import ProgramEnrollment
 from profiles.factories import ProfileFactory, UserFactory
 from profiles.models import Profile
-from profiles.permissions import CanEditIfOwner
+from profiles.permissions import (
+    CanEditIfOwner,
+    CanSeeIfNotPrivate,
+)
 from profiles.serializers import (
+    ProfileFilledOutSerializer,
     ProfileLimitedSerializer,
     ProfileSerializer,
 )
 from profiles.views import ProfileViewSet
+from roles.models import Role
+from roles.roles import (
+    Instructor,
+    Staff,
+)
 from search.base import ESTestCase
 
 
-class ProfileTests(ESTestCase):
+class ProfileBaseTests(ESTestCase):
     """
-    Tests for GET on profile view
+    Tests for profile views
     """
 
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         """
-        Create a user and profile
+        Create a user
         """
-        super(ProfileTests, self).setUp()
-
         with mute_signals(post_save):
-            self.user1 = UserFactory.create()
-            username = "{}_edx".format(self.user1.username)
-            self.user1.social_auth.create(
+            cls.user1 = UserFactory.create()
+            username = "{}_edx".format(cls.user1.username)
+            cls.user1.social_auth.create(
                 provider=EdxOrgOAuth2.name,
                 uid=username
             )
-        self.url1 = reverse('profile-detail', kwargs={'user': username})
+        cls.url1 = reverse('profile-detail', kwargs={'user': username})
 
         with mute_signals(post_save):
-            self.user2 = UserFactory.create()
-            username = "{}_edx".format(self.user2.username)
-            self.user2.social_auth.create(
+            cls.user2 = UserFactory.create()
+            username = "{}_edx".format(cls.user2.username)
+            cls.user2.social_auth.create(
                 provider=EdxOrgOAuth2.name,
                 uid=username
             )
-        self.url2 = reverse('profile-detail', kwargs={'user': username})
+        cls.url2 = reverse('profile-detail', kwargs={'user': username})
 
+
+class ProfileGETTests(ProfileBaseTests):
+    """Tests for GET requests on profiles"""
     def test_viewset(self):
         """
         Assert that the URL links up with the viewset
@@ -65,8 +84,7 @@ class ProfileTests(ESTestCase):
         """
         Assert that we set permissions correctly
         """
-        # Users can only edit their own profile
-        assert CanEditIfOwner in ProfileViewSet.permission_classes
+        assert set(ProfileViewSet.permission_classes) == {CanEditIfOwner, CanSeeIfNotPrivate}
 
     def test_check_object_permissions(self):
         """
@@ -198,16 +216,67 @@ class ProfileTests(ESTestCase):
         resp = self.client.get(self.url2)
         assert resp.status_code == HTTP_404_NOT_FOUND
 
+    def test_instructor_sees_entire_profile(self):
+        """
+        An instructor should be able to see the entire profile despite the account privacy
+        """
+        with mute_signals(post_save):
+            profile = ProfileFactory.create(user=self.user2, account_privacy=Profile.PRIVATE)
+            ProfileFactory.create(user=self.user1, verified_micromaster_user=False)
+
+        program = ProgramFactory.create()
+        ProgramEnrollment.objects.create(
+            program=program,
+            user=profile.user,
+        )
+        Role.objects.create(
+            program=program,
+            role=Instructor.ROLE_ID,
+            user=self.user1,
+        )
+
+        self.client.force_login(self.user1)
+        resp = self.client.get(self.url2)
+        assert resp.json() == ProfileSerializer().to_representation(profile)
+
+    def test_staff_sees_entire_profile(self):
+        """
+        Staff should be able to see the entire profile despite the account privacy
+        """
+        with mute_signals(post_save):
+            profile = ProfileFactory.create(user=self.user2, account_privacy=Profile.PRIVATE)
+            ProfileFactory.create(user=self.user1, verified_micromaster_user=False)
+
+        program = ProgramFactory.create()
+        ProgramEnrollment.objects.create(
+            program=program,
+            user=profile.user,
+        )
+        Role.objects.create(
+            program=program,
+            role=Staff.ROLE_ID,
+            user=self.user1,
+        )
+
+        self.client.force_login(self.user1)
+        resp = self.client.get(self.url2)
+        assert resp.json() == ProfileSerializer().to_representation(profile)
+
+
+class ProfilePATCHTests(ProfileBaseTests):
+    """
+    Tests for profile PATCH
+    """
     def test_patch_own_profile(self):
         """
         A user PATCHes their own profile
         """
         with mute_signals(post_save):
-            ProfileFactory.create(user=self.user1)
+            ProfileFactory.create(user=self.user1, filled_out=False, agreed_to_terms_of_service=False)
         self.client.force_login(self.user1)
 
         with mute_signals(post_save):
-            new_profile = ProfileFactory.create()
+            new_profile = ProfileFactory.create(filled_out=False)
         new_profile.user.social_auth.create(
             provider=EdxOrgOAuth2.name,
             uid="{}_edx".format(new_profile.user.username)
@@ -219,15 +288,56 @@ class ProfileTests(ESTestCase):
 
         old_profile = Profile.objects.get(user__username=self.user1.username)
         for key, value in patch_data.items():
-            if key in ("username", "filled_out", "pretty_printed_student_id",
-                       "work_history", "education", "profile_url_full",
-                       "profile_url_large", "profile_url_medium", "profile_url_small",):
+            field = ProfileSerializer().fields[key]
+
+            if isinstance(field, (ListSerializer, SerializerMethodField, ReadOnlyField)) or field.read_only is True:
                 # these fields are readonly
                 continue
-            elif key == "date_of_birth":
+            elif isinstance(field, DateField):
                 assert getattr(old_profile, key) == parse(value).date()
             else:
                 assert getattr(old_profile, key) == value
+
+    def test_serializer(self):
+        """
+        Get a user's own profile, ensure that we used ProfileSerializer and not ProfileFilledOutSerializer
+        """
+        with mute_signals(post_save):
+            profile = ProfileFactory.create(user=self.user1, filled_out=False)
+        self.client.force_login(self.user1)
+
+        patch_data = ProfileSerializer().to_representation(profile)
+        # PATCH may not succeed, we just care that the right serializer was used
+        with patch(
+            'profiles.views.ProfileFilledOutSerializer.__new__',
+            autospec=True,
+            side_effect=ProfileFilledOutSerializer.__new__
+        ) as mocked_filled_out, patch(
+            'profiles.views.ProfileSerializer.__new__',
+            autospec=True,
+            side_effect=ProfileSerializer.__new__
+        ) as mocked:
+            self.client.patch(self.url1, content_type="application/json", data=json.dumps(patch_data))
+        assert mocked.called
+        assert not mocked_filled_out.called
+
+    def test_filled_out_serializer(self):
+        """
+        Get a user's own profile, ensure that we used ProfileFilledOutSerializer
+        """
+        with mute_signals(post_save):
+            profile = ProfileFactory.create(user=self.user1, filled_out=True)
+        self.client.force_login(self.user1)
+
+        patch_data = ProfileSerializer().to_representation(profile)
+        # PATCH may not succeed, we just care that the right serializer was used
+        with patch(
+            'profiles.views.ProfileFilledOutSerializer.__new__',
+            autospec=True,
+            side_effect=ProfileFilledOutSerializer.__new__
+        ) as mocked:
+            self.client.patch(self.url1, content_type="application/json", data=json.dumps(patch_data))
+        assert mocked.called
 
     def test_forbidden_methods(self):
         """

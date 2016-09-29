@@ -1,0 +1,26 @@
+.email-composition-dialog {
+  .email-composition-contents {
+    display: flex;
+    flex-direction: column;
+
+    .user-count {
+      padding-bottom: 20px;
+      font-style: italic;
+    }
+
+    .validation-error {
+      font-size: 12px;
+      color: $validation-red;
+    }
+
+    textarea {
+      padding: 15px;
+      border-color: $border-color;
+      border-radius: 2px;
+
+      &.email-subject {
+        margin-bottom: 5px;
+      }
+    }
+  }
+}

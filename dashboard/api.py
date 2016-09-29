@@ -14,6 +14,7 @@ from django.db import transaction
 from django.db.models import Q
 import pytz
 
+from ecommerce.models import CoursePrice
 from courses.models import CourseRun
 from dashboard import models
 from profiles.api import get_social_username
@@ -28,25 +29,24 @@ REFRESH_ENROLLMENT_CACHE_MINUTES = 5
 
 class CourseStatus:
     """
-    Possible statuses for a course for a user
+    Possible statuses for a course for a user. These are the course run statuses used in the dashboard API.
     """
     PASSED = 'passed'
     NOT_PASSED = 'not-passed'
-    CURRENT_GRADE = 'verified-not-completed'
-    UPGRADE = 'enrolled-not-verified'
-    NOT_OFFERED = 'not-offered'
-    OFFERED = 'offered-not-enrolled'
+    CURRENT_GRADE = 'verified'
+    UPGRADE = 'enrolled'
+    OFFERED = 'offered'
 
     @classmethod
     def all_statuses(cls):
         """Helper to get all the statuses"""
         return [cls.PASSED, cls.NOT_PASSED, cls.CURRENT_GRADE,
-                cls.UPGRADE, cls.NOT_OFFERED, cls.OFFERED]
+                cls.UPGRADE, cls.OFFERED]
 
 
 class CourseRunStatus:
     """
-    Possible statuses for a course run for a user
+    Possible statuses for a course run for a user. These are used internally.
     """
     NOT_ENROLLED = 'not-enrolled'
     GRADE = 'grade'
@@ -114,13 +114,12 @@ class CourseRunUserStatus:
         )
 
 
-def get_info_for_program(program, user, enrollments, certificates):
+def get_info_for_program(program, enrollments, certificates):
     """
     Helper function that formats a program with all the courses and runs
 
     Args:
         program (Program): a program
-        user (User): an user object
         enrollments (Enrollments): the user enrollments object
         certificates (Certificates): the user certificates objects
 
@@ -132,22 +131,34 @@ def get_info_for_program(program, user, enrollments, certificates):
         "id": program.pk,
         "description": program.description,
         "title": program.title,
+        "financial_aid_availability": program.financial_aid_availability,
         "courses": []
     }
     for course in program.course_set.all():
         data['courses'].append(
-            get_info_for_course(user, course, enrollments, certificates)
+            get_info_for_course(course, enrollments, certificates)
         )
     data['courses'].sort(key=lambda x: x['position_in_program'])
     return data
 
 
-def get_info_for_course(user, course, user_enrollments, user_certificates):
+def _add_run(course_data, run, status, certificate=None):
+    """Helper function to add a course run to the status dictionary"""
+    course_data['runs'].append(
+        format_courserun_for_dashboard(
+            run,
+            status,
+            certificate=certificate,
+            position=len(course_data['runs']) + 1
+        )
+    )
+
+
+def get_info_for_course(course, user_enrollments, user_certificates):
     """
     Checks the status of a course given the status of all its runs
 
     Args:
-        user (User): an user object
         course (Course): a course object
         user_enrollments (Enrollments): the user enrollments object
         user_certificates (Certificates): the user certificates objects
@@ -164,11 +175,9 @@ def get_info_for_course(user, course, user_enrollments, user_certificates):
         "description": course.description,
         "prerequisites": course.prerequisites,
         "runs": [],
-        "status": None,
     }
     with transaction.atomic():
         if not course.courserun_set.count():
-            course_data['status'] = CourseStatus.NOT_OFFERED
             return course_data
         # get all the run statuses
         run_statuses = [get_status_for_courserun(course_run, user_enrollments)
@@ -187,94 +196,35 @@ def get_info_for_course(user, course, user_enrollments, user_certificates):
 
     if run_status.status == CourseRunStatus.NOT_ENROLLED:
         next_run = course.get_next_run()
-        status = CourseStatus.OFFERED if next_run is not None else CourseStatus.NOT_OFFERED
-        course_data['status'] = status
         if next_run is not None:
-            course_data['runs'].append(
-                format_courserun_for_dashboard(next_run, status, position=len(course_data['runs'])+1))
+            _add_run(course_data, next_run, CourseStatus.OFFERED)
     elif run_status.status == CourseRunStatus.NOT_PASSED:
         next_run = course.get_next_run()
-        status = CourseStatus.OFFERED if next_run is not None else CourseStatus.NOT_OFFERED
-        course_data['status'] = status
         if next_run is not None:
-            course_data['runs'].append(
-                format_courserun_for_dashboard(next_run, status, position=len(course_data['runs'])+1))
+            _add_run(course_data, next_run, CourseStatus.OFFERED)
         if next_run is None or run_status.course_run.pk != next_run.pk:
-            course_data['runs'].append(
-                format_courserun_for_dashboard(
-                    run_status.course_run, CourseStatus.NOT_PASSED, position=len(course_data['runs'])+1)
-            )
+            _add_run(course_data, run_status.course_run, CourseStatus.NOT_PASSED)
     elif run_status.status == CourseRunStatus.GRADE:
-        course_data['status'] = CourseStatus.CURRENT_GRADE
-        course_data['runs'].append(
-            format_courserun_for_dashboard(
-                run_status.course_run, CourseStatus.CURRENT_GRADE, position=len(course_data['runs'])+1)
-        )
+        _add_run(course_data, run_status.course_run, CourseStatus.CURRENT_GRADE)
     # check if we need to check the certificate
     elif run_status.status == CourseRunStatus.READ_CERT:
         # if there is no certificate for the user, the user never passed
         # the course, so she needs to enroll in the next one
         if not user_certificates.has_verified_cert(run_status.course_run.edx_course_key):
             next_run = course.get_next_run()
-            status = CourseStatus.OFFERED if next_run is not None else CourseStatus.NOT_OFFERED
-            course_data['status'] = status
             if next_run is not None:
-                course_data['runs'].append(
-                    format_courserun_for_dashboard(next_run, status, position=len(course_data['runs'])+1)
-                )
+                _add_run(course_data, next_run, CourseStatus.OFFERED)
             # add the run of the status anyway if the next run is different from the one just added
             if next_run is None or run_status.course_run.pk != next_run.pk:
-                course_data['runs'].append(
-                    format_courserun_for_dashboard(
-                        run_status.course_run, CourseStatus.NOT_PASSED, position=len(course_data['runs'])+1)
-                )
+                _add_run(course_data, run_status.course_run, CourseStatus.NOT_PASSED)
         else:
             # pull the verified certificate for course
             cert = user_certificates.get_verified_cert(run_status.course_run.edx_course_key)
-            course_data['status'] = CourseStatus.PASSED
-            course_data['runs'].append(
-                format_courserun_for_dashboard(
-                    run_status.course_run,
-                    CourseStatus.PASSED,
-                    cert,
-                    position=len(course_data['runs'])+1
-                )
-            )
+            _add_run(course_data, run_status.course_run, CourseStatus.PASSED, certificate=cert)
     elif run_status.status == CourseRunStatus.WILL_ATTEND:
-        course_data['status'] = CourseStatus.CURRENT_GRADE
-        course_data['runs'].append(
-            format_courserun_for_dashboard(
-                run_status.course_run, CourseStatus.CURRENT_GRADE, position=len(course_data['runs'])+1)
-            )
+        _add_run(course_data, run_status.course_run, CourseStatus.CURRENT_GRADE)
     elif run_status.status == CourseRunStatus.UPGRADE:
-        course_data['status'] = CourseStatus.UPGRADE
-        course_data['runs'].append(
-            format_courserun_for_dashboard(
-                run_status.course_run, CourseStatus.UPGRADE, position=len(course_data['runs'])+1)
-            )
-
-    # final check before returning the data
-    if course_data['status'] is None:
-        # this should never happen, but put a default behavior just in case
-        log.critical(
-            'course %s for user %s has status %s',
-            run_status.course_run.edx_course_key,
-            user.username,
-            run_status.status
-        )
-        next_run = course.get_next_run()
-        status = CourseStatus.OFFERED if next_run is not None else CourseStatus.NOT_OFFERED
-        course_data['status'] = status
-        if next_run is not None:
-            course_data['runs'].append(
-                format_courserun_for_dashboard(next_run, status, position=len(course_data['runs'])+1)
-            )
-        # add the run of the status anyway if the next run is different from the one just added
-        if next_run is None or run_status.course_run.pk != next_run.pk:
-            course_data['runs'].append(
-                format_courserun_for_dashboard(
-                    run_status.course_run, CourseStatus.NOT_PASSED, position=len(course_data['runs'])+1)
-            )
+        _add_run(course_data, run_status.course_run, CourseStatus.UPGRADE)
 
     # add all the other runs with status != NOT_ENROLLED
     # the first one (or two in some cases) has been added with the logic before
@@ -284,23 +234,10 @@ def get_info_for_course(user, course, user_enrollments, user_certificates):
                     user_certificates.has_verified_cert(run_status.course_run.edx_course_key)):
                 # in this case the user might have passed the course also in the past
                 cert = user_certificates.get_verified_cert(run_status.course_run.edx_course_key)
-                course_data['runs'].append(
-                    format_courserun_for_dashboard(
-                        run_status.course_run,
-                        CourseStatus.PASSED,
-                        cert,
-                        position=len(course_data['runs'])+1
-                    )
-                )
+                _add_run(course_data, run_status.course_run, CourseStatus.PASSED, certificate=cert)
             else:
                 # any other status means that the student never passed the course run
-                course_data['runs'].append(
-                    format_courserun_for_dashboard(
-                        run_status.course_run,
-                        CourseStatus.NOT_PASSED,
-                        position=len(course_data['runs'])+1
-                    )
-                )
+                _add_run(course_data, run_status.course_run, CourseStatus.NOT_PASSED)
 
     return course_data
 
@@ -348,6 +285,7 @@ def format_courserun_for_dashboard(course_run, status_for_user, certificate=None
         status_for_user (str): a string representing the status of a course for the user
         certificate (Certificate): an object representing the
             certificate of the user for this run
+        position (int): The position of the course run within the list
 
     Returns:
         dict: a dictionary containing information about the course
@@ -360,6 +298,9 @@ def format_courserun_for_dashboard(course_run, status_for_user, certificate=None
         'title': course_run.title,
         'status': status_for_user,
         'position': position,
+        'course_start_date': course_run.start_date,
+        'course_end_date': course_run.end_date,
+        'fuzzy_start_date': course_run.fuzzy_start_date
     }
 
     # check if there are extra fields to pull in
@@ -379,6 +320,14 @@ def format_courserun_for_dashboard(course_run, status_for_user, certificate=None
     if status_for_user == CourseStatus.CURRENT_GRADE:
         # TODO: here goes the logic to pull the current grade  # pylint: disable=fixme
         pass
+
+    if status_for_user == CourseStatus.OFFERED or status_for_user == CourseStatus.UPGRADE:
+        try:
+            course_price = CoursePrice.objects.get(course_run=course_run, is_valid=True)
+            formatted_run['price'] = course_price.price
+        except CoursePrice.DoesNotExist:
+            pass
+
     return formatted_run
 
 

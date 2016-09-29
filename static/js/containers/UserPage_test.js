@@ -6,7 +6,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import sinon from 'sinon';
 
-import { 
+import {
   RECEIVE_GET_USER_PROFILE_SUCCESS,
   REQUEST_GET_USER_PROFILE,
   START_PROFILE_EDIT,
@@ -17,7 +17,7 @@ import {
 
   startProfileEdit,
   updateProfile,
-} from '../actions';
+} from '../actions/profile';
 import {
   SET_WORK_DIALOG_VISIBILITY,
   SET_WORK_DIALOG_INDEX,
@@ -29,14 +29,16 @@ import {
   SET_SHOW_WORK_DELETE_DIALOG,
   SET_SHOW_EDUCATION_DELETE_DIALOG,
 } from '../actions/ui';
+import { USER_PROFILE_RESPONSE, HIGH_SCHOOL, DOCTORATE } from '../constants';
 import {
   generateNewEducation,
   generateNewWorkHistory,
+  getPreferredName
 } from '../util/util';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../util/api';
-import { USER_PROFILE_RESPONSE, HIGH_SCHOOL, DOCTORATE } from '../constants';
 import { workEntriesByDate, educationEntriesByDate } from '../util/sorting';
+import { modifyTextField, activeDeleteDialog } from '../util/test_utils';
 import ValidationAlert from '../components/ValidationAlert';
 
 describe("UserPage", function() {
@@ -44,18 +46,6 @@ describe("UserPage", function() {
 
   let listenForActions, renderComponent, helper, patchUserProfileStub;
   let userActions = [RECEIVE_GET_USER_PROFILE_SUCCESS, REQUEST_GET_USER_PROFILE];
-
-  let modifyTextField = (field, text) => {
-    field.value = text;
-    TestUtils.Simulate.change(field);
-    TestUtils.Simulate.keyDown(field, {key: "Enter", keyCode: 13, which: 13});
-  };
-
-  let openDialog = () => {
-    return [...document.getElementsByClassName('deletion-confirmation')].find(dialog => (
-      dialog.style["left"] === "0px"
-    ));
-  };
 
   const confirmResumeOrder = (
     editButton,
@@ -93,7 +83,7 @@ describe("UserPage", function() {
     });
   };
 
-  describe ("Authenticated user page", () => {
+  describe("Authenticated user page", () => {
     beforeEach(() => {
       helper = new IntegrationTestHelper();
       listenForActions = helper.listenForActions.bind(helper);
@@ -124,7 +114,7 @@ describe("UserPage", function() {
 
     describe("validation", () => {
       const inputs = dialog => [...dialog.getElementsByTagName('input')];
-      const getEditPersonalButton = div => div.querySelector('.main-content .material-icons');
+      const getEditPersonalButton = div => div.querySelector('.edit-profile-holder .mdl-button');
       const getDialog = () => document.querySelector('.personal-dialog');
       const getSave = () => getDialog().querySelector('.save-button');
 
@@ -274,13 +264,14 @@ describe("UserPage", function() {
 
 
     describe("Education History", () => {
+      let userProfile;
       let deleteButton = div => {
-        return div.getElementsByClassName('profile-tab-card')[1].
+        return div.getElementsByClassName('profile-form')[1].
           getElementsByClassName('delete-button')[0];
       };
 
       beforeEach(() => {
-        let userProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
+        userProfile = Object.assign(_.cloneDeep(USER_PROFILE_RESPONSE), {
           username: SETTINGS.username
         });
         userProfile.education.push({
@@ -301,7 +292,7 @@ describe("UserPage", function() {
 
       it('shows the education component', () => {
         return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let title = div.getElementsByClassName('profile-card-title')[1];
+          let title = div.getElementsByClassName('profile-card-header')[0];
           assert.equal(title.textContent, 'Education');
         });
       });
@@ -337,7 +328,7 @@ describe("UserPage", function() {
             SET_DELETION_INDEX
           ], () => {
             TestUtils.Simulate.click(button);
-            let dialog = openDialog();
+            let dialog = activeDeleteDialog();
             let cancelButton = dialog.getElementsByClassName('cancel-button')[0];
             TestUtils.Simulate.click(cancelButton);
           });
@@ -346,16 +337,17 @@ describe("UserPage", function() {
 
       it('should confirm deletion and let you continue', () => {
         return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let updatedProfile = _.cloneDeep(USER_PROFILE_RESPONSE);
-          updatedProfile.username = SETTINGS.username;
-          updatedProfile.education.splice(0,1);
+          let expectedProfile = _.cloneDeep(userProfile);
+          let sortedEducationEntries = educationEntriesByDate(expectedProfile.education);
+          let indexOfFirstEntry = sortedEducationEntries[0][0];
+          expectedProfile.education.splice(indexOfFirstEntry,1);
 
           patchUserProfileStub.throws("Invalid arguments");
-          patchUserProfileStub.withArgs(SETTINGS.username, updatedProfile).returns(
-            Promise.resolve(updatedProfile)
-          );
+          patchUserProfileStub.
+            withArgs(expectedProfile.username, expectedProfile).
+            returns(Promise.resolve(expectedProfile));
 
-          let button = deleteButton(div);
+          let firstEducationDeleteButton = deleteButton(div);
 
           return listenForActions([
             SET_DELETION_INDEX,
@@ -368,10 +360,10 @@ describe("UserPage", function() {
             REQUEST_PATCH_USER_PROFILE,
             RECEIVE_PATCH_USER_PROFILE_SUCCESS,
           ], () => {
-            TestUtils.Simulate.click(button);
-            let dialog = openDialog();
-            button = dialog.getElementsByClassName('delete-button')[0];
-            TestUtils.Simulate.click(button);
+            TestUtils.Simulate.click(firstEducationDeleteButton);
+            let dialog = activeDeleteDialog();
+            let confirmButton = dialog.getElementsByClassName('delete-button')[0];
+            TestUtils.Simulate.click(confirmButton);
           });
         });
       });
@@ -379,7 +371,7 @@ describe("UserPage", function() {
       it('should let you edit an education entry', () => {
         return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
 
-          let editButton = div.getElementsByClassName('profile-tab-card')[1].
+          let editButton = div.getElementsByClassName('profile-form')[1].
             getElementsByClassName('profile-row-icons')[0].
             getElementsByClassName('mdl-button')[0];
 
@@ -395,11 +387,10 @@ describe("UserPage", function() {
 
       it('should let you add an education entry', () => {
         return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let addButton = div.getElementsByClassName('profile-tab-card')[1].
-            getElementsByClassName('profile-add-button')[0];
+          let addButton = div.getElementsByClassName('profile-form')[1].
+            querySelector('.mm-minor-action');
 
-          let updatedProfile = _.cloneDeep(USER_PROFILE_RESPONSE);
-          updatedProfile.username = SETTINGS.username;
+          let expectedProfile = _.cloneDeep(userProfile);
           let entry = Object.assign({}, generateNewEducation(HIGH_SCHOOL), {
             graduation_date: "1999-12-01",
             graduation_date_edit: {
@@ -415,12 +406,12 @@ describe("UserPage", function() {
             school_state_or_territory_edit: undefined,
             school_city: "FoobarVille"
           });
-          updatedProfile.education.push(entry);
+          expectedProfile.education.push(entry);
 
           patchUserProfileStub.throws("Invalid arguments");
-          patchUserProfileStub.withArgs(SETTINGS.username, updatedProfile).returns(
-            Promise.resolve(updatedProfile)
-          );
+          patchUserProfileStub.
+            withArgs(expectedProfile.username, expectedProfile).
+            returns(Promise.resolve(expectedProfile));
 
           let expectedActions = [
             START_PROFILE_EDIT,
@@ -462,21 +453,21 @@ describe("UserPage", function() {
 
     describe("Employment History", () => {
       let deleteButton = div => {
-        return div.getElementsByClassName('profile-tab-card')[0].
+        return div.getElementsByClassName('profile-form')[2].
           getElementsByClassName('profile-row-icons')[0].
           getElementsByClassName('mdl-button')[1];
       };
 
       it('shows the employment history component', () => {
-        return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let title = div.getElementsByClassName('profile-card-title')[0];
-          assert.equal(title.textContent, 'Employment');
+        return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([wrapper, ]) => {
+          let headerText = wrapper.find('#work-history-card').find('.profile-card-header').text();
+          assert.equal(headerText, 'Employment');
         });
       });
 
       it('should show the entries in resume order', () => {
         return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let editButton = div.getElementsByClassName('profile-tab-card')[0].
+          let editButton = div.getElementsByClassName('profile-form')[2].
             getElementsByClassName('profile-row-icons')[0].
             getElementsByClassName('mdl-button')[0];
 
@@ -505,7 +496,7 @@ describe("UserPage", function() {
             SET_DELETION_INDEX,
           ], () => {
             TestUtils.Simulate.click(button);
-            let dialog = openDialog();
+            let dialog = activeDeleteDialog();
             let cancelButton = dialog.getElementsByClassName('cancel-button')[0];
             TestUtils.Simulate.click(cancelButton);
           });
@@ -523,7 +514,7 @@ describe("UserPage", function() {
             Promise.resolve(updatedProfile)
           );
 
-          let deleteButton = div.getElementsByClassName('profile-tab-card')[0].
+          let deleteButton = div.getElementsByClassName('profile-form')[2].
             getElementsByClassName('profile-row-icons')[0].
             getElementsByClassName('mdl-button')[1];
 
@@ -539,7 +530,7 @@ describe("UserPage", function() {
             RECEIVE_PATCH_USER_PROFILE_SUCCESS,
           ], () => {
             TestUtils.Simulate.click(deleteButton);
-            let dialog = openDialog();
+            let dialog = activeDeleteDialog();
             let button = dialog.getElementsByClassName('delete-button')[0];
             TestUtils.Simulate.click(button);
           });
@@ -549,7 +540,7 @@ describe("UserPage", function() {
       it('should let you edit a work history entry', () => {
         return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
 
-          let editButton = div.getElementsByClassName('profile-tab-card')[0].
+          let editButton = div.getElementsByClassName('profile-form')[2].
             getElementsByClassName('profile-row-icons')[0].
             getElementsByClassName('mdl-button')[0];
 
@@ -564,8 +555,7 @@ describe("UserPage", function() {
 
       it('should let you add a work history entry', () => {
         return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let addButton = div.getElementsByClassName('profile-tab-card')[0].
-            getElementsByClassName('profile-add-button')[0];
+          let addButton = div.getElementsByClassName('profile-form')[2].querySelector('.mm-minor-action');
 
           let updatedProfile = _.cloneDeep(USER_PROFILE_RESPONSE);
           updatedProfile.username = SETTINGS.username;
@@ -615,7 +605,7 @@ describe("UserPage", function() {
           return listenForActions(expectedActions, () => {
             TestUtils.Simulate.click(addButton);
             let dialog = document.querySelector('.employment-dashboard-dialog');
-            let grid = dialog.getElementsByClassName('profile-tab-grid')[0];
+            let grid = dialog.querySelector('.profile-tab-grid');
             let inputs = grid.getElementsByTagName('input');
 
             // company name
@@ -648,19 +638,15 @@ describe("UserPage", function() {
     describe('Personal Info', () => {
       it('should show name and location', () => {
         return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let name = div.getElementsByClassName('users-name')[0].textContent;
-          assert.deepEqual(name, USER_PROFILE_RESPONSE.preferred_name);
-
-          let location = div.getElementsByClassName('users-location')[0].textContent;
-
-          assert.deepEqual(location, `${USER_PROFILE_RESPONSE.city}, `);
+          let name = div.getElementsByClassName('profile-title')[0].textContent;
+          assert.deepEqual(name, getPreferredName(USER_PROFILE_RESPONSE));
         });
       });
 
       it('should let you edit personal info', () => {
         return renderComponent(`/users/${SETTINGS.username}`, userActions).then(([, div]) => {
-          let personalButton = div.querySelector('.main-content').
-            getElementsByClassName('material-icons')[0];
+          let personalButton = div.querySelector('.edit-profile-holder').
+            getElementsByClassName('mdl-button')[0];
 
           return listenForActions([SET_USER_PAGE_DIALOG_VISIBILITY], () => {
             TestUtils.Simulate.click(personalButton);
@@ -702,7 +688,9 @@ describe("UserPage", function() {
         returns(Promise.resolve(USER_PROFILE_RESPONSE));
       settingsBackup = SETTINGS;
       SETTINGS = Object.assign({}, SETTINGS, {
-        authenticated: false
+        authenticated: false,
+        username: null,
+        name: ""
       });
     });
 

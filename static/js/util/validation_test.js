@@ -2,13 +2,13 @@ import { assert } from 'chai';
 import _ from 'lodash';
 import sinon from 'sinon';
 import moment from 'moment';
+import { S } from './sanctuary';
+const { Just } = S;
 
 import {
   personalValidation,
   educationValidation,
-  educationUiValidation,
   employmentValidation,
-  employmentUiValidation,
   privacyValidation,
   validateProfileComplete,
   validateDay,
@@ -16,17 +16,15 @@ import {
   validateYear,
   combineValidators,
   sanitizeDate,
+  emailValidation,
 } from './validation';
 import {
   USER_PROFILE_RESPONSE,
-  EDUCATION_LEVELS,
-  BACHELORS,
   HIGH_SCHOOL,
   PERSONAL_STEP,
   EMPLOYMENT_STEP,
-  PRIVACY_STEP,
 } from '../constants';
-import { INITIAL_UI_STATE } from '../reducers/ui';
+import { assertMaybeEquality, assertIsNothing } from './sanctuary_test';
 
 describe('Profile validation functions', () => {
   let sandbox;
@@ -43,7 +41,7 @@ describe('Profile validation functions', () => {
     });
 
     it('should return an appropriate error if a field is missing', () => {
-      let clone = Object.assign({}, USER_PROFILE_RESPONSE);
+      let clone = _.cloneDeep(USER_PROFILE_RESPONSE);
       clone.first_name = '';
       assert.deepEqual({first_name: "Given name is required"}, personalValidation(clone));
     });
@@ -57,8 +55,8 @@ describe('Profile validation functions', () => {
         ['preferred_language'],
         ['city'],
         ['country'],
-        ['birth_city'],
         ['birth_country'],
+        ['nationality'],
       ];
 
       let profile = {};
@@ -81,7 +79,7 @@ describe('Profile validation functions', () => {
     });
 
     it('should error if date of birth is in the future', () => {
-      let profile = Object.assign({}, USER_PROFILE_RESPONSE, {
+      let profile = Object.assign(_.cloneDeep(USER_PROFILE_RESPONSE), {
         date_of_birth: "2077-01-01"
       });
       let errors = {
@@ -127,24 +125,6 @@ describe('Profile validation functions', () => {
         }]
       }, educationValidation(clone));
     });
-
-    it('should complain about switches being on if there are no elements in the list', () => {
-      let profile = Object.assign({}, USER_PROFILE_RESPONSE, {
-        education: [{
-          degree_name: BACHELORS
-        }]
-      });
-      let ui = Object.assign({}, INITIAL_UI_STATE);
-      ui.educationDegreeInclusions[HIGH_SCHOOL] = true;
-      ui.educationDegreeInclusions[BACHELORS] = true;
-
-      let errors = educationUiValidation(profile, ui);
-      let highSchoolLabel = EDUCATION_LEVELS.find(education => education.value === HIGH_SCHOOL).label;
-      assert.deepEqual(errors, {
-        [`education_${HIGH_SCHOOL}_required`]:
-          `${highSchoolLabel} is required if switch is on. Please add a degree or switch it off.`
-      });
-    });
   });
 
   describe('Employment validation', () => {
@@ -175,20 +155,6 @@ describe('Profile validation functions', () => {
           company_name: 'Company Name is required'
         }]
       }, employmentValidation(clone));
-    });
-
-    it('should complain about the switch being on if there are no elements in the list', () => {
-      let profile = Object.assign({}, USER_PROFILE_RESPONSE, {
-        work_history: []
-      });
-      let ui = Object.assign({}, INITIAL_UI_STATE, {
-        workHistoryEdit: true
-      });
-
-      let errors = employmentUiValidation(profile, ui);
-      assert.deepEqual(errors, {
-        work_history_required: `Work history is required if switch is on. Please add work history or switch it off.`
-      });
     });
 
     it('should reject end date before start date', () => {
@@ -261,18 +227,6 @@ describe('Profile validation functions', () => {
     });
   });
 
-  describe('Privacy validation', () => {
-    it('should return an empty object when all fields are present', () => {
-      assert.deepEqual({}, privacyValidation(USER_PROFILE_RESPONSE));
-    });
-
-    it('should return an appropriate error if a field is missing', () => {
-      let clone = Object.assign({}, USER_PROFILE_RESPONSE, {account_privacy: ''});
-      let expectation = {account_privacy: 'Privacy level is required'};
-      assert.deepEqual(expectation, privacyValidation(clone));
-    });
-  });
-
   describe('validateProfileComplete', () => {
     let profile;
     beforeEach(() => {
@@ -289,8 +243,7 @@ describe('Profile validation functions', () => {
         'city': "City",
         'state_or_territory': 'State or Territory',
         'country': "Country",
-        'birth_city': 'City',
-        'birth_state_or_territory': 'State or Territory',
+        'nationality': "Nationality",
         'birth_country': "Country",
       }).map(([k,v]) => ({[k]: `${v} is required`})));
       errors.date_of_birth = "Please enter a valid date of birth";
@@ -300,9 +253,9 @@ describe('Profile validation functions', () => {
 
     it('should return appropriate fields when a field is missing', () => {
       profile = _.cloneDeep(USER_PROFILE_RESPONSE);
-      profile['account_privacy'] = '';
-      let expectation = [false, PRIVACY_STEP, {
-        account_privacy: 'Privacy level is required'
+      profile['first_name'] = '';
+      let expectation = [false, PERSONAL_STEP, {
+        first_name: 'Given name is required'
       }];
       assert.deepEqual(validateProfileComplete(profile), expectation);
     });
@@ -376,107 +329,118 @@ describe('Profile validation functions', () => {
 
   describe('validateMonth', () => {
     it('handles months starting with 0 without treating as octal', () => {
-      assert.equal(9, validateMonth("09"));
+      assertMaybeEquality(Just(9), validateMonth("09"));
     });
 
     it('converts strings to numbers', () => {
       for (let i = 1; i < 13; i++) {
-        assert.equal(i, validateMonth(String(i)));
+        assertMaybeEquality(Just(i), validateMonth(String(i)));
       }
     });
 
     it('strips out any non-numerical characters', () => {
-      assert.equal(12, validateMonth("1e2"));
-      assert.equal(4, validateMonth("0-4"));
-      assert.equal(3, validateMonth("-3"));
+      assertMaybeEquality(Just(12), validateMonth("1e2"));
+      assertMaybeEquality(Just(4), validateMonth("0-4"));
+      assertMaybeEquality(Just(3), validateMonth("-3"));
     });
 
     it('returns 12 for any number >= 12', () => {
-      assert.equal(12, validateMonth("3.4"));
-      assert.equal(12, validateMonth("13"));
+      assertMaybeEquality(Just(12), validateMonth("3.4"));
+      assertMaybeEquality(Just(12), validateMonth("13"));
     });
 
     it('will let a user input a leading zero', () => {
-      assert.equal(0, validateMonth("0"));
-      assert.equal(8, validateMonth("08"));
+      assertMaybeEquality(Just(0), validateMonth("0"));
+      assertMaybeEquality(Just(8), validateMonth("08"));
     });
 
-    it('returns undefined if the text is not an integer number', () => {
-      assert.equal(undefined, validateMonth(""));
-      assert.equal(undefined, validateMonth("two"));
-      assert.equal(undefined, validateMonth(null));
-      assert.equal(undefined, validateMonth({}));
-      assert.equal(undefined, validateMonth(undefined));
+    it('returns Nothing if the text is not an integer number', () => {
+      assertIsNothing(validateMonth(""));
+      assertIsNothing(validateMonth("two"));
+      assertIsNothing(validateMonth(null));
+      assertIsNothing(validateMonth({}));
+      assertIsNothing(validateMonth(undefined));
     });
   });
 
   describe('validateYear', () => {
     it('handles years starting with 0 without treating as octal', () => {
-      assert.equal(1999, validateYear("01999"));
+      assertMaybeEquality(Just(1999), validateYear("01999"));
     });
+
     it('converts strings to numbers', () => {
-      assert.equal(1943, validateYear("1943"));
+      assertMaybeEquality(Just(1943), validateYear("1943"));
     });
 
     it('strips non-numerical characters', () => {
-      assert.equal(2004, validateYear("2e004"));
-      assert.equal(2034, validateYear("203-4"));
+      assertMaybeEquality(Just(2004), validateYear("2e004"));
+      assertMaybeEquality(Just(2034), validateYear("203-4"));
     });
+
     it('returns values for years less than 1800 if they are less than 4 character', () => {
-      assert.equal(3, validateYear("3"));
-      assert.equal(703, validateYear("703"));
-      assert.equal(0, validateYear("0"));
-      assert.equal(20, validateYear("-20"));
+      assertMaybeEquality(Just(3), validateYear("3"));
+      assertMaybeEquality(Just(703), validateYear("703"));
+      assertMaybeEquality(Just(0), validateYear("0"));
+      assertMaybeEquality(Just(20), validateYear("-20"));
     });
+
     it('returns 1800 for 4-character years less than 1800', () => {
-      assert.equal(1800, validateYear("1799"));
-      assert.equal(1800, validateYear("1099"));
+      assertMaybeEquality(Just(1800), validateYear("1799"));
+      assertMaybeEquality(Just(1800), validateYear("1099"));
     });
+
     it('returns 2100 for years >= 2100', () => {
-      assert.equal(2100, validateYear("2100"));
-      assert.equal(2100, validateYear("2300"));
-      assert.equal(2100, validateYear("52300"));
+      assertMaybeEquality(Just(2100), validateYear("2100"));
+      assertMaybeEquality(Just(2100), validateYear("2300"));
+      assertMaybeEquality(Just(2100), validateYear("52300"));
     });
-    it('returns undefined if the text is not an integer number', () => {
-      assert.equal(undefined, validateYear(""));
-      assert.equal(undefined, validateYear("two"));
-      assert.equal(undefined, validateYear(null));
-      assert.equal(undefined, validateYear("@#"));
-      assert.equal(undefined, validateYear({}));
-      assert.equal(undefined, validateYear(undefined));
+
+    it('returns an empty string if the text is not an integer number', () => {
+      assertIsNothing(validateYear(""));
+      assertIsNothing(validateYear("two"));
+      assertIsNothing(validateYear(null));
+      assertIsNothing(validateYear("@#"));
+      assertIsNothing(validateYear({}));
+      assertIsNothing(validateYear(undefined));
     });
   });
 
   describe('validateDay', () => {
     it('handles dates starting with 0 without treating as octal', () => {
-      assert.equal(1, validateDay("01"));
+      assertMaybeEquality(Just(1), validateDay("01"));
     });
+
     it('converts strings to numbers', () => {
-      assert.equal(3, validateDay("3"));
+      assertMaybeEquality(Just(3), validateDay("3"));
     });
+
     it("allows leading zeros", () => {
-      assert.equal(0, validateDay("0"));
-      assert.equal(1, validateDay("01"));
+      assertMaybeEquality(Just(0), validateDay("0"));
+      assertMaybeEquality(Just(1), validateDay("01"));
     });
+
     it('disallows non-numerical input', () => {
-      assert.equal(3, validateDay("-3"));
-      assert.equal(20, validateDay("2e0"));
-      assert.equal(21, validateDay("2-1"));
-      assert.equal(22, validateDay("2.2"));
+      assertMaybeEquality(Just(3), validateDay("-3"));
+      assertMaybeEquality(Just(20), validateDay("2e0"));
+      assertMaybeEquality(Just(21), validateDay("2-1"));
+      assertMaybeEquality(Just(22), validateDay("2.2"));
     });
+
     it('returns 31 for dates greater than 31', () => {
-      assert.equal(31, validateDay("32"));
-      assert.equal(31, validateDay("71"));
+      assertMaybeEquality(Just(31), validateDay("32"));
+      assertMaybeEquality(Just(31), validateDay("71"));
     });
+
     it('truncates to the first 2 characters of input', () => {
-      assert.equal(22, validateDay("220"));
+      assertMaybeEquality(Just(22), validateDay("220"));
     });
-    it('returns undefined if the text is not an integer number', () => {
-      assert.equal(undefined, validateDay(""));
-      assert.equal(undefined, validateDay("two"));
-      assert.equal(undefined, validateDay(null));
-      assert.equal(undefined, validateDay({}));
-      assert.equal(undefined, validateDay(undefined));
+
+    it('returns an empty string if the text is not an integer number', () => {
+      assertIsNothing(validateDay(""));
+      assertIsNothing(validateDay("two"));
+      assertIsNothing(validateDay(null));
+      assertIsNothing(validateDay({}));
+      assertIsNothing(validateDay(undefined));
     });
   });
 
@@ -496,5 +460,49 @@ describe('Profile validation functions', () => {
       assert(mergeStub.calledWith({}, "ret1", "ret2"));
       assert.equal(result, mergeResult);
     });
+  });
+});
+
+describe('Privacy validation', () => {
+  it('should return an empty object when all fields are present', () => {
+    assert.deepEqual({}, privacyValidation(USER_PROFILE_RESPONSE));
+  });
+
+  it('should return an appropriate error if a field is missing', () => {
+    let clone = Object.assign(_.cloneDeep(USER_PROFILE_RESPONSE), {account_privacy: ''});
+    let expectation = {account_privacy: 'Privacy level is required'};
+    assert.deepEqual(expectation, privacyValidation(clone));
+  });
+});
+
+describe('Email validation', () => {
+  let email = {
+    subject: 'a great email',
+    body: 'hi, how are you?'
+  };
+
+  let blank = field => {
+    let emailClone = _.cloneDeep(email);
+    emailClone[field] = null;
+    return emailClone;
+  };
+
+  it('should require a subject', () => {
+    assert.deepEqual(
+      emailValidation(blank('subject')),
+      { 'subject': 'Please fill in a subject' }
+    );
+  });
+
+  it('should require a body', () => {
+    assert.deepEqual(
+      emailValidation(blank('body')),
+      { 'body': 'Please fill in a body' }
+    );
+  });
+
+  it('should return no errors if all fields are filled out', () => {
+    let errors = emailValidation(email);
+    assert.deepEqual(errors, {});
   });
 });

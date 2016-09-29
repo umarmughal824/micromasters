@@ -6,6 +6,7 @@ import {
   boundDateField,
   boundTextField,
   boundRadioGroupField,
+  boundCheckbox,
 } from './profile_edit';
 import { EDUCATION_LEVELS } from '../constants';
 import LANGUAGE_CODES from '../language_codes';
@@ -20,6 +21,7 @@ export default class ProfileFormFields extends React.Component {
     this.boundTextField = boundTextField.bind(this);
     this.boundDateField = boundDateField.bind(this);
     this.boundRadioGroupField = boundRadioGroupField.bind(this);
+    this.boundCheckbox = boundCheckbox.bind(this);
 
     // options we set (for select components)
     this.genderOptions = [
@@ -51,6 +53,7 @@ export default class ProfileFormFields extends React.Component {
   boundTextField: Function;
   boundDateField: Function;
   boundRadioGroupField: Function;
+  boundCheckbox: Function;
   genderOptions: Option[];
   languageOptions: Option[];
   privacyOptions: Array<{value: string, label: string, helper: string}>;
@@ -100,7 +103,7 @@ export default class ProfileFormFields extends React.Component {
     setShowEducationDeleteDialog(true);
   };
 
-  openWorkDeleteDialog:Function = (index: number): void => {
+  openWorkDeleteDialog: Function = (index: number): void => {
     const { setDeletionIndex, setShowWorkDeleteDialog } = this.props;
     setDeletionIndex(index);
     setShowWorkDeleteDialog(true);

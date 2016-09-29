@@ -26,6 +26,7 @@ FAKE = faker.Factory.create()
 class UserFactory(DjangoModelFactory):
     """Factory for Users"""
     username = Sequence(lambda n: "user_%d" % n)
+    email = FuzzyText(suffix='@example.com')
 
     class Meta:  # pylint: disable=missing-docstring,no-init,too-few-public-methods,old-style-class
         model = User
@@ -56,15 +57,14 @@ class ProfileFactory(DjangoModelFactory):
     country = FuzzyText(suffix="land")
     state_or_territory = FuzzyText(suffix=" state")
 
-    birth_city = FuzzyText(suffix=" city")
     birth_country = FuzzyText(suffix="land")
-    birth_state_or_territory = FuzzyText(suffix=" state")
+    nationality = FuzzyText(prefix="Person of ")
 
     has_profile_image = FuzzyAttribute(FAKE.boolean)
     edx_requires_parental_consent = FuzzyAttribute(FAKE.boolean)
     date_of_birth = FuzzyDate(date(1850, 1, 1))
     edx_level_of_education = FuzzyChoice(
-        [choice[0] for choice in Profile.LEVEL_OF_EDUCATION_CHOICES]
+        [None] + [choice[0] for choice in Profile.LEVEL_OF_EDUCATION_CHOICES]
     )
     edx_goals = FuzzyText()
     preferred_language = FuzzyText(suffix=" language")
