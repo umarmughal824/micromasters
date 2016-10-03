@@ -137,6 +137,7 @@ def get_info_for_program(mmtrack):
     }
     if mmtrack.financial_aid_available:
         data["financial_aid_user_info"] = {
+            "id": mmtrack.financial_aid_id,
             "has_user_applied": mmtrack.financial_aid_applied,
             "application_status": mmtrack.financial_aid_status,
             "min_possible_cost": mmtrack.financial_aid_min_price,
