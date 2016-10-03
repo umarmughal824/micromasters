@@ -70,6 +70,7 @@ export type UIState = {
   enrollSelectedProgram:        ?number;
   photoDialogVisibility:        boolean;
   calculatorDialogVisibility:   boolean;
+  documentSentDate: Object;
 };
 
 export const INITIAL_UI_STATE: UIState = {
@@ -97,6 +98,7 @@ export const INITIAL_UI_STATE: UIState = {
   enrollSelectedProgram: null,
   photoDialogVisibility: false,
   calculatorDialogVisibility: false,
+  documentSentDate: {},
 };
 
 export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
