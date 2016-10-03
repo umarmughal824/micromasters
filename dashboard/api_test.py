@@ -779,6 +779,7 @@ class InfoProgramTest(ESTestCase):
     def test_program_financial_aid(self, mock_info_course):
         """Test happy path"""
         kwargs = {
+            'financial_aid_id': 1122334455,
             'program': self.program,
             'financial_aid_available': True,
             'financial_aid_applied': True,
@@ -799,6 +800,7 @@ class InfoProgramTest(ESTestCase):
             "courses": [{'position_in_program': 1}, {'position_in_program': 1}],
             "financial_aid_availability": kwargs['financial_aid_available'],
             "financial_aid_user_info": {
+                "id": kwargs['financial_aid_id'],
                 "has_user_applied": kwargs['financial_aid_applied'],
                 "application_status": kwargs['financial_aid_status'],
                 "min_possible_cost": kwargs['financial_aid_min_price'],
