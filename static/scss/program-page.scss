@@ -15,10 +15,12 @@
     color: white;
     text-align: center;
     background-size: cover;
-    padding-top: 210px;
+    padding: 210px 5% 0;
+    background-position: center;
 
     @media (max-width: 479px) {
-      height: auto;
+      height: 460px;
+      padding: 145px 5% 0;
     }
 
     .title {
@@ -26,6 +28,9 @@
       margin-top: 0;
       margin-bottom: 31px;
       max-width: 700px;
+      @media (max-width: 580px) {
+        font-size: 31px;
+      }
     }
 
     .description {
@@ -34,6 +39,9 @@
 
       * {
         font-size: 23px;
+        @media (max-width: 580px) {
+          font-size: 18px;
+        }
         font-weight: 300;
         line-height: 1.3em;
         color: rgba(255,255,255,.8);
@@ -172,6 +180,10 @@
 
   .faqs {
     margin-top: 20px;
+    @media (max-width: 580px) {
+      width: 85%;
+      margin: 58px auto;
+    }
 
     * {
       font-size: 16px;
@@ -198,6 +210,9 @@
     background-color: #0c0c0c;
     text-align: center;
     padding: 40px 0 140px;
+    @media (max-width: 840px) {
+      padding: 40px 5% 140px;
+    }
 
     h3 {
       margin: 0 0 13px;
@@ -209,14 +224,17 @@
     p.description {
       font-size: 16px;
       font-weight: 300;
-      color: rgba(255,255,255,.8);
-      margin: 0 0 25px 0;
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0 0 45px 0;
     }
 
     #faculty-carousel {
       max-width: 1300px;
       width: 90%;
       margin: 0 auto;
+      @media (max-width: 840px) {
+        width: 100%;
+      }
     }
 
     .faculty-tile {
@@ -228,7 +246,11 @@
       position: relative;
       width: 96%;
       margin: 0 auto;
-
+      @media (max-width: 840px) {
+        height: auto;
+        padding: 0;
+        margin: 0 auto 40px;
+      }
 
       h4 {
         margin-top: 0;
@@ -250,7 +272,11 @@
         position: absolute;
         top: 0;
         left: 0;
-        z-index: 1
+        z-index: 1;
+        @media (max-width: 840px) {
+          margin-bottom: 12px;
+          position: static;
+        }
       }
 
       h4, p {
@@ -267,8 +293,12 @@
       right: -30px;
     }
 
-    .slick-arrow:before, .slick-dots li button:before {
-      font-size: 30px;
+    .slick-dots li button:before {
+      font-size: 20px;
+    }
+
+    .slick-arrow:before {
+      font-size: 40px;
     }
 
     .slick-dots {
@@ -284,6 +314,16 @@
 
       &.slick-active button:before {
         color: #ffffff;
+      }
+    }
+  }
+
+  @media (max-width: 839px) {
+    .mdl-cell--4-col {
+      width: calc(100% - 16px);
+
+      .info-box {
+        margin: 0 0 23px 0;
       }
     }
   }
