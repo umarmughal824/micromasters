@@ -210,3 +210,9 @@ export function addFinancialAid(income: number, currency: string, programId: num
 export function getCoursePrices(): Promise<*> {
   return mockableFetchJSONWithCSRF('/api/v0/course_prices/', {});
 }
+
+export function skipFinancialAid(programId: number): Promise<*> {
+  return mockableFetchJSONWithCSRF(`/api/v0/financial_aid_skip/${programId}/`, {
+    method: 'PATCH',
+  });
+}

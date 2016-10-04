@@ -17,6 +17,7 @@ import {
   addProgramEnrollment,
   updateProfileImage,
   addFinancialAid,
+  skipFinancialAid,
 } from './api';
 import * as api from './api';
 import {
@@ -291,6 +292,33 @@ describe('api', function() {
               original_currency: 'USD',
               program_id: 3
             })
+          }));
+        });
+      });
+    });
+
+    describe('for skipping financial aid', () => {
+      let programId = 2;
+      it('successfully skips financial aid', () => {
+        fetchJSONStub.returns(Promise.resolve());
+
+        fetchMock.mock('/api/v0/financial_aid_skip/2/', () => {
+          return { status: 200 };
+        });
+
+        return skipFinancialAid(programId).then(() => {
+          assert.ok(fetchJSONStub.calledWith('/api/v0/financial_aid_skip/2/', {
+            method: 'PATCH'
+          }));
+        });
+      });
+
+      it('fails to skip financial aid', () => {
+        fetchJSONStub.returns(Promise.reject());
+
+        return assert.isRejected(skipFinancialAid(programId)).then(() => {
+          assert.ok(fetchJSONStub.calledWith('/api/v0/financial_aid_skip/2/', {
+            method: 'PATCH'
           }));
         });
       });

@@ -11,11 +11,11 @@ import FinancialAidCalculator from '../../containers/FinancialAidCalculator';
 
 export default class CourseListCard extends React.Component {
   props: {
-    checkout:                   Function,
-    program:                    Program,
-    coursePrice:                CoursePrice,
-    openFinancialAidCalculator: () => void,
-    now?:                       Object,
+    checkout:                     Function,
+    program:                      Program,
+    coursePrice:                  CoursePrice,
+    openFinancialAidCalculator?:  () => void,
+    now?:                         Object,
   };
 
   render() {

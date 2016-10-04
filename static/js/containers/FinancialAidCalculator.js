@@ -11,6 +11,7 @@ import {
   clearCalculatorEdit,
   addFinancialAid,
   updateCalculatorValidation,
+  skipFinancialAid,
 } from '../actions/financial_aid';
 import { setCalculatorDialogVisibility } from '../actions/ui';
 import {
@@ -85,15 +86,14 @@ const actionButtons = R.map(({ name, onClick, label}) => (
     { label }
   </Button>
 ));
-
-const calculatorActions = (cancel, save) => {
+const calculatorActions = (skipFinancialAid, programId, cancel, save) => {
   const buttonManifest = [
     { name: 'cancel', onClick: cancel, label: 'Cancel' },
     { name: 'main-action save', onClick: save, label: 'Calculate' },
   ];
 
   return <div className="actions">
-    <a className="full-price">
+    <a className="full-price" onClick={skipFinancialAid(programId)}>
       Skip this and Pay Full Price
     </a>
     <div className="buttons">
@@ -119,6 +119,7 @@ type CalculatorProps = {
   saveFinancialAid:           (f: FinancialAidState) => void,
   updateCalculatorEdit:       (f: FinancialAidState) => void,
   currentProgramEnrollment:   ProgramEnrollment,
+  skipFinancialAid:           (p: number) => void,
 };
 
 const FinancialAidCalculator = ({
@@ -128,7 +129,8 @@ const FinancialAidCalculator = ({
   financialAid: { validation },
   saveFinancialAid,
   updateCalculatorEdit,
-  currentProgramEnrollment: { title },
+  currentProgramEnrollment: { id, title },
+  skipFinancialAid,
 }: CalculatorProps) => (
   <Dialog
     open={calculatorDialogVisibility}
@@ -136,7 +138,7 @@ const FinancialAidCalculator = ({
     bodyClassName="financial-aid-calculator-body"
     onRequestClose={closeDialogAndCancel}
     autoScrollBodyContent={true}
-    actions={calculatorActions(closeDialogAndCancel, () => saveFinancialAid(financialAid))}
+    actions={calculatorActions(skipFinancialAid, id, closeDialogAndCancel, () => saveFinancialAid(financialAid))}
     title="Cost Calculator"
   >
     <div className="copy">
@@ -192,6 +194,13 @@ const saveFinancialAid = R.curry((dispatch, current) => {
   }
 });
 
+const skipFinancialAidHelper = R.curry((dispatch, programId) => () => {
+  dispatch(skipFinancialAid(programId)).then(() => {
+    dispatch(clearCalculatorEdit());
+    dispatch(setCalculatorDialogVisibility(false));
+  });
+});
+
 const mapStateToProps = state => {
   const {
     ui: { calculatorDialogVisibility },
@@ -210,6 +219,7 @@ const mapDispatchToProps = dispatch => {
   return {
     closeDialogAndCancel: closeDialogAndCancel(dispatch),
     saveFinancialAid: saveFinancialAid(dispatch),
+    skipFinancialAid: skipFinancialAidHelper(dispatch),
     ...createSimpleActionHelpers(dispatch, [
       ['clearCalculatorEdit', clearCalculatorEdit],
       ['updateCalculatorEdit', updateCalculatorEdit],

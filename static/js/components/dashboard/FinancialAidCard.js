@@ -29,6 +29,7 @@ export default class FinancialAidCard extends React.Component {
     openFinancialAidCalculator: () => void,
     documentSentDate: Object,
     setDocumentSentDate: Function,
+    skipFinancialAid: (p: number) => void,
   };
 
   renderDocumentStatus() {
@@ -82,6 +83,7 @@ export default class FinancialAidCard extends React.Component {
     const {
       program,
       openFinancialAidCalculator,
+      skipFinancialAid,
     } = this.props;
     const {
       min_possible_cost: minPossibleCost,
@@ -97,12 +99,17 @@ export default class FinancialAidCard extends React.Component {
         Courses cost varies between {price(minPossibleCost)} and {price(maxPossibleCost)} (full
         price), depending on your income and ability to pay.
       </div>
-      <button
-        className="mm-button dashboard-button"
-        onClick={openFinancialAidCalculator}
-      >
-        Calculate your cost
-      </button>
+      <div className="pricing-actions">
+        <button
+          className="mm-button dashboard-button"
+          onClick={openFinancialAidCalculator}
+        >
+          Calculate your cost
+        </button>
+        <a className="full-price" onClick={() => skipFinancialAid(program.id)}>
+          Skip this and Pay Full Price
+        </a>
+      </div>
     </div>;
   }
 

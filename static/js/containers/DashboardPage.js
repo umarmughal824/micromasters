@@ -29,6 +29,7 @@ import type { UIState } from '../reducers/ui';
 import type { CoursePricesState, DashboardState } from '../flow/dashboardTypes';
 import type { ProgramEnrollment } from '../flow/enrollmentTypes';
 import type { ProfileGetResult } from '../flow/profileTypes';
+import { skipFinancialAid } from '../actions/financial_aid';
 
 class DashboardPage extends React.Component {
   static contextTypes = {
@@ -118,6 +119,11 @@ class DashboardPage extends React.Component {
     dispatch(setDocumentSentDate(newDate));
   };
 
+  skipFinancialAid = programId => {
+    const { dispatch } = this.props;
+    dispatch(skipFinancialAid(programId));
+  }
+
   render() {
     const {
       dashboard,
@@ -150,6 +156,7 @@ class DashboardPage extends React.Component {
           openFinancialAidCalculator={this.openFinancialAidCalculator}
           documentSentDate={documentSentDate}
           setDocumentSentDate={this.setDocumentSentDate}
+          skipFinancialAid={this.skipFinancialAid}
         />;
       }
 

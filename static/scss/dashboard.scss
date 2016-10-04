@@ -180,6 +180,12 @@ c.validation-wrapper {
         font-weight: 600;
       }
     }
+
+    .pricing-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
   }
 
   .course-list {

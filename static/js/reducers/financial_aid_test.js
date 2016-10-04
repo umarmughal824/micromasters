@@ -18,6 +18,10 @@ import {
   RECEIVE_ADD_FINANCIAL_AID_SUCCESS,
   RECEIVE_ADD_FINANCIAL_AID_FAILURE,
   addFinancialAid,
+  REQUEST_SKIP_FINANCIAL_AID,
+  RECEIVE_SKIP_FINANCIAL_AID_FAILURE,
+  RECEIVE_SKIP_FINANCIAL_AID_SUCCESS,
+  skipFinancialAid,
 } from '../actions/financial_aid';
 import {
   FETCH_FAILURE,
@@ -34,7 +38,7 @@ import * as api from '../util/api';
 
 describe('financial aid reducers', () => {
   let sandbox, store, dispatchThen;
-  let addFinancialAidStub;
+  let addFinancialAidStub, skipFinancialAidStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -42,6 +46,7 @@ describe('financial aid reducers', () => {
     dispatchThen = store.createDispatchThen(state => state.financialAid);
     store.dispatch(setCurrentProgramEnrollment(1));
     addFinancialAidStub = sandbox.stub(api, 'addFinancialAid');
+    skipFinancialAidStub = sandbox.stub(api, 'skipFinancialAid');
   });
 
   afterEach(() => {
@@ -120,6 +125,32 @@ describe('financial aid reducers', () => {
         fetchStatus: FETCH_FAILURE
       });
       assert.deepEqual(state, expectation);
+    });
+  });
+
+  it('should let you skip financial aid', () => {
+    skipFinancialAidStub.returns(Promise.resolve());
+    return dispatchThen(skipFinancialAid(2), [
+      REQUEST_SKIP_FINANCIAL_AID,
+      RECEIVE_SKIP_FINANCIAL_AID_SUCCESS
+    ]).then(state => {
+      assert.deepEqual(state, {
+        fetchStatus: FETCH_SUCCESS
+      });
+      assert.ok(skipFinancialAidStub.calledWith(2));
+    });
+  });
+
+  it('should fail to skip financial aid', () => {
+    skipFinancialAidStub.returns(Promise.reject());
+    return dispatchThen(skipFinancialAid(2), [
+      REQUEST_SKIP_FINANCIAL_AID,
+      RECEIVE_SKIP_FINANCIAL_AID_FAILURE
+    ]).then(state => {
+      assert.deepEqual(state, {
+        fetchStatus: FETCH_FAILURE
+      });
+      assert.ok(skipFinancialAidStub.calledWith(2));
     });
   });
 });

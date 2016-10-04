@@ -25,7 +25,7 @@ export default class CourseAction extends React.Component {
     coursePrice: CoursePrice,
     financialAid: FinancialAidUserInfo,
     hasFinancialAid: boolean,
-    openFinancialAidCalculator: () => void,
+    openFinancialAidCalculator?: () => void,
     now: moment$Moment,
   };
 
