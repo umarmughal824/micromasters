@@ -36,10 +36,10 @@ class DashboardPage extends React.Component {
   };
 
   props: {
-    coursePrices:             CoursePricesState,
     profile:                  ProfileGetResult,
     currentProgramEnrollment: ProgramEnrollment,
     dashboard:                DashboardState,
+    prices:                   CoursePricesState,
     dispatch:                 Dispatch,
     setCalculatorVisibility:  (b: boolean) => void,
     ui:                       UIState,
@@ -120,25 +120,25 @@ class DashboardPage extends React.Component {
 
   render() {
     const {
-      coursePrices,
       dashboard,
+      prices,
       profile: { profile },
       documents: { documentSentDate },
       currentProgramEnrollment,
     } = this.props;
-    const loaded = dashboard.fetchStatus !== FETCH_PROCESSING;
+    const loaded = dashboard.fetchStatus !== FETCH_PROCESSING && prices.fetchStatus !== FETCH_PROCESSING;
     let errorMessage;
     let dashboardContent;
     // if there are no errors coming from the backend, simply show the dashboard
     let program, coursePrice;
     if (!_.isNil(currentProgramEnrollment)) {
       program = dashboard.programs.find(program => program.id === currentProgramEnrollment.id);
-      coursePrice = coursePrices.coursePrices.find(prices => prices.program_id === currentProgramEnrollment.id);
+      coursePrice = prices.coursePrices.find(coursePrice => coursePrice.program_id === currentProgramEnrollment.id);
     }
     if (dashboard.errorInfo !== undefined) {
       errorMessage = <ErrorMessage errorInfo={dashboard.errorInfo}/>;
-    } else if (coursePrices.errorInfo !== undefined) {
-      errorMessage = <ErrorMessage errorInfo={coursePrices.errorInfo} />;
+    } else if (prices.errorInfo !== undefined) {
+      errorMessage = <ErrorMessage errorInfo={prices.errorInfo} />;
     } else if (_.isNil(program) || _.isNil(coursePrice)) {
       errorMessage = <ErrorMessage errorInfo={{user_message: "No program enrollment is available."}} />;
     } else {
@@ -160,8 +160,10 @@ class DashboardPage extends React.Component {
             {financialAidCard}
             <CourseListCard
               program={program}
+              coursePrice={coursePrice}
               key={program.id}
               checkout={this.dispatchCheckout}
+              openFinancialAidCalculator={this.openFinancialAidCalculator}
             />
           </div>
           <div className="second-column">
@@ -194,8 +196,8 @@ const mapStateToProps = (state) => {
 
   return {
     profile: profile,
-    coursePrices: state.coursePrices,
     dashboard: state.dashboard,
+    prices: state.prices,
     currentProgramEnrollment: state.currentProgramEnrollment,
     ui: state.ui,
     documents: state.documents,

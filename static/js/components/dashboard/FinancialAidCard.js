@@ -119,7 +119,7 @@ export default class FinancialAidCard extends React.Component {
     case FA_STATUS_SKIPPED:
       return <Grid className="financial-aid-box">
         <Cell col={12}>
-          Your cost is <b>{price(coursePrice.course_price)} per course</b>.
+          Your cost is <b>{price(coursePrice.price)} per course</b>.
         </Cell>
       </Grid>;
     case FA_STATUS_PENDING_MANUAL_APPROVAL:
@@ -128,7 +128,7 @@ export default class FinancialAidCard extends React.Component {
       return <div>
         <Grid>
           <Cell col={12}>
-            Your cost is {price(coursePrice.course_price)} per course.
+            Your cost is {price(coursePrice.price)} per course.
           </Cell>
         </Grid>
 

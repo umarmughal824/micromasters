@@ -15,7 +15,7 @@ import {
   TOAST_FAILURE,
   TOAST_SUCCESS,
 } from '../constants';
-import { findCourse } from '../components/dashboard/CourseDescription_test';
+import { findCourse } from '../util/test_utils';
 
 describe('DashboardPage', () => {
   let renderComponent, helper;
