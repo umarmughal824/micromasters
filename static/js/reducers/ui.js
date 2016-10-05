@@ -32,10 +32,15 @@ import {
   SET_ENROLL_DIALOG_VISIBILITY,
   SET_TOAST_MESSAGE,
   SET_ENROLL_SELECTED_PROGRAM,
+
+  SET_PHOTO_DIALOG_VISIBILITY,
+  SET_CALCULATOR_DIALOG_VISIBILITY,
 } from '../actions/ui';
 import { PERSONAL_STEP } from '../constants';
 import type { ToastMessage } from '../flow/generalTypes';
 import type { Action } from '../flow/reduxTypes';
+import { SET_PROGRAM } from '../actions/ui';
+import type { Program } from '../flow/programTypes';
 
 export type UIDialog = {
   title?: string;
@@ -65,6 +70,10 @@ export type UIState = {
   enrollDialogVisibility:       boolean;
   toastMessage:                 ?ToastMessage;
   enrollSelectedProgram:        ?number;
+  photoDialogVisibility:        boolean;
+  calculatorDialogVisibility:   boolean;
+  documentSentDate:             Object;
+  selectedProgram:              Program;
 };
 
 export const INITIAL_UI_STATE: UIState = {
@@ -90,6 +99,10 @@ export const INITIAL_UI_STATE: UIState = {
   enrollDialogVisibility: false,
   toastMessage: null,
   enrollSelectedProgram: null,
+  photoDialogVisibility: false,
+  calculatorDialogVisibility: false,
+  documentSentDate: {},
+  selectedProgram: null,
 };
 
 export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
@@ -117,6 +130,10 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
         state.dialog,
         { visible: action.payload }
       )
+    });
+  case SET_PROGRAM:
+    return Object.assign({}, state, {
+      selectedProgram: action.payload
     });
   case SET_WORK_HISTORY_EDIT:
     return Object.assign({}, state, {
@@ -212,6 +229,10 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
       enrollDialogVisibility: action.payload
     });
   }
+  case SET_PHOTO_DIALOG_VISIBILITY:
+    return { ...state, photoDialogVisibility: action.payload };
+  case SET_CALCULATOR_DIALOG_VISIBILITY:
+    return { ...state, calculatorDialogVisibility: action.payload };
   default:
     return state;
   }

@@ -3,19 +3,18 @@ Models for dashboard
 """
 
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import JSONField
 from django.db.models import (
     DateTimeField,
     ForeignKey,
     Model,
 )
-from jsonfield import JSONField
-
 from courses.models import CourseRun, Program
 
 
-class CachedEnrollment(Model):
+class CachedEdxInfoModel(Model):
     """
-    Model for user enrollment data from edX
+    Base class to define other cached models
     """
     user = ForeignKey(User)
     course_run = ForeignKey(CourseRun)
@@ -24,7 +23,23 @@ class CachedEnrollment(Model):
 
     class Meta:
         unique_together = (('user', 'course_run'), )
+        abstract = True
 
+    def __str__(self):
+        """
+        String representation of the model object
+        """
+        return 'user "{0}", run "{1}", has_data={2}'.format(
+            self.user.username,
+            self.course_run.edx_course_key,
+            self.data is not None,
+        )
+
+
+class CachedEnrollment(CachedEdxInfoModel):
+    """
+    Model for user enrollment data from edX
+    """
     @classmethod
     def active_count(cls, user, program):
         """
@@ -35,38 +50,17 @@ class CachedEnrollment(Model):
             course_run__course__program=program
         ).exclude(data__isnull=True).count()
 
-    def __str__(self):
-        """
-        String representation of the model object
-        """
-        return 'user "{0}", run "{1}", has_data={2}'.format(
-            self.user.username,
-            self.course_run.edx_course_key,
-            self.data is not None,
-        )
 
-
-class CachedCertificate(Model):
+class CachedCertificate(CachedEdxInfoModel):
     """
     Model for certificate data from edX
     """
-    user = ForeignKey(User)
-    course_run = ForeignKey(CourseRun)
-    data = JSONField(null=True)
-    last_request = DateTimeField()
 
-    class Meta:
-        unique_together = (('user', 'course_run'), )
 
-    def __str__(self):
-        """
-        String representation of the model object
-        """
-        return 'user "{0}", run "{1}", has_data={2}'.format(
-            self.user.username,
-            self.course_run.edx_course_key,
-            self.data is not None,
-        )
+class CachedCurrentGrade(CachedEdxInfoModel):
+    """
+    Model for current grade data from edX
+    """
 
 
 class ProgramEnrollment(Model):

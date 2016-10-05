@@ -15,7 +15,7 @@ from wagtail.wagtailimages.tests.utils import get_test_image_file
 
 from cms.models import HomePage, ProgramPage
 from courses.models import Program
-from courses.factories import ProgramFactory
+from courses.factories import ProgramFactory, CourseFactory
 from backends.edxorg import EdxOrgOAuth2
 from profiles.api import get_social_username
 from profiles.factories import ProfileFactory
@@ -95,13 +95,13 @@ class TestHomePage(ViewsTests):
     def test_login_button(self):
         """Verify that we see a login button if not logged in"""
         response = self.client.get('/')
-        self.assertContains(response, "SIGN UP")
+        self.assertContains(response, "Sign Up")
 
     def test_sign_out_button(self):
         """Verify that we see a sign out button if logged in"""
         self.create_and_login_user()
         response = self.client.get('/')
-        self.assertContains(response, 'Sign out')
+        self.assertContains(response, 'Sign Out')
 
     def test_index_context_anonymous(self):
         """
@@ -182,7 +182,6 @@ class DashboardTests(ViewsTests):
                 'gaTrackingID': ga_tracking_id,
                 'reactGaDebug': react_ga_debug,
                 'authenticated': True,
-                'name': user.profile.preferred_name,
                 'username': get_social_username(user),
                 'host': host,
                 'edx_base_url': edx_base_url,
@@ -361,6 +360,26 @@ class TestProgramPage(ViewsTests):
         resp = self.client.get('/')
         self.assertContains(resp, image.get_rendition('fill-690x530').url)
 
+    def test_courses_enrollment_text(self):
+        """
+        Verify get_course_enrollment_test is called with
+        each course in the program
+        """
+        for i in range(5):
+            course = CourseFactory(
+                program=self.program_page.program,
+                position_in_program=i)
+            course.save()
+        with patch('cms.models.get_course_enrollment_text') as get_enrollment_text:
+            get_enrollment_text.return_value = 'some text'
+            response = self.client.get(self.program_page.url)
+            self.assertContains(response, 'some text')
+            courses = self.program_page.program.course_set.all().order_by(
+                'position_in_program'
+            )
+            for i, course in enumerate(courses):
+                assert get_enrollment_text.call_args_list[i][0][0] == course
+
 
 class TestUsersPage(ViewsTests):
     """
@@ -395,7 +414,6 @@ class TestUsersPage(ViewsTests):
                     'gaTrackingID': ga_tracking_id,
                     'reactGaDebug': react_ga_debug,
                     'authenticated': True,
-                    'name': user.profile.preferred_name,
                     'username': username,
                     'host': host,
                     'edx_base_url': edx_base_url,
@@ -433,7 +451,6 @@ class TestUsersPage(ViewsTests):
                     'gaTrackingID': ga_tracking_id,
                     'reactGaDebug': react_ga_debug,
                     'authenticated': False,
-                    'name': "",
                     'username': None,
                     'host': host,
                     'edx_base_url': edx_base_url,

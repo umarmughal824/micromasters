@@ -23,6 +23,9 @@
 @import "responsive-styles";
 @import "signup-dialog";
 @import "footer";
+@import "profile-image";
+@import "profile-image-uploader";
+@import "calculator";
 
 .selected {
   font-weight: bold;
@@ -65,6 +68,10 @@
   // arbitrarily chosen height
   height: 300px;
   width: 100%;
+}
+
+.upper-case {
+  text-transform: uppercase;
 }
 
 // hides elements so that they're visible only to screenreaders

@@ -7,7 +7,6 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
 import {
   setDialogVisibility,
-  setProgram,
 } from './actions/signup_dialog';
 import { signupDialogStore } from './store/configureStore';
 import SignupDialog from './containers/SignupDialog';
@@ -22,14 +21,8 @@ const dialogDiv = document.querySelector('#signup-dialog');
 const openDialog = () => store.dispatch(setDialogVisibility(true));
 
 // find the DOM element and attach openDialog to onClick
-const signInButton = document.querySelector('.open-signup-dialog');
-
-if ( signInButton ) {
-  signInButton.onclick = openDialog;
-}
-
-if ( typeof SETTINGS.programId === 'number' ) {
-  store.dispatch(setProgram(SETTINGS.programId));
+for (let signUpButton of document.querySelectorAll('.open-signup-dialog')) {
+  signUpButton.onclick = openDialog;
 }
 
 ReactDOM.render(

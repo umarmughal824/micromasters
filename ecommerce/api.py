@@ -6,22 +6,35 @@ from datetime import datetime
 import hashlib
 import hmac
 import logging
+from urllib.parse import quote_plus
 import uuid
 
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
 from django.http.response import Http404
 from django.shortcuts import get_object_or_404
+from edx_api.client import EdxApi
+import pytz
 from rest_framework.exceptions import ValidationError
 
+from backends.edxorg import EdxOrgOAuth2
 from courses.models import CourseRun
+from dashboard.api import update_cached_enrollment
+from dashboard.models import ProgramEnrollment
 from ecommerce.exceptions import (
+    EcommerceEdxApiException,
     EcommerceException,
     ParseException,
 )
 from ecommerce.models import (
     Line,
     Order,
+)
+from financialaid.api import get_formatted_course_price
+from financialaid.models import (
+    FinancialAid,
+    FinancialAidStatus,
 )
 from profiles.api import get_social_username
 
@@ -33,7 +46,9 @@ _REFERENCE_NUMBER_PREFIX = 'MM-'
 
 def get_purchasable_course_run(course_key, user):
     """
-    Gets a course run, or raises Http404 if not purchasable
+    Gets a course run, or raises Http404 if not purchasable. To be purchasable a course run
+    must not already be purchased, must be part of a live program, must be part of a program
+    with financial aid enabled, with a financial aid object, and must have a valid price.
 
     Args:
         course_key (str):
@@ -49,11 +64,23 @@ def get_purchasable_course_run(course_key, user):
             CourseRun,
             edx_course_key=course_key,
             course__program__live=True,
+            course__program__financial_aid_availability=True,
             courseprice__is_valid=True,
         )
     except Http404:
         log.warning("Course run %s is not purchasable", course_key)
         raise
+
+    if not FinancialAid.objects.filter(
+            tier_program__current=True,
+            tier_program__program__course__courserun=course_run,
+            user=user,
+            status__in=FinancialAidStatus.TERMINAL_STATUSES,
+    ).exists():
+        log.warning("Course run %s has no attached financial aid for user %s", course_key, get_social_username(user))
+        raise ValidationError(
+            "Course run {} does not have a current attached financial aid application".format(course_key)
+        )
 
     # Make sure it's not already purchased
     if Line.objects.filter(
@@ -82,7 +109,18 @@ def create_unfulfilled_order(course_id, user):
         Order: A newly created Order for the CourseRun with the given course_id
     """
     course_run = get_purchasable_course_run(course_id, user)
-    price = course_run.courseprice_set.get(is_valid=True).price
+    enrollment = get_object_or_404(ProgramEnrollment, program=course_run.course.program, user=user)
+    price_dict = get_formatted_course_price(enrollment)
+    price = price_dict['price']
+    if price <= 0:
+        log.warning(
+            "Price to be charged for course run %s for user %s is less than or equal to zero: %s",
+            course_id,
+            get_social_username(user),
+            price,
+        )
+        raise ImproperlyConfigured("Price to be charged is less than or equal to zero")
+
     order = Order.objects.create(
         status=Order.CREATED,
         total_price_paid=price,
@@ -120,26 +158,39 @@ def generate_cybersource_sa_signature(payload):
     return b64encode(digest).decode('utf-8')
 
 
-def generate_cybersource_sa_payload(order):
+def generate_cybersource_sa_payload(order, dashboard_url):
     """
     Generates a payload dict to send to CyberSource for Secure Acceptance
 
     Args:
         order (Order): An order
+        dashboard_url: (str): The absolute url for the dashboard
     Returns:
         dict: the payload to send to CyberSource via Secure Acceptance
     """
     # http://apps.cybersource.com/library/documentation/dev_guides/Secure_Acceptance_WM/Secure_Acceptance_WM.pdf
     # Section: API Fields
+
+    # Course key is used only to show the confirmation message to the user
+    course_key = ""
+    line = order.line_set.first()
+    if line is not None:
+        course_key = line.course_key
+
     payload = {
         'access_key': settings.CYBERSOURCE_ACCESS_KEY,
         'amount': str(order.total_price_paid),
         'consumer_id': get_social_username(order.user),
         'currency': 'USD',
         'locale': 'en-us',
-        # TODO
-        'override_custom_cancel_page': 'https://micromasters.mit.edu?cancel',
-        'override_custom_receipt_page': "https://micromasters.mit.edu?receipt",
+        'override_custom_cancel_page': "{}?status=cancel&course_key={}".format(
+            dashboard_url,
+            quote_plus(course_key),
+        ),
+        'override_custom_receipt_page': "{}?status=receipt&course_key={}".format(
+            dashboard_url,
+            quote_plus(course_key),
+        ),
         'reference_number': make_reference_id(order),
         'profile_id': settings.CYBERSOURCE_PROFILE_ID,
         'signed_date_time': datetime.utcnow().strftime(ISO_8601_FORMAT),
@@ -204,3 +255,38 @@ def get_new_order_by_reference_number(reference_number):
         return Order.objects.get(id=order_id, status=Order.CREATED)
     except Order.DoesNotExist:
         raise EcommerceException("Order {} is expected to have status 'created'".format(order_id))
+
+
+def enroll_user_on_success(order):
+    """
+    Enroll user after they made a successful purchase.
+
+    Args:
+        order (Order): An order to be fulfilled
+
+    Returns:
+         None
+    """
+    user_social = order.user.social_auth.get(provider=EdxOrgOAuth2.name)
+    enrollments_client = EdxApi(user_social.extra_data, settings.EDXORG_BASE_URL).enrollments
+
+    exceptions = []
+    enrollments = []
+    for line in order.line_set.all():
+        course_key = line.course_key
+        try:
+            enrollments.append(enrollments_client.create_audit_student_enrollment(course_key))
+        except Exception as ex:  # pylint: disable=broad-except
+            log.error(
+                "Error creating audit enrollment for course key %s for user %s",
+                course_key,
+                get_social_username(order.user),
+            )
+            exceptions.append(ex)
+
+    now = datetime.now(pytz.UTC)
+    for enrollment in enrollments:
+        update_cached_enrollment(order.user, enrollment, enrollment.course_id, now)
+
+    if exceptions:
+        raise EcommerceEdxApiException(exceptions)

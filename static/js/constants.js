@@ -5,6 +5,66 @@ export const BACHELORS = 'b';
 export const MASTERS = 'm';
 export const DOCTORATE = 'p';
 
+export const ISO_8601_FORMAT = 'YYYY-MM-DD';
+export const DASHBOARD_FORMAT = 'M/D/Y';
+
+// NOTE: this is in order of attainment
+export const EDUCATION_LEVELS = [
+  {value: HIGH_SCHOOL, label: "High school"},
+  {value: ASSOCIATE, label: 'Associate degree'},
+  {value: BACHELORS, label: "Bachelor's degree"},
+  {value: MASTERS, label: "Master's or professional degree"},
+  {value: DOCTORATE, label: "Doctorate"}
+];
+
+export const PERSONAL_STEP = 'personal';
+export const EMPLOYMENT_STEP = 'employment';
+export const EDUCATION_STEP = 'education';
+
+export const PROFILE_STEP_LABELS = new Map([
+  [PERSONAL_STEP, "Personal"],
+  [EDUCATION_STEP, "Education"],
+  [EMPLOYMENT_STEP, "Professional"]
+]);
+
+export const DEFAULT_OPTION_LIMIT_COUNT = 10;
+
+export const SEARCH_FILTER_DEFAULT_VISIBILITY = true;
+
+export const STATUS_PASSED = 'passed';
+export const STATUS_NOT_PASSED = 'not-passed';
+export const STATUS_CURRENTLY_ENROLLED = 'currently-enrolled';
+export const STATUS_CAN_UPGRADE = 'can-upgrade';
+export const STATUS_OFFERED = 'offered';
+
+export const ALL_COURSE_STATUSES = [
+  STATUS_PASSED,
+  STATUS_NOT_PASSED,
+  STATUS_OFFERED,
+  STATUS_CAN_UPGRADE,
+  STATUS_CURRENTLY_ENROLLED,
+];
+
+// financial aid statuses
+export const FA_STATUS_CREATED = 'created';
+export const FA_STATUS_PENDING_DOCS = 'pending-docs';
+export const FA_STATUS_DOCS_SENT = 'docs-sent';
+export const FA_STATUS_PENDING_MANUAL_APPROVAL = 'pending-manual-approval';
+export const FA_STATUS_APPROVED = 'approved';
+export const FA_STATUS_AUTO_APPROVED = 'auto-approved';
+export const FA_STATUS_REJECTED = 'rejected';
+export const FA_STATUS_SKIPPED = 'skipped';
+
+export const FA_PENDING_STATUSES = [
+  FA_STATUS_PENDING_DOCS,
+  FA_STATUS_DOCS_SENT,
+  FA_STATUS_PENDING_MANUAL_APPROVAL
+];
+export const FA_APPROVED_STATUSES = [FA_STATUS_APPROVED, FA_STATUS_AUTO_APPROVED];
+
+export const TOAST_SUCCESS = 'success';
+export const TOAST_FAILURE = 'failure';
+
 export const ELASTICSEARCH_RESPONSE = {
   "took": 22,
   "timed_out": false,
@@ -211,20 +271,6 @@ export const USER_PROGRAM_RESPONSE = {
   "grade_average": 83
 };
 
-export const STATUS_PASSED = 'passed';
-export const STATUS_NOT_PASSED = 'not-passed';
-export const STATUS_VERIFIED = 'verified';
-export const STATUS_ENROLLED = "enrolled";
-export const STATUS_OFFERED = "offered";
-
-export const ALL_COURSE_STATUSES = [
-  STATUS_PASSED,
-  STATUS_NOT_PASSED,
-  STATUS_OFFERED,
-  STATUS_ENROLLED,
-  STATUS_VERIFIED,
-];
-
 export const DASHBOARD_RESPONSE = [
   {
     "title": "Empty program",
@@ -303,6 +349,7 @@ export const DASHBOARD_RESPONSE = [
         "id": 4
       }
     ],
+    "financial_aid_availability": false,
     "id": 3
   },
   {
@@ -366,7 +413,7 @@ export const DASHBOARD_RESPONSE = [
         "runs": [
           {
             "id": 7,
-            "status": STATUS_ENROLLED,
+            "status": STATUS_CAN_UPGRADE,
             "title": "Not verified run",
             "course_id": "not-verified",
             "position": 0,
@@ -374,6 +421,7 @@ export const DASHBOARD_RESPONSE = [
             "course_start_date": "2016-08-22T11:48:27Z",
             "fuzzy_start_date": "Fall 2017",
             "course_end_date": "2016-09-09T10:20:10Z",
+            "course_upgrade_deadline": "2016-08-20T11:48:27Z",
           }
         ],
         "description": null,
@@ -385,7 +433,7 @@ export const DASHBOARD_RESPONSE = [
         "title": "Enrollment starting course - disabled enroll button, text says Enrollment begins 3/3/2106",
         "runs": [
           {
-            "course_id": "course-v1:supply+chain",
+            "course_id": "course-v1:supply+chain2",
             "id": 8,
             "status": STATUS_OFFERED,
             "fuzzy_enrollment_start_date": null,
@@ -426,12 +474,13 @@ export const DASHBOARD_RESPONSE = [
         "runs": [
           {
             "id": 13,
-            "status": STATUS_VERIFIED,
+            "status": STATUS_CURRENTLY_ENROLLED,
             "course_start_date": "8765-03-21",
             "title": "First run",
             "position": 0,
             "fuzzy_start_date": "Fall 2017",
             "course_end_date": "2016-09-09T10:20:10Z",
+            "course_id": "verified",
           }
         ]
       },
@@ -441,7 +490,7 @@ export const DASHBOARD_RESPONSE = [
         "title": "Fuzzy enrollment starting course - First in program, action text is enrollment begins soonish",
         "runs": [
           {
-            "course_id": "course-v1:supply+chain",
+            "course_id": "course-v1:supply+chain3",
             "id": 9,
             "status": STATUS_OFFERED,
             "fuzzy_enrollment_start_date": "soonish",
@@ -459,6 +508,7 @@ export const DASHBOARD_RESPONSE = [
     ],
     "title": "Master Program",
     "description": null,
+    "financial_aid_availability": false,
     "id": 4
   },
   {
@@ -471,9 +521,9 @@ export const DASHBOARD_RESPONSE = [
         "title": "Course for last program in progress - no grade, action or description",
         "runs": [
           {
-            "course_id": "course-v1:edX+DemoX+Demo_Course",
+            "course_id": "course-v1:edX+DemoX+Demo_Course2",
             "id": 6,
-            "status": STATUS_VERIFIED,
+            "status": STATUS_CURRENTLY_ENROLLED,
             "title": "Course run for last program",
             "position": 0,
             "course_start_date": "2016-01-01",
@@ -485,9 +535,42 @@ export const DASHBOARD_RESPONSE = [
         "prerequisites": ""
       },
     ],
+    "financial_aid_availability": false,
     "id": 5
   },
 ];
+
+export const PROGRAM_ENROLLMENTS = [
+  {
+    id: DASHBOARD_RESPONSE[1].id,
+    title: DASHBOARD_RESPONSE[1].title
+  },
+  {
+    id: DASHBOARD_RESPONSE[2].id,
+    title: DASHBOARD_RESPONSE[2].title
+  },
+];
+
+export const FINANCIAL_AID_PARTIAL_RESPONSE = {
+  application_status: null,
+  has_user_applied: false,
+  max_possible_cost: 1000,
+  min_possible_cost: 1000
+};
+
+export const COURSE_PRICES_RESPONSE = [{
+  program_id: DASHBOARD_RESPONSE[1].id,
+  price: 100.00,
+  financial_aid_adjustment: false,
+  financial_aid_availability: false,
+  has_financial_aid_request: false
+}, {
+  program_id: DASHBOARD_RESPONSE[2].id,
+  price: 200.00,
+  financial_aid_adjustment: false,
+  financial_aid_availability: false,
+  has_financial_aid_request: false
+}];
 
 export const ERROR_RESPONSE = {
   "errorStatusCode": 500,
@@ -495,32 +578,8 @@ export const ERROR_RESPONSE = {
   "user_message": "custom error message for the user."
 };
 
-export const ISO_8601_FORMAT = 'YYYY-MM-DD';
-export const DASHBOARD_FORMAT = 'M/D/Y';
-
-// NOTE: this is in order of attainment
-export const EDUCATION_LEVELS = [
-  {value: HIGH_SCHOOL, label: "High school"},
-  {value: ASSOCIATE, label: 'Associate degree'},
-  {value: BACHELORS, label: "Bachelor's degree"},
-  {value: MASTERS, label: "Master's or professional degree"},
-  {value: DOCTORATE, label: "Doctorate"}
-];
-
-export const PERSONAL_STEP = 'personal';
-export const EMPLOYMENT_STEP = 'employment';
-export const EDUCATION_STEP = 'education';
-
-export const PROFILE_STEP_LABELS = new Map([
-  [PERSONAL_STEP, "Personal"],
-  [EDUCATION_STEP, "Education"],
-  [EMPLOYMENT_STEP, "Professional"]
-]);
-
-export const DEFAULT_OPTION_LIMIT_COUNT = 10;
-
 /* eslint-disable max-len */
-export const CHECKOUT_RESPONSE = {
+export const CHECKOUT_RESPONSE_CYBERSOURCE = {
   "payload": {
     "access_key": "access_key",
     "amount": "123.45",
@@ -538,22 +597,12 @@ export const CHECKOUT_RESPONSE = {
     "transaction_uuid": "uuid",
     "unsigned_field_names": ""
   },
-  "url": "https://testsecureacceptance.cybersource.com/pay"
+  "url": "https://testsecureacceptance.cybersource.com/pay",
+  "method": "POST"
+};
+export const CHECKOUT_RESPONSE_EDX = {
+  "payload": {},
+  "url": "http://edx.org",
+  "method": "GET"
 };
 /* eslint-enable max-len */
-
-export const PROGRAM_ENROLLMENTS = [
-  {
-    id: DASHBOARD_RESPONSE[1].id,
-    title: DASHBOARD_RESPONSE[1].title
-  },
-  {
-    id: DASHBOARD_RESPONSE[2].id,
-    title: DASHBOARD_RESPONSE[2].title
-  },
-];
-
-export const SEARCH_FILTER_DEFAULT_VISIBILITY = true;
-
-export const TOAST_SUCCESS = 'success';
-export const TOAST_FAILURE = 'failure';

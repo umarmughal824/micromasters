@@ -4,6 +4,7 @@ Models for course structure
 from datetime import datetime
 
 import pytz
+from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 
 
@@ -18,6 +19,24 @@ class Program(models.Model):
 
     def __str__(self):
         return self.title
+
+    def get_course_price(self):
+        """
+        Returns a decimal course price attached to this program.
+
+        Note: This implementation of retrieving a course price is a naive lookup that assumes
+        all course runs in a single program will be the same price for the foreseeable future.
+        Therefore we can just take the price from any currently enroll-able course run.
+        """
+        from ecommerce.models import CoursePrice
+        course_price_object = CoursePrice.objects.filter(
+            is_valid=True,
+            course_run__course__program=self
+        ).first()
+        if course_price_object is None:
+            # If no CoursePrice is valid for this program, can't meaningfully return any value
+            raise ImproperlyConfigured('No course price available for program "{}".'.format(self.title))
+        return course_price_object.price
 
 
 class Course(models.Model):
@@ -54,6 +73,15 @@ class Course(models.Model):
         next_run_set = next_run_set.order_by('start_date')
         return next_run_set[0]
 
+    def get_promised_run(self):
+        """
+        Get a run that does not have start_date,
+        only fuzzy_start_date
+        """
+        return self.courserun_set.filter(
+            models.Q(start_date=None) & models.Q(fuzzy_start_date__isnull=False)
+        ).first()
+
 
 class CourseRun(models.Model):
     """
@@ -62,7 +90,7 @@ class CourseRun(models.Model):
       rather a specific instance of that course being taught.
     """
     title = models.CharField(max_length=255)
-    edx_course_key = models.CharField(max_length=255, blank=True, null=True)
+    edx_course_key = models.CharField(max_length=255, blank=True, null=True, db_index=True)
     enrollment_start = models.DateTimeField(blank=True, null=True)
     start_date = models.DateTimeField(blank=True, null=True)
     enrollment_end = models.DateTimeField(blank=True, null=True)
@@ -107,6 +135,22 @@ class CourseRun(models.Model):
         if not self.start_date:
             return False
         return self.start_date > datetime.now(pytz.utc)
+
+    @property
+    def is_future_enrollment_open(self):
+        """
+        Checks if the course will run in the future and
+        enrollment is currently open
+        """
+        if self.is_future:
+            if self.enrollment_start:
+                now = datetime.now(pytz.utc)
+                if self.enrollment_end:
+                    return self.enrollment_start <= now <= self.enrollment_end
+                else:
+                    return self.enrollment_start <= now
+
+        return False
 
     @property
     def is_upgradable(self):

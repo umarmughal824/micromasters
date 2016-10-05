@@ -25,6 +25,8 @@ import {
   setEnrollDialogVisibility,
   setToastMessage,
   setEnrollSelectedProgram,
+  setPhotoDialogVisibility,
+  setCalculatorDialogVisibility,
 } from '../actions/ui';
 import { INITIAL_UI_STATE } from '../reducers/ui';
 import type { UIState } from '../reducers/ui';
@@ -163,6 +165,12 @@ describe('ui reducers', () => {
     });
   });
 
+  describe('Photo dialog visibility', () => {
+    it(`should let you set photo dialog visibility`, () => {
+      assertReducerResultState(setPhotoDialogVisibility, ui => ui.photoDialogVisibility, false);
+    });
+  });
+
   describe('Enrollment', () => {
     it('sets the enrollment message', () => {
       assertReducerResultState(setToastMessage, ui => ui.toastMessage, null);
@@ -178,6 +186,12 @@ describe('ui reducers', () => {
 
     it('sets the enrollment dialog currently selected program', () => {
       assertReducerResultState(setEnrollSelectedProgram, ui => ui.enrollSelectedProgram, null);
+    });
+  });
+
+  describe('Calculator visibility', () => {
+    it('should let you set calculator visibility', () => {
+      assertReducerResultState(setCalculatorDialogVisibility, ui => ui.calculatorDialogVisibility, false);
     });
   });
 });

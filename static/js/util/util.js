@@ -240,8 +240,8 @@ export function makeStrippedHtml(textOrElement: any): string {
 
 export function makeProfileImageUrl(profile: Profile): string {
   let imageUrl = '/static/images/avatar_default.png';
-  if (profile !== undefined && profile.profile_url_large) {
-    imageUrl = profile.profile_url_large;
+  if (profile !== undefined && profile.image) {
+    imageUrl = profile.image;
   }
 
   return imageUrl;
@@ -251,16 +251,8 @@ export function makeProfileImageUrl(profile: Profile): string {
  * Returns the preferred name or else the username
  */
 export function getPreferredName(profile: Profile, last: boolean = true): string {
-  let first;
-  if ( profile.username === SETTINGS.username ) {
-    first = profile.preferred_name || SETTINGS.name || SETTINGS.username;
-  } else {
-    first = profile.preferred_name || profile.first_name;
-  }
-  if ( last ) {
-    return profile.last_name ? `${first} ${profile.last_name}` : first;
-  }
-  return first;
+  let first = profile.preferred_name || profile.first_name || profile.username;
+  return last && profile.last_name && !profile.preferred_name ? `${first} ${profile.last_name}` : first;
 }
 
 /**
@@ -367,7 +359,7 @@ export function createForm(url: string, payload: CheckoutPayload): HTMLFormEleme
 /**
  * Formats course price.
  */
-export function formatPrice(price: string): string {
+export function formatPrice(price: string|number): string {
   return `$${price}`;
 }
 

@@ -2,9 +2,10 @@
 Models for user profile
 """
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import JSONField
 from django.db import models, transaction
 from django.db.models import Max
-from jsonfield import JSONField
+
 
 DOCTORATE = 'p'
 MASTERS = 'm'
@@ -117,6 +118,7 @@ class Profile(models.Model):
     nationality = models.TextField(blank=True, null=True)
 
     has_profile_image = models.BooleanField(default=False)
+    image = models.ImageField(upload_to='profile', null=True)
 
     edx_requires_parental_consent = models.NullBooleanField()
     date_of_birth = models.DateField(blank=True, null=True)

@@ -13,15 +13,16 @@ from wagtail.wagtailadmin.edit_handlers import FieldPanel, InlinePanel, MultiFie
 
 
 from courses.models import Program
-from courses.serializers import ProgramSerializer
 from micromasters.utils import webpack_dev_server_host
 from profiles.api import get_social_username
 from ui.views import get_bundle_url
+from cms.api import get_course_enrollment_text, get_course_url
 
 
-def programs_for_sign_up(programs):
-    """formats program info for the signup dialogs"""
-    return [ProgramSerializer().to_representation(p) for p in programs]
+def faculty_for_carousel(faculty):
+    """formats faculty info for the carousel"""
+    from cms.serializers import FacultySerializer
+    return [FacultySerializer().to_representation(f) for f in faculty]
 
 
 class HomePage(Page):
@@ -43,7 +44,6 @@ class HomePage(Page):
         js_settings = {
             "gaTrackingID": settings.GA_TRACKING_ID,
             "host": webpack_dev_server_host(request),
-            "programs": programs_for_sign_up(programs),
         }
 
         username = get_social_username(request.user)
@@ -135,24 +135,31 @@ class ProgramPage(Page):
     ]
 
     def get_context(self, request):
-        programs = Program.objects.filter(live=True)
         js_settings = {
             "gaTrackingID": settings.GA_TRACKING_ID,
             "host": webpack_dev_server_host(request),
             "programId": self.program.id,
-            "programs": programs_for_sign_up(programs),
+            "faculty": faculty_for_carousel(self.faculty_members.all()),
         }
         username = get_social_username(request.user)
         context = super(ProgramPage, self).get_context(request)
+
+        courses_info = []
+        for course in self.program.course_set.all().order_by(
+                'position_in_program'
+        ):
+            courses_info.append((course, get_course_enrollment_text(course), get_course_url(course)))
 
         context["style_src"] = get_bundle_url(request, "style.js")
         context["public_src"] = get_bundle_url(request, "public.js")
         context["style_public_src"] = get_bundle_url(request, "style_public.js")
         context["authenticated"] = not request.user.is_anonymous()
         context["signup_dialog_src"] = get_bundle_url(request, "signup_dialog.js")
+        context["faculty_carousel_src"] = get_bundle_url(request, "faculty_carousel.js")
         context["username"] = username
         context["js_settings_json"] = json.dumps(js_settings)
         context["title"] = self.title
+        context["courses_info"] = courses_info
 
         return context
 
@@ -187,7 +194,7 @@ class ProgramFaculty(Orderable):
         blank=True,
         on_delete=models.SET_NULL,
         related_name='+',
-        help_text='Image for the faculty member'
+        help_text='Image for the faculty member. Should be 500px by 385px.'
     )
     content_panels = Page.content_panels + [
         MultiFieldPanel(

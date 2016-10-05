@@ -1,20 +1,36 @@
 .program-page {
   padding: 0;
+  background: #fff;
+
+  .double-column {
+    width: 89%;
+    }
 
   .hero-image {
     height: 600px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: flex-start;
     color: white;
     text-align: center;
     background-size: cover;
+    padding: 210px 5% 0;
+    background-position: center;
+
+    @media (max-width: 479px) {
+      height: 460px;
+      padding: 145px 5% 0;
+    }
 
     .title {
       font-size: 36px;
-      margin-bottom: 25px;
+      margin-top: 0;
+      margin-bottom: 31px;
       max-width: 700px;
+      @media (max-width: 580px) {
+        font-size: 31px;
+      }
     }
 
     .description {
@@ -22,23 +38,34 @@
       margin-bottom: 25px;
 
       * {
-        font-size: 30px;
+        font-size: 23px;
+        @media (max-width: 580px) {
+          font-size: 18px;
+        }
         font-weight: 300;
+        line-height: 1.3em;
+        color: rgba(255,255,255,.8);
       }
     }
 
     button {
       margin-bottom: 20px;
       margin-right: 0;
+      font-size: 16px;
+      font-weight: 300;
+      padding: 14px 53px;
     }
 
     .log-in {
-      margin-bottom: 120px;
       font-size: 16px;
+      font-weight: 300;
+      color: rgba(255,255,255,.8);
 
       a {
         color: white;
         border-bottom: 1px solid white;
+        font-size: 18px;
+        margin-left: 5px;
       }
     }
   }
@@ -46,29 +73,51 @@
   .mdl-tabs {
     .tab-container {
       width: 96%;
-      max-width: 1000px;
+      max-width: 1150px;
+
+      a:focus, a:hover {
+        text-decoration: none;
+      }
+    }
+
+    .is-upgraded:after, .is-active:after {
+      height: 3px !important;
+      background: $mm-brand-bg !important;
+    }
+
+    .mdl-tabs__tab-bar {
+      margin-bottom: 30px;
+      height: 57px;
+    }
+
+    .mdl-tabs__tab {
+      height: 56px;
+      line-height: 55px;
     }
 
     .mdl-tabs__panel {
-      margin-bottom: 50px;
+      margin-bottom: 40px;
     }
   }
 
   .info-box, .powered-by {
-    margin: 16px;
+    margin: 0 0 23px 15px;
+
   }
 
   .info-box {
     padding: 30px;
-    background-color: $medgrey;
+    background-color: $bg-med-gray;
 
     > *:not(:last-child) {
-      margin-bottom: 15px;
+      margin-bottom: 22px;
     }
 
     > .title {
       font-size: 18px;
       font-weight: 600;
+      margin-top: 0;
+      line-height: 1.4em;
     }
   }
 
@@ -76,10 +125,17 @@
     .course-details {
       .title {
         font-weight: 600;
+        font-size: 16px;
+        margin: 0 0 6px 0;
       }
 
       .description {
         color: $font-gray;
+        font-size: 15px;
+      }
+
+      .enrollment_dates {
+        margin-bottom: 6px;
       }
     }
   }
@@ -94,22 +150,39 @@
   .powered-by {
     padding: 20px;
 
+    p {
+      display: inline-block;
+      font-size: 16px;
+      font-weight: 400;
+      color: rgba(0, 0, 0, 0.6) !important;
+    }
+
     > *:not(:last-child) {
-      margin-right: 12px;
+      margin-right: 7px;
     }
 
     img {
-      height: 25px;
-      margin-bottom: 5px;
+      height: 30px;
+      margin-bottom: 9px;
     }
+  }
 
+  .tabs-content {
+    width: 94%;
+    margin: 0 auto;
+    max-width: 1150px;
+
+    p {
+      font-size: 16px;
+      color: rgba(0,0,0,.7);
+      margin-bottom: 23px;
+    }
   }
 
   .faqs {
     margin-top: 20px;
-
-    > *:not(:last-child) {
-      border-bottom: 2px solid $medgrey;
+    @media (max-width: 580px) {
+      margin: 18px auto;
     }
 
     * {
@@ -117,14 +190,137 @@
     }
 
     .faq {
+      padding: 0 15px 23px 0;
+
       .question {
-        font-weight: 600;
-        margin: 25px 0;
+        font-weight: 500;
+        font-size: 18px;
+        margin: 0 0 25px 0;
+      }
+    }
+  }
+
+
+  .faculty-section {
+    color: #ffffff;
+    background-color: #0c0c0c;
+    text-align: center;
+    padding: 40px 0 140px;
+    @media (max-width: 840px) {
+      padding: 40px 5% 140px;
+    }
+
+    h3 {
+      margin: 0 0 13px;
+      font-weight: 300;
+      font-size: 28px;
+      color: white;
+    }
+
+    p.description {
+      font-size: 16px;
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.6);
+      margin: 0 0 45px 0;
+    }
+
+    #faculty-carousel {
+      max-width: 1300px;
+      width: 90%;
+      margin: 0 auto;
+      @media (max-width: 840px) {
+        width: 100%;
       }
     }
 
-    .faq:last-child {
-      margin-bottom: 100px;
+    .faculty-tile {
+      height: 385px;
+      padding: 250px 22px 20px 26px;
+      margin: 0 auto;
+      color: #ffffff;
+      text-align: left;
+      position: relative;
+      width: 96%;
+      margin: 0 auto;
+      @media (max-width: 840px) {
+        height: auto;
+        padding: 0;
+        margin: 0 auto 40px;
+      }
+
+      h4 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-size: 23px;
+        font-weight: 300;
+        color: rgba(255,255,255,1);
+      }
+
+      p {
+        font-size: 16px;
+        line-height: 1.4em;
+        font-weight: 300;
+        color: rgba(255,255,255,.7);
+      }
+
+      img {
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        @media (max-width: 840px) {
+          margin-bottom: 12px;
+          position: static;
+        }
+      }
+
+      h4, p {
+        position: relative;
+        z-index: 2;
+      }
+    }
+
+    .slick-prev {
+      left: -40px;
+    }
+
+    .slick-next {
+      right: -30px;
+    }
+
+    .slick-dots li button:before {
+      font-size: 20px;
+    }
+
+    .slick-arrow:before {
+      font-size: 40px;
+    }
+
+    .slick-dots {
+      bottom: -65px;
+    }
+
+    .slick-dots li {
+      margin: 0 10px;
+
+      button:before {
+        color: $font-gray-light;
+      }
+
+      &.slick-active button:before {
+        color: #ffffff;
+      }
+    }
+  }
+
+  @media (max-width: 839px) {
+    .mdl-cell--4-col {
+      width: calc(100% - 16px);
+
+      .info-box {
+        margin: 0 0 23px 0;
+      }
     }
   }
 }

@@ -8,31 +8,48 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models import F
 from django.views.generic import ListView
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import (
     CreateAPIView,
-    get_object_or_404
+    get_object_or_404,
+    UpdateAPIView
 )
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from rolepermissions.verifications import has_object_permission
 
 from courses.models import Program
-from ecommerce.models import CoursePrice
+from dashboard.models import ProgramEnrollment
+from financialaid.api import (
+    get_formatted_course_price,
+    get_no_discount_tier_program
+)
 from financialaid.models import (
     FinancialAid,
     FinancialAidStatus,
     TierProgram
 )
-from financialaid.serializers import IncomeValidationSerializer
+from financialaid.permissions import (
+    UserCanEditFinancialAid,
+    FinancialAidUserMatchesLoggedInUser
+)
+from financialaid.serializers import (
+    FinancialAidActionSerializer,
+    FinancialAidRequestSerializer,
+    FinancialAidSerializer,
+    FinancialAidSkipSerializer
+)
 from roles.roles import Permissions
 from ui.views import get_bundle_url
 
 
-class IncomeValidationView(CreateAPIView):
+class FinancialAidRequestView(CreateAPIView):
     """
-    View for income validation API. Takes income and currency, then determines whether review
+    View for financial aid request API. Takes income, currency, and program, then determines whether review
     is necessary, and if not, sets the appropriate tier for personalized pricing.
     """
-    serializer_class = IncomeValidationSerializer
+    serializer_class = FinancialAidRequestSerializer
     authentication_classes = (SessionAuthentication, )
     permission_classes = (IsAuthenticated, )
 
@@ -41,6 +58,35 @@ class IncomeValidationView(CreateAPIView):
         Allows the DRF helper pages to load - not available in production
         """
         return None
+
+
+class FinancialAidSkipView(UpdateAPIView):
+    """
+    View for financial aid skip API. Takes user and program, then determines whether a financial
+    aid object exists, and then either creates or updates a financial aid object to reflect
+    the user skipping financial aid.
+    """
+    serializer_class = FinancialAidSkipSerializer
+    authentication_classes = (SessionAuthentication, )
+    permission_classes = (IsAuthenticated, )
+
+    def get_object(self):
+        """
+        Overrides get_object in case financialaid object does not exist, as the learner may skip
+        financial aid either after starting the process or in lieu of applying
+        """
+        program = get_object_or_404(Program, id=self.kwargs["program_id"])
+        if not program.financial_aid_availability:
+            raise ValidationError("Financial aid not available for this program.")
+        if not ProgramEnrollment.objects.filter(program=program.id, user=self.request.user).exists():
+            raise ValidationError("User not in program.")
+        tier_program = get_no_discount_tier_program(program.id)
+        financialaid, _ = FinancialAid.objects.get_or_create(
+            user=self.request.user,
+            tier_program__program=program,
+            defaults={"tier_program": tier_program}
+        )
+        return financialaid
 
 
 class ReviewFinancialAidView(UserPassesTestMixin, ListView):
@@ -172,21 +218,6 @@ class ReviewFinancialAidView(UserPassesTestMixin, ListView):
         """
         Gets queryset for ListView to return to view
         """
-        # Get course price to calculate adjusted cost - we put this first so that we can return
-        # an empty queryset if no valid CoursePrice is found.
-        # Note: This implementation of retrieving a course price is a naive lookup that assumes
-        # all course runs and courses will be the same price for the foreseeable future.
-        # Therefore we can just take the price from any currently enroll-able course run.
-        course_price_object = CoursePrice.objects.filter(
-            is_valid=True,
-            course_run__course__program=self.program
-        ).first()
-        if course_price_object is None:
-            # If course price is not set, we can't meaningfully display any financial aid requests
-            return []
-        else:
-            self.course_price = course_price_object.price
-
         # Filter by program (self.program set in test_func())
         financial_aids = FinancialAid.objects.filter(
             tier_program__program=self.program
@@ -199,6 +230,7 @@ class ReviewFinancialAidView(UserPassesTestMixin, ListView):
         financial_aids = financial_aids.filter(status=self.selected_status)
 
         # Annotate with adjusted cost
+        self.course_price = self.program.get_course_price()
         financial_aids = financial_aids.annotate(adjusted_cost=self.course_price - F("tier_program__discount_amount"))
 
         # Sort by field
@@ -218,3 +250,73 @@ class ReviewFinancialAidView(UserPassesTestMixin, ListView):
         )
 
         return financial_aids
+
+
+class FinancialAidActionView(UpdateAPIView):
+    """
+    View for rejecting and approving financial aid requests
+    """
+    serializer_class = FinancialAidActionSerializer
+    permission_classes = (IsAuthenticated, UserCanEditFinancialAid)
+    lookup_field = "id"
+    lookup_url_kwarg = "financial_aid_id"
+    queryset = FinancialAid.objects.all()
+
+
+class FinancialAidDetailView(UpdateAPIView):
+    """
+    View for updating a FinancialAid record
+    """
+    serializer_class = FinancialAidSerializer
+    authentication_classes = (SessionAuthentication, )
+    permission_classes = (IsAuthenticated, FinancialAidUserMatchesLoggedInUser)
+    lookup_field = "id"
+    lookup_url_kwarg = "financial_aid_id"
+    queryset = FinancialAid.objects.all()
+
+
+class CoursePriceListView(APIView):
+    """
+    View for retrieving a learner's price for course runs in all enrolled programs
+    """
+    authentication_classes = (SessionAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
+        """
+        GET handler
+        """
+        user = request.user
+        program_enrollments = (
+            ProgramEnrollment.objects
+            .select_related('user', 'program')
+            .filter(user=user, program__live=True).all()
+        )
+        formatted_course_prices = []
+        for program_enrollment in program_enrollments:
+            response_dict = get_formatted_course_price(program_enrollment)
+            formatted_course_prices.append(response_dict)
+        return Response(data=formatted_course_prices)
+
+
+class CoursePriceDetailView(APIView):
+    """
+    View for retrieving a learner's price for a course run
+    """
+    authentication_classes = (SessionAuthentication, )
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request, *args, **kwargs):
+        """
+        GET handler
+        """
+        user = request.user
+        program_enrollment = get_object_or_404(
+            ProgramEnrollment,
+            user=user,
+            program__id=self.kwargs["program_id"],
+            program__live=True
+        )
+        return Response(
+            data=get_formatted_course_price(program_enrollment)
+        )

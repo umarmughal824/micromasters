@@ -85,3 +85,12 @@ export const setToastMessage = createAction(SET_TOAST_MESSAGE);
 
 export const SET_ENROLL_SELECTED_PROGRAM = 'SET_ENROLL_SELECTED_PROGRAM';
 export const setEnrollSelectedProgram = createAction(SET_ENROLL_SELECTED_PROGRAM);
+
+export const SET_PHOTO_DIALOG_VISIBILITY = 'SET_PHOTO_DIALOG_VISIBILITY';
+export const setPhotoDialogVisibility = createAction(SET_PHOTO_DIALOG_VISIBILITY);
+
+export const SET_CALCULATOR_DIALOG_VISIBILITY = 'SET_CALCULATOR_DIALOG_VISIBILITY';
+export const setCalculatorDialogVisibility = createAction(SET_CALCULATOR_DIALOG_VISIBILITY);
+
+export const SET_PROGRAM = 'SET_PROGRAM';
+export const setProgram = createAction(SET_PROGRAM);

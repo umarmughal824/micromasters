@@ -1,8 +1,23 @@
 """
 Tests for financialaid models
 """
-from financialaid.factories import TierFactory
-from financialaid.models import Tier
+import json
+
+from django.core import serializers
+from django.core.exceptions import ValidationError
+from django.db.models.signals import post_save
+from factory.django import mute_signals
+
+from financialaid.factories import (
+    TierFactory,
+    FinancialAidFactory
+)
+from financialaid.models import (
+    Tier,
+    FinancialAidAudit,
+    FinancialAidStatus
+)
+from profiles.factories import ProfileFactory
 from search.base import ESTestCase
 
 
@@ -22,3 +37,56 @@ class FinancialAidModelsTests(ESTestCase):
         Tier.objects.filter(id=tier.id).update(name="new_tier")
         third_timestamp = Tier.objects.get(id=tier.id)  # Since we need to re-fetch the object
         assert second_timestamp != third_timestamp
+
+    def test_financial_aid_model_unique(self):
+        """
+        Tests that FinancialAid objects are unique per User and Program
+        """
+        financial_aid = FinancialAidFactory.create()
+        # Test creation of FinancialAid that isn't unique_together with "user" and "tier_program__program"
+        FinancialAidFactory.create(user=financial_aid.user)
+        FinancialAidFactory.create(tier_program=financial_aid.tier_program)
+        # Test updating the original FinancialAid doesn't raise ValidationError
+        financial_aid.income_usd = 100
+        financial_aid.save()
+        # Test creation should fail for FinancialAid already existing with the same "user" and "tier_program__program"
+        with self.assertRaises(ValidationError):
+            FinancialAidFactory.create(
+                user=financial_aid.user,
+                tier_program=financial_aid.tier_program
+            )
+
+    def test_save_and_log(self):  # pylint: disable=no-self-use
+        """
+        Tests that FinancialAid.save_and_log() creates an audit record with the correct information.
+        """
+        with mute_signals(post_save):
+            profile = ProfileFactory.create()
+        acting_user = profile.user
+        financial_aid = FinancialAidFactory.create()
+        original_before_json = json.loads(serializers.serialize("json", [financial_aid, ]))[0]["fields"]
+        # Make sure audit object is created
+        assert FinancialAidAudit.objects.count() == 0
+        financial_aid.status = FinancialAidStatus.AUTO_APPROVED
+        financial_aid.save_and_log(acting_user)
+        assert FinancialAidAudit.objects.count() == 1
+        # Make sure the before and after data are correct
+        financial_aid.refresh_from_db()
+        original_after_json = json.loads(serializers.serialize("json", [financial_aid, ]))[0]["fields"]
+        financial_aid_audit = FinancialAidAudit.objects.first()
+        before_json = json.loads(financial_aid_audit.data_before)[0]["fields"]
+        after_json = json.loads(financial_aid_audit.data_after)[0]["fields"]
+        for field, value in before_json.items():
+            # Data before
+            if isinstance(value, float):
+                # JSON serialization of FloatField is precise, so we need to do almost equal
+                self.assertAlmostEqual(value, original_before_json[field])
+            else:
+                assert value == original_before_json[field]
+        for field, value in after_json.items():
+            # Data after
+            if isinstance(value, float):
+                # JSON serialization of FloatField is precise, so we need to do almost equal
+                self.assertAlmostEqual(value, original_after_json[field])
+            else:
+                assert value == original_after_json[field]

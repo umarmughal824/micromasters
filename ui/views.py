@@ -8,8 +8,10 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.core.urlresolvers import reverse
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from django.shortcuts import (
+    redirect,
     render,
     Http404,
 )
@@ -49,10 +51,8 @@ class ReactView(View):  # pylint: disable=unused-argument
         """
         user = request.user
         username = get_social_username(user)
-        name = ""
         roles = []
         if not user.is_anonymous():
-            name = user.profile.preferred_name
             roles = [
                 {
                     'program': role.program.id,
@@ -65,7 +65,6 @@ class ReactView(View):  # pylint: disable=unused-argument
             "gaTrackingID": settings.GA_TRACKING_ID,
             "reactGaDebug": settings.REACT_GA_DEBUG,
             "authenticated": not user.is_anonymous(),
-            "name": name,
             "username": username,
             "host": webpack_dev_server_host(request),
             "edx_base_url": settings.EDXORG_BASE_URL,
@@ -83,9 +82,14 @@ class ReactView(View):  # pylint: disable=unused-argument
             }
         )
 
+    def post(self, request, *args, **kwargs):
+        """Redirect to GET. This assumes there's never any good reason to POST to these views."""
+        return redirect(request.build_absolute_uri())
+
 
 @method_decorator(require_mandatory_urls, name='dispatch')
 @method_decorator(login_required, name='dispatch')
+@method_decorator(csrf_exempt, name='dispatch')
 class DashboardView(ReactView):
     """
     Wrapper for dashboard view which asserts certain logged in requirements
@@ -145,6 +149,7 @@ def terms_of_service(request):
         context={
             "style_src": get_bundle_url(request, "style.js"),
             "js_settings_json": "{}",
+            "signup_dialog_src": get_bundle_url(request, "signup_dialog.js"),
         }
     )
 
