@@ -1,10 +1,12 @@
 // @flow
 import _ from 'lodash';
 import React from 'react';
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import { assert } from 'chai';
 import sinon from 'sinon';
 import moment from 'moment';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
 import FinancialAidCard from './FinancialAidCard';
 import {
@@ -20,27 +22,41 @@ import {
   FA_STATUS_REJECTED,
   FA_STATUS_SKIPPED,
 } from '../../constants';
+import { INITIAL_UI_STATE } from '../../reducers/ui';
 
 describe("FinancialAidCard", () => {
   let sandbox;
+  let openFinancialAidCalculatorStub, setSkipDialogStub;
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    openFinancialAidCalculatorStub = sandbox.stub();
+    setSkipDialogStub = sandbox.stub();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
   });
 
   let renderCard = (props = {}) => {
-    return shallow(
-      <FinancialAidCard
-        program={DASHBOARD_RESPONSE[1]}
-        coursePrice={COURSE_PRICES_RESPONSE[0]}
-        updateDocumentSentDate={sandbox.stub()}
-        documents={{
-          documentSentDate: '2011-11-11'
-        }}
-        fetchDashboard={sandbox.stub()}
-        openFinancialAidCalculator={sandbox.stub()}
-        setDocumentSentDate={sandbox.stub()}
-        {...props}
-      />
+    return mount(
+      <MuiThemeProvider muiTheme={getMuiTheme()}>
+        <FinancialAidCard
+          program={DASHBOARD_RESPONSE[1]}
+          coursePrice={COURSE_PRICES_RESPONSE[0]}
+          updateDocumentSentDate={sandbox.stub()}
+          documents={{
+            documentSentDate: '2011-11-11'
+          }}
+          fetchDashboard={sandbox.stub()}
+          openFinancialAidCalculator={openFinancialAidCalculatorStub}
+          setDocumentSentDate={sandbox.stub()}
+          ui={INITIAL_UI_STATE}
+          setConfirmSkipDialogVisibility={setSkipDialogStub}
+          skipFinancialAid={sandbox.stub()}
+          {...props}
+        />
+      </MuiThemeProvider>
     );
   };
 
@@ -71,14 +87,13 @@ describe("FinancialAidCard", () => {
     });
 
     it('calculates the cost when you click the button', () => {
-      let openFinancialAidCalculator = sandbox.stub();
       const program = programWithStatus();
       program.financial_aid_user_info.has_user_applied = false;
-      let wrapper = renderCard({ program, openFinancialAidCalculator });
+      let wrapper = renderCard({ program });
       let button = wrapper.find(".dashboard-button");
       assert.equal(button.text(), "Calculate your cost");
       button.simulate('click');
-      assert.ok(openFinancialAidCalculator.calledWith());
+      assert.ok(openFinancialAidCalculatorStub.calledWith());
     });
 
     it('shows the minimum and maximum price', () => {
@@ -89,6 +104,21 @@ describe("FinancialAidCard", () => {
       let min = program.financial_aid_user_info.min_possible_cost;
       let max = program.financial_aid_user_info.max_possible_cost;
       assert.deepEqual([`$${min}`, `$${max}`], wrapper.find(".price").map(node => node.text()));
+    });
+
+    it('shows a link to open the calculator', () => {
+      const program = programWithStatus();
+      program.financial_aid_user_info.has_user_applied = false;
+      let wrapper = renderCard({ program });
+      assert.equal(wrapper.find('.full-price').text(), 'Skip this and Pay Full Price');
+    });
+
+    it('opens the skip dialog when you click "Skip this..."', () => {
+      const program = programWithStatus();
+      program.financial_aid_user_info.has_user_applied = false;
+      let wrapper = renderCard({ program });
+      wrapper.find('.full-price').simulate('click');
+      assert.ok(setSkipDialogStub.calledWith(true), 'Dialog should get opened');
     });
   });
 
@@ -144,7 +174,7 @@ describe("FinancialAidCard", () => {
         it(`shows the document sent date for status ${status}`, () => {
           let program = programWithStatus(status);
           let wrapper = renderCard({ program });
-          assert(wrapper.html().includes('Documents mailed on 3/3/2003'));
+          assert(wrapper.text().includes('Documents mailed on 3/3/2003'));
         });
       }
     });

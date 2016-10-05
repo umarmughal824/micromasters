@@ -25,19 +25,24 @@ import {
   DASHBOARD_FORMAT,
   ISO_8601_FORMAT,
 } from '../../constants';
+import SkipFinancialAidDialog from '../SkipFinancialAidDialog';
+import type { UIState } from '../../reducers/ui';
 
 const price = price => <span className="price">{ formatPrice(price) }</span>;
 
 export default class FinancialAidCard extends React.Component {
   props: {
-    program: Program,
-    coursePrice: CoursePrice,
-    openFinancialAidCalculator: () => void,
-    skipFinancialAid: (p: number) => void,
-    documents: DocumentsState,
-    setDocumentSentDate: (sentDate: string) => void,
-    updateDocumentSentDate: (financialAidId: number, sentDate: string) => Promise<*>,
-    fetchDashboard: () => void,
+    program:                        Program,
+    coursePrice:                    CoursePrice,
+    openFinancialAidCalculator:     () => void,
+    skipFinancialAid:               (p: number) => void,
+    documents:                      DocumentsState,
+    setDocumentSentDate:            (sentDate: string) => void,
+    updateDocumentSentDate:         (financialAidId: number, sentDate: string) => Promise<*>,
+    fetchDashboard:                 () => void,
+    setConfirmSkipDialogVisibility: (b: boolean) => void,
+    ui:                             UIState,
+    skipFinancialAid:               () => void,
   };
 
   submitDocuments = (): void => {
@@ -99,14 +104,15 @@ export default class FinancialAidCard extends React.Component {
 
   renderInitialAidPrompt() {
     const {
-      program,
+      program: {
+        financial_aid_user_info: {
+          min_possible_cost: minPossibleCost,
+          max_possible_cost: maxPossibleCost,
+        }
+      },
       openFinancialAidCalculator,
-      skipFinancialAid,
+      setConfirmSkipDialogVisibility,
     } = this.props;
-    const {
-      min_possible_cost: minPossibleCost,
-      max_possible_cost: maxPossibleCost,
-    } = program.financial_aid_user_info;
 
     return <div className="personalized-pricing">
       <div className="heading">
@@ -124,7 +130,7 @@ export default class FinancialAidCard extends React.Component {
         >
           Calculate your cost
         </button>
-        <a className="full-price" onClick={() => skipFinancialAid(program.id)}>
+        <a className="full-price" onClick={() => setConfirmSkipDialogVisibility(true)}>
           Skip this and Pay Full Price
         </a>
       </div>
@@ -199,7 +205,17 @@ export default class FinancialAidCard extends React.Component {
   }
 
   render() {
-    const { program } = this.props;
+    const {
+      program,
+      program: {
+        financial_aid_user_info: {
+          max_possible_cost: maxPossibleCost,
+        }
+      },
+      ui: { skipDialogVisibility },
+      setConfirmSkipDialogVisibility,
+      skipFinancialAid,
+    } = this.props;
 
     let contents;
     if (!program.financial_aid_user_info.has_user_applied) {
@@ -209,6 +225,12 @@ export default class FinancialAidCard extends React.Component {
     }
 
     return <Card shadow={0}>
+      <SkipFinancialAidDialog
+        open={skipDialogVisibility}
+        cancel={() => setConfirmSkipDialogVisibility(false)}
+        skip={() => skipFinancialAid(program.id)}
+        fullPrice={price(maxPossibleCost)}
+      />
       <CardTitle>Pricing Based on Income</CardTitle>
       <div>
         {contents}
