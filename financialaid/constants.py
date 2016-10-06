@@ -6,6 +6,51 @@ from urllib.parse import quote_plus
 from django.conf import settings
 
 
+class FinancialAidJustification:
+    """
+    Justifications for financial aid decisions
+    """
+    OKAY = "Documents in order"
+    NOT_NOTARIZED = "Docs not notarized"
+    INSUFFICIENT = "Insufficient docs"
+    INCOME_INACCURATE = "Inaccurate income reported"
+    COUNTRY_INACCURATE = "Inaccurate country reported"
+
+    ALL_JUSTIFICATIONS = [OKAY, NOT_NOTARIZED, INSUFFICIENT, INCOME_INACCURATE, COUNTRY_INACCURATE]
+
+
+class FinancialAidStatus:
+    """Statuses for the Financial Aid model"""
+    APPROVED = 'approved'
+    AUTO_APPROVED = 'auto-approved'
+    CREATED = 'created'
+    DOCS_SENT = 'docs-sent'
+    PENDING_DOCS = 'pending-docs'
+    PENDING_MANUAL_APPROVAL = 'pending-manual-approval'
+    SKIPPED = 'skipped'
+
+    ALL_STATUSES = [
+        APPROVED,
+        AUTO_APPROVED,
+        CREATED,
+        DOCS_SENT,
+        PENDING_DOCS,
+        PENDING_MANUAL_APPROVAL,
+        SKIPPED
+    ]
+    TERMINAL_STATUSES = [APPROVED, AUTO_APPROVED, SKIPPED]
+
+    STATUS_MESSAGES_DICT = {
+        APPROVED: "Approved",
+        AUTO_APPROVED: "Auto-Approved",
+        CREATED: "--",
+        DOCS_SENT: "Documents Sent by User",
+        PENDING_DOCS: "Started Applications",
+        PENDING_MANUAL_APPROVAL: "Pending Approval (Documents Received)",
+        SKIPPED: "Skipped"
+    }
+
+
 CURRENCY_EXCHANGE_RATE_API_REQUEST_URL = "{url}latest.json?app_id={app_id}".format(
     url=settings.OPEN_EXCHANGE_RATES_URL,
     app_id=quote_plus(settings.OPEN_EXCHANGE_RATES_APP_ID)

@@ -6,6 +6,7 @@ from unittest.mock import Mock, patch
 
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.test import APIClient
@@ -15,6 +16,10 @@ from courses.models import Program
 from dashboard.models import ProgramEnrollment
 from ecommerce.factories import CoursePriceFactory
 from financialaid.api_test import FinancialAidBaseTestCase
+from financialaid.constants import (
+    FinancialAidJustification,
+    FinancialAidStatus
+)
 from financialaid.factories import (
     FinancialAidFactory,
     TierProgramFactory
@@ -22,7 +27,6 @@ from financialaid.factories import (
 from financialaid.models import (
     FinancialAid,
     FinancialAidAudit,
-    FinancialAidStatus,
     CurrencyExchangeRate
 )
 from mail.api import generate_financial_aid_email
@@ -201,16 +205,16 @@ class FinancialAidViewTests(FinancialAidBaseTestCase, APIClient):
         """
         Tests ReviewFinancialAidView with filters and sorting
         """
-        FinancialAidFactory.create(tier_program=self.tier_programs["0k"], status=FinancialAidStatus.AUTO_APPROVED)
-        FinancialAidFactory.create(tier_program=self.tier_programs["0k"], status=FinancialAidStatus.APPROVED)
+        for _ in range(100):
+            FinancialAidFactory.create(tier_program=self.tier_programs["0k"])
         self.client.force_login(self.staff_user_profile.user)
-        # Should work a filter
+        # Should work with a filter
         resp = self.assert_http_status(self.client.get, self.review_url_with_filter, status.HTTP_200_OK)
         resp_obj_id_list = resp.context_data["financial_aid_objects"].values_list("id", flat=True)
         expected_obj_id_list = FinancialAid.objects.filter(
             tier_program__program_id=self.program.id,
             status=FinancialAidStatus.AUTO_APPROVED
-        ).order_by("user__profile__first_name").values_list("id", flat=True)  # Default sort field
+        ).order_by("user__profile__last_name").values_list("id", flat=True)  # Default sort field
         self.assertListEqual(list(resp_obj_id_list), list(expected_obj_id_list))
         # Should work with sorting
         url_with_sorting = "{url}?sort_by=-last_name".format(url=self.review_url)
@@ -221,7 +225,7 @@ class FinancialAidViewTests(FinancialAidBaseTestCase, APIClient):
             status=FinancialAidStatus.PENDING_MANUAL_APPROVAL  # Default filter field
         ).order_by("-user__profile__last_name").values_list("id", flat=True)
         self.assertListEqual(list(resp_obj_id_list), list(expected_obj_id_list))
-        # Should work a filter and sorting
+        # Should work with a filter and sorting
         url_with_filter_and_sorting = "{url}?sort_by=-last_name".format(url=self.review_url_with_filter)
         resp = self.assert_http_status(self.client.get, url_with_filter_and_sorting, status.HTTP_200_OK)
         resp_obj_id_list = resp.context_data["financial_aid_objects"].values_list("id", flat=True)
@@ -252,25 +256,52 @@ class FinancialAidViewTests(FinancialAidBaseTestCase, APIClient):
         url_with_bad_filter_and_bad_sorting = "{url}?sort_by=-askjdf".format(url=url_with_bad_filter)
         self.assert_http_status(self.client.get, url_with_bad_filter_and_bad_sorting, status.HTTP_200_OK)
 
+    def test_review_financial_aid_view_with_search(self):
+        """
+        Tests that ReviewFinancialAidView returns the expected results with search
+        """
+        for _ in range(100):
+            FinancialAidFactory.create(tier_program=self.tier_programs["0k"])
+        self.client.force_login(self.staff_user_profile.user)
+        # Works with search and filter
+        search_query = self.financialaid_approved.user.profile.first_name
+        search_url = "{path}?search_query={search_query}".format(
+            path=self.review_url_with_filter,
+            search_query=search_query
+        )
+        resp = self.assert_http_status(self.client.get, search_url, status.HTTP_200_OK)
+        resp_obj_id_list = resp.context_data["financial_aid_objects"].values_list("id", flat=True)
+        expected_obj_id_list = FinancialAid.objects.filter(
+            Q(user__profile__first_name__icontains=search_query) | Q(user__profile__last_name__icontains=search_query),
+            tier_program__program_id=self.program.id,
+            status=FinancialAidStatus.AUTO_APPROVED
+        ).order_by("user__profile__last_name").values_list("id", flat=True)  # Default sort field
+        self.assertListEqual(list(resp_obj_id_list), list(expected_obj_id_list))
+
 
 @patch("financialaid.serializers.MailgunClient")  # pylint: disable=missing-docstring
 class FinancialAidActionTests(FinancialAidBaseTestCase, APIClient):
     """
     Tests for financialaid views
     """
-    def setUp(self):
-        super().setUp()
-        self.financialaid = FinancialAidFactory.create(
-            user=self.profile.user,
-            tier_program=self.tier_programs["25k"],
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.financialaid = FinancialAidFactory.create(
+            user=cls.profile.user,
+            tier_program=cls.tier_programs["25k"],
             status=FinancialAidStatus.PENDING_MANUAL_APPROVAL
         )
-        self.action_url = reverse("financial_aid_action", kwargs={"financial_aid_id": self.financialaid.id})
+        cls.action_url = reverse("financial_aid_action", kwargs={"financial_aid_id": cls.financialaid.id})
+
+    def setUp(self):
+        super().setUp()
+        self.financialaid.refresh_from_db()
         self.client.force_login(self.staff_user_profile.user)
         self.data = {
-            "financial_aid_id": self.financialaid.id,
             "action": FinancialAidStatus.APPROVED,
-            "tier_program_id": self.financialaid.tier_program.id
+            "tier_program_id": self.financialaid.tier_program.id,
+            "justification": FinancialAidJustification.NOT_NOTARIZED
         }
 
     def test_not_allowed(self, *args):  # pylint: disable=unused-argument
@@ -279,72 +310,96 @@ class FinancialAidActionTests(FinancialAidBaseTestCase, APIClient):
         """
         # Not allowed for default logged-in user
         self.client.force_login(self.profile.user)
-        self.assert_http_status(self.client.put, self.action_url, status.HTTP_403_FORBIDDEN, data=self.data)
+        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_403_FORBIDDEN, data=self.data)
         # Not allowed for staff of different program
         self.client.force_login(self.staff_user_profile2.user)
-        self.assert_http_status(self.client.put, self.action_url, status.HTTP_403_FORBIDDEN, data=self.data)
+        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_403_FORBIDDEN, data=self.data)
         # Not allowed for instructors (regardless of program)
         self.client.force_login(self.instructor_user_profile.user)
-        self.assert_http_status(self.client.put, self.action_url, status.HTTP_403_FORBIDDEN, data=self.data)
+        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_403_FORBIDDEN, data=self.data)
         # Not allowed for logged-out user
         self.client.logout()
-        self.assert_http_status(self.client.put, self.action_url, status.HTTP_403_FORBIDDEN, data=self.data)
+        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_403_FORBIDDEN, data=self.data)
 
     def test_invalid_action(self, *args):  # pylint: disable=unused-argument
         """
         Tests FinancialAidActionView when invalid action is posted
         """
-        # Invalid action
-        self.client.force_login(self.staff_user_profile.user)
-        self.data["action"] = FinancialAidStatus.PENDING_DOCS
-        self.assert_http_status(self.client.put, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
+        # No action
+        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_400_BAD_REQUEST)
+        # Invalid actions
+        invalid_statuses = [
+            status for status in FinancialAidStatus.ALL_STATUSES
+            if status not in [FinancialAidStatus.APPROVED, FinancialAidStatus.PENDING_MANUAL_APPROVAL]
+        ]
+        for invalid_status in invalid_statuses:
+            self.assert_http_status(
+                self.client.patch,
+                self.action_url,
+                status.HTTP_400_BAD_REQUEST,
+                data={"action": invalid_status}
+            )
 
     def test_invalid_tier_program(self, *args):  # pylint: disable=unused-argument
         """
         Tests FinancialAidActionView when invalid tier_program is posted
         """
-        self.client.force_login(self.staff_user_profile.user)
         self.data["action"] = FinancialAidStatus.APPROVED
         # Not current tier
         self.data["tier_program_id"] = self.tier_programs["75k_not_current"].id
-        self.assert_http_status(self.client.put, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
+        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
         # Not part of the same program
         self.data["tier_program_id"] = TierProgramFactory.create().id  # Will be part of a different program
-        self.assert_http_status(self.client.put, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
+        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
+        # No tier program
+        self.data.pop("tier_program_id")
+        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
 
     def test_approve_invalid_status(self, *args):  # pylint: disable=unused-argument
         """
         Tests FinancialAidActionView when trying to approve a FinancialAid that isn't pending manual approval
+        or docs sent
         """
         # FinancialAid object that cannot be approved
         self.data["action"] = FinancialAidStatus.APPROVED
         statuses_to_test = [
-            FinancialAidStatus.CREATED,
-            FinancialAidStatus.AUTO_APPROVED,
-            FinancialAidStatus.PENDING_DOCS,
-            FinancialAidStatus.APPROVED
+            status for status in FinancialAidStatus.ALL_STATUSES
+            if status != FinancialAidStatus.PENDING_MANUAL_APPROVAL
         ]
         for financial_aid_status in statuses_to_test:
             self.financialaid.status = financial_aid_status
             self.financialaid.save()
-            self.assert_http_status(self.client.put, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
+            self.assert_http_status(self.client.patch, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
+
+    def test_approve_invalid_justification(self, *args):  # pylint: disable=unused-argument
+        """
+        Tests FinancialAidActionView when trying to approve a FinancialAid with an invalid justification
+        """
+        # FinancialAid object that cannot be approved
+        self.data["justification"] = "somerandomstring"
+        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
+        # No justification
+        self.data.pop("justification")
+        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
 
     def test_mark_documents_received_invalid_status(self, *args):  # pylint: disable=unused-argument
         """
         Tests FinancialAidActionView when trying to approve a FinancialAid that isn't pending docs
         """
         # FinancialAid object whose documents cannot received
-        self.data["action"] = FinancialAidStatus.PENDING_MANUAL_APPROVAL
         statuses_to_test = [
-            FinancialAidStatus.CREATED,
-            FinancialAidStatus.AUTO_APPROVED,
-            FinancialAidStatus.PENDING_MANUAL_APPROVAL,
-            FinancialAidStatus.APPROVED
+            status for status in FinancialAidStatus.ALL_STATUSES
+            if status not in [FinancialAidStatus.PENDING_DOCS, FinancialAidStatus.DOCS_SENT]
         ]
         for financial_aid_status in statuses_to_test:
             self.financialaid.status = financial_aid_status
             self.financialaid.save()
-            self.assert_http_status(self.client.put, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
+            self.assert_http_status(
+                self.client.patch,
+                self.action_url,
+                status.HTTP_400_BAD_REQUEST,
+                data={"action": FinancialAidStatus.PENDING_MANUAL_APPROVAL}
+            )
 
     def test_approval(self, mock_mailgun_client):
         """
@@ -356,11 +411,13 @@ class FinancialAidActionTests(FinancialAidBaseTestCase, APIClient):
             json=mocked_json()
         )
         assert self.financialaid.status != FinancialAidStatus.APPROVED
-        self.assert_http_status(self.client.put, self.action_url, status.HTTP_200_OK, data=self.data)
+        assert self.financialaid.justification != FinancialAidJustification.NOT_NOTARIZED
+        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_200_OK, data=self.data)
         # Application is approved for the tier program in the financial aid object
         self.financialaid.refresh_from_db()
         assert self.financialaid.tier_program == self.tier_programs["25k"]
         assert self.financialaid.status == FinancialAidStatus.APPROVED
+        assert self.financialaid.justification == FinancialAidJustification.NOT_NOTARIZED
         assert mock_mailgun_client.send_financial_aid_email.called
         _, called_kwargs = mock_mailgun_client.send_financial_aid_email.call_args
         assert called_kwargs["acting_user"] == self.staff_user_profile.user
@@ -381,7 +438,7 @@ class FinancialAidActionTests(FinancialAidBaseTestCase, APIClient):
         assert self.financialaid.tier_program != self.tier_programs["50k"]
         assert self.financialaid.status != FinancialAidStatus.APPROVED
         self.data["tier_program_id"] = self.tier_programs["50k"].id
-        self.assert_http_status(self.client.put, self.action_url, status.HTTP_200_OK, data=self.data)
+        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_200_OK, data=self.data)
         # Application is approved for a different tier program
         self.financialaid.refresh_from_db()
         assert self.financialaid.tier_program == self.tier_programs["50k"]
@@ -407,9 +464,13 @@ class FinancialAidActionTests(FinancialAidBaseTestCase, APIClient):
         assert self.financialaid.tier_program == self.tier_programs["25k"]
         self.financialaid.status = FinancialAidStatus.PENDING_DOCS
         self.financialaid.save()
-        self.data["action"] = FinancialAidStatus.PENDING_MANUAL_APPROVAL
         # Set action to pending manual approval from pending-docs
-        self.assert_http_status(self.client.put, self.action_url, status.HTTP_200_OK, data=self.data)
+        self.assert_http_status(
+            self.client.patch,
+            self.action_url,
+            status.HTTP_200_OK,
+            data={"action": FinancialAidStatus.PENDING_MANUAL_APPROVAL}
+        )
         self.financialaid.refresh_from_db()
         # Check that the tier does not change:
         assert self.financialaid.tier_program == self.tier_programs["25k"]
@@ -435,9 +496,13 @@ class FinancialAidActionTests(FinancialAidBaseTestCase, APIClient):
         assert self.financialaid.tier_program == self.tier_programs["25k"]
         self.financialaid.status = FinancialAidStatus.DOCS_SENT
         self.financialaid.save()
-        self.data["action"] = FinancialAidStatus.PENDING_MANUAL_APPROVAL
         # Set action to pending manual approval from pending-docs
-        self.assert_http_status(self.client.put, self.action_url, status.HTTP_200_OK, data=self.data)
+        self.assert_http_status(
+            self.client.patch,
+            self.action_url,
+            status.HTTP_200_OK,
+            data={"action": FinancialAidStatus.PENDING_MANUAL_APPROVAL}
+        )
         self.financialaid.refresh_from_db()
         # Check that the tier does not change:
         assert self.financialaid.tier_program == self.tier_programs["25k"]
@@ -477,7 +542,7 @@ class FinancialAidDetailViewTests(FinancialAidBaseTestCase, APIClient):
         Tests FinancialAidDetailView for user editing their own financial aid document status
         """
         self.client.force_login(self.enrolled_profile3.user)
-        self.assert_http_status(self.client.put, self.docs_sent_url, status.HTTP_200_OK, data=self.data)
+        self.assert_http_status(self.client.patch, self.docs_sent_url, status.HTTP_200_OK, data=self.data)
         self.financialaid_pending_docs.refresh_from_db()
         assert self.financialaid_pending_docs.status == FinancialAidStatus.DOCS_SENT
         assert self.financialaid_pending_docs.date_documents_sent == datetime.date(2016, 9, 25)
@@ -494,7 +559,7 @@ class FinancialAidDetailViewTests(FinancialAidBaseTestCase, APIClient):
         ]
         for unpermitted_user in unpermitted_users_to_test:
             self.client.force_login(unpermitted_user)
-            self.assert_http_status(self.client.put, self.docs_sent_url, status.HTTP_403_FORBIDDEN, data=self.data)
+            self.assert_http_status(self.client.patch, self.docs_sent_url, status.HTTP_403_FORBIDDEN, data=self.data)
 
     def test_correct_status_change_on_indicating_documents_sent(self):
         """
@@ -511,7 +576,7 @@ class FinancialAidDetailViewTests(FinancialAidBaseTestCase, APIClient):
             self.financialaid_pending_docs.status = financial_aid_status
             self.financialaid_pending_docs.save()
             self.client.force_login(self.enrolled_profile3.user)
-            self.assert_http_status(self.client.put, self.docs_sent_url, status.HTTP_400_BAD_REQUEST, data=self.data)
+            self.assert_http_status(self.client.patch, self.docs_sent_url, status.HTTP_400_BAD_REQUEST, data=self.data)
 
 
 class CoursePriceDetailViewTests(FinancialAidBaseTestCase, APIClient):
@@ -618,7 +683,7 @@ class LearnerSkipsFinancialAid(FinancialAidBaseTestCase, APIClient):
         assert FinancialAidAudit.objects.count() == 0
         # Check number of financial aid objects (two are created at test setup)
         assert FinancialAid.objects.count() == 2
-        self.assert_http_status(self.client.put, self.skip_url, status.HTTP_200_OK)
+        self.assert_http_status(self.client.patch, self.skip_url, status.HTTP_200_OK)
         assert FinancialAid.objects.count() == 3
         financialaid = FinancialAid.objects.get(user=self.enrolled_profile3.user, tier_program__program=self.program)
         assert financialaid.tier_program == self.tier_programs["75k"]
@@ -634,7 +699,7 @@ class LearnerSkipsFinancialAid(FinancialAidBaseTestCase, APIClient):
         assert FinancialAidAudit.objects.count() == 0
         # Check number of financial aid objects (two are created at test setup)
         assert FinancialAid.objects.count() == 2
-        self.assert_http_status(self.client.put, self.skip_url, status.HTTP_200_OK)
+        self.assert_http_status(self.client.patch, self.skip_url, status.HTTP_200_OK)
         assert FinancialAid.objects.count() == 2
         self.financialaid_pending.refresh_from_db()
         assert self.financialaid_pending.tier_program == self.tier_programs["75k"]
@@ -650,7 +715,7 @@ class LearnerSkipsFinancialAid(FinancialAidBaseTestCase, APIClient):
         for financial_aid_status in FinancialAidStatus.TERMINAL_STATUSES:
             self.financialaid_pending.status = financial_aid_status
             self.financialaid_pending.save()
-            self.assert_http_status(self.client.put, self.skip_url, status.HTTP_400_BAD_REQUEST)
+            self.assert_http_status(self.client.patch, self.skip_url, status.HTTP_400_BAD_REQUEST)
 
     def test_financialaid_object_cannot_be_skipped_if_aid_not_available(self):
         """
@@ -660,7 +725,7 @@ class LearnerSkipsFinancialAid(FinancialAidBaseTestCase, APIClient):
         self.client.force_login(self.enrolled_profile3.user)
         self.program.financial_aid_availability = False
         self.program.save()
-        self.assert_http_status(self.client.put, self.skip_url, status.HTTP_400_BAD_REQUEST)
+        self.assert_http_status(self.client.patch, self.skip_url, status.HTTP_400_BAD_REQUEST)
 
     def test_financialaid_object_cannot_be_skipped_if_not_enrolled_in_program(self):
         """
@@ -670,7 +735,7 @@ class LearnerSkipsFinancialAid(FinancialAidBaseTestCase, APIClient):
         with self.assertRaises(ProgramEnrollment.DoesNotExist):
             ProgramEnrollment.objects.get(user=self.enrolled_profile3.user, program=self.program2)
         url = reverse("financial_aid_skip", kwargs={"program_id": self.program2.id})
-        self.assert_http_status(self.client.put, url, status.HTTP_400_BAD_REQUEST)
+        self.assert_http_status(self.client.patch, url, status.HTTP_400_BAD_REQUEST)
 
     def test_financialaid_object_cannot_be_skipped_for_nonexisting_program(self):
         """
@@ -681,7 +746,7 @@ class LearnerSkipsFinancialAid(FinancialAidBaseTestCase, APIClient):
         invalid_program_id = 8675305
         assert invalid_program_id not in valid_program_ids
         url = reverse("financial_aid_skip", kwargs={"program_id": invalid_program_id})
-        self.assert_http_status(self.client.put, url, status.HTTP_404_NOT_FOUND)
+        self.assert_http_status(self.client.patch, url, status.HTTP_404_NOT_FOUND)
 
     def test_skip_financial_aid_only_put_allowed(self):
         """

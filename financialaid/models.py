@@ -13,6 +13,7 @@ from django.db import (
 from django.forms.models import model_to_dict
 
 from courses.models import Program
+from financialaid.constants import FinancialAidStatus
 
 
 class TimestampedModelQuerySet(models.query.QuerySet):
@@ -97,36 +98,6 @@ class TierProgram(TimestampedModel):
         return super(TierProgram, self).save(*args, **kwargs)
 
 
-class FinancialAidStatus:
-    """Statuses for the Financial Aid model"""
-    CREATED = 'created'
-    AUTO_APPROVED = 'auto-approved'
-    PENDING_DOCS = 'pending-docs'
-    DOCS_SENT = 'docs-sent'
-    PENDING_MANUAL_APPROVAL = 'pending-manual-approval'
-    APPROVED = 'approved'
-    SKIPPED = 'skipped'
-
-    ALL_STATUSES = [
-        CREATED,
-        APPROVED,
-        AUTO_APPROVED,
-        PENDING_DOCS,
-        DOCS_SENT,
-        PENDING_MANUAL_APPROVAL,
-        SKIPPED
-    ]
-    TERMINAL_STATUSES = [APPROVED, AUTO_APPROVED, SKIPPED]
-    STATUS_MESSAGES_DICT = {
-        CREATED: "Created Applications",
-        AUTO_APPROVED: "Auto-approved Applications",
-        PENDING_DOCS: "Incomplete Applications",
-        DOCS_SENT: "Incomplete Applications (Documents Sent)",
-        PENDING_MANUAL_APPROVAL: "Pending Applications",
-        APPROVED: "Approved Applications",
-    }
-
-
 class FinancialAid(TimestampedModel):
     """
     An application for financial aid/personal pricing
@@ -145,6 +116,7 @@ class FinancialAid(TimestampedModel):
     country_of_income = models.CharField(null=True, max_length=100)
     date_exchange_rate = models.DateTimeField(null=True)
     date_documents_sent = models.DateField(null=True, blank=True)
+    justification = models.TextField(null=True)
 
     def to_dict(self):
         """

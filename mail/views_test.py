@@ -2,6 +2,7 @@
 Tests for HTTP email API views
 """
 from unittest.mock import Mock, patch
+
 from django.core.urlresolvers import reverse
 from django.db.models.signals import post_save
 from rest_framework import status
@@ -9,9 +10,10 @@ from rest_framework.test import APITestCase
 from rest_framework.response import Response
 from factory.django import mute_signals
 
+from courses.factories import ProgramFactory
+from financialaid.api_test import FinancialAidBaseTestCase
 from financialaid.factories import FinancialAidFactory, TierProgramFactory
 from profiles.factories import ProfileFactory
-from courses.factories import ProgramFactory
 from roles.models import Role
 from roles.roles import Staff, Instructor
 
@@ -104,7 +106,7 @@ class MailViewsTests(APITestCase):
 
 
 @patch('mail.views.MailgunClient')
-class FinancialAidMailViewsTests(APITestCase):
+class FinancialAidMailViewsTests(FinancialAidBaseTestCase, APITestCase):
     """
     Tests for FinancialAidMailViews
     """
@@ -137,14 +139,31 @@ class FinancialAidMailViewsTests(APITestCase):
         cls.financial_aid = FinancialAidFactory.create(
             tier_program=TierProgramFactory.create(program=cls.program)
         )
-        cls.financial_aid_mail_url = reverse(
+        cls.url = reverse(
             'financial_aid_mail_api',
             kwargs={'financial_aid_id': cls.financial_aid.id}
         )
         cls.request_data = {
             'email_subject': 'email subject',
-            'email_body': 'email body',
+            'email_body': 'email body'
         }
+
+    def test_financial_aid_mail_view_not_allowed(self, mock_mailgun_client):  # pylint: disable=unused-argument
+        """
+        Tests permissions for FinancialAidMailView
+        """
+        # Different program's staff
+        self.client.force_login(self.staff_user_profile2.user)
+        self.assert_http_status(self.client.post, self.url, status.HTTP_403_FORBIDDEN, data=self.request_data)
+        # Instructor
+        self.client.force_login(self.instructor_user_profile.user)
+        self.assert_http_status(self.client.post, self.url, status.HTTP_403_FORBIDDEN, data=self.request_data)
+        # Other learner
+        self.client.force_login(self.profile2.user)
+        self.assert_http_status(self.client.post, self.url, status.HTTP_403_FORBIDDEN, data=self.request_data)
+        # Not logged in
+        self.client.logout()
+        self.assert_http_status(self.client.post, self.url, status.HTTP_403_FORBIDDEN, data=self.request_data)
 
     def test_send_financial_aid_view(self, mock_mailgun_client):
         """
@@ -156,7 +175,7 @@ class FinancialAidMailViewsTests(APITestCase):
             status_code=status.HTTP_200_OK,
             json=mocked_json()
         )
-        resp_post = self.client.post(self.financial_aid_mail_url, data=self.request_data, format='json')
+        resp_post = self.client.post(self.url, data=self.request_data, format='json')
         assert resp_post.status_code == status.HTTP_200_OK
         assert mock_mailgun_client.send_financial_aid_email.called
         _, called_kwargs = mock_mailgun_client.send_financial_aid_email.call_args
@@ -170,17 +189,17 @@ class FinancialAidMailViewsTests(APITestCase):
         Test that the FinancialAidMailView returns 403 for not allowed permissions
         """
         # Not logged in
-        resp = self.client.post(self.financial_aid_mail_url, data=self.request_data, format='json')
+        resp = self.client.post(self.url, data=self.request_data, format='json')
         assert resp.status_code == status.HTTP_403_FORBIDDEN
         # Instructor
         self.client.force_login(self.instructor_user)
-        resp = self.client.post(self.financial_aid_mail_url, data=self.request_data, format='json')
+        resp = self.client.post(self.url, data=self.request_data, format='json')
         assert resp.status_code == status.HTTP_403_FORBIDDEN
         # Staff of a different program
         self.client.force_login(self.staff_user2)
-        resp = self.client.post(self.financial_aid_mail_url, data=self.request_data, format='json')
+        resp = self.client.post(self.url, data=self.request_data, format='json')
         assert resp.status_code == status.HTTP_403_FORBIDDEN
         # Learner
         self.client.force_login(self.learner_user)
-        resp = self.client.post(self.financial_aid_mail_url, data=self.request_data, format='json')
+        resp = self.client.post(self.url, data=self.request_data, format='json')
         assert resp.status_code == status.HTTP_403_FORBIDDEN
