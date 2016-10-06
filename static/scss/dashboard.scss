@@ -129,6 +129,15 @@ c.validation-wrapper {
     margin: 0;
   }
 
+  .price-explanation {
+    display: flex;
+    justify-content: space-between;
+
+    a {
+      cursor: pointer;
+    }
+  }
+
   .document-row {
     display: flex;
     flex-direction: row;
