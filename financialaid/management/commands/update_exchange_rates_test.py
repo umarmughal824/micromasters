@@ -1,22 +1,22 @@
 """
 Test for management command generating exchange rates
 """
+from django.test import TestCase
 from mock import patch
 
 from financialaid.constants import CURRENCY_EXCHANGE_RATE_API_REQUEST_URL
-from financialaid.management.commands import generate_exchange_rates
+from financialaid.management.commands import update_exchange_rates
 from financialaid.models import CurrencyExchangeRate
-from search.base import ESTestCase
 
 
 @patch('financialaid.tasks.requests.get')
-class GenerateExchangeRatesTest(ESTestCase):
+class GenerateExchangeRatesTest(TestCase):
     """
     Tests for generate_exchange_rates management command
     """
     @classmethod
     def setUpTestData(cls):
-        cls.command = generate_exchange_rates.Command()
+        cls.command = update_exchange_rates.Command()
 
     def setUp(self):
         super(GenerateExchangeRatesTest, self).setUp()
@@ -39,9 +39,9 @@ class GenerateExchangeRatesTest(ESTestCase):
         called_args, _ = mocked_request.call_args
         assert called_args[0] == CURRENCY_EXCHANGE_RATE_API_REQUEST_URL
         assert CurrencyExchangeRate.objects.count() == 3
-        currency = CurrencyExchangeRate.objects.get(currency_code="CBA")
-        assert currency.exchange_rate == 3.5
-        currency = CurrencyExchangeRate.objects.get(currency_code="FED")
-        assert currency.exchange_rate == 1.9
-        currency = CurrencyExchangeRate.objects.get(currency_code="RQP")
-        assert currency.exchange_rate == 0.5
+        currency_cba = CurrencyExchangeRate.objects.get(currency_code="CBA")
+        assert currency_cba.exchange_rate == 3.5
+        currency_fed = CurrencyExchangeRate.objects.get(currency_code="FED")
+        assert currency_fed.exchange_rate == 1.9
+        currency_rqp = CurrencyExchangeRate.objects.get(currency_code="RQP")
+        assert currency_rqp.exchange_rate == 0.5
