@@ -470,7 +470,7 @@ class TestUsersPage(ViewsTests):
 
     def test_users_index_logged_in(self):
         """
-        Assert that a logged in user gets a 200 going to /users/
+        Assert that a logged in user gets a 200 going to /learner/
         """
         self.create_and_login_user()
         resp = self.client.get(reverse('ui-users'))
@@ -479,7 +479,7 @@ class TestUsersPage(ViewsTests):
 
     def test_users_index_anonymous(self):
         """
-        Assert that an anonymous user gets a 404 going to /users/
+        Assert that an anonymous user gets a 404 going to /learner/
         """
         resp = self.client.get(reverse('ui-users'))
         assert resp.status_code == 404
