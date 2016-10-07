@@ -15,7 +15,10 @@ import {
   TOAST_SUCCESS,
   TOAST_FAILURE,
 } from '../constants';
-import { setToastMessage } from '../actions/ui';
+import {
+  setToastMessage,
+  setConfirmSkipDialogVisibility,
+} from '../actions/ui';
 import { createForm } from '../util/util';
 import CourseListCard from '../components/dashboard/CourseListCard';
 import DashboardUserCard from '../components/dashboard/DashboardUserCard';
@@ -23,12 +26,19 @@ import FinancialAidCard from '../components/dashboard/FinancialAidCard';
 import ErrorMessage from '../components/ErrorMessage';
 import ProgressWidget from '../components/ProgressWidget';
 import { setCalculatorDialogVisibility } from '../actions/ui';
-import { setDocumentSentDate } from '../actions/documents';
+import {
+  setDocumentSentDate,
+  updateDocumentSentDate,
+} from '../actions/documents';
 import { startCalculatorEdit } from '../actions/financial_aid';
 import type { UIState } from '../reducers/ui';
+import type {
+  DocumentsState,
+} from '../reducers/documents';
 import type { CoursePricesState, DashboardState } from '../flow/dashboardTypes';
 import type { ProgramEnrollment } from '../flow/enrollmentTypes';
 import type { ProfileGetResult } from '../flow/profileTypes';
+import { skipFinancialAid } from '../actions/financial_aid';
 
 class DashboardPage extends React.Component {
   static contextTypes = {
@@ -113,9 +123,26 @@ class DashboardPage extends React.Component {
     dispatch(startCalculatorEdit(currentProgramEnrollment.id));
   };
 
-  setDocumentSentDate = newDate => {
+  setDocumentSentDate = (newDate: string): void => {
     const { dispatch } = this.props;
     dispatch(setDocumentSentDate(newDate));
+  };
+
+  skipFinancialAid = programId => {
+    const { dispatch } = this.props;
+    dispatch(skipFinancialAid(programId)).then(() => {
+      this.setConfirmSkipDialogVisibility(false);
+    });
+  };
+
+  setConfirmSkipDialogVisibility = bool => {
+    const { dispatch } = this.props;
+    dispatch(setConfirmSkipDialogVisibility(bool));
+  };
+
+  updateDocumentSentDate = (financialAidId: number, sentDate: string): Promise<*> => {
+    const { dispatch } = this.props;
+    return dispatch(updateDocumentSentDate(financialAidId, sentDate));
   };
 
   render() {
@@ -123,8 +150,9 @@ class DashboardPage extends React.Component {
       dashboard,
       prices,
       profile: { profile },
-      documents: { documentSentDate },
+      documents,
       currentProgramEnrollment,
+      ui,
     } = this.props;
     const loaded = dashboard.fetchStatus !== FETCH_PROCESSING && prices.fetchStatus !== FETCH_PROCESSING;
     let errorMessage;
@@ -148,8 +176,12 @@ class DashboardPage extends React.Component {
           program={program}
           coursePrice={coursePrice}
           openFinancialAidCalculator={this.openFinancialAidCalculator}
-          documentSentDate={documentSentDate}
+          documents={documents}
           setDocumentSentDate={this.setDocumentSentDate}
+          skipFinancialAid={this.skipFinancialAid}
+          updateDocumentSentDate={this.updateDocumentSentDate}
+          setConfirmSkipDialogVisibility={this.setConfirmSkipDialogVisibility}
+          ui={ui}
         />;
       }
 

@@ -4,15 +4,16 @@ Models for the Financial Aid App
 import datetime
 
 from django.contrib.auth.models import User
-from django.core import serializers
 from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import (
     models,
     transaction,
 )
+from django.forms.models import model_to_dict
 
 from courses.models import Program
+from financialaid.constants import FinancialAidStatus
 
 
 class TimestampedModelQuerySet(models.query.QuerySet):
@@ -97,39 +98,6 @@ class TierProgram(TimestampedModel):
         return super(TierProgram, self).save(*args, **kwargs)
 
 
-class FinancialAidStatus:
-    """Statuses for the Financial Aid model"""
-    CREATED = 'created'
-    AUTO_APPROVED = 'auto-approved'
-    PENDING_DOCS = 'pending-docs'
-    DOCS_SENT = 'docs-sent'
-    PENDING_MANUAL_APPROVAL = 'pending-manual-approval'
-    APPROVED = 'approved'
-    REJECTED = 'rejected'
-    SKIPPED = 'skipped'
-
-    ALL_STATUSES = [
-        CREATED,
-        APPROVED,
-        AUTO_APPROVED,
-        REJECTED,
-        PENDING_DOCS,
-        DOCS_SENT,
-        PENDING_MANUAL_APPROVAL,
-        SKIPPED
-    ]
-    TERMINAL_STATUSES = [APPROVED, AUTO_APPROVED, REJECTED, SKIPPED]
-    STATUS_MESSAGES_DICT = {
-        CREATED: "Created Applications",
-        AUTO_APPROVED: "Auto-approved Applications",
-        PENDING_DOCS: "Incomplete Applications",
-        DOCS_SENT: "Incomplete Applications (Documents Sent)",
-        PENDING_MANUAL_APPROVAL: "Pending Applications",
-        APPROVED: "Approved Applications",
-        REJECTED: "Rejected Applications",
-    }
-
-
 class FinancialAid(TimestampedModel):
     """
     An application for financial aid/personal pricing
@@ -147,7 +115,19 @@ class FinancialAid(TimestampedModel):
     original_currency = models.CharField(null=True, max_length=10)
     country_of_income = models.CharField(null=True, max_length=100)
     date_exchange_rate = models.DateTimeField(null=True)
-    date_documents_sent = models.DateField(null=True)
+    date_documents_sent = models.DateField(null=True, blank=True)
+    justification = models.TextField(null=True)
+
+    def to_dict(self):
+        """
+        Get the model_to_dict of self
+        """
+        ret = model_to_dict(self)
+        if self.date_exchange_rate is not None:
+            ret["date_exchange_rate"] = ret["date_exchange_rate"].isoformat()
+        if self.date_documents_sent is not None:
+            ret["date_documents_sent"] = ret["date_documents_sent"].isoformat()
+        return ret
 
     def save(self, *args, **kwargs):
         """
@@ -171,8 +151,8 @@ class FinancialAid(TimestampedModel):
         FinancialAidAudit.objects.create(
             acting_user=acting_user,
             financial_aid=self,
-            data_before=serializers.serialize("json", [financialaid_before, ]),
-            data_after=serializers.serialize("json", [self, ])
+            data_before=financialaid_before.to_dict(),
+            data_after=self.to_dict()
         )
 
 

@@ -33,7 +33,7 @@ import {
   DOCTORATE,
   MASTERS,
   PROFILE_STEP_LABELS,
-  CHECKOUT_RESPONSE_CYBERSOURCE,
+  CYBERSOURCE_CHECKOUT_RESPONSE,
 } from '../constants';
 import { assertMaybeEquality, assertIsNothing } from './sanctuary_test';
 import { program } from '../components/ProgressWidget_test';
@@ -63,7 +63,7 @@ describe('utility functions', () => {
       });
     });
   });
-  
+
   describe('generateNewEducation', () => {
     it('generates a new education object', () => {
       let level = 'level';
@@ -85,7 +85,7 @@ describe('utility functions', () => {
       let url = "/url";
       assert.equal(url, makeProfileImageUrl({ image: url }));
     });
-    
+
     it('uses a default profile image if not available, removing duplicate slashes', () => {
       assert.equal(
         '/static/images/avatar_default.png',
@@ -198,7 +198,7 @@ describe('utility functions', () => {
         for (let child of svg.props.children[1]) {
           if (child.key === `circle_${i}`) {
             // the green circle should be the currently selected one
-            assert.equal(child.props.fill, "#30BB5C");
+            assert.equal(child.props.fill, "#a31f34");
             foundCircle = true;
           }
           if (child.key === `circletext_${i}`) {
@@ -361,7 +361,7 @@ describe('utility functions', () => {
 
   describe('createForm', () => {
     it('creates a form with hidden values corresponding to the payload', () => {
-      const { url, payload } = CHECKOUT_RESPONSE_CYBERSOURCE;
+      const { url, payload } = CYBERSOURCE_CHECKOUT_RESPONSE;
       const form = createForm(url, payload);
 
       let clone = _.clone(payload);

@@ -14,12 +14,13 @@ from rest_framework.response import Response
 
 from financialaid.models import FinancialAid
 from financialaid.permissions import UserCanEditFinancialAid
+from mail.api import MailgunClient
+from mail.permissions import UserCanMessageLearnersPermission
+from mail.serializers import FinancialAidMailSerializer
 from search.api import (
     prepare_and_execute_search,
     get_all_query_matching_emails
 )
-from mail.api import MailgunClient
-from mail.permissions import UserCanMessageLearnersPermission
 
 
 log = logging.getLogger(__name__)
@@ -61,6 +62,7 @@ class FinancialAidMailView(GenericAPIView):
     """
     View for sending financial aid emails to individual learners
     """
+    serializer_class = FinancialAidMailSerializer
     authentication_classes = (authentication.SessionAuthentication, )
     permission_classes = (permissions.IsAuthenticated, UserCanMessageLearnersPermission, UserCanEditFinancialAid)
     lookup_field = "id"
@@ -72,10 +74,12 @@ class FinancialAidMailView(GenericAPIView):
         Post request to send emails to an individual learner
         """
         financial_aid = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         mailgun_response = MailgunClient.send_financial_aid_email(
+            body=serializer.data['email_body'],
             acting_user=request.user,
-            financial_aid=financial_aid,
-            subject=request.data['email_subject'],
-            body=request.data['email_body']
+            subject=serializer.data['email_subject'],
+            financial_aid=financial_aid
         )
         return Response(data=mailgun_response.json(), status=mailgun_response.status_code)

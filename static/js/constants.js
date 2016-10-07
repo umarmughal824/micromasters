@@ -52,7 +52,6 @@ export const FA_STATUS_DOCS_SENT = 'docs-sent';
 export const FA_STATUS_PENDING_MANUAL_APPROVAL = 'pending-manual-approval';
 export const FA_STATUS_APPROVED = 'approved';
 export const FA_STATUS_AUTO_APPROVED = 'auto-approved';
-export const FA_STATUS_REJECTED = 'rejected';
 export const FA_STATUS_SKIPPED = 'skipped';
 
 export const FA_PENDING_STATUSES = [
@@ -561,13 +560,11 @@ export const FINANCIAL_AID_PARTIAL_RESPONSE = {
 export const COURSE_PRICES_RESPONSE = [{
   program_id: DASHBOARD_RESPONSE[1].id,
   price: 100.00,
-  financial_aid_adjustment: false,
   financial_aid_availability: false,
   has_financial_aid_request: false
 }, {
   program_id: DASHBOARD_RESPONSE[2].id,
   price: 200.00,
-  financial_aid_adjustment: false,
   financial_aid_availability: false,
   has_financial_aid_request: false
 }];
@@ -579,7 +576,7 @@ export const ERROR_RESPONSE = {
 };
 
 /* eslint-disable max-len */
-export const CHECKOUT_RESPONSE_CYBERSOURCE = {
+export const CYBERSOURCE_CHECKOUT_RESPONSE = {
   "payload": {
     "access_key": "access_key",
     "amount": "123.45",
@@ -600,7 +597,7 @@ export const CHECKOUT_RESPONSE_CYBERSOURCE = {
   "url": "https://testsecureacceptance.cybersource.com/pay",
   "method": "POST"
 };
-export const CHECKOUT_RESPONSE_EDX = {
+export const EDX_CHECKOUT_RESPONSE = {
   "payload": {},
   "url": "http://edx.org",
   "method": "GET"
