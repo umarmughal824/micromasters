@@ -104,7 +104,7 @@ class DashboardView(ReactView):
 
 class UsersView(ReactView):
     """
-    View for users pages. This gets handled by the dashboard view like all other
+    View for learner pages. This gets handled by the dashboard view like all other
     React handled views, but we also want to return a 404 if the user does not exist.
     """
     def get(self, request, *args, **kwargs):
@@ -116,7 +116,7 @@ class UsersView(ReactView):
             if not CanSeeIfNotPrivate().has_permission(request, self):
                 raise Http404
         elif request.user.is_anonymous():
-            # /users/ redirects to logged in user's page, but user is not logged in here
+            # /learner/ redirects to logged in user's page, but user is not logged in here
             raise Http404
 
         return super(UsersView, self).get(request, *args, **kwargs)
