@@ -35,7 +35,8 @@ describe('CourseAction', () => {
       checkout: checkoutStub,
       coursePrice: coursePrice,
       hasFinancialAid: false,
-      financialAid: {}
+      financialAid: {},
+      addCourseEnrollment: sandbox.stub(),
     };
     defaultParamsNow = Object.assign({}, defaultParams, { now: now });
   });

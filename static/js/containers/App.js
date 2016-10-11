@@ -235,6 +235,7 @@ class App extends React.Component {
         enrollDialogVisibility={enrollDialogVisibility}
         enrollSelectedProgram={enrollSelectedProgram}
         enrollments={enrollments}
+        pathname={pathname}
         setCurrentProgramEnrollment={this.setCurrentProgramEnrollment}
         setEnrollDialogError={this.setEnrollDialogError}
         setEnrollDialogVisibility={this.setEnrollDialogVisibility}
