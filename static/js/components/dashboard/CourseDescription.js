@@ -15,6 +15,7 @@ import {
   STATUS_PENDING_ENROLLMENT,
   DASHBOARD_FORMAT,
 } from '../../constants';
+import { ifValidDate } from '../../util/date';
 
 const edxLinkBase = `${SETTINGS.edx_base_url}/courses/`;
 
@@ -29,8 +30,9 @@ export default class CourseDescription extends React.Component {
   }
 
   renderCourseDateMessage(label: string, dateString: string): React$Element<*> {
-    let formattedDate = moment(dateString).format(DASHBOARD_FORMAT);
-    return <span key='1'>{label}: {formattedDate}</span>;
+    let date = moment(dateString);
+    let text = ifValidDate('', date => `${label}: ${date.format(DASHBOARD_FORMAT)}`, date);
+    return <span key='1'>{text}</span>;
   }
 
   renderDetailContents(run: CourseRun) {

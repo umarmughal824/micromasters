@@ -21,6 +21,10 @@ export function findCourse(courseSelector: (course: Course, program: Program) =>
   throw "Unable to find course";
 }
 
+export const alterFirstRun = (course: Course, overrideObject: Object): Course => {
+  course.runs[0] = Object.assign({}, course.runs[0], overrideObject);
+};
+
 export function findAndCloneCourse(courseSelector: (course: Course, program: Program) => boolean): Course {
   return _.cloneDeep(findCourse(courseSelector));
 }
