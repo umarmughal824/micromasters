@@ -67,9 +67,7 @@ class FaqsPage(Page):
     """
     CMS page for questions
     """
-    content_panels = Page.content_panels + [
-        InlinePanel('faqs', label='Frequently Asked Questions'),
-    ]
+    content_panels = Page.content_panels
     parent_page_types = ['ProgramPage']
 
     def parent_page(self):
@@ -249,7 +247,6 @@ class FrequentlyAskedQuestion(Orderable):
     """
     FAQs for the program
     """
-    faqs_page = ParentalKey(FaqsPage, related_name='faqs', null=True)
     question = models.TextField()
     answer = RichTextField()
 
