@@ -21,9 +21,11 @@ const dialogDiv = document.querySelector('#signup-dialog');
 const openDialog = () => store.dispatch(setDialogVisibility(true));
 
 // find the DOM element and attach openDialog to onClick
-for (let signUpButton of document.querySelectorAll('.open-signup-dialog')) {
+let nodes = [...document.querySelectorAll('.open-signup-dialog')];
+
+nodes.forEach(signUpButton => {
   signUpButton.onclick = openDialog;
-}
+});
 
 ReactDOM.render(
   <MuiThemeProvider muiTheme={getMuiTheme()}>
