@@ -6,15 +6,18 @@
 
 {% block panel %}
   <div class="faqs">
-    {% for faq in faqpage.faqs.all %}
-    <div class="faq">
-      <div class="question">
-        {{ faq.question }}
-      </div>
-      <div class="answer">
-        {{ faq.answer|richtext }}
-      </div>
-    </div>
+    {% for categorized in faqpage.get_children.specific %}
+      <h3 class="faq-category"> {{ categorized.title }}</h3>
+      {% for faq in categorized.faqs.all %}
+        <div class="faq">
+          <div class="question">
+            {{ faq.question }}
+          </div>
+          <div class="answer">
+            {{ faq.answer|richtext }}
+          </div>
+        </div>
+      {% endfor %}
     {% endfor %}
   </div>
 
