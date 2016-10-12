@@ -33,6 +33,10 @@
 
     ga('create', '{{ GA_TRACKING_ID }}', 'auto');
     ga('send', 'pageview');
+    {% if tracking_id %}
+      ga('create', '{{ tracking_id }}', 'auto', 'programPageTracker');
+      ga('programPageTracker.send', 'pageview');
+    {% endif %}
     </script>
 <!-- End Google Analytics -->
   </head>

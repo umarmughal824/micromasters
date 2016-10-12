@@ -56,6 +56,7 @@ class HomePage(Page):
         context["username"] = username
         context["js_settings_json"] = json.dumps(js_settings)
         context["title"] = self.title
+        context["tracking_id"] = ""
 
         return context
 
@@ -189,6 +190,7 @@ def get_program_page_context(programpage, request):
     context["js_settings_json"] = json.dumps(js_settings)
     context["title"] = programpage.title
     context["courses_info"] = courses_info
+    context["tracking_id"] = programpage.program.ga_tracking_id
 
     return context
 
