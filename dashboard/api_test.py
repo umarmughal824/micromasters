@@ -1377,6 +1377,31 @@ class CachedCurrentGradesTests(ESTestCase):
             list(set(self.all_course_run_ids).difference(set(course_ids)))
         )
 
+    def test_cache_with_no_enrollments(self):
+        """
+        Test that entries are created even if there are no enrollments for the user
+        """
+        # delete all the enrollments
+        models.CachedEnrollment.objects.all().delete()
+
+        mocked_get_student_curgrade = MagicMock(
+            return_value=CurrentGrades([])
+        )
+        edx_client = MagicMock(
+            current_grades=MagicMock(
+                get_student_current_grades=mocked_get_student_curgrade
+            )
+        )
+
+        username = 'fake_username'
+        with patch('dashboard.api.get_social_username', autospec=True, return_value=username):
+            api.get_student_current_grades(self.user, edx_client)
+
+        self.assert_null_entry_in_db(
+            datetime.now(tz=pytz.utc),
+            self.all_course_run_ids
+        )
+
     def test_cached(self):
         """
         If our copy of the current grades data is in the database, don't fetch from edX
