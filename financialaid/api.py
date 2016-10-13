@@ -5,12 +5,10 @@ import logging
 
 from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
-from financialaid.constants import (
-    COUNTRY_INCOME_THRESHOLDS,
-    DEFAULT_INCOME_THRESHOLD
-)
+from financialaid.constants import DEFAULT_INCOME_THRESHOLD
 from financialaid.exceptions import NotSupportedException
 from financialaid.models import (
+    CountryIncomeThreshold,
     CurrencyExchangeRate,
     FinancialAid,
     TierProgram
@@ -46,13 +44,23 @@ def determine_tier_program(program, income):
 
 def determine_auto_approval(financial_aid):
     """
-    Takes income and country code and returns a boolean if auto-approved.
+    Takes income and country code and returns a boolean if auto-approved. Logs an error if the country of
+    financial_aid does not exist in CountryIncomeThreshold.
     Args:
         financial_aid (FinancialAid): the financial aid object to determine auto-approval
     Returns:
         boolean: True if auto-approved, False if not
     """
-    income_threshold = COUNTRY_INCOME_THRESHOLDS.get(financial_aid.country_of_income, DEFAULT_INCOME_THRESHOLD)
+    try:
+        country_income_threshold = CountryIncomeThreshold.objects.get(country_code=financial_aid.country_of_income)
+        income_threshold = country_income_threshold.income_threshold
+    except CountryIncomeThreshold.DoesNotExist:
+        log.error(
+            "Country code %s does not exist in CountryIncomeThreshold for financial aid id %s",
+            financial_aid.country_of_income,
+            financial_aid.id
+        )
+        income_threshold = DEFAULT_INCOME_THRESHOLD
     # The income_threshold == 0 is because in all cases BUT threshold == 0, it's strictly > instead of >=
     return financial_aid.income_usd > income_threshold or income_threshold == 0
 

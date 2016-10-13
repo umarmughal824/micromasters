@@ -5,11 +5,19 @@ Admin views for Financial Aid app
 from django.contrib import admin
 
 from financialaid.models import (
+    CountryIncomeThreshold,
     FinancialAid,
     FinancialAidAudit,
-    TierProgram,
     Tier,
+    TierProgram
 )
+
+
+class CountryIncomeThresholdAdmin(admin.ModelAdmin):
+    """Admin for CountryIncomeThreshold"""
+    model = CountryIncomeThreshold
+    list_display = ('country_code', 'income_threshold')
+    ordering = ('country_code',)
 
 
 class FinancialAidAdmin(admin.ModelAdmin):
@@ -40,18 +48,20 @@ class FinancialAidAuditAdmin(admin.ModelAdmin):
         return False
 
 
+class TierAdmin(admin.ModelAdmin):
+    """Admin for Tier"""
+    model = Tier
+    list_display = ('name', 'description')
+
+
 class TierProgramAdmin(admin.ModelAdmin):
     """Admin for TierProgram"""
     model = TierProgram
     list_display = ('tier', 'program', 'discount_amount', 'income_threshold', 'current')
 
 
-class TierAdmin(admin.ModelAdmin):
-    """Admin for Tier"""
-    model = Tier
-    list_display = ('name', 'description')
-
+admin.site.register(CountryIncomeThreshold, CountryIncomeThresholdAdmin)
 admin.site.register(FinancialAid, FinancialAidAdmin)
 admin.site.register(FinancialAidAudit, FinancialAidAuditAdmin)
-admin.site.register(TierProgram, TierProgramAdmin)
 admin.site.register(Tier, TierAdmin)
+admin.site.register(TierProgram, TierProgramAdmin)

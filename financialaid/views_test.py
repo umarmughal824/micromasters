@@ -15,7 +15,10 @@ from courses.factories import CourseRunFactory
 from courses.models import Program
 from dashboard.models import ProgramEnrollment
 from ecommerce.factories import CoursePriceFactory
-from financialaid.api import determine_tier_program, determine_income_usd
+from financialaid.api import (
+    determine_income_usd,
+    determine_tier_program
+)
 from financialaid.api_test import FinancialAidBaseTestCase
 from financialaid.constants import (
     FinancialAidJustification,
@@ -67,7 +70,7 @@ class FinancialAidViewTests(FinancialAidBaseTestCase, APIClient):
         self.data = {
             "original_currency": "USD",
             "program_id": self.program.id,
-            "original_income": 70000
+            "original_income": self.country_income_threshold_50000.income_threshold-1  # Not auto-approved
         }
 
     def test_income_validation_not_auto_approved(self):
@@ -91,7 +94,7 @@ class FinancialAidViewTests(FinancialAidBaseTestCase, APIClient):
         """
         assert FinancialAid.objects.count() == 0
         assert FinancialAidAudit.objects.count() == 0
-        self.data["original_income"] = 200000
+        self.data["original_income"] = self.country_income_threshold_50000.income_threshold+1
         self.assert_http_status(self.client.post, self.request_url, status.HTTP_201_CREATED, data=self.data)
         assert FinancialAid.objects.count() == 1
         assert FinancialAidAudit.objects.count() == 1
@@ -137,7 +140,7 @@ class FinancialAidViewTests(FinancialAidBaseTestCase, APIClient):
         """
         self.data["original_currency"] = self.currency_abc.currency_code
         assert FinancialAid.objects.count() == 0
-        resp = self.client.post(self.request_url, self.data, format='json')
+        resp = self.client.post(self.request_url, self.data, format="json")
         assert resp.status_code == status.HTTP_201_CREATED
         assert FinancialAid.objects.count() == 1
         financial_aid = FinancialAid.objects.first()
@@ -170,7 +173,6 @@ class FinancialAidViewTests(FinancialAidBaseTestCase, APIClient):
         Tests FinancialAidRequestView post with a currency not supported
         """
         self.data["original_currency"] = "DEF"
-        assert FinancialAid.objects.count() == 0
         resp = self.client.post(self.request_url, self.data, format='json')
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
 
