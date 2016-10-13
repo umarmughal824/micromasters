@@ -68,10 +68,8 @@ class FaqsPage(Page):
     """
     CMS page for questions
     """
-    content_panels = Page.content_panels + [
-        InlinePanel('faqs', label='Frequently Asked Questions'),
-    ]
     parent_page_types = ['ProgramPage']
+    subpage_types = ['CategorizedFaqsPage']
 
     def parent_page(self):
         """ Get the parent ProgramPage"""
@@ -82,6 +80,16 @@ class FaqsPage(Page):
         context['faqpage'] = self
         context['active_tab'] = self.title
         return context
+
+
+class CategorizedFaqsPage(Page):
+    """
+    CMS page for categorized questions
+    """
+    content_panels = Page.content_panels + [
+        InlinePanel('faqs', label='Frequently Asked Questions'),
+    ]
+    parent_page_types = ['FaqsPage']
 
 
 class ProgramPage(Page):
@@ -250,7 +258,7 @@ class FrequentlyAskedQuestion(Orderable):
     """
     FAQs for the program
     """
-    faqs_page = ParentalKey(FaqsPage, related_name='faqs', null=True)
+    faqs_page = ParentalKey(CategorizedFaqsPage, related_name='faqs', null=True)
     question = models.TextField()
     answer = RichTextField()
 
