@@ -12,7 +12,8 @@ import { DASHBOARD_RESPONSE, COURSE_PRICES_RESPONSE } from '../../constants';
 describe('CourseListCard', () => {
   let defaultCardParams = {
     coursePrice: _.cloneDeep(COURSE_PRICES_RESPONSE[0]),
-    checkout: () => null
+    checkout: () => null,
+    addCourseEnrollment: () => undefined,
   };
 
   it('creates a CourseRow for each course', () => {

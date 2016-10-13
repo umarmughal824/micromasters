@@ -6,22 +6,20 @@ import json
 from django.conf import settings
 from django.db import models
 from modelcluster.fields import ParentalKey
-from wagtail.wagtailimages.models import Image
-from wagtail.wagtailcore.models import Page, Orderable
-from wagtail.wagtailcore.fields import RichTextField
-from wagtail.wagtailadmin.edit_handlers import FieldPanel, InlinePanel, MultiFieldPanel
+from raven.contrib.django.raven_compat.models import client as sentry
 from rolepermissions.verifications import has_role
+from wagtail.wagtailadmin.edit_handlers import (FieldPanel, InlinePanel,
+                                                MultiFieldPanel)
+from wagtail.wagtailcore.fields import RichTextField
+from wagtail.wagtailcore.models import Orderable, Page
+from wagtail.wagtailimages.models import Image
 
-
+from cms.api import get_course_enrollment_text, get_course_url
 from courses.models import Program
 from micromasters.utils import webpack_dev_server_host
 from profiles.api import get_social_username
+from roles.models import Instructor, Staff
 from ui.views import get_bundle_url
-from cms.api import get_course_enrollment_text, get_course_url
-from roles.models import (
-    Instructor,
-    Staff,
-)
 
 
 def faculty_for_carousel(faculty):
@@ -34,21 +32,17 @@ class HomePage(Page):
     """
     CMS page representing the homepage.
     """
-    title_background = models.ForeignKey(
-        Image,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-    )
-    content_panels = Page.content_panels + [
-        FieldPanel('title_background')
-    ]
+    content_panels = []
+    subpage_types = ['ProgramPage']
 
     def get_context(self, request):
         programs = Program.objects.filter(live=True)
         js_settings = {
             "gaTrackingID": settings.GA_TRACKING_ID,
             "host": webpack_dev_server_host(request),
+            "environment": settings.ENVIRONMENT,
+            "sentry_dsn": sentry.get_public_dsn(),
+            "release_version": settings.VERSION
         }
 
         username = get_social_username(request.user)
@@ -64,7 +58,29 @@ class HomePage(Page):
         context["username"] = username
         context["js_settings_json"] = json.dumps(js_settings)
         context["title"] = self.title
+        context["sentry_client"] = get_bundle_url(request, "sentry_client.js")
+        context["tracking_id"] = ""
 
+        return context
+
+
+class FaqsPage(Page):
+    """
+    CMS page for questions
+    """
+    content_panels = Page.content_panels + [
+        InlinePanel('faqs', label='Frequently Asked Questions'),
+    ]
+    parent_page_types = ['ProgramPage']
+
+    def parent_page(self):
+        """ Get the parent ProgramPage"""
+        return ProgramPage.objects.ancestor_of(self).first()
+
+    def get_context(self, request):
+        context = get_program_page_context(self.parent_page(), request)
+        context['faqpage'] = self
+        context['active_tab'] = self.title
         return context
 
 
@@ -124,7 +140,7 @@ class ProgramPage(Page):
             'Thumbnails are cropped down to this size, preserving aspect ratio.'
         ),
     )
-
+    subpage_types = ['FaqsPage']
     content_panels = Page.content_panels + [
         FieldPanel('description', classname="full"),
         FieldPanel('program'),
@@ -137,37 +153,53 @@ class ProgramPage(Page):
         FieldPanel('faculty_description'),
         InlinePanel('courses', label='Program Courses'),
         InlinePanel('faculty_members', label='Faculty'),
-        InlinePanel('faqs', label='Frequently Asked Questions'),
     ]
 
     def get_context(self, request):
-        js_settings = {
-            "gaTrackingID": settings.GA_TRACKING_ID,
-            "host": webpack_dev_server_host(request),
-            "programId": self.program.id,
-            "faculty": faculty_for_carousel(self.faculty_members.all()),
-        }
-        username = get_social_username(request.user)
-        context = super(ProgramPage, self).get_context(request)
-
-        courses_info = []
-        for course in self.program.course_set.all().order_by(
-                'position_in_program'
-        ):
-            courses_info.append((course, get_course_enrollment_text(course), get_course_url(course)))
-
-        context["style_src"] = get_bundle_url(request, "style.js")
-        context["public_src"] = get_bundle_url(request, "public.js")
-        context["style_public_src"] = get_bundle_url(request, "style_public.js")
-        context["authenticated"] = not request.user.is_anonymous()
-        context["signup_dialog_src"] = get_bundle_url(request, "signup_dialog.js")
-        context["faculty_carousel_src"] = get_bundle_url(request, "faculty_carousel.js")
-        context["username"] = username
-        context["js_settings_json"] = json.dumps(js_settings)
-        context["title"] = self.title
-        context["courses_info"] = courses_info
-
+        context = get_program_page_context(self, request)
+        context['active_tab'] = 'about'
         return context
+
+
+def get_program_page_context(programpage, request):
+    """ Get context for the program page"""
+    js_settings = {
+        "gaTrackingID": settings.GA_TRACKING_ID,
+        "host": webpack_dev_server_host(request),
+        "programId": programpage.program.id,
+        "faculty": faculty_for_carousel(programpage.faculty_members.all()),
+        "environment": settings.ENVIRONMENT,
+        "sentry_dsn": sentry.get_public_dsn(),
+        "release_version": settings.VERSION
+    }
+    username = get_social_username(request.user)
+    context = super(ProgramPage, programpage).get_context(request)
+
+    courses_info = []
+    for course in programpage.program.course_set.all().order_by(
+            'position_in_program'
+    ):
+        courses_info.append(
+            (course,
+             get_course_enrollment_text(course),
+             get_course_url(course))
+        )
+
+    context["zendesk_widget"] = get_bundle_url(request, "js/zendesk_widget.js")
+    context["style_src"] = get_bundle_url(request, "style.js")
+    context["public_src"] = get_bundle_url(request, "public.js")
+    context["style_public_src"] = get_bundle_url(request, "style_public.js")
+    context["authenticated"] = not request.user.is_anonymous()
+    context["signup_dialog_src"] = get_bundle_url(request, "signup_dialog.js")
+    context["faculty_carousel_src"] = get_bundle_url(request, "faculty_carousel.js")
+    context["username"] = username
+    context["js_settings_json"] = json.dumps(js_settings)
+    context["title"] = programpage.title
+    context["courses_info"] = courses_info
+    context["sentry_client"] = get_bundle_url(request, "sentry_client.js")
+    context["tracking_id"] = programpage.program.ga_tracking_id
+
+    return context
 
 
 class ProgramCourse(Orderable):
@@ -218,7 +250,7 @@ class FrequentlyAskedQuestion(Orderable):
     """
     FAQs for the program
     """
-    program_page = ParentalKey(ProgramPage, related_name='faqs')
+    faqs_page = ParentalKey(FaqsPage, related_name='faqs', null=True)
     question = models.TextField()
     answer = RichTextField()
 

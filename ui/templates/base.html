@@ -1,25 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    {% load static %}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,400i,500,700" />
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-    {% load static %}
+    {% load raven %}
     <link rel="icon" href="{% static 'images/favicon.ico' %}" />
     <script type="text/javascript">
     var SETTINGS = {{ js_settings_json|safe }};
     var CURRENT_PAGE_URL = '{{ request.build_absolute_uri }}';
     </script>
+    <script type="text/javascript" src="{{ sentry_client }}"></script>
     {% if style_public_src %}
     <script type="text/javascript" src="{{ style_public_src }}"></script>
-    <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
     {% endif %}
     <script type="text/javascript" src="{{ style_src }}"></script>
+    {% if zendesk_widget %}
+      <script type="text/javascript" src="{{ zendesk_widget }}"></script>
+    {% endif %}
     <title>{% block title %}{% endblock %}</title>
     <meta name="description" content="{% block description %}{% endblock %}">
-    <meta name="keywords" content="{% block keywords%}{% endblock %}">
+    <meta name="keywords" content="{% block keywords %}{% endblock %}">
     {% block social %}{% endblock %}
     {% block extrahead %}
     {% endblock %}
@@ -32,16 +35,15 @@
 
     ga('create', '{{ GA_TRACKING_ID }}', 'auto');
     ga('send', 'pageview');
+    {% if tracking_id %}
+      ga('create', '{{ tracking_id }}', 'auto', 'programPageTracker');
+      ga('programPageTracker.send', 'pageview');
+    {% endif %}
     </script>
 <!-- End Google Analytics -->
   </head>
   <body>
     {% block content %}
     {% endblock %}
-    <!-- Start of odl Zendesk Widget script -->
-     <script>/*<![CDATA[*/window.zEmbed||function(e,t){var n,o,d,i,s,a=[],r=document.createElement("iframe");window.zEmbed=function(){a.push(arguments)},window.zE=window.zE||window.zEmbed,r.src="javascript:false",r.title="",r.role="presentation",(r.frameElement||r).style.cssText="display: none",d=document.getElementsByTagName("script"),d=d[d.length-1],d.parentNode.insertBefore(r,d),i=r.contentWindow,s=i.document;try{o=s}catch(e){n=document.domain,r.src='javascript:var d=document.open();d.domain="'+n+'";void(0);',o=s}o.open()._l=function(){var o=this.createElement("script");n&&(this.domain=n),o.id="js-iframe-async",o.src=e,this.t=+new Date,this.zendeskHost=t,this.zEQueue=a,this.body.appendChild(o)},o.write('<body onload="document._l();">'),o.close()}("https://assets.zendesk.com/embeddable_framework/main.js","odl.zendesk.com");
-     /*]]>*/</script>
-     <!-- End of odl Zendesk Widget script -->
   </body>
 </html>
-

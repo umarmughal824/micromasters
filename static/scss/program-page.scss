@@ -7,7 +7,7 @@
     }
 
   .hero-image {
-    height: 600px;
+    height: 700px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -78,6 +78,21 @@
       a:focus, a:hover {
         text-decoration: none;
       }
+
+      a.tab-link {
+        padding: 0 24px;
+        float: left;
+        height: 56px;
+        line-height: 55px;
+        text-transform: uppercase;
+        color: rgba(0,0,0,.54);
+
+      }
+
+      a.active-tab {
+        color: rgba(0,0,0,.87);
+        border-bottom: 3px solid $mm-brand-bg;
+      }
     }
 
     .is-upgraded:after, .is-active:after {
@@ -90,13 +105,9 @@
       height: 57px;
     }
 
-    .mdl-tabs__tab {
-      height: 56px;
-      line-height: 55px;
-    }
-
-    .mdl-tabs__panel {
+    .panel-content {
       margin-bottom: 40px;
+      margin-right: 3%;
     }
   }
 
@@ -132,6 +143,10 @@
       .description {
         color: $font-gray;
         font-size: 15px;
+      }
+
+      .course-description {
+        display: none;
       }
 
       .enrollment_dates {
@@ -173,9 +188,10 @@
     max-width: 1150px;
 
     p {
-      font-size: 16px;
+      font-size: 17px;
       color: rgba(0,0,0,.7);
-      margin-bottom: 23px;
+      margin-bottom: 44px;
+      line-height: 1.5em;
     }
   }
 
@@ -210,6 +226,24 @@
       padding: 40px 5% 140px;
     }
 
+    .faculty-copy {
+      width: 100%;
+      height: 164px;
+      position: absolute;
+      bottom: -1px;
+      padding: 25px 22px;
+      z-index: 2;
+      background: -moz-linear-gradient(top,  rgba(0,0,0,0) 0%, rgba(0,0,0,1) 100%); /* FF3.6-15 */
+      background: -webkit-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,1) 100%); /* Chrome10-25,Safari5.1-6 */
+      background: linear-gradient(to bottom,  rgba(0,0,0,0) 0%,rgba(0,0,0,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#000000',GradientType=0 ); /* IE6-9 */
+      @media (max-width: 840px) {
+        position: static;
+        padding: 6px 9px;
+        height: auto;
+      }
+    }
+
     h3 {
       margin: 0 0 13px;
       font-weight: 300;
@@ -235,17 +269,18 @@
 
     .faculty-tile {
       height: 385px;
-      padding: 250px 22px 20px 26px;
+      padding: 0;
       margin: 0 auto;
       color: #ffffff;
       text-align: left;
       position: relative;
-      width: 96%;
+      width: 500px;
       margin: 0 auto;
       @media (max-width: 840px) {
         height: auto;
         padding: 0;
         margin: 0 auto 40px;
+        width: 100%;
       }
 
       h4 {
@@ -264,7 +299,6 @@
       }
 
       img {
-        width: 100%;
         position: absolute;
         top: 0;
         left: 0;
@@ -272,29 +306,35 @@
         @media (max-width: 840px) {
           margin-bottom: 12px;
           position: static;
+          width: 100%;
+          height: auto;
         }
       }
 
       h4, p {
         position: relative;
-        z-index: 2;
       }
     }
 
     .slick-prev {
-      left: -40px;
+      left: -50px;
     }
 
     .slick-next {
-      right: -30px;
+      right: -50px;
     }
 
     .slick-dots li button:before {
       font-size: 20px;
     }
 
-    .slick-arrow:before {
-      font-size: 40px;
+    .slick-arrow {
+      height: 40px;
+      width: 40px;
+
+      &:before {
+        font-size: 40px;
+      }
     }
 
     .slick-dots {

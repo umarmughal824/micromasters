@@ -49,6 +49,11 @@ describe('ProgramSelector', () => {
     assert.equal(wrapper.find("div").children().length, 0);
   });
 
+  it('renders an empty div if it is passed `selectorVisibility === false`', () => {
+    let wrapper = renderProgramSelector({ selectorVisibility: false });
+    assert.equal(wrapper.find("div").children().length, 0);
+  });
+
   it("renders the currently selected enrollment first, then all other enrollments", () => {
     let wrapper = renderProgramSelector();
     let selectProps = wrapper.find(Select).props();

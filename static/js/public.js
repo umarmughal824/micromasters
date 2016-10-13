@@ -2,22 +2,22 @@
 __webpack_public_path__ = `http://${SETTINGS.host}:8078/`;  // eslint-disable-line no-undef, camelcase
 
 // responsive sharing buttons
-require("rrssb/js/rrssb.js");
+import "rrssb/js/rrssb.js";
 
-require("bootstrap");
+import "bootstrap";
 
 // jquery things
-require("./public/jquery.raty.js");
+import "./public/jquery.raty.js";
 
 // other code
-require("./public/core.js");
-require("./public/site.js");
+import "./public/core.js";
+import "./public/site.js";
 
 // jquery components
-require("./public/components/raty.js");
+import "./public/components/raty.js";
 
 // mailchimp requirements
-require("ajaxchimp");
+import "ajaxchimp";
 
 // make the thing work
 (function(document, window, $) {
@@ -121,38 +121,3 @@ jQuery(document).ready(function ($) {
     emailBody: description + CURRENT_PAGE_URL
   });
 });
-
-/**
- * Set url hash if hash provided in the url,
- * or set hash based on the active panel
- */
-$(function(){
-  $('.mdl-tabs__tab').click(function(){
-    document.location.hash = $(this).attr('href');
-  });
-  if (document.location.hash){
-    setPanelActive(document.location.hash);
-  } else {
-    location.hash = $('.mdl-tabs__tab.is-active').attr('href');
-  }
-});
-
-$(window).on('hashchange', function () {
-  if (location.hash) {
-    setPanelActive(location.hash);
-  }
-});
-
-/**
- *  Given a valid hash, set the corresponding panel active.
- */
-function setPanelActive(hash){
-  var $panel = $(hash);
-  if ($panel.length > 0) {
-    $(".mdl-tabs__panel, .mdl-tabs__tab").removeClass('is-active');
-    $panel.addClass('is-active');
-    $(`a.mdl-tabs__tab[href="${hash}"]`).addClass('is-active');
-  } else {
-    location.hash = $('.mdl-tabs__tab.is-active').attr('href');
-  }
-}

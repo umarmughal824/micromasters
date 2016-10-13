@@ -14,12 +14,13 @@ import ast
 import os
 import platform
 
-from celery.schedules import crontab
 import dj_database_url
-from django.core.exceptions import ImproperlyConfigured
 import yaml
+from celery.schedules import crontab
+from django.core.exceptions import ImproperlyConfigured
 
-VERSION = "0.16.0"
+
+VERSION = "0.17.0"
 
 CONFIG_PATHS = [
     os.environ.get('MICROMASTERS_CONFIG', ''),
@@ -83,6 +84,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
     'server_status',
     'social.apps.django_app.default',
 
@@ -103,6 +105,7 @@ INSTALLED_APPS = (
 
     # other third party APPS
     'rolepermissions',
+    'raven.contrib.django.raven_compat',
 
     # Our INSTALLED_APPS
     'backends',
@@ -119,6 +122,7 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -350,6 +354,11 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
         },
+        'sentry': {
+            'level': 'ERROR',
+            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+            'formatter': 'verbose'
+        }
     },
     'loggers': {
         'root': DEFAULT_LOG_STANZA,
@@ -373,7 +382,20 @@ LOGGING = {
         'elasticsearch': {
             'level': ES_LOG_LEVEL,
         },
+        'raven': {
+            'level': 'DEBUG',
+            'handlers': []
+        }
     },
+}
+
+# Sentry
+ENVIRONMENT = get_var('MICROMASTERS_ENVIRONMENT', 'dev')
+SENTRY_CLIENT = 'raven.contrib.django.raven_compat.DjangoClient'
+RAVEN_CONFIG = {
+    'dsn': get_var('SENTRY_DSN', ''),
+    'environment': ENVIRONMENT,
+    'release': VERSION
 }
 
 # to run the app locally on mac you need to bypass syslog

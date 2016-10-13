@@ -37,7 +37,10 @@ class UserDashboard(APIView):
     """
     Class based view for user dashboard view.
     """
-    authentication_classes = (authentication.SessionAuthentication, )
+    authentication_classes = (
+        authentication.SessionAuthentication,
+        authentication.TokenAuthentication,
+    )
     permission_classes = (permissions.IsAuthenticated, )
 
     def get(self, request, *args, **kargs):  # pylint: disable=unused-argument, no-self-use
@@ -63,6 +66,8 @@ class UserDashboard(APIView):
         # get certificates for the student
         certificates = get_student_certificates(request.user, edx_client)
         # get current_grades for the student
+        # the grades should be refreshed always after the enrollments
+        # or else some grades may not get fetched
         current_grades = get_student_current_grades(request.user, edx_client)
 
         response_data = []
@@ -82,7 +87,10 @@ class UserCourseEnrollment(APIView):
     """
     Create an audit enrollment for the user in a given course run identified by course_id.
     """
-    authentication_classes = (authentication.SessionAuthentication, )
+    authentication_classes = (
+        authentication.SessionAuthentication,
+        authentication.TokenAuthentication,
+    )
     permission_classes = (permissions.IsAuthenticated, )
 
     def post(self, request):  # pylint: disable=no-self-use

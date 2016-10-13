@@ -10,9 +10,11 @@ module.exports = {
     'dashboard': ['babel-polyfill', './static/js/dashboard'],
     'signup_dialog': './static/js/signup_dialog',
     'faculty_carousel': './static/js/faculty_carousel',
+    'financial_aid': './static/js/financial_aid/functions',
     'public': ['babel-polyfill', './static/js/public'],
     'style': './static/js/style',
     'style_public': './static/js/style_public',
+    'sentry_client': './static/js/sentry_client.js'
   },
   output: {
     path: path.resolve('./static/bundles/'),
@@ -23,7 +25,7 @@ module.exports = {
       {
         test: /\.jsx?$/,
         exclude: /node_modules/,
-        loaders: ['react-hot', 'babel-loader?' + JSON.stringify(babelQuerySettings)],
+        loaders: ['react-hot', 'babel-loader?' + JSON.stringify(babelQuerySettings)]
       },  // to transform JSX into JS
       {
         test: /\.(svg|ttf|woff|woff2|eot|gif)$/,

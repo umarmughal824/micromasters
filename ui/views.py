@@ -8,27 +8,19 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.core.urlresolvers import reverse
+from django.shortcuts import Http404, redirect, render
+from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
-from django.shortcuts import (
-    redirect,
-    render,
-    Http404,
-)
-from django.utils.decorators import method_decorator
+from raven.contrib.django.raven_compat.models import client as sentry
 from rolepermissions.shortcuts import available_perm_status
 from rolepermissions.verifications import has_role
 
 from micromasters.utils import webpack_dev_server_host, webpack_dev_server_url
 from profiles.api import get_social_username
 from profiles.permissions import CanSeeIfNotPrivate
-from ui.decorators import (
-    require_mandatory_urls,
-)
-from roles.models import (
-    Instructor,
-    Staff,
-)
+from roles.models import Instructor, Staff
+from ui.decorators import require_mandatory_urls
 
 log = logging.getLogger(__name__)
 
@@ -74,13 +66,19 @@ class ReactView(View):  # pylint: disable=unused-argument
             "host": webpack_dev_server_host(request),
             "edx_base_url": settings.EDXORG_BASE_URL,
             "roles": roles,
+            "release_version": settings.VERSION,
+            "environment": settings.ENVIRONMENT,
+            "sentry_dsn": sentry.get_public_dsn(),
             "search_url": reverse('search_api', kwargs={"elastic_url": ""}),
+            "support_email": settings.EMAIL_SUPPORT,
         }
 
         return render(
             request,
             "dashboard.html",
             context={
+                "sentry_client": get_bundle_url(request, "sentry_client.js"),
+                "zendesk_widget": get_bundle_url(request, "js/zendesk_widget.js"),
                 "style_src": get_bundle_url(request, "style.js"),
                 "dashboard_src": get_bundle_url(request, "dashboard.js"),
                 "js_settings_json": json.dumps(js_settings),
@@ -103,7 +101,7 @@ class DashboardView(ReactView):
 
 class UsersView(ReactView):
     """
-    View for users pages. This gets handled by the dashboard view like all other
+    View for learner pages. This gets handled by the dashboard view like all other
     React handled views, but we also want to return a 404 if the user does not exist.
     """
     def get(self, request, *args, **kwargs):
@@ -115,7 +113,7 @@ class UsersView(ReactView):
             if not CanSeeIfNotPrivate().has_permission(request, self):
                 raise Http404
         elif request.user.is_anonymous():
-            # /users/ redirects to logged in user's page, but user is not logged in here
+            # /learner/ redirects to logged in user's page, but user is not logged in here
             raise Http404
 
         return super(UsersView, self).get(request, *args, **kwargs)
@@ -132,13 +130,21 @@ def standard_error_page(request, status_code, template_filename):
         request,
         template_filename,
         context={
+            "zendesk_widget": get_bundle_url(request, "js/zendesk_widget.js"),
             "style_src": get_bundle_url(request, "style.js"),
             "dashboard_src": get_bundle_url(request, "dashboard.js"),
-            "js_settings_json": "{}",
+            "sentry_client": get_bundle_url(request, "sentry_client.js"),
+            "js_settings_json": json.dumps({
+                "release_version": settings.VERSION,
+                "environment": settings.ENVIRONMENT,
+                "sentry_dsn": sentry.get_public_dsn()
+            }),
             "authenticated": authenticated,
             "name": name,
             "username": username,
-            "is_staff": has_role(request.user, [Staff.ROLE_ID, Instructor.ROLE_ID])
+            "is_staff": has_role(request.user, [Staff.ROLE_ID, Instructor.ROLE_ID]),
+            "support_email": settings.EMAIL_SUPPORT,
+            "sentry_dsn": sentry.get_public_dsn(),
         }
     )
     response.status_code = status_code
@@ -153,21 +159,27 @@ def terms_of_service(request):
         request,
         "terms_of_service.html",
         context={
+            "zendesk_widget": get_bundle_url(request, "js/zendesk_widget.js"),
             "style_src": get_bundle_url(request, "style.js"),
-            "js_settings_json": "{}",
+            "sentry_client": get_bundle_url(request, "sentry_client.js"),
+            "js_settings_json": json.dumps({
+                "release_version": settings.VERSION,
+                "environment": settings.ENVIRONMENT,
+                "sentry_dsn": sentry.get_public_dsn()
+            }),
             "signup_dialog_src": get_bundle_url(request, "signup_dialog.js"),
         }
     )
 
 
-def page_404(request):
+def page_404(request, *args, **kwargs):  # pylint: disable=unused-argument
     """
     Overridden handler for the 404 error pages.
     """
     return standard_error_page(request, 404, "404.html")
 
 
-def page_500(request):
+def page_500(request, *args, **kwargs):  # pylint: disable=unused-argument
     """
     Overridden handler for the 404 error pages.
     """

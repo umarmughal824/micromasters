@@ -12,17 +12,20 @@ import type {
 import ProgramSelector from './ProgramSelector';
 import UserMenu from '../containers/UserMenu';
 
+const PROFILE_SETTINGS_REGEX = /^\/profile\/?|settings\/?|learner\/[a-z]?/;
+
 export default class Navbar extends React.Component {
   props: {
     addProgramEnrollment:        (programId: number) => void,
-    empty:                       boolean,
     children?:                   React$Element<*>[],
     currentProgramEnrollment:    ProgramEnrollment,
     dashboard:                   DashboardState,
-    enrollments:                 ProgramEnrollmentsState,
+    empty:                       boolean,
     enrollDialogError:           ?string,
     enrollDialogVisibility:      boolean,
     enrollSelectedProgram:       ?number,
+    enrollments:                 ProgramEnrollmentsState,
+    pathname:                    string,
     setCurrentProgramEnrollment: (enrollment: ProgramEnrollment) => void,
     setEnrollDialogError:        (error: ?string) => void,
     setEnrollDialogVisibility:   (open: boolean) => void,
@@ -43,6 +46,7 @@ export default class Navbar extends React.Component {
       enrollDialogVisibility,
       enrollSelectedProgram,
       enrollments,
+      pathname,
       setCurrentProgramEnrollment,
       setEnrollDialogError,
       setEnrollDialogVisibility,
@@ -75,6 +79,7 @@ export default class Navbar extends React.Component {
                 enrollDialogVisibility={enrollDialogVisibility}
                 enrollSelectedProgram={enrollSelectedProgram}
                 enrollments={enrollments}
+                selectorVisibility={!PROFILE_SETTINGS_REGEX.test(pathname)}
                 setCurrentProgramEnrollment={setCurrentProgramEnrollment}
                 setEnrollDialogError={setEnrollDialogError}
                 setEnrollDialogVisibility={setEnrollDialogVisibility}

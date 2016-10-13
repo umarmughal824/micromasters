@@ -26,6 +26,7 @@ export default class ProgramSelector extends React.Component {
     setEnrollDialogError:        (error: ?string) => void,
     setEnrollDialogVisibility:   (open: boolean) => void,
     setEnrollSelectedProgram:    (programId: ?number) => void,
+    selectorVisibility:          boolean,
   };
 
   selectEnrollment = (option: Option): void => {
@@ -89,6 +90,7 @@ export default class ProgramSelector extends React.Component {
       setEnrollDialogError,
       setEnrollDialogVisibility,
       setEnrollSelectedProgram,
+      selectorVisibility,
     } = this.props;
     let currentId;
     if (!_.isNil(currentProgramEnrollment)) {
@@ -98,7 +100,7 @@ export default class ProgramSelector extends React.Component {
     let selected = programEnrollments.find(enrollment => enrollment.id === currentId);
     let options = this.makeOptions();
 
-    if (programEnrollments.length === 0) {
+    if (programEnrollments.length === 0 || selectorVisibility === false) {
       return <div className="program-selector" />;
     } else {
       return <div className="program-selector">

@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models import F, Q
 from django.views.generic import ListView
-from rest_framework.authentication import SessionAuthentication
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import (
     CreateAPIView,
@@ -55,7 +55,10 @@ class FinancialAidRequestView(CreateAPIView):
     is necessary, and if not, sets the appropriate tier for personalized pricing.
     """
     serializer_class = FinancialAidRequestSerializer
-    authentication_classes = (SessionAuthentication, )
+    authentication_classes = (
+        SessionAuthentication,
+        TokenAuthentication,
+    )
     permission_classes = (IsAuthenticated, )
 
     def get_queryset(self):  # pragma: no cover
@@ -72,7 +75,10 @@ class FinancialAidSkipView(UpdateAPIView):
     the user skipping financial aid.
     """
     serializer_class = FinancialAidSkipSerializer
-    authentication_classes = (SessionAuthentication, )
+    authentication_classes = (
+        SessionAuthentication,
+        TokenAuthentication,
+    )
     permission_classes = (IsAuthenticated, )
 
     def get_object(self):
@@ -176,7 +182,6 @@ class ReviewFinancialAidView(UserPassesTestMixin, ListView):
         context["search_query"] = self.search_query
 
         # Create ordered list of (financial aid status, financial message)
-        messages = FinancialAidStatus.STATUS_MESSAGES_DICT
         message_order = (
             FinancialAidStatus.AUTO_APPROVED,
             FinancialAidStatus.PENDING_DOCS,
@@ -186,7 +191,7 @@ class ReviewFinancialAidView(UserPassesTestMixin, ListView):
             FinancialAidStatus.SKIPPED
         )
         context["financial_aid_statuses"] = (
-            (status, "Show: {message}".format(message=messages[status]))
+            (status, FinancialAidStatus.STATUS_MESSAGES_DICT[status])
             for status in message_order
         )
 
@@ -206,6 +211,7 @@ class ReviewFinancialAidView(UserPassesTestMixin, ListView):
         # Required for styling
         context["style_src"] = get_bundle_url(self.request, "style.js")
         context["dashboard_src"] = get_bundle_url(self.request, "dashboard.js")
+        context["zendesk_widget"] = get_bundle_url(self.request, "js/zendesk_widget.js")
         js_settings = {
             "gaTrackingID": settings.GA_TRACKING_ID,
             "reactGaDebug": settings.REACT_GA_DEBUG,
@@ -214,6 +220,7 @@ class ReviewFinancialAidView(UserPassesTestMixin, ListView):
         }
         context["js_settings_json"] = json.dumps(js_settings)
         context["authenticated"] = not self.request.user.is_anonymous()
+        context["financial_aid_src"] = get_bundle_url(self.request, "financial_aid.js")
         return context
 
     def get_queryset(self):
@@ -284,7 +291,10 @@ class FinancialAidDetailView(UpdateAPIView):
     View for updating a FinancialAid record
     """
     serializer_class = FinancialAidSerializer
-    authentication_classes = (SessionAuthentication, )
+    authentication_classes = (
+        SessionAuthentication,
+        TokenAuthentication,
+    )
     permission_classes = (IsAuthenticated, FinancialAidUserMatchesLoggedInUser)
     lookup_field = "id"
     lookup_url_kwarg = "financial_aid_id"
@@ -295,7 +305,10 @@ class CoursePriceListView(APIView):
     """
     View for retrieving a learner's price for course runs in all enrolled programs
     """
-    authentication_classes = (SessionAuthentication,)
+    authentication_classes = (
+        SessionAuthentication,
+        TokenAuthentication,
+    )
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
@@ -319,7 +332,10 @@ class CoursePriceDetailView(APIView):
     """
     View for retrieving a learner's price for a course run
     """
-    authentication_classes = (SessionAuthentication, )
+    authentication_classes = (
+        SessionAuthentication,
+        TokenAuthentication,
+    )
     permission_classes = (IsAuthenticated, )
 
     def get(self, request, *args, **kwargs):

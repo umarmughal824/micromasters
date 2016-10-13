@@ -5,6 +5,7 @@ import json
 
 from django.db.models.signals import post_save
 from django.core.urlresolvers import reverse
+from django.test import override_settings
 from factory.django import mute_signals
 from factory.fuzzy import FuzzyText
 from mock import patch, Mock
@@ -170,11 +171,15 @@ class DashboardTests(ViewsTests):
         react_ga_debug = FuzzyText().fuzz()
         edx_base_url = FuzzyText().fuzz()
         host = FuzzyText().fuzz()
+        email_support = FuzzyText().fuzz()
         with self.settings(
             GA_TRACKING_ID=ga_tracking_id,
             REACT_GA_DEBUG=react_ga_debug,
             EDXORG_BASE_URL=edx_base_url,
             WEBPACK_DEV_SERVER_HOST=host,
+            EMAIL_SUPPORT=email_support,
+            VERSION='0.0.1',
+            RAVEN_CONFIG={'dsn': ''}
         ):
             resp = self.client.get(DASHBOARD_URL)
             js_settings = json.loads(resp.context['js_settings_json'])
@@ -187,6 +192,10 @@ class DashboardTests(ViewsTests):
                 'edx_base_url': edx_base_url,
                 'roles': [],
                 'search_url': reverse('search_api', kwargs={"elastic_url": ""}),
+                'support_email': email_support,
+                'environment': 'dev',
+                'release_version': '0.0.1',
+                'sentry_dsn': None
             }
 
     def test_roles_setting(self):
@@ -243,17 +252,20 @@ class HandlerTests(ViewsTests):
             self.client.force_login(profile.user)
 
         # case with specific page
-        response = self.client.get('/404/')
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.context['authenticated'] is True
-        assert response.context['name'] == profile.preferred_name
-
-        # case with a fake page
-        with self.settings(DEBUG=False):
-            response = self.client.get('/gfh0o4n8741387jfmnub134fn348fr38f348f/')
+        with override_settings(EMAIL_SUPPORT='support'):
+            response = self.client.get('/404/')
             assert response.status_code == status.HTTP_404_NOT_FOUND
             assert response.context['authenticated'] is True
             assert response.context['name'] == profile.preferred_name
+            assert response.context['support_email'] == 'support'
+
+            # case with a fake page
+            with self.settings(DEBUG=False):
+                response = self.client.get('/gfh0o4n8741387jfmnub134fn348fr38f348f/')
+                assert response.status_code == status.HTTP_404_NOT_FOUND
+                assert response.context['authenticated'] is True
+                assert response.context['name'] == profile.preferred_name
+                assert response.context['support_email'] == 'support'
 
     def test_404_error_context_logged_out(self):
         """
@@ -280,10 +292,12 @@ class HandlerTests(ViewsTests):
             profile = self.create_and_login_user()
             self.client.force_login(profile.user)
 
-        response = self.client.get('/500/')
-        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-        assert response.context['authenticated'] is True
-        assert response.context['name'] == profile.preferred_name
+        with override_settings(EMAIL_SUPPORT='support'):
+            response = self.client.get('/500/')
+            assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+            assert response.context['authenticated'] is True
+            assert response.context['name'] == profile.preferred_name
+            assert response.context['support_email'] == 'support'
 
     def test_500_error_context_logged_out(self):
         """
@@ -398,11 +412,15 @@ class TestUsersPage(ViewsTests):
         react_ga_debug = FuzzyText().fuzz()
         edx_base_url = FuzzyText().fuzz()
         host = FuzzyText().fuzz()
+        email_support = FuzzyText().fuzz()
         with self.settings(
             GA_TRACKING_ID=ga_tracking_id,
             REACT_GA_DEBUG=react_ga_debug,
             EDXORG_BASE_URL=edx_base_url,
             WEBPACK_DEV_SERVER_HOST=host,
+            EMAIL_SUPPORT=email_support,
+            VERSION='0.0.1',
+            RAVEN_CONFIG={'dsn': ''}
         ):
             # Mock has_permission so we don't worry about testing permissions here
             has_permission = Mock(return_value=True)
@@ -419,6 +437,10 @@ class TestUsersPage(ViewsTests):
                     'edx_base_url': edx_base_url,
                     'roles': [],
                     'search_url': reverse('search_api', kwargs={"elastic_url": ""}),
+                    'support_email': email_support,
+                    'environment': 'dev',
+                    'release_version': '0.0.1',
+                    'sentry_dsn': None
                 }
                 assert has_permission.called
 
@@ -435,11 +457,15 @@ class TestUsersPage(ViewsTests):
         react_ga_debug = FuzzyText().fuzz()
         edx_base_url = FuzzyText().fuzz()
         host = FuzzyText().fuzz()
+        email_support = FuzzyText().fuzz()
         with self.settings(
             GA_TRACKING_ID=ga_tracking_id,
             REACT_GA_DEBUG=react_ga_debug,
             EDXORG_BASE_URL=edx_base_url,
             WEBPACK_DEV_SERVER_HOST=host,
+            EMAIL_SUPPORT=email_support,
+            VERSION='0.0.1',
+            RAVEN_CONFIG={'dsn': ''}
         ):
             # Mock has_permission so we don't worry about testing permissions here
             has_permission = Mock(return_value=True)
@@ -455,7 +481,11 @@ class TestUsersPage(ViewsTests):
                     'host': host,
                     'edx_base_url': edx_base_url,
                     'roles': [],
-                    'search_url': reverse('search_api', kwargs={"elastic_url": ""})
+                    'search_url': reverse('search_api', kwargs={"elastic_url": ""}),
+                    'support_email': email_support,
+                    'environment': 'dev',
+                    'release_version': '0.0.1',
+                    'sentry_dsn': None
                 }
                 assert has_permission.called
 
@@ -470,7 +500,7 @@ class TestUsersPage(ViewsTests):
 
     def test_users_index_logged_in(self):
         """
-        Assert that a logged in user gets a 200 going to /users/
+        Assert that a logged in user gets a 200 going to /learner/
         """
         self.create_and_login_user()
         resp = self.client.get(reverse('ui-users'))
@@ -479,7 +509,7 @@ class TestUsersPage(ViewsTests):
 
     def test_users_index_anonymous(self):
         """
-        Assert that an anonymous user gets a 404 going to /users/
+        Assert that an anonymous user gets a 404 going to /learner/
         """
         resp = self.client.get(reverse('ui-users'))
         assert resp.status_code == 404
@@ -496,4 +526,4 @@ class TestTermsOfService(ViewsTests):
         """
         response = self.client.get(TERMS_OF_SERVICE_URL)
         js_settings = json.loads(response.context['js_settings_json'])
-        assert js_settings == {}
+        assert {'environment', 'release_version', 'sentry_dsn'}.issubset(set(js_settings.keys()))
