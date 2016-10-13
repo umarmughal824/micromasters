@@ -33,6 +33,7 @@ class HomePage(Page):
     CMS page representing the homepage.
     """
     content_panels = []
+    subpage_types = ['ProgramPage']
 
     def get_context(self, request):
         programs = Program.objects.filter(live=True)
