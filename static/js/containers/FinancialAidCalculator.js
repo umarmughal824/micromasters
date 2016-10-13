@@ -29,6 +29,8 @@ import type {
   FinancialAidState,
   FinancialAidValidation,
 } from '../reducers/financial_aid';
+import type { Program } from '../flow/programTypes';
+import { formatPrice } from '../util/util';
 
 const currencySelect = (update, current) => (
   <SelectField
@@ -60,7 +62,7 @@ const salaryField = (update, current) => (
 );
 
 const checkboxText = `I testify that the income I reported is true and accurate.
-I am aware that I may be asked to verify my income with documentation.`;
+I am aware that I may be asked to verify the reported income with documentation.`;
 
 const checkboxUpdate = (update, current, bool) => {
   let newEdit = R.clone(current);
@@ -119,6 +121,7 @@ type CalculatorProps = {
   updateCalculatorEdit:       (f: FinancialAidState) => void,
   currentProgramEnrollment:   ProgramEnrollment,
   openConfirmSkipDialog:      () => void,
+  programs:                   Array<Program>,
 };
 
 const FinancialAidCalculator = ({
@@ -128,10 +131,17 @@ const FinancialAidCalculator = ({
   financialAid: { validation },
   saveFinancialAid,
   updateCalculatorEdit,
-  currentProgramEnrollment: { title },
+  currentProgramEnrollment: { title, id },
   openConfirmSkipDialog,
-}: CalculatorProps) => (
-  <Dialog
+  programs,
+}: CalculatorProps) => {
+  let program = programs.find(prog => prog.id === id);
+  let minPossibleCost, maxPossibleCost;
+  if ( program.financial_aid_availability ) {
+    minPossibleCost = formatPrice(program.financial_aid_user_info.min_possible_cost),
+    maxPossibleCost = formatPrice(program.financial_aid_user_info.max_possible_cost);
+  }
+  return <Dialog
     open={calculatorDialogVisibility}
     contentClassName="financial-aid-calculator"
     bodyClassName="financial-aid-calculator-body"
@@ -141,8 +151,8 @@ const FinancialAidCalculator = ({
     title="Cost Calculator"
   >
     <div className="copy">
-      { `The cost of courses in the ${title} Micromasters varies between $50 and $1000,
-      based on your income and ability to pay.`}
+      { `The cost of courses in the ${title} Micromasters varies between ${minPossibleCost} and ${maxPossibleCost},
+      depending on your income and ability to pay.`}
     </div>
     <div className="salary-input">
       <div className="income">
@@ -166,8 +176,8 @@ const FinancialAidCalculator = ({
     <div className="checkbox-alert">
       { validationMessage('checkBox', validation) }
     </div>
-  </Dialog>
-);
+  </Dialog>;
+};
 
 const closeDialogAndCancel = dispatch => (
   () => {
@@ -206,12 +216,14 @@ const mapStateToProps = state => {
     ui: { calculatorDialogVisibility },
     financialAid,
     currentProgramEnrollment,
+    dashboard: { programs },
   } = state;
 
   return {
     calculatorDialogVisibility,
     financialAid,
     currentProgramEnrollment,
+    programs,
   };
 };
 

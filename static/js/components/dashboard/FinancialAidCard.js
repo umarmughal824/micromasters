@@ -105,7 +105,8 @@ export default class FinancialAidCard extends React.Component {
         financial_aid_user_info: {
           min_possible_cost: minPossibleCost,
           max_possible_cost: maxPossibleCost,
-        }
+        },
+        title,
       },
       openFinancialAidCalculator,
       setConfirmSkipDialogVisibility,
@@ -117,8 +118,9 @@ export default class FinancialAidCard extends React.Component {
         { courseListToolTip('filler-text', 'course-price') }
       </div>
       <div className="explanation">
-        Courses cost varies between {price(minPossibleCost)} and {price(maxPossibleCost)} (full
-        price), depending on your income and ability to pay.
+        The cost of courses in the {title} Micromasters varies
+        between {price(minPossibleCost)} and {price(maxPossibleCost)},
+        depending on your income and ability to pay.
       </div>
       <div className="pricing-actions">
         <button
