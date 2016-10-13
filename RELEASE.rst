@@ -1,6 +1,50 @@
 Release Notes
 =============
 
+Version 0.17.0
+--------------
+
+- adds has_delete_permission to financial aid django admin model (#1326)
+- Limit HomePage to have only PrgramPage as a child page
+- Fixes hero image to not scroll on home page (#1348)
+- Added sentry to app (#1306)
+- Fixed console warning (#1345)
+- Fixed user menu wideness
+- Add ga tracking to program pages
+- Adds a gradient overlay on the faculty carousel (#1319)
+- Hid program selector on certain pages
+- Added test cases (#1335)
+- Fixed bug in financial aid request for determining tier (#1314)
+- Fixed image size for faculty carousel (#1300)
+- Updated financial aid document address slightly
+- Replaced hard coded support email (#1330)
+- Implemented enroll links (#1289)
+- Added currently-enrolled dashboard course states
+- Made photo uploader only accept image files
+- fix the failing currency exchange rate command test (#1321)
+- Switched profile button order
+- Fixed income verification required display
+- add dollar sign to email body text for financial aid
+- Removed zendesk widget from homepage
+- Upgrade wagtail to 1.6.3
+- Added logging for IsSignedByCyberSource (#1241)
+- Expand country code to country name on review page (#1297)
+- changes /users/ to /learner/
+- Moved &quot;Show:&quot; outside the dropdown on financial aid review page label and made table responsive (#1284)
+- Enabled &#39;View on edX&#39; link on dashboard
+- Implemented passed course display (#1268)
+- Switched to hosted jquery and bootstrap (#1274)
+- Added default currency (based on country) to calculator
+- Limited the course grade cache refresh to the enrolled runs
+- Created FaqsPage
+- Fix for 404 page when passed exception kwarg (#1277)
+- Added support for token authentication
+- Remove fields from homepage object and CMS (#1165)
+- adds error handling for syncing exchange rates with API
+- changed names and description
+- adding test coverage for currency exchange rate management command
+- management command for generating exchange rate objects
+
 Version 0.16.0
 --------------
 
