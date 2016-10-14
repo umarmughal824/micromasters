@@ -12,64 +12,33 @@
 
 {% block content %}
 
-<div class="app-media layout-boxed">
+  {% include "header.html" %}
 
-  <nav class="navbar navbar-default" role="navigation">
-    <div class="container-fluid">
-      <div class="navbar-header">
-        <a class="navbar-brand" href="/"><img src="/static/images/logo-micromasters@2x.png" width="215" height="40" alt="MIT MicroMasters" /></a>
-        <div class="nav-utility pull-right">
-            {% if authenticated %}
-            <div class="dropdown btn-group">
-              <a class="btn btn-danger" href="/dashboard"><span>{{ name }}</span></a>
-              <button aria-label="logout_label" id="user-menu" role="button" class="dropdown-toggle btn btn-danger"
-                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button">
-                <span><span class="caret"></span></span>
-              </button>
-              <ul class="dropdown-menu" aria-labelledby="user-menu">
-                <li role="presentation" class=""><a role="menuitem" href="/learner/{{ username }}" tabindex="-1">Profile</a></li>
-                <li role="presentation" class=""><a role="menuitem" href="/settings" tabindex="-1">Settings</a></li>
-                <li role="presentation" class=""><a role="menuitem" href="/logout" tabindex="-1">Logout</a></li>
-              </ul>
+  <div class="main-content-wrapper">
+    <section class="main-content">
+      <div class="page-content">
+        <div class="single-column">
+
+          <div class="mdl-card">
+            <div class="mdl-card__title">
+              <h2 class="mdl-card__title-text">
+                {% block error_header %}
+                {% endblock %}
+              </h2>
             </div>
-            {% else %}
-            <span>Get Started Today!</span>
-            <a class="btn btn-danger" href="{% url 'social:begin' 'edxorg' %}">
-              Sign in with edX.org
-            </a>
-            {% endif %}
+            <div class="mdl-card__supporting-text">
+              {% block error_content %}
+              {% endblock %}
+            </div>
+          </div>
         </div>
-        {% if authenticated %}
-        <ul class="nav navbar-toolbar navbar-left">
-          <li class="active">
-            {% if is_staff %}
-              <a href="/learners">Dashboard</a>
-            {% else %}
-              <a href="/dashboard">Dashboard</a>
-            {% endif %}
-          </li>
-        </ul>
-        {% endif %}
       </div>
-    </div>
-  </nav>
-
-<div class="page-content">
-  <div class="card">
-
-     <div>
-       <div class="card-header">
-        {% block error_header %}
-        {% endblock %}
-       </div>
-       <div class="card-copy">
-         {% block error_content %}
-         {% endblock %}
-       </div>
-     </div>
-   </div>
- </div>
-
+    </section>
+  </div>
   {% include "footer.html" %}
-</div>
+  <div id="signup-dialog">
+  <!-- signup dialog React component injected here -->
+  </div>
+  <script type="text/javascript" src="{{ public_src }}"></script>
+  <script type="text/javascript" src="{{ signup_dialog_src }}"></script>
 {% endblock %}

@@ -3,8 +3,8 @@
 import React from 'react';
 import moment from 'moment';
 import Button from 'react-mdl/lib/Button';
+import Spinner from 'react-mdl/lib/Spinner';
 import R from 'ramda';
-
 import _ from 'lodash';
 
 import type { Course, CourseRun, FinancialAidUserInfo } from '../../flow/programTypes';
@@ -16,11 +16,13 @@ import {
   STATUS_CURRENTLY_ENROLLED,
   STATUS_WILL_ATTEND,
   STATUS_OFFERED,
+  STATUS_PENDING_ENROLLMENT,
   DASHBOARD_FORMAT,
   FA_PENDING_STATUSES,
   FA_STATUS_SKIPPED
 } from '../../constants';
 import { formatPrice } from '../../util/util';
+import { ifValidDate } from '../../util/date';
 
 export default class CourseAction extends React.Component {
   props: {
@@ -90,6 +92,14 @@ export default class CourseAction extends React.Component {
       }
     }
 
+    if (run.status === STATUS_PENDING_ENROLLMENT) {
+      buttonProps.disabled = true;
+
+      text = <div className="spinner-container">
+        <Spinner singleColor />
+      </div>;
+    }
+
     return (
       <Button className="dashboard-button" key="1" {...buttonProps}>
         {text}
@@ -140,14 +150,15 @@ export default class CourseAction extends React.Component {
     }
     case STATUS_WILL_ATTEND: {
       let startDate = moment(run.course_start_date);
-      let daysUntilStart = startDate.diff(now, 'days');
-      description = this.renderBoxedDescription(`Course starts in ${daysUntilStart} days`);
+      let text = ifValidDate('', date => `Course starts in ${date.diff(now, 'days')} days`, startDate);
+      description = this.renderBoxedDescription(text);
       break;
     }
     case STATUS_CAN_UPGRADE: {
-      let formattedUpgradeDate = moment(run.course_upgrade_deadline).format(DASHBOARD_FORMAT);
+      let date = moment(run.course_upgrade_deadline);
       action = this.renderEnrollButton(run);
-      description = this.renderTextDescription(`Payment due: ${formattedUpgradeDate}`);
+      let text = ifValidDate('', date => `Payment due: ${date.format(DASHBOARD_FORMAT)}`, date); 
+      description = this.renderTextDescription(text);
       break;
     }
     case STATUS_OFFERED: {
@@ -156,17 +167,22 @@ export default class CourseAction extends React.Component {
         action = this.renderEnrollButton(run);
         description = this.renderPayLaterLink(run);
       } else {
+        let text;
         if (enrollmentStartDate) {
-          let formattedEnrollDate = enrollmentStartDate.format(DASHBOARD_FORMAT);
-          description = this.renderTextDescription(`Enrollment begins ${formattedEnrollDate}`);
+          text = ifValidDate('', date => `Enrollment begins ${date.format(DASHBOARD_FORMAT)}`, enrollmentStartDate);
         } else if (run.fuzzy_enrollment_start_date) {
-          description = this.renderTextDescription(`Enrollment begins ${run.fuzzy_enrollment_start_date}`);
+          text = `Enrollment begins ${run.fuzzy_enrollment_start_date}`;
         }
+        description = this.renderTextDescription(text);
       }
       break;
     }
     case STATUS_NOT_PASSED:
       // do nothing;
+      break;
+    case STATUS_PENDING_ENROLLMENT:
+      action = this.renderEnrollButton(run);
+      description = this.renderTextDescription('Processing...');
       break;
     }
 

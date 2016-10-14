@@ -18,10 +18,15 @@ import {
   STATUS_CAN_UPGRADE,
   STATUS_CURRENTLY_ENROLLED,
   STATUS_WILL_ATTEND,
+  STATUS_PENDING_ENROLLMENT,
   FA_PENDING_STATUSES,
   FA_STATUS_SKIPPED
 } from '../../constants';
-import { findCourse, findAndCloneCourse } from '../../util/test_utils';
+import {
+  findCourse,
+  alterFirstRun,
+  findAndCloneCourse
+} from '../../util/test_utils';
 
 describe('CourseAction', () => {
   const now = moment();
@@ -61,10 +66,6 @@ describe('CourseAction', () => {
       descriptionText: descriptionText,
       linkText: linkText
     };
-  };
-
-  let alterFirstRun = (course, overrideObject) => {
-    course.runs[0] = Object.assign({}, course.runs[0], overrideObject);
   };
 
   let assertCheckoutButton = (button, courseId) => {
@@ -117,6 +118,17 @@ describe('CourseAction', () => {
     assertCheckoutButton(elements.button, firstRun.course_id);
   });
 
+  it('hides an invalid date with STATUS_OFFERED', () => {
+    let course = findAndCloneCourse(course => (
+      course.runs.length > 0 &&
+      course.runs[0].status === STATUS_OFFERED
+    ));
+    alterFirstRun(course, {enrollment_start_date: '1999-13-92'});
+    const wrapper = shallow(<CourseAction course={course} {...defaultParamsNow} />);
+    let elements = getElements(wrapper);
+    assert.isUndefined(elements.descriptionText);
+  });
+
   it('shows an enroll button if user is not enrolled and enrollment starts today or earlier', () => {
     let course = findAndCloneCourse(course => (
       course.runs.length > 0 &&
@@ -155,6 +167,17 @@ describe('CourseAction', () => {
     assertCheckoutButton(elements.button, firstRun.course_id);
   });
 
+  it('hides an invalid date if user is enrolled but is not verified', () => {
+    let course = findAndCloneCourse(course => (
+      course.runs.length > 0 &&
+      course.runs[0].status === STATUS_CAN_UPGRADE
+    ));
+    alterFirstRun(course, { course_upgrade_deadline: '1999-13-92' });
+    const wrapper = shallow(<CourseAction course={course} {...defaultParamsNow} />);
+    let elements = getElements(wrapper);
+    assert.isUndefined(elements.descriptionText, 'Should not be any text');
+  });
+
   it('shows a message if a user is not enrolled and the course has a future enrollment start date', () => {
     let course = findAndCloneCourse(course => (
       course.runs.length > 0 &&
@@ -188,7 +211,7 @@ describe('CourseAction', () => {
   });
 
   it('shows a countdown message if the user is enrolled and the course starts in the future', () => {
-    let course = findCourse(course => (
+    let course = findAndCloneCourse(course => (
       course.runs.length > 0 &&
       course.runs[0].status === STATUS_WILL_ATTEND
     ));
@@ -198,6 +221,29 @@ describe('CourseAction', () => {
     let elements = getElements(wrapper);
 
     assert.include(elements.descriptionText, 'Course starts in 10 days');
+  });
+
+  it('shows a pending disabled button if the user has status pending-enrollment', () => {
+    let course = findCourse(course => (
+      course.runs.length > 0 &&
+      course.runs[0].status === STATUS_PENDING_ENROLLMENT
+    ));
+    const wrapper = shallow(<CourseAction course={course} {...defaultParamsNow} />);
+
+    assert.equal(wrapper.text(), "<Button />Processing...");
+    assert.isTrue(wrapper.find("Button").props()['disabled']);
+    assert.equal(wrapper.find("Spinner").length, 1);
+  });
+
+  it('hides an invalid date if the user is enrolled and the course has yet to start', () => {
+    let course = findAndCloneCourse(course => (
+      course.runs.length > 0 &&
+      course.runs[0].status === STATUS_WILL_ATTEND
+    ));
+    alterFirstRun(course, {course_start_date: "1999-13-92"});
+    const wrapper = shallow(<CourseAction course={course} {...defaultParamsNow} />);
+    let elements = getElements(wrapper);
+    assert.isUndefined(elements.descriptionText, 'Should not be any text');
   });
 
   describe('with financial aid', () => {

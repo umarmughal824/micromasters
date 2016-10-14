@@ -8,8 +8,9 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db.models.signals import post_save
 from django.test import TestCase
 from factory.django import mute_signals
+from factory.fuzzy import FuzzyText
 
-from courses.factories import ProgramFactory, CourseRunFactory
+from courses.factories import ProgramFactory, CourseFactory, CourseRunFactory
 from dashboard.models import ProgramEnrollment
 from ecommerce.factories import CoursePriceFactory
 from financialaid.api import (
@@ -20,15 +21,15 @@ from financialaid.api import (
     get_no_discount_tier_program,
     update_currency_exchange_rate
 )
-from financialaid.constants import (
-    COUNTRY_INCOME_THRESHOLDS,
-    FinancialAidStatus
-)
+from financialaid.constants import FinancialAidStatus
 from financialaid.factories import (
-    TierProgramFactory,
-    FinancialAidFactory
+    FinancialAidFactory,
+    TierProgramFactory
 )
-from financialaid.models import CurrencyExchangeRate
+from financialaid.models import (
+    CountryIncomeThreshold,
+    CurrencyExchangeRate
+)
 from profiles.factories import ProfileFactory
 from roles.models import Role
 from roles.roles import Staff, Instructor
@@ -41,7 +42,9 @@ class FinancialAidBaseTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         with mute_signals(post_save):
-            cls.profile = ProfileFactory.create()
+            cls.profile = ProfileFactory.create(
+                country=FuzzyText(length=2)
+            )
             cls.profile2 = ProfileFactory.create()
             cls.staff_user_profile = ProfileFactory.create()
             cls.staff_user_profile2 = ProfileFactory.create()
@@ -54,9 +57,10 @@ class FinancialAidBaseTestCase(TestCase):
             financial_aid_availability=True,
             live=True
         )
+        cls.course = CourseFactory.create(program=cls.program)
         cls.course_run = CourseRunFactory.create(
             enrollment_end=datetime.utcnow() + timedelta(hours=1),
-            program=cls.program
+            course=cls.course
         )
         cls.course_price = CoursePriceFactory.create(
             course_run=cls.course_run,
@@ -89,6 +93,7 @@ class FinancialAidBaseTestCase(TestCase):
             financial_aid_availability=True,
             live=True
         )
+        cls.course2 = CourseFactory.create(program=cls.program2)
         Role.objects.create(
             user=cls.staff_user_profile2.user,
             program=cls.program2,
@@ -131,6 +136,22 @@ class FinancialAidBaseTestCase(TestCase):
             tier_program=cls.tier_programs["25k"],
             status=FinancialAidStatus.PENDING_MANUAL_APPROVAL
         )
+        # Country income thresholds (CountryIncomeThreshold objects already exist in the database, but since we
+        # use fuzzy generators for cls.profile.country, it may not exist yet)
+        cls.country_income_threshold_50000, _ = CountryIncomeThreshold.objects.get_or_create(
+            country_code=cls.profile.country,
+            defaults={
+                "income_threshold": 50000
+            }
+        )
+        if cls.country_income_threshold_50000.income_threshold != 50000:
+            cls.country_income_threshold_50000.income_threshold = 50000
+            cls.country_income_threshold_50000.save()
+        cls.country_income_threshold_0 = CountryIncomeThreshold.objects.exclude(
+            id=cls.country_income_threshold_50000.id
+        ).first()
+        cls.country_income_threshold_0.income_threshold = 0
+        cls.country_income_threshold_0.save()
 
     @staticmethod
     def assert_http_status(method, url, status, data=None, content_type="application/json", **kwargs):
@@ -198,87 +219,41 @@ class FinancialAidAPITests(FinancialAidBaseTestCase):
         Tests determine_auto_approval() assigning the correct auto-approval status. This should return True
         if income is strictly greater than the threshold (or if the threshold is 0, which is inclusive of 0).
         """
-        # Assumes US threshold is 75000
-        assert COUNTRY_INCOME_THRESHOLDS["US"] == 75000
+        # Income threshold == 0
+        assert self.country_income_threshold_0.income_threshold == 0
         financial_aid = FinancialAidFactory.create(
-            income_usd=75001,
-            country_of_income="US"
+            income_usd=self.country_income_threshold_0.income_threshold+1,
+            country_of_income=self.country_income_threshold_0.country_code
         )
         assert determine_auto_approval(financial_aid) is True
         financial_aid = FinancialAidFactory.create(
-            income_usd=75000,
-            country_of_income="US"
-        )
-        assert not determine_auto_approval(financial_aid)
-        financial_aid = FinancialAidFactory.create(
-            income_usd=1000,
-            country_of_income="US"
-        )
-        assert not determine_auto_approval(financial_aid)
-        financial_aid = FinancialAidFactory.create(
             income_usd=0,
-            country_of_income="US"
+            country_of_income=self.country_income_threshold_0.country_code
         )
-        assert not determine_auto_approval(financial_aid)
+        assert determine_auto_approval(financial_aid) is True
 
-        # Assumes MX threshold is 50000
-        assert COUNTRY_INCOME_THRESHOLDS["MX"] == 50000
+        # Income threshold greater than 0
+        assert self.country_income_threshold_50000.income_threshold > 0
         financial_aid = FinancialAidFactory.create(
-            income_usd=50001,
-            country_of_income="MX"
+            income_usd=self.country_income_threshold_50000.income_threshold+1,
+            country_of_income=self.country_income_threshold_50000.country_code
         )
         assert determine_auto_approval(financial_aid) is True
         financial_aid = FinancialAidFactory.create(
-            income_usd=50000,
-            country_of_income="MX"
+            income_usd=self.country_income_threshold_50000.income_threshold,
+            country_of_income=self.country_income_threshold_50000.country_code
         )
-        assert not determine_auto_approval(financial_aid)
+        assert determine_auto_approval(financial_aid) is not True  # Only auto-approved if > income threshold
         financial_aid = FinancialAidFactory.create(
-            income_usd=45000,
-            country_of_income="MX"
+            income_usd=self.country_income_threshold_50000.income_threshold-1,
+            country_of_income=self.country_income_threshold_50000.country_code
         )
-        assert not determine_auto_approval(financial_aid)
+        assert determine_auto_approval(financial_aid) is not True  # Only auto-approved if > income threshold
         financial_aid = FinancialAidFactory.create(
             income_usd=0,
-            country_of_income="MX"
+            country_of_income=self.country_income_threshold_50000.country_code
         )
-        assert not determine_auto_approval(financial_aid)
-
-        # Assumes IN threshold is 25000
-        assert COUNTRY_INCOME_THRESHOLDS["IN"] == 25000
-        financial_aid = FinancialAidFactory.create(
-            income_usd=30000,
-            country_of_income="IN"
-        )
-        assert determine_auto_approval(financial_aid) is True
-        financial_aid = FinancialAidFactory.create(
-            income_usd=25000,
-            country_of_income="IN"
-        )
-        assert not determine_auto_approval(financial_aid)
-        financial_aid = FinancialAidFactory.create(
-            income_usd=1000,
-            country_of_income="IN"
-        )
-        assert not determine_auto_approval(financial_aid)
-        financial_aid = FinancialAidFactory.create(
-            income_usd=0,
-            country_of_income="IN"
-        )
-        assert not determine_auto_approval(financial_aid)
-
-        # Assumes KP threshold is 0
-        assert COUNTRY_INCOME_THRESHOLDS["KP"] == 0
-        financial_aid = FinancialAidFactory.create(
-            income_usd=3000,
-            country_of_income="KP"
-        )
-        assert determine_auto_approval(financial_aid) is True
-        financial_aid = FinancialAidFactory.create(
-            income_usd=0,
-            country_of_income="KP"
-        )
-        assert determine_auto_approval(financial_aid) is True
+        assert determine_auto_approval(financial_aid) is not True  # Only auto-approved if > income threshold
 
     def test_determine_income_usd(self):  # pylint: disable=no-self-use
         """

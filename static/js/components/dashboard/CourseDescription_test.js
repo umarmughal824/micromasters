@@ -6,7 +6,11 @@ import { assert } from 'chai';
 import _ from 'lodash';
 
 import CourseDescription from './CourseDescription';
-import { findCourse } from '../../util/test_utils';
+import {
+  findCourse,
+  findAndCloneCourse,
+  alterFirstRun,
+} from '../../util/test_utils';
 import {
   DASHBOARD_FORMAT,
   STATUS_PASSED,
@@ -72,6 +76,17 @@ describe('CourseDescription', () => {
     assert.include(elements.detailsText, `Ended: ${formattedDate}`);
   });
 
+  it('hides an invalid date with status passed', () => {
+    let course = findAndCloneCourse(course => (
+      course.runs.length > 0 &&
+      course.runs[0].status === STATUS_PASSED
+    ));
+    alterFirstRun(course, {course_end_date: '1999-13-92'});
+    const wrapper = shallow(<CourseDescription course={course} />);
+    let elements = getElements(wrapper);
+    assert.equal(elements.detailsText, '');
+  });
+
   it('does show date with status not-passed', () => {
     let course = findCourse(course => (
       course.runs.length > 0 &&
@@ -82,14 +97,22 @@ describe('CourseDescription', () => {
     let firstRun = course.runs[0];
     let courseEndDate = moment(firstRun.course_end_date);
     let formattedDate = courseEndDate.format(DASHBOARD_FORMAT);
-
     assert.equal(elements.detailsText, `Ended: ${formattedDate}`);
   });
 
-  it('does not show anything when there are no runs for a course', () => {
-    let course = findCourse(course => (
-      course.runs.length === 0
+  it('hides an invalid date with status not-passed', () => {
+    let course = findAndCloneCourse(course => (
+      course.runs.length > 0 &&
+      course.runs[0].status === STATUS_NOT_PASSED
     ));
+    alterFirstRun(course, {course_end_date: '1999-13-92'});
+    const wrapper = shallow(<CourseDescription course={course} />);
+    let elements = getElements(wrapper);
+    assert.equal(elements.detailsText, '');
+  });
+
+  it('does not show anything when there are no runs for a course', () => {
+    let course = findCourse(course => course.runs.length === 0);
     const wrapper = shallow(<CourseDescription course={course} />);
     let elements = getElements(wrapper);
 
@@ -110,6 +133,17 @@ describe('CourseDescription', () => {
     assert.equal(elements.detailsText, `Start date: ${formattedDate}`);
   });
 
+  it('hides an invalid date with status verified', () => {
+    let course = findAndCloneCourse(course => (
+      course.runs.length > 0 &&
+      course.runs[0].status === STATUS_CURRENTLY_ENROLLED
+    ));
+    alterFirstRun(course, { course_start_date: '1999-13-92' });
+    const wrapper = shallow(<CourseDescription course={course} />);
+    let elements = getElements(wrapper);
+    assert.equal(elements.detailsText, '');
+  });
+
   it('does show date with status enrolled', () => {
     let course = findCourse(course => (
       course.runs.length > 0 &&
@@ -124,6 +158,17 @@ describe('CourseDescription', () => {
     assert.include(elements.detailsText, `Start date: ${formattedDate}`);
   });
 
+  it('hides an invalid date with status enrolled', () => {
+    let course = findAndCloneCourse(course => (
+      course.runs.length > 0 &&
+      course.runs[0].status === STATUS_CAN_UPGRADE
+    ));
+    alterFirstRun(course, {course_start_date: '1999-13-92'});
+    const wrapper = shallow(<CourseDescription course={course} />);
+    let elements = getElements(wrapper);
+    assert.notInclude(elements.detailsText, 'Start date: ');
+  });
+
   it('does show date with status offered', () => {
     let course = findCourse(course => (
       course.runs.length > 0 &&
@@ -136,6 +181,17 @@ describe('CourseDescription', () => {
     let formattedDate = courseStartDate.format(DASHBOARD_FORMAT);
 
     assert.equal(elements.detailsText, `Start date: ${formattedDate}`);
+  });
+
+  it('hides an invalid date with status offered', () => {
+    let course = findAndCloneCourse(course => (
+      course.runs.length > 0 &&
+      course.runs[0].status === STATUS_OFFERED
+    ));
+    alterFirstRun(course, {course_start_date: '1999-13-92'});
+    const wrapper = shallow(<CourseDescription course={course} />);
+    let elements = getElements(wrapper);
+    assert.equal(elements.detailsText, '');
   });
 
   it('shows a message when the user is auditing the course', () => {

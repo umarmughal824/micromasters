@@ -14,8 +14,8 @@ from wagtail.wagtailcore.fields import RichTextField
 from wagtail.wagtailcore.models import Orderable, Page
 from wagtail.wagtailimages.models import Image
 
-from cms.api import get_course_enrollment_text, get_course_url
 from courses.models import Program
+from courses.serializers import CourseSerializer
 from micromasters.utils import webpack_dev_server_host
 from profiles.api import get_social_username
 from roles.models import Instructor, Staff
@@ -26,6 +26,11 @@ def faculty_for_carousel(faculty):
     """formats faculty info for the carousel"""
     from cms.serializers import FacultySerializer
     return [FacultySerializer().to_representation(f) for f in faculty]
+
+
+def courses_for_popover(courses):
+    """formats course info for the popover"""
+    return [CourseSerializer().to_representation(c) for c in courses]
 
 
 class HomePage(Page):
@@ -68,10 +73,8 @@ class FaqsPage(Page):
     """
     CMS page for questions
     """
-    content_panels = Page.content_panels + [
-        InlinePanel('faqs', label='Frequently Asked Questions'),
-    ]
     parent_page_types = ['ProgramPage']
+    subpage_types = ['CategorizedFaqsPage']
 
     def parent_page(self):
         """ Get the parent ProgramPage"""
@@ -82,6 +85,16 @@ class FaqsPage(Page):
         context['faqpage'] = self
         context['active_tab'] = self.title
         return context
+
+
+class CategorizedFaqsPage(Page):
+    """
+    CMS page for categorized questions
+    """
+    content_panels = Page.content_panels + [
+        InlinePanel('faqs', label='Frequently Asked Questions'),
+    ]
+    parent_page_types = ['FaqsPage']
 
 
 class ProgramPage(Page):
@@ -163,11 +176,15 @@ class ProgramPage(Page):
 
 def get_program_page_context(programpage, request):
     """ Get context for the program page"""
+    courses_query = (
+        programpage.program.course_set.order_by('position_in_program').all()
+    )
     js_settings = {
         "gaTrackingID": settings.GA_TRACKING_ID,
         "host": webpack_dev_server_host(request),
         "programId": programpage.program.id,
         "faculty": faculty_for_carousel(programpage.faculty_members.all()),
+        "courses": courses_for_popover(courses_query),
         "environment": settings.ENVIRONMENT,
         "sentry_dsn": sentry.get_public_dsn(),
         "release_version": settings.VERSION
@@ -175,17 +192,7 @@ def get_program_page_context(programpage, request):
     username = get_social_username(request.user)
     context = super(ProgramPage, programpage).get_context(request)
 
-    courses_info = []
-    for course in programpage.program.course_set.all().order_by(
-            'position_in_program'
-    ):
-        courses_info.append(
-            (course,
-             get_course_enrollment_text(course),
-             get_course_url(course))
-        )
-
-    context["zendesk_widget"] = get_bundle_url(request, "js/zendesk_widget.js")
+    context["zendesk_widget"] = get_bundle_url(request, "zendesk_widget.js")
     context["style_src"] = get_bundle_url(request, "style.js")
     context["public_src"] = get_bundle_url(request, "public.js")
     context["style_public_src"] = get_bundle_url(request, "style_public.js")
@@ -195,7 +202,7 @@ def get_program_page_context(programpage, request):
     context["username"] = username
     context["js_settings_json"] = json.dumps(js_settings)
     context["title"] = programpage.title
-    context["courses_info"] = courses_info
+    context["courses"] = courses_query
     context["sentry_client"] = get_bundle_url(request, "sentry_client.js")
     context["tracking_id"] = programpage.program.ga_tracking_id
 
@@ -250,7 +257,7 @@ class FrequentlyAskedQuestion(Orderable):
     """
     FAQs for the program
     """
-    faqs_page = ParentalKey(FaqsPage, related_name='faqs', null=True)
+    faqs_page = ParentalKey(CategorizedFaqsPage, related_name='faqs', null=True)
     question = models.TextField()
     answer = RichTextField()
 
