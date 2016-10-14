@@ -1,6 +1,25 @@
 Release Notes
 =============
 
+Version 0.18.0
+--------------
+
+- Updated process count and basicauth exemption (#1395)
+- Fix 404 page and social buttons on Terms of Service page
+- Serialize program courses to SETTINGS object (#1378)
+- Handled invalid dates in dashboard course display
+- Fixed issues with popups on IE11, Edge
+- Fixed order fulfillment race condition (#1318)
+- Fixes failing test on master (#1382)
+- Removed learners near me card (#1372)
+- Fixed celery scheduling for currency exhange rate updates (#1385)
+- Fixed paid course filtering (#1381)
+- Country income threshold database model (#1303)
+- Fixed path to zendesk_widget.js (#1364)
+- fixes footer to page bottom if page content is short (#1365)
+- Add CategorizedFaqsPage to the faqs hierarchy
+- Remove ParentalKey from faqs model
+
 Version 0.17.0
 --------------
 
