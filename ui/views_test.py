@@ -374,25 +374,29 @@ class TestProgramPage(ViewsTests):
         resp = self.client.get('/')
         self.assertContains(resp, image.get_rendition('fill-690x530').url)
 
-    def test_courses_enrollment_text(self):
+    def test_course_listing(self):
         """
-        Verify get_course_enrollment_test is called with
-        each course in the program
+        Verify that courses are being serialized to JS in the correct order
         """
-        for i in range(5):
-            course = CourseFactory(
+        # Create several courses in the program
+        courses = [
+            CourseFactory.create(
                 program=self.program_page.program,
-                position_in_program=i)
-            course.save()
-        with patch('cms.models.get_course_enrollment_text') as get_enrollment_text:
-            get_enrollment_text.return_value = 'some text'
-            response = self.client.get(self.program_page.url)
-            self.assertContains(response, 'some text')
-            courses = self.program_page.program.course_set.all().order_by(
-                'position_in_program'
+                position_in_program=i,
             )
-            for i, course in enumerate(courses):
-                assert get_enrollment_text.call_args_list[i][0][0] == course
+            for i in range(5)
+        ]
+        # render the page
+        response = self.client.get(self.program_page.url)
+        js_settings = json.loads(response.context['js_settings_json'])
+        # check that the courses are in the response
+        self.assertIn("courses", js_settings)
+        self.assertEqual(len(js_settings["courses"]), 5)
+        # check that they're in the correct order
+        for course, js_course in zip(courses, js_settings["courses"]):
+            self.assertEqual(course.title, js_course["title"])
+            self.assertEqual(course.description, js_course["description"])
+            self.assertEqual(course.url, js_course["url"])
 
 
 class TestUsersPage(ViewsTests):
