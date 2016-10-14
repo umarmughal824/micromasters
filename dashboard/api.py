@@ -377,15 +377,20 @@ def _check_if_refresh(user, cached_model, refresh_delta, limit_to_courses=None):
         Q(edx_course_key__isnull=True) | Q(edx_course_key__exact='')
     ).values_list("edx_course_key", flat=True)
 
+    all_course_count = course_ids.count()
+
     if limit_to_courses is not None:
         course_ids = course_ids.filter(edx_course_key__in=limit_to_courses)
 
     model_queryset = cached_model.objects.filter(
         user=user,
         last_request__gt=refresh_delta,
-        course_run__edx_course_key__in=course_ids,
     )
-    return model_queryset.count() == len(course_ids), model_queryset, course_ids
+    all_cached_elements_count = model_queryset.count()
+    model_queryset = model_queryset.filter(course_run__edx_course_key__in=course_ids)
+
+    is_data_fresh = model_queryset.count() == len(course_ids) and all_cached_elements_count == all_course_count
+    return is_data_fresh, model_queryset, course_ids
 
 
 def get_student_enrollments(user, edx_client):
