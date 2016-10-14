@@ -1,4 +1,4 @@
-c.validation-wrapper {
+.validation-wrapper {
   padding-bottom: 10px;
 }
 
@@ -221,11 +221,12 @@ c.validation-wrapper {
       .course-description {
         .course-title {
           font-weight: 500;
+          font-size: 16px;
         }
 
         .details {
           font-weight: 400;
-          font-size: 10pt;
+          font-size: 15px;
           color: $darkgrey;
           padding: 10px 0;
 
@@ -234,7 +235,7 @@ c.validation-wrapper {
           }
 
           .no-runs {
-            color: black;
+            color: #868686;
           }
         }
       }
@@ -466,7 +467,7 @@ c.validation-wrapper {
   }
 
   .save-button {
-    color: #58b7bc;
+    color: #0c92e0;
     margin-right: 20px;
   }
 }
