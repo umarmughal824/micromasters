@@ -3,6 +3,7 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 import _ from 'lodash';
 
+import { findCourseRun } from '../util/util';
 import { DASHBOARD_RESPONSE } from '../constants';
 import type {
   Course,
@@ -10,12 +11,12 @@ import type {
 } from '../../flow/programTypes';
 
 export function findCourse(courseSelector: (course: Course, program: Program) => boolean): Course {
-  for (let program of DASHBOARD_RESPONSE) {
-    for (let course of program.courses) {
-      if (courseSelector(course, program)) {
-        return course;
-      }
-    }
+  let [, course, ] = findCourseRun(
+    DASHBOARD_RESPONSE,
+    (courseRun, _course, program) => courseSelector(_course, program)
+  );
+  if (course !== null) {
+    return course;
   }
   throw "Unable to find course";
 }
@@ -97,3 +98,22 @@ export const findReact = (dom) => {
   }
   return null;
 };
+
+export function createAssertReducerResultState<State>(store, getReducerState) {
+  return (
+    action: () => Action, stateLookup: (state: State) => any, defaultValue: any
+  ): void => {
+    const getState = () => stateLookup(getReducerState(store.getState()));
+
+    assert.deepEqual(defaultValue, getState());
+    for (let value of [true, null, false, 0, 3, 'x', {'a': 'b'}, {}, [3, 4, 5], [], '']) {
+      let expected = value;
+      if (value === null) {
+        // redux-actions converts this to undefined
+        expected = undefined;
+      }
+      store.dispatch(action(value));
+      assert.deepEqual(expected, getState());
+    }
+  };
+}

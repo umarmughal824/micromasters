@@ -38,6 +38,9 @@ export const STATUS_WILL_ATTEND = 'will-attend';
 export const STATUS_CAN_UPGRADE = 'can-upgrade';
 export const STATUS_OFFERED = 'offered';
 
+// note: this status is not sent from the server
+export const STATUS_PENDING_ENROLLMENT = 'pending-enrollment';
+
 export const ALL_COURSE_STATUSES = [
   STATUS_PASSED,
   STATUS_NOT_PASSED,
@@ -45,6 +48,7 @@ export const ALL_COURSE_STATUSES = [
   STATUS_CAN_UPGRADE,
   STATUS_CURRENTLY_ENROLLED,
   STATUS_WILL_ATTEND,
+  STATUS_PENDING_ENROLLMENT,
 ];
 
 // financial aid statuses
@@ -506,6 +510,23 @@ export const DASHBOARD_RESPONSE = [
         "description": null,
         "prerequisites": null
       },
+      {
+        "id": 16,
+        "position_in_program": 10,
+        "title": "Pending enrollment course",
+        "runs": [
+          {
+            "course_id": "course-v1:pending",
+            "id": 47,
+            "title": "Pending enrollment course run",
+            "position": 0,
+            "status": STATUS_PENDING_ENROLLMENT,
+            "course_start_date": "2018-08-22T11:48:27Z",
+            "course_end_date": "2018-09-09T10:20:10Z",
+            "enrollment_start_date": "2016-03-04T01:00:00Z",
+          }
+        ]
+      }
     ],
     "title": "Master Program",
     "description": null,

@@ -23,6 +23,7 @@ import {
   createForm,
   formatPrice,
   programCourseInfo,
+  findCourseRun,
 } from '../util/util';
 import {
   EDUCATION_LEVELS,
@@ -34,6 +35,7 @@ import {
   MASTERS,
   PROFILE_STEP_LABELS,
   CYBERSOURCE_CHECKOUT_RESPONSE,
+  DASHBOARD_RESPONSE,
 } from '../constants';
 import { assertMaybeEquality, assertIsNothing } from './sanctuary_test';
 import { program } from '../components/ProgressWidget_test';
@@ -392,6 +394,47 @@ describe('utility functions', () => {
         totalPassedCourses: 1,
         totalCourses: 3
       });
+    });
+  });
+
+  describe('findCourseRun', () => {
+    it('iterates and finds the course run, course, and program', () => {
+      let program = DASHBOARD_RESPONSE[1];
+      let course = program.courses[0];
+      let run = course.runs[0];
+
+      assert.deepEqual(
+        findCourseRun(DASHBOARD_RESPONSE, _run => run.course_id === _run.course_id),
+        [run, course, program],
+      );
+    });
+
+    it('finds courses with no course runs', () => {
+      let program = DASHBOARD_RESPONSE[1];
+      let course = program.courses[1];
+      assert.equal(course.runs.length, 0);
+
+      assert.deepEqual(
+        findCourseRun(DASHBOARD_RESPONSE, (_run, _course) => _course.runs.length === 0),
+        [null, course, program]
+      );
+    });
+
+    it('finds a program with no courses', () => {
+      let program = DASHBOARD_RESPONSE[0];
+      assert.equal(program.courses.length, 0);
+
+      assert.deepEqual(
+        findCourseRun(DASHBOARD_RESPONSE, (_run, _course, _program) => _program.courses.length === 0),
+        [null, null, program]
+      );
+    });
+
+    it('returns an empty object for each if selector never matches', () => {
+      assert.deepEqual(
+        findCourseRun(DASHBOARD_RESPONSE, () => false),
+        [null, null, null],
+      );
     });
   });
 });
