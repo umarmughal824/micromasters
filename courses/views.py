@@ -85,20 +85,19 @@ class ProgramEnrollmentListView(ListCreateAPIView):
         if not isinstance(program_id, int):
             raise ValidationError('A `program_id` parameter must be specified')
 
-        if ProgramEnrollment.objects.filter(user=request.user, program__pk=program_id).exists():
-            raise ResourceConflict('The enrollment for the specified program already exists')
+        serializer = self.get_serializer_class()
 
         try:
             program = Program.objects.get(live=True, pk=program_id)
         except Program.DoesNotExist:
             raise NotFound('The specified program has not been found or it is not live yet')
 
-        ProgramEnrollment.objects.create(
+        _, created = ProgramEnrollment.objects.get_or_create(
             user=request.user,
             program=program,
         )
-        serializer = self.get_serializer_class()
+        status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
         return Response(
-            status=status.HTTP_201_CREATED,
+            status=status_code,
             data=serializer(program).data
         )

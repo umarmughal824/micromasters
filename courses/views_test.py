@@ -168,7 +168,8 @@ class ProgramEnrollmentTests(ESTestCase, APITestCase):
         self.assert_program_enrollments_count()
         resp = self.client.post(self.url, {'program_id': self.program1.pk}, format='json')
         self.assert_program_enrollments_count()
-        assert resp.status_code == status.HTTP_409_CONFLICT
+        assert resp.status_code == status.HTTP_200_OK
+        self.assert_program_enrollments_count()
 
     def test_create_program_does_not_exists(self):
         """Test in case the program does not exist"""
