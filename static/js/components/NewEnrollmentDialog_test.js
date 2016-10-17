@@ -31,7 +31,7 @@ describe("NewEnrollmentDialog", () => {
 
   it('renders a dialog', () => {
     return helper.renderComponent("/dashboard").then(([wrapper]) => {
-      let dialog = wrapper.find(NewEnrollmentDialog);
+      let dialog = wrapper.find(NewEnrollmentDialog).at(0);
       let props = dialog.props();
 
       assert.deepEqual(props.enrollments.programEnrollments, PROGRAM_ENROLLMENTS);
@@ -47,7 +47,7 @@ describe("NewEnrollmentDialog", () => {
     it(`dispatches ${funcName}`, () => {
       let stub = helper.sandbox.spy(uiActions, funcName);
       return helper.renderComponent("/dashboard").then(([wrapper]) => {
-        let handler = wrapper.find(NewEnrollmentDialog).props()[funcName];
+        let handler = wrapper.find(NewEnrollmentDialog).at(0).props()[funcName];
         handler(value);
         assert(stub.calledWith(value));
       });
@@ -57,7 +57,7 @@ describe("NewEnrollmentDialog", () => {
       helper.store.dispatch(uiActions[funcName](value));
 
       return helper.renderComponent("/dashboard").then(([wrapper]) => {
-        let actual = wrapper.find(NewEnrollmentDialog).props()[propName];
+        let actual = wrapper.find(NewEnrollmentDialog).at(0).props()[propName];
         assert.equal(actual, value);
       });
     });
@@ -67,7 +67,7 @@ describe("NewEnrollmentDialog", () => {
     let stub = helper.sandbox.stub(enrollmentActions, 'addProgramEnrollment');
     stub.returns({type: "fake"});
     return helper.renderComponent("/dashboard").then(([wrapper]) => {
-      let handler = wrapper.find(NewEnrollmentDialog).props().addProgramEnrollment;
+      let handler = wrapper.find(NewEnrollmentDialog).at(0).props().addProgramEnrollment;
       handler(3);
       assert(stub.calledWith(3));
     });

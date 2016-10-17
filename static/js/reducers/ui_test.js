@@ -29,6 +29,7 @@ import {
   setCalculatorDialogVisibility,
   setConfirmSkipDialogVisibility,
   setDocsInstructionsVisibility,
+  setNavDrawerOpen,
 } from '../actions/ui';
 import { INITIAL_UI_STATE } from '../reducers/ui';
 import { PERSONAL_STEP } from '../constants';
@@ -191,6 +192,12 @@ describe('ui reducers', () => {
   describe('docs instructions visibility', () => {
     it('should let you set the document instruction visibility', () => {
       assertReducerResultState(setDocsInstructionsVisibility, ui => ui.docsInstructionsVisibility, false);
+    });
+  });
+
+  describe('nav drawer', () => {
+    it('should let you set the nav drawer visibility', () => {
+      assertReducerResultState(setNavDrawerOpen, ui => ui.navDrawerOpen, false);
     });
   });
 });
