@@ -93,6 +93,19 @@ class MailViewsTests(APITestCase):
         assert resp_post.data['batch_0']['status_code'] == status.HTTP_200_OK
         assert resp_post.data['batch_1']['status_code'] == status.HTTP_400_BAD_REQUEST
 
+    def test_view_response_improperly_configured(self, mock_mailgun_client, mock_prepare_exec_search):
+        """
+        Test that the SearchResultMailView will raise ImproperlyConfigured if mailgun returns 401, which
+        results in returning 500 since micromasters.utils.custom_exception_hanlder catches ImproperlyConfigured
+        """
+        email_results = ['a@example.com', 'b@example.com']
+        mock_prepare_exec_search.return_value = email_results
+        mock_mailgun_client.send_batch.return_value = [
+            Mock(spec=Response, status_code=status.HTTP_401_UNAUTHORIZED),
+        ]
+        resp = self.client.post(self.search_result_mail_url, data=self.request_data, format='json')
+        assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+
     def test_no_program_user_response(self, *args):  # pylint: disable=unused-argument
         """
         Test that a 403 will be returned when a user with inadequate permissions attempts
@@ -203,3 +216,16 @@ class FinancialAidMailViewsTests(FinancialAidBaseTestCase, APITestCase):
         self.client.force_login(self.learner_user)
         resp = self.client.post(self.url, data=self.request_data, format='json')
         assert resp.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_send_financial_aid_view_improperly_configured(self, mock_mailgun_client):
+        """
+        Test that the FinancialAidMailView will raise ImproperlyConfigured if mailgun returns 401, which
+        results in returning 500 since micromasters.utils.custom_exception_hanlder catches ImproperlyConfigured
+        """
+        self.client.force_login(self.staff_user)
+        mock_mailgun_client.send_financial_aid_email.return_value = Mock(
+            spec=Response,
+            status_code=status.HTTP_401_UNAUTHORIZED
+        )
+        resp = self.client.post(self.url, data=self.request_data, format='json')
+        assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
