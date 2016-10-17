@@ -26,6 +26,7 @@ import {
   EMPLOYMENT_STEP,
 } from '../constants';
 import { assertMaybeEquality, assertIsNothing } from './sanctuary_test';
+import { YEAR_VALIDATION_CUTOFF } from '../constants';
 
 describe('Profile validation functions', () => {
   let sandbox;
@@ -375,7 +376,7 @@ describe('Profile validation functions', () => {
 
     it('strips non-numerical characters', () => {
       assertMaybeEquality(Just(2004), validateYear("2e004"));
-      assertMaybeEquality(Just(2034), validateYear("203-4"));
+      assertMaybeEquality(Just(2014), validateYear("201-4"));
     });
 
     it('returns values for years less than 1800 if they are less than 4 character', () => {
@@ -385,15 +386,14 @@ describe('Profile validation functions', () => {
       assertMaybeEquality(Just(20), validateYear("-20"));
     });
 
-    it('returns 1800 for 4-character years less than 1800', () => {
-      assertMaybeEquality(Just(1800), validateYear("1799"));
-      assertMaybeEquality(Just(1800), validateYear("1099"));
+    it(`returns a minimum of ${YEAR_VALIDATION_CUTOFF} years ago`, () => {
+      let cutoff = moment().subtract(YEAR_VALIDATION_CUTOFF, 'years').year();
+      assertMaybeEquality(Just(cutoff), validateYear(`${cutoff - 5}`));
     });
 
-    it('returns 2100 for years >= 2100', () => {
-      assertMaybeEquality(Just(2100), validateYear("2100"));
-      assertMaybeEquality(Just(2100), validateYear("2300"));
-      assertMaybeEquality(Just(2100), validateYear("52300"));
+    it('returns a maximum of the current year', () => {
+      let now = moment().year();
+      assertMaybeEquality(Just(now), validateYear(`${now + 3}`));
     });
 
     it('returns an empty string if the text is not an integer number', () => {

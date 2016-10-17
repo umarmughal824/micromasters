@@ -1,6 +1,7 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 import { shallow } from 'enzyme';
+import moment from 'moment';
 
 import {
   boundTextField,
@@ -9,6 +10,7 @@ import {
   saveProfileStep,
 } from './profile_edit';
 import * as validation from '../util/validation';
+import { YEAR_VALIDATION_CUTOFF } from '../constants';
 
 describe('Profile Editing utility functions', () => {
   let that, sandbox;
@@ -149,6 +151,11 @@ describe('Profile Editing utility functions', () => {
       }
     };
 
+    let currentYear = moment().year();
+    let cutoff = currentYear - YEAR_VALIDATION_CUTOFF;
+    let tooOld = cutoff - 5;
+    let tooYoung = currentYear + 5;
+
     it("has proper props for an invalid or missing value", () => {
       for (let dateOfBirth of ['', {}, null, undefined]) {
         that.props.profile.date_of_birth = dateOfBirth;
@@ -264,25 +271,25 @@ describe('Profile Editing utility functions', () => {
       });
     });
 
-    it('only accepts years in the range 1800-2100, correcting up or down', () => {
+    it('only accepts years in the range of 120 years ago to now, correcting up or down', () => {
       that.props.profile.date_of_birth = "1917-11-07";
       rerender(false);
-      yearTextField.props.onChange({target: {value: "1233"}});
-      assert.deepEqual(that.props.profile.date_of_birth, "1800-11-07");
+      yearTextField.props.onChange({target: {value: tooOld}});
+      assert.deepEqual(that.props.profile.date_of_birth, `${cutoff}-11-07`);
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
         day: "7",
         month: "11",
-        year: "1800",
+        year: `${cutoff}`,
       });
 
       that.props.profile.date_of_birth = "1917-11-07";
       rerender(false);
-      yearTextField.props.onChange({target: {value: "3000"}});
-      assert.deepEqual(that.props.profile.date_of_birth, "2100-11-07");
+      yearTextField.props.onChange({target: {value: tooYoung}});
+      assert.deepEqual(that.props.profile.date_of_birth, `${currentYear}-11-07`);
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
         day: "7",
         month: "11",
-        year: "2100",
+        year: `${currentYear}`,
       });
     });
 
@@ -368,12 +375,12 @@ describe('Profile Editing utility functions', () => {
       rerender(true);
       monthTextField.props.onChange({target: {value: "12"}});
       rerender(true);
-      yearTextField.props.onChange({target: {value: "2077"}});
+      yearTextField.props.onChange({target: {value: tooYoung}});
 
-      assert.equal(that.props.profile.date_of_birth, "2077-12-01");
+      assert.equal(that.props.profile.date_of_birth, `${currentYear}-12-01`);
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
         month: "12",
-        year: "2077",
+        year: `${currentYear}`,
         day: undefined
       });
     });
@@ -384,18 +391,18 @@ describe('Profile Editing utility functions', () => {
       rerender(false);
       monthTextField.props.onChange({target: {value: "12"}});
       rerender(false);
-      yearTextField.props.onChange({target: {value: "2077"}});
+      yearTextField.props.onChange({target: {value: tooYoung}});
 
-      assert.equal(that.props.profile.date_of_birth, "2077-12-01");
+      assert.equal(that.props.profile.date_of_birth, `${currentYear}-12-01`);
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
         month: "12",
-        year: "2077",
+        year: `${currentYear}`,
         day: "1"
       });
     });
 
     it("stores text in date_of_birth_edit if it's not a valid date", () => {
-      that.props.profile.date_of_birth = "2066-02-28";
+      that.props.profile.date_of_birth = `${tooYoung}-02-28`;
       rerender(false);
       monthTextField.props.onChange({target: {value: "MONTH"}});
       rerender(false);
@@ -404,22 +411,22 @@ describe('Profile Editing utility functions', () => {
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
         day: "28",
         month: "",
-        year: "2066"
+        year: `${currentYear}`,
       });
     });
 
     it("uses a day of 1 if omitDate is true", () => {
-      that.props.profile.date_of_birth = "2066-02-28";
+      that.props.profile.date_of_birth = `${tooYoung}-02-28`;
       rerender(true);
       monthTextField.props.onChange({target: {value: "13"}});
       rerender(true);
       monthTextField.props.onChange({target: {value: "1"}});
 
-      assert.deepEqual(that.props.profile.date_of_birth, "2066-01-01");
+      assert.deepEqual(that.props.profile.date_of_birth, `${currentYear}-01-01`);
       // day is 28 here but it's discarded in the timestamp above, resulting in 01
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
         month: "1",
-        year: "2066",
+        year: `${currentYear}`,
         day: "28"
       });
     });
@@ -444,7 +451,7 @@ describe('Profile Editing utility functions', () => {
 
     it("uses moment.js for validation", () => {
       rerender(false);
-      that.props.profile.date_of_birth = "2066-02-28";
+      that.props.profile.date_of_birth = `${tooYoung}-02-28`;
       rerender(false);
       dayTextField.props.onChange({target: {value: "31"}});
       rerender(false);
@@ -454,36 +461,36 @@ describe('Profile Editing utility functions', () => {
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
         day: "31",
         month: "2",
-        year: "2066"
+        year: `${currentYear}`,
       });
     });
 
     it("treats an empty date string as deleting the format text but not edit data", () => {
-      that.props.profile.date_of_birth = "2066-02-28";
+      that.props.profile.date_of_birth = `${tooYoung}-02-28`;
       rerender(false);
       dayTextField.props.onChange({target: {value: ""}});
       assert.deepEqual(that.props.profile.date_of_birth, null);
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
         day: "",
         month: "2",
-        year: "2066"
+        year: `${currentYear}`,
       });
     });
 
     it("treats an empty month string as deleting the format text but not edit data", () => {
-      that.props.profile.date_of_birth = "2066-02-28";
+      that.props.profile.date_of_birth = `${tooYoung}-02-28`;
       rerender(false);
       monthTextField.props.onChange({target: {value: ""}});
       assert.deepEqual(that.props.profile.date_of_birth, null);
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
         day: "28",
         month: "",
-        year: "2066"
+        year: `${currentYear}`,
       });
     });
 
     it("treats an empty year string as deleting the format text but not edit data", () => {
-      that.props.profile.date_of_birth = "2066-02-28";
+      that.props.profile.date_of_birth = `${tooYoung}-02-28`;
       rerender(false);
       yearTextField.props.onChange({target: {value: ""}});
       assert.deepEqual(that.props.profile.date_of_birth, null);

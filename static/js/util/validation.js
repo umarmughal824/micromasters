@@ -20,6 +20,7 @@ import {
   EDUCATION_STEP,
   EMPLOYMENT_STEP,
 } from '../constants';
+import { YEAR_VALIDATION_CUTOFF } from '../constants';
 import { S } from './sanctuary';
 const { Maybe, Nothing } = S;
 
@@ -294,14 +295,16 @@ export function validateYear(input: string|number|null): Maybe<number> {
   if (year === undefined) {
     return Nothing();
   }
-  if ( year < 1800 ) {
+  let now = moment().year();
+  let cutoff = now - YEAR_VALIDATION_CUTOFF;
+  if ( year < cutoff ) {
     if ( String(year).length < 4 ) {
       return Maybe.of(year);
     }
-    return Maybe.of(1800);
+    return Maybe.of(cutoff);
   }
-  if ( year >= 2100) {
-    return Maybe.of(2100);
+  if ( year >= now ) {
+    return Maybe.of(now);
   }
   return Maybe.of(year);
 }

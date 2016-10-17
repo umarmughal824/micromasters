@@ -21,6 +21,8 @@ export const PERSONAL_STEP = 'personal';
 export const EMPLOYMENT_STEP = 'employment';
 export const EDUCATION_STEP = 'education';
 
+export const YEAR_VALIDATION_CUTOFF = 120;
+
 export const PROFILE_STEP_LABELS = new Map([
   [PERSONAL_STEP, "Personal"],
   [EDUCATION_STEP, "Education"],
