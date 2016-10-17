@@ -121,3 +121,18 @@ jQuery(document).ready(function ($) {
     emailBody: description + CURRENT_PAGE_URL
   });
 });
+
+/**
+ * FAQs accordion on the program page
+ */
+$(document).ready(function ($) {
+  $('.accordion').find('.accordion-toggle').click(function () {
+    //Expand or collapse this panel
+    $(this).next().slideToggle('fast');
+    //Rotate the icon
+    $(this).find('.material-icons').toggleClass('rotate').toggleClass('rotate-reset');
+    //Hide the other panels and rotate the icons to default
+    $(".accordion-content").not($(this).next()).slideUp('fast').prev().
+    find('.material-icons').removeClass('rotate-reset').addClass('rotate');
+  });
+});

@@ -238,7 +238,7 @@
     }
 
     .faq {
-      padding: 0 15px 23px 0;
+      padding: 0 15px 2px 0;
 
       .question {
         font-weight: 500;
@@ -394,5 +394,34 @@
         margin: 0 0 23px 0;
       }
     }
+  }
+
+  .accordion-toggle {
+    cursor: pointer;
+  }
+
+  .accordion-content {
+    display: none;
+  }
+
+  .answer.accordion-content {
+    padding-left: 35px;
+  }
+
+  .accordion-content.default {
+    display: block;
+  }
+
+  .rotate {
+    transform: rotate(-90deg);
+  }
+
+  .rotate-reset {
+    transform: rotate(0deg);
+  }
+
+  .accordion-icon {
+    font-size: 30px;
+    vertical-align:top
   }
 }

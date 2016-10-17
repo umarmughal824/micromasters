@@ -5,15 +5,16 @@
 {% endblock %}
 
 {% block panel %}
-  <div class="faqs">
+  <div class="faqs" >
     {% for categorized in faqpage.get_children.specific %}
       <h3 class="faq-category"> {{ categorized.title }}</h3>
       {% for faq in categorized.faqs.all %}
-        <div class="faq">
-          <div class="question">
+        <div class="faq accordion">
+          <h4 class="question accordion-toggle">
+            <i class="material-icons rotate accordion-icon">arrow_drop_down</i>
             {{ faq.question }}
-          </div>
-          <div class="answer">
+          </h4>
+          <div class="answer accordion-content">
             {{ faq.answer|richtext }}
           </div>
         </div>
