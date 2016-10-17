@@ -28,6 +28,7 @@ import {
   setPhotoDialogVisibility,
   setCalculatorDialogVisibility,
   setConfirmSkipDialogVisibility,
+  setDocsInstructionsVisibility,
 } from '../actions/ui';
 import { INITIAL_UI_STATE } from '../reducers/ui';
 import { PERSONAL_STEP } from '../constants';
@@ -184,6 +185,12 @@ describe('ui reducers', () => {
   describe('Skip dialog visibility', () => {
     it('should let you set skip dialog visibility', () => {
       assertReducerResultState(setConfirmSkipDialogVisibility, ui => ui.skipDialogVisibility, false);
+    });
+  });
+
+  describe('docs instructions visibility', () => {
+    it('should let you set the document instruction visibility', () => {
+      assertReducerResultState(setDocsInstructionsVisibility, ui => ui.docsInstructionsVisibility, false);
     });
   });
 });

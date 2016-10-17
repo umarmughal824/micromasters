@@ -53,6 +53,7 @@ describe("FinancialAidCard", () => {
           ui={INITIAL_UI_STATE}
           setConfirmSkipDialogVisibility={setSkipDialogStub}
           skipFinancialAid={sandbox.stub()}
+          setDocsInstructionsVisibility={sandbox.stub()}
           {...props}
         />
       </MuiThemeProvider>

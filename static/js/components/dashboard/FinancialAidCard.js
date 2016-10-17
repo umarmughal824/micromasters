@@ -41,6 +41,7 @@ export default class FinancialAidCard extends React.Component {
     setConfirmSkipDialogVisibility: (b: boolean) => void,
     ui:                             UIState,
     skipFinancialAid:               () => void,
+    setDocsInstructionsVisibility:  (b: boolean) => void,
   };
 
   submitDocuments = (): void => {
@@ -141,6 +142,7 @@ export default class FinancialAidCard extends React.Component {
       program,
       coursePrice,
       setConfirmSkipDialogVisibility,
+      setDocsInstructionsVisibility,
     } = this.props;
 
     switch (program.financial_aid_user_info.application_status) {
@@ -171,6 +173,11 @@ export default class FinancialAidCard extends React.Component {
           <Cell col={12}>
             Before you can pay, you need to verify your income. Please mail or fax an
             English-translated and notarized income tax or income statement document.
+          </Cell>
+          <Cell col={12}>
+            <a onClick={() => setDocsInstructionsVisibility(true)}>
+              Read Complete Instructions
+            </a>
           </Cell>
         </Grid>
 

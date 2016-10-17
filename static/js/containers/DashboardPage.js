@@ -27,6 +27,7 @@ import { addCourseEnrollment } from '../actions/enrollments';
 import {
   setToastMessage,
   setConfirmSkipDialogVisibility,
+  setDocsInstructionsVisibility,
 } from '../actions/ui';
 import { createForm, findCourseRun } from '../util/util';
 import CourseListCard from '../components/dashboard/CourseListCard';
@@ -55,6 +56,7 @@ import type { ProfileGetResult } from '../flow/profileTypes';
 import type { Course, CourseRun } from '../flow/programTypes';
 import { skipFinancialAid } from '../actions/financial_aid';
 import { currencyForCountry } from '../util/currency';
+import DocsInstructionsDialog from '../components/DocsInstructionsDialog';
 
 class DashboardPage extends React.Component {
   static contextTypes = {
@@ -213,6 +215,11 @@ class DashboardPage extends React.Component {
     return dispatch(addCourseEnrollment(courseId));
   };
 
+  setDocsInstructionsVisibility = bool => {
+    const { dispatch } = this.props;
+    dispatch(setDocsInstructionsVisibility(bool));
+  };
+
   render() {
     const {
       dashboard,
@@ -249,12 +256,17 @@ class DashboardPage extends React.Component {
           skipFinancialAid={this.skipFinancialAid}
           updateDocumentSentDate={this.updateDocumentSentDate}
           setConfirmSkipDialogVisibility={this.setConfirmSkipDialogVisibility}
+          setDocsInstructionsVisibility={this.setDocsInstructionsVisibility}
           ui={ui}
         />;
       }
 
       dashboardContent = (
         <div className="double-column">
+          <DocsInstructionsDialog
+            open={ui.docsInstructionsVisibility}
+            setDialogVisibility={this.setDocsInstructionsVisibility}
+          />
           <div className="first-column">
             <DashboardUserCard profile={profile} program={program}/>
             {financialAidCard}
