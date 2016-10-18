@@ -25,7 +25,8 @@ web:
     - elastic
 
 watch:
-  image: node:6.2
+  build: .
+  dockerfile: Dockerfile-node
   working_dir: /src
   command: >
     /bin/bash -c './webpack_if_prod.sh'

@@ -1,16 +1,18 @@
 // @flow
 import React from 'react';
+
 import CourseListItemWithPopover from './CourseListItemWithPopover';
+import type { ProgramPageCourse } from '../flow/programTypes';
 
 const listItems = (courses) => {
   return courses.map((course, index) =>
-    <CourseListItemWithPopover key={index} {...course} />
+    <CourseListItemWithPopover key={index} course={course} />
   );
 };
 
 export default class CourseListWithPopover extends React.Component {
   props: {
-    courses: Array<CourseListItemWithPopover>,
+    courses: Array<ProgramPageCourse>,
   }
 
   render() {

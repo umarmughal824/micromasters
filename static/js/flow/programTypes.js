@@ -13,11 +13,21 @@ export type Program = {
   financial_aid_availability: boolean;
   financial_aid_user_info?: FinancialAidUserInfo;
 };
+
 export type Course = {
   runs: Array<CourseRun>;
   title: string;
   id: number;
 };
+
+export type ProgramPageCourse = {
+  id:               number,
+  title:            string,
+  description:      string,
+  url:              string,
+  enrollment_text:  string,
+};
+
 export type CourseRun = {
   grade?: number|null;
   course_id: string;
@@ -31,12 +41,14 @@ export type CourseRun = {
   course_upgrade_deadline?: string;
   price?: number;
 };
+
 export type FinancialAid = {
   application_status: string;
   has_user_applied: boolean;
   max_possible_cost: number;
   min_possible_cost: number;
 };
+
 export type UserProgram = {
   grade_average: number
 };

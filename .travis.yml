@@ -10,6 +10,7 @@ script:
   - docker-compose -f travis-docker-compose.yml run watch npm run-script coverage
   - docker-compose -f travis-docker-compose.yml run watch npm run-script lint
   - docker-compose -f travis-docker-compose.yml run watch npm run-script scss_lint
+  - docker-compose -f travis-docker-compose.yml run watch npm run-script flow
   - docker-compose -f travis-docker-compose.yml run watch ./webpack_if_prod.sh
 services:
   - docker

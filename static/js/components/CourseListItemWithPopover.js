@@ -1,7 +1,9 @@
 // @flow
 import React from 'react';
 import Popover from 'material-ui/Popover';
+
 import PopoverNullAnimation from '../util/popover_animation';
+import type { ProgramPageCourse } from '../flow/programTypes';
 
 const titleEl = (title, url) => (
   url ? <a href={url}>{title}</a> : title
@@ -13,18 +15,15 @@ const popoverLink = (url) => (
 
 export default class CourseListItemWithPopover extends React.Component {
   props: {
-    id: number,
-    title: string,
-    description: string,
-    url: string,
-    enrollment_text: string,
-  }
+    course: ProgramPageCourse,
+  };
 
   state = {
     isOpen: false,
+    anchorEl: undefined,
   }
 
-  handleClick = (event) => {
+  handleClick = (event: Event) => {
     // This prevents ghost click.
     event.preventDefault();
 
@@ -42,10 +41,12 @@ export default class CourseListItemWithPopover extends React.Component {
 
   render() {
     const {
-      title,
-      description,
-      url,
-      enrollment_text: enrollmentText
+      course: {
+        title,
+        description,
+        url,
+        enrollment_text: enrollmentText
+      }
     } = this.props;
     const {
       isOpen,
