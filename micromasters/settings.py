@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 """
 import ast
+import logging
 import os
 import platform
 
@@ -135,6 +136,11 @@ MIDDLEWARE_CLASSES = (
     'wagtail.wagtailredirects.middleware.RedirectMiddleware',
     'social.apps.django_app.middleware.SocialAuthExceptionMiddleware',
 )
+
+# enable the nplusone profiler only in debug mode
+if DEBUG:
+    INSTALLED_APPS += ('nplusone.ext.django', )
+    MIDDLEWARE_CLASSES += ('nplusone.ext.django.NPlusOneMiddleware', )
 
 AUTHENTICATION_BACKENDS = (
     'backends.edxorg.EdxOrgOAuth2',
@@ -315,6 +321,10 @@ DEFAULT_LOG_STANZA = {
     'level': LOG_LEVEL,
 }
 
+# nplusone profiler logger configuration
+NPLUSONE_LOGGER = logging.getLogger('nplusone')
+NPLUSONE_LOG_LEVEL = logging.ERROR
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
@@ -382,7 +392,11 @@ LOGGING = {
         'raven': {
             'level': 'DEBUG',
             'handlers': []
-        }
+        },
+        'nplusone': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+        },
     },
 }
 
