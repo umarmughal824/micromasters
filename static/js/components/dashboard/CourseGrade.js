@@ -2,31 +2,29 @@
 import React from 'react';
 import _ from 'lodash';
 
-import type { Course } from '../../flow/programTypes';
+import type { CourseRun } from '../../flow/programTypes';
+import { formatGrade } from './util';
 
 export default class CourseGrade extends React.Component {
   props: {
-    course: Course
+    courseRun: CourseRun
   };
 
   render() {
-    const { course } = this.props;
+    const { courseRun } = this.props;
 
-    let firstRun, grade, caption;
-    if (course.runs.length > 0) {
-      firstRun = course.runs[0];
-      if (!_.isNil(firstRun.final_grade)) {
-        grade = firstRun.final_grade;
-        caption = 'Final grade';
-      } else if (!_.isNil(firstRun.current_grade)) {
-        grade = firstRun.current_grade;
-        caption = 'Current grade';
-      }
+    let grade, caption;
+    if (!_.isNil(courseRun.final_grade)) {
+      grade = courseRun.final_grade;
+      caption = 'Final grade';
+    } else if (!_.isNil(courseRun.current_grade)) {
+      grade = courseRun.current_grade;
+      caption = 'Current grade';
     }
 
     if (grade && caption) {
       return <div className="course-grade">
-        <div className="number">{grade}%</div>
+        <div className="number">{formatGrade(grade)}</div>
         <div className="caption">{caption}</div>
       </div>;
     } else {

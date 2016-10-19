@@ -151,7 +151,7 @@ const FinancialAidCalculator = ({
     title="Cost Calculator"
   >
     <div className="copy">
-      { `The cost of courses in the ${title} Micromasters varies between ${minPossibleCost} and ${maxPossibleCost},
+      { `The cost of courses in the ${title} MicroMasters varies between ${minPossibleCost} and ${maxPossibleCost},
       depending on your income and ability to pay.`}
     </div>
     <div className="salary-input">

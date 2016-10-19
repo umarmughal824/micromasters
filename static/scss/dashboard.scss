@@ -206,13 +206,16 @@
       padding-left: 28px;
     }
 
+    .course-container {
+      border-bottom: 1px solid $lightgrey;
+    }
+
     .course-row {
       width: 100%;
       font-size: 11pt;
       min-height: 100px;
       align-items: center;
       padding: 0 20px;
-      border-bottom: 1px solid $lightgrey;
 
       &:last-child {
         border-bottom: none;
@@ -307,6 +310,48 @@
             border-color: #aaaaaa !important;
           }
         }
+      }
+
+      .long-description .course-action .description {
+        text-align: left;
+      }
+    }
+
+    .course-sub-row {
+      margin: 0px 15px 15px 15px;
+      font-size: 11pt;
+      min-height: 55px;
+      align-items: center;
+      padding: 5px 20px;
+      background-color: $fg-grey;
+      color: $darkgrey;
+
+      .course-description,
+      .course-grade,
+      .course-action  {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .course-action,
+      .course-grade {
+        align-items: center;
+        text-align: center;
+      }
+
+      .title {
+        font-weight: 500;
+        padding-bottom: 5px;
+        color: #000;
+      }
+
+      .detail {
+        font-weight: 400;
+        font-size: 10pt;
+      }
+
+      &.course-not-passed {
+        font-style: italic;
       }
     }
   }

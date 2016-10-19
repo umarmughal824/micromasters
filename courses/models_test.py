@@ -51,23 +51,17 @@ class CourseModelTests(ESTestCase):
         )
 
 
-class CourseTests(CourseModelTests):  # pylint: disable=too-many-public-methods
-    """Tests for Course model"""
+class GetFirstUnexpiredRunTests(CourseModelTests):  # pylint: disable=too-many-public-methods
+    """Tests for get_unexpired_run function"""
 
-    def test_to_string(self):
-        """Test for __str__ method"""
-        assert "{}".format(self.course) == "Title"
-
-    def test_get_next_run_no_run(self):
+    def test_no_run(self):
         """
-        Test for the get_next_run method
         No run available
         """
-        assert self.course.get_next_run() is None
+        assert self.course.get_first_unexpired_run() is None
 
-    def test_get_next_run_only_past(self):
+    def test_only_past(self):
         """
-        Test for the get_next_run method
         enrollment past and course past
         """
         self.create_run(
@@ -76,11 +70,10 @@ class CourseTests(CourseModelTests):  # pylint: disable=too-many-public-methods
             enr_start=self.now-timedelta(weeks=62),
             enr_end=self.now-timedelta(weeks=53),
         )
-        assert self.course.get_next_run() is None
+        assert self.course.get_first_unexpired_run() is None
 
-    def test_get_next_run_present_enroll_closed(self):
+    def test_present_enroll_closed(self):
         """
-        Test for the get_next_run method
         enrollment past, course present
         """
         self.create_run(
@@ -89,11 +82,10 @@ class CourseTests(CourseModelTests):  # pylint: disable=too-many-public-methods
             enr_start=self.now-timedelta(weeks=10),
             enr_end=self.now-timedelta(weeks=3),
         )
-        assert self.course.get_next_run() is None
+        assert self.course.get_first_unexpired_run() is None
 
-    def test_get_next_run_present_enroll_closed_course_future(self):
+    def test_present_enroll_closed_course_future(self):
         """
-        Test for the get_next_run method
         enrollment past, course future
         """
         self.create_run(
@@ -102,34 +94,31 @@ class CourseTests(CourseModelTests):  # pylint: disable=too-many-public-methods
             enr_start=self.now-timedelta(weeks=10),
             enr_end=self.now-timedelta(weeks=3),
         )
-        assert self.course.get_next_run() is None
+        assert self.course.get_first_unexpired_run() is None
 
-    def test_get_next_run_enroll_none_course_past(self):
+    def test_enroll_none_course_past(self):
         """
-        Test for the get_next_run method
         enrollment none, course past
         """
         self.create_run(
             start=self.now-timedelta(weeks=10),
             end=self.now-timedelta(weeks=3),
         )
-        assert self.course.get_next_run() is None
+        assert self.course.get_first_unexpired_run() is None
 
-    def test_get_next_run_only_present_forever(self):
+    def test_only_present_forever(self):
         """
-        Test for the get_next_run method
         enrollment none, course started in the past with no end
         """
         course_run = self.create_run(
             start=self.now-timedelta(weeks=52),
         )
-        next_run = self.course.get_next_run()
+        next_run = self.course.get_first_unexpired_run()
         assert isinstance(next_run, CourseRun)
         assert next_run.pk == course_run.pk
 
-    def test_get_next_run_enr_present_course_future(self):
+    def test_enr_present_course_future(self):
         """
-        Test for the get_next_run method
         enrollment present, course future
         """
         course_run = self.create_run(
@@ -138,13 +127,12 @@ class CourseTests(CourseModelTests):  # pylint: disable=too-many-public-methods
             enr_start=self.now-timedelta(weeks=10),
             enr_end=self.now+timedelta(weeks=1),
         )
-        next_run = self.course.get_next_run()
+        next_run = self.course.get_first_unexpired_run()
         assert isinstance(next_run, CourseRun)
         assert next_run.pk == course_run.pk
 
-    def test_get_next_run_present_enroll_open(self):
+    def test_present_enroll_open(self):
         """
-        Test for the get_next_run method
         enrollment present, course present
         """
         course_run = self.create_run(
@@ -153,13 +141,12 @@ class CourseTests(CourseModelTests):  # pylint: disable=too-many-public-methods
             enr_start=self.now-timedelta(weeks=10),
             enr_end=self.now+timedelta(weeks=1),
         )
-        next_run = self.course.get_next_run()
+        next_run = self.course.get_first_unexpired_run()
         assert isinstance(next_run, CourseRun)
         assert next_run.pk == course_run.pk
 
-    def test_get_next_run_present_enroll_open_null(self):
+    def test_present_enroll_open_null(self):
         """
-        Test for the get_next_run method
         enrollment past with no end, course present
         """
         course_run = self.create_run(
@@ -167,13 +154,12 @@ class CourseTests(CourseModelTests):  # pylint: disable=too-many-public-methods
             end=self.now+timedelta(weeks=2),
             enr_start=self.now-timedelta(weeks=10),
         )
-        next_run = self.course.get_next_run()
+        next_run = self.course.get_first_unexpired_run()
         assert isinstance(next_run, CourseRun)
         assert next_run.pk == course_run.pk
 
-    def test_get_next_run_present_enroll_open_with_future_present(self):
+    def test_present_enroll_open_with_future_present(self):
         """
-        Test for the get_next_run method
         one run with enrollment present and course present
         and one run with enrollment future and course future
         """
@@ -189,13 +175,12 @@ class CourseTests(CourseModelTests):  # pylint: disable=too-many-public-methods
             enr_start=self.now+timedelta(weeks=40),
             enr_end=self.now+timedelta(weeks=50),
         )
-        next_run = self.course.get_next_run()
+        next_run = self.course.get_first_unexpired_run()
         assert isinstance(next_run, CourseRun)
         assert next_run.pk == course_run.pk
 
-    def test_get_next_run_present_enroll_closed_with_future_present(self):
+    def test_present_enroll_closed_with_future_present(self):
         """
-        Test for the get_next_run method
         one run with enrollment past and course present
         and one run with enrollment future and course future
         """
@@ -211,13 +196,12 @@ class CourseTests(CourseModelTests):  # pylint: disable=too-many-public-methods
             enr_start=self.now+timedelta(weeks=40),
             enr_end=self.now+timedelta(weeks=50),
         )
-        next_run = self.course.get_next_run()
+        next_run = self.course.get_first_unexpired_run()
         assert isinstance(next_run, CourseRun)
         assert next_run.pk == course_run.pk
 
-    def test_get_next_run_future(self):
+    def test_future(self):
         """
-        Test for the get_next_run method
         enrollment in the future and course in the future
         """
         course_run = self.create_run(
@@ -226,22 +210,49 @@ class CourseTests(CourseModelTests):  # pylint: disable=too-many-public-methods
             enr_start=self.now+timedelta(weeks=40),
             enr_end=self.now+timedelta(weeks=50),
         )
-        next_run = self.course.get_next_run()
+        next_run = self.course.get_first_unexpired_run()
         assert isinstance(next_run, CourseRun)
         assert next_run.pk == course_run.pk
 
-    def test_get_next_run_enroll_none_course_future(self):
+    def test_enroll_none_course_future(self):
         """
-        Test for the get_next_run method
         enrollment none, course future
         """
         course_run = self.create_run(
             start=self.now+timedelta(weeks=1),
             end=self.now+timedelta(weeks=4),
         )
-        next_run = self.course.get_next_run()
+        next_run = self.course.get_first_unexpired_run()
         assert isinstance(next_run, CourseRun)
         assert next_run.pk == course_run.pk
+
+    def test_exclude_course_run(self):
+        """
+        Two runs, one of which will be excluded from the results.
+        """
+        course_run_earlier = self.create_run(
+            start=self.now-timedelta(days=2),
+            end=self.now+timedelta(days=10),
+            enr_start=self.now-timedelta(days=1),
+            enr_end=self.now+timedelta(days=4),
+        )
+        course_run_later = self.create_run(
+            start=self.now-timedelta(days=1),
+            end=self.now+timedelta(days=11),
+            enr_start=self.now,
+            enr_end=self.now+timedelta(days=5),
+        )
+        next_run = self.course.get_first_unexpired_run(course_run_to_exclude=course_run_earlier)
+        assert isinstance(next_run, CourseRun)
+        assert next_run.pk == course_run_later.pk
+
+
+class CourseTests(CourseModelTests):  # pylint: disable=too-many-public-methods
+    """Tests for Courses"""
+
+    def test_to_string(self):
+        """Test for __str__ method"""
+        assert "{}".format(self.course) == "Title"
 
     def test_future_course_enr_future(self):
         """Test Course that starts in the future, enrollment in future"""

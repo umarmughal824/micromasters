@@ -7,6 +7,7 @@ export const DOCTORATE = 'p';
 
 export const ISO_8601_FORMAT = 'YYYY-MM-DD';
 export const DASHBOARD_FORMAT = 'M/D/Y';
+export const DASHBOARD_MONTH_FORMAT = 'M/Y';
 
 // NOTE: this is in order of attainment
 export const EDUCATION_LEVELS = [
@@ -38,6 +39,7 @@ export const STATUS_NOT_PASSED = 'not-passed';
 export const STATUS_CURRENTLY_ENROLLED = 'currently-enrolled';
 export const STATUS_WILL_ATTEND = 'will-attend';
 export const STATUS_CAN_UPGRADE = 'can-upgrade';
+export const STATUS_MISSED_DEADLINE = 'missed-deadline';
 export const STATUS_OFFERED = 'offered';
 
 // note: this status is not sent from the server
@@ -51,6 +53,7 @@ export const ALL_COURSE_STATUSES = [
   STATUS_CURRENTLY_ENROLLED,
   STATUS_WILL_ATTEND,
   STATUS_PENDING_ENROLLMENT,
+  STATUS_MISSED_DEADLINE,
 ];
 
 // financial aid statuses
@@ -536,17 +539,38 @@ export const DASHBOARD_RESPONSE = [
     "id": 4
   },
   {
+    "title": "Missed deadline program",
+    "description": "Missed deadline program",
+    "courses": [{
+      "id": 9,
+      "position_in_program": 0,
+      "title": "Course for the missed deadline program",
+      "description": "Course for the missed deadline program",
+      "prerequisites": "",
+      "runs": [{
+        "course_id": "course-v1:edX+missed+deadline",
+        "id": 6,
+        "status": STATUS_MISSED_DEADLINE,
+        "title": "Course run for the missed deadline program",
+        "position": 0,
+        "course_start_date": "2016-01-01",
+        "course_end_date": "2016-09-09T10:20:10Z",
+      }]
+    }],
+    "id": 5
+  },
+  {
     "title": "Last program",
     "description": "The last program",
     "courses": [
       {
-        "id": 9,
+        "id": 13,
         "position_in_program": 0,
         "title": "Course for last program in progress - no grade, action or description",
         "runs": [
           {
             "course_id": "course-v1:edX+DemoX+Demo_Course2",
-            "id": 6,
+            "id": 11,
             "status": STATUS_CURRENTLY_ENROLLED,
             "title": "Course run for last program",
             "position": 0,
@@ -560,7 +584,7 @@ export const DASHBOARD_RESPONSE = [
       },
     ],
     "financial_aid_availability": false,
-    "id": 5
+    "id": 6
   },
 ];
 

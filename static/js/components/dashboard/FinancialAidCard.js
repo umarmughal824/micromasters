@@ -119,7 +119,7 @@ export default class FinancialAidCard extends React.Component {
         { courseListToolTip('filler-text', 'course-price') }
       </div>
       <div className="explanation">
-        The cost of courses in the {title} Micromasters varies
+        The cost of courses in the {title} MicroMasters varies
         between {price(minPossibleCost)} and {price(maxPossibleCost)},
         depending on your income and ability to pay.
       </div>
