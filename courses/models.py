@@ -69,17 +69,27 @@ class Course(models.Model):
     class Meta:
         unique_together = ('program', 'position_in_program',)
 
-    def get_next_run(self):
+    def get_first_unexpired_run(self, course_run_to_exclude=None):
         """
-        Gets the next run associated with this course.
+        Gets the soonest unexpired run associated with this course.
         Note that it could be current as long as the enrollment window
         has not closed.
+
+        Args:
+            course_run_to_exclude (CourseRun): A CourseRun to exclude
+                from the query
+
+        Returns: CourseRun or None: An unexpired course run
+
         """
-        next_run_set = self.courserun_set.filter(CourseRun.get_active_enrollment_queryset())
-        if not next_run_set.count():
-            return
-        next_run_set = next_run_set.order_by('start_date')
-        return next_run_set[0]
+        future_run_queryset = (
+            self.courserun_set
+            .filter(CourseRun.unexpired_courserun_queryset())
+            .order_by('start_date')
+        )
+        if course_run_to_exclude:
+            future_run_queryset = future_run_queryset.exclude(pk=course_run_to_exclude.pk)
+        return future_run_queryset.first()
 
     def get_promised_run(self):
         """
@@ -95,7 +105,7 @@ class Course(models.Model):
         """
         Construct the course page url
         """
-        course_run = self.get_next_run()
+        course_run = self.get_first_unexpired_run()
         if not course_run:
             return ""
         if not course_run.edx_course_key:
@@ -111,8 +121,8 @@ class Course(models.Model):
         Return text that contains start and enrollment
         information about the course.
         """
-        course_run = self.get_next_run()
-        if not course_run:
+        course_run = self.get_first_unexpired_run()
+        if not course_run or not course_run.start_date:
             promised_run = self.get_promised_run()
             if promised_run:
                 return "Coming " + promised_run.fuzzy_start_date
@@ -210,7 +220,6 @@ class CourseRun(models.Model):
                     return self.enrollment_start <= now <= self.enrollment_end
                 else:
                     return self.enrollment_start <= now
-
         return False
 
     @property
@@ -223,18 +232,16 @@ class CourseRun(models.Model):
                 (self.upgrade_deadline > datetime.now(pytz.utc)))
 
     @staticmethod
-    def get_active_enrollment_queryset():
+    def unexpired_courserun_queryset():
         """
-        Returns a Q object that encapsulates the logic for filtering for CourseRun objects
-        that are active for enrollment.
+        Returns a Q object for CourseRuns that have not expired (ie: the enrollment
+        period has not passed, or the enrollment period is unspecified and the end
+        date occurs in the future)
         """
         now = datetime.now(pytz.utc)
         return (
-            # there is only the start date
-            (models.Q(enrollment_end=None) &
-             models.Q(end_date=None) & models.Q(start_date__lte=now)) |
-            # there is no enrollment date but the course has not ended yet
-            (models.Q(enrollment_end=None) & models.Q(end_date__gte=now)) |
-            # the enrollment end date is simply greater than now
+            (models.Q(enrollment_end=None) & (
+                models.Q(end_date__gte=now) | models.Q(end_date=None)
+            )) |
             models.Q(enrollment_end__gte=now)
         )

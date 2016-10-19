@@ -348,7 +348,7 @@ class CourseRunTest(CourseTests):
         current_run.upgrade_deadline = self.now-timedelta(weeks=1)
         current_run.save()
         run_status = api.get_status_for_courserun(current_run, self.mmtrack)
-        assert run_status.status == api.CourseRunStatus.NOT_PASSED
+        assert run_status.status == api.CourseRunStatus.MISSED_DEADLINE
 
     def test_not_paid_not_passed(self):
         """test for get_status_for_courserun for course not paid but that is past"""
@@ -490,42 +490,44 @@ class InfoCourseTest(CourseTests):
                 api.get_info_for_course(self.course, None)
             )
         # the mock object has been called 2 times
-        # one for the course that is current run
-        mock_format.assert_any_call(self.course_run, api.CourseStatus.OFFERED, None, position=1)
         # one for the one that is past
-        mock_format.assert_any_call(self.course_run_ver, api.CourseStatus.NOT_PASSED, None, position=2)
+        mock_format.assert_any_call(self.course_run_ver, api.CourseStatus.NOT_PASSED, None, position=1)
+        # one for the course that is current run
+        mock_format.assert_any_call(self.course_run, api.CourseStatus.OFFERED, None, position=2)
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
     def test_info_not_enrolled_not_passed_not_offered(self, mock_format):
         """test for get_info_for_course for course with run not passed and nothing offered"""
+        self.mmtrack.configure_mock(**{'has_passed_course.return_value': False})
         with patch(
             'dashboard.api.get_status_for_courserun',
             autospec=True,
             side_effect=self.get_mock_run_status_func(
-                api.CourseRunStatus.NOT_PASSED, self.course_run, api.CourseRunStatus.NOT_PASSED),
-        ), patch('courses.models.Course.get_next_run', autospec=True, return_value=None):
+                api.CourseRunStatus.CHECK_IF_PASSED, self.course_run, api.CourseRunStatus.CHECK_IF_PASSED),
+        ), patch('courses.models.Course.get_first_unexpired_run', autospec=True, return_value=None):
             self.assert_course_equal(
                 self.course,
-                api.get_info_for_course(self.course, None)
+                api.get_info_for_course(self.course, self.mmtrack)
             )
-        mock_format.assert_any_call(self.course_run, api.CourseStatus.NOT_PASSED, None, position=1)
-        mock_format.assert_any_call(self.course_run_ver, api.CourseStatus.NOT_PASSED, None, position=2)
+        mock_format.assert_any_call(self.course_run, api.CourseStatus.NOT_PASSED, self.mmtrack, position=1)
+        mock_format.assert_any_call(self.course_run_ver, api.CourseStatus.NOT_PASSED, self.mmtrack, position=2)
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
     def test_info_grade(self, mock_format):
         """test for get_info_for_course for course with a course current and another not passed"""
+        self.mmtrack.configure_mock(**{'has_passed_course.return_value': False})
         with patch(
             'dashboard.api.get_status_for_courserun',
             autospec=True,
             side_effect=self.get_mock_run_status_func(
-                api.CourseRunStatus.CURRENTLY_ENROLLED, self.course_run, api.CourseRunStatus.NOT_PASSED),
+                api.CourseRunStatus.CURRENTLY_ENROLLED, self.course_run, api.CourseRunStatus.CHECK_IF_PASSED),
         ):
             self.assert_course_equal(
                 self.course,
-                api.get_info_for_course(self.course, None)
+                api.get_info_for_course(self.course, self.mmtrack)
             )
-        mock_format.assert_any_call(self.course_run, api.CourseStatus.CURRENTLY_ENROLLED, None, position=1)
-        mock_format.assert_any_call(self.course_run_ver, api.CourseStatus.NOT_PASSED, None, position=2)
+        mock_format.assert_any_call(self.course_run, api.CourseStatus.CURRENTLY_ENROLLED, self.mmtrack, position=1)
+        mock_format.assert_any_call(self.course_run_ver, api.CourseStatus.NOT_PASSED, self.mmtrack, position=2)
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
     def test_info_check_but_not_passed(self, mock_format):
@@ -537,14 +539,32 @@ class InfoCourseTest(CourseTests):
             'dashboard.api.get_status_for_courserun',
             autospec=True,
             side_effect=self.get_mock_run_status_func(
-                api.CourseRunStatus.CHECK_IF_PASSED, self.course_run, api.CourseRunStatus.NOT_PASSED),
+                api.CourseRunStatus.NOT_ENROLLED, self.course_run, api.CourseRunStatus.CHECK_IF_PASSED),
         ):
             self.assert_course_equal(
                 self.course,
                 api.get_info_for_course(self.course, self.mmtrack)
             )
-        mock_format.assert_any_call(self.course_run, api.CourseStatus.OFFERED, self.mmtrack, position=1)
-        mock_format.assert_any_call(self.course_run_ver, api.CourseStatus.NOT_PASSED, self.mmtrack, position=2)
+        mock_format.assert_any_call(self.course_run_ver, api.CourseStatus.NOT_PASSED, self.mmtrack, position=1)
+        mock_format.assert_any_call(self.course_run, api.CourseStatus.OFFERED, self.mmtrack, position=2)
+
+    @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
+    def test_info_missed_deadline(self, mock_format):
+        """
+        test for get_info_for_course with a missed upgrade deadline
+        """
+        with patch(
+            'dashboard.api.get_status_for_courserun',
+            autospec=True,
+            side_effect=self.get_mock_run_status_func(
+                api.CourseRunStatus.NOT_ENROLLED, self.course_run, api.CourseRunStatus.MISSED_DEADLINE),
+        ):
+            self.assert_course_equal(
+                self.course,
+                api.get_info_for_course(self.course, self.mmtrack)
+            )
+        mock_format.assert_any_call(self.course_run_ver, api.CourseStatus.MISSED_DEADLINE, self.mmtrack, position=1)
+        mock_format.assert_any_call(self.course_run, api.CourseStatus.OFFERED, self.mmtrack, position=2)
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
     def test_info_check_but_not_passed_no_next(self, mock_format):
