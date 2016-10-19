@@ -55,7 +55,7 @@ class Course(models.Model):
     general across multiple course runs.
     """
     program = models.ForeignKey(Program)
-    position_in_program = models.PositiveSmallIntegerField(null=True)
+    position_in_program = models.PositiveSmallIntegerField()
 
     # These fields will likely make their way into the CMS at some point.
     title = models.CharField(max_length=255)
