@@ -8,18 +8,16 @@ from profiles.api import get_social_username
 from profiles.models import Employment, Education
 from courses.models import Program, Course, CourseRun
 from dashboard.models import ProgramEnrollment, CachedCertificate, CachedEnrollment
+from ecommerce.models import CoursePrice
 from roles.models import Role
 from roles.roles import Staff
 from micromasters.utils import load_json_from_file
 from backends.edxorg import EdxOrgOAuth2
 from search.indexing_api import recreate_index
-
-
-USER_DATA_PATH = 'profiles/management/realistic_user_data.json'
-PROGRAM_DATA_PATH = 'profiles/management/realistic_program_data.json'
-FAKE_USER_USERNAME_PREFIX = 'fake.'
-FAKE_PROGRAM_DESC_PREFIX = '[FAKE] '
-CACHED_MODEL_LAST_REQUEST = datetime.now() + timedelta(days=365)
+from seed_data.management.commands import (  # pylint: disable=import-error
+    USER_DATA_PATH, PROGRAM_DATA_PATH,
+    FAKE_USER_USERNAME_PREFIX, FAKE_PROGRAM_DESC_PREFIX
+)
 
 
 # Util functions
@@ -97,7 +95,7 @@ class CachedModelDeserializer:
             user=user,
             course_run=course_run,
             data=data,
-            last_request=CACHED_MODEL_LAST_REQUEST
+            last_request=datetime.now() + timedelta(days=365)
         )
         return course_run
 
@@ -185,7 +183,7 @@ def deserialize_user_data(user_data, course_runs):
             cached_model_deserializer.model_cls.objects.create(
                 user=user,
                 course_run=course_run,
-                last_request=CACHED_MODEL_LAST_REQUEST
+                last_request=datetime.now() + timedelta(days=365)
             )
     return user
 
@@ -214,9 +212,23 @@ def deserialize_user_data_list(user_data_list, course_runs):
 
 # Program data deserialization
 
+def deserialize_course_price_data(course_run, course_price_data):
+    """Deserializes a CoursePrice object"""
+    # set `is_valid` to True, so we don't have to specify it in the JSON file
+    course_price_data["is_valid"] = True
+    course_price = deserialize_model_data(
+        CoursePrice, course_price_data, dict(course_run=course_run)
+    )
+    return course_price
+
+
 def deserialize_course_run_data(course, course_run_data):
     """Deserializes a CourseRun object"""
-    course_run = deserialize_model_data(CourseRun, course_run_data, dict(course=course))
+    course_price_data = course_run_data.pop('course_price')
+    course_run = deserialize_model_data(
+        CourseRun, course_run_data, dict(course=course)
+    )
+    deserialize_course_price_data(course_run, course_price_data)
     return course_run
 
 
@@ -249,16 +261,19 @@ def deserialize_program_data_list(program_data_list):
 
 class Command(BaseCommand):
     """
-    Generates a set of realistic users and programs/courses to help us test search
+    Seed the database with a set of realistic data, for development purposes.
     """
-    help = "Generates a set of realistic users and programs/courses to help us test search"
+    help = "Seed the database with a set of realistic data, for development purposes."
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--staff-user',
             action='store',
             dest='staff_user',
-            help='Username for a user to assign the staff role for the programs created by this script.'
+            help=(
+                "Username for a user to assign the 'staff' role "
+                "for the programs created by this script."
+            )
         )
 
     @staticmethod
@@ -278,20 +293,35 @@ class Command(BaseCommand):
         existing_fake_program_count = Program.objects.filter(description__startswith=FAKE_PROGRAM_DESC_PREFIX).count()
         if len(user_data_list) == existing_fake_user_count and len(program_data_list) == existing_fake_program_count:
             fake_programs = Program.objects.filter(description__startswith=FAKE_PROGRAM_DESC_PREFIX).all()
-            self.stdout.write("Realistic users and programs appear to exist already.")
+            self.stdout.write("Seed data appears to already exist.")
         else:
+            recreate_index()
             fake_programs = deserialize_program_data_list(program_data_list)
             fake_course_runs = CourseRun.objects.filter(
                 course__program__description__contains=FAKE_PROGRAM_DESC_PREFIX
             ).all()
             fake_user_count = deserialize_user_data_list(user_data_list, fake_course_runs)
             recreate_index()
-            self.stdout.write("Created {} new programs from '{}'.".format(len(fake_programs), PROGRAM_DATA_PATH))
-            self.stdout.write("Created {} new users from '{}'.".format(fake_user_count, USER_DATA_PATH))
+            program_msg = (
+                "Created {num} new programs from '{path}'."
+            ).format(
+                num=len(fake_programs),
+                path=PROGRAM_DATA_PATH
+            )
+            user_msg = (
+                "Created {num} new users from '{path}'."
+            ).format(
+                num=fake_user_count,
+                path=USER_DATA_PATH,
+            )
+            self.stdout.write(program_msg)
+            self.stdout.write(user_msg)
         if fake_programs and options.get('staff_user'):
             self.assign_staff_user_to_programs(options['staff_user'], fake_programs)
-            self.stdout.write(
-                "Added enrollment and 'staff' role for user '{}' to {} programs".format(
-                    options['staff_user'], len(fake_programs)
-                )
+            msg = (
+                "Added enrollment and 'staff' role for user '{user}' to {num} programs"
+            ).format(
+                user=options['staff_user'],
+                num=len(fake_programs),
             )
+            self.stdout.write(msg)
