@@ -220,14 +220,15 @@ WSGI_APPLICATION = 'micromasters.wsgi.application'
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 # Uses DATABASE_URL to configure with sqlite default:
 # For URL structure:
-# https://github.com/kennethreitz/dj-database-url
+# https://github.com/kennethreitz/dj-database-ulr
 DEFAULT_DATABASE_CONFIG = dj_database_url.parse(
     get_var(
         'DATABASE_URL',
         'sqlite:///{0}'.format(os.path.join(BASE_DIR, 'db.sqlite3'))
-    )
+    ),
 )
-DEFAULT_DATABASE_CONFIG['CONN_MAX_AGE'] = int(get_var('MICROMASTERS_DB_CONN_MAX_AGE', 500))
+DEFAULT_DATABASE_CONFIG['CONN_MAX_AGE'] = 0
+DEFAULT_DATABASE_CONFIG['ENGINE'] = 'django_db_geventpool.backends.postgresql_psycopg2'
 
 if get_var('MICROMASTERS_DB_DISABLE_SSL', False):
     DEFAULT_DATABASE_CONFIG['OPTIONS'] = {}
