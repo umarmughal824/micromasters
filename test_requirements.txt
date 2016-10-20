@@ -2,6 +2,7 @@ bpython
 ipdb
 ipython
 mock==1.3.0
+nplusone
 pdbpp
 pylint-django==0.7.1
 pylint==1.5.4
