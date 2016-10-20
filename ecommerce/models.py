@@ -4,7 +4,10 @@ Models for storing ecommerce data
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.db import transaction
-from django.db.models import Model
+from django.db.models import (
+    Model,
+    SET_NULL,
+)
 from django.db.models.fields import (
     BooleanField,
     CharField,
@@ -18,9 +21,14 @@ from django.db.models.fields.related import (
 
 from courses.models import CourseRun
 from ecommerce.exceptions import EcommerceModelException
+from micromasters.models import (
+    AuditableModel,
+    AuditModel,
+)
+from micromasters.utils import serialize_model_object
 
 
-class Order(Model):
+class Order(AuditableModel):
     """
     An order for financial aid programs
     """
@@ -45,6 +53,29 @@ class Order(Model):
     def __str__(self):
         """Description for Order"""
         return "Order {}, status={} for user={}".format(self.id, self.status, self.user)
+
+    @classmethod
+    def get_audit_class(cls):
+        return OrderAudit
+
+    def to_dict(self):
+        """
+        Get a serialized representation of the Order and any attached Lines
+        """
+        data = serialize_model_object(self)
+        data['lines'] = [serialize_model_object(line) for line in self.line_set.all()]
+        return data
+
+
+class OrderAudit(AuditModel):
+    """
+    Audit model for Order
+    """
+    order = ForeignKey(Order, null=True, on_delete=SET_NULL)
+
+    @classmethod
+    def get_related_field_name(cls):
+        return 'order'
 
 
 class Line(Model):

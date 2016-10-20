@@ -104,10 +104,10 @@ class OrderFulfillmentView(APIView):
                 # Do the verified enrollment with edX here
                 order.status = Order.FULFILLED
                 enroll_user_on_success(order)
-            order.save()
+            order.save_and_log(None)
         except:
             order.status = Order.FAILED
-            order.save()
+            order.save_and_log(None)
             raise
 
         # The response does not matter to CyberSource
