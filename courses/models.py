@@ -161,7 +161,7 @@ class CourseRun(models.Model):
       rather a specific instance of that course being taught.
     """
     title = models.CharField(max_length=255)
-    edx_course_key = models.CharField(max_length=255, blank=True, null=True, db_index=True)
+    edx_course_key = models.CharField(max_length=255, blank=True, null=True, unique=True, )
     enrollment_start = models.DateTimeField(blank=True, null=True)
     start_date = models.DateTimeField(blank=True, null=True)
     enrollment_end = models.DateTimeField(blank=True, null=True)

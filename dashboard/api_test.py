@@ -1,8 +1,6 @@
 """
 Tests for the dashboard api functions
 """
-import json
-import os
 from datetime import datetime, timedelta
 from mock import patch, MagicMock
 
@@ -25,6 +23,7 @@ from dashboard import (
 from dashboard.utils import MMTrack
 from profiles.factories import UserFactory
 from search.base import ESTestCase
+from micromasters.utils import load_json_from_file
 
 
 # pylint: disable=too-many-lines
@@ -34,13 +33,13 @@ class StatusTest(ESTestCase):
     """
     # pylint: disable= no-self-use
     def test_course_status(self):
-        """test for CourseGrade"""
+        """test for CourseStatus"""
         for attr in ('PASSED', 'NOT_PASSED', 'CURRENTLY_ENROLLED',
                      'CAN_UPGRADE', 'OFFERED', 'WILL_ATTEND', ):
             assert hasattr(api.CourseStatus, attr)
 
     def test_course_status_all_statuses(self):
-        """test for CourseGrade.all_statuses"""
+        """test for CourseStatus.all_statuses"""
         all_constants = [value for name, value in vars(api.CourseStatus).items()
                          if not name.startswith('_') and isinstance(value, str)]
         assert sorted(all_constants) == sorted(api.CourseStatus.all_statuses())
@@ -314,7 +313,7 @@ class CourseRunTest(CourseTests):
             end=self.now+timedelta(weeks=2),
             enr_start=self.now-timedelta(weeks=10),
             enr_end=self.now+timedelta(weeks=1),
-            edx_key="course-v1:MITx+8.MechCX+2014_T1"
+            edx_key="course-v1:MITx+8.MechCX+2014_T2"
         )
         run_status = api.get_status_for_courserun(future_run, self.mmtrack)
         assert run_status.status == api.CourseRunStatus.CAN_UPGRADE
@@ -416,7 +415,7 @@ class InfoCourseTest(CourseTests):
             end=now-timedelta(weeks=32),
             enr_start=now-timedelta(weeks=50),
             enr_end=now-timedelta(weeks=30),
-            edx_key="course-v1:edX+DemoX+Demo_Course",
+            edx_key="course-v1:edX+DemoX+Demo_Course_2",
             title="Demo 2"
         )
 
@@ -840,10 +839,7 @@ class CachedCertificatesTests(ESTestCase):
         """
         Set up certificate
         """
-        with open(os.path.join(os.path.dirname(__file__),
-                               'fixtures/certificates.json')) as file_obj:
-            certificates_json = json.loads(file_obj.read())
-
+        certificates_json = load_json_from_file('dashboard/fixtures/certificates.json')
         cls.certificates = Certificates([Certificate(cert_json) for cert_json in certificates_json])
 
         all_runs = []
@@ -1078,11 +1074,9 @@ class CachedEnrollmentsTests(ESTestCase):
         """
         Set up enrollments
         """
-        with open(os.path.join(os.path.dirname(__file__),
-                               'fixtures/user_enrollments.json')) as file_obj:
-            enrollments_json = json.loads(file_obj.read())
+        enrollments_json = load_json_from_file('dashboard/fixtures/user_enrollments.json')
+        cls.enrollments = Enrollments(enrollments_json)
 
-        cls.enrollments = Enrollments([enrollment_json for enrollment_json in enrollments_json])
         all_runs = []
         cls.all_course_run_ids = []
         for enrollment in cls.enrollments.enrolled_courses:
@@ -1300,11 +1294,9 @@ class CachedCurrentGradesTests(ESTestCase):
         """
         cls.user = UserFactory.create()
 
-        with open(os.path.join(os.path.dirname(__file__),
-                               'fixtures/current_grades.json')) as file_obj:
-            grades_json = json.loads(file_obj.read())
+        current_grades_json = load_json_from_file('dashboard/fixtures/current_grades.json')
+        cls.current_grades = CurrentGrades([CurrentGrade(grade_json) for grade_json in current_grades_json])
 
-        cls.current_grades = CurrentGrades([CurrentGrade(grade_json) for grade_json in grades_json])
         all_runs = []
         cls.all_course_run_ids = []
         cls.all_enrolled_run_ids = []
