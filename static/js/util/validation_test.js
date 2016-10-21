@@ -2,8 +2,6 @@ import { assert } from 'chai';
 import _ from 'lodash';
 import sinon from 'sinon';
 import moment from 'moment';
-import { S } from './sanctuary';
-const { Just } = S;
 
 import {
   personalValidation,
@@ -11,11 +9,7 @@ import {
   employmentValidation,
   privacyValidation,
   validateProfileComplete,
-  validateDay,
-  validateMonth,
-  validateYear,
   combineValidators,
-  sanitizeNumberString,
   emailValidation,
   validateFinancialAid,
 } from './validation';
@@ -25,14 +19,15 @@ import {
   PERSONAL_STEP,
   EMPLOYMENT_STEP,
 } from '../constants';
-import { assertMaybeEquality, assertIsNothing } from './sanctuary_test';
-import { YEAR_VALIDATION_CUTOFF } from '../constants';
+import { ISO_8601_FORMAT } from '../constants';
 
 describe('Profile validation functions', () => {
   let sandbox;
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
   });
+
   afterEach(() => {
     sandbox.restore();
   });
@@ -168,8 +163,28 @@ describe('Profile validation functions', () => {
         ]
       };
       let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
-      profile.work_history[1].end_date = moment(profile.work_history[1].start_date).subtract(1, 'months');
+      profile.work_history[1].end_date = moment(profile.work_history[1].start_date).subtract(1, 'months').
+        format(ISO_8601_FORMAT);
       assert.deepEqual(errors, employmentValidation(profile));
+    });
+
+    it('should reject an end date in the future', () => {
+      sandbox.useFakeTimers(moment('2016-10-01').valueOf());
+      let expectation = {
+        work_history: [, // eslint-disable-line no-sparse-arrays
+          { end_date: 'End date cannot be in the future' }
+        ]
+      };
+      let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
+      profile.work_history[1].end_date = moment().add(1, 'month').format(ISO_8601_FORMAT);
+      assert.deepEqual(expectation, employmentValidation(profile));
+    });
+
+    it('should not reject an end date in the current month', () => {
+      sandbox.useFakeTimers(moment('2016-10-01').valueOf());
+      let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
+      profile.work_history[1].end_date = moment().format(ISO_8601_FORMAT);
+      assert.deepEqual({}, employmentValidation(profile));
     });
 
     it('should not error if end_date is blank', () => {
@@ -273,175 +288,6 @@ describe('Profile validation functions', () => {
         work_history: [{country: "Country is required"}]
       }];
       assert.deepEqual(validateProfileComplete(profile), expectation);
-    });
-  });
-
-  describe('sanitizeNumberString', () => {
-    describe('string input', () => {
-      it('should remove any non-numerical characters', () => {
-        [
-          ['-', 2, ''],
-          ['-32', 2, '32'],
-          ['asdf', 19, ''],
-          ['A(*@$%!@#$100', 2, '10'],
-          ['eggplant 1X00 hey', 10, '100']
-        ].forEach(([input, length, expectation]) => {
-          assert.deepEqual(sanitizeNumberString(input, length), expectation);
-        });
-      });
-
-      it('should trim the input down to the desired length', () => {
-        [
-          ['1999', 2, '19'],
-          ['1x9', 2, '19'],
-          ['1', 4, '1'],
-          ['', 18318, ''],
-          ['TESTS', 25, ''],
-          ['1991', 0, '']
-        ].forEach(([input, length, expectation]) => {
-          assert.deepEqual(sanitizeNumberString(input, length), expectation);
-        });
-      });
-
-      it('should leave leading zeros when under the length', () => {
-        assert.equal(sanitizeNumberString('09', 2), '09');
-      });
-
-      it('should remove leading zeros when over the length', () => {
-        assert.equal(sanitizeNumberString('01999', 4), '1999');
-      });
-    });
-
-    describe('numerical input', () => {
-      it('should return a string', () => {
-        assert.deepEqual(sanitizeNumberString(3, 1), '3');
-      });
-
-      it('should trim a number down to the correct number of places', () => {
-        [
-          [1999, 4, '1999'],
-          [1999, 2, '19'],
-          [112341234, 1, '1']
-        ].forEach(([input, length, expectation]) => {
-          assert.deepEqual(sanitizeNumberString(input, length), expectation);
-        });
-      });
-    });
-  });
-
-  describe('validateMonth', () => {
-    it('handles months starting with 0 without treating as octal', () => {
-      assertMaybeEquality(Just(9), validateMonth("09"));
-    });
-
-    it('converts strings to numbers', () => {
-      for (let i = 1; i < 13; i++) {
-        assertMaybeEquality(Just(i), validateMonth(String(i)));
-      }
-    });
-
-    it('strips out any non-numerical characters', () => {
-      assertMaybeEquality(Just(12), validateMonth("1e2"));
-      assertMaybeEquality(Just(4), validateMonth("0-4"));
-      assertMaybeEquality(Just(3), validateMonth("-3"));
-    });
-
-    it('returns 12 for any number >= 12', () => {
-      assertMaybeEquality(Just(12), validateMonth("3.4"));
-      assertMaybeEquality(Just(12), validateMonth("13"));
-    });
-
-    it('will let a user input a leading zero', () => {
-      assertMaybeEquality(Just(0), validateMonth("0"));
-      assertMaybeEquality(Just(8), validateMonth("08"));
-    });
-
-    it('returns Nothing if the text is not an integer number', () => {
-      assertIsNothing(validateMonth(""));
-      assertIsNothing(validateMonth("two"));
-      assertIsNothing(validateMonth(null));
-      assertIsNothing(validateMonth({}));
-      assertIsNothing(validateMonth(undefined));
-    });
-  });
-
-  describe('validateYear', () => {
-    it('handles years starting with 0 without treating as octal', () => {
-      assertMaybeEquality(Just(1999), validateYear("01999"));
-    });
-
-    it('converts strings to numbers', () => {
-      assertMaybeEquality(Just(1943), validateYear("1943"));
-    });
-
-    it('strips non-numerical characters', () => {
-      assertMaybeEquality(Just(2004), validateYear("2e004"));
-      assertMaybeEquality(Just(2014), validateYear("201-4"));
-    });
-
-    it('returns values for years less than 1800 if they are less than 4 character', () => {
-      assertMaybeEquality(Just(3), validateYear("3"));
-      assertMaybeEquality(Just(703), validateYear("703"));
-      assertMaybeEquality(Just(0), validateYear("0"));
-      assertMaybeEquality(Just(20), validateYear("-20"));
-    });
-
-    it(`returns a minimum of ${YEAR_VALIDATION_CUTOFF} years ago`, () => {
-      let cutoff = moment().subtract(YEAR_VALIDATION_CUTOFF, 'years').year();
-      assertMaybeEquality(Just(cutoff), validateYear(`${cutoff - 5}`));
-    });
-
-    it('returns a maximum of the current year', () => {
-      let now = moment().year();
-      assertMaybeEquality(Just(now), validateYear(`${now + 3}`));
-    });
-
-    it('returns an empty string if the text is not an integer number', () => {
-      assertIsNothing(validateYear(""));
-      assertIsNothing(validateYear("two"));
-      assertIsNothing(validateYear(null));
-      assertIsNothing(validateYear("@#"));
-      assertIsNothing(validateYear({}));
-      assertIsNothing(validateYear(undefined));
-    });
-  });
-
-  describe('validateDay', () => {
-    it('handles dates starting with 0 without treating as octal', () => {
-      assertMaybeEquality(Just(1), validateDay("01"));
-    });
-
-    it('converts strings to numbers', () => {
-      assertMaybeEquality(Just(3), validateDay("3"));
-    });
-
-    it("allows leading zeros", () => {
-      assertMaybeEquality(Just(0), validateDay("0"));
-      assertMaybeEquality(Just(1), validateDay("01"));
-    });
-
-    it('disallows non-numerical input', () => {
-      assertMaybeEquality(Just(3), validateDay("-3"));
-      assertMaybeEquality(Just(20), validateDay("2e0"));
-      assertMaybeEquality(Just(21), validateDay("2-1"));
-      assertMaybeEquality(Just(22), validateDay("2.2"));
-    });
-
-    it('returns 31 for dates greater than 31', () => {
-      assertMaybeEquality(Just(31), validateDay("32"));
-      assertMaybeEquality(Just(31), validateDay("71"));
-    });
-
-    it('truncates to the first 2 characters of input', () => {
-      assertMaybeEquality(Just(22), validateDay("220"));
-    });
-
-    it('returns an empty string if the text is not an integer number', () => {
-      assertIsNothing(validateDay(""));
-      assertIsNothing(validateDay("two"));
-      assertIsNothing(validateDay(null));
-      assertIsNothing(validateDay({}));
-      assertIsNothing(validateDay(undefined));
     });
   });
 

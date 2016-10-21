@@ -16,3 +16,10 @@ export const allJust = R.curry((items: S.Maybe[]) => (
  * converts a Maybe<String> to a string
  */
 export const mstr = S.maybe("", String);
+
+/*
+ * returns Nothing if the input is undefined|null,
+ * else passes the input through a provided function
+ * (the third argument to R.ifElse)
+ */
+export const ifNil = R.ifElse(R.isNil, () => S.Nothing());

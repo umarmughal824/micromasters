@@ -29,7 +29,7 @@ const codeToOption = code => (
 
 const labelSort = R.sortBy(R.compose(R.toLower, R.prop('label')));
 
-const invalidCurrency = R.flip(R.contains)(excludedCurrencyCodes);
+const invalidCurrency = R.contains(R.__, excludedCurrencyCodes);
 
 const codesToOptions = R.compose(
   labelSort, R.map(codeToOption), R.reject(invalidCurrency)

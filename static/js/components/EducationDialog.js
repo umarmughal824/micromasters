@@ -105,7 +105,7 @@ export default class EducationDialog extends ProfileFormFields {
         {this.boundTextField(keySet('school_name'), 'School Name')}
       </Cell>
       <Cell col={5}>
-        {this.boundDateField(keySet('graduation_date'), 'Graduation Date', true)}
+        {this.boundDateField(keySet('graduation_date'), 'Graduation Date', true, true)}
       </Cell>
       <Cell col={4}>
         <CountrySelectField

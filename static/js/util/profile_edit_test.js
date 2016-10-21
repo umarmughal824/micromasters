@@ -9,7 +9,7 @@ import {
   boundRadioGroupField,
   saveProfileStep,
 } from './profile_edit';
-import * as validation from '../util/validation';
+import * as dateValidation from '../util/date_validation';
 import { YEAR_VALIDATION_CUTOFF } from '../constants';
 
 describe('Profile Editing utility functions', () => {
@@ -132,9 +132,9 @@ describe('Profile Editing utility functions', () => {
     };
 
     beforeEach(() => {
-      validateYearSpy = sandbox.spy(validation, 'validateYear');
-      validateMonthSpy = sandbox.spy(validation, 'validateMonth');
-      validateDaySpy = sandbox.spy(validation, 'validateDay');
+      validateYearSpy = sandbox.spy(dateValidation, 'validateYear');
+      validateMonthSpy = sandbox.spy(dateValidation, 'validateMonth');
+      validateDaySpy = sandbox.spy(dateValidation, 'validateDay');
     });
 
     afterEach(() => {

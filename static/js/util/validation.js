@@ -13,16 +13,12 @@ import type {
   FinancialAidState,
   FinancialAidValidation,
 } from '../reducers/financial_aid';
-import { filterPositiveInt } from './util';
 import {
   HIGH_SCHOOL,
   PERSONAL_STEP,
   EDUCATION_STEP,
   EMPLOYMENT_STEP,
 } from '../constants';
-import { YEAR_VALIDATION_CUTOFF } from '../constants';
-import { S } from './sanctuary';
-const { Maybe, Nothing } = S;
 
 let handleNestedValidation = (profile: Profile, keys, nestedKey: string) => {
   let nestedFields = index => (
@@ -154,9 +150,13 @@ export function employmentValidation(profile: Profile): ValidationErrors {
     let errors = checkFieldPresence(profile, requiredFields, messages);
 
     profile.work_history.forEach((workHistory, index) => {
-      if (!isNilOrEmptyString(workHistory.end_date) && workHistory.end_date !== undefined &&
+      if (!isNilOrEmptyString(workHistory.end_date) &&
         moment(workHistory.end_date).isBefore(workHistory.start_date, 'month')) {
         _.set(errors, ['work_history', String(index), 'end_date'], "End date cannot be before start date");
+      }
+      if (!isNilOrEmptyString(workHistory.end_date) &&
+        moment(workHistory.end_date).isAfter(moment(), 'month')) {
+        _.set(errors, ['work_history', String(index), 'end_date'], 'End date cannot be in the future');
       }
       let editIsEmpty = _.isEmpty(workHistory.end_date_edit) || (
         workHistory.end_date_edit !== undefined &&
@@ -231,82 +231,6 @@ export function validateProfileComplete(profile: Profile): ProfileComplete {
   }
 
   return [true, null, {}];
-}
-
-/**
- * Validate a day of month
- */
-export function validateDay(input: string): Maybe<number> {
-  let sanitized = sanitizeNumberString(input, 2);
-  let date = filterPositiveInt(sanitized);
-  if (date === undefined) {
-    return Nothing();
-  }
-  // More complicated cases like Feb 29 are handled in moment.js isValid
-  if (date > 31) {
-    return Maybe.of(31);
-  }
-  return Maybe.of(date);
-}
-
-/**
- * Removes non-numeric characters and truncates output string
- */
-export function sanitizeNumberString(input: string|number, length: number): string {
-  if ( typeof input === 'string' ) {
-    let out = input.replace(/[^\d]+/g, '');
-    if ( out.match(/^0+/) ) {
-      if ( out.length <= length ) {
-        return out.slice(0, length);
-      } else {
-        return out.replace(/^0+/, "").slice(0, length);
-      }
-    } else {
-      return out.slice(0, length);
-    }
-  } else {
-    return String(input).slice(0, length);
-  }
-}
-/**
- * Validate a month number
- */
-export function validateMonth(input: string|number): Maybe<number> {
-  let sanitized = sanitizeNumberString(input, 2);
-  let month = filterPositiveInt(sanitized);
-  if (month === undefined) {
-    return Nothing();
-  }
-  if (month > 12) {
-    return Maybe.of(12);
-  }
-  return Maybe.of(month);
-}
-
-/**
- * Validate a year string is an integer and fits into YYYY
- */
-export function validateYear(input: string|number|null): Maybe<number> {
-  if ( input === null ) {
-    return Nothing();
-  }
-  let sanitized = sanitizeNumberString(input, 4);
-  let year = filterPositiveInt(sanitized);
-  if (year === undefined) {
-    return Nothing();
-  }
-  let now = moment().year();
-  let cutoff = now - YEAR_VALIDATION_CUTOFF;
-  if ( year < cutoff ) {
-    if ( String(year).length < 4 ) {
-      return Maybe.of(year);
-    }
-    return Maybe.of(cutoff);
-  }
-  if ( year >= now ) {
-    return Maybe.of(now);
-  }
-  return Maybe.of(year);
 }
 
 /**

@@ -11,9 +11,10 @@ import { ISO_8601_FORMAT } from '../../constants';
 import { validationErrorSelector } from '../../util/util';
 import {
   validateMonth,
-  validateYear,
   validateDay,
-} from '../../util/validation';
+  validateYear,
+  validateNearFutureYear,
+} from '../../util/date_validation';
 
 export default class DateField extends React.Component {
   props: {
@@ -24,6 +25,7 @@ export default class DateField extends React.Component {
     keySet: Array<string>,
     label: string,
     omitDay: boolean,
+    allowFutureYear: boolean,
   };
 
   render() {
@@ -35,6 +37,7 @@ export default class DateField extends React.Component {
       keySet,
       label,
       omitDay,
+      allowFutureYear,
     } = this.props;
 
     // make a copy of keySet with a slightly different key for temporary storage of the textfields being edited
@@ -96,7 +99,13 @@ export default class DateField extends React.Component {
       let validatedMonth = validateMonth(newEdit.month);
       newEdit.month = mstr(validatedMonth);
 
-      let validatedYear = validateYear(newEdit.year);
+      let validatedYear;
+      if ( allowFutureYear ) {
+        validatedYear = validateNearFutureYear(newEdit.year);
+      } else {
+        validatedYear = validateYear(newEdit.year);
+      }
+
       newEdit.year = mstr(validatedYear);
 
       // keep text up to date
