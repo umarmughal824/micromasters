@@ -17,13 +17,13 @@ import {
   setCalculatorDialogVisibility,
   setConfirmSkipDialogVisibility,
 } from '../actions/ui';
-import { createSimpleActionHelpers } from '../util/redux';
+import { createSimpleActionHelpers } from '../lib/redux';
 import SelectField from '../components/inputs/SelectField';
-import { currencyOptions } from '../util/currency';
+import { currencyOptions } from '../lib/currency';
 import {
   validateFinancialAid,
   sanitizeNumberString
-} from '../util/validation';
+} from '../lib/validation/profile';
 import type { ProgramEnrollment } from '../flow/enrollmentTypes';
 import type {
   FinancialAidState,

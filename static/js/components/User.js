@@ -5,7 +5,7 @@ import EmploymentForm from './EmploymentForm';
 import EducationDisplay from './EducationDisplay';
 import UserPagePersonalDialog from './UserPagePersonalDialog.js';
 import UserInfoCard from './UserInfoCard';
-import { employmentValidation } from '../util/validation';
+import { employmentValidation } from '../lib/validation/profile';
 import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 

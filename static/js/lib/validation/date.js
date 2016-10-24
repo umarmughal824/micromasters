@@ -2,10 +2,10 @@
 import R from 'ramda';
 import moment from 'moment';
 
-import { S, ifNil } from './sanctuary';
+import { S, ifNil } from '../sanctuary';
 const { Maybe, Nothing } = S;
-import { filterPositiveInt } from './util';
-import { YEAR_VALIDATION_CUTOFF } from '../constants';
+import { filterPositiveInt } from '../../util/util';
+import { YEAR_VALIDATION_CUTOFF } from '../../constants';
 
 /**
  * Removes non-numeric characters and truncates output string

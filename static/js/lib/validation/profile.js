@@ -6,19 +6,19 @@ import type {
   Profile,
   WorkHistoryEntry,
   ValidationErrors
-} from '../flow/profileTypes';
-import type { UIState } from '../reducers/ui';
-import type { Email } from '../flow/emailTypes';
+} from '../../flow/profileTypes';
+import type { UIState } from '../../reducers/ui';
+import type { Email } from '../../flow/emailTypes';
 import type {
   FinancialAidState,
   FinancialAidValidation,
-} from '../reducers/financial_aid';
+} from '../../reducers/financial_aid';
 import {
   HIGH_SCHOOL,
   PERSONAL_STEP,
   EDUCATION_STEP,
   EMPLOYMENT_STEP,
-} from '../constants';
+} from '../../constants';
 
 let handleNestedValidation = (profile: Profile, keys, nestedKey: string) => {
   let nestedFields = index => (

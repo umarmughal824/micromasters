@@ -23,7 +23,7 @@ import configureTestStore from 'redux-asserts';
 import rootReducer from '../reducers';
 import { assert } from 'chai';
 import sinon from 'sinon';
-import * as api from '../util/api';
+import * as api from '../lib/api';
 
 describe('image upload reducer', () => {
   let sandbox, store, dispatchThen;

@@ -6,27 +6,8 @@ import "rrssb/js/rrssb.js";
 
 import "bootstrap";
 
-// jquery things
-import "./public/jquery.raty.js";
-
-// other code
-import "./public/core.js";
-import "./public/site.js";
-
-// jquery components
-import "./public/components/raty.js";
-
 // mailchimp requirements
 import "ajaxchimp";
-
-// make the thing work
-(function(document, window, $) {
-  'use strict';
-  var Site = window.Site;
-  $(document).ready(function() {
-    Site.run();
-  });
-})(document, window, jQuery);
 
 /// MAILCHIMP BELOW
 

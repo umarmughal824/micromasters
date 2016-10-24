@@ -4,7 +4,7 @@ import moment from 'moment';
 import _ from 'lodash';
 import R from 'ramda';
 import TextField from 'material-ui/TextField';
-import { S, mstr, allJust } from '../../util/sanctuary';
+import { S, mstr, allJust } from '../../lib/sanctuary';
 const { Maybe } = S;
 
 import { ISO_8601_FORMAT } from '../../constants';
@@ -14,7 +14,7 @@ import {
   validateDay,
   validateYear,
   validateNearFutureYear,
-} from '../../util/date_validation';
+} from '../../lib/validation/date';
 
 export default class DateField extends React.Component {
   props: {

@@ -20,7 +20,7 @@ import {
 import * as actions from '../actions';
 import type { DocumentsState } from '../reducers/documents';
 import rootReducer from '../reducers';
-import * as api from '../util/api';
+import * as api from '../lib/api';
 import type { Action } from '../flow/reduxTypes';
 
 describe('documents reducers', () => {

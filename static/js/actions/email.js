@@ -4,7 +4,7 @@ import { createAction } from 'redux-actions';
 
 import type { Dispatcher } from '../flow/reduxTypes';
 import type { EmailSendResponse } from '../flow/emailTypes';
-import * as api from '../util/api';
+import * as api from '../lib/api';
 
 export const START_EMAIL_EDIT = 'START_EMAIL_EDIT';
 export const startEmailEdit = createAction(START_EMAIL_EDIT);

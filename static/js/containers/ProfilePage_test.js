@@ -18,7 +18,7 @@ import {
   EMPLOYMENT_STEP,
 } from '../constants';
 import IntegrationTestHelper from '../util/integration_test_helper';
-import * as api from '../util/api';
+import * as api from '../lib/api';
 import { activeDialog } from '../util/test_utils';
 
 describe("ProfilePage", function() {

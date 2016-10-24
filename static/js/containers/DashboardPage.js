@@ -55,7 +55,7 @@ import type { ProgramEnrollment } from '../flow/enrollmentTypes';
 import type { ProfileGetResult } from '../flow/profileTypes';
 import type { Course, CourseRun } from '../flow/programTypes';
 import { skipFinancialAid } from '../actions/financial_aid';
-import { currencyForCountry } from '../util/currency';
+import { currencyForCountry } from '../lib/currency';
 import DocsInstructionsDialog from '../components/DocsInstructionsDialog';
 
 class DashboardPage extends React.Component {

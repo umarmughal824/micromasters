@@ -5,7 +5,7 @@ import Icon from 'react-mdl/lib/Icon';
 
 import { getPreferredName, getEmployer } from '../util/util';
 import ProfileImage from '../containers/ProfileImage';
-import { mstr } from '../util/sanctuary';
+import { mstr } from '../lib/sanctuary';
 import type { Profile } from '../flow/profileTypes';
 
 const UserChip = ({ profile }: {profile: Profile}): React$Element<*> => (

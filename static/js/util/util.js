@@ -6,7 +6,7 @@ import ga from 'react-ga';
 import striptags from 'striptags';
 import _ from 'lodash';
 import iso3166 from 'iso-3166-2';
-import { S } from './sanctuary';
+import { S } from '../lib/sanctuary';
 const { Maybe, Just, Nothing } = S;
 
 import {

@@ -18,7 +18,7 @@ import {
 } from '../actions/email';
 import { NEW_EMAIL_EDIT, INITIAL_EMAIL_STATE } from './email';
 import { EmailSendResponse } from '../flow/emailTypes';
-import * as api from '../util/api';
+import * as api from '../lib/api';
 import rootReducer from '../reducers';
 import { assert } from 'chai';
 import sinon from 'sinon';

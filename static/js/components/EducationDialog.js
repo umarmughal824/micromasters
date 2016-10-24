@@ -7,7 +7,7 @@ import _ from 'lodash';
 
 import { HIGH_SCHOOL, BACHELORS, EDUCATION_LEVELS } from '../constants';
 import ProfileFormFields from '../util/ProfileFormFields';
-import { educationValidation } from '../util/validation';
+import { educationValidation } from '../lib/validation/profile';
 import SelectField from './inputs/SelectField';
 import CountrySelectField from './inputs/CountrySelectField';
 import StateSelectField from './inputs/StateSelectField';
@@ -16,7 +16,7 @@ import ValidationAlert from './ValidationAlert';
 
 import type { UIState } from '../reducers/ui';
 import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
-import type { Validator, UIValidator } from '../util/validation';
+import type { Validator, UIValidator } from '../lib/validation/profile';
 
 export default class EducationDialog extends ProfileFormFields {
   constructor(props: Object) {

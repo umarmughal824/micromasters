@@ -9,8 +9,8 @@ import {
   boundCheckbox,
 } from './profile_edit';
 import { EDUCATION_LEVELS } from '../constants';
-import LANGUAGE_CODES from '../language_codes';
-import INDUSTRIES from '../industries';
+import LANGUAGE_CODES from '../data/language_codes';
+import INDUSTRIES from '../data/industries';
 import type { Option } from '../flow/generalTypes';
 
 export default class ProfileFormFields extends React.Component {

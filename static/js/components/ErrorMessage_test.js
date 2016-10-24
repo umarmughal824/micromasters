@@ -28,7 +28,7 @@ import {
 } from '../constants';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import { makeStrippedHtml } from '../util/util';
-import * as api from '../util/api';
+import * as api from '../lib/api';
 import ErrorMessage from './ErrorMessage';
 
 describe("ErrorMessage", () => {

@@ -43,7 +43,7 @@ import {
   setProfileStep,
   setPhotoDialogVisibility,
 } from '../actions/ui';
-import { validateProfileComplete } from '../util/validation';
+import { validateProfileComplete } from '../lib/validation/profile';
 import type { DashboardState, CoursePricesState } from '../flow/dashboardTypes';
 import type {
   ProgramEnrollment,

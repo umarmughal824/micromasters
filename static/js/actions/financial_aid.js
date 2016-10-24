@@ -3,7 +3,7 @@ import type { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 
 import type { Dispatcher } from '../flow/reduxTypes';
-import * as api from '../util/api';
+import * as api from '../lib/api';
 import {
   fetchCoursePrices,
   fetchDashboard,

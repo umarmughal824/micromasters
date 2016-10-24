@@ -13,7 +13,7 @@ import {
   combineValidators,
   personalValidation,
   programValidation,
-} from '../util/validation';
+} from '../lib/validation/profile';
 import ValidationAlert  from './ValidationAlert';
 import type {
   Profile,

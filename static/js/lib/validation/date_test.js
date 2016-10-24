@@ -1,7 +1,7 @@
 // @flow
 import { assert } from 'chai';
 import moment from 'moment';
-import { S } from './sanctuary';
+import { S } from '../sanctuary';
 const { Just } = S;
 
 import {
@@ -13,9 +13,9 @@ import {
   validateMonth,
   validateYear,
   validateNearFutureYear,
-} from './date_validation';
-import { YEAR_VALIDATION_CUTOFF } from '../constants';
-import { assertMaybeEquality, assertIsNothing } from './sanctuary_test';
+} from './date';
+import { YEAR_VALIDATION_CUTOFF } from '../../constants';
+import { assertMaybeEquality, assertIsNothing } from '../sanctuary_test';
 
 describe('Date validation', () => {
   describe('helper functions', () => {

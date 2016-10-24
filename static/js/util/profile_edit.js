@@ -7,7 +7,7 @@ import Checkbox from 'material-ui/Checkbox';
 
 import DateField from '../components/inputs/DateField';
 import { validationErrorSelector } from './util';
-import type { Validator, UIValidator } from './validation';
+import type { Validator, UIValidator } from '../lib/validation/profile';
 import type { Profile } from '../flow/profileTypes';
 import type { Option } from '../flow/generalTypes';
 

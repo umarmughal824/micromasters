@@ -2,7 +2,7 @@
 import type { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 
-import * as api from '../util/api';
+import * as api from '../lib/api';
 import type { CheckoutResponse } from '../flow/checkoutTypes';
 import type { APIErrorInfo } from '../flow/generalTypes';
 import type { Action, Dispatcher } from '../flow/reduxTypes';

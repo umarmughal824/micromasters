@@ -8,7 +8,7 @@ import { ReactPageClick } from 'react-page-click';
 import type { Dispatch } from 'redux';
 
 import { getPreferredName } from '../util/util';
-import { createActionHelper } from '../util/redux';
+import { createActionHelper } from '../lib/redux';
 import { setUserMenuOpen } from '../actions/ui';
 import ProfileImage from '../containers/ProfileImage';
 import type { Profile } from '../flow/profileTypes';

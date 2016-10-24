@@ -2,10 +2,10 @@
 __webpack_public_path__ = `http://${SETTINGS.host}:8078/`;  // eslint-disable-line no-undef, camelcase
 import ReactDOM from 'react-dom';
 
-import configureStore from './store/configureStore';
+import configureStore from '../store/configureStore';
 import ga from 'react-ga';
 import { browserHistory } from 'react-router';
-import { makeDashboardRoutes } from './dashboard_routes';
+import { makeDashboardRoutes } from '../dashboard_routes';
 
 // requirements for react-mdl which uses a modified version of material-design-lite
 import 'react-mdl/extra/material.js';

@@ -35,7 +35,7 @@ import {
   INITIAL_FINANCIAL_AID_STATE,
 } from './financial_aid';
 import rootReducer from '../reducers';
-import * as api from '../util/api';
+import * as api from '../lib/api';
 
 describe('financial aid reducers', () => {
   let sandbox, store, dispatchThen;

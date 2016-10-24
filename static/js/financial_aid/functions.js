@@ -3,7 +3,7 @@ global.jQuery = require('jquery');
 
 require("bootstrap");
 
-import { codeToCountryName } from "../util/currency";
+import { codeToCountryName } from "../lib/currency";
 
 /* Wrapper for all of the functions used by the financial aid review page */
 window.financialAidReview = (function(window, document, $) {

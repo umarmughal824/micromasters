@@ -9,7 +9,7 @@ import {
   boundRadioGroupField,
   saveProfileStep,
 } from './profile_edit';
-import * as dateValidation from '../util/date_validation';
+import * as dateValidation from '../lib/validation/date';
 import { YEAR_VALIDATION_CUTOFF } from '../constants';
 
 describe('Profile Editing utility functions', () => {

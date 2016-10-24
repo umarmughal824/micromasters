@@ -12,14 +12,14 @@ import {
   combineValidators,
   emailValidation,
   validateFinancialAid,
-} from './validation';
+} from './profile';
 import {
   USER_PROFILE_RESPONSE,
   HIGH_SCHOOL,
   PERSONAL_STEP,
   EMPLOYMENT_STEP,
-} from '../constants';
-import { ISO_8601_FORMAT } from '../constants';
+  ISO_8601_FORMAT,
+} from '../../constants';
 
 describe('Profile validation functions', () => {
   let sandbox;

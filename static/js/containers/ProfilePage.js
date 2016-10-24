@@ -18,7 +18,7 @@ import {
   EDUCATION_STEP,
   EMPLOYMENT_STEP,
 } from '../constants';
-import { createActionHelper } from '../util/redux';
+import { createActionHelper } from '../lib/redux';
 import type { Profile } from '../flow/profileTypes';
 
 class ProfilePage extends ProfileFormContainer {

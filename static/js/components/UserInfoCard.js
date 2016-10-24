@@ -10,7 +10,7 @@ import {
   getPreferredName,
   userPrivilegeCheck
 } from '../util/util';
-import { mstr } from '../util/sanctuary';
+import { mstr } from '../lib/sanctuary';
 import type { Profile } from '../flow/profileTypes';
 
 export default class UserInfoCard extends React.Component {

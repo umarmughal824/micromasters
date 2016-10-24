@@ -4,8 +4,7 @@ import React from 'react';
 import Dialog from 'material-ui/Dialog';
 import { connect } from 'react-redux';
 
-import { createSimpleActionHelpers } from '../util/redux';
-
+import { createSimpleActionHelpers } from '../lib/redux';
 import {
   setDialogVisibility,
 } from '../actions/signup_dialog';

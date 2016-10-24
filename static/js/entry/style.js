@@ -19,4 +19,4 @@ import 'style!css!slick-carousel/slick/slick-theme.css';
 import 'style!css!react-datepicker/dist/react-datepicker.css';
 
 // This should come last to override other styles
-import '../scss/layout.scss';
+import '../../scss/layout.scss';

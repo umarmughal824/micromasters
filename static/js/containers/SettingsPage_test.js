@@ -14,7 +14,7 @@ import {
   receiveGetUserProfileSuccess
 } from '../actions/profile';
 import IntegrationTestHelper from '../util/integration_test_helper';
-import * as api from '../util/api';
+import * as api from '../lib/api';
 import { USER_PROFILE_RESPONSE } from '../constants';
 
 describe("SettingsPage", function() {

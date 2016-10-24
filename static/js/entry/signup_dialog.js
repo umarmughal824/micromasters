@@ -8,9 +8,9 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
 import {
   setDialogVisibility,
-} from './actions/signup_dialog';
-import { signupDialogStore } from './store/configureStore';
-import SignupDialog from './containers/SignupDialog';
+} from '../actions/signup_dialog';
+import { signupDialogStore } from '../store/configureStore';
+import SignupDialog from '../containers/SignupDialog';
 
 import injectTapEventPlugin from 'react-tap-event-plugin';
 injectTapEventPlugin();

@@ -5,7 +5,7 @@ import AutoComplete from '../AutoComplete';
 import { defaultFilter, showAllOptions } from '../utils/AutoCompleteSettings';
 import { callFunctionArray, validationErrorSelector } from '../../util/util';
 import type { Option } from '../../flow/generalTypes';
-import type { Validator, UIValidator } from '../../util/validation';
+import type { Validator, UIValidator } from '../../lib/validation/profile';
 import type {
   Profile,
   ValidationErrors,

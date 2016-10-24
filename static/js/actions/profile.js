@@ -2,7 +2,7 @@
 import type { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 
-import * as api from '../util/api';
+import * as api from '../lib/api';
 import type { Profile } from '../flow/profileTypes';
 import type { Dispatcher } from '../flow/reduxTypes';
 
