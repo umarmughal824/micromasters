@@ -215,6 +215,7 @@ TEMPLATES = [
                 'social.apps.django_app.context_processors.backends',
                 'social.apps.django_app.context_processors.login_redirect',
                 'ui.context_processors.google_analytics',
+                'ui.context_processors.smartlook',
             ],
         },
     },
@@ -423,6 +424,7 @@ HEALTH_CHECK = ['CELERY', 'REDIS', 'POSTGRES', 'ELASTIC_SEARCH']
 
 GA_TRACKING_ID = get_var("GA_TRACKING_ID", "")
 REACT_GA_DEBUG = get_var("REACT_GA_DEBUG", False)
+SL_TRACKING_ID = get_var("SL_TRACKING_ID", "")
 
 # Wagtail
 WAGTAIL_SITE_NAME = "MIT MicroMasters"
