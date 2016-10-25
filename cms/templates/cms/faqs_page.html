@@ -6,7 +6,7 @@
 
 {% block panel %}
   <div class="faqs">
-    {% for categorized in child_page.get_children.specific %}
+    {% for categorized in child_page.get_children.specific.live %}
       <h3 class="faq-category"> {{ categorized.title }}</h3>
       {% for faq in categorized.faqs.all %}
         <div class="faq accordion">
