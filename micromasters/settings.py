@@ -507,17 +507,6 @@ if DEBUG:
         'debug_toolbar.middleware.DebugToolbarMiddleware',
     ) + MIDDLEWARE_CLASSES
 
-    DEBUG_TOOLBAR_PANELS = (
-        'debug_toolbar.panels.versions.VersionsPanel',
-        'debug_toolbar.panels.timer.TimerPanel',
-        'debug_toolbar.panels.settings.SettingsPanel',
-        'debug_toolbar.panels.headers.HeadersPanel',
-        'debug_toolbar.panels.request.RequestPanel',
-        'debug_toolbar.panels.sql.SQLPanel',
-        'debug_toolbar.panels.signals.SignalsPanel',
-        'debug_toolbar.panels.logging.LoggingPanel',
-    )
-
     def show_toolbar(request):
         """
         Custom function needed because of bug in wagtail.
