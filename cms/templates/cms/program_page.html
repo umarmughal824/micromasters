@@ -58,7 +58,7 @@
            class="tab-link {% if active_tab == 'about' %}active-tab{% endif %}">
           About the Program
         </a>
-        {% for child in page.get_children %}
+        {% for child in page.get_children.live %}
           <a href="{{ child.url }}"
              class="tab-link {% if child.title == active_tab %}active-tab{% endif %}">
             {{ child.title }}
