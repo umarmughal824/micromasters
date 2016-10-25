@@ -183,6 +183,12 @@ class CourseRun(models.Model):
     def __str__(self):
         return self.title
 
+    def save(self, *args, **kwargs):
+        """Overridden save method"""
+        if not self.edx_course_key:
+            self.edx_course_key = None
+        super(CourseRun, self).save(*args, **kwargs)
+
     @property
     def is_current(self):
         """Checks if the course is running now"""

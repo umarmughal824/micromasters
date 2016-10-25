@@ -359,6 +359,23 @@ class CourseRunTests(CourseModelTests):
         course_run = self.create_run()
         assert "{}".format(course_run) == "Title Run"
 
+    def test_save(self):
+        """
+        Test that save method treats blank and null edx_course_key
+        values as null
+        """
+        test_run = CourseRun.objects.create(
+            course=self.course,
+            title='test_run'
+        )
+        test_run_blank_edx_key = CourseRun.objects.create(
+            course=self.course,
+            title='test_run_blank_edx_key',
+            edx_course_key=''
+        )
+        assert test_run.edx_course_key is None
+        assert test_run_blank_edx_key.edx_course_key is None
+
     def test_is_current_no_start(self):
         """Test for is_current property"""
         course_run = self.create_run()
