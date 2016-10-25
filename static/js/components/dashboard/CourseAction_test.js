@@ -214,6 +214,22 @@ describe('CourseAction', () => {
     assert.equal(elements.descriptionText, 'Enrollment begins whenever');
   });
 
+  it('shows a message if a course run is offered with inadequate enrollment information', () => {
+    let course = findAndCloneCourse(course => (
+      course.runs.length > 0 &&
+      course.runs[0].status === STATUS_OFFERED
+    ));
+    let firstRun = alterFirstRun(course, {
+      fuzzy_enrollment_start_date: null,
+      enrollment_start_date: null
+    });
+    const wrapper = shallow(<CourseAction courseRun={firstRun} {...defaultParamsNow} />);
+    let elements = getElements(wrapper);
+
+    assert.equal(elements.button.length, 0);
+    assert.equal(elements.descriptionText, 'Enrollment information unavailable');
+  });
+
   it('shows a countdown message if the user is enrolled and the course starts in the future', () => {
     let course = findAndCloneCourse(course => (
       course.runs.length > 0 &&
