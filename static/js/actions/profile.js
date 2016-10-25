@@ -64,6 +64,11 @@ export const updateProfileValidation = createAction(UPDATE_PROFILE_VALIDATION,
   (username, errors) => ({ errors, username })
 );
 
+export const UPDATE_VALIDATION_VISIBILITY = 'UPDATE_VALIDATION_VISIBILITY';
+export const updateValidationVisibility = createAction(UPDATE_VALIDATION_VISIBILITY,
+  (username, keySet) => ({ username, keySet })
+);
+
 export function fetchUserProfile(username: string): Dispatcher<Profile> {
   return (dispatch: Dispatch) => {
     dispatch(requestGetUserProfile(username));

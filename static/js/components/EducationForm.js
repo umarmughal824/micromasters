@@ -41,7 +41,6 @@ import type {
   Validator,
   UIValidator,
 } from '../lib/validation/profile';
-import ValidationAlert from './ValidationAlert';
 import { formatMonthDate } from '../util/date';
 
 const EDUCATION_LEVEL_OPTIONS: Array<Option> = EDUCATION_LEVELS;
@@ -66,6 +65,7 @@ class EducationForm extends ProfileFormFields {
     setShowEducationDeleteDialog:     (b: boolean) => void,
     showSwitch:                       boolean,
     validator:                        Validator|UIValidator,
+    updateValidationVisibility:       (xs: Array<string>) => void,
   };
 
   openEditEducationForm: Function = (index: number): void => {
@@ -356,20 +356,22 @@ class EducationForm extends ProfileFormFields {
       }
     } = this.props;
 
-    const actions = <ValidationAlert {...this.props}>
+    const actions = [
       <Button
-        type='button'
+        type='cancel'
+        key='cancel'
         className="secondary-button cancel-button"
         onClick={this.clearEducationEdit}>
         Cancel
-      </Button>
+      </Button>,
       <Button
         type='button'
+        key='save'
         className="primary-button save-button"
         onClick={this.saveEducationForm}>
         Save
       </Button>
-    </ValidationAlert>;
+    ];
 
     return (
       <div>

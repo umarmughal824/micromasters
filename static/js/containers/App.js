@@ -102,9 +102,13 @@ class App extends React.Component {
   }
 
   fetchUserProfile(username) {
-    const { userProfile, dispatch } = this.props;
+    const { userProfile, dispatch, location: { pathname } } = this.props;
     if (userProfile.getStatus === undefined) {
-      dispatch(fetchUserProfile(username));
+      dispatch(fetchUserProfile(username)).then(() => {
+        if ( PROFILE_REGEX.test(pathname) ) {
+          dispatch(startProfileEdit(SETTINGS.username));
+        }
+      });
     }
   }
 

@@ -16,6 +16,7 @@ describe('Profile Editing utility functions', () => {
   let that, sandbox;
   const change = (clone) => that.props.profile = clone;
   beforeEach(() => {
+    sandbox = sinon.sandbox.create();
     that = {
       props: {
         profile: {
@@ -34,10 +35,10 @@ describe('Profile Editing utility functions', () => {
           "account_privacy": "Account privacy is required"
         },
         updateProfile: change,
+        updateValidationVisibility: sandbox.stub(),
         ui: {}
       }
     };
-    sandbox = sinon.sandbox.create();
   });
 
   afterEach(() => {

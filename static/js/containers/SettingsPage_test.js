@@ -10,6 +10,7 @@ import {
   REQUEST_PATCH_USER_PROFILE,
   RECEIVE_PATCH_USER_PROFILE_SUCCESS,
   CLEAR_PROFILE_EDIT,
+  UPDATE_VALIDATION_VISIBILITY,
 
   receiveGetUserProfileSuccess
 } from '../actions/profile';
@@ -54,7 +55,8 @@ describe("SettingsPage", function() {
         REQUEST_PATCH_USER_PROFILE,
         RECEIVE_PATCH_USER_PROFILE_SUCCESS,
         START_PROFILE_EDIT,
-        CLEAR_PROFILE_EDIT
+        CLEAR_PROFILE_EDIT,
+        UPDATE_VALIDATION_VISIBILITY,
       );
     }
     actions.push(

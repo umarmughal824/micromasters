@@ -1,4 +1,6 @@
 /* global SETTINGS: false */
+import _ from 'lodash';
+
 import {
   fetchUserProfile,
   receiveGetUserProfileSuccess,
@@ -8,6 +10,7 @@ import {
   updateProfileValidation,
   startProfileEdit,
   clearProfileEdit,
+  updateValidationVisibility,
   REQUEST_GET_USER_PROFILE,
   RECEIVE_GET_USER_PROFILE_SUCCESS,
   RECEIVE_GET_USER_PROFILE_FAILURE,
@@ -45,6 +48,7 @@ import {
   USER_PROFILE_RESPONSE,
   CYBERSOURCE_CHECKOUT_RESPONSE,
   STATUS_NOT_PASSED,
+  ALL_ERRORS_VISIBLE,
 } from '../constants';
 import configureTestStore from 'redux-asserts';
 import rootReducer, { INITIAL_PROFILES_STATE } from '../reducers';
@@ -142,11 +146,12 @@ describe('reducers', () => {
 
     it("should start editing the profile, update the copy, then clear it", () => {
       // populate a profile
-      store.dispatch(receiveGetUserProfileSuccess('jane', USER_PROFILE_RESPONSE));
+      store.dispatch(receiveGetUserProfileSuccess('jane', _.cloneDeep(USER_PROFILE_RESPONSE)));
       return dispatchThen(startProfileEdit('jane'), [START_PROFILE_EDIT]).then(profileState => {
         assert.deepEqual(profileState['jane'].edit, {
           profile: USER_PROFILE_RESPONSE,
-          errors: {}
+          errors: {},
+          visibility: [],
         });
 
         let newProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
@@ -156,7 +161,8 @@ describe('reducers', () => {
         return dispatchThen(updateProfile('jane', newProfile), [UPDATE_PROFILE]).then(profileState => {
           assert.deepEqual(profileState['jane'].edit, {
             profile: newProfile,
-            errors: {}
+            errors: {},
+            visibility: [],
           });
 
           return dispatchThen(clearProfileEdit('jane'), [CLEAR_PROFILE_EDIT]).then(profileState => {
@@ -170,12 +176,14 @@ describe('reducers', () => {
       // populate a profile
       store.dispatch(receiveGetUserProfileSuccess('jane', USER_PROFILE_RESPONSE));
       store.dispatch(startProfileEdit('jane'));
+      store.dispatch(updateValidationVisibility('jane', ALL_ERRORS_VISIBLE));
 
       let errors = {error: "I am an error"};
       return dispatchThen(updateProfileValidation('jane', errors), [UPDATE_PROFILE_VALIDATION]).then(profileState => {
         assert.deepEqual(profileState['jane'].edit, {
           profile: USER_PROFILE_RESPONSE,
-          errors: errors
+          errors: errors,
+          visibility: [ ALL_ERRORS_VISIBLE ],
         });
       });
     });
@@ -184,6 +192,7 @@ describe('reducers', () => {
       // populate a profile
       store.dispatch(receiveGetUserProfileSuccess('jane', USER_PROFILE_RESPONSE));
       store.dispatch(startProfileEdit('jane'));
+      store.dispatch(updateValidationVisibility('jane', ALL_ERRORS_VISIBLE));
 
       return dispatchThen(
         updateProfileValidation('jane', {}),
@@ -197,6 +206,7 @@ describe('reducers', () => {
       // populate a profile
       store.dispatch(receiveGetUserProfileSuccess('jane', USER_PROFILE_RESPONSE));
       store.dispatch(startProfileEdit('jane'));
+      store.dispatch(updateValidationVisibility('jane', ALL_ERRORS_VISIBLE));
       let errors = {
         first_name: "Given name is required"
       };
@@ -220,6 +230,7 @@ describe('reducers', () => {
       // populate a profile
       store.dispatch(receiveGetUserProfileSuccess('jane', USER_PROFILE_RESPONSE));
       store.dispatch(startProfileEdit('jane'));
+      store.dispatch(updateValidationVisibility('jane', ALL_ERRORS_VISIBLE));
       return dispatchThen(
         updateProfileValidation('jane', errors),
         [UPDATE_PROFILE_VALIDATION]

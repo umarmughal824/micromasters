@@ -74,9 +74,14 @@ export default class Navbar extends React.Component {
       profile,
       setNavDrawerOpen,
       setPhotoDialogVisibility,
+      navDrawerOpen,
     } = this.props;
 
-    const closeDrawer = () => setNavDrawerOpen(false);
+    const closeDrawer = () => {
+      if ( navDrawerOpen ) {
+        setNavDrawerOpen(false);
+      }
+    };
 
     return (
       <Swipeable onSwipedLeft={closeDrawer}>

@@ -14,6 +14,8 @@ import {
   UPDATE_PROFILE_VALIDATION,
   REQUEST_PATCH_USER_PROFILE,
   RECEIVE_PATCH_USER_PROFILE_SUCCESS,
+  UPDATE_VALIDATION_VISIBILITY,
+  CLEAR_PROFILE_EDIT,
 
   startProfileEdit,
   updateProfile,
@@ -39,7 +41,6 @@ import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../lib/api';
 import { workEntriesByDate, educationEntriesByDate } from '../util/sorting';
 import { modifyTextField, activeDeleteDialog } from '../util/test_utils';
-import ValidationAlert from '../components/ValidationAlert';
 
 describe("UserPage", function() {
   this.timeout(10000);
@@ -159,9 +160,6 @@ describe("UserPage", function() {
             TestUtils.Simulate.click(getSave());
             let state = helper.store.getState();
             assert.deepEqual(state.profiles.jane.edit.errors, validationExpectation);
-            let validationInfoText = document.querySelector('.validation-alert').
-              querySelector('.message').textContent;
-            assert.equal(validationInfoText, ValidationAlert.message);
 
             // run the 'remove error' function if it's a function
             if ( _.isFunction(removeErrorValue) ) {
@@ -180,7 +178,7 @@ describe("UserPage", function() {
       const scrollIntoView = (actions, getInput) => {
         const username = SETTINGS.user ? SETTINGS.user.username : null;
         return renderComponent(`/learner/${username}`, userActions).then(([, div]) => {
-          return listenForActions(scrollActions, () => {
+          return listenForActions(actions, () => {
             TestUtils.Simulate.click(getEditPersonalButton(div));
             let input = getInput(getDialog());
             modifyTextField(input, "");
@@ -196,39 +194,90 @@ describe("UserPage", function() {
         });
       };
 
-      [clearValidation, scrollIntoView].forEach(testFunc => {
-        it(`should ${testFunc.name} when filling out a required text field`, () => {
-          const preferredName = dialog => inputs(dialog).find(i => i.name === "Preferred name");
+      it(`should clearValidation when filling out a required text field`, () => {
+        const preferredName = dialog => inputs(dialog).find(i => i.name === "Preferred name");
 
-          return testFunc(
-            userProfileActions,
-            preferredName,
-            { preferred_name: 'Preferred name is required' },
-            USER_PROFILE_RESPONSE.preferred_name
-          );
-        });
+        return clearValidation(
+          userProfileActions.concat([
+            UPDATE_PROFILE_VALIDATION,
+            UPDATE_VALIDATION_VISIBILITY,
+            UPDATE_VALIDATION_VISIBILITY,
+            UPDATE_VALIDATION_VISIBILITY,
+            START_PROFILE_EDIT,
+          ]),
+          preferredName,
+          { preferred_name: 'Preferred name is required' },
+          USER_PROFILE_RESPONSE.preferred_name
+        );
+      });
 
-        it(`should ${testFunc.name} when filling out a required select field`, () => {
-          const languageField = dialog => inputs(dialog).find(i => i.id.includes('Preferredlanguage'));
+      it(`should scrollIntoView when filling out a required text field`, () => {
+        const preferredName = dialog => inputs(dialog).find(i => i.name === "Preferred name");
 
-          return testFunc(
-            userProfileActions.concat(UPDATE_PROFILE, UPDATE_PROFILE_VALIDATION),
-            languageField,
-            { preferred_language: "Preferred language is required" },
-            USER_PROFILE_RESPONSE.preferred_language
-          );
-        });
+        return scrollIntoView(
+          scrollActions.concat([
+            UPDATE_PROFILE_VALIDATION,
+            UPDATE_VALIDATION_VISIBILITY,
+            UPDATE_VALIDATION_VISIBILITY,
+            START_PROFILE_EDIT,
+          ]),
+          preferredName,
+          { preferred_name: 'Preferred name is required' },
+          USER_PROFILE_RESPONSE.preferred_name
+        );
+      });
 
+      [
+        [clearValidation, userProfileActions],
+        [scrollIntoView, scrollActions],
+      ].forEach(([testFunc, testActions]) => {
         it(`should ${testFunc.name} when filling out a required date field`, () => {
           const dobMonth = dialog => inputs(dialog).find(i => i.id.includes('Dateofbirth'));
 
           return testFunc(
-            userProfileActions,
+            testActions.concat([
+              UPDATE_PROFILE_VALIDATION,
+              UPDATE_VALIDATION_VISIBILITY,
+              START_PROFILE_EDIT,
+            ]),
             dobMonth,
             { date_of_birth: "Please enter a valid date of birth" },
             String(moment(USER_PROFILE_RESPONSE.date_of_birth).month())
           );
         });
+      });
+
+
+      it('should clearValidationErrors when filling out a required select field', () => {
+        const languageField = dialog => inputs(dialog).find(i => i.id.includes('Preferredlanguage'));
+
+        return clearValidation(
+          userProfileActions.concat([
+            UPDATE_PROFILE,
+            START_PROFILE_EDIT,
+            UPDATE_PROFILE_VALIDATION,
+            UPDATE_PROFILE_VALIDATION,
+            UPDATE_VALIDATION_VISIBILITY,
+          ]),
+          languageField,
+          { preferred_language: "Preferred language is required" },
+          USER_PROFILE_RESPONSE.preferred_language
+        );
+      });
+
+      it('should scrollIntoView when filling out a required select field', () => {
+        const languageField = dialog => inputs(dialog).find(i => i.id.includes('Preferredlanguage'));
+
+        return scrollIntoView(
+          scrollActions.concat([
+            UPDATE_PROFILE_VALIDATION,
+            UPDATE_VALIDATION_VISIBILITY,
+            START_PROFILE_EDIT,
+          ]),
+          languageField,
+          { preferred_language: "Preferred language is required" },
+          USER_PROFILE_RESPONSE.preferred_language
+        );
       });
 
       it(`should clearValidationErrors when filling out a required radio field`, () => {
@@ -245,7 +294,11 @@ describe("UserPage", function() {
         };
 
         return clearValidation(
-          userProfileActions,
+          userProfileActions.concat([
+            START_PROFILE_EDIT,
+            UPDATE_VALIDATION_VISIBILITY,
+            UPDATE_VALIDATION_VISIBILITY,
+          ]),
           createValidationError,
           { gender: "Gender is required" },
           removeErrorValue,
@@ -257,7 +310,12 @@ describe("UserPage", function() {
         const removeErrorValue = dialog => TestUtils.Simulate.click(genderField(dialog));
 
         return scrollIntoView(
-          userProfileActions,
+          scrollActions.concat([
+            UPDATE_PROFILE_VALIDATION,
+            START_PROFILE_EDIT,
+            UPDATE_VALIDATION_VISIBILITY,
+            UPDATE_VALIDATION_VISIBILITY,
+          ]),
           genderField,
           { gender: "Gender is required" },
           removeErrorValue,
@@ -366,6 +424,7 @@ describe("UserPage", function() {
             SET_DELETION_INDEX,
             REQUEST_PATCH_USER_PROFILE,
             RECEIVE_PATCH_USER_PROFILE_SUCCESS,
+            UPDATE_VALIDATION_VISIBILITY
           ], () => {
             TestUtils.Simulate.click(firstEducationDeleteButton);
             let dialog = activeDeleteDialog();
@@ -426,14 +485,24 @@ describe("UserPage", function() {
             START_PROFILE_EDIT,
             SET_EDUCATION_DIALOG_INDEX,
             SET_EDUCATION_DIALOG_VISIBILITY,
+            SET_EDUCATION_DIALOG_VISIBILITY,
+            SET_EDUCATION_DEGREE_LEVEL,
             SET_EDUCATION_DEGREE_LEVEL,
             UPDATE_PROFILE_VALIDATION,
             REQUEST_PATCH_USER_PROFILE,
-            RECEIVE_PATCH_USER_PROFILE_SUCCESS
+            RECEIVE_PATCH_USER_PROFILE_SUCCESS,
+            CLEAR_PROFILE_EDIT,
           ];
           for (let i = 0; i < 12; i++) {
             expectedActions.push(UPDATE_PROFILE);
           }
+          for (let i = 0; i < 11; i++) {
+            expectedActions.push(UPDATE_PROFILE_VALIDATION);
+          }
+          for (let i = 0; i < 3; i++) {
+            expectedActions.push(UPDATE_VALIDATION_VISIBILITY);
+          }
+
           return listenForActions(expectedActions, () => {
             TestUtils.Simulate.click(addButton);
 
@@ -536,6 +605,7 @@ describe("UserPage", function() {
             SET_SHOW_WORK_DELETE_DIALOG,
             START_PROFILE_EDIT,
             UPDATE_PROFILE_VALIDATION,
+            UPDATE_VALIDATION_VISIBILITY,
             SET_SHOW_EDUCATION_DELETE_DIALOG,
             SET_SHOW_WORK_DELETE_DIALOG,
             SET_DELETION_INDEX,
@@ -615,6 +685,10 @@ describe("UserPage", function() {
           ];
           for (let i = 0; i < 14; i++) {
             expectedActions.push(UPDATE_PROFILE);
+            expectedActions.push(UPDATE_PROFILE_VALIDATION);
+          }
+          for (let i = 0; i < 4; i++) {
+            expectedActions.push(UPDATE_VALIDATION_VISIBILITY);
           }
 
           return listenForActions(expectedActions, () => {
@@ -665,7 +739,10 @@ describe("UserPage", function() {
           let personalButton = div.querySelector('.edit-profile-holder').
             getElementsByClassName('mdl-button')[0];
 
-          return listenForActions([SET_USER_PAGE_DIALOG_VISIBILITY], () => {
+          return listenForActions([
+            SET_USER_PAGE_DIALOG_VISIBILITY,
+            START_PROFILE_EDIT,
+          ], () => {
             TestUtils.Simulate.click(personalButton);
           });
         });

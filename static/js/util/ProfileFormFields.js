@@ -32,6 +32,7 @@ export default class ProfileFormFields extends React.Component {
       saveProfile: this.props.saveProfile,
       errors: this.props.errors,
       validator: this.props.validator,
+      updateValidationVisibility: this.props.updateValidationVisibility,
     };
   };
 
@@ -49,6 +50,7 @@ export default class ProfileFormFields extends React.Component {
     setShowEducationDeleteDialog: React.PropTypes.func,
     showSwitch:                   React.PropTypes.bool,
     validator:                    React.PropTypes.func,
+    updateValidationVisibility:   React.PropTypes.func,
   };
 
   closeConfirmDeleteDialog: Function = (): void => {

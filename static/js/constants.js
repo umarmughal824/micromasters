@@ -24,6 +24,8 @@ export const EDUCATION_STEP = 'education';
 
 export const YEAR_VALIDATION_CUTOFF = 120;
 
+export const ALL_ERRORS_VISIBLE = 'ALL_ERRORS_VISIBLE';
+
 export const PROFILE_STEP_LABELS = new Map([
   [PERSONAL_STEP, "Personal"],
   [EDUCATION_STEP, "Education"],
@@ -274,7 +276,7 @@ export const USER_PROFILE_RESPONSE = {
     "school_country": "US",
     "online_degree": false
   }],
-  "edx_level_of_education": null
+  "edx_level_of_education": null,
 };
 
 export const USER_PROGRAM_RESPONSE = {

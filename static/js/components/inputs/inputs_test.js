@@ -94,7 +94,8 @@ describe('Profile inputs', () => {
           "date_field": "Date field is required",
           "account_privacy": "Account privacy is required"
         },
-        updateProfile: change
+        updateProfile: change,
+        updateValidationVisibility: sandbox.stub(),
       };
     });
 

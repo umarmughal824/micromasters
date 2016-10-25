@@ -19,14 +19,17 @@ export default class User extends React.Component {
     ui:                           UIState,
     clearProfileEdit:             () => void,
     saveProfile:                  SaveProfileFunc,
+    startProfileEdit:             () => void,
   };
 
   toggleShowPersonalDialog: Function = (): void => {
     const {
       setUserPageDialogVisibility,
-      ui: { userPageDialogVisibility }
+      ui: { userPageDialogVisibility },
+      startProfileEdit,
     } = this.props;
     setUserPageDialogVisibility(!userPageDialogVisibility);
+    startProfileEdit();
   };
 
   render() {

@@ -2,6 +2,7 @@
 /* global SETTINGS: false */
 import { combineReducers } from 'redux';
 import _ from 'lodash';
+import R from 'ramda';
 
 import {
   REQUEST_GET_USER_PROFILE,
@@ -15,6 +16,7 @@ import {
   RECEIVE_PATCH_USER_PROFILE_SUCCESS,
   RECEIVE_PATCH_USER_PROFILE_FAILURE,
   UPDATE_PROFILE_VALIDATION,
+  UPDATE_VALIDATION_VISIBILITY,
 } from '../actions/profile';
 import {
   REQUEST_DASHBOARD,
@@ -54,6 +56,7 @@ import { imageUpload } from './image_upload';
 import { financialAid } from './financial_aid';
 import { documents } from './documents';
 import { orderReceipt } from './order_receipt';
+import { ALL_ERRORS_VISIBLE } from '../constants';
 
 export const INITIAL_PROFILES_STATE = {};
 export const profiles = (state: Profiles = INITIAL_PROFILES_STATE, action: Action) => {
@@ -115,7 +118,8 @@ export const profiles = (state: Profiles = INITIAL_PROFILES_STATE, action: Actio
     return patchProfile({
       edit: {
         profile: profile.profile,
-        errors: {}
+        errors: {},
+        visibility: [],
       }
     });
   case CLEAR_PROFILE_EDIT:
@@ -142,9 +146,28 @@ export const profiles = (state: Profiles = INITIAL_PROFILES_STATE, action: Actio
       // caller must have dispatched START_PROFILE_EDIT successfully first
       return state;
     } else {
+      let errors = {};
+      let visibility = profile.edit.visibility;
+      if ( R.contains(ALL_ERRORS_VISIBLE, visibility) ) {
+        errors = action.payload.errors;
+      } else {
+        visibility.forEach(keySet => {
+          _.set(errors, keySet, _.get(action.payload.errors, keySet));
+        });
+      }
+      return patchProfile({
+        edit: Object.assign({}, profile.edit, { errors })
+      });
+    }
+  case UPDATE_VALIDATION_VISIBILITY:
+    profile = getProfile();
+    if (profile === undefined || profile.edit === undefined) {
+      return state;
+    } else {
+      let visibility = profile.edit.visibility;
       return patchProfile({
         edit: Object.assign({}, profile.edit, {
-          errors: action.payload.errors
+          visibility: R.append(action.payload.keySet, visibility)
         })
       });
     }

@@ -21,7 +21,6 @@ import ConfirmDeletion from './ConfirmDeletion';
 import SelectField from './inputs/SelectField';
 import CountrySelectField from './inputs/CountrySelectField';
 import StateSelectField from './inputs/StateSelectField';
-import ValidationAlert from './ValidationAlert';
 import INDUSTRIES from '../data/industries';
 import { formatMonthDate } from '../util/date';
 import type { Option } from '../flow/generalTypes';
@@ -299,20 +298,22 @@ class EmploymentForm extends ProfileFormFields {
         showWorkDeleteDialog,
       },
     } = this.props;
-    const actions = <ValidationAlert {...this.props}>
+    const actions = [
       <Button
         type='button'
         className="secondary-button cancel-button"
+        key='cancel'
         onClick={this.closeWorkDialog}>
         Cancel
-      </Button>
+      </Button>,
       <Button
         type='button'
         className="primary-button save-button"
+        key='save'
         onClick={this.saveWorkHistoryEntry}>
         Save
       </Button>
-    </ValidationAlert>;
+    ];
 
     return (
       <div>

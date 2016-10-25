@@ -20,12 +20,18 @@ import {
 } from '../constants';
 import { createActionHelper } from '../lib/redux';
 import type { Profile } from '../flow/profileTypes';
+import { startProfileEdit } from '../actions/profile';
 
 class ProfilePage extends ProfileFormContainer {
   currentStep: Function = (): string => {
     const { ui: { profileStep } } = this.props;
     return profileStep;
   };
+
+  componentDidMount() {
+    const { dispatch } = this.props;
+    dispatch(startProfileEdit(SETTINGS.user.username));
+  }
 
   stepTransitions: Function = (): [void|() => void, () => void] => {
     const { dispatch } = this.props;

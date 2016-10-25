@@ -173,13 +173,14 @@ describe("ErrorMessage", () => {
           withArgs(SETTINGS.user.username).
           returns(Promise.reject(ERROR_RESPONSE));
 
-        const types = [
+        const actions = [
           RECEIVE_DASHBOARD_SUCCESS,
           RECEIVE_COURSE_PRICES_SUCCESS,
           RECEIVE_GET_USER_PROFILE_FAILURE,
           RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
+          START_PROFILE_EDIT,
         ];
-        return renderComponent("/profile", types, false).then(([, div]) => {
+        return renderComponent("/profile", actions, false).then(([, div]) => {
           confirmErrorMessage(
             div,
             `${ERROR_RESPONSE.error_code} ${errorString}`,

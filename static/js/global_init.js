@@ -9,7 +9,7 @@ const settings = {
   },
   edx_base_url: "/edx/",
   roles: [],
-  support_email: "a_real_email@example.com"
+  support_email: "a_real_email@example.com",
 };
 global.SETTINGS = Object.assign({}, settings);
 
