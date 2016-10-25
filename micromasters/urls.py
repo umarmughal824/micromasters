@@ -71,5 +71,11 @@ urlpatterns = [
     url(r'', include(wagtail_urls)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+if settings.DEBUG:
+    import debug_toolbar  # pylint: disable=wrong-import-position, wrong-import-order
+    urlpatterns += [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ]
+
 handler404 = 'ui.views.page_404'
 handler500 = 'ui.views.page_500'
