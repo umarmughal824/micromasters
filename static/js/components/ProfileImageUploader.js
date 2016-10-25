@@ -13,6 +13,7 @@ const onDrop = R.curry((startPhotoEdit, files) => startPhotoEdit(...files));
 const dropZone = (startPhotoEdit, setPhotoError) => (
   <Dropzone
     onDrop={onDrop(startPhotoEdit)}
+    style={{height: uploaderBodyHeight()}}
     className="photo-active-item photo-dropzone"
     activeClassName="photo-active-item photo-dropzone active"
     accept="image/*"
@@ -22,6 +23,10 @@ const dropZone = (startPhotoEdit, setPhotoError) => (
       Drag a photo here or click to select a photo.
     </div>
   </Dropzone>
+);
+
+const uploaderBodyHeight = (): number => (
+  R.min(500, window.innerHeight / 2)
 );
 
 const imageError = err => <div className="img-error">{err}</div>;
@@ -74,8 +79,10 @@ const ProfileImageUploader = ({
       </Button>
     ]}
   >
-    { photo ? <CropperWrapper {...{updatePhotoEdit, photo}} /> : dropZone(startPhotoEdit, setPhotoError) }
-    { imageError(error) }
+   { imageError(error) }
+   { photo ? <CropperWrapper
+     {...{updatePhotoEdit, photo, uploaderBodyHeight}} /> : dropZone(startPhotoEdit, setPhotoError)
+   }
   </Dialog>
 );
 
