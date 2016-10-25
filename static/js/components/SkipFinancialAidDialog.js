@@ -30,6 +30,7 @@ type SkipProps = {
 const SkipFinancialAidDialog = ({cancel, skip, open, fullPrice}: SkipProps) => (
   <Dialog
     open={open}
+    className="skip-aid-dialog-wrapper"
     bodyClassName="skip-aid-dialog"
     onRequestClose={cancel}
     actions={skipActions(cancel, skip)}

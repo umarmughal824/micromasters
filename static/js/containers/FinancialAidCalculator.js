@@ -20,10 +20,8 @@ import {
 import { createSimpleActionHelpers } from '../lib/redux';
 import SelectField from '../components/inputs/SelectField';
 import { currencyOptions } from '../lib/currency';
-import {
-  validateFinancialAid,
-  sanitizeNumberString
-} from '../lib/validation/profile';
+import { validateFinancialAid } from '../lib/validation/profile';
+import { sanitizeNumberString } from '../lib/validation/date';
 import type { ProgramEnrollment } from '../flow/enrollmentTypes';
 import type {
   FinancialAidState,
@@ -46,7 +44,7 @@ const currencySelect = (update, current) => (
 
 const salaryUpdate = R.curry((update, current, e) => {
   let newEdit = R.clone(current);
-  newEdit.income = sanitizeNumberString(e.target.value, 20);
+  newEdit.income = sanitizeNumberString(20, e.target.value);
   update(newEdit);
 });
 

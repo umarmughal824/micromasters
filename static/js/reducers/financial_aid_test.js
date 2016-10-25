@@ -30,10 +30,7 @@ import {
 } from '../actions';
 import * as actions from '../actions';
 import { setCurrentProgramEnrollment } from '../actions/enrollments';
-import {
-  FINANCIAL_AID_EDIT,
-  INITIAL_FINANCIAL_AID_STATE,
-} from './financial_aid';
+import { FINANCIAL_AID_EDIT } from './financial_aid';
 import rootReducer from '../reducers';
 import * as api from '../lib/api';
 
@@ -72,7 +69,7 @@ describe('financial aid reducers', () => {
   it('should let you clear edits', () => {
     store.dispatch(startCalculatorEdit(1));
     return dispatchThen(clearCalculatorEdit(), [CLEAR_CALCULATOR_EDIT]).then(state => {
-      assert.deepEqual(state, INITIAL_FINANCIAL_AID_STATE);
+      assert.deepEqual(state, FINANCIAL_AID_EDIT);
     });
   });
 

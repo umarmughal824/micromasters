@@ -49,7 +49,7 @@ export const financialAid = (state: FinancialAidState = INITIAL_FINANCIAL_AID_ST
   case START_CALCULATOR_EDIT:
     return { ...FINANCIAL_AID_EDIT, programId: action.payload };
   case CLEAR_CALCULATOR_EDIT:
-    return INITIAL_FINANCIAL_AID_STATE;
+    return FINANCIAL_AID_EDIT;
   case UPDATE_CALCULATOR_EDIT:
     return { ...state, ...action.payload };
   case UPDATE_CALCULATOR_VALIDATION:
