@@ -10,6 +10,14 @@ from courses.models import Program
 from roles.roles import Staff, Instructor
 
 
+# List need to update when new roles added,
+# roles which are not learners.
+NON_LEARNERS = [
+    Staff.ROLE_ID,
+    Instructor.ROLE_ID
+]
+
+
 class Role(models.Model):
     """
     Assignment of a MicroMasters Role per program to a user.
