@@ -79,12 +79,14 @@ class CategorizedFaqsPage(Page):
     parent_page_types = ['FaqsPage']
 
 
-class FaqsPage(Page):
+class ProgramChildPage(Page):
     """
-    CMS page for questions
+    Abstract page representing a child of ProgramPage
     """
+    class Meta:
+        abstract = True
+
     parent_page_types = ['ProgramPage']
-    subpage_types = ['CategorizedFaqsPage']
 
     def parent_page(self):
         """ Get the parent ProgramPage"""
@@ -95,6 +97,26 @@ class FaqsPage(Page):
         context['child_page'] = self
         context['active_tab'] = self.title
         return context
+
+
+class FaqsPage(ProgramChildPage):
+    """
+    CMS page for questions
+    """
+    subpage_types = ['CategorizedFaqsPage']
+
+
+class ProgramTabPage(ProgramChildPage):
+    """
+    CMS page for custom tabs on the program page
+    """
+    content = RichTextField(
+        blank=True,
+        help_text='The content of this tab on the program page'
+    )
+    content_panels = Page.content_panels + [
+        FieldPanel('content')
+    ]
 
 
 class ProgramPage(Page):
@@ -157,7 +179,7 @@ class ProgramPage(Page):
             'Thumbnails are cropped down to this size, preserving aspect ratio.'
         ),
     )
-    subpage_types = ['FaqsPage']
+    subpage_types = ['FaqsPage', 'ProgramTabPage']
     content_panels = Page.content_panels + [
         FieldPanel('description', classname="full"),
         FieldPanel('program'),
