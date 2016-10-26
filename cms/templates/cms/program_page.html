@@ -90,27 +90,33 @@
             <!-- CourseListWithPopover component injected here -->
           </div>
         </div>
-        <div class="info-box contact-info">
-          <h3 class="title">
-            More Info
-          </h3>
-          <div class="contact-links">
-            {% if page.program_home_page_url %}
-            <p>
-            <a target="_blank" href="{{ page.program_home_page_url }}">
-              {{ page.title }} Home Page
-            </a>
-            </p>
-            {% endif %}
-            {% if page.program_contact_email %}
-            <p>
-            <a href="mailto:{{ page.program_contact_email }}">
-              Contact us: {{ page.program_contact_email }}
-            </a>
-            </p>
-            {% endif %}
+        {% if page.program_home_page_url or page.program_contact_email %}
+          <div class="info-box contact-info">
+            <h3 class="title">
+              More Info
+            </h3>
+            <div class="contact-links">
+              {% if page.program_home_page_url %}
+                <p>
+                  <a target="_blank" href="{{ page.program_home_page_url }}">
+                  {% if page.title_program_home_page_url %}
+                    {{ page.title_program_home_page_url|richtext }}
+                  {% else %}
+                    {{ page.title }} Home Page
+                  {% endif %}
+                  </a>
+                </p>
+              {% endif %}
+              {% if page.program_contact_email %}
+                <p>
+                  <a href="mailto:{{ page.program_contact_email }}">
+                    Contact us: {{ page.program_contact_email }}
+                  </a>
+                </p>
+              {% endif %}
+            </div>
           </div>
-        </div>
+        {% endif %}
         <div class="powered-by">
           <p>
             Courses delivered on

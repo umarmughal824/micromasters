@@ -127,6 +127,10 @@ class ProgramPage(Page):
         null=True,
         help_text="A url for an external homepage. There will be a link to this url from the program page."
     )
+    title_program_home_page_url = models.TextField(
+        blank=True,
+        help_text='The text for the link to an external homepage.'
+    )
     program_contact_email = models.EmailField(
         blank=True,
         null=True,
@@ -160,6 +164,7 @@ class ProgramPage(Page):
         FieldPanel('thumbnail_image'),
         FieldPanel('external_program_page_url'),
         FieldPanel('program_home_page_url'),
+        FieldPanel('title_program_home_page_url'),
         FieldPanel('program_contact_email'),
         FieldPanel('background_image'),
         FieldPanel('title_over_image'),
