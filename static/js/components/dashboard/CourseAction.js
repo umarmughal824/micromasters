@@ -103,12 +103,12 @@ export default class CourseAction extends React.Component {
   }
 
   renderDescription = R.curry(
-    (className: string, runStatus: ?string, text: string): React$Element<*>|null => {
+    (className: string, runStatus: ?string, text: ?string): React$Element<*>|null => {
       let classDefinition = className;
       if (runStatus && this.statusDescriptionClasses[runStatus]) {
         classDefinition = `${classDefinition} ${this.statusDescriptionClasses[runStatus]}`;
       }
-      return text.length > 0 ? <div className={classDefinition} key="2">{text}</div> : null;
+      return text && text.length > 0 ? <div className={classDefinition} key="2">{text}</div> : null;
     }
   );
 
@@ -175,6 +175,8 @@ export default class CourseAction extends React.Component {
           text = ifValidDate('', date => `Enrollment begins ${date.format(DASHBOARD_FORMAT)}`, enrollmentStartDate);
         } else if (run.fuzzy_enrollment_start_date) {
           text = `Enrollment begins ${run.fuzzy_enrollment_start_date}`;
+        } else {
+          text = 'Enrollment information unavailable';
         }
         description = this.renderTextDescription(text);
       }
