@@ -35,13 +35,15 @@ import { INITIAL_UI_STATE } from '../reducers/ui';
 import { PERSONAL_STEP } from '../constants';
 import rootReducer from '../reducers';
 import { createAssertReducerResultState } from '../util/test_utils';
+import type { AssertReducerResultState } from '../flow/reduxTypes';
+import type { UIState } from './ui';
 
 import configureTestStore from 'redux-asserts';
 import { assert } from 'chai';
 import sinon from 'sinon';
 
 describe('ui reducers', () => {
-  let sandbox, store, dispatchThen, assertReducerResultState;
+  let sandbox, store, dispatchThen, assertReducerResultState: AssertReducerResultState<UIState>;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
