@@ -503,7 +503,9 @@ class InfoCourseTest(CourseTests):
             autospec=True,
             side_effect=self.get_mock_run_status_func(
                 api.CourseRunStatus.CHECK_IF_PASSED, self.course_run, api.CourseRunStatus.CHECK_IF_PASSED),
-        ), patch('courses.models.Course.get_first_unexpired_run', autospec=True, return_value=None):
+        ), patch('courses.models.CourseRun.get_first_unexpired_run', new=MagicMock()) as mock_get_run:
+            # this is necessary because for some reason patching a classmethod by default gives a NonCallableMagicMock
+            mock_get_run.return_value = None
             self.assert_course_equal(
                 self.course,
                 api.get_info_for_course(self.course, self.mmtrack)

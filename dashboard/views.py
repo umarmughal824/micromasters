@@ -6,6 +6,7 @@ from datetime import datetime
 
 import pytz
 from django.conf import settings
+from django.db.models import Prefetch
 from edx_api.client import EdxApi
 from rest_framework import (
     authentication,
@@ -18,7 +19,7 @@ from rest_framework.response import Response
 
 from backends import utils
 from backends.edxorg import EdxOrgOAuth2
-from courses.models import Program
+from courses.models import Program, CourseRun
 from dashboard.api import (
     get_info_for_program,
     get_student_certificates,
@@ -71,7 +72,14 @@ class UserDashboard(APIView):
         current_grades = get_student_current_grades(request.user, edx_client)
 
         response_data = []
-        for program in Program.objects.filter(live=True):
+
+        all_programs = (
+            Program.objects.filter(live=True)
+            .prefetch_related(
+                Prefetch('course_set__courserun_set', queryset=CourseRun.get_first_unexpired_run_qset())
+            )
+        )
+        for program in all_programs:
             mmtrack_info = MMTrack(
                 request.user,
                 program,

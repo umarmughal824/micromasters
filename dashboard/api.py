@@ -209,17 +209,17 @@ def get_info_for_course(course, mmtrack):
     run_statuses.remove(run_status)
 
     if run_status.status == CourseRunStatus.NOT_ENROLLED:
-        next_run = course.get_first_unexpired_run()
+        next_run = CourseRun.get_first_unexpired_run(course)
         if next_run is not None:
             _add_run(next_run, mmtrack, CourseStatus.OFFERED)
     elif run_status.status == CourseRunStatus.NOT_PASSED:
         _add_run(run_status.course_run, mmtrack, CourseRunStatus.NOT_PASSED)
-        next_run = course.get_first_unexpired_run()
+        next_run = CourseRun.get_first_unexpired_run(course)
         if next_run is not None:
             _add_run(next_run, mmtrack, CourseStatus.OFFERED)
     elif run_status.status == CourseRunStatus.MISSED_DEADLINE:
-        _add_run(run_status.course_run, mmtrack, CourseRunStatus.MISSED_DEADLINE)
-        next_run = course.get_first_unexpired_run(course_run_to_exclude=run_status.course_run)
+        _add_run(run_status.course_run, mmtrack, CourseStatus.MISSED_DEADLINE)
+        next_run = CourseRun.get_first_unexpired_run(course)
         if next_run is not None:
             _add_run(next_run, mmtrack, CourseStatus.OFFERED)
     elif run_status.status == CourseRunStatus.CURRENTLY_ENROLLED:
@@ -229,7 +229,7 @@ def get_info_for_course(course, mmtrack):
         # if the user never passed the course she needs to enroll in the next one
         if not mmtrack.has_passed_course(run_status.course_run.edx_course_key):
             _add_run(run_status.course_run, mmtrack, CourseRunStatus.NOT_PASSED)
-            next_run = course.get_first_unexpired_run()
+            next_run = CourseRun.get_first_unexpired_run(course)
             if next_run is not None:
                 _add_run(next_run, mmtrack, CourseStatus.OFFERED)
         else:
