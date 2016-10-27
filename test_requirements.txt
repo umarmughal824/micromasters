@@ -1,4 +1,5 @@
 bpython
+codecov
 ddt==1.1.1
 ipdb
 ipython

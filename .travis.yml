@@ -6,8 +6,9 @@ install:
   - docker-compose -f travis-docker-compose.yml run watch npm install --quiet
 
 script:
+  - CI_ENV=`bash <(curl -s https://codecov.io/env)`
   - docker-compose -f travis-docker-compose.yml run web tox
-  - docker-compose -f travis-docker-compose.yml run watch npm run-script coverage
+  - docker-compose -f travis-docker-compose.yml run watch npm run-script codecov
   - docker-compose -f travis-docker-compose.yml run watch npm run-script lint
   - docker-compose -f travis-docker-compose.yml run watch npm run-script scss_lint
   - docker-compose -f travis-docker-compose.yml run watch npm run-script flow

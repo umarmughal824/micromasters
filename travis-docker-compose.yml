@@ -18,6 +18,7 @@ web:
     MICROMASTERS_SECURE_SSL_REDIRECT: 'False'
     MICROMASTERS_DB_DISABLE_SSL: 'True'
     ELASTICSEARCH_URL: elastic:9200
+    CI_ENV: ${CI_ENV}
   ports:
     - "8079:8079"
   links:
@@ -42,4 +43,3 @@ elastic:
   command: elasticsearch -Des.network.host=0.0.0.0
   ports:
     - "9200"
-
