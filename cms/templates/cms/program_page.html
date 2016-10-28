@@ -40,7 +40,7 @@
       {{ page.title_over_image|richtext }}
     </div>
     {% if not authenticated %}
-    <button class="mm-button main-action open-signup-dialog mdl-cell--hide-phone">
+    <button class="mdl-button hero-button open-signup-dialog mdl-cell--hide-phone">
       Sign Up Now
     </button>
     <div class="log-in mdl-cell--hide-phone">
@@ -58,7 +58,7 @@
            class="tab-link {% if active_tab == 'about' %}active-tab{% endif %}">
           About the Program
         </a>
-        {% for child in page.get_children %}
+        {% for child in page.get_children.live %}
           <a href="{{ child.url }}"
              class="tab-link {% if child.title == active_tab %}active-tab{% endif %}">
             {{ child.title }}
@@ -86,41 +86,37 @@
           <h3 class="title">
             Courses
           </h3>
-          {% for course in courses %}
-          <div class="course-details">
-            <div class="title">
-              {% if course.url %}
-                <a href="{{ course.url }}">{{ course.title }}</a>
-              {% else %}
-                {{ course.title }}
+          <div id="course-list">
+            <!-- CourseListWithPopover component injected here -->
+          </div>
+        </div>
+        {% if page.program_home_page_url or page.program_contact_email %}
+          <div class="info-box contact-info">
+            <h3 class="title">
+              More Info
+            </h3>
+            <div class="contact-links">
+              {% if page.program_home_page_url %}
+                <p>
+                  <a target="_blank" href="{{ page.program_home_page_url }}">
+                  {% if page.title_program_home_page_url %}
+                    {{ page.title_program_home_page_url|richtext }}
+                  {% else %}
+                    {{ page.title }} Home Page
+                  {% endif %}
+                  </a>
+                </p>
+              {% endif %}
+              {% if page.program_contact_email %}
+                <p>
+                  <a href="mailto:{{ page.program_contact_email }}">
+                    Contact us: {{ page.program_contact_email }}
+                  </a>
+                </p>
               {% endif %}
             </div>
-            <div class="description enrollment_dates">
-              {{ course.enrollment_text }}
-            </div>
-            <div class="description course-description">
-              {{ course.description }}
-            </div>
           </div>
-          {% endfor %}
-        </div>
-        <div class="info-box contact-info">
-          <h3 class="title">
-            More Info
-          </h3>
-          <div class="contact-links">
-            {% if page.program_home_page_url %}
-            <a target="_blank" href="{{ page.program_home_page_url }}">
-              {{ page.title }} Home Page
-            </a>
-            {% endif %}
-            {% if page.program_contact_email %}
-            <a href="mailto:{{ page.program_contact_email }}">
-              Contact us: {{ page.program_contact_email }}
-            </a>
-            {% endif %}
-          </div>
-        </div>
+        {% endif %}
         <div class="powered-by">
           <p>
             Courses delivered on
@@ -134,7 +130,7 @@
   {% if page.faculty_members.count > 0 %}
     <div class="faculty-section mdl-grid mdl-grid--no-spacing">
       <div class="mdl-cell mdl-cell--12-col">
-        <h3 class="title">Faculty</h3>
+        <h3 class="title">Instructors</h3>
         {% if page.faculty_description|length > 0 %}
           <p class="description">{{ page.faculty_description }}</p>
         {% endif %}
@@ -152,6 +148,7 @@
 </div>
 <script type="text/javascript" src="{{ signup_dialog_src }}"></script>
 <script type="text/javascript" src="{{ faculty_carousel_src }}"></script>
+<script type="text/javascript" src="{{ course_list_src }}"></script>
 <script type="text/javascript" src="{{ public_src }}"></script>
 <script defer src="https://code.getmdl.io/1.2.1/material.min.js"></script>
 {% endblock %}

@@ -4,7 +4,6 @@ Models for user profile
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.db import models, transaction
-from django.db.models import Max
 
 
 DOCTORATE = 'p'
@@ -144,16 +143,13 @@ class Profile(models.Model):
 
     @transaction.atomic
     def save(self, *args, **kwargs):
-        """need to handle setting the student_id number"""
-        if self.id is None or self.student_id is None:
-            max_id = Profile.objects.aggregate(Max('student_id'))
-            max_id = max_id['student_id__max'] or 1
-            iteration_limit = 1000
-            while Profile.objects.filter(student_id=max_id).exists() and iteration_limit > 0:
-                max_id += 1
-                iteration_limit -= 1
-            self.student_id = max_id
+        """Set the student_id number to the PK number"""
+        # first save the profile
         super(Profile, self).save(*args, **kwargs)
+        # if there is no student id, assign the same number of the primary key
+        if self.student_id is None:
+            self.student_id = self.id
+            super(Profile, self).save()
 
     def __str__(self):
         return 'Profile for "{0}"'.format(self.user.username)

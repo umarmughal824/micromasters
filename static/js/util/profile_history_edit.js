@@ -2,7 +2,7 @@
 import _ from 'lodash';
 
 import { generateNewEducation, generateNewWorkHistory } from "../util/util";
-import { educationValidation, employmentValidation } from '../util/validation';
+import { educationValidation, employmentValidation } from '../lib/validation/profile';
 
 export function openEditEducationForm(index: number) {
   const {

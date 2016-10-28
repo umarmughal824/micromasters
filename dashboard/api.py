@@ -40,13 +40,14 @@ class CourseStatus:
     CURRENTLY_ENROLLED = 'currently-enrolled'
     WILL_ATTEND = 'will-attend'
     CAN_UPGRADE = 'can-upgrade'
+    MISSED_DEADLINE = 'missed-deadline'
     OFFERED = 'offered'
 
     @classmethod
     def all_statuses(cls):
         """Helper to get all the statuses"""
         return [cls.PASSED, cls.NOT_PASSED, cls.CURRENTLY_ENROLLED,
-                cls.CAN_UPGRADE, cls.OFFERED, cls.WILL_ATTEND]
+                cls.CAN_UPGRADE, cls.OFFERED, cls.WILL_ATTEND, cls.MISSED_DEADLINE]
 
 
 class CourseRunStatus:
@@ -58,6 +59,7 @@ class CourseRunStatus:
     CHECK_IF_PASSED = 'check-if-passed'
     WILL_ATTEND = 'will-attend'
     CAN_UPGRADE = 'can-upgrade'
+    MISSED_DEADLINE = 'missed-deadline'
     NOT_PASSED = 'not-passed'
 
 
@@ -207,27 +209,29 @@ def get_info_for_course(course, mmtrack):
     run_statuses.remove(run_status)
 
     if run_status.status == CourseRunStatus.NOT_ENROLLED:
-        next_run = course.get_next_run()
+        next_run = course.get_first_unexpired_run()
         if next_run is not None:
             _add_run(next_run, mmtrack, CourseStatus.OFFERED)
     elif run_status.status == CourseRunStatus.NOT_PASSED:
-        next_run = course.get_next_run()
+        _add_run(run_status.course_run, mmtrack, CourseRunStatus.NOT_PASSED)
+        next_run = course.get_first_unexpired_run()
         if next_run is not None:
             _add_run(next_run, mmtrack, CourseStatus.OFFERED)
-        if next_run is None or run_status.course_run.pk != next_run.pk:
-            _add_run(run_status.course_run, mmtrack, CourseStatus.NOT_PASSED)
+    elif run_status.status == CourseRunStatus.MISSED_DEADLINE:
+        _add_run(run_status.course_run, mmtrack, CourseRunStatus.MISSED_DEADLINE)
+        next_run = course.get_first_unexpired_run(course_run_to_exclude=run_status.course_run)
+        if next_run is not None:
+            _add_run(next_run, mmtrack, CourseStatus.OFFERED)
     elif run_status.status == CourseRunStatus.CURRENTLY_ENROLLED:
         _add_run(run_status.course_run, mmtrack, CourseStatus.CURRENTLY_ENROLLED)
     # check if we need to check the certificate
     elif run_status.status == CourseRunStatus.CHECK_IF_PASSED:
         # if the user never passed the course she needs to enroll in the next one
         if not mmtrack.has_passed_course(run_status.course_run.edx_course_key):
-            next_run = course.get_next_run()
+            _add_run(run_status.course_run, mmtrack, CourseRunStatus.NOT_PASSED)
+            next_run = course.get_first_unexpired_run()
             if next_run is not None:
                 _add_run(next_run, mmtrack, CourseStatus.OFFERED)
-            # add the run of the status anyway if the next run is different from the one just added
-            if next_run is None or run_status.course_run.pk != next_run.pk:
-                _add_run(run_status.course_run, mmtrack, CourseStatus.NOT_PASSED)
         else:
             _add_run(run_status.course_run, mmtrack, CourseStatus.PASSED)
     elif run_status.status == CourseRunStatus.WILL_ATTEND:
@@ -238,9 +242,8 @@ def get_info_for_course(course, mmtrack):
     # add all the other runs with status != NOT_ENROLLED
     # the first one (or two in some cases) has been added with the logic before
     for run_status in run_statuses:
-        if run_status.status != CourseRunStatus.NOT_ENROLLED:
-            if (run_status.status == CourseRunStatus.CHECK_IF_PASSED and
-                    mmtrack.has_passed_course(run_status.course_run.edx_course_key)):
+        if run_status.status == CourseRunStatus.CHECK_IF_PASSED:
+            if mmtrack.has_passed_course(run_status.course_run.edx_course_key):
                 # in this case the user might have passed the course also in the past
                 _add_run(run_status.course_run, mmtrack, CourseStatus.PASSED)
             else:
@@ -271,11 +274,15 @@ def get_status_for_courserun(course_run, mmtrack):
             status = CourseRunStatus.CHECK_IF_PASSED
         elif course_run.is_future:
             status = CourseRunStatus.WILL_ATTEND
+        # If a course run has no start or end date, is_past, is_current, and is_future all return False
     else:
-        if (course_run.is_current or course_run.is_future) and course_run.is_upgradable:
-            status = CourseRunStatus.CAN_UPGRADE
-        else:
+        if course_run.is_past:
             status = CourseRunStatus.NOT_PASSED
+        else:
+            if course_run.is_upgradable:
+                status = CourseRunStatus.CAN_UPGRADE
+            else:
+                status = CourseRunStatus.MISSED_DEADLINE
     return CourseRunUserStatus(
         status=status,
         course_run=course_run
@@ -377,15 +384,20 @@ def _check_if_refresh(user, cached_model, refresh_delta, limit_to_courses=None):
         Q(edx_course_key__isnull=True) | Q(edx_course_key__exact='')
     ).values_list("edx_course_key", flat=True)
 
+    all_course_count = course_ids.count()
+
     if limit_to_courses is not None:
         course_ids = course_ids.filter(edx_course_key__in=limit_to_courses)
 
     model_queryset = cached_model.objects.filter(
         user=user,
         last_request__gt=refresh_delta,
-        course_run__edx_course_key__in=course_ids,
     )
-    return model_queryset.count() == len(course_ids), model_queryset, course_ids
+    all_cached_elements_count = model_queryset.count()
+    model_queryset = model_queryset.filter(course_run__edx_course_key__in=course_ids)
+
+    is_data_fresh = model_queryset.count() == len(course_ids) and all_cached_elements_count == all_course_count
+    return is_data_fresh, model_queryset, course_ids
 
 
 def get_student_enrollments(user, edx_client):

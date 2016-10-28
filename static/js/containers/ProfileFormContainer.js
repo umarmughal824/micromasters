@@ -27,9 +27,9 @@ import {
   setDeletionIndex,
 } from '../actions/ui';
 import { setProgram } from '../actions/ui';
-import { createSimpleActionHelpers, createAsyncActionHelpers } from '../util/redux';
-import type { ActionHelpers, AsyncActionHelpers } from '../util/redux';
-import type { Validator, UIValidator } from '../util/validation';
+import { createSimpleActionHelpers, createAsyncActionHelpers } from '../lib/redux';
+import type { ActionHelpers, AsyncActionHelpers } from '../lib/redux';
+import type { Validator, UIValidator } from '../lib/validation/profile';
 import type { Profile, Profiles, ProfileGetResult } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 import type { DashboardState } from '../flow/dashboardTypes';

@@ -9,13 +9,6 @@ footer {
   font-size:.83em;
   line-height: 1.2em;
 
-  @media (min-width: 1600px) {
-    .container-footer {
-      width: 1310px;
-      padding-right: 60px;
-    }
-  }
-
   .social-buttons-list {
     margin-bottom: 60px;
   }
@@ -35,39 +28,59 @@ footer {
     display: block;
   }
 
-  .footer-button {
+  .footer-cta {
     display: inline-block;
     vertical-align: middle;
-    width: 40%;
+    width: 100%;
     min-width: 150px;
+    padding: 0;
+
+    @include breakpoint(phone) {
+      display: block;
+      margin: 20px 0;
+      width: 100%;
+    }
+
+    &.non-marketing-pages {
+      min-width: 300px;
+      margin-bottom: 50px;
+    }
 
     a {
-      width: 80%;
+      width: 100%;
       float: right;
+
+      &.no-float {
+        float: none;
+      }
+
+      @include breakpoint(phone) {
+        float: none;
+        width: 100%;
+      }
     }
   }
 
-  .footer-cta {
-    padding:0 0 60px 0;
+  .footer-cta-left {
+    padding: 0;
+    width: 60%;
+    display: inline-block;
+    vertical-align: middle;
 
-    .btn-primary {
+    @include breakpoint(phone) {
       display: block;
-      background:#4c8399 !important;
-      border-color:#4c8399 !important;
-
-      color:#fff;
+      margin: 20px 0;
       width: 100%;
+    }
 
-      &:hover {
-        background:transparent !important;
-        border-color:#830615 !important;
-        color:#fff;
-      }
+    a {
+      width: 60%;
+      margin: 0 0 0 60px;
 
-      &:active {
-        background:#d0021b !important;
-        border-color:#830615 !important;
-        color:#fff;
+      @include breakpoint(phone) {
+        float: none;
+        width: 100%;
+        margin: 0;
       }
     }
   }

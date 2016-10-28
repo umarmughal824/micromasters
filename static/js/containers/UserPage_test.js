@@ -36,7 +36,7 @@ import {
   getPreferredName
 } from '../util/util';
 import IntegrationTestHelper from '../util/integration_test_helper';
-import * as api from '../util/api';
+import * as api from '../lib/api';
 import { workEntriesByDate, educationEntriesByDate } from '../util/sorting';
 import { modifyTextField, activeDeleteDialog } from '../util/test_utils';
 import ValidationAlert from '../components/ValidationAlert';

@@ -14,14 +14,8 @@ from rest_framework.generics import ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from courses.models import (
-    CourseRun,
-    Program,
-)
-from courses.serializers import (
-    CourseRunSerializer,
-    ProgramSerializer,
-)
+from courses.models import Program
+from courses.serializers import ProgramSerializer
 from dashboard.models import ProgramEnrollment
 
 
@@ -42,19 +36,6 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     )
     queryset = Program.objects.filter(live=True)
     serializer_class = ProgramSerializer
-
-
-class CourseRunViewSet(viewsets.ReadOnlyModelViewSet):
-    """API for the Program collection"""
-    authentication_classes = (
-        SessionAuthentication,
-        TokenAuthentication,
-    )
-    permission_classes = (
-        IsAuthenticated,
-    )
-    queryset = CourseRun.objects.filter(course__program__live=True)
-    serializer_class = CourseRunSerializer
 
 
 class ProgramEnrollmentListView(ListCreateAPIView):
@@ -85,20 +66,19 @@ class ProgramEnrollmentListView(ListCreateAPIView):
         if not isinstance(program_id, int):
             raise ValidationError('A `program_id` parameter must be specified')
 
-        if ProgramEnrollment.objects.filter(user=request.user, program__pk=program_id).exists():
-            raise ResourceConflict('The enrollment for the specified program already exists')
+        serializer = self.get_serializer_class()
 
         try:
             program = Program.objects.get(live=True, pk=program_id)
         except Program.DoesNotExist:
             raise NotFound('The specified program has not been found or it is not live yet')
 
-        ProgramEnrollment.objects.create(
+        _, created = ProgramEnrollment.objects.get_or_create(
             user=request.user,
             program=program,
         )
-        serializer = self.get_serializer_class()
+        status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
         return Response(
-            status=status.HTTP_201_CREATED,
-            data=serializer(program).data
+            status=status_code,
+            data=serializer(program, context={'request': request}).data
         )

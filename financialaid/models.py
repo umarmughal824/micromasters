@@ -1,63 +1,21 @@
 """
 Models for the Financial Aid App
 """
-import datetime
-
 from django.contrib.auth.models import User
-from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import (
     models,
     transaction,
 )
-from django.forms.models import model_to_dict
 
 from courses.models import Program
 from financialaid.constants import FinancialAidStatus
-
-
-class TimestampedModelQuerySet(models.query.QuerySet):
-    """
-    Subclassed QuerySet for TimestampedModelManager
-    """
-    def update(self, **kwargs):
-        """
-        Automatically update updated_on timestamp when .update(). This is because .update()
-        does not go through .save(), thus will not auto_now, because it happens on the
-        database level without loading objects into memory.
-        """
-        if "updated_on" not in kwargs:
-            kwargs["updated_on"] = datetime.datetime.utcnow()
-        return super().update(**kwargs)
-
-
-class TimestampedModelManager(models.Manager):
-    """
-    Subclassed manager for TimestampedModel
-    """
-    def update(self, **kwargs):
-        """
-        Allows access to TimestampedModelQuerySet's update method on the manager
-        """
-        return self.get_queryset().update(**kwargs)
-
-    def get_queryset(self):
-        """
-        Returns custom queryset
-        """
-        return TimestampedModelQuerySet(self.model, using=self._db)
-
-
-class TimestampedModel(models.Model):
-    """
-    Base model for create/update timestamps
-    """
-    objects = TimestampedModelManager()
-    created_on = models.DateTimeField(auto_now_add=True)  # UTC
-    updated_on = models.DateTimeField(auto_now=True)  # UTC
-
-    class Meta:
-        abstract = True
+from micromasters.models import (
+    AuditableModel,
+    AuditModel,
+    TimestampedModel,
+)
+from micromasters.utils import serialize_model_object
 
 
 class Tier(TimestampedModel):
@@ -98,7 +56,7 @@ class TierProgram(TimestampedModel):
         return super(TierProgram, self).save(*args, **kwargs)
 
 
-class FinancialAid(TimestampedModel):
+class FinancialAid(TimestampedModel, AuditableModel):
     """
     An application for financial aid/personal pricing
     """
@@ -118,17 +76,6 @@ class FinancialAid(TimestampedModel):
     date_documents_sent = models.DateField(null=True, blank=True)
     justification = models.TextField(null=True)
 
-    def to_dict(self):
-        """
-        Get the model_to_dict of self
-        """
-        ret = model_to_dict(self)
-        if self.date_exchange_rate is not None:
-            ret["date_exchange_rate"] = ret["date_exchange_rate"].isoformat()
-        if self.date_documents_sent is not None:
-            ret["date_documents_sent"] = ret["date_documents_sent"].isoformat()
-        return ret
-
     def save(self, *args, **kwargs):
         """
         Override save to make sure only one FinancialAid object exists for a User and the associated Program
@@ -140,30 +87,23 @@ class FinancialAid(TimestampedModel):
             raise ValidationError("Cannot have multiple FinancialAid objects for the same User and Program.")
         super().save(*args, **kwargs)
 
-    @transaction.atomic
-    def save_and_log(self, acting_user, *args, **kwargs):
-        """
-        Saves the object and creates an audit object.
-        """
-        financialaid_before = FinancialAid.objects.get(id=self.id)
-        self.save(*args, **kwargs)
-        self.refresh_from_db()
-        FinancialAidAudit.objects.create(
-            acting_user=acting_user,
-            financial_aid=self,
-            data_before=financialaid_before.to_dict(),
-            data_after=self.to_dict()
-        )
+    @classmethod
+    def get_audit_class(cls):
+        return FinancialAidAudit
+
+    def to_dict(self):
+        return serialize_model_object(self)
 
 
-class FinancialAidAudit(TimestampedModel):
+class FinancialAidAudit(AuditModel):
     """
     Audit table for the Financial Aid
     """
-    acting_user = models.ForeignKey(User, null=False)
     financial_aid = models.ForeignKey(FinancialAid, null=True, on_delete=models.SET_NULL)
-    data_before = JSONField(blank=True, null=False)
-    data_after = JSONField(blank=True, null=False)
+
+    @classmethod
+    def get_related_field_name(cls):
+        return 'financial_aid'
 
 
 class CurrencyExchangeRate(TimestampedModel):

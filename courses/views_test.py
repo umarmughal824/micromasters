@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from courses.factories import ProgramFactory, CourseRunFactory
+from courses.factories import ProgramFactory
 from dashboard.factories import ProgramEnrollmentFactory
 from dashboard.models import ProgramEnrollment
 from profiles.factories import UserFactory
@@ -37,39 +37,6 @@ class ProgramTests(ESTestCase):
         ProgramFactory.create(live=False)
 
         resp = self.client.get(reverse('program-list'))
-
-        assert len(resp.json()) == 0
-
-
-class CourseTests(ESTestCase):
-    """Tests for the Course API"""
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
-        cls.user = UserFactory.create()
-
-    def setUp(self):
-        super().setUp()
-        self.client.force_login(self.user)
-
-    def test_list_course_if_program_live(self):
-        """
-        If the course belongs to a live program, show it.
-        """
-        course = CourseRunFactory.create(course__program__live=True)
-
-        resp = self.client.get(reverse('courserun-list'))
-
-        assert len(resp.json()) == 1
-        assert resp.json()[0]['id'] == course.id
-
-    def test_doesnt_list_courses_from_unlive_programs(self):
-        """
-        If the course belongs to a non-live program, hide it.
-        """
-        CourseRunFactory.create(course__program__live=False)
-
-        resp = self.client.get(reverse('courserun-list'))
 
         assert len(resp.json()) == 0
 
@@ -168,7 +135,8 @@ class ProgramEnrollmentTests(ESTestCase, APITestCase):
         self.assert_program_enrollments_count()
         resp = self.client.post(self.url, {'program_id': self.program1.pk}, format='json')
         self.assert_program_enrollments_count()
-        assert resp.status_code == status.HTTP_409_CONFLICT
+        assert resp.status_code == status.HTTP_200_OK
+        self.assert_program_enrollments_count()
 
     def test_create_program_does_not_exists(self):
         """Test in case the program does not exist"""

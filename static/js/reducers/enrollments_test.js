@@ -34,7 +34,7 @@ import {
   RECEIVE_ADD_COURSE_ENROLLMENT_SUCCESS,
   RECEIVE_ADD_COURSE_ENROLLMENT_FAILURE,
 } from '../actions/enrollments';
-import * as api from '../util/api';
+import * as api from '../lib/api';
 import * as actions from '../actions';
 import rootReducer from '../reducers';
 

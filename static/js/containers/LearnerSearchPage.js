@@ -20,11 +20,11 @@ import {
   updateEmailValidation,
   sendSearchResultMail
 } from '../actions/email';
-import { emailValidation } from '../util/validation';
+import { emailValidation } from '../lib/validation/profile';
 import type { UIState } from '../reducers/ui';
 import type { EmailState } from '../flow/emailTypes';
 import type { ProgramEnrollment } from '../flow/enrollmentTypes';
-import { getCookie } from '../util/api';
+import { getCookie } from '../lib/api';
 import { SEARCH_FILTER_DEFAULT_VISIBILITY } from '../constants';
 
 const searchKit = new SearchkitManager(SETTINGS.search_url, {

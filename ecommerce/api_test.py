@@ -43,7 +43,10 @@ from ecommerce.factories import (
     LineFactory,
     OrderFactory,
 )
-from ecommerce.models import Order
+from ecommerce.models import (
+    Order,
+    OrderAudit,
+)
 from financialaid.factories import FinancialAidFactory
 from financialaid.models import FinancialAidStatus
 from profiles.factories import UserFactory
@@ -264,6 +267,18 @@ class PurchasableTests(ESTestCase):
         assert line.description == 'Seat for {}'.format(course_run.title)
         assert line.price == discounted_price
 
+        assert OrderAudit.objects.count() == 1
+        order_audit = OrderAudit.objects.first()
+        assert order_audit.order == order
+        assert order_audit.data_after == order.to_dict()
+
+        # data_before only has modified_at different, since we only call save_and_log
+        # after Order is already created
+        data_before = order_audit.data_before
+        dict_before = order.to_dict()
+        del data_before['modified_at']
+        del dict_before['modified_at']
+        assert data_before == dict_before
 
 CYBERSOURCE_ACCESS_KEY = 'access'
 CYBERSOURCE_PROFILE_ID = 'profile'
@@ -328,6 +343,13 @@ class CybersourceTests(ESTestCase):
             'amount': str(order.total_price_paid),
             'consumer_id': username,
             'currency': 'USD',
+            'item_0_code': 'course',
+            'item_0_name': '{}'.format(course_run.title),
+            'item_0_quantity': 1,
+            'item_0_sku': '{}'.format(course_run.edx_course_key),
+            'item_0_tax_amount': '0',
+            'item_0_unit_price': str(order.total_price_paid),
+            'line_item_count': 1,
             'locale': 'en-us',
             'override_custom_cancel_page': 'dashboard_url?status=cancel&course_key={}'.format(quoted_course_key),
             'override_custom_receipt_page': "dashboard_url?status=receipt&course_key={}".format(quoted_course_key),

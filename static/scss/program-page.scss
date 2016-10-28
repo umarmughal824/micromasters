@@ -1,5 +1,5 @@
 .program-page {
-  padding: 0;
+  padding: 0 !important;
   background: #fff;
 
   .double-column {
@@ -28,7 +28,7 @@
       margin-top: 0;
       margin-bottom: 31px;
       max-width: 700px;
-      @media (max-width: 580px) {
+      @include breakpoint(phone) {
         font-size: 31px;
       }
     }
@@ -39,21 +39,13 @@
 
       * {
         font-size: 23px;
-        @media (max-width: 580px) {
+        @include breakpoint(phone) {
           font-size: 18px;
         }
         font-weight: 300;
         line-height: 1.3em;
         color: rgba(255,255,255,.8);
       }
-    }
-
-    button {
-      margin-bottom: 20px;
-      margin-right: 0;
-      font-size: 16px;
-      font-weight: 300;
-      padding: 14px 53px;
     }
 
     .log-in {
@@ -74,6 +66,12 @@
     .tab-container {
       width: 96%;
       max-width: 1150px;
+      display: flex;
+      overflow-x: scroll;
+
+      a {
+        white-space: nowrap;
+      }
 
       a:focus, a:hover {
         text-decoration: none;
@@ -133,23 +131,36 @@
   }
 
   .course-info {
-    .course-details {
-      .title {
+    #course-list {
+      ol {
+        list-style: none;
+        padding: 0;
+
+        li {
+          margin: 0 0 22px 0;
+        }
+      }
+
+      .title, .title a {
+        color: $link-text;
         font-weight: 600;
         font-size: 16px;
         margin: 0 0 6px 0;
+        cursor: pointer;
+        line-height: 1.4em;
+
+        &:hover {
+          text-decoration: underline;
+        }
       }
 
       .description {
         color: $font-gray;
         font-size: 15px;
+        line-height: 1.4em;
       }
 
-      .course-description {
-        display: none;
-      }
-
-      .enrollment_dates {
+      .enrollment-dates {
         margin-bottom: 6px;
       }
     }
@@ -159,6 +170,11 @@
     .contact-links {
       display: flex;
       flex-direction: column;
+
+      p {
+        font-size: 15px;
+        margin: 0 0 12px 0;
+      }
     }
   }
 
@@ -187,6 +203,25 @@
     margin: 0 auto;
     max-width: 1150px;
 
+    @include breakpoint(phone) {
+      padding: 0 23px;
+      width: 100%;
+
+      .mdl-cell--8-col, .mdl-cell--4-col {
+        width: 100%;
+
+        .panel-content {
+          margin-right: 0;
+
+          .faqs {
+            .faq {
+              padding: 0 0 17px 0;
+            }
+          }
+        }
+      }
+    }
+
     p {
       font-size: 17px;
       color: rgba(0,0,0,.7);
@@ -197,7 +232,8 @@
 
   .faqs {
     margin-top: 20px;
-    @media (max-width: 580px) {
+
+    @include breakpoint(phone) {
       margin: 18px auto;
     }
 
@@ -212,7 +248,7 @@
     }
 
     .faq {
-      padding: 0 15px 23px 0;
+      padding: 0 15px 2px 0;
 
       .question {
         font-weight: 500;
@@ -368,5 +404,54 @@
         margin: 0 0 23px 0;
       }
     }
+  }
+
+  .accordion-toggle {
+    cursor: pointer;
+  }
+
+  .accordion-content {
+    display: none;
+  }
+
+  .answer.accordion-content {
+    padding-left: 35px;
+  }
+
+  .accordion-content.default {
+    display: block;
+  }
+
+  .rotate {
+    transform: rotate(-90deg);
+  }
+
+  .rotate-reset {
+    transform: rotate(0deg);
+  }
+
+  .accordion-icon {
+    font-size: 30px;
+    vertical-align:top
+  }
+}
+
+.program-course-popover {
+  padding: 10px;
+
+  .title {
+    font-weight: 600;
+    font-size: 16px;
+    margin: 0 0 6px 0;
+  }
+
+  .description {
+    color: $font-gray;
+    font-size: 15px;
+    margin-bottom: 1em;
+  }
+
+  .edx-link {
+    display: block;
   }
 }

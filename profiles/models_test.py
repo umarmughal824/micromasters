@@ -17,6 +17,7 @@ class ProfileTests(ESTestCase):
         with mute_signals(post_save):
             profile = ProfileFactory()
         assert profile.student_id is not None
+        assert profile.student_id == profile.id
 
     def test_student_id_increments(self):
         """test that a student id increments correctly"""

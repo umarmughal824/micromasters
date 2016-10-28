@@ -5,7 +5,7 @@ import { createMemoryHistory } from 'react-router';
 import { mergePersistedState }  from 'redux-localstorage';
 import { compose } from 'redux';
 
-import * as api from '../util/api';
+import * as api from '../lib/api';
 import {
   DASHBOARD_RESPONSE,
   COURSE_PRICES_RESPONSE,

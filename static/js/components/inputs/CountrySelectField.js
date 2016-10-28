@@ -4,7 +4,7 @@ import _ from 'lodash';
 import iso3166 from 'iso-3166-2';
 import SelectField from './SelectField';
 import type { Profile, UpdateProfileFunc, ValidationErrors } from '../../flow/profileTypes';
-import type { Validator, UIValidator } from '../../util/validation';
+import type { Validator, UIValidator } from '../../lib/validation/profile';
 import type { Option } from '../../flow/generalTypes';
 
 let countryOptions = _(iso3166.data)

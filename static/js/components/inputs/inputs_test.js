@@ -12,7 +12,7 @@ import CountrySelectField from './CountrySelectField';
 import StateSelectField from './StateSelectField';
 import FieldsOfStudySelectField from './FieldsOfStudySelectField';
 import { showAllOptions, showLimitedOptions } from '../utils/AutoCompleteSettings';
-import FIELDS_OF_STUDY from '../../fields_of_study';
+import FIELDS_OF_STUDY from '../../data/fields_of_study';
 
 describe('Profile inputs', () => {
   let inputProps, sandbox;

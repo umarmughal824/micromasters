@@ -7,13 +7,13 @@ const skipActions = (cancel, skip) => (
   <div className="actions">
     <Button
       type='button'
-      className="dialog-button cancel-button"
+      className="cancel-button"
       onClick={cancel}>
       Cancel
     </Button>
     <Button
       type='button'
-      className="dialog-button save-button"
+      className="save-button"
       onClick={skip}>
       Pay Full Price
     </Button>
@@ -30,6 +30,7 @@ type SkipProps = {
 const SkipFinancialAidDialog = ({cancel, skip, open, fullPrice}: SkipProps) => (
   <Dialog
     open={open}
+    className="skip-aid-dialog-wrapper"
     bodyClassName="skip-aid-dialog"
     onRequestClose={cancel}
     actions={skipActions(cancel, skip)}

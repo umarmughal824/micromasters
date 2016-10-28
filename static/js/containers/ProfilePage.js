@@ -18,7 +18,7 @@ import {
   EDUCATION_STEP,
   EMPLOYMENT_STEP,
 } from '../constants';
-import { createActionHelper } from '../util/redux';
+import { createActionHelper } from '../lib/redux';
 import type { Profile } from '../flow/profileTypes';
 
 class ProfilePage extends ProfileFormContainer {
@@ -74,7 +74,7 @@ class ProfilePage extends ProfileFormContainer {
       } else {
         content = <div>
           <WelcomeBanner profile={profile} text={text} />
-          <div style={{textAlign: "center"}}>
+          <div className="profile-pagination">
             {makeProfileProgressDisplay(this.currentStep())}
           </div>
           <section>

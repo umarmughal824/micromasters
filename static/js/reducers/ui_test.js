@@ -28,18 +28,22 @@ import {
   setPhotoDialogVisibility,
   setCalculatorDialogVisibility,
   setConfirmSkipDialogVisibility,
+  setDocsInstructionsVisibility,
+  setNavDrawerOpen,
 } from '../actions/ui';
 import { INITIAL_UI_STATE } from '../reducers/ui';
 import { PERSONAL_STEP } from '../constants';
 import rootReducer from '../reducers';
 import { createAssertReducerResultState } from '../util/test_utils';
+import type { AssertReducerResultState } from '../flow/reduxTypes';
+import type { UIState } from './ui';
 
 import configureTestStore from 'redux-asserts';
 import { assert } from 'chai';
 import sinon from 'sinon';
 
 describe('ui reducers', () => {
-  let sandbox, store, dispatchThen, assertReducerResultState;
+  let sandbox, store, dispatchThen, assertReducerResultState: AssertReducerResultState<UIState>;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -184,6 +188,18 @@ describe('ui reducers', () => {
   describe('Skip dialog visibility', () => {
     it('should let you set skip dialog visibility', () => {
       assertReducerResultState(setConfirmSkipDialogVisibility, ui => ui.skipDialogVisibility, false);
+    });
+  });
+
+  describe('docs instructions visibility', () => {
+    it('should let you set the document instruction visibility', () => {
+      assertReducerResultState(setDocsInstructionsVisibility, ui => ui.docsInstructionsVisibility, false);
+    });
+  });
+
+  describe('nav drawer', () => {
+    it('should let you set the nav drawer visibility', () => {
+      assertReducerResultState(setNavDrawerOpen, ui => ui.navDrawerOpen, false);
     });
   });
 });

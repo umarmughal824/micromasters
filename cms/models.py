@@ -41,7 +41,7 @@ class HomePage(Page):
     subpage_types = ['ProgramPage']
 
     def get_context(self, request):
-        programs = Program.objects.filter(live=True)
+        programs = Program.objects.filter(live=True).order_by("id")
         js_settings = {
             "gaTrackingID": settings.GA_TRACKING_ID,
             "host": webpack_dev_server_host(request),
@@ -69,24 +69,6 @@ class HomePage(Page):
         return context
 
 
-class FaqsPage(Page):
-    """
-    CMS page for questions
-    """
-    parent_page_types = ['ProgramPage']
-    subpage_types = ['CategorizedFaqsPage']
-
-    def parent_page(self):
-        """ Get the parent ProgramPage"""
-        return ProgramPage.objects.ancestor_of(self).first()
-
-    def get_context(self, request):
-        context = get_program_page_context(self.parent_page(), request)
-        context['faqpage'] = self
-        context['active_tab'] = self.title
-        return context
-
-
 class CategorizedFaqsPage(Page):
     """
     CMS page for categorized questions
@@ -95,6 +77,46 @@ class CategorizedFaqsPage(Page):
         InlinePanel('faqs', label='Frequently Asked Questions'),
     ]
     parent_page_types = ['FaqsPage']
+
+
+class ProgramChildPage(Page):
+    """
+    Abstract page representing a child of ProgramPage
+    """
+    class Meta:
+        abstract = True
+
+    parent_page_types = ['ProgramPage']
+
+    def parent_page(self):
+        """ Get the parent ProgramPage"""
+        return ProgramPage.objects.ancestor_of(self).first()
+
+    def get_context(self, request):
+        context = get_program_page_context(self.parent_page(), request)
+        context['child_page'] = self
+        context['active_tab'] = self.title
+        return context
+
+
+class FaqsPage(ProgramChildPage):
+    """
+    CMS page for questions
+    """
+    subpage_types = ['CategorizedFaqsPage']
+
+
+class ProgramTabPage(ProgramChildPage):
+    """
+    CMS page for custom tabs on the program page
+    """
+    content = RichTextField(
+        blank=True,
+        help_text='The content of this tab on the program page'
+    )
+    content_panels = Page.content_panels + [
+        FieldPanel('content')
+    ]
 
 
 class ProgramPage(Page):
@@ -127,6 +149,10 @@ class ProgramPage(Page):
         null=True,
         help_text="A url for an external homepage. There will be a link to this url from the program page."
     )
+    title_program_home_page_url = models.TextField(
+        blank=True,
+        help_text='The text for the link to an external homepage.'
+    )
     program_contact_email = models.EmailField(
         blank=True,
         null=True,
@@ -153,13 +179,14 @@ class ProgramPage(Page):
             'Thumbnails are cropped down to this size, preserving aspect ratio.'
         ),
     )
-    subpage_types = ['FaqsPage']
+    subpage_types = ['FaqsPage', 'ProgramTabPage']
     content_panels = Page.content_panels + [
         FieldPanel('description', classname="full"),
         FieldPanel('program'),
         FieldPanel('thumbnail_image'),
         FieldPanel('external_program_page_url'),
         FieldPanel('program_home_page_url'),
+        FieldPanel('title_program_home_page_url'),
         FieldPanel('program_contact_email'),
         FieldPanel('background_image'),
         FieldPanel('title_over_image'),
@@ -199,6 +226,7 @@ def get_program_page_context(programpage, request):
     context["authenticated"] = not request.user.is_anonymous()
     context["signup_dialog_src"] = get_bundle_url(request, "signup_dialog.js")
     context["faculty_carousel_src"] = get_bundle_url(request, "faculty_carousel.js")
+    context["course_list_src"] = get_bundle_url(request, "course_list.js")
     context["username"] = username
     context["js_settings_json"] = json.dumps(js_settings)
     context["title"] = programpage.title

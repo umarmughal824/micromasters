@@ -1,5 +1,5 @@
 // @flow
-import type { Validator, UIValidator } from '../util/validation';
+import type { Validator, UIValidator } from '../lib/validation/profile';
 import type { UIState } from '../reducers/ui';
 import type { APIErrorInfo } from './generalTypes';
 

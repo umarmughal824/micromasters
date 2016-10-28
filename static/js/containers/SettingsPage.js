@@ -9,7 +9,7 @@ import { FETCH_PROCESSING } from '../actions/index';
 import ProfileFormContainer from './ProfileFormContainer';
 import PrivacyForm from '../components/PrivacyForm';
 import ProfileProgressControls from '../components/ProfileProgressControls';
-import { privacyValidation } from '../util/validation';
+import { privacyValidation } from '../lib/validation/profile';
 
 class SettingsPage extends ProfileFormContainer {
   componentWillMount() {

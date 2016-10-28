@@ -3,7 +3,7 @@ import React from 'react';
 
 import ProfileProgressControls from './ProfileProgressControls';
 import EducationForm from './EducationForm';
-import { educationValidation } from '../util/validation';
+import { educationValidation } from '../lib/validation/profile';
 import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 

@@ -3,7 +3,7 @@ import { createAction } from 'redux-actions';
 import type { Dispatch } from 'redux';
 
 import type { Dispatcher } from '../flow/reduxTypes';
-import { updateProfileImage } from '../util/api';
+import { updateProfileImage } from '../lib/api';
 
 export const START_PHOTO_EDIT = 'START_PHOTO_EDIT';
 export const startPhotoEdit = createAction(START_PHOTO_EDIT);

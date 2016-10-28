@@ -7,12 +7,13 @@ import Spinner from 'react-mdl/lib/Spinner';
 import R from 'ramda';
 import _ from 'lodash';
 
-import type { Course, CourseRun, FinancialAidUserInfo } from '../../flow/programTypes';
+import type { CourseRun, FinancialAidUserInfo } from '../../flow/programTypes';
 import type { CoursePrice } from '../../flow/dashboardTypes';
 import {
   STATUS_NOT_PASSED,
   STATUS_PASSED,
   STATUS_CAN_UPGRADE,
+  STATUS_MISSED_DEADLINE,
   STATUS_CURRENTLY_ENROLLED,
   STATUS_WILL_ATTEND,
   STATUS_OFFERED,
@@ -21,18 +22,19 @@ import {
   FA_PENDING_STATUSES,
   FA_STATUS_SKIPPED
 } from '../../constants';
+import { isCurrentlyEnrollable } from './util';
 import { formatPrice } from '../../util/util';
 import { ifValidDate } from '../../util/date';
 
 export default class CourseAction extends React.Component {
   props: {
     checkout: Function,
-    course: Course,
+    courseRun: CourseRun,
     coursePrice: CoursePrice,
+    now: moment$Moment,
     financialAid: FinancialAidUserInfo,
     hasFinancialAid: boolean,
     openFinancialAidCalculator?: () => void,
-    now: moment$Moment,
     addCourseEnrollment: (courseId: string) => void
   };
 
@@ -44,13 +46,6 @@ export default class CourseAction extends React.Component {
   getCoursePrice(): string {
     const { coursePrice } = this.props;
     return formatPrice(coursePrice.price);
-  }
-
-  isCurrentlyEnrollable(enrollmentStartDate: ?Object): boolean {
-    const { now } = this.props;
-    return enrollmentStartDate !== null &&
-      enrollmentStartDate !== undefined &&
-      enrollmentStartDate.isSameOrBefore(now, 'day');
   }
 
   needsPriceCalculation(): boolean {
@@ -108,12 +103,12 @@ export default class CourseAction extends React.Component {
   }
 
   renderDescription = R.curry(
-    (className: string, runStatus: ?string, text: string): React$Element<*>|null => {
+    (className: string, runStatus: ?string, text: ?string): React$Element<*>|null => {
       let classDefinition = className;
       if (runStatus && this.statusDescriptionClasses[runStatus]) {
         classDefinition = `${classDefinition} ${this.statusDescriptionClasses[runStatus]}`;
       }
-      return text.length > 0 ? <div className={classDefinition} key="2">{text}</div> : null;
+      return text && text.length > 0 ? <div className={classDefinition} key="2">{text}</div> : null;
     }
   );
 
@@ -131,7 +126,12 @@ export default class CourseAction extends React.Component {
 
   renderPayLaterLink(run: CourseRun): React$Element<*> {
     return (
-      <a href="#" onClick={e => this.handleAddCourseEnrollment(e, run)} key="2">Enroll and pay later</a>
+      <a href="#"
+        className="enroll-pay-later"
+        onClick={e => this.handleAddCourseEnrollment(e, run)} key="2"
+      >
+        Enroll and pay later
+      </a>
     );
   }
 
@@ -143,6 +143,9 @@ export default class CourseAction extends React.Component {
     switch (run.status) {
     case STATUS_PASSED:
       description = this.renderStatusDescription(run.status, 'Passed');
+      break;
+    case STATUS_NOT_PASSED:
+      description = this.renderStatusDescription(run.status, 'Failed');
       break;
     case STATUS_CURRENTLY_ENROLLED: {
       description = this.renderBoxedDescription('In Progress');
@@ -157,13 +160,13 @@ export default class CourseAction extends React.Component {
     case STATUS_CAN_UPGRADE: {
       let date = moment(run.course_upgrade_deadline);
       action = this.renderEnrollButton(run);
-      let text = ifValidDate('', date => `Payment due: ${date.format(DASHBOARD_FORMAT)}`, date); 
+      let text = ifValidDate('', date => `Payment due: ${date.format(DASHBOARD_FORMAT)}`, date);
       description = this.renderTextDescription(text);
       break;
     }
     case STATUS_OFFERED: {
       let enrollmentStartDate = run.enrollment_start_date ? moment(run.enrollment_start_date) : null;
-      if (this.isCurrentlyEnrollable(enrollmentStartDate)) {
+      if (isCurrentlyEnrollable(enrollmentStartDate, now)) {
         action = this.renderEnrollButton(run);
         description = this.renderPayLaterLink(run);
       } else {
@@ -172,13 +175,17 @@ export default class CourseAction extends React.Component {
           text = ifValidDate('', date => `Enrollment begins ${date.format(DASHBOARD_FORMAT)}`, enrollmentStartDate);
         } else if (run.fuzzy_enrollment_start_date) {
           text = `Enrollment begins ${run.fuzzy_enrollment_start_date}`;
+        } else {
+          text = 'Enrollment information unavailable';
         }
         description = this.renderTextDescription(text);
       }
       break;
     }
-    case STATUS_NOT_PASSED:
-      // do nothing;
+    case STATUS_MISSED_DEADLINE:
+      description = this.renderTextDescription(
+        'You missed the payment deadline and will not receive MicroMasters credit for this course.'
+      );
       break;
     case STATUS_PENDING_ENROLLMENT:
       action = this.renderEnrollButton(run);
@@ -190,14 +197,10 @@ export default class CourseAction extends React.Component {
   }
 
   render() {
-    const { course } = this.props;
-    let firstRun: CourseRun = {};
-    if (course.runs.length > 0) {
-      firstRun = course.runs[0];
-    }
+    const { courseRun } = this.props;
 
     return <div className="course-action">
-      { this.renderContents(firstRun) }
+      { this.renderContents(courseRun) }
     </div>;
   }
 }

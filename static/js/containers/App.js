@@ -11,7 +11,6 @@ import {
 } from '../constants';
 import ErrorMessage from '../components/ErrorMessage';
 import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 import Toast from '../components/Toast';
 import {
   FETCH_SUCCESS,
@@ -38,9 +37,12 @@ import {
   setEnrollDialogVisibility,
   setToastMessage,
   setEnrollSelectedProgram,
+  setNavDrawerOpen,
+  clearUI,
+  setProfileStep,
+  setPhotoDialogVisibility,
 } from '../actions/ui';
-import { clearUI, setProfileStep } from '../actions/ui';
-import { validateProfileComplete } from '../util/validation';
+import { validateProfileComplete } from '../lib/validation/profile';
 import type { DashboardState, CoursePricesState } from '../flow/dashboardTypes';
 import type {
   ProgramEnrollment,
@@ -187,6 +189,16 @@ class App extends React.Component {
     dispatch(setToastMessage(null));
   };
 
+  setNavDrawerOpen = (bool: boolean): void => {
+    const { dispatch } = this.props;
+    dispatch(setNavDrawerOpen(bool));
+  }
+
+  setPhotoDialogVisibility = (bool: boolean): void => {
+    const { dispatch } = this.props;
+    dispatch(setPhotoDialogVisibility(bool));
+  };
+
   render() {
     const {
       currentProgramEnrollment,
@@ -196,9 +208,11 @@ class App extends React.Component {
         enrollDialogVisibility,
         toastMessage,
         enrollSelectedProgram,
+        navDrawerOpen,
       },
       location: { pathname },
-      dashboard
+      dashboard,
+      userProfile: { profile },
     } = this.props;
     let { children } = this.props;
     let empty = false;
@@ -240,6 +254,10 @@ class App extends React.Component {
         setEnrollDialogError={this.setEnrollDialogError}
         setEnrollDialogVisibility={this.setEnrollDialogVisibility}
         setEnrollSelectedProgram={this.setEnrollSelectedProgram}
+        setNavDrawerOpen={this.setNavDrawerOpen}
+        navDrawerOpen={navDrawerOpen}
+        profile={profile}
+        setPhotoDialogVisibility={this.setPhotoDialogVisibility}
       />
       <Toast onTimeout={this.clearMessage} open={open}>
         {icon}
@@ -251,7 +269,6 @@ class App extends React.Component {
       <div className="page-content">
         { children }
       </div>
-      <Footer />
     </div>;
   }
 }

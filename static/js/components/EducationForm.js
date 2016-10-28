@@ -25,7 +25,7 @@ import type {
   UpdateProfileFunc,
 } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
-import type { Validator, UIValidator } from '../util/validation';
+import type { Validator, UIValidator } from '../lib/validation/profile';
 
 class EducationForm extends ProfileFormFields {
   props: {
@@ -94,7 +94,7 @@ class EducationForm extends ProfileFormFields {
     let prefix = label.toLowerCase().startsWith("a") ? "an" : "a";
     let levelName = !label.endsWith("degree") ? `${label.toLowerCase()} degree` : label.toLowerCase();
     return <Cell col={12} className="profile-card-header profile-form-row">
-      <span>
+      <span className="question">
         {`Do you have ${prefix} ${levelName}?`}
       </span>
       { this.educationLevelRadioSwitch(level) }

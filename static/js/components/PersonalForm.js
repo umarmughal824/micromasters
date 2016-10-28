@@ -13,7 +13,7 @@ import type {
   ValidationErrors,
   UpdateProfileFunc,
 } from '../flow/profileTypes';
-import type { Validator, UIValidator } from '../util/validation';
+import type { Validator, UIValidator } from '../lib/validation/profile';
 import type { UIState } from '../reducers/ui';
 
 export default class PersonalForm extends ProfileFormFields {

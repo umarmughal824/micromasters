@@ -16,7 +16,7 @@ import type {
   ProgramEnrollment,
   ProgramEnrollments,
 } from '../flow/enrollmentTypes';
-import * as api from '../util/api';
+import * as api from '../lib/api';
 
 
 export const REQUEST_GET_PROGRAM_ENROLLMENTS = 'REQUEST_GET_PROGRAM_ENROLLMENTS';

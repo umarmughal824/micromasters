@@ -39,7 +39,7 @@ import {
   FETCH_FAILURE,
   FETCH_SUCCESS
 } from '../actions/index';
-import * as api from '../util/api';
+import * as api from '../lib/api';
 import {
   DASHBOARD_RESPONSE,
   USER_PROFILE_RESPONSE,

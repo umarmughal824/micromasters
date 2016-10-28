@@ -11,7 +11,7 @@ import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
 
 import { userPrivilegeCheck } from '../util/util';
 import { workEntriesByDate } from '../util/sorting';
-import { employmentValidation } from '../util/validation';
+import { employmentValidation } from '../lib/validation/profile';
 import ProfileFormFields from '../util/ProfileFormFields';
 import {
   openEditWorkHistoryForm,
@@ -25,7 +25,7 @@ import StateSelectField from './inputs/StateSelectField';
 import ValidationAlert from './ValidationAlert';
 
 import type { WorkHistoryEntry } from '../flow/profileTypes';
-import type { Validator, UIValidator } from '../util/validation';
+import type { Validator, UIValidator } from '../lib/validation/profile';
 import type {
   Profile,
   SaveProfileFunc,
@@ -216,7 +216,7 @@ class EmploymentForm extends ProfileFormFields {
 
   renderWorkQuestionForm () {
     return <Cell col={12} className="profile-form-row profile-card-header">
-      <span>
+      <span className="question">
         Do you want to add an employer?
       </span>
       { this.renderWorkRadioSwitch() }

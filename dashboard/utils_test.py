@@ -1,8 +1,6 @@
 """
 Tests for the utils module
 """
-import json
-import os
 from datetime import datetime, timedelta
 
 import pytz
@@ -19,6 +17,7 @@ from ecommerce.factories import CoursePriceFactory, LineFactory, OrderFactory
 from ecommerce.models import Order
 from financialaid.factories import TierProgramFactory, FinancialAidFactory
 from profiles.factories import UserFactory
+from micromasters.utils import load_json_from_file
 
 
 class MMTrackTest(TestCase):
@@ -33,19 +32,13 @@ class MMTrackTest(TestCase):
         cls.user = UserFactory.create()
 
         # create Enrollments, Certificates, CurrentGrades
-        with open(os.path.join(os.path.dirname(__file__),
-                               'fixtures/user_enrollments.json')) as file_obj:
-            cls.enrollments_json = json.loads(file_obj.read())
-        cls.enrollments = Enrollments(cls.enrollments_json)
+        enrollments_json = load_json_from_file('dashboard/fixtures/user_enrollments.json')
+        cls.enrollments = Enrollments(enrollments_json)
 
-        with open(os.path.join(os.path.dirname(__file__),
-                               'fixtures/certificates.json')) as file_obj:
-            certificates_json = json.loads(file_obj.read())
+        certificates_json = load_json_from_file('dashboard/fixtures/certificates.json')
         cls.certificates = Certificates([Certificate(cert_json) for cert_json in certificates_json])
 
-        with open(os.path.join(os.path.dirname(__file__),
-                               'fixtures/current_grades.json')) as file_obj:
-            current_grades_json = json.loads(file_obj.read())
+        current_grades_json = load_json_from_file('dashboard/fixtures/current_grades.json')
         cls.current_grades = CurrentGrades([CurrentGrade(grade_json) for grade_json in current_grades_json])
 
         # create the programs
@@ -71,11 +64,10 @@ class MMTrackTest(TestCase):
             enrollment_end=cls.now-timedelta(weeks=53),
             edx_course_key="course-v1:odl+FOO101+CR-FALL15"
         )
-        for course_key in ['', None]:
-            CourseRunFactory.create(
-                course=finaid_course,
-                edx_course_key=course_key
-            )
+        CourseRunFactory.create(
+            course=finaid_course,
+            edx_course_key=None
+        )
 
         # create price for the financial aid course
         CoursePriceFactory.create(
@@ -125,9 +117,10 @@ class MMTrackTest(TestCase):
         assert mmtrack.current_grades == self.current_grades
         assert mmtrack.certificates == self.certificates
         assert mmtrack.financial_aid_available == self.program.financial_aid_availability
-        assert mmtrack.course_ids == set(
-            ["course-v1:edX+DemoX+Demo_Course", "course-v1:MITx+8.MechCX+2014_T1"]
-        )
+        assert mmtrack.course_ids == {
+            "course-v1:edX+DemoX+Demo_Course",
+            "course-v1:MITx+8.MechCX+2014_T1"
+        }
         assert mmtrack.paid_course_ids == set()
         assert mmtrack.financial_aid_applied is None
         assert mmtrack.financial_aid_status is None
@@ -154,7 +147,7 @@ class MMTrackTest(TestCase):
         assert mmtrack.current_grades == self.current_grades
         assert mmtrack.certificates == self.certificates
         assert mmtrack.financial_aid_available == self.program_financial_aid.financial_aid_availability
-        assert mmtrack.course_ids == set(["course-v1:odl+FOO101+CR-FALL15"])
+        assert mmtrack.course_ids == {"course-v1:odl+FOO101+CR-FALL15"}
         assert mmtrack.paid_course_ids == set()
         assert mmtrack.financial_aid_applied is False
         assert mmtrack.financial_aid_status is None
@@ -177,7 +170,7 @@ class MMTrackTest(TestCase):
             current_grades=self.current_grades,
             certificates=self.certificates
         )
-        assert mmtrack_paid.paid_course_ids == set([key])
+        assert mmtrack_paid.paid_course_ids == {key}
 
         mmtrack = MMTrack(
             user=UserFactory.create(),
@@ -196,6 +189,7 @@ class MMTrackTest(TestCase):
         fin_aid = FinancialAidFactory.create(
             user=self.user,
             tier_program=self.min_tier_program,
+            date_documents_sent=None,
         )
         mmtrack = MMTrack(
             user=self.user,

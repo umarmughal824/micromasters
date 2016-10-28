@@ -1,6 +1,90 @@
 Release Notes
 =============
 
+Version 0.19.0
+--------------
+
+- Refactored financial aid tests (#1495)
+- Added enrolled field to ProgramSerializer (#1584)
+- Fixed detect_missing_migrations.sh (#1583)
+- Refactor test code (#1572)
+- Moved ddt into test_requirements.txt (#1576)
+- Fixed input bug with the FinancialAidCalculator
+- Added programpage_url to /api/v0/programs/ (#1571)
+- pinned elasticsearch in docker to 2.4.1 (#1580)
+- Remove detect_missing_migrations.sh from build temporarily (#1581)
+- Protected detect_missing_migrations.sh against hanging for console input (#1573)
+- Removed course run view (#1570)
+- Omitted program staff from search results (#1502)
+- Prevented an enrollment failure from failing the order (#1552)
+- Copy changes per maria&#39;s request (#1557)
+- fixed layout bug with footer Give to MIT buttons (#1554)
+- Custom Tabs for ProgramPage
+- Fixed course description JS bug
+- Use bulk indexing for seed_db (#1544)
+- Refactored course tests (#1492)
+- Add alt text to logos (#1553)
+- Customize More Info card
+- Refactored buttons html and css and other style changes (#1446)
+- Show only published children pages on the ProgramPage
+- Clarify title for average grade filter (#1539)
+- Fixed course run edx key save issue
+- Footer consistency all over app (#1503)
+- Logged exception being handled in custom_exception_handler (#1532)
+- Reorganized JS code
+- Added check for missing migrations (#1491)
+- Protected audit tables (#1488)
+- Fixed size of image upload container (#1471)
+- Removed dashboard links from profile page header (#1505)
+- Remove subtype for ProgramPage (#1535)
+- Refactored date validation
+- Added ability to mark orders as refunded (#1483)
+- Added unique constraint to CourseRun edx_course_key
+- Implemented mobile sidenav
+- Add Smartlook tracking
+- update style: removed top padding from searched page (#1504)
+- Reverting cms migrations
+- Removed mm id from dashboard (#1493)
+- Add/remove custom tabs on program page (#1436)
+- Note Flow incompatibility within Docker (#1469)
+- Fixed preferred Language options (#1475)
+- Removed filler-text tooltip (#1484)
+- Added audit table for Order, Line (#1456)
+- Fixed IE11 support for image upload (#1402)
+- Improve profile factories using Faker library (#1476)
+- line-height fix for Course list on program page (#1480)
+- hid facets when they have no hits (#1407)
+- Make footer mit logo a link
+- Add app config for seed_data app (#1473)
+- Changed discount_amount to have a min of 1 (so we never have multiple… (#1467)
+- Seed data app (#1463)
+- Added past course run UI to dashboard
+- Updated the app.json to include required env vars (#1464)
+- Added serialize_model, replaced to_dict (#1447)
+- Make position_in_program required
+- Make program selector use full dialog width (#1388)
+- Fix a bug in course enrollment text (#1416)
+- Added FAQs accordion
+- Added nplusone library for query profiling in app DEBUG mode
+- Added line items to cybersource payload (#1438)
+- Added complete financial aid instructions
+- Added flow to travis
+- Remove deprecated TEMPLATE_CONTEXT_PROCESSORS setting (#1236)
+- Fixed error in year validation logic
+- Course description popover (#1392)
+- Added persistent connection settings for DB
+- Added tracking_id to silence warnings (#1403)
+- Added webpack_public_path (#1404)
+- Fixed console warning for faculty carousel (#1406)
+- Modified mail.views responses to catch 401 status codes from mailgun … (#1376)
+- Program enrollment does not return error if already exists
+- Changed logic to assign the student ID
+- Changed copy for financial aid stuff
+- Sorted programs in id order (#1387)
+- adds admin model for financialaidemailaudit objects (#1380)
+- Partial Fix for Responsive Styles in Dashboard (#1386)
+- Fixed bug with current grade refresh and no enrollments
+
 Version 0.18.0
 --------------
 
@@ -603,7 +687,7 @@ Version 0.3.0
 - Added google analytics to base ui template
 - Added redirect, &quot;/dashboard&quot; -&gt; &quot;/&quot; if user not logged in
 - Implemented React component for dashboard API
-- Added MIT Micromasters graphic and updated title
+- Added MIT MicroMasters graphic and updated title
 - Display student avatar and name
 - Made log out button on dashboard log user out
 - Added CourseRun to gen_fake_data

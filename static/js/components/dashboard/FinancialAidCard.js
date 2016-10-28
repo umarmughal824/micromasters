@@ -12,7 +12,6 @@ import type { Program } from '../../flow/programTypes';
 import type {
   DocumentsState,
 } from '../../reducers/documents';
-import { courseListToolTip } from './util';
 import { formatPrice } from '../../util/util';
 import {
   FA_STATUS_APPROVED,
@@ -41,6 +40,7 @@ export default class FinancialAidCard extends React.Component {
     setConfirmSkipDialogVisibility: (b: boolean) => void,
     ui:                             UIState,
     skipFinancialAid:               () => void,
+    setDocsInstructionsVisibility:  (b: boolean) => void,
   };
 
   submitDocuments = (): void => {
@@ -105,7 +105,8 @@ export default class FinancialAidCard extends React.Component {
         financial_aid_user_info: {
           min_possible_cost: minPossibleCost,
           max_possible_cost: maxPossibleCost,
-        }
+        },
+        title,
       },
       openFinancialAidCalculator,
       setConfirmSkipDialogVisibility,
@@ -114,15 +115,15 @@ export default class FinancialAidCard extends React.Component {
     return <div className="personalized-pricing">
       <div className="heading">
         How much does it cost?
-        { courseListToolTip('filler-text', 'course-price') }
       </div>
       <div className="explanation">
-        Courses cost varies between {price(minPossibleCost)} and {price(maxPossibleCost)} (full
-        price), depending on your income and ability to pay.
+        The cost of courses in the {title} MicroMasters varies
+        between {price(minPossibleCost)} and {price(maxPossibleCost)},
+        depending on your income and ability to pay.
       </div>
       <div className="pricing-actions">
         <button
-          className="mm-button dashboard-button"
+          className="mdl-button dashboard-button"
           onClick={openFinancialAidCalculator}
         >
           Calculate your cost
@@ -139,6 +140,7 @@ export default class FinancialAidCard extends React.Component {
       program,
       coursePrice,
       setConfirmSkipDialogVisibility,
+      setDocsInstructionsVisibility,
     } = this.props;
 
     switch (program.financial_aid_user_info.application_status) {
@@ -169,6 +171,11 @@ export default class FinancialAidCard extends React.Component {
           <Cell col={12}>
             Before you can pay, you need to verify your income. Please mail or fax an
             English-translated and notarized income tax or income statement document.
+          </Cell>
+          <Cell col={12}>
+            <a onClick={() => setDocsInstructionsVisibility(true)}>
+              Read Complete Instructions
+            </a>
           </Cell>
         </Grid>
 

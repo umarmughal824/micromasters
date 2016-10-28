@@ -14,12 +14,12 @@ import {
   receiveGetUserProfileSuccess
 } from '../actions/profile';
 import IntegrationTestHelper from '../util/integration_test_helper';
-import * as api from '../util/api';
+import * as api from '../lib/api';
 import { USER_PROFILE_RESPONSE } from '../constants';
 
 describe("SettingsPage", function() {
   this.timeout(5000);
-  let nextButtonSelector = '.mm-button.main-action';
+  let nextButtonSelector = '.next';
   let listenForActions, renderComponent, helper, patchUserProfileStub;
   let userActions = [START_PROFILE_EDIT];
 

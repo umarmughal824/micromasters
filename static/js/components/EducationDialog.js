@@ -7,7 +7,7 @@ import _ from 'lodash';
 
 import { HIGH_SCHOOL, BACHELORS, EDUCATION_LEVELS } from '../constants';
 import ProfileFormFields from '../util/ProfileFormFields';
-import { educationValidation } from '../util/validation';
+import { educationValidation } from '../lib/validation/profile';
 import SelectField from './inputs/SelectField';
 import CountrySelectField from './inputs/CountrySelectField';
 import StateSelectField from './inputs/StateSelectField';
@@ -16,7 +16,7 @@ import ValidationAlert from './ValidationAlert';
 
 import type { UIState } from '../reducers/ui';
 import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
-import type { Validator, UIValidator } from '../util/validation';
+import type { Validator, UIValidator } from '../lib/validation/profile';
 
 export default class EducationDialog extends ProfileFormFields {
   constructor(props: Object) {
@@ -72,7 +72,7 @@ export default class EducationDialog extends ProfileFormFields {
     let keySet = (key) => ['education', educationDialogIndex, key];
 
     let fieldOfStudy = () => {
-      if (educationDegreeLevel !== HIGH_SCHOOL) { 
+      if (educationDegreeLevel !== HIGH_SCHOOL) {
         return <Cell col={12}>
             <FieldsOfStudySelectField
               keySet={keySet('field_of_study')}
@@ -105,7 +105,7 @@ export default class EducationDialog extends ProfileFormFields {
         {this.boundTextField(keySet('school_name'), 'School Name')}
       </Cell>
       <Cell col={5}>
-        {this.boundDateField(keySet('graduation_date'), 'Graduation Date', true)}
+        {this.boundDateField(keySet('graduation_date'), 'Graduation Date', true, true)}
       </Cell>
       <Cell col={4}>
         <CountrySelectField

@@ -1,5 +1,6 @@
 @import "grid-settings";
 @import "variables";
+@import "breakpoints";
 @import "page-layout";
 @import "navbar";
 @import "dashboard";
@@ -26,6 +27,7 @@
 @import "profile-image";
 @import "profile-image-uploader";
 @import "calculator";
+@import "docs-instructions";
 
 .selected {
   font-weight: bold;

@@ -7,15 +7,16 @@ let babelQuerySettings = {
 
 module.exports = {
   entry: {
-    'dashboard': ['babel-polyfill', './static/js/dashboard'],
-    'signup_dialog': ['babel-polyfill', './static/js/signup_dialog'],
-    'faculty_carousel': './static/js/faculty_carousel',
+    'course_list': './static/js/entry/course_list',
+    'dashboard': ['babel-polyfill', './static/js/entry/dashboard'],
+    'faculty_carousel': './static/js/entry/faculty_carousel',
     'financial_aid': './static/js/financial_aid/functions',
-    'public': './static/js/public',
-    'style': './static/js/style',
-    'style_public': './static/js/style_public',
-    'sentry_client': './static/js/sentry_client.js',
-    'zendesk_widget': './static/js/zendesk_widget.js',
+    'public': './static/js/entry/public',
+    'sentry_client': './static/js/entry/sentry_client.js',
+    'signup_dialog': ['babel-polyfill', './static/js/entry/signup_dialog'],
+    'style': './static/js/entry/style',
+    'style_public': './static/js/entry/style_public',
+    'zendesk_widget': './static/js/entry/zendesk_widget.js',
   },
   output: {
     path: path.resolve('./static/bundles/'),

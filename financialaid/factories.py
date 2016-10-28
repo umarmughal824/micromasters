@@ -8,6 +8,7 @@ from factory.django import DjangoModelFactory, mute_signals
 from factory.fuzzy import (
     FuzzyAttribute,
     FuzzyChoice,
+    FuzzyDate,
     FuzzyDateTime,
     FuzzyFloat,
     FuzzyInteger,
@@ -46,9 +47,9 @@ class TierProgramFactory(DjangoModelFactory):
     """
     program = SubFactory(ProgramFactory)
     tier = SubFactory(TierFactory)
-    discount_amount = FuzzyInteger(low=0, high=12345)
+    discount_amount = FuzzyInteger(low=1, high=12345)
     current = FuzzyAttribute(FAKE.boolean)
-    income_threshold = FuzzyInteger(low=0, high=10000)
+    income_threshold = FuzzyInteger(low=1, high=10000)
 
     class Meta:  # pylint: disable=missing-docstring
         model = TierProgram
@@ -66,6 +67,7 @@ class FinancialAidFactory(DjangoModelFactory):
     original_currency = FuzzyText(length=3)
     country_of_income = FuzzyText(length=2)
     date_exchange_rate = FuzzyDateTime(datetime.datetime(2000, 1, 1, tzinfo=UTC))
+    date_documents_sent = FuzzyDate(datetime.date(2000, 1, 1))
 
     @classmethod
     def create(cls, **kwargs):

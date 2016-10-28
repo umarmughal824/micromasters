@@ -1,3 +1,4 @@
+// @flow
 import TestUtils from 'react-addons-test-utils';
 import { assert } from 'chai';
 import sinon from 'sinon';
@@ -7,8 +8,11 @@ import { findCourseRun } from '../util/util';
 import { DASHBOARD_RESPONSE } from '../constants';
 import type {
   Course,
+  CourseRun,
   Program
-} from '../../flow/programTypes';
+} from '../flow/programTypes';
+import type { Action } from '../flow/reduxTypes';
+import type { Store } from 'redux';
 
 export function findCourse(courseSelector: (course: Course, program: Program) => boolean): Course {
   let [, course, ] = findCourseRun(
@@ -21,35 +25,68 @@ export function findCourse(courseSelector: (course: Course, program: Program) =>
   throw "Unable to find course";
 }
 
-export const alterFirstRun = (course: Course, overrideObject: Object): Course => {
+export const alterFirstRun = (course: Course, overrideObject: Object): CourseRun => {
   course.runs[0] = Object.assign({}, course.runs[0], overrideObject);
+  return course.runs[0];
 };
 
 export function findAndCloneCourse(courseSelector: (course: Course, program: Program) => boolean): Course {
   return _.cloneDeep(findCourse(courseSelector));
 }
 
-export const modifyTextField = (field, text) => {
+export function generateCourseFromExisting(courseToClone: Course, desiredRuns: number, runToCopy: ?CourseRun) {
+  let course = _.cloneDeep(courseToClone);
+  let currentRunCount = course.runs.length;
+  if (currentRunCount < desiredRuns) {
+    let courseRun = currentRunCount === 0 ? runToCopy : course.runs[0];
+    if (!courseRun) {
+      throw new Error('Need a course run to copy.');
+    }
+    let runsNeeded = desiredRuns - currentRunCount;
+    let idMax = _.max(_.map(course.runs, run => run.id)) || 0;
+    let positionMax = _.max(_.map(course.runs, run => run.position)) || 0;
+    for (let i = 0; i < runsNeeded; i++) {
+      let newCourseRun = _.cloneDeep(courseRun);
+      positionMax++;
+      idMax++;
+      Object.assign(newCourseRun, {
+        position: positionMax,
+        id: idMax,
+        course_id: `${newCourseRun.course_id}-new-${i}`
+      });
+      course.runs.push(newCourseRun);
+    }
+  } else if (currentRunCount > desiredRuns) {
+    course.runs = _.take(course.runs, desiredRuns);
+  }
+  Object.assign(course, {
+    id: 1,
+    position_in_program: 0
+  });
+  return course;
+}
+
+export const modifyTextField = (field: HTMLInputElement, text: string): void => {
   field.value = text;
   TestUtils.Simulate.change(field);
   TestUtils.Simulate.keyDown(field, {key: "Enter", keyCode: 13, which: 13});
 };
 
-export const isActiveDialog = (dialog) => (
+// dialog should be HTMLDivElement but flow complains incorrectly here
+export const isActiveDialog = (dialog: any): boolean => (
   dialog.style["left"] === "0px"
 );
 
-let findActiveDialog = (dialogClassName) => (
-  [...document.getElementsByClassName(dialogClassName)].find(dialog => (
-    isActiveDialog(dialog)
-  ))
-);
+let findActiveDialog = (dialogClassName: string): HTMLDivElement => {
+  let elements: any = document.getElementsByClassName(dialogClassName);
+  return [...elements].find(isActiveDialog);
+};
 
-export const noActiveDialogs = (dialogClassName) => (
+export const noActiveDialogs = (dialogClassName: string): boolean => (
   findActiveDialog(dialogClassName) === undefined
 );
 
-export const activeDialog = (dialogClassName) => {
+export const activeDialog = (dialogClassName: string): HTMLDivElement => {
   let dialog = findActiveDialog(dialogClassName);
   assert.isDefined(dialog, `dialog element w/ className '${dialogClassName}' should be active`);
   return dialog;
@@ -63,7 +100,7 @@ export const noActiveDeleteDialogs = () => (
   noActiveDialogs('deletion-confirmation')
 );
 
-export const localStorageMock = (init = {}) => {
+export const localStorageMock = (init: any = {}) => {
   let storage = init;
 
   const sandbox = sinon.sandbox.create();
@@ -91,19 +128,7 @@ export const localStorageMock = (init = {}) => {
   };
 };
 
-export const findReact = (dom) => {
-  for (let [key, val] of Object.entries(dom)) {
-    if (key.startsWith("__reactInternalInstance$")) {
-      let compInternals = val._currentElement;
-      let compWrapper = compInternals._owner;
-      let comp = compWrapper._instance;
-      return comp;
-    }
-  }
-  return null;
-};
-
-export function createAssertReducerResultState<State>(store, getReducerState) {
+export function createAssertReducerResultState<State>(store: Store, getReducerState: (x: any) => State) {
   return (
     action: () => Action, stateLookup: (state: State) => any, defaultValue: any
   ): void => {

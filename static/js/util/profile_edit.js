@@ -7,7 +7,7 @@ import Checkbox from 'material-ui/Checkbox';
 
 import DateField from '../components/inputs/DateField';
 import { validationErrorSelector } from './util';
-import type { Validator, UIValidator } from './validation';
+import type { Validator, UIValidator } from '../lib/validation/profile';
 import type { Profile } from '../flow/profileTypes';
 import type { Option } from '../flow/generalTypes';
 
@@ -129,7 +129,7 @@ export function boundTextField(keySet: string[], label: string): React$Element<*
  * to update date fields
  * pass in the name (used as placeholder), key for profile.
  */
-export function boundDateField(keySet: string[], label: string, omitDay: boolean): React$Element<*> {
+export function boundDateField(keySet: string[], label: string, omitDay: boolean, allowFutureYear: boolean = false): React$Element<*> { // eslint-disable-line max-len
   const {
     profile,
     errors,
@@ -145,6 +145,7 @@ export function boundDateField(keySet: string[], label: string, omitDay: boolean
     keySet={keySet}
     label={label}
     omitDay={omitDay}
+    allowFutureYear={allowFutureYear}
   />;
 }
 

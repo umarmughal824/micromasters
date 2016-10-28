@@ -19,7 +19,7 @@ import { userPrivilegeCheck } from '../util/util';
 import { HIGH_SCHOOL } from '../constants';
 import { educationEntriesByDate } from '../util/sorting';
 import type { EducationEntry } from '../flow/profileTypes';
-import { educationValidation } from '../util/validation';
+import { educationValidation } from '../lib/validation/profile';
 
 export default class EducationDisplay extends ProfileFormFields {
   openEditEducationForm: Function = (index: number): void => {

@@ -36,6 +36,8 @@ import {
   SET_PHOTO_DIALOG_VISIBILITY,
   SET_CALCULATOR_DIALOG_VISIBILITY,
   SET_CONFIRM_SKIP_DIALOG_VISIBILITY,
+  SET_DOCS_INSTRUCTIONS_VISIBILITY,
+  SET_NAV_DRAWER_OPEN,
 } from '../actions/ui';
 import { PERSONAL_STEP } from '../constants';
 import type { ToastMessage } from '../flow/generalTypes';
@@ -48,6 +50,7 @@ export type UIDialog = {
   text?: string;
   visible?: boolean;
 };
+
 export type UIState = {
   educationDialogVisibility:    boolean;
   educationDialogIndex:         number;
@@ -76,6 +79,8 @@ export type UIState = {
   documentSentDate:             Object;
   selectedProgram:              Program;
   skipDialogVisibility:         boolean;
+  docsInstructionsVisibility:   boolean;
+  navDrawerOpen:                boolean;
 };
 
 export const INITIAL_UI_STATE: UIState = {
@@ -106,6 +111,8 @@ export const INITIAL_UI_STATE: UIState = {
   documentSentDate: {},
   selectedProgram: null,
   skipDialogVisibility: false,
+  docsInstructionsVisibility: false,
+  navDrawerOpen: false,
 };
 
 export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
@@ -238,6 +245,10 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
     return { ...state, calculatorDialogVisibility: action.payload };
   case SET_CONFIRM_SKIP_DIALOG_VISIBILITY:
     return { ...state, skipDialogVisibility: action.payload };
+  case SET_DOCS_INSTRUCTIONS_VISIBILITY:
+    return { ...state, docsInstructionsVisibility: action.payload };
+  case SET_NAV_DRAWER_OPEN:
+    return { ...state, navDrawerOpen: action.payload };
   default:
     return state;
   }

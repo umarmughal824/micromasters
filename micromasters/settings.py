@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 """
 import ast
+import logging
 import os
 import platform
 
@@ -20,7 +21,7 @@ from celery.schedules import crontab
 from django.core.exceptions import ImproperlyConfigured
 
 
-VERSION = "0.18.0"
+VERSION = "0.19.0"
 
 CONFIG_PATHS = [
     os.environ.get('MICROMASTERS_CONFIG', ''),
@@ -119,6 +120,7 @@ INSTALLED_APPS = (
     'roles',
     'search',
     'ui',
+    'seed_data',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -135,6 +137,11 @@ MIDDLEWARE_CLASSES = (
     'wagtail.wagtailredirects.middleware.RedirectMiddleware',
     'social.apps.django_app.middleware.SocialAuthExceptionMiddleware',
 )
+
+# enable the nplusone profiler only in debug mode
+if DEBUG:
+    INSTALLED_APPS += ('nplusone.ext.django', )
+    MIDDLEWARE_CLASSES += ('nplusone.ext.django.NPlusOneMiddleware', )
 
 AUTHENTICATION_BACKENDS = (
     'backends.edxorg.EdxOrgOAuth2',
@@ -205,17 +212,14 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social.apps.django_app.context_processors.backends',
+                'social.apps.django_app.context_processors.login_redirect',
                 'ui.context_processors.google_analytics',
+                'ui.context_processors.smartlook',
             ],
         },
     },
 ]
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'social.apps.django_app.context_processors.backends',
-    'social.apps.django_app.context_processors.login_redirect',
-    'django.core.context_processors.request'
-)
 
 WSGI_APPLICATION = 'micromasters.wsgi.application'
 
@@ -231,6 +235,7 @@ DEFAULT_DATABASE_CONFIG = dj_database_url.parse(
         'sqlite:///{0}'.format(os.path.join(BASE_DIR, 'db.sqlite3'))
     )
 )
+DEFAULT_DATABASE_CONFIG['CONN_MAX_AGE'] = int(get_var('MICROMASTERS_DB_CONN_MAX_AGE', 500))
 
 if get_var('MICROMASTERS_DB_DISABLE_SSL', False):
     DEFAULT_DATABASE_CONFIG['OPTIONS'] = {}
@@ -318,6 +323,10 @@ DEFAULT_LOG_STANZA = {
     'level': LOG_LEVEL,
 }
 
+# nplusone profiler logger configuration
+NPLUSONE_LOGGER = logging.getLogger('nplusone')
+NPLUSONE_LOG_LEVEL = logging.ERROR
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
@@ -385,7 +394,11 @@ LOGGING = {
         'raven': {
             'level': 'DEBUG',
             'handlers': []
-        }
+        },
+        'nplusone': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+        },
     },
 }
 
@@ -411,6 +424,7 @@ HEALTH_CHECK = ['CELERY', 'REDIS', 'POSTGRES', 'ELASTIC_SEARCH']
 
 GA_TRACKING_ID = get_var("GA_TRACKING_ID", "")
 REACT_GA_DEBUG = get_var("REACT_GA_DEBUG", False)
+SL_TRACKING_ID = get_var("SL_TRACKING_ID", "")
 
 # Wagtail
 WAGTAIL_SITE_NAME = "MIT MicroMasters"

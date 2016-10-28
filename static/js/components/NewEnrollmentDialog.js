@@ -45,14 +45,14 @@ export default class NewEnrollmentDialog extends React.Component {
   createDialogActions = () => {
     return [
       <Button
-        className="dialog-button cancel-button"
+        className="cancel-button"
         key="cancel"
         onClick={this.closeDialog}
       >
         Cancel
       </Button>,
       <Button
-        className="dialog-button enroll-button"
+        className="enroll-button"
         key="enroll"
         onClick={this.addEnrollment}
       >
@@ -94,6 +94,14 @@ export default class NewEnrollmentDialog extends React.Component {
         onChange={this.handleSelectedProgramChange}
         floatingLabelText="Select Program"
         errorText={enrollDialogError}
+        fullWidth={true}
+        style={{
+          width: "500px"
+        }}
+        menuStyle={{
+          width: "500px",
+          overflow: "hidden"
+        }}
       >
         {options}
       </SelectField>

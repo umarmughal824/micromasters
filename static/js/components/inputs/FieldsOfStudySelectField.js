@@ -7,7 +7,7 @@ import {
   showLimitedOptions,
   highlightMatchedOptionText
 } from '../utils/AutoCompleteSettings';
-import FIELDS_OF_STUDY from '../../fields_of_study';
+import FIELDS_OF_STUDY from '../../data/fields_of_study';
 
 let fieldOfStudyOptions = _.map(FIELDS_OF_STUDY, (name, code) => ({
   value: code,

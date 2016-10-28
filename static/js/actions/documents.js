@@ -6,7 +6,7 @@ import {
   fetchDashboard,
   fetchCoursePrices,
 } from './';
-import * as api from '../util/api';
+import * as api from '../lib/api';
 import type { Dispatcher } from '../flow/reduxTypes';
 
 export const SET_DOCUMENT_SENT_DATE = 'SET_DOCUMENT_SENT_DATE';

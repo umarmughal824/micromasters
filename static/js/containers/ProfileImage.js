@@ -9,7 +9,7 @@ import type { Dispatch } from 'redux';
 import { makeProfileImageUrl, getPreferredName } from '../util/util';
 import type { Profile } from '../flow/profileTypes';
 import ProfileImageUploader from '../components/ProfileImageUploader';
-import { createActionHelper } from '../util/redux';
+import { createActionHelper } from '../lib/redux';
 import { setPhotoDialogVisibility } from '../actions/ui';
 import {
   startPhotoEdit,

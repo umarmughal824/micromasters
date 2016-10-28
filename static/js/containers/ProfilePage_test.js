@@ -18,7 +18,7 @@ import {
   EMPLOYMENT_STEP,
 } from '../constants';
 import IntegrationTestHelper from '../util/integration_test_helper';
-import * as api from '../util/api';
+import * as api from '../lib/api';
 import { activeDialog } from '../util/test_utils';
 
 describe("ProfilePage", function() {
@@ -30,8 +30,8 @@ describe("ProfilePage", function() {
     EDUCATION_STEP,
     EMPLOYMENT_STEP,
   ];
-  let prevButtonSelector = '.mm-button.prev';
-  let nextButtonSelector = '.mm-button.next';
+  let prevButtonSelector = '.prev';
+  let nextButtonSelector = '.next';
 
   const setStep = step => helper.store.dispatch(setProfileStep(step));
 

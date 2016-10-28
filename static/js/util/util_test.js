@@ -3,7 +3,7 @@ import { assert } from 'chai';
 import React from 'react';
 import R from 'ramda';
 import _ from 'lodash';
-import { S } from './sanctuary';
+import { S } from '../lib/sanctuary';
 const { Just } = S;
 
 import {
@@ -37,7 +37,7 @@ import {
   CYBERSOURCE_CHECKOUT_RESPONSE,
   DASHBOARD_RESPONSE,
 } from '../constants';
-import { assertMaybeEquality, assertIsNothing } from './sanctuary_test';
+import { assertMaybeEquality, assertIsNothing } from '../lib/sanctuary_test';
 import { program } from '../components/ProgressWidget_test';
 
 /* eslint-disable camelcase */

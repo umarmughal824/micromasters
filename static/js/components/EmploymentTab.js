@@ -8,7 +8,7 @@ import {
   personalValidation,
   educationValidation,
   employmentValidation,
-} from '../util/validation';
+} from '../lib/validation/profile';
 import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 

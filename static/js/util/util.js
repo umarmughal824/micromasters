@@ -6,7 +6,7 @@ import ga from 'react-ga';
 import striptags from 'striptags';
 import _ from 'lodash';
 import iso3166 from 'iso-3166-2';
-import { S } from './sanctuary';
+import { S } from '../lib/sanctuary';
 const { Maybe, Just, Nothing } = S;
 
 import {
@@ -62,7 +62,7 @@ export function makeProfileProgressDisplay(active: string) {
   const lightGreyText = "#888";
   const colors = {
     completed: {
-      fill: "#626262",
+      fill: "#a31f34",
       circleText: "white",
       text: lightGreyText,
       fontWeight: 400,
@@ -70,8 +70,8 @@ export function makeProfileProgressDisplay(active: string) {
     current: {
       fill: "#a31f34",
       circleText: "white",
-      text: "black",
-      fontWeight: 700,
+      text: lightGreyText,
+      fontWeight: 400,
     },
     future: {
       fill: "#ffffff",

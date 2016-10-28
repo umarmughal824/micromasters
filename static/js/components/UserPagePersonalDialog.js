@@ -3,7 +3,7 @@ import React from 'react';
 import Dialog from 'material-ui/Dialog';
 import Button from 'react-mdl/lib/Button';
 
-import { personalValidation } from '../util/validation';
+import { personalValidation } from '../lib/validation/profile';
 import PersonalForm from './PersonalForm';
 import ValidationAlert from './ValidationAlert';
 import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
@@ -54,7 +54,7 @@ export default class UserPagePersonalDialog extends React.Component {
 
     return (
       <Dialog
-        className="personal-dialog"
+        className="dashboard-dialog personal-dialog"
         open={userPageDialogVisibility}
         onRequestClose={this.closePersonalDialog}
         actions={actions}
