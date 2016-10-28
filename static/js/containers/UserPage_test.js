@@ -42,7 +42,7 @@ import { modifyTextField, activeDeleteDialog } from '../util/test_utils';
 import ValidationAlert from '../components/ValidationAlert';
 
 describe("UserPage", function() {
-  this.timeout(5000);
+  this.timeout(10000);
 
   let listenForActions, renderComponent, helper, patchUserProfileStub;
   let userActions = [RECEIVE_GET_USER_PROFILE_SUCCESS, REQUEST_GET_USER_PROFILE];

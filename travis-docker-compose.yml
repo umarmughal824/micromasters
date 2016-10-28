@@ -2,8 +2,10 @@ db:
   image: postgres
   ports:
     - "5432"
+
 web:
   build: .
+  dockerfile: ./travis/Dockerfile-travis-web
   command: >
     /bin/bash -c '
     sleep 3 &&
@@ -23,19 +25,6 @@ web:
   links:
     - db
     - elastic
-
-watch:
-  build: .
-  dockerfile: Dockerfile-node
-  working_dir: /src
-  command: >
-    /bin/bash -c './webpack_if_prod.sh'
-  ports:
-    - "8078:8078"
-  volumes:
-    - .:/src
-  environment:
-    NODE_ENV: 'production'
 
 elastic:
   image: elasticsearch:2.4.1
