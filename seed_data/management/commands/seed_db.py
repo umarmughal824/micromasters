@@ -20,24 +20,12 @@ from profiles.models import Employment, Education, Profile
 from roles.models import Role
 from roles.roles import Staff
 from search.indexing_api import recreate_index
+from seed_data.utils import first_matching_item, filter_dict_by_key_set
+from seed_data.lib import fake_programs_query
 from seed_data.management.commands import (  # pylint: disable=import-error
     USER_DATA_PATH, PROGRAM_DATA_PATH,
     FAKE_USER_USERNAME_PREFIX, FAKE_PROGRAM_DESC_PREFIX
 )
-
-
-# Util functions
-
-def first_matching_item(iterable, predicate):
-    """Returns the first item in an iterable that matches a given predicate"""
-    return next(x for x in iterable if predicate(x))
-
-
-def filter_dict_by_key_set(dict_to_filter, key_set):
-    """
-    Takes a dictionary and returns a copy without keys that don't exist in a given set
-    """
-    return {key: dict_to_filter[key] for key in dict_to_filter.keys() if key in key_set}
 
 
 def deserialize_model_data_on_object(model_obj, data, save=True):
@@ -290,9 +278,9 @@ class Command(BaseCommand):
         program_data_list = load_json_from_file(PROGRAM_DATA_PATH)
         user_data_list = load_json_from_file(USER_DATA_PATH)
         existing_fake_user_count = User.objects.filter(username__startswith=FAKE_USER_USERNAME_PREFIX).count()
-        existing_fake_program_count = Program.objects.filter(description__startswith=FAKE_PROGRAM_DESC_PREFIX).count()
+        existing_fake_program_count = fake_programs_query().count()
         if len(user_data_list) == existing_fake_user_count and len(program_data_list) == existing_fake_program_count:
-            fake_programs = Program.objects.filter(description__startswith=FAKE_PROGRAM_DESC_PREFIX).all()
+            fake_programs = fake_programs_query().all()
             self.stdout.write("Seed data appears to already exist.")
         else:
             recreate_index()
