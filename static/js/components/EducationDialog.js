@@ -135,13 +135,13 @@ export default class EducationDialog extends ProfileFormFields {
     let actions = <ValidationAlert {...this.props}>
       <Button
         type='button'
-        className="cancel-button"
+        className="secondary-button cancel-button"
         onClick={this.clearEducationEdit}>
         Cancel
       </Button>
       <Button
         type='button'
-        className="save-button"
+        className="primary-button save-button"
         onClick={this.saveEducationForm}>
         Save
       </Button>
@@ -149,8 +149,11 @@ export default class EducationDialog extends ProfileFormFields {
 
     return (
       <Dialog
+        title="Education"
+        titleClassName="dialog-title"
+        contentClassName="dialog education-dialog"
+        className="education-dialog-wrapper"
         open={educationDialogVisibility}
-        className="dashboard-dialog education-dashboard-dialog"
         onRequestClose={this.clearEducationEdit}
         actions={actions}
         autoScrollBodyContent={true}

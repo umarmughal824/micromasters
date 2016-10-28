@@ -19,11 +19,13 @@ type DocsInstructions = {
 
 const DocsInstructionsDialog = ({ open, setDialogVisibility }: DocsInstructions) => (
   <Dialog
+    title={dialogTitle(setDialogVisibility)}
+    titleClassName="dialog-title"
+    contentClassName="dialog docs-instructions-dialog"
+    className="docs-instructions-dialog-wrapper"
     open={open}
-    className="docs-instructions-dialog"
     onRequestClose={() => setDialogVisibility(false)}
     autoScrollBodyContent={true}
-    title={dialogTitle(setDialogVisibility)}
   >
     <div className="heading">
       Whose income should I report?

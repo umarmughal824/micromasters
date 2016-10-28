@@ -289,13 +289,13 @@ class EmploymentForm extends ProfileFormFields {
     const actions = <ValidationAlert {...this.props}>
       <Button
         type='button'
-        className="cancel-button"
+        className="secondary-button cancel-button"
         onClick={this.closeWorkDialog}>
         Cancel
       </Button>
       <Button
         type='button'
-        className="save-button"
+        className="primary-button save-button"
         onClick={this.saveWorkHistoryEntry}>
         Save
       </Button>
@@ -307,11 +307,14 @@ class EmploymentForm extends ProfileFormFields {
           deleteFunc={this.deleteWorkHistoryEntry}
           open={showWorkDeleteDialog}
           close={this.closeConfirmDeleteDialog}
-          confirmText="Delete this entry?"
+          itemText="position"
         />
         <Dialog
+          title="Employment"
+          titleClassName="dialog-title"
+          contentClassName="dialog employment-dialog"
+          className="employment-dialog-wrapper"
           open={workDialogVisibility}
-          className="dashboard-dialog employment-dashboard-dialog"
           onRequestClose={this.closeWorkDialog}
           actions={actions}
           autoScrollBodyContent={true}
