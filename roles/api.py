@@ -15,7 +15,7 @@ def get_advance_searchable_programs(user):
     Returns:
         list: list of courses.models.Program instances
     """
-    user_role_program = Role.objects.filter(user=user)
+    user_role_program = Role.objects.filter(user=user).select_related('program')
     programs = [
         role.program for role in user_role_program
         if has_object_permission('can_advance_search', user, role.program)
