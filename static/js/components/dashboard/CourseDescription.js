@@ -3,6 +3,7 @@
 import React from 'react';
 import _ from 'lodash';
 import moment from 'moment';
+import urljoin from 'url-join';
 
 import type { CourseRun } from '../../flow/programTypes';
 import {
@@ -18,7 +19,7 @@ import {
 } from '../../constants';
 import { ifValidDate } from '../../util/date';
 
-const edxLinkBase = `${SETTINGS.edx_base_url}/courses/`;
+const edxLinkBase = urljoin(SETTINGS.edx_base_url, 'courses/');
 
 export default class CourseDescription extends React.Component {
   props: {
