@@ -197,6 +197,13 @@ class DashboardTests(ViewsTests):
             assert js_settings == {
                 'gaTrackingID': ga_tracking_id,
                 'reactGaDebug': react_ga_debug,
+                'user': {
+                    'email': user.email,
+                    'username': get_social_username(user),
+                    'first_name': profile.first_name,
+                    'last_name': profile.last_name,
+                    'preferred_name': profile.preferred_name,
+                },
                 'authenticated': True,
                 'username': get_social_username(user),
                 'host': host,
@@ -446,6 +453,13 @@ class TestUsersPage(ViewsTests):
                 assert js_settings == {
                     'gaTrackingID': ga_tracking_id,
                     'reactGaDebug': react_ga_debug,
+                    'user': {
+                        'email': user.email,
+                        'username': username,
+                        'first_name': profile.first_name,
+                        'last_name': profile.last_name,
+                        'preferred_name': profile.preferred_name,
+                    },
                     'authenticated': True,
                     'username': username,
                     'host': host,
@@ -491,6 +505,7 @@ class TestUsersPage(ViewsTests):
                 assert js_settings == {
                     'gaTrackingID': ga_tracking_id,
                     'reactGaDebug': react_ga_debug,
+                    'user': None,
                     'authenticated': False,
                     'username': None,
                     'host': host,

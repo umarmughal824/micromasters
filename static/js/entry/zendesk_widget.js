@@ -34,6 +34,19 @@ window.zEmbed || function (e, t) {
 // Web Widget API is available to be used. The HTML for the Zendesk widget
 // may *not* have been inserted into the DOM yet.
 zE(function() {
+  // pre-populate feedback form
+  if (SETTINGS.user) {
+    const user = SETTINGS.user;
+    let identity = {};
+    if (user.first_name && user.last_name) {
+      identity.name = `${user.first_name} ${user.last_name}`;
+    }
+    if (user.email) {
+      identity.email = user.email;
+    }
+    zE.identify(identity);
+  }
+
   // trigger onZendeskIFrameExists at the appropriate time
   let tries = 0;
   const intervalID = setInterval(() => {
