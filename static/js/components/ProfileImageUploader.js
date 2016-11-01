@@ -53,16 +53,18 @@ const ProfileImageUploader = ({
   setPhotoError,
 }: ImageUploadProps) => (
   <Dialog
-    open = {photoDialogOpen}
-    className="dashboard-dialog photo-upload-dialog"
+    title="Upload a Profile Photo"
+    titleClassName="dialog-title"
+    contentClassName="dialog photo-upload-dialog"
+    className="photo-upload-dialog-wrapper"
     onRequestClose={() => setDialogVisibility(false)}
     autoScrollBodyContent={true}
-    title="Upload a Profile Photo"
     contentStyle={{ maxWidth: '620px' }}
+    open={photoDialogOpen}
     actions = {[
       <Button
         type='button'
-        className='cancel-button'
+        className='secondary-button cancel-button'
         key="cancel"
         onClick={() => {
           setDialogVisibility(false);
@@ -72,7 +74,7 @@ const ProfileImageUploader = ({
       </Button>,
       <Button
         type='button'
-        className='save-button'
+        className='primary-button save-button'
         key="save"
         onClick={updateUserPhoto}>
         Save

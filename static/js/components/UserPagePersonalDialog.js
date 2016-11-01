@@ -40,13 +40,13 @@ export default class UserPagePersonalDialog extends React.Component {
     const actions = <ValidationAlert {...this.props}>
       <Button
         type='button'
-        className='cancel-button'
+        className='secondary-button cancel-button'
         onClick={this.closePersonalDialog}>
         Cancel
       </Button>
       <Button
         type='button'
-        className='save-button'
+        className='primary-button save-button'
         onClick={this.savePersonalInfo}>
         Save
       </Button>
@@ -54,7 +54,10 @@ export default class UserPagePersonalDialog extends React.Component {
 
     return (
       <Dialog
-        className="dashboard-dialog personal-dialog"
+        title="Edit Personal Info"
+        titleClassName="dialog-title"
+        contentClassName="dialog personal-dialog"
+        className="personal-dialog-wrapper"
         open={userPageDialogVisibility}
         onRequestClose={this.closePersonalDialog}
         actions={actions}

@@ -4936,9 +4936,9 @@
       }
     },
     "redux-asserts": {
-      "version": "0.0.8",
-      "from": "https://registry.npmjs.org/redux-asserts/-/redux-asserts-0.0.8.tgz",
-      "resolved": "https://registry.npmjs.org/redux-asserts/-/redux-asserts-0.0.8.tgz"
+      "version": "0.0.10",
+      "from": "redux-asserts@latest",
+      "resolved": "https://registry.npmjs.org/redux-asserts/-/redux-asserts-0.0.10.tgz"
     },
     "redux-localstorage": {
       "version": "1.0.0-rc5",

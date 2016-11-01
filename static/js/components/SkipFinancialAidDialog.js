@@ -7,13 +7,13 @@ const skipActions = (cancel, skip) => (
   <div className="actions">
     <Button
       type='button'
-      className="cancel-button"
+      className="secondary-button cancel-button"
       onClick={cancel}>
       Cancel
     </Button>
     <Button
       type='button'
-      className="save-button"
+      className="primary-button save-button"
       onClick={skip}>
       Pay Full Price
     </Button>
@@ -29,12 +29,13 @@ type SkipProps = {
 
 const SkipFinancialAidDialog = ({cancel, skip, open, fullPrice}: SkipProps) => (
   <Dialog
+    title="Are you sure?"
+    titleClassName="dialog-title"
+    contentClassName="dialog skip-financial-aid-dialog"
+    className="skip-financial-aid-dialog-wrapper"
     open={open}
-    className="skip-aid-dialog-wrapper"
-    bodyClassName="skip-aid-dialog"
     onRequestClose={cancel}
     actions={skipActions(cancel, skip)}
-    title="Are you sure?"
   >
     You may qualify for a reduced cost. Clicking "Pay Full Price"
     means that you are declining this option and you will pay the

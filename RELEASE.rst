@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.20.0
+--------------
+
+- Upgraded redux-asserts again
+- Add a __str__() for Role (#1594)
+- Added management commands for fine-grained course state control
+- Set background color of Zendesk button (#1496)
+- Bumped redux-asserts version to 0.0.9
+- Made detect_missing_migrations.sh use makemigrations --dry-run (#1587)
+- Make modals more consistent (#1565)
+- Hide the x-scroll on program page
+
 Version 0.19.0
 --------------
 
