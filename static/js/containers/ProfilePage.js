@@ -3,6 +3,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import Loader from 'react-loader';
+import ReactDOM from 'react-dom';
 
 import { makeProfileProgressDisplay } from '../util/util';
 import { FETCH_PROCESSING } from '../actions';
@@ -36,7 +37,10 @@ class ProfilePage extends ProfileFormContainer {
   stepTransitions: Function = (): [void|() => void, () => void] => {
     const { dispatch } = this.props;
     let setStep = createActionHelper(dispatch, setProfileStep);
-    let createStepFunc = step => () => setStep(step);
+    let createStepFunc = step => () => {
+      setStep(step);
+      ReactDOM.findDOMNode(this).querySelector(".profile-pagination").scrollIntoView();
+    };
     switch ( this.currentStep() ) {
     case EDUCATION_STEP:
       return [createStepFunc(PERSONAL_STEP), createStepFunc(EMPLOYMENT_STEP)];

@@ -127,6 +127,7 @@ describe("ProfilePage", function() {
       let button = div.querySelector(prevButtonSelector);
       assert.equal(checkStep(), EDUCATION_STEP);
       TestUtils.Simulate.click(button);
+      assert(helper.scrollIntoViewStub.called, "Not called yet");
       assert.equal(checkStep(), PERSONAL_STEP);
     });
   });
