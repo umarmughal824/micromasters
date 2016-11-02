@@ -73,7 +73,9 @@ class App extends React.Component {
   };
 
   updateRequirements() {
-    this.fetchUserProfile(SETTINGS.username);
+    if (SETTINGS.user) {
+      this.fetchUserProfile(SETTINGS.user.username);
+    }
     this.fetchDashboard();
     this.fetchCoursePrices();
     this.fetchEnrollments();
@@ -91,7 +93,8 @@ class App extends React.Component {
 
   componentWillUnmount() {
     const { dispatch } = this.props;
-    dispatch(clearProfile(SETTINGS.username));
+    const username = SETTINGS.user ? SETTINGS.user.username : null;
+    dispatch(clearProfile(username));
     dispatch(clearDashboard());
     dispatch(clearCoursePrices());
     dispatch(clearUI());
@@ -145,13 +148,14 @@ class App extends React.Component {
       dispatch,
     } = this.props;
     const [ complete, step, errors] = validateProfileComplete(profile);
+    const username = SETTINGS.user ? SETTINGS.user.username : null;
     if (
       userProfile.getStatus === FETCH_SUCCESS &&
       !PROFILE_REGEX.test(pathname) &&
       !complete
     ) {
-      dispatch(startProfileEdit(SETTINGS.username));
-      dispatch(updateProfileValidation(SETTINGS.username, errors));
+      dispatch(startProfileEdit(username));
+      dispatch(updateProfileValidation(username, errors));
       if ( step !== null ) {
         dispatch(setProfileStep(step));
       }
@@ -274,11 +278,12 @@ class App extends React.Component {
 }
 
 const mapStateToProps = (state) => {
+  const user = SETTINGS.user;
   let profile = {
     profile: {}
   };
-  if (state.profiles[SETTINGS.username] !== undefined) {
-    profile = state.profiles[SETTINGS.username];
+  if (user && state.profiles[user.username] !== undefined) {
+    profile = state.profiles[user.username];
   }
   return {
     userProfile:              profile,
