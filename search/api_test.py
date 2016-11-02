@@ -2,7 +2,7 @@
 Tests for search API functionality
 """
 import math
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 from elasticsearch_dsl import Search, Q
 from factory.django import mute_signals
 from django.test import TestCase
@@ -84,25 +84,33 @@ class SearchAPITests(TestCase):  # pylint: disable=missing-docstring
             should=[
                 Q('term', **{'program.id': self.program.id})
             ],
+            minimum_should_match=1,
             must=[
                 Q('term', **{'program.is_learner': True})
             ]
         )
-        assert search_query_dict['query'] == expected_program_query.to_dict()
+        assert 'query' in search_query_dict
+        assert 'bool' in search_query_dict['query']
+        assert 'filter' in search_query_dict['query']['bool']
+        assert len(search_query_dict['query']['bool']['filter']) == 1
+        assert search_query_dict['query']['bool']['filter'][0] == expected_program_query.to_dict()
 
     def test_create_search_obj_metadata(self):  # pylint: disable=no-self-use
         """
         Test that Search objects are created with proper metadata
         """
-        mock_search_obj = Mock(spec=Search)
+        mock_filter_obj = MagicMock(spec=Search)
+        mock_update_from_dict_obj = MagicMock(spec=Search)
+        mock_filter_obj.filter.return_value = mock_update_from_dict_obj
         search_param_dict = {'size': 50}
-        with patch('search.api.Search', autospec=True, return_value=mock_search_obj) as mock_search_cls:
+        with patch('search.api.Search', autospec=True, return_value=mock_filter_obj) as mock_search_cls:
             create_search_obj(self.user, search_param_dict=search_param_dict)
-            mock_search_cls.assert_called_with(
-                doc_type=DOC_TYPES,
-                index=settings.ELASTICSEARCH_INDEX
-            )
-            mock_search_obj.update_from_dict.assert_called_with(search_param_dict)
+        mock_search_cls.assert_called_with(
+            doc_type=DOC_TYPES,
+            index=settings.ELASTICSEARCH_INDEX
+        )
+        assert mock_filter_obj.filter.call_count == 1
+        mock_update_from_dict_obj.update_from_dict.assert_called_with(search_param_dict)
 
     def test_user_with_no_program_access(self):
         """
@@ -166,5 +174,5 @@ class SearchAPITests(TestCase):  # pylint: disable=missing-docstring
             assert results == set([result.email[0] for result in fake_search_result.hits.results])
             assert mock_execute_search.call_count == math.ceil(fake_search_result.hits.total/test_es_page_size)
             # Assert that the Search object is limited to return only the email field
-            args, kwargs = mock_execute_search.call_args  # pylint: disable=unused-variable, unpacking-non-sequence
+            args, _ = mock_execute_search.call_args  # pylint: disable=unpacking-non-sequence
             assert args[0].to_dict()['fields'] == 'email'
