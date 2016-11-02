@@ -88,7 +88,7 @@ describe('ProgressWidget', () => {
     );
     assert.equal(
       wrapper.find(".heading-paragraph").text(),
-      "On completion, you can apply for the Masters Degree Program"
+      "On completion, you can apply for the Master’s Degree Program"
     );
     assert.isTrue(wrapper.find(".progress-button").hasClass('disabled'), 'Button is disable');
   });
