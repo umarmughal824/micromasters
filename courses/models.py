@@ -139,12 +139,12 @@ class CourseRun(models.Model):
       rather a specific instance of that course being taught.
     """
     title = models.CharField(max_length=255)
-    edx_course_key = models.CharField(max_length=255, blank=True, null=True, unique=True, )
-    enrollment_start = models.DateTimeField(blank=True, null=True)
-    start_date = models.DateTimeField(blank=True, null=True)
-    enrollment_end = models.DateTimeField(blank=True, null=True)
-    end_date = models.DateTimeField(blank=True, null=True)
-    upgrade_deadline = models.DateTimeField(blank=True, null=True)
+    edx_course_key = models.CharField(max_length=255, blank=True, null=True, unique=True)
+    enrollment_start = models.DateTimeField(blank=True, null=True, db_index=True)
+    start_date = models.DateTimeField(blank=True, null=True, db_index=True)
+    enrollment_end = models.DateTimeField(blank=True, null=True, db_index=True)
+    end_date = models.DateTimeField(blank=True, null=True, db_index=True)
+    upgrade_deadline = models.DateTimeField(blank=True, null=True, db_index=True)
     fuzzy_start_date = models.CharField(
         max_length=255, blank=True, null=True,
         help_text="If you don't know when your course will run exactly, "
