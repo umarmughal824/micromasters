@@ -8,6 +8,7 @@ import _ from 'lodash';
 import iso3166 from 'iso-3166-2';
 import { S } from '../lib/sanctuary';
 const { Maybe, Just, Nothing } = S;
+import R from 'ramda';
 
 import {
   STATUS_PASSED,
@@ -423,3 +424,7 @@ export function findCourseRun(
   }
   return [null, null, null];
 }
+
+export const classify: (s: string) => string = (
+  R.compose(R.replace(/_/g,'-'), _.snakeCase, R.defaultTo(""))
+);

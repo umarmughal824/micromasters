@@ -4265,11 +4265,6 @@
       "from": "https://registry.npmjs.org/pend/-/pend-1.2.0.tgz",
       "resolved": "https://registry.npmjs.org/pend/-/pend-1.2.0.tgz"
     },
-    "performance-now": {
-      "version": "0.2.0",
-      "from": "https://registry.npmjs.org/performance-now/-/performance-now-0.2.0.tgz",
-      "resolved": "https://registry.npmjs.org/performance-now/-/performance-now-0.2.0.tgz"
-    },
     "pify": {
       "version": "2.3.0",
       "from": "pify@>=2.0.0 <3.0.0",
@@ -4557,11 +4552,6 @@
       "from": "querystringify@>=0.0.0 <0.1.0",
       "resolved": "https://registry.npmjs.org/querystringify/-/querystringify-0.0.3.tgz"
     },
-    "raf": {
-      "version": "3.2.0",
-      "from": "https://registry.npmjs.org/raf/-/raf-3.2.0.tgz",
-      "resolved": "https://registry.npmjs.org/raf/-/raf-3.2.0.tgz"
-    },
     "ramda": {
       "version": "0.22.1",
       "from": "ramda@latest",
@@ -4823,9 +4813,28 @@
       "resolved": "https://registry.npmjs.org/react-tooltip/-/react-tooltip-3.1.6.tgz"
     },
     "react-virtualized": {
-      "version": "7.11.6",
-      "from": "https://registry.npmjs.org/react-virtualized/-/react-virtualized-7.11.6.tgz",
-      "resolved": "https://registry.npmjs.org/react-virtualized/-/react-virtualized-7.11.6.tgz"
+      "version": "8.5.1",
+      "from": "react-virtualized@>=8.0.5 <9.0.0",
+      "resolved": "https://registry.npmjs.org/react-virtualized/-/react-virtualized-8.5.1.tgz",
+      "dependencies": {
+        "babel-runtime": {
+          "version": "6.18.0",
+          "from": "babel-runtime@^6.11.6",
+          "resolved": "https://registry.npmjs.org/babel-runtime/-/babel-runtime-6.18.0.tgz"
+        }
+      }
+    },
+    "react-virtualized-select": {
+      "version": "2.1.0",
+      "from": "react-virtualized-select@latest",
+      "resolved": "https://registry.npmjs.org/react-virtualized-select/-/react-virtualized-select-2.1.0.tgz",
+      "dependencies": {
+        "babel-runtime": {
+          "version": "6.18.0",
+          "from": "babel-runtime@>=6.11.6 <7.0.0",
+          "resolved": "https://registry.npmjs.org/babel-runtime/-/babel-runtime-6.18.0.tgz"
+        }
+      }
     },
     "read-all-stream": {
       "version": "3.1.0",

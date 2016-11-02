@@ -41,6 +41,7 @@ import {
   clearUI,
   setProfileStep,
   setPhotoDialogVisibility,
+  setProgram,
 } from '../actions/ui';
 import { validateProfileComplete } from '../lib/validation/profile';
 import type { DashboardState, CoursePricesState } from '../flow/dashboardTypes';
@@ -128,9 +129,20 @@ class App extends React.Component {
   }
 
   fetchEnrollments() {
-    const { programs, dispatch } = this.props;
+    const {
+      programs,
+      dispatch,
+      location: { pathname },
+      currentProgramEnrollment,
+      ui: { selectedProgram },
+    } = this.props;
     if (programs.getStatus === undefined) {
-      dispatch(fetchProgramEnrollments());
+      dispatch(fetchProgramEnrollments()).then(({payload}) => {
+        if ( PROFILE_REGEX.test(pathname) && currentProgramEnrollment && !selectedProgram ) {
+          let selected = payload.find(program => program.id === currentProgramEnrollment.id);
+          dispatch(setProgram(selected));
+        }
+      });
     }
   }
 

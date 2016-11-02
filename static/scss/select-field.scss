@@ -1,0 +1,25 @@
+.select-field {
+  padding-top: 9px;
+}
+
+.select-field, .Select {
+  .Select-menu-outer {
+    z-index: 10000;
+  }
+}
+
+.select-field {
+  .select-label {
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .menu-outer-top .Select-menu-outer {
+    top: inherit;
+    bottom: 35px!important;
+    border-bottom-right-radius: 0px!important;
+    border-bottom-left-radius: 0px!important;
+    border-top-right-radius: 4px!important;
+    border-top-left-radius: 4px!important;
+  }
+}

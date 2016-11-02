@@ -2,38 +2,47 @@
 import React from 'react';
 import _ from 'lodash';
 import iso3166 from 'iso-3166-2';
+import R from 'ramda';
+
 import SelectField from './SelectField';
-import type { Option } from '../../flow/generalTypes';
+import { labelSort } from '../../lib/currency';
+import type { Validator, UIValidator } from '../../lib/validation/profile';
+import type {
+  Profile,
+  ValidationErrors,
+  UpdateProfileFunc,
+} from '../../flow/profileTypes';
 
-export default class StateSelectField extends React.Component {
-  static propTypes = {
-    profile:                  React.PropTypes.object,
-    updateProfile:            React.PropTypes.func,
-    stateKeySet:              React.PropTypes.array,
-    countryKeySet:            React.PropTypes.array
-  };
+const stateOption = (stateInfo, code) => (
+  { value: code, label: stateInfo.name }
+);
 
-  getStateOptions(): Option[] {
-    const { profile, countryKeySet } = this.props;
-    let options = [];
-    let country = _.get(profile, countryKeySet);
-    if (iso3166.data[country] !== undefined) {
-      options = _(iso3166.data[country].sub)
-        .map((stateInfoObj, stateCode) => ({
-          value: stateCode,
-          label: stateInfoObj.name
-        }))
-        .sortBy('label').value();
-    }
-    return options;
-  }
+const statesForCountry = code => R.prop('sub', R.defaultTo({}, iso3166.data[code]));
 
-  render() {
-    const { stateKeySet } = this.props;
-    return <SelectField
-      options={this.getStateOptions()}
-      keySet={stateKeySet}
-      {...this.props}
-    />;
-  }
-}
+const stateOptions = R.compose(
+  labelSort, R.values, R.mapObjIndexed(stateOption), statesForCountry
+);
+
+type StateSelectProps = {
+  className:                  string,
+  countryKeySet:              Array<string>,
+  errors:                     ValidationErrors,
+  label:                      string,
+  onChange:                   Function,
+  profile:                    Profile,
+  stateKeySet:                Array<string>,
+  topMenu:                    boolean,
+  updateProfile:              UpdateProfileFunc,
+  updateValidationVisibility: (xs: Array<string>) => void,
+  validator:                  Validator|UIValidator,
+};
+
+export default (props: StateSelectProps) => {
+  const { stateKeySet, countryKeySet, profile } = props;
+  let country = _.get(profile, countryKeySet);
+  return <SelectField
+    {...props}
+    options={stateOptions(country)}
+    keySet={stateKeySet}
+  />;
+};

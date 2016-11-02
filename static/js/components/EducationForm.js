@@ -16,7 +16,6 @@ import {
 } from '../util/util';
 import ProfileFormFields from '../util/ProfileFormFields';
 import ConfirmDeletion from './ConfirmDeletion';
-import FieldsOfStudySelectField from './inputs/FieldsOfStudySelectField';
 import SelectField from './inputs/SelectField';
 import CountrySelectField from './inputs/CountrySelectField';
 import StateSelectField from './inputs/StateSelectField';
@@ -44,6 +43,12 @@ import type {
   UIValidator,
 } from '../lib/validation/profile';
 import { formatMonthDate } from '../util/date';
+import FIELDS_OF_STUDY from '../data/fields_of_study';
+
+const fieldOfStudyOptions = _.map(FIELDS_OF_STUDY, (name, code) => ({
+  value: code,
+  label: name
+}));
 
 const EDUCATION_LEVEL_OPTIONS: Array<Option> = EDUCATION_LEVELS;
 const EDUCATION_LEVEL_LABELS: Object = {};
@@ -266,12 +271,13 @@ class EducationForm extends ProfileFormFields {
     let fieldOfStudy = () => {
       if (educationDegreeLevel !== HIGH_SCHOOL) {
         return <Cell col={12}>
-            <FieldsOfStudySelectField
-              keySet={keySet('field_of_study')}
-              label='Field of Study'
-              {...this.defaultInputComponentProps()}
-            />
-          </Cell>;
+          <SelectField
+            options={fieldOfStudyOptions}
+            keySet={keySet('field_of_study')}
+            label='Field of Study'
+            {...this.defaultInputComponentProps()}
+          />
+        </Cell>;
       }
     };
     let levelForm = () => {
@@ -304,6 +310,7 @@ class EducationForm extends ProfileFormFields {
           stateKeySet={keySet('school_state_or_territory')}
           countryKeySet={keySet('school_country')}
           label='Country'
+          topMenu={true}
           {...this.defaultInputComponentProps()}
         />
       </Cell>
@@ -312,6 +319,7 @@ class EducationForm extends ProfileFormFields {
           stateKeySet={keySet('school_state_or_territory')}
           countryKeySet={keySet('school_country')}
           label='State'
+          topMenu={true}
           {...this.defaultInputComponentProps()}
         />
       </Cell>

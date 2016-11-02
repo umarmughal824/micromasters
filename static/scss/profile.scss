@@ -205,6 +205,8 @@
 }
 
 .program-select {
+  z-index: 2;
+  overflow: visible;
   font-weight: 500;
   font-size: 16px;
   padding-top: 30px;

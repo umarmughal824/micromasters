@@ -72,6 +72,18 @@ export const modifyTextField = (field: HTMLInputElement, text: string): void => 
   TestUtils.Simulate.keyDown(field, {key: "Enter", keyCode: 13, which: 13});
 };
 
+export const modifySelectField = (field: HTMLElement, text: string): void => {
+  let input = field.querySelector('.Select-input').querySelector('input');
+  TestUtils.Simulate.focus(input);
+  TestUtils.Simulate.change(input, { target: { value: text } });
+  TestUtils.Simulate.keyDown(input, { keyCode: 9, key: 'Tab' });
+};
+
+export const clearSelectField = (field: HTMLElement): void => {
+  TestUtils.Simulate.mouseDown(field.querySelector('.Select-clear'), { button: 1 });
+};
+
+
 // dialog should be HTMLDivElement but flow complains incorrectly here
 export const isActiveDialog = (dialog: any): boolean => (
   dialog.style["left"] === "0px"

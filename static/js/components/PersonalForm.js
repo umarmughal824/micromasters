@@ -77,6 +77,7 @@ export default class PersonalForm extends ProfileFormFields {
           <CountrySelectField
             stateKeySet={['state_or_territory']}
             countryKeySet={['country']}
+            topMenu={true}
             label='Country'
             {...this.defaultInputComponentProps()}
           />
@@ -85,6 +86,7 @@ export default class PersonalForm extends ProfileFormFields {
           <StateSelectField
             stateKeySet={['state_or_territory']}
             countryKeySet={['country']}
+            topMenu={true}
             label='State or Territory'
             {...this.defaultInputComponentProps()}
           />
@@ -109,6 +111,7 @@ export default class PersonalForm extends ProfileFormFields {
           <CountrySelectField
             countryKeySet={['birth_country']}
             label='Country of birth'
+            topMenu={true}
             {...this.defaultInputComponentProps()}
           />
         </Cell>
@@ -116,6 +119,7 @@ export default class PersonalForm extends ProfileFormFields {
           <CountrySelectField
             countryKeySet={['nationality']}
             label='Nationality'
+            topMenu={true}
             {...this.defaultInputComponentProps()}
           />
         </Cell>

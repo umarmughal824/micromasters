@@ -24,7 +24,8 @@ import {
   formatPrice,
   programCourseInfo,
   findCourseRun,
-  isProfileOfLoggedinUser
+  isProfileOfLoggedinUser,
+  classify,
 } from '../util/util';
 import {
   EDUCATION_LEVELS,
@@ -520,6 +521,21 @@ describe('utility functions', () => {
         findCourseRun(DASHBOARD_RESPONSE, () => false),
         [null, null, null],
       );
+    });
+  });
+
+  describe('classify', () => {
+    it('turns a string into something appropriate for a CSS class', () => {
+      assert.equal(classify('Foo Bar'), 'foo-bar');
+      assert.equal(classify('fooBar'), 'foo-bar');
+      assert.equal(classify('Foobar'), 'foobar');
+      assert.equal(classify('foo_barBaz'), 'foo-bar-baz');
+      assert.equal(classify('foo_bar Baz'), 'foo-bar-baz');
+    });
+
+    it('returns an empty string when passed an empty string or undefined', () => {
+      assert.equal(classify(''), '');
+      assert.equal(classify(undefined), '');
     });
   });
 });

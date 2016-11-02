@@ -8,7 +8,7 @@ import { Provider } from 'react-redux';
 import FinancialAidCalculator from '../containers/FinancialAidCalculator';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../lib/api';
-import { modifyTextField } from '../util/test_utils';
+import { modifyTextField, modifySelectField } from '../util/test_utils';
 import { DASHBOARD_RESPONSE, FINANCIAL_AID_PARTIAL_RESPONSE } from '../constants';
 import {
   START_CALCULATOR_EDIT,
@@ -134,16 +134,14 @@ describe('FinancialAidCalculator', () => {
         UPDATE_CALCULATOR_EDIT,
         SET_CALCULATOR_DIALOG_VISIBILITY,
         UPDATE_CALCULATOR_EDIT,
-        UPDATE_CALCULATOR_EDIT,
-        UPDATE_CALCULATOR_EDIT,
       ], () => {
         wrapper.find('.pricing-actions').find('.dashboard-button').simulate('click');
-        modifyTextField(document.querySelector('#currency-select'), 'Pound sterling');
+        let select = document.querySelector('.currency');
+        modifySelectField(select, 'GBP');
       }).then(() => {
         assert.deepEqual(helper.store.getState().financialAid, {
           income: '',
           currency: 'GBP',
-          currency_edit: undefined,
           checkBox: false,
           fetchStatus: null,
           programId: program.id,

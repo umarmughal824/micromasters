@@ -35,7 +35,6 @@ const currencySelect = (update, current) => (
     options={currencyOptions}
     keySet={['currency']}
     profile={current}
-    onChange={update}
     updateProfile={update}
     name="currency"
     id="currency-select"
@@ -151,7 +150,6 @@ const FinancialAidCalculator = ({
     open={calculatorDialogVisibility}
     bodyClassName="financial-aid-calculator-body"
     onRequestClose={closeDialogAndCancel}
-    autoScrollBodyContent={true}
     actions={calculatorActions(openConfirmSkipDialog, closeDialogAndCancel, () => saveFinancialAid(financialAid))}
   >
     <div className="copy">
