@@ -105,7 +105,7 @@ class RequestAPITests(FinancialAidBaseTestCase, APIClient):
         """
         Tests FinancialAidRequestView post with missing args
         """
-        for missing_key in self.data.keys():
+        for missing_key in self.data:
             data = {key: value for key, value in self.data.items() if key != missing_key}
             self.assert_http_status(self.client.post, self.request_url, status.HTTP_400_BAD_REQUEST, data=data)
 
