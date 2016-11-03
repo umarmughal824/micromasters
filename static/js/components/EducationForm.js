@@ -26,7 +26,6 @@ import { educationEntriesByDate } from '../util/sorting';
 import {
   EDUCATION_LEVELS,
   HIGH_SCHOOL,
-  BACHELORS,
 } from '../constants';
 import type { Option } from '../flow/generalTypes';
 import type {
@@ -253,11 +252,13 @@ class EducationForm extends ProfileFormFields {
     const {
       ui: { educationDialogIndex },
       showSwitch,
-      profile: { education },
+      profile,
     } = this.props;
 
-    let educationDegreeLevel = _.get(education[educationDialogIndex], "degree_name") || BACHELORS;
-    let keySet = (key) => ['education', educationDialogIndex, key];
+    let keySet = (key): any => ['education', educationDialogIndex, key];
+    let educationDegreeLevel = _.get(profile, keySet("degree_name"));
+    let id = _.get(profile, keySet("id"));
+    let title = id !== undefined ? 'Edit Education' : 'Add Education';
 
     let fieldOfStudy = () => {
       if (educationDegreeLevel !== HIGH_SCHOOL) {
@@ -285,7 +286,7 @@ class EducationForm extends ProfileFormFields {
 
     return <Grid className="profile-tab-grid">
       <Cell col={12} className="profile-form-title">
-        {EDUCATION_LEVEL_LABELS[educationDegreeLevel]}
+        {title}
       </Cell>
       { levelForm() }
       { fieldOfStudy() }
