@@ -14,7 +14,7 @@ from dashboard.factories import (
     ProgramEnrollmentFactory
 )
 from dashboard.models import ProgramEnrollment
-from dashboard.serializers import UserProgramSerializer
+from dashboard.serializers import UserProgramSearchSerializer
 from courses.factories import (
     ProgramFactory,
     CourseFactory,
@@ -292,7 +292,7 @@ class SerializerTests(ESTestCase):
             'user_id': profile.user.id,
             'email': profile.user.email,
             'profile': ProfileSerializer(profile).data,
-            'program': UserProgramSerializer.serialize(program_enrollment)
+            'program': UserProgramSearchSerializer.serialize(program_enrollment)
         }
 
 

@@ -1,5 +1,5 @@
 """
-Test cases for the UserProgramSerializer
+Test cases for the UserProgramSearchSerializer
 """
 from django.test import TestCase
 from django.db.models.signals import post_save
@@ -18,15 +18,15 @@ from dashboard.factories import (
     CachedCertificateFactory,
     CachedEnrollmentFactory,
 )
-from dashboard.models import ProgramEnrollment
-from dashboard.serializers import UserProgramSerializer
+from dashboard.models import ProgramEnrollment, CachedEnrollment, CachedCertificate
+from dashboard.serializers import UserProgramSearchSerializer
 from roles.models import Role
 from roles.roles import Staff
 
 
-class UserProgramSerializerTests(TestCase):
+class UserProgramSearchSerializerTests(TestCase):
     """
-    Test cases for the UserProgramSerializer
+    Test cases for the UserProgramSearchSerializer
     """
     @staticmethod
     def _generate_cached_enrollments(user, program, num_course_runs=1, data=None):
@@ -66,10 +66,10 @@ class UserProgramSerializerTests(TestCase):
         """
         user = self.program_enrollment.user
         program = self.program_enrollment.program
-        assert UserProgramSerializer.serialize(self.program_enrollment) == {
+        assert UserProgramSearchSerializer.serialize(self.program_enrollment) == {
             'id': program.id,
-            'enrollments': UserProgramSerializer.serialize_valid_edx_data(user.cachedenrollment_set, program),
-            'certificates': UserProgramSerializer.serialize_valid_edx_data(user.cachedcertificate_set, program),
+            'enrollments': list(CachedEnrollment.active_data(user, program)),
+            'certificates': list(CachedCertificate.active_data(user, program)),
             'grade_average': 75,
             'is_learner': True
         }
@@ -81,10 +81,10 @@ class UserProgramSerializerTests(TestCase):
             role=Staff.ROLE_ID
         )
 
-        assert UserProgramSerializer.serialize(self.program_enrollment) == {
+        assert UserProgramSearchSerializer.serialize(self.program_enrollment) == {
             'id': program.id,
-            'enrollments': UserProgramSerializer.serialize_valid_edx_data(user.cachedenrollment_set, program),
-            'certificates': UserProgramSerializer.serialize_valid_edx_data(user.cachedcertificate_set, program),
+            'enrollments': list(CachedEnrollment.active_data(user, program)),
+            'certificates': list(CachedCertificate.active_data(user, program)),
             'grade_average': 75,
             'is_learner': False
         }
@@ -97,7 +97,7 @@ class UserProgramSerializerTests(TestCase):
             'enrollments': [enrollment.data for enrollment in self.enrollments],
             'certificates': [certificate.data for certificate in self.certificates]
         }
-        serialized_user_program = UserProgramSerializer.serialize(self.program_enrollment)
+        serialized_user_program = UserProgramSearchSerializer.serialize(self.program_enrollment)
         for key in ['enrollments', 'certificates']:
             assert len(serialized_user_program[key]) == len(expected_serialized[key])
             assert all([data in serialized_user_program[key] for data in expected_serialized[key]])
@@ -111,9 +111,9 @@ class UserProgramSerializerTests(TestCase):
         enrolled_program = self.program_enrollment.program
         other_program = ProgramFactory.create()
         self._generate_cached_enrollments(user, other_program, num_course_runs=1, data={'enroll': '1'})
-        serialized_program_user = UserProgramSerializer.serialize(self.program_enrollment)
+        serialized_program_user = UserProgramSearchSerializer.serialize(self.program_enrollment)
         assert len([e for e in serialized_program_user['enrollments'] if e == {'enroll': '1'}]) == 0
         # Create an enrollment in the same program and make sure it is part of the serialized version
         self._generate_cached_enrollments(user, enrolled_program, num_course_runs=1, data={'enroll': '2'})
-        serialized_program_user = UserProgramSerializer.serialize(self.program_enrollment)
+        serialized_program_user = UserProgramSearchSerializer.serialize(self.program_enrollment)
         assert len([e for e in serialized_program_user['enrollments'] if e == {'enroll': '2'}]) == 1

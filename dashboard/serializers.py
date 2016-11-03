@@ -3,13 +3,14 @@ Provides functionality for serializing a ProgramEnrollment for the ES index
 """
 from decimal import Decimal
 
+from dashboard.models import CachedEnrollment, CachedCertificate
 from roles.models import (
     NON_LEARNERS,
     Role
 )
 
 
-class UserProgramSerializer:
+class UserProgramSearchSerializer:
     """
     Provides functions for serializing a ProgramEnrollment for the ES index
     """
@@ -23,31 +24,14 @@ class UserProgramSerializer:
         )
 
     @classmethod
-    def serialize_valid_edx_data(cls, related_edx_obj_set, program):
-        """
-        Args:
-            related_edx_obj_set (RelatedManager): RelatedManager for set of cached edX model objects
-                (eg: CachedEnrollment)
-            program (Program): Program object
-
-        Returns:
-            list of dict: List of serialized objects
-        """
-        return [
-            edx_obj.data for edx_obj in related_edx_obj_set.filter(
-                course_run__course__program=program
-            ).exclude(data__isnull=True)
-        ]
-
-    @classmethod
     def serialize(cls, program_enrollment):
         """
         Serializes a ProgramEnrollment object
         """
         user = program_enrollment.user
         program = program_enrollment.program
-        program_cached_enrollments = cls.serialize_valid_edx_data(user.cachedenrollment_set, program)
-        program_cached_certificates = cls.serialize_valid_edx_data(user.cachedcertificate_set, program)
+        program_cached_enrollments = list(CachedEnrollment.active_data(user, program))
+        program_cached_certificates = list(CachedCertificate.active_data(user, program))
         return {
             'id': program.id,
             'enrollments': program_cached_enrollments,

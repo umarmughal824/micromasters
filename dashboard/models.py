@@ -25,6 +25,31 @@ class CachedEdxInfoModel(Model):
         unique_together = (('user', 'course_run'), )
         abstract = True
 
+    @classmethod
+    def active_qset(cls, user, program):
+        """
+        Returns a queryset for the active records associated with a User/Program pair
+        """
+        return cls.objects.filter(
+            user=user,
+            course_run__course__program=program
+        ).exclude(data__isnull=True)
+
+    @classmethod
+    def active_count(cls, user, program):
+        """
+        Returns the number of active records associated with a User/Program pair
+        """
+        return cls.active_qset(user, program).count()
+
+    @classmethod
+    def active_data(cls, user, program):
+        """
+        Returns a list containing the 'data' property of every active record associated
+        with a User/Program pair
+        """
+        return cls.active_qset(user, program).values_list('data', flat=True).all()
+
     def __str__(self):
         """
         String representation of the model object
@@ -40,15 +65,6 @@ class CachedEnrollment(CachedEdxInfoModel):
     """
     Model for user enrollment data from edX
     """
-    @classmethod
-    def active_count(cls, user, program):
-        """
-        Returns the number of active CachedEnrollments for a User/Program pair
-        """
-        return cls.objects.filter(
-            user=user,
-            course_run__course__program=program
-        ).exclude(data__isnull=True).count()
 
 
 class CachedCertificate(CachedEdxInfoModel):
@@ -72,6 +88,13 @@ class ProgramEnrollment(Model):
 
     class Meta:
         unique_together = (('user', 'program'), )
+
+    @classmethod
+    def prefetched_qset(cls):
+        """
+        Returns a queryset that will prefetch Program and User (with Profile)
+        """
+        return cls.objects.select_related('user__profile', 'program')
 
     def __str__(self):
         """
