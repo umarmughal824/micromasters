@@ -18,19 +18,19 @@ import {
 } from '../actions';
 import type { Action } from '../flow/reduxTypes';
 import type {
-  ProgramEnrollmentsState,
+  AvailableProgramsState,
 } from '../flow/enrollmentTypes';
 
-export const INITIAL_ENROLLMENTS_STATE: ProgramEnrollmentsState = {
-  programEnrollments: []
+export const INITIAL_PROGRAMS_STATE: AvailableProgramsState = {
+  availablePrograms: []
 };
 
-export const programs = (state: ProgramEnrollmentsState = INITIAL_ENROLLMENTS_STATE, action: Action) => {
+export const programs = (state: AvailableProgramsState = INITIAL_PROGRAMS_STATE, action: Action) => {
   switch (action.type) {
   case REQUEST_GET_PROGRAM_ENROLLMENTS:
     return { ...state, getStatus: FETCH_PROCESSING };
   case RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS:
-    return { ...state, getStatus: FETCH_SUCCESS, programEnrollments: action.payload };
+    return { ...state, getStatus: FETCH_SUCCESS, availablePrograms: action.payload };
   case RECEIVE_GET_PROGRAM_ENROLLMENTS_FAILURE:
     return { ...state, getStatus: FETCH_FAILURE, getErrorInfo: action.payload };
   case REQUEST_ADD_PROGRAM_ENROLLMENT:
@@ -39,12 +39,15 @@ export const programs = (state: ProgramEnrollmentsState = INITIAL_ENROLLMENTS_ST
     return {
       ...state,
       postStatus: FETCH_SUCCESS,
-      programEnrollments: state.programEnrollments.concat(action.payload)
+      availablePrograms: state.availablePrograms.filter(
+        // filter out old copy of program first
+        program => program.id !== action.payload.id
+      ).concat(action.payload)
     };
   case RECEIVE_ADD_PROGRAM_ENROLLMENT_FAILURE:
     return { ...state, postStatus: FETCH_FAILURE, postErrorInfo: action.payload };
   case CLEAR_ENROLLMENTS:
-    return INITIAL_ENROLLMENTS_STATE;
+    return INITIAL_PROGRAMS_STATE;
   default:
     return state;
   }
@@ -57,7 +60,9 @@ export const currentProgramEnrollment = (state: any = null, action: Action) => {
     return action.payload;
   case RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS:
     if (!_.isNil(state)) {
-      let enrollment = action.payload.find(enrollment => enrollment.id === state.id);
+      let enrollment = action.payload.find(enrollment => (
+        enrollment.id === state.id && enrollment.enrolled
+      ));
       if (enrollment === undefined) {
         // current enrollment not found in list
         state = null;

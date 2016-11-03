@@ -12,7 +12,7 @@ import * as uiActions from '../actions/ui';
 
 import {
   DASHBOARD_RESPONSE,
-  PROGRAM_ENROLLMENTS,
+  PROGRAMS,
 } from '../constants';
 import NewEnrollmentDialog from './NewEnrollmentDialog';
 import IntegrationTestHelper from '../util/integration_test_helper';
@@ -27,13 +27,22 @@ describe("NewEnrollmentDialog", () => {
     helper.cleanup();
   });
 
+  const renderEnrollmentDialog = (props = {}) => {
+    return shallow(
+      <NewEnrollmentDialog
+        programs={PROGRAMS}
+        enrollDialogVisibility={true}
+        {...props}
+      />
+    );
+  };
+
   it('renders a dialog', () => {
     return helper.renderComponent("/dashboard").then(([wrapper]) => {
       let dialog = wrapper.find(NewEnrollmentDialog).at(0);
       let props = dialog.props();
 
-      assert.deepEqual(props.programs.programEnrollments, PROGRAM_ENROLLMENTS);
-      assert.deepEqual(props.dashboard.programs, DASHBOARD_RESPONSE);
+      assert.deepEqual(props.programs, PROGRAMS);
     });
   });
 
@@ -72,32 +81,24 @@ describe("NewEnrollmentDialog", () => {
   });
 
   it('can select the program enrollment via SelectField', () => {
-    let enrollment = PROGRAM_ENROLLMENTS[0];
+    let enrollment = PROGRAMS[0];
     let stub = helper.sandbox.stub();
-    let wrapper = shallow(
-      <NewEnrollmentDialog
-        dashboard={{programs: DASHBOARD_RESPONSE}}
-        programs={{programEnrollments: PROGRAM_ENROLLMENTS}}
-        enrollDialogVisibility={true}
-        setEnrollSelectedProgram={stub}
-      />);
+    let wrapper = renderEnrollmentDialog({
+      setEnrollSelectedProgram: stub
+    });
     wrapper.find(SelectField).props().onChange(null, null, enrollment);
     assert(stub.calledWith(enrollment));
   });
 
   it('can dispatch an addProgramEnrollment action for the currently selected enrollment', () => {
-    let selectedEnrollment = PROGRAM_ENROLLMENTS[0];
+    let selectedEnrollment = PROGRAMS[0];
     let visibilityStub = helper.sandbox.stub();
     let enrollStub = helper.sandbox.stub();
-    let wrapper = shallow(
-      <NewEnrollmentDialog
-        dashboard={{programs: DASHBOARD_RESPONSE}}
-        programs={{programEnrollments: PROGRAM_ENROLLMENTS}}
-        enrollDialogVisibility={true}
-        setEnrollDialogVisibility={visibilityStub}
-        addProgramEnrollment={enrollStub}
-        enrollSelectedProgram={selectedEnrollment}
-      />);
+    let wrapper = renderEnrollmentDialog({
+      setEnrollDialogVisibility: visibilityStub,
+      addProgramEnrollment: enrollStub,
+      enrollSelectedProgram: selectedEnrollment,
+    });
     let button = wrapper.find(Dialog).props().actions.find(
       button => button.props.className.includes("enroll")
     );
@@ -108,13 +109,9 @@ describe("NewEnrollmentDialog", () => {
 
   it("shows an error if the user didn't select any program when they click enroll", () => {
     let stub = helper.sandbox.stub();
-    let wrapper = shallow(
-      <NewEnrollmentDialog
-        dashboard={{programs: DASHBOARD_RESPONSE}}
-        programs={{programEnrollments: PROGRAM_ENROLLMENTS}}
-        enrollDialogVisibility={true}
-        setEnrollDialogError={stub}
-      />);
+    let wrapper = renderEnrollmentDialog({
+      setEnrollDialogError: stub
+    });
     let button = wrapper.find(Dialog).props().actions.find(
       button => button.props.className.includes("enroll")
     );
@@ -124,13 +121,9 @@ describe("NewEnrollmentDialog", () => {
 
   it("clears the dialog when the user clicks cancel", () => {
     let stub = helper.sandbox.stub();
-    let wrapper = shallow(
-      <NewEnrollmentDialog
-        dashboard={{programs: DASHBOARD_RESPONSE}}
-        programs={{programEnrollments: PROGRAM_ENROLLMENTS}}
-        enrollDialogVisibility={true}
-        setEnrollDialogVisibility={stub}
-      />);
+    let wrapper = renderEnrollmentDialog({
+      setEnrollDialogVisibility: stub
+    });
     let button = wrapper.find(Dialog).props().actions.find(
       button => button.props.className.includes("cancel")
     );
@@ -139,7 +132,7 @@ describe("NewEnrollmentDialog", () => {
   });
 
   it("only shows programs which the user is not already enrolled in", () => {
-    let enrollmentLookup = new Map(PROGRAM_ENROLLMENTS.map(enrollment => [enrollment.id, null]));
+    let enrollmentLookup = new Map(PROGRAMS.map(enrollment => [enrollment.id, null]));
     let unenrolledPrograms = DASHBOARD_RESPONSE.filter(program => !enrollmentLookup.has(program.id));
     unenrolledPrograms = _.sortBy(unenrolledPrograms, 'title');
     unenrolledPrograms = unenrolledPrograms.map(program => ({
@@ -147,15 +140,12 @@ describe("NewEnrollmentDialog", () => {
       id: program.id,
     }));
 
-    let selectedEnrollment = PROGRAM_ENROLLMENTS[0];
+    let selectedEnrollment = PROGRAMS[0];
 
-    let wrapper = shallow(
-      <NewEnrollmentDialog
-        dashboard={{programs: DASHBOARD_RESPONSE}}
-        programs={{programEnrollments: PROGRAM_ENROLLMENTS}}
-        enrollDialogVisibility={false}
-        enrollSelectedProgram={selectedEnrollment}
-      />);
+    let wrapper = renderEnrollmentDialog({
+      enrollDialogVisibility: false,
+      enrollSelectedProgram: selectedEnrollment
+    });
 
     let list = wrapper.find(MenuItem).map(menuItem => {
       let props = menuItem.props();
@@ -169,15 +159,12 @@ describe("NewEnrollmentDialog", () => {
   });
 
   it("shows the current enrollment in the SelectField", () => {
-    let selectedEnrollment = PROGRAM_ENROLLMENTS[0];
+    let selectedEnrollment = PROGRAMS[0];
 
-    let wrapper = shallow(
-      <NewEnrollmentDialog
-        dashboard={{programs: DASHBOARD_RESPONSE}}
-        programs={{programEnrollments: PROGRAM_ENROLLMENTS}}
-        enrollSelectedProgram={selectedEnrollment}
-        enrollDialogVisibility={false}
-      />);
+    let wrapper = renderEnrollmentDialog({
+      enrollSelectedProgram: selectedEnrollment,
+      enrollDialogVisibility: false
+    });
     let select = wrapper.find(SelectField);
     assert.equal(select.props().value, selectedEnrollment);
   });
