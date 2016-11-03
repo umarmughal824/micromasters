@@ -218,7 +218,7 @@ describe('Profile Editing utility functions', () => {
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
         month: '2',
         year: '1917',
-        day: '7'
+        day: '07'
       });
     });
 
@@ -228,7 +228,7 @@ describe('Profile Editing utility functions', () => {
       monthTextField.props.onChange({target: {value: "text"}});
       assert.deepEqual(that.props.profile.date_of_birth, null);
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
-        day: "7",
+        day: "07",
         month: "",
         year: "1917",
       });
@@ -247,7 +247,7 @@ describe('Profile Editing utility functions', () => {
       yearTextField.props.onChange({target: {value: "text"}});
       assert.deepEqual(that.props.profile.date_of_birth, null);
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
-        day: "7",
+        day: "07",
         month: "11",
         year: "",
       });
@@ -266,7 +266,7 @@ describe('Profile Editing utility functions', () => {
       monthTextField.props.onChange({target: {value: "233"}});
       assert.deepEqual(that.props.profile.date_of_birth, "1917-12-07");
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
-        day: "7",
+        day: "07",
         month: "12",
         year: "1917",
       });
@@ -278,7 +278,7 @@ describe('Profile Editing utility functions', () => {
       yearTextField.props.onChange({target: {value: tooOld}});
       assert.deepEqual(that.props.profile.date_of_birth, `${cutoff}-11-07`);
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
-        day: "7",
+        day: "07",
         month: "11",
         year: `${cutoff}`,
       });
@@ -288,7 +288,7 @@ describe('Profile Editing utility functions', () => {
       yearTextField.props.onChange({target: {value: tooYoung}});
       assert.deepEqual(that.props.profile.date_of_birth, `${currentYear}-11-07`);
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
-        day: "7",
+        day: "07",
         month: "11",
         year: `${currentYear}`,
       });
@@ -351,7 +351,7 @@ describe('Profile Editing utility functions', () => {
       rerender(false);
       monthTextField.props.onChange({target: {value: "8"}});
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
-        day: "9",
+        day: "09",
         month: "8",
         year: "1965"
       });
@@ -366,7 +366,7 @@ describe('Profile Editing utility functions', () => {
       rerender(false);
       yearTextField.props.onChange({target: {value: "1991"}});
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
-        day: "9",
+        day: "09",
         month: "11",
         year: "1991"
       });
@@ -461,7 +461,7 @@ describe('Profile Editing utility functions', () => {
       assert.deepEqual(that.props.profile.date_of_birth, null);
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
         day: "31",
-        month: "2",
+        month: "02",
         year: `${currentYear}`,
       });
     });
@@ -473,7 +473,7 @@ describe('Profile Editing utility functions', () => {
       assert.deepEqual(that.props.profile.date_of_birth, null);
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
         day: "",
-        month: "2",
+        month: "02",
         year: `${currentYear}`,
       });
     });
@@ -497,7 +497,7 @@ describe('Profile Editing utility functions', () => {
       assert.deepEqual(that.props.profile.date_of_birth, null);
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
         day: "28",
-        month: "2",
+        month: "02",
         year: ""
       });
     });

@@ -658,7 +658,7 @@ describe("UserPage", function() {
             end_date: "2002-01-01",
             end_date_edit: {
               year: "2002",
-              month: "1",
+              month: "01",
               day: undefined
             },
             city: "FoobarVille",

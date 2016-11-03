@@ -92,14 +92,15 @@ export default class DateField extends React.Component {
         day: day !== undefined ? day : edit.day
       });
 
+      const firstIfNumEqual = R.curry((x, y) => Number(x) === y ? x : y);
       let validatedDay = Maybe.of(1);
       if (!omitDay) {
         validatedDay = validateDay(newEdit.day);
-        newEdit.day = mstr(validatedDay);
+        newEdit.day = mstr(validatedDay.map(firstIfNumEqual(newEdit.day)));
       }
 
       let validatedMonth = validateMonth(newEdit.month);
-      newEdit.month = mstr(validatedMonth);
+      newEdit.month = mstr(validatedMonth.map(firstIfNumEqual(newEdit.month)));
 
       let validatedYear;
       if ( allowFutureYear ) {
