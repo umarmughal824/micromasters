@@ -9,7 +9,12 @@ from django.db import transaction
 
 from courses.models import Program, CourseRun
 from seed_data.management.commands import DEFAULT_GRADE, DEFAULT_FAILED_GRADE
-from seed_data.utils import accepts_or_calculates_now, filter_dict_by_key_set, filter_dict_none_values
+from seed_data.utils import (
+    accepts_or_calculates_now,
+    filter_dict_by_key_set,
+    filter_dict_none_values,
+    localized_datetime
+)
 from seed_data.lib import (
     CACHED_HANDLERS,
     CourseFinder,
@@ -23,6 +28,7 @@ from seed_data.lib import (
     set_course_run_current,
     set_course_run_future,
     set_program_financial_aid,
+    ensure_cached_edx_data_for_user,
 )
 
 
@@ -197,28 +203,36 @@ def add_past_failed_run(user=None, course=None, now=None, grade=DEFAULT_FAILED_G
     return chosen_past_run
 
 
+def _formatted_datetime(dt, dt_format='%m/%d/%Y'):
+    if not dt:
+        return None
+    return localized_datetime(dt).strftime(dt_format)
+
+
 def course_info(user=None, course=None):
     """Convenience method to show some consequential information for a course"""
     results = {'course_title': course.title}
     run_results = []
-    date_format = '%m/%d/%Y'
     for run in course.courserun_set.order_by('-start_date').all():
         run_result = {
             'id': run.id,
             'edx_course_key': run.edx_course_key,
-            'start_date': run.start_date.strftime(date_format) if run.start_date else None,
-            'end_date': run.end_date.strftime(date_format) if run.end_date else None
+            'start_date': _formatted_datetime(run.start_date),
+            'end_date': _formatted_datetime(run.end_date)
         }
+        for key in ['fuzzy_start_date', 'fuzzy_enrollment_start_date']:
+            if getattr(run, key, None):
+                run_result[key] = getattr(run, key)
         for date_key in ['enrollment_start', 'enrollment_end', 'upgrade_deadline']:
             if getattr(run, date_key, None):
-                run_result[date_key] = getattr(run, date_key).strftime(date_format)
+                run_result[date_key] = _formatted_datetime(getattr(run, date_key))
         for model_cls in CACHED_HANDLERS.keys():
             obj = model_cls.objects.filter(user=user, course_run=run).first()
             if obj and obj.data:
                 run_result['edx_data'] = run_result.get('edx_data', {})
                 run_result['edx_data'][model_cls.__name__] = {
                     'data': obj.data,
-                    'last_request': obj.last_request.strftime(date_format)
+                    'last_request': _formatted_datetime(obj.last_request)
                 }
         run_results.append(run_result)
     results['course_runs'] = run_results
@@ -330,6 +344,9 @@ class Command(BaseCommand):
             # Coerce 'grade' to decimal if it exists
             if 'grade' in additional_params:
                 additional_params['grade'] = Decimal(int(additional_params['grade'])/100)
+            # Make sure that cached edX records exist for the user (so we don't go to edX to fetch data)
+            ensure_cached_edx_data_for_user(user)
+            # Execute the action
             result = action_func(user=user, course=course, **additional_params)
             if isinstance(result, CourseRun):
                 self.stdout.write("Course run changed: (id: {}, edx_course_key: {})\nUser: {}; Course: {}".format(

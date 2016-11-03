@@ -5,9 +5,10 @@ import re
 from datetime import timedelta
 from functools import wraps
 from django.db import IntegrityError
+from django.db.models import Q
 
 from django.contrib.auth.models import User
-from courses.models import Program, Course
+from courses.models import Program, Course, CourseRun
 from dashboard.models import CachedCertificate, CachedEnrollment, CachedCurrentGrade
 from financialaid.factories import TierProgramFactory
 from financialaid.models import TierProgram
@@ -111,7 +112,7 @@ def course_state_editor(func):
         course_run = kwargs.get('course_run')
         if not course_run:
             course = kwargs['course']
-            clear_edx_data_for_course(user, course)
+            clear_edx_data(user, course=course)
             course_run = course.courserun_set.order_by('fuzzy_start_date', '-start_date').first()
             kwargs['course_run'] = course_run
             del kwargs['course']
@@ -147,9 +148,18 @@ class CachedHandler(object):
     def __init__(self, user):
         self.user = user
 
-    def clear_all(self, course_run=None):
-        """Sets data to None for all cached edX objects associated with a User (and CourseRun, if provided)"""
+    def get_missing_course_runs(self, course_runs):
+        """Given a list of CourseRuns, return the ones that do not have a cached edX object for the User"""
+        course_run_ids = set(course_run.id for course_run in course_runs)
+        cached_course_run_ids = self.model_cls.objects.filter(user=self.user).values_list("course_run__id", flat=True)
+        missing_course_run_ids = course_run_ids.difference(set(cached_course_run_ids))
+        return [cr for cr in course_runs if cr.id in missing_course_run_ids]
+
+    def clear_all(self, course=None, course_run=None):
+        """Sets data to None for all cached edX objects associated with a User (and Course/CourseRun, if provided)"""
         params = {'user': self.user}
+        if course:
+            params['course_run__course'] = course
         if course_run:
             params['course_run'] = course_run
         return self.model_cls.objects.filter(**params).update(data=None)
@@ -250,25 +260,34 @@ CACHED_HANDLERS = {
 }
 
 
-def clear_edx_data_for_course_run(user, course_run, models=None):
-    """Clears all of a User's cached edX data for a CourseRun, or just the data for specific cached models"""
+def ensure_cached_edx_data_for_user(user):
+    """
+    For every CourseRun in the database, ensure that a User has an associated cached edX
+    record (eg: CachedEnrollment)
+    """
+    all_course_runs = CourseRun.objects.filter(course__program__live=True).exclude(
+        Q(edx_course_key__isnull=True) | Q(edx_course_key__exact='')
+    ).all()
+    results = []
+    for cached_model, cached_model_handler in CACHED_HANDLERS.items():
+        missing_course_runs = cached_model_handler(user).get_missing_course_runs(all_course_runs)
+        # For any CourseRun that isn't already associated with a cached object, create a new one with data=None
+        create_result = cached_model.objects.bulk_create([
+            cached_model(user=user, course_run=course_run, data=None, last_request=future_date())
+            for course_run in missing_course_runs
+        ])
+        results.extend(create_result)
+    return results
+
+
+def clear_edx_data(user, course=None, course_run=None, models=None):
+    """Clears all of a User's cached edX data for a Course/CourseRun, or just the data for specific cached models"""
     if models:
         handlers = [CACHED_HANDLERS[model] for model in models]
     else:
         handlers = CACHED_HANDLERS.values()
     for cached_model_handler in handlers:
-        cached_model_handler(user).clear_all(course_run=course_run)
-
-
-def clear_edx_data_for_course(user, course, models=None):
-    """Clears all of a User's cached edX data for a Course, or just the data for specific cached models"""
-    if models:
-        handlers = [CACHED_HANDLERS[model] for model in models]
-    else:
-        handlers = CACHED_HANDLERS.values()
-    for cached_model_handler in handlers:
-        for course_run in course.courserun_set.all():
-            cached_model_handler(user).clear_all(course_run=course_run)
+        cached_model_handler(user).clear_all(course=course, course_run=course_run)
 
 
 def refresh_all_cached_edx_data(user):

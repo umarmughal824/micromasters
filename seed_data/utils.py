@@ -4,6 +4,7 @@ General util functions for database seeding
 from datetime import datetime, timedelta
 from functools import wraps
 import math
+from pytz import timezone
 
 
 def accepts_or_calculates_now(func):
@@ -64,3 +65,11 @@ def create_past_date_range(ended_days_ago=5, day_spread=10, now=None):
 def future_date(now=None, days_in_future=30):
     """Creates a date in the future"""
     return now + timedelta(days=days_in_future)
+
+
+def localized_datetime(dt, tz='US/Eastern'):
+    """Ensures a localized datetime"""
+    if dt.tzinfo:
+        return dt.astimezone(timezone(tz))
+    else:
+        return timezone(tz).localize(dt)
