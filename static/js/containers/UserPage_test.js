@@ -4,7 +4,6 @@ import TestUtils from 'react-addons-test-utils';
 import { assert } from 'chai';
 import _ from 'lodash';
 import moment from 'moment';
-import sinon from 'sinon';
 
 import {
   RECEIVE_GET_USER_PROFILE_SUCCESS,
@@ -120,10 +119,6 @@ describe("UserPage", function() {
       const getDialog = () => document.querySelector('.personal-dialog');
       const getSave = () => getDialog().querySelector('.save-button');
 
-      beforeEach(() => {
-        HTMLDivElement.prototype.scrollIntoView = sinon.stub();
-      });
-
       let userProfileActions = [
         SET_USER_PAGE_DIALOG_VISIBILITY,
         START_PROFILE_EDIT,
@@ -186,7 +181,7 @@ describe("UserPage", function() {
           }).then(() => {
             return new Promise(resolve => {
               setTimeout(() => { // ensure that the DOM update after clicking 'save' has finished
-                assert(HTMLDivElement.prototype.scrollIntoView.called, "Not called yet");
+                assert(helper.scrollIntoViewStub.called, "Not called yet");
                 resolve();
               }, 100);
             });

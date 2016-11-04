@@ -57,6 +57,8 @@ class IntegrationTestHelper {
     this.profileGetStub.returns(Promise.resolve(USER_PROFILE_RESPONSE));
     this.programsGetStub = this.sandbox.stub(api, 'getPrograms');
     this.programsGetStub.returns(Promise.resolve(PROGRAMS));
+    HTMLDivElement.prototype.scrollIntoView = this.sandbox.stub();
+    this.scrollIntoViewStub = HTMLDivElement.prototype.scrollIntoView;
     this.browserHistory = createMemoryHistory();
     this.currentLocation = null;
     this.browserHistory.listen(url => {
