@@ -106,7 +106,7 @@ class EmploymentForm extends ProfileFormFields {
           {title}
         </Cell>
         <Cell col={12}>
-          {this.boundTextField(keySet('company_name'), 'Company Name')}
+          {this.boundTextField(keySet('company_name'), 'Name of Employer')}
         </Cell>
         <Cell col={4}>
           <CountrySelectField
