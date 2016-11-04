@@ -79,6 +79,16 @@ class CachedCurrentGrade(CachedEdxInfoModel):
     """
 
 
+class UserCacheRefreshTime(Model):
+    """
+    Model to store the last refresh timestamp for each of the edX cached info model.
+    """
+    user = ForeignKey(User)
+    enrollment = DateTimeField(null=True)
+    certificate = DateTimeField(null=True)
+    current_grade = DateTimeField(null=True)
+
+
 class ProgramEnrollment(Model):
     """
     Model for student enrollments in Programs
