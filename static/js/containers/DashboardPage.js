@@ -23,7 +23,7 @@ import {
   STATUS_PASSED,
   STATUS_CURRENTLY_ENROLLED,
 } from '../constants';
-import { addCourseEnrollment } from '../actions/enrollments';
+import { addCourseEnrollment } from '../actions/course_enrollments';
 import {
   setToastMessage,
   setConfirmSkipDialogVisibility,
@@ -300,8 +300,8 @@ const mapStateToProps = (state) => {
   let profile = {
     profile: {}
   };
-  if (state.profiles[SETTINGS.username] !== undefined) {
-    profile = state.profiles[SETTINGS.username];
+  if (SETTINGS.user && state.profiles[SETTINGS.user.username] !== undefined) {
+    profile = state.profiles[SETTINGS.user.username];
   }
 
   return {

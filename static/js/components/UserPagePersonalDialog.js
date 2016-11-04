@@ -5,7 +5,6 @@ import Button from 'react-mdl/lib/Button';
 
 import { personalValidation } from '../lib/validation/profile';
 import PersonalForm from './PersonalForm';
-import ValidationAlert from './ValidationAlert';
 import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 
@@ -37,20 +36,22 @@ export default class UserPagePersonalDialog extends React.Component {
 
   render () {
     const { ui: { userPageDialogVisibility } } = this.props;
-    const actions = <ValidationAlert {...this.props}>
+    const actions = [
       <Button
         type='button'
         className='secondary-button cancel-button'
+        key='cancel'
         onClick={this.closePersonalDialog}>
         Cancel
-      </Button>
+      </Button>,
       <Button
         type='button'
         className='primary-button save-button'
+        key='save'
         onClick={this.savePersonalInfo}>
         Save
       </Button>
-    </ValidationAlert>;
+    ];
 
     return (
       <Dialog

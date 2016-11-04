@@ -13,7 +13,7 @@ from elasticsearch_dsl.connections import connections
 from profiles.models import Profile
 from profiles.serializers import ProfileSerializer
 from dashboard.models import ProgramEnrollment
-from dashboard.serializers import UserProgramSerializer
+from dashboard.serializers import UserProgramSearchSerializer
 from search.exceptions import ReindexException
 
 log = logging.getLogger(__name__)
@@ -134,7 +134,7 @@ def index_users(users, chunk_size=100):
     """
     Indexes a list of users via their ProgramEnrollments
     """
-    program_enrollments = ProgramEnrollment.objects.filter(user__in=users).select_related('user', 'program').all()
+    program_enrollments = ProgramEnrollment.prefetched_qset().filter(user__in=users)
     return index_program_enrolled_users(program_enrollments, chunk_size)
 
 
@@ -176,12 +176,12 @@ def serialize_program_enrolled_user(program_enrollment):
         'email': user.email
     }
     try:
-        serialized['profile'] = ProfileSerializer().to_representation(user.profile)
+        serialized['profile'] = ProfileSerializer(user.profile).data
     except Profile.DoesNotExist:
         # Just in case
         pass
 
-    serialized['program'] = UserProgramSerializer.serialize(program_enrollment)
+    serialized['program'] = UserProgramSearchSerializer.serialize(program_enrollment)
     return serialized
 
 

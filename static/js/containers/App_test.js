@@ -21,8 +21,8 @@ import {
 import {
   CLEAR_ENROLLMENTS,
   RECEIVE_GET_PROGRAM_ENROLLMENTS_FAILURE,
-} from '../actions/enrollments';
-import * as enrollmentActions from '../actions/enrollments';
+} from '../actions/programs';
+import * as enrollmentActions from '../actions/programs';
 import {
   CLEAR_UI,
   SET_PROFILE_STEP,
@@ -45,6 +45,7 @@ describe('App', () => {
     listenForActions = helper.listenForActions.bind(helper);
     renderComponent = helper.renderComponent.bind(helper);
     editProfileActions = [
+      START_PROFILE_EDIT,
       START_PROFILE_EDIT,
       UPDATE_PROFILE_VALIDATION,
       SET_PROFILE_STEP,
@@ -89,7 +90,7 @@ describe('App', () => {
       });
       helper.profileGetStub.returns(Promise.resolve(response));
 
-      return renderComponent("/dashboard").then(() => {
+      return renderComponent("/dashboard", [START_PROFILE_EDIT]).then(() => {
         assert.equal(helper.currentLocation.pathname, "/profile");
         assert.equal(checkStep(), PERSONAL_STEP);
       });

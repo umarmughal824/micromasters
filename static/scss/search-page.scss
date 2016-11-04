@@ -65,7 +65,7 @@
 
         .sk-item-list-option__text {
           margin-left: 10px;
-          color: m#666;
+          color: #666;
         }
 
         .sk-item-list-option__count {
@@ -75,14 +75,16 @@
     }
 
     .sk-hierarchical-menu-list {
+      width: 100%;
+
       .sk-hierarchical-menu-list__header {
-        margin: 15px 5px;
+        margin: 15px 5px 10px;
         font-size: 15px;
       }
 
       .sk-hierarchical-menu-list__root {
-        margin-left: 6px;
-        margin-right: 0;
+        margin-left: 10px;
+        margin-right: 10px;
 
         .sk-hierarchical-menu-option {
           >div {
@@ -91,6 +93,14 @@
 
           .sk-hierarchical-menu-option__text {
             margin-right: 15px;
+          }
+        }
+
+        .sk-hierarchical-menu-list__hierarchical-options > div {
+          align-items: stretch;
+
+          .sk-hierarchical-menu-option__count {
+            color: $font-gray;
           }
         }
       }
@@ -155,26 +165,30 @@
     }
   }
 
-  .mm-filters:empty {
-    display: none !important;
+  .mm-filters {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 10px 0 15px 8px !important;
+
+    &:empty {
+      display: none;
+    }
   }
 
   .search-header {
     min-height: 100px;
-    padding-left: 5px;
-    padding-bottom: 0;
+    padding: 30px 0 0 5px;
     border-bottom: 1px solid $border-color;
     margin: 0;
 
     > * {
       display: flex;
       flex-direction: row;
-      align-items: center;
     }
 
     .pagination-sort {
       justify-content: flex-end;
-      align-items: center;
 
       .sk-pagination-navigation {
         display: flex;
@@ -257,6 +271,9 @@
       font-weight: 300;
       padding-left: 15px;
       color: $font-gray;
+      height: 36px;
+      align-items: center;
+      display: flex;
     }
 
     .learner-actions {
@@ -363,5 +380,24 @@
     font-size: 14px;
     font-weight: normal;
     color: rgba(0,0,0,0.8);
+  }
+}
+
+.no-hits {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+  background-color: #efefef;
+  margin: 30px 0 4px 0;
+  height: 300px;
+  color: #848484;
+  font-style: italic;
+  font-weight: 200;
+
+  &.left-nav {
+    margin: 19px 6px 22px 6px;
+    font-size: 14px;
+    padding: 0 75px;
   }
 }

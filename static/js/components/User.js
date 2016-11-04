@@ -2,10 +2,13 @@
 import React from 'react';
 
 import EmploymentForm from './EmploymentForm';
-import EducationDisplay from './EducationDisplay';
+import EducationForm from './EducationForm';
 import UserPagePersonalDialog from './UserPagePersonalDialog.js';
 import UserInfoCard from './UserInfoCard';
-import { employmentValidation } from '../lib/validation/profile';
+import {
+  educationValidation,
+  employmentValidation,
+} from '../lib/validation/profile';
 import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 
@@ -16,14 +19,17 @@ export default class User extends React.Component {
     ui:                           UIState,
     clearProfileEdit:             () => void,
     saveProfile:                  SaveProfileFunc,
+    startProfileEdit:             () => void,
   };
 
   toggleShowPersonalDialog: Function = (): void => {
     const {
       setUserPageDialogVisibility,
-      ui: { userPageDialogVisibility }
+      ui: { userPageDialogVisibility },
+      startProfileEdit,
     } = this.props;
     setUserPageDialogVisibility(!userPageDialogVisibility);
+    startProfileEdit();
   };
 
   render() {
@@ -32,7 +38,7 @@ export default class User extends React.Component {
     return <div className="single-column">
       <UserPagePersonalDialog {...this.props} />
       <UserInfoCard profile={profile} toggleShowPersonalDialog={this.toggleShowPersonalDialog} />
-      <EducationDisplay {...this.props} />
+      <EducationForm {...this.props} showSwitch={false} validator={educationValidation} />
       <EmploymentForm {...this.props} showSwitch={false} validator={employmentValidation} />
     </div>;
   }

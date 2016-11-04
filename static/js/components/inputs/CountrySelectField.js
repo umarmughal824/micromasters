@@ -16,16 +16,17 @@ let countryOptions = _(iso3166.data)
 
 export default class CountrySelectField extends React.Component {
   props: {
-    updateProfile:            UpdateProfileFunc,
-    stateKeySet:              Array<string>,
-    countryKeySet:            Array<string>,
-    errors:                   ValidationErrors,
-    label:                    Node,
-    maxSearchResults:         number,
-    keySet:                   Array<string>,
-    options:                  Array<Option>,
-    validator:                Validator|UIValidator,
-    profile:                  Profile,
+    updateProfile:              UpdateProfileFunc,
+    stateKeySet:                Array<string>,
+    countryKeySet:              Array<string>,
+    errors:                     ValidationErrors,
+    label:                      Node,
+    maxSearchResults:           number,
+    keySet:                     Array<string>,
+    options:                    Array<Option>,
+    validator:                  Validator|UIValidator,
+    profile:                    Profile,
+    updateValidationVisibility: (xs: Array<string>) => void,
   };
 
   onChange: Function = (newProfile: Profile): void => {

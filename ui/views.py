@@ -17,6 +17,7 @@ from rolepermissions.shortcuts import available_perm_status
 from rolepermissions.verifications import has_role
 
 from micromasters.utils import webpack_dev_server_host, webpack_dev_server_url
+from micromasters.serializers import serialize_maybe_user
 from profiles.api import get_social_username
 from profiles.permissions import CanSeeIfNotPrivate
 from roles.models import Instructor, Staff
@@ -47,7 +48,6 @@ class ReactView(View):  # pylint: disable=unused-argument
         Handle GET requests to templates using React
         """
         user = request.user
-        username = get_social_username(user)
         roles = []
         if not user.is_anonymous():
             roles = [
@@ -61,8 +61,6 @@ class ReactView(View):  # pylint: disable=unused-argument
         js_settings = {
             "gaTrackingID": settings.GA_TRACKING_ID,
             "reactGaDebug": settings.REACT_GA_DEBUG,
-            "authenticated": not user.is_anonymous(),
-            "username": username,
             "host": webpack_dev_server_host(request),
             "edx_base_url": settings.EDXORG_BASE_URL,
             "roles": roles,
@@ -71,6 +69,7 @@ class ReactView(View):  # pylint: disable=unused-argument
             "sentry_dsn": sentry.get_public_dsn(),
             "search_url": reverse('search_api', kwargs={"elastic_url": ""}),
             "support_email": settings.EMAIL_SUPPORT,
+            "user": serialize_maybe_user(request.user),
         }
 
         return render(
@@ -139,7 +138,8 @@ def standard_error_page(request, status_code, template_filename):
             "js_settings_json": json.dumps({
                 "release_version": settings.VERSION,
                 "environment": settings.ENVIRONMENT,
-                "sentry_dsn": sentry.get_public_dsn()
+                "sentry_dsn": sentry.get_public_dsn(),
+                "user": serialize_maybe_user(request.user),
             }),
             "authenticated": authenticated,
             "name": name,
@@ -167,7 +167,8 @@ def terms_of_service(request):
             "js_settings_json": json.dumps({
                 "release_version": settings.VERSION,
                 "environment": settings.ENVIRONMENT,
-                "sentry_dsn": sentry.get_public_dsn()
+                "sentry_dsn": sentry.get_public_dsn(),
+                "user": serialize_maybe_user(request.user),
             }),
             "signup_dialog_src": get_bundle_url(request, "signup_dialog.js"),
             "tracking_id": "",

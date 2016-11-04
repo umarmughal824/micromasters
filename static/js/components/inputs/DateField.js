@@ -18,14 +18,15 @@ import {
 
 export default class DateField extends React.Component {
   props: {
-    data: Object,
-    errors: Object,
-    updateHandler: Function,
-    validator: Function,
-    keySet: Array<string>,
-    label: string,
-    omitDay: boolean,
-    allowFutureYear: boolean,
+    allowFutureYear:  boolean,
+    data:             Object,
+    errors:           Object,
+    keySet:           Array<string>,
+    label:            string,
+    omitDay:          boolean,
+    onBlur:           () => void,
+    updateHandler:    Function,
+    validator:        Function,
   };
 
   render() {
@@ -38,6 +39,7 @@ export default class DateField extends React.Component {
       label,
       omitDay,
       allowFutureYear,
+      onBlur,
     } = this.props;
 
     // make a copy of keySet with a slightly different key for temporary storage of the textfields being edited
@@ -184,6 +186,7 @@ export default class DateField extends React.Component {
         fullWidth={true}
         value={edit.year !== undefined ? edit.year : ""}
         onChange={e => setNewDate(undefined, undefined, e.target.value)}
+        onBlur={onBlur}
       />
     </div>;
   }

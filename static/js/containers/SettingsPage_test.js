@@ -10,6 +10,7 @@ import {
   REQUEST_PATCH_USER_PROFILE,
   RECEIVE_PATCH_USER_PROFILE_SUCCESS,
   CLEAR_PROFILE_EDIT,
+  UPDATE_VALIDATION_VISIBILITY,
 
   receiveGetUserProfileSuccess
 } from '../actions/profile';
@@ -30,10 +31,10 @@ describe("SettingsPage", function() {
     patchUserProfileStub = helper.sandbox.stub(api, 'patchUserProfile');
 
     helper.profileGetStub.
-      withArgs(SETTINGS.username).
+      withArgs(SETTINGS.user.username).
       returns(
         Promise.resolve(_.cloneDeep(USER_PROFILE_RESPONSE), {
-          username: SETTINGS.username
+          username: SETTINGS.user.username
         })
       );
   });
@@ -46,7 +47,7 @@ describe("SettingsPage", function() {
     let { div, button } = pageElements;
     button = button || div.querySelector(nextButtonSelector);
     patchUserProfileStub.throws("Invalid arguments");
-    patchUserProfileStub.withArgs(SETTINGS.username, updatedProfile).returns(Promise.resolve(updatedProfile));
+    patchUserProfileStub.withArgs(SETTINGS.user.username, updatedProfile).returns(Promise.resolve(updatedProfile));
 
     let actions = [];
     if (!validationFailure) {
@@ -54,7 +55,8 @@ describe("SettingsPage", function() {
         REQUEST_PATCH_USER_PROFILE,
         RECEIVE_PATCH_USER_PROFILE_SUCCESS,
         START_PROFILE_EDIT,
-        CLEAR_PROFILE_EDIT
+        CLEAR_PROFILE_EDIT,
+        UPDATE_VALIDATION_VISIBILITY,
       );
     }
     actions.push(
@@ -86,7 +88,7 @@ describe("SettingsPage", function() {
           account_privacy: 'public',
           email_optin: true
         });
-        helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.username, receivedProfile));
+        helper.store.dispatch(receiveGetUserProfileSuccess(SETTINGS.user.username, receivedProfile));
 
         assert(button.innerHTML.includes("Save"));
         let updatedProfile = Object.assign(_.cloneDeep(receivedProfile), {

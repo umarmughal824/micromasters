@@ -21,7 +21,7 @@ from celery.schedules import crontab
 from django.core.exceptions import ImproperlyConfigured
 
 
-VERSION = "0.20.0"
+VERSION = "0.21.0"
 
 CONFIG_PATHS = [
     os.environ.get('MICROMASTERS_CONFIG', ''),
@@ -140,8 +140,12 @@ MIDDLEWARE_CLASSES = (
 
 # enable the nplusone profiler only in debug mode
 if DEBUG:
-    INSTALLED_APPS += ('nplusone.ext.django', )
-    MIDDLEWARE_CLASSES += ('nplusone.ext.django.NPlusOneMiddleware', )
+    INSTALLED_APPS += (
+        'nplusone.ext.django',
+    )
+    MIDDLEWARE_CLASSES += (
+        'nplusone.ext.django.NPlusOneMiddleware',
+    )
 
 AUTHENTICATION_BACKENDS = (
     'backends.edxorg.EdxOrgOAuth2',

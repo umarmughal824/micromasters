@@ -63,11 +63,17 @@ export type Profiles = {
   [username: string]: ProfileGetResult,
 };
 
+type ValidationVisibility = Array<string[]>;
+
 export type ProfileGetResult = {
   profile: Profile,
   errorInfo?: APIErrorInfo,
   getStatus: string,
-  edit?: {errors: ValidationErrors, profile: Profile},
+  edit?: {
+    errors: ValidationErrors,
+    profile: Profile,
+    visibility: ValidationVisibility,
+  },
 };
 
 export type ProfilePatchResult = ProfileGetResult;

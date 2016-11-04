@@ -20,7 +20,7 @@ import {
   RECEIVE_PATCH_USER_PROFILE_FAILURE,
   CLEAR_PROFILE_EDIT,
 } from '../actions/profile';
-import { RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS } from '../actions/enrollments';
+import { RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS } from '../actions/programs';
 import {
   DASHBOARD_RESPONSE,
   ERROR_RESPONSE,
@@ -98,10 +98,10 @@ describe("ErrorMessage", () => {
       ];
 
       helper.profileGetStub.
-        withArgs(SETTINGS.username).
+        withArgs(SETTINGS.user.username).
         returns(
           Promise.resolve(Object.assign({}, USER_PROFILE_RESPONSE, {
-            username: SETTINGS.username
+            username: SETTINGS.user.username
           }))
         );
     });
@@ -170,16 +170,17 @@ describe("ErrorMessage", () => {
     describe('profile page', () => {
       it('renders errors when there is an error receiving the profile', () => {
         helper.profileGetStub.
-          withArgs(SETTINGS.username).
+          withArgs(SETTINGS.user.username).
           returns(Promise.reject(ERROR_RESPONSE));
 
-        const types = [
+        const actions = [
           RECEIVE_DASHBOARD_SUCCESS,
           RECEIVE_COURSE_PRICES_SUCCESS,
           RECEIVE_GET_USER_PROFILE_FAILURE,
           RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
+          START_PROFILE_EDIT,
         ];
-        return renderComponent("/profile", types, false).then(([, div]) => {
+        return renderComponent("/profile", actions, false).then(([, div]) => {
           confirmErrorMessage(
             div,
             `${ERROR_RESPONSE.error_code} ${errorString}`,
@@ -196,7 +197,7 @@ describe("ErrorMessage", () => {
           detail: "some error messsage"
         };
         helper.profileGetStub.
-          withArgs(SETTINGS.username).
+          withArgs(SETTINGS.user.username).
           returns(Promise.reject(fourOhFour));
         let actions = [
           REQUEST_GET_USER_PROFILE,
@@ -205,7 +206,7 @@ describe("ErrorMessage", () => {
           RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
           RECEIVE_GET_USER_PROFILE_FAILURE,
         ];
-        return renderComponent(`/learner/${SETTINGS.username}`, actions, false).then(([, div]) => {
+        return renderComponent(`/learner/${SETTINGS.user.username}`, actions, false).then(([, div]) => {
           confirmErrorMessage(
             div,
             `404 ${errorString}`,
@@ -223,7 +224,7 @@ describe("ErrorMessage", () => {
           RECEIVE_GET_USER_PROFILE_SUCCESS,
           RECEIVE_GET_USER_PROFILE_SUCCESS,
         ];
-        return renderComponent(`/learner/${SETTINGS.username}`, userPageActions, false).then(([, div]) => {
+        return renderComponent(`/learner/${SETTINGS.user.username}`, userPageActions, false).then(([, div]) => {
           let editButton = div.querySelector('.mdl-card').querySelector('.mdl-button--icon');
           listenForActions([
             SET_USER_PAGE_DIALOG_VISIBILITY,

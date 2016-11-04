@@ -4,8 +4,8 @@ Model tests
 # pylint: disable=no-self-use
 from datetime import datetime, timedelta
 
-from ddt import ddt, data, unpack
 import pytz
+from ddt import ddt, data, unpack
 
 from courses.factories import (
     ProgramFactory,
@@ -75,7 +75,7 @@ class GetFirstUnexpiredRunTests(CourseModelTests):  # pylint: disable=too-many-p
         """
         No run available
         """
-        assert self.course.get_first_unexpired_run() is None
+        assert CourseRun.get_first_unexpired_run(self.course) is None
 
     @data(
         # course past, enrollment past
@@ -110,7 +110,7 @@ class GetFirstUnexpiredRunTests(CourseModelTests):  # pylint: disable=too-many-p
             enr_start=self.from_weeks(enr_start_weeks),
             enr_end=self.from_weeks(enr_end_weeks),
         )
-        unexpired_run = self.course.get_first_unexpired_run()
+        unexpired_run = CourseRun.get_first_unexpired_run(self.course)
         if is_run:
             assert unexpired_run == course_run
         else:
@@ -133,7 +133,7 @@ class GetFirstUnexpiredRunTests(CourseModelTests):  # pylint: disable=too-many-p
             enr_start=self.from_weeks(40),
             enr_end=self.from_weeks(50),
         )
-        next_run = self.course.get_first_unexpired_run()
+        next_run = CourseRun.get_first_unexpired_run(self.course)
         assert isinstance(next_run, CourseRun)
         assert next_run.pk == course_run.pk
 
@@ -154,19 +154,22 @@ class GetFirstUnexpiredRunTests(CourseModelTests):  # pylint: disable=too-many-p
             enr_start=self.from_weeks(40),
             enr_end=self.from_weeks(50),
         )
-        next_run = self.course.get_first_unexpired_run()
+        next_run = CourseRun.get_first_unexpired_run(self.course)
         assert isinstance(next_run, CourseRun)
         assert next_run.pk == course_run.pk
 
     def test_exclude_course_run(self):
         """
-        Two runs, one of which will be excluded from the results.
+        Two runs, one of which will be excluded from the results
+        because the upgrade deadline for that course has passed.
         """
-        course_run_earlier = self.create_run(
+        # course run earlier
+        self.create_run(
             start=self.from_weeks(-2),
             end=self.from_weeks(10),
-            enr_start=self.from_weeks(-1),
-            enr_end=self.from_weeks(4),
+            enr_start=self.from_weeks(-5),
+            enr_end=self.from_weeks(-1),
+            upgrade_deadline=self.from_weeks(-1),
         )
         course_run_later = self.create_run(
             start=self.from_weeks(-1),
@@ -174,7 +177,7 @@ class GetFirstUnexpiredRunTests(CourseModelTests):  # pylint: disable=too-many-p
             enr_start=self.from_weeks(0),
             enr_end=self.from_weeks(5),
         )
-        next_run = self.course.get_first_unexpired_run(course_run_to_exclude=course_run_earlier)
+        next_run = CourseRun.get_first_unexpired_run(self.course)
         assert isinstance(next_run, CourseRun)
         assert next_run.pk == course_run_later.pk
 

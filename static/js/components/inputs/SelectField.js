@@ -22,18 +22,19 @@ class SelectField extends React.Component {
   editKeySet: string[];
 
   props: {
-    id?:                      string,
-    profile:                  Profile,
-    autocompleteStyleProps:   Object,
-    autocompleteBehaviors:    Array<any>,
-    errors:                   ValidationErrors,
-    label:                    Node,
-    onChange:                 Function,
-    updateProfile:            UpdateProfileFunc,
-    maxSearchResults:         number,
-    keySet:                   Array<string>,
-    options:                  Array<Option>,
-    validator:                Validator|UIValidator,
+    id?:                        string,
+    profile:                    Profile,
+    autocompleteStyleProps:     Object,
+    autocompleteBehaviors:      Array<any>,
+    errors:                     ValidationErrors,
+    label:                      Node,
+    onChange:                   Function,
+    updateProfile:              UpdateProfileFunc,
+    maxSearchResults:           number,
+    keySet:                     Array<string>,
+    options:                    Array<Option>,
+    validator:                  Validator|UIValidator,
+    updateValidationVisibility: (xs: Array<string>) => void,
   };
 
   static defaultProps = {
@@ -68,9 +69,16 @@ class SelectField extends React.Component {
   onBlur: Function = (): void => {
     // clear the edit value when we lose focus. In its place we will display
     // the selected option label if one is selected, or an empty string
-    const { profile, updateProfile, validator } = this.props;
+    const {
+      profile,
+      keySet,
+      updateProfile,
+      validator,
+      updateValidationVisibility
+    } = this.props;
     let clone = _.cloneDeep(profile);
     _.set(clone, this.editKeySet, undefined);
+    updateValidationVisibility(keySet);
     updateProfile(clone, validator);
   };
 

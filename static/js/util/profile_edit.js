@@ -22,7 +22,7 @@ import type { Option } from '../flow/generalTypes';
  * pass in the name (used as placeholder), key for profile, and the options.
  */
 export function boundRadioGroupField(keySet: string[], label: string, options: Option[]): React$Element<*> {
-  const { profile, updateProfile, errors, validator } = this.props;
+  const { profile, updateProfile, errors, validator, updateValidationVisibility } = this.props;
   const styles = {
     labelStyle: {
       left: -10,
@@ -39,6 +39,7 @@ export function boundRadioGroupField(keySet: string[], label: string, options: O
       value = false;
     }
     _.set(clone, keySet, value);
+    updateValidationVisibility(keySet);
     updateProfile(clone, validator);
   };
 
@@ -99,12 +100,22 @@ export function boundTextField(keySet: string[], label: string): React$Element<*
     errors,
     updateProfile,
     validator,
+    updateValidationVisibility,
+    updateProfileValidation,
   } = this.props;
+
   let onChange = e => {
     let clone = _.cloneDeep(profile);
     _.set(clone, keySet, e.target.value);
+    updateValidationVisibility(keySet);
     updateProfile(clone, validator);
   };
+
+  let onBlur = () => {
+    updateValidationVisibility(keySet);
+    updateProfileValidation(profile, validator);
+  };
+
   let getValue = () => {
     let value = _.get(profile, keySet, "");
     return ( _.isNull(value) || _.isUndefined(value) ) ? "" : value;
@@ -114,6 +125,7 @@ export function boundTextField(keySet: string[], label: string): React$Element<*
   // Grid and Cell to manage its size
   return (
     <TextField
+      onBlur={onBlur}
       name={label}
       className={validationErrorSelector(errors, keySet)}
       floatingLabelText={label}
@@ -135,12 +147,21 @@ export function boundDateField(keySet: string[], label: string, omitDay: boolean
     errors,
     updateProfile,
     validator,
+    updateValidationVisibility,
+    updateProfileValidation,
   } = this.props;
+
+  let onBlur = () => {
+    updateValidationVisibility(keySet);
+    updateProfileValidation(profile, validator);
+  };
+
 
   return <DateField
     data={profile}
     errors={errors}
     updateHandler={updateProfile}
+    onBlur={onBlur}
     validator={validator}
     keySet={keySet}
     label={label}
@@ -155,11 +176,13 @@ export function boundCheckbox(keySet: string[], label: string|React$Element<*>):
     errors,
     updateProfile,
     validator,
+    updateValidationVisibility,
   } = this.props;
 
   let onChange = e => {
     let clone = _.cloneDeep(profile);
     _.set(clone, keySet, e.target.checked);
+    updateValidationVisibility(keySet);
     updateProfile(clone, validator);
   };
 

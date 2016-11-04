@@ -9,6 +9,7 @@ import {
   RECEIVE_PATCH_USER_PROFILE_SUCCESS,
   START_PROFILE_EDIT,
   UPDATE_PROFILE_VALIDATION,
+  UPDATE_VALIDATION_VISIBILITY,
 } from '../actions/profile';
 import { setProfileStep } from '../actions/ui';
 import {
@@ -50,7 +51,7 @@ describe("ProfilePage", function() {
     let { div, button } = pageElements;
     button = button || div.querySelector(nextButtonSelector);
     patchUserProfileStub.throws("Invalid arguments");
-    patchUserProfileStub.withArgs(SETTINGS.username, updatedProfile).returns(Promise.resolve(updatedProfile));
+    patchUserProfileStub.withArgs(SETTINGS.user.username, updatedProfile).returns(Promise.resolve(updatedProfile));
 
     if ( actions.length === 0 ) {
       if (!validationFailure) {
@@ -60,8 +61,9 @@ describe("ProfilePage", function() {
         );
       }
       actions.push(
+        UPDATE_PROFILE_VALIDATION,
+        UPDATE_VALIDATION_VISIBILITY,
         START_PROFILE_EDIT,
-        UPDATE_PROFILE_VALIDATION
       );
     }
 
@@ -79,10 +81,10 @@ describe("ProfilePage", function() {
         work_history: []
       });
       helper.profileGetStub.
-        withArgs(SETTINGS.username).
+        withArgs(SETTINGS.user.username).
         returns(
           Promise.resolve(Object.assign({}, userProfile, {
-            username: SETTINGS.username
+            username: SETTINGS.user.username
           }))
         );
     });
@@ -94,7 +96,7 @@ describe("ProfilePage", function() {
         activeDialog('education-dialog-wrapper');
       };
       setStep(EDUCATION_STEP);
-      return renderComponent('/profile').then(dialogTest);
+      return renderComponent('/profile', [START_PROFILE_EDIT]).then(dialogTest);
     });
 
     it('should launch a dialog to add an entry when an employment switch is set to Yes', () => {
@@ -104,14 +106,14 @@ describe("ProfilePage", function() {
         activeDialog('employment-dialog-wrapper');
       };
       setStep(EMPLOYMENT_STEP);
-      return renderComponent('/profile').then(dialogTest);
+      return renderComponent('/profile', [START_PROFILE_EDIT]).then(dialogTest);
     });
   });
 
   it('navigates backward when Previous button is clicked', () => {
     setStep(EDUCATION_STEP);
     const checkStep = () => helper.store.getState().ui.profileStep;
-    return renderComponent('/profile').then(([, div]) => {
+    return renderComponent('/profile', [START_PROFILE_EDIT]).then(([, div]) => {
       let button = div.querySelector(prevButtonSelector);
       assert.equal(checkStep(), EDUCATION_STEP);
       TestUtils.Simulate.click(button);
@@ -128,7 +130,7 @@ describe("ProfilePage", function() {
           education: []
         });
         helper.profileGetStub.returns(Promise.resolve(updatedProfile));
-        return renderComponent('/profile').then(([, div]) => {
+        return renderComponent('/profile', [START_PROFILE_EDIT]).then(([, div]) => {
           // close all switches
           if (`${step}` === 'personal') {
             return confirmSaveButtonBehavior(updatedProfile, {div: div}, true);
@@ -140,12 +142,12 @@ describe("ProfilePage", function() {
   }
 
   it('shows a spinner when profile get is processing', () => {
-    return renderComponent('/profile').then(([, div]) => {
+    return renderComponent('/profile', [START_PROFILE_EDIT]).then(([, div]) => {
       assert.notOk(div.querySelector(".spinner"), "Found spinner but no fetch in progress");
       helper.store.dispatch({
         type: REQUEST_GET_USER_PROFILE,
         payload: {
-          username: SETTINGS.username
+          username: SETTINGS.user.username
         }
       });
 
@@ -154,7 +156,7 @@ describe("ProfilePage", function() {
   });
 
   it('select program display on personal tab', () => {
-    return renderComponent('/profile').then(([, div]) => {
+    return renderComponent('/profile', [START_PROFILE_EDIT]).then(([, div]) => {
       assert(div.querySelector(".program-select"), "Unable to find select program dropdown");
     });
   });

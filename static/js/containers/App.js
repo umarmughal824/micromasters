@@ -31,7 +31,7 @@ import {
   clearEnrollments,
   fetchProgramEnrollments,
   setCurrentProgramEnrollment,
-} from '../actions/enrollments';
+} from '../actions/programs';
 import {
   setEnrollDialogError,
   setEnrollDialogVisibility,
@@ -62,7 +62,7 @@ class App extends React.Component {
     dispatch:                 Dispatch,
     dashboard:                DashboardState,
     prices:                   CoursePricesState,
-    enrollments:              ProgramEnrollmentsState,
+    programs:                 ProgramEnrollmentsState,
     history:                  Object,
     ui:                       UIState,
     signupDialog:             Object,
@@ -73,7 +73,9 @@ class App extends React.Component {
   };
 
   updateRequirements() {
-    this.fetchUserProfile(SETTINGS.username);
+    if (SETTINGS.user) {
+      this.fetchUserProfile(SETTINGS.user.username);
+    }
     this.fetchDashboard();
     this.fetchCoursePrices();
     this.fetchEnrollments();
@@ -91,7 +93,8 @@ class App extends React.Component {
 
   componentWillUnmount() {
     const { dispatch } = this.props;
-    dispatch(clearProfile(SETTINGS.username));
+    const username = SETTINGS.user ? SETTINGS.user.username : null;
+    dispatch(clearProfile(username));
     dispatch(clearDashboard());
     dispatch(clearCoursePrices());
     dispatch(clearUI());
@@ -99,9 +102,13 @@ class App extends React.Component {
   }
 
   fetchUserProfile(username) {
-    const { userProfile, dispatch } = this.props;
+    const { userProfile, dispatch, location: { pathname } } = this.props;
     if (userProfile.getStatus === undefined) {
-      dispatch(fetchUserProfile(username));
+      dispatch(fetchUserProfile(username)).then(() => {
+        if ( PROFILE_REGEX.test(pathname) ) {
+          dispatch(startProfileEdit(SETTINGS.username));
+        }
+      });
     }
   }
 
@@ -120,8 +127,8 @@ class App extends React.Component {
   }
 
   fetchEnrollments() {
-    const { enrollments, dispatch } = this.props;
-    if (enrollments.getStatus === undefined) {
+    const { programs, dispatch } = this.props;
+    if (programs.getStatus === undefined) {
       dispatch(fetchProgramEnrollments());
     }
   }
@@ -145,13 +152,14 @@ class App extends React.Component {
       dispatch,
     } = this.props;
     const [ complete, step, errors] = validateProfileComplete(profile);
+    const username = SETTINGS.user ? SETTINGS.user.username : null;
     if (
       userProfile.getStatus === FETCH_SUCCESS &&
       !PROFILE_REGEX.test(pathname) &&
       !complete
     ) {
-      dispatch(startProfileEdit(SETTINGS.username));
-      dispatch(updateProfileValidation(SETTINGS.username, errors));
+      dispatch(startProfileEdit(username));
+      dispatch(updateProfileValidation(username, errors));
       if ( step !== null ) {
         dispatch(setProfileStep(step));
       }
@@ -202,7 +210,7 @@ class App extends React.Component {
   render() {
     const {
       currentProgramEnrollment,
-      enrollments,
+      programs,
       ui: {
         enrollDialogError,
         enrollDialogVisibility,
@@ -220,8 +228,8 @@ class App extends React.Component {
       empty = true;
     }
 
-    if (enrollments.getStatus === FETCH_FAILURE) {
-      children = <ErrorMessage errorInfo={enrollments.getErrorInfo} />;
+    if (programs.getStatus === FETCH_FAILURE) {
+      children = <ErrorMessage errorInfo={programs.getErrorInfo} />;
       empty = true;
     }
 
@@ -248,8 +256,8 @@ class App extends React.Component {
         enrollDialogError={enrollDialogError}
         enrollDialogVisibility={enrollDialogVisibility}
         enrollSelectedProgram={enrollSelectedProgram}
-        enrollments={enrollments}
         pathname={pathname}
+        programs={programs}
         setCurrentProgramEnrollment={this.setCurrentProgramEnrollment}
         setEnrollDialogError={this.setEnrollDialogError}
         setEnrollDialogVisibility={this.setEnrollDialogVisibility}
@@ -274,11 +282,12 @@ class App extends React.Component {
 }
 
 const mapStateToProps = (state) => {
+  const user = SETTINGS.user;
   let profile = {
     profile: {}
   };
-  if (state.profiles[SETTINGS.username] !== undefined) {
-    profile = state.profiles[SETTINGS.username];
+  if (user && state.profiles[user.username] !== undefined) {
+    profile = state.profiles[user.username];
   }
   return {
     userProfile:              profile,
@@ -286,7 +295,8 @@ const mapStateToProps = (state) => {
     prices:                   state.prices,
     ui:                       state.ui,
     currentProgramEnrollment: state.currentProgramEnrollment,
-    enrollments:              state.enrollments,
+    programs:                 state.programs,
+    courseEnrollments:        state.courseEnrollments,
     signupDialog:             state.signupDialog,
   };
 };

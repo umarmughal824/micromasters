@@ -48,9 +48,11 @@ def create_program_limit_query(user):
         should=[
             Q('term', **{'program.id': program.id}) for program in users_allowed_programs
         ],
+        # require that at least one program id matches the user's allowed programs
+        minimum_should_match=1,
         must=[
             Q('term', **{'program.is_learner': True})
-        ]
+        ],
     )
 
 
@@ -67,9 +69,10 @@ def create_search_obj(user, search_param_dict=None):
         Search: elasticsearch_dsl Search object
     """
     search_obj = Search(index=settings.ELASTICSEARCH_INDEX, doc_type=DOC_TYPES)
+    # the following filter should come first because the sequence matters in applying them
+    search_obj = search_obj.filter(create_program_limit_query(user))
     if search_param_dict is not None:
         search_obj.update_from_dict(search_param_dict)
-    search_obj = search_obj.query(create_program_limit_query(user))
     return search_obj
 
 

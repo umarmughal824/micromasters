@@ -16,6 +16,7 @@ from wagtail.wagtailimages.models import Image
 
 from courses.models import Program
 from courses.serializers import CourseSerializer
+from micromasters.serializers import serialize_maybe_user
 from micromasters.utils import webpack_dev_server_host
 from profiles.api import get_social_username
 from roles.models import Instructor, Staff
@@ -25,12 +26,12 @@ from ui.views import get_bundle_url
 def faculty_for_carousel(faculty):
     """formats faculty info for the carousel"""
     from cms.serializers import FacultySerializer
-    return [FacultySerializer().to_representation(f) for f in faculty]
+    return FacultySerializer(faculty, many=True).data
 
 
 def courses_for_popover(courses):
     """formats course info for the popover"""
-    return [CourseSerializer().to_representation(c) for c in courses]
+    return CourseSerializer(courses, many=True).data
 
 
 class HomePage(Page):
@@ -214,7 +215,8 @@ def get_program_page_context(programpage, request):
         "courses": courses_for_popover(courses_query),
         "environment": settings.ENVIRONMENT,
         "sentry_dsn": sentry.get_public_dsn(),
-        "release_version": settings.VERSION
+        "release_version": settings.VERSION,
+        "user": serialize_maybe_user(request.user),
     }
     username = get_social_username(request.user)
     context = super(ProgramPage, programpage).get_context(request)

@@ -14,7 +14,6 @@ import {
   personalValidation,
   programValidation,
 } from '../lib/validation/profile';
-import ValidationAlert  from './ValidationAlert';
 import type {
   Profile,
   SaveProfileFunc,
@@ -25,6 +24,7 @@ import type { UIState } from '../reducers/ui';
 import type { DashboardState } from '../flow/dashboardTypes';
 import type { Program } from '../flow/programTypes';
 import type { Event } from '../flow/eventType';
+import {  validationErrorSelector } from '../util/util';
 
 class PersonalTab extends React.Component {
   props: {
@@ -71,7 +71,7 @@ class PersonalTab extends React.Component {
         style={{width: "65%"}}
         hintText="Select Program"
         onChange={this.setProgramHelper}
-        className="program-select"
+        className={`program-select ${validationErrorSelector(errors, ['program'])}`}
         errorText={_.get(errors, "program")}
       >
         { this.programListing(programs) }
@@ -91,7 +91,6 @@ class PersonalTab extends React.Component {
         </Card>
         <Card shadow={1} className="profile-form">
           <PersonalForm {...this.props} validator={personalValidation} />
-          <ValidationAlert {...this.props} />
         </Card>
         <ProfileProgressControls
           {...this.props}

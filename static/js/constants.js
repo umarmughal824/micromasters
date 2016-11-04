@@ -7,7 +7,7 @@ export const DOCTORATE = 'p';
 
 export const ISO_8601_FORMAT = 'YYYY-MM-DD';
 export const DASHBOARD_FORMAT = 'M/D/Y';
-export const DASHBOARD_MONTH_FORMAT = 'M/Y';
+export const DASHBOARD_MONTH_FORMAT = 'MM[/]YYYY';
 
 // NOTE: this is in order of attainment
 export const EDUCATION_LEVELS = [
@@ -23,6 +23,8 @@ export const EMPLOYMENT_STEP = 'employment';
 export const EDUCATION_STEP = 'education';
 
 export const YEAR_VALIDATION_CUTOFF = 120;
+
+export const ALL_ERRORS_VISIBLE = 'ALL_ERRORS_VISIBLE';
 
 export const PROFILE_STEP_LABELS = new Map([
   [PERSONAL_STEP, "Personal"],
@@ -210,7 +212,7 @@ export const ELASTICSEARCH_RESPONSE = {
 };
 
 export const USER_PROFILE_RESPONSE = {
-  "username": SETTINGS.username,
+  "username": SETTINGS.user ? SETTINGS.user.username : null,
   "filled_out": true,
   "agreed_to_terms_of_service": true,
   "account_privacy": "all_users",
@@ -274,7 +276,7 @@ export const USER_PROFILE_RESPONSE = {
     "school_country": "US",
     "online_degree": false
   }],
-  "edx_level_of_education": null
+  "edx_level_of_education": null,
 };
 
 export const USER_PROGRAM_RESPONSE = {
@@ -591,11 +593,15 @@ export const DASHBOARD_RESPONSE = [
 export const PROGRAM_ENROLLMENTS = [
   {
     id: DASHBOARD_RESPONSE[1].id,
-    title: DASHBOARD_RESPONSE[1].title
+    title: DASHBOARD_RESPONSE[1].title,
+    programpage_url: "/program/",
+    enrolled: true,
   },
   {
     id: DASHBOARD_RESPONSE[2].id,
-    title: DASHBOARD_RESPONSE[2].title
+    title: DASHBOARD_RESPONSE[2].title,
+    programpage_url: null,
+    enrolled: true,
   },
 ];
 

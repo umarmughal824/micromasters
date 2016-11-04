@@ -3,6 +3,7 @@
 import React from 'react';
 import _ from 'lodash';
 import type { Dispatch } from 'redux';
+import R from 'ramda';
 
 import {
   startProfileEdit,
@@ -11,6 +12,7 @@ import {
   clearProfileEdit,
   fetchUserProfile,
   saveProfile,
+  updateValidationVisibility,
 } from '../actions/profile';
 import {
   setWorkHistoryEdit,
@@ -34,7 +36,8 @@ import type { Profile, Profiles, ProfileGetResult } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 import type { DashboardState } from '../flow/dashboardTypes';
 import type { Program } from '../flow/programTypes';
-import { addProgramEnrollment } from '../actions/enrollments';
+import { addProgramEnrollment } from '../actions/programs';
+import { ALL_ERRORS_VISIBLE } from '../constants';
 
 type UpdateProfile = (isEdit: boolean, profile: Profile, validator: Validator|UIValidator) => void;
 
@@ -68,35 +71,52 @@ class ProfileFormContainer extends React.Component {
     }
   };
 
-  updateProfileValidation(props: Object, profile: Profile, validator: Validator|UIValidator): void {
-    const username = SETTINGS.username;
-    const { dispatch, profiles, ui } = props;
-    if ( profiles[username].edit && !_.isEmpty(profiles[username].edit.errors) ) {
-      let errors = validator(profile, ui);
-      dispatch(updateProfileValidation(username, errors));
-    }
+  updateProfileValidation: Function = (profile: Profile, validator: Validator|UIValidator): void => {
+    const username = SETTINGS.user.username;
+    const { dispatch, ui } = this.props;
+    let errors = validator(profile, ui);
+    dispatch(updateProfileValidation(username, errors));
   }
 
-  updateProfile: UpdateProfile = (isEdit, profile, validator) => {
+  updateProfile: UpdateProfile = (isEdit, profile, validator, skipValidation = false) => {
     const { dispatch } = this.props;
-    const username = SETTINGS.username;
+    const username = SETTINGS.user.username;
 
     if (!isEdit) {
       dispatch(startProfileEdit(username));
     }
     dispatch(updateProfile(username, profile));
-    this.updateProfileValidation(this.props, profile, validator);
+    if ( !skipValidation ) {
+      this.updateProfileValidation(profile, validator);
+    }
+  };
+
+  updateValidationVisibility: Function = keySet => {
+    const { dispatch, profiles } = this.props;
+    const username = SETTINGS.user.username;
+    if ( !profiles[username].edit ) {
+      dispatch(updateValidationVisibility(username, keySet));
+    } else if ( !R.contains(keySet, profiles[username].edit.visibility) ) {
+      dispatch(updateValidationVisibility(username, keySet));
+    }
+  };
+
+  startProfileEdit: Function = () => {
+    const { dispatch } = this.props;
+    const username = SETTINGS.username;
+    dispatch(startProfileEdit(username));
   };
 
   saveProfile(isEdit: boolean, validator: Validator|UIValidator, profile: Profile, ui: UIState) {
     const { dispatch } = this.props;
-    const username = SETTINGS.username;
+    const username = SETTINGS.user.username;
 
     if (!isEdit) {
       // Validation errors will only show up if we start the edit
       dispatch(startProfileEdit(username));
     }
     let errors = validator(profile, ui);
+    this.updateValidationVisibility(ALL_ERRORS_VISIBLE);
     dispatch(updateProfileValidation(username, errors));
     if (_.isEmpty(errors)) {
       return dispatch(saveProfile(username, profile)).then(() => {
@@ -116,31 +136,31 @@ class ProfileFormContainer extends React.Component {
     }
   }
 
-  setProgram = (program: Program): void => {
-    const { dispatch } = this.props;
-    dispatch(setProgram(program));
-  }
-
   addProgramEnrollment = (programId: number): void => {
     const { dispatch } = this.props;
     dispatch(addProgramEnrollment(programId));
   };
 
+  setProgram = (program: Program): void => {
+    const { dispatch } = this.props;
+    dispatch(setProgram(program));
+  };
+
   simpleActionHelpers: Function = (): ActionHelpers => {
     const { dispatch } = this.props;
     return createSimpleActionHelpers(dispatch, [
-      ['setWorkDialogVisibility', setWorkDialogVisibility],
-      ['setWorkHistoryAnswer', setWorkHistoryAnswer],
-      ['setWorkDialogIndex', setWorkDialogIndex],
       ['clearProfileEdit', clearProfileEdit],
-      ['setEducationDialogVisibility', setEducationDialogVisibility],
-      ['setEducationDialogIndex', setEducationDialogIndex],
+      ['setDeletionIndex', setDeletionIndex],
       ['setEducationDegreeLevel', setEducationDegreeLevel],
+      ['setEducationDialogIndex', setEducationDialogIndex],
+      ['setEducationDialogVisibility', setEducationDialogVisibility],
       ['setEducationLevelAnswers', setEducationLevelAnswers],
-      ['setUserPageDialogVisibility', setUserPageDialogVisibility],
       ['setShowEducationDeleteDialog', setShowEducationDeleteDialog],
       ['setShowWorkDeleteDialog', setShowWorkDeleteDialog],
-      ['setDeletionIndex', setDeletionIndex],
+      ['setUserPageDialogVisibility', setUserPageDialogVisibility],
+      ['setWorkDialogIndex', setWorkDialogIndex],
+      ['setWorkDialogVisibility', setWorkDialogVisibility],
+      ['setWorkHistoryAnswer', setWorkHistoryAnswer],
     ]);
   };
 
@@ -176,16 +196,19 @@ class ProfileFormContainer extends React.Component {
     }
 
     return {
-      profile: profile,
-      errors: errors,
-      ui: ui,
-      dispatch: dispatch,
-      dashboard: dashboard,
-      setProgram: this.setProgram,
       addProgramEnrollment: this.addProgramEnrollment,
-      updateProfile: this.updateProfile.bind(this, isEdit),
-      saveProfile: this.saveProfile.bind(this, isEdit),
+      dashboard: dashboard,
+      dispatch: dispatch,
+      errors: errors,
       fetchProfile: this.fetchProfile,
+      profile: profile,
+      saveProfile: this.saveProfile.bind(this, isEdit),
+      setProgram: this.setProgram,
+      startProfileEdit: this.startProfileEdit,
+      ui: ui,
+      updateProfile: this.updateProfile.bind(this, isEdit),
+      updateProfileValidation: this.updateProfileValidation,
+      updateValidationVisibility: this.updateValidationVisibility,
       ...this.simpleActionHelpers(),
       ...this.asyncActionHelpers()
     };

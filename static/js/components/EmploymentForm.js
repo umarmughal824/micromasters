@@ -6,7 +6,6 @@ import Dialog from 'material-ui/Dialog';
 import Card from 'react-mdl/lib/Card/Card';
 import IconButton from 'react-mdl/lib/IconButton';
 import _ from 'lodash';
-import moment from 'moment';
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
 
 import { userPrivilegeCheck } from '../util/util';
@@ -22,8 +21,9 @@ import ConfirmDeletion from './ConfirmDeletion';
 import SelectField from './inputs/SelectField';
 import CountrySelectField from './inputs/CountrySelectField';
 import StateSelectField from './inputs/StateSelectField';
-import ValidationAlert from './ValidationAlert';
-
+import INDUSTRIES from '../data/industries';
+import { formatMonthDate } from '../util/date';
+import type { Option } from '../flow/generalTypes';
 import type { WorkHistoryEntry } from '../flow/profileTypes';
 import type { Validator, UIValidator } from '../lib/validation/profile';
 import type {
@@ -36,6 +36,11 @@ import type { UIState } from '../reducers/ui';
 import type { AsyncActionHelper } from '../flow/reduxTypes';
 
 class EmploymentForm extends ProfileFormFields {
+  industryOptions: Array<Option> = INDUSTRIES.map(industry => ({
+    value: industry,
+    label: industry
+  }));
+
   props: {
     profile:                          Profile,
     ui:                               UIState;
@@ -43,10 +48,12 @@ class EmploymentForm extends ProfileFormFields {
     saveProfile:                      SaveProfileFunc,
     clearProfileEdit:                 () => void,
     errors:                           ValidationErrors,
-    setWorkDialogVisibility:          () => void,
-    setWorkDialogIndex:               () => void,
-    setWorkHistoryAnswer:             () => void,
+    setDeletionIndex:                 (i: number) => void,
+    setWorkDialogVisibility:          (b: boolean) => void,
+    setWorkDialogIndex:               (i: number) => void,
+    setWorkHistoryAnswer:             (b: ?boolean) => void,
     setWorkHistoryEdit:               AsyncActionHelper,
+    setShowWorkDeleteDialog:          (b: boolean) => void,
     deletionIndex:                    number,
     showSwitch:                       boolean,
     validator:                        Validator|UIValidator,
@@ -79,6 +86,12 @@ class EmploymentForm extends ProfileFormFields {
     } = this.props;
     setWorkDialogVisibility(false);
     clearProfileEdit(username);
+  };
+
+  openWorkDeleteDialog: Function = (index: number): void => {
+    const { setDeletionIndex, setShowWorkDeleteDialog } = this.props;
+    setDeletionIndex(index);
+    setShowWorkDeleteDialog(true);
   };
 
   editWorkHistoryForm(): React$Element<*> {
@@ -174,9 +187,8 @@ class EmploymentForm extends ProfileFormFields {
       profile,
     } = this.props;
 
-    let dateFormat = date => moment(date).format("MM[/]YYYY");
     let endDateText = () => (
-      _.isEmpty(position.end_date) ? "Current" : dateFormat(position.end_date)
+      _.isEmpty(position.end_date) ? "Current" : formatMonthDate(position.end_date)
     );
     let deleteEntry = () => this.openWorkDeleteDialog();
     let editEntry = () => this.openEditWorkHistoryForm(index);
@@ -198,7 +210,7 @@ class EmploymentForm extends ProfileFormFields {
       );
     };
     return (
-      <Cell col={12} className="profile-form-row row-padding" key={index}>
+      <Cell col={12} className="profile-form-row row-padding row-with-border" key={index}>
         <div className="col user-credentials">
           <div className="profile-row-name">
             {`${position.company_name}, ${position.position}`}
@@ -206,7 +218,7 @@ class EmploymentForm extends ProfileFormFields {
         </div>
         <div className="col user-credentials">
           <div className="profile-row-date-range">
-            {`${dateFormat(position.start_date)} - ${endDateText()}`}
+            {`${formatMonthDate(position.start_date)} - ${endDateText()}`}
           </div>
           { icons() }
         </div>
@@ -286,20 +298,22 @@ class EmploymentForm extends ProfileFormFields {
         showWorkDeleteDialog,
       },
     } = this.props;
-    const actions = <ValidationAlert {...this.props}>
+    const actions = [
       <Button
         type='button'
         className="secondary-button cancel-button"
+        key='cancel'
         onClick={this.closeWorkDialog}>
         Cancel
-      </Button>
+      </Button>,
       <Button
         type='button'
         className="primary-button save-button"
+        key='save'
         onClick={this.saveWorkHistoryEntry}>
         Save
       </Button>
-    </ValidationAlert>;
+    ];
 
     return (
       <div>
