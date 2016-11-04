@@ -498,3 +498,26 @@ CYBERSOURCE_REFERENCE_PREFIX = get_var("CYBERSOURCE_REFERENCE_PREFIX", None)
 # Open Exchange Rates
 OPEN_EXCHANGE_RATES_URL = get_var("OPEN_EXCHANGE_RATES_URL", None)
 OPEN_EXCHANGE_RATES_APP_ID = get_var("OPEN_EXCHANGE_RATES_APP_ID", "")
+
+# django debug toolbar only in debug mode
+if DEBUG:
+    INSTALLED_APPS += ('debug_toolbar', )
+    # it needs to be enabled before other middlewares
+    MIDDLEWARE_CLASSES = (
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
+    ) + MIDDLEWARE_CLASSES
+
+    def show_toolbar(request):
+        """
+        Custom function needed because of bug in wagtail.
+        Theoretically this bug has been fixed in django 1.10 and wagtail 1.6.3
+        so if we upgrade we should be able to change this function to just
+        return True.
+        """
+        request.META["wsgi.multithread"] = True
+        request.META["wsgi.multiprocess"] = True
+        excluded_urls = ['/pages/preview/', '/pages/preview_loading/', '/edit/preview/']
+        excluded = any(request.path.endswith(url) for url in excluded_urls)
+        return not excluded
+
+    DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": show_toolbar, }
