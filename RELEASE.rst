@@ -1,6 +1,32 @@
 Release Notes
 =============
 
+Version 0.21.0
+--------------
+
+- Made small optimization to user serialization for search results
+- Made sure we&#39;re root when doing pip install in travis-web container build
+- Fixed pending JS tests (#1631)
+- Fixed course date issue in alter_data command
+- Fixed alignment of Current Residence on search page (#1607)
+- Use DRF API correctly (#1625)
+- Implemented inline validation
+- Made changes to speed up CI builds
+- Fixed header of search page (#1624)
+- Added indices for all dates in the CourseRun model
+- addied cybersource settings to app.json (#1601)
+- Fixed bug with search visibility
+- Small change to width of modals on mobile (#1609)
+- Replace `SETTINGS.username` with `SETTINGS.user.username` (#1615)
+- Refactored Education frontend components (#1606)
+- Split enrollments reducer into programs and courseEnrollments (#1586)
+- Shown message when no search results (#1449)
+- Handling n+1 queries in dashboard
+- Added development to the industry vocabulary
+- Small PR to make header say MITx MicroMasters (#1610)
+- Zendesk prepopulate name/email (#1482)
+- Fixed View on edX url inside dashboard (#1591)
+
 Version 0.20.0
 --------------
 
