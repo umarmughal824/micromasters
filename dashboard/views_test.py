@@ -19,6 +19,7 @@ from edx_api.grades.models import CurrentGrades
 from backends.edxorg import EdxOrgOAuth2
 from backends.utils import InvalidCredentialStored
 from courses.factories import ProgramFactory, CourseRunFactory
+from courses.models import Program
 from dashboard.models import ProgramEnrollment, CachedEnrollment
 from dashboard.utils import MMTrack
 from micromasters.factories import UserFactory
@@ -45,11 +46,11 @@ class DashboardTest(APITestCase):
         # create the programs
         cls.program_1 = ProgramFactory.create(live=True)
         cls.program_2 = ProgramFactory.create(live=True)
-        cls.program_3 = ProgramFactory.create(live=True)
+        cls.program_not_enrolled = ProgramFactory.create(live=True)
         cls.program_no_live = ProgramFactory.create(live=False)
 
         # enroll the user in some courses
-        for program in [cls.program_1, cls.program_3, cls.program_no_live]:
+        for program in [cls.program_1, cls.program_2, cls.program_no_live]:
             ProgramEnrollment.objects.create(
                 user=cls.user,
                 program=program
@@ -95,13 +96,10 @@ class DashboardTest(APITestCase):
         res = self.get_with_mocked_refresh_backends()
 
         assert res.status_code == status.HTTP_200_OK
-        data = res.data
-        assert len(data) == 3
-        program_ids = [data[0]['id'], data[1]['id'], data[2]['id'], ]
-        assert self.program_1.pk in program_ids
-        assert self.program_3.pk in program_ids
-        assert self.program_2.pk in program_ids
-        assert self.program_no_live.pk not in program_ids
+        program_ids = [program['id'] for program in res.data]
+        # not live and not enrolled programs are missing
+        assert program_ids == [self.program_1.pk, self.program_2.pk]
+        assert Program.objects.count() == 4
 
 
 class DashboardTokensTest(APITestCase):

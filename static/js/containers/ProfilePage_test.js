@@ -4,19 +4,29 @@ import { assert } from 'chai';
 import _ from 'lodash';
 
 import {
+  REQUEST_ADD_PROGRAM_ENROLLMENT,
+  RECEIVE_ADD_PROGRAM_ENROLLMENT_SUCCESS,
+} from '../actions/programs';
+import {
   REQUEST_GET_USER_PROFILE,
   REQUEST_PATCH_USER_PROFILE,
   RECEIVE_PATCH_USER_PROFILE_SUCCESS,
   START_PROFILE_EDIT,
   UPDATE_PROFILE_VALIDATION,
   UPDATE_VALIDATION_VISIBILITY,
+  CLEAR_PROFILE_EDIT,
 } from '../actions/profile';
-import { setProfileStep } from '../actions/ui';
+import {
+  setProfileStep,
+  setProgram,
+  SET_PROFILE_STEP,
+} from '../actions/ui';
 import {
   USER_PROFILE_RESPONSE,
   PERSONAL_STEP,
   EDUCATION_STEP,
   EMPLOYMENT_STEP,
+  PROGRAMS,
 } from '../constants';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../lib/api';
@@ -117,6 +127,7 @@ describe("ProfilePage", function() {
       let button = div.querySelector(prevButtonSelector);
       assert.equal(checkStep(), EDUCATION_STEP);
       TestUtils.Simulate.click(button);
+      assert(helper.scrollIntoViewStub.called, "Not called yet");
       assert.equal(checkStep(), PERSONAL_STEP);
     });
   });
@@ -143,7 +154,7 @@ describe("ProfilePage", function() {
 
   it('shows a spinner when profile get is processing', () => {
     return renderComponent('/profile', [START_PROFILE_EDIT]).then(([, div]) => {
-      assert.notOk(div.querySelector(".spinner"), "Found spinner but no fetch in progress");
+      assert.notOk(div.querySelector(".loader"), "Found spinner but no fetch in progress");
       helper.store.dispatch({
         type: REQUEST_GET_USER_PROFILE,
         payload: {
@@ -151,13 +162,52 @@ describe("ProfilePage", function() {
         }
       });
 
-      assert(div.querySelector(".spinner"), "Unable to find spinner");
+      assert(div.querySelector(".loader"), "Unable to find spinner");
     });
   });
 
-  it('select program display on personal tab', () => {
-    return renderComponent('/profile', [START_PROFILE_EDIT]).then(([, div]) => {
-      assert(div.querySelector(".program-select"), "Unable to find select program dropdown");
+  it('should enroll the user when they go to the next page', () => {
+    let addEnrollmentStub = helper.sandbox.stub(api, 'addProgramEnrollment');
+    let program = PROGRAMS[0];
+    addEnrollmentStub.returns(Promise.resolve(program));
+
+    patchUserProfileStub.returns(Promise.resolve(USER_PROFILE_RESPONSE));
+
+    helper.store.dispatch(setProgram(program));
+    return renderComponent(`/profile`, [START_PROFILE_EDIT]).then(([wrapper]) => {
+      assert.isFalse(addEnrollmentStub.called);
+
+      return helper.listenForActions([
+        REQUEST_PATCH_USER_PROFILE,
+        RECEIVE_PATCH_USER_PROFILE_SUCCESS,
+        CLEAR_PROFILE_EDIT,
+        UPDATE_PROFILE_VALIDATION,
+        REQUEST_ADD_PROGRAM_ENROLLMENT,
+        RECEIVE_ADD_PROGRAM_ENROLLMENT_SUCCESS,
+        SET_PROFILE_STEP,
+        START_PROFILE_EDIT,
+        UPDATE_VALIDATION_VISIBILITY,
+      ], () => {
+        wrapper.find(".next").simulate("click");
+      }).then(() => {
+        assert.isTrue(addEnrollmentStub.called);
+      });
     });
   });
+
+  for (let [step, component] of [
+    [PERSONAL_STEP, 'PersonalTab'],
+    [EDUCATION_STEP, 'EducationTab'],
+    [EMPLOYMENT_STEP, 'EmploymentTab'],
+  ]) {
+    it(`sends the right props to tab components for step ${step}`, () => {
+      setStep(step);
+      return renderComponent('/profile', [START_PROFILE_EDIT]).then(([wrapper]) => {
+        let props = wrapper.find(component).props();
+        assert.deepEqual(props['ui'], helper.store.getState().ui);
+        assert.deepEqual(props['programs'], helper.store.getState().programs.availablePrograms);
+        assert.deepEqual(props['profile'], helper.store.getState().profiles['jane'].profile);
+      });
+    });
+  }
 });

@@ -2,6 +2,7 @@
 Tests for ecommerce models
 """
 
+from django.core.exceptions import ValidationError
 from django.test import (
     TestCase,
     override_settings,
@@ -87,12 +88,28 @@ class CoursePriceTests(TestCase):
 
         assert ex.exception.args[0] == "Cannot have two CoursePrice objects for same CourseRun marked is_valid"
 
+    def test_clean_no_two_is_valid(self):
+        """
+        A CoursePrice instance should raise a ValidationError if another CoursePrice for the same CourseRun
+        is already marked is_valid
+        """
+        price = CoursePriceFactory.create(is_valid=False)
+        CoursePriceFactory.create(is_valid=True, course_run=price.course_run)
+        with self.assertRaises(ValidationError) as ex:
+            price.is_valid = True
+            price.clean()
+
+        assert ex.exception.args[0] == {
+            'is_valid': "Cannot have two CoursePrice objects for same CourseRun marked is_valid",
+        }
+
     def test_update_one_is_valid(self):
         """
         If only one CoursePrice has is_valid=True, we should be able to update it without problems
         """
         price = CoursePriceFactory.create(is_valid=True)
         price.price = 345
+        price.clean()
         price.save()
 
     def test_two_different_courseruns(self):

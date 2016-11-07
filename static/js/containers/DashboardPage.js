@@ -2,7 +2,7 @@
 import React from 'react';
 import type { Dispatch } from 'redux';
 import { connect } from 'react-redux';
-import Loader from 'react-loader';
+import Loader from '../components/Loader';
 import _ from 'lodash';
 import moment from 'moment';
 
@@ -51,7 +51,7 @@ import type {
   DocumentsState,
 } from '../reducers/documents';
 import type { CoursePricesState, DashboardState } from '../flow/dashboardTypes';
-import type { ProgramEnrollment } from '../flow/enrollmentTypes';
+import type { AvailableProgram } from '../flow/enrollmentTypes';
 import type { ProfileGetResult } from '../flow/profileTypes';
 import type { Course, CourseRun } from '../flow/programTypes';
 import { skipFinancialAid } from '../actions/financial_aid';
@@ -65,7 +65,7 @@ class DashboardPage extends React.Component {
 
   props: {
     profile:                  ProfileGetResult,
-    currentProgramEnrollment: ProgramEnrollment,
+    currentProgramEnrollment: AvailableProgram,
     dashboard:                DashboardState,
     prices:                   CoursePricesState,
     dispatch:                 Dispatch,

@@ -2,8 +2,9 @@
 /* global SETTINGS */
 import React from 'react';
 import { connect } from 'react-redux';
-import Loader from 'react-loader';
+import ReactDOM from 'react-dom';
 
+import Loader from '../components/Loader';
 import { makeProfileProgressDisplay } from '../util/util';
 import { FETCH_PROCESSING } from '../actions';
 import { setProfileStep } from '../actions/ui';
@@ -36,7 +37,10 @@ class ProfilePage extends ProfileFormContainer {
   stepTransitions: Function = (): [void|() => void, () => void] => {
     const { dispatch } = this.props;
     let setStep = createActionHelper(dispatch, setProfileStep);
-    let createStepFunc = step => () => setStep(step);
+    let createStepFunc = step => () => {
+      setStep(step);
+      ReactDOM.findDOMNode(this).querySelector(".profile-pagination").scrollIntoView();
+    };
     switch ( this.currentStep() ) {
     case EDUCATION_STEP:
       return [createStepFunc(PERSONAL_STEP), createStepFunc(EMPLOYMENT_STEP)];
@@ -64,7 +68,7 @@ class ProfilePage extends ProfileFormContainer {
   render() {
     const { profiles } = this.props;
     const profileInfo = profiles[SETTINGS.user.username];
-    let props, text;
+    let props;
     let [prev, next] = this.stepTransitions();
     props = Object.assign({}, this.profileProps(profileInfo), {
       prevStep: prev,
@@ -79,7 +83,7 @@ class ProfilePage extends ProfileFormContainer {
         errorMessage = <ErrorMessage errorInfo={profileInfo.errorInfo} />;
       } else {
         content = <div>
-          <WelcomeBanner profile={profile} text={text} />
+          <WelcomeBanner profile={profile} />
           <div className="profile-pagination">
             {makeProfileProgressDisplay(this.currentStep())}
           </div>

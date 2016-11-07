@@ -3,6 +3,7 @@ Models for storing ecommerce data
 """
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import (
     Model,
@@ -124,6 +125,18 @@ class CoursePrice(Model):
 
     created_at = DateTimeField(auto_now_add=True)
     modified_at = DateTimeField(auto_now=True)
+
+    def clean(self):
+        """
+        Override clean to provide user-friendly validation around CoursePrice.is_valid
+        """
+        if self.is_valid and CoursePrice.objects.filter(
+                course_run=self.course_run,
+                is_valid=True
+        ).exclude(id=self.id).exists():
+            raise ValidationError({
+                'is_valid': 'Cannot have two CoursePrice objects for same CourseRun marked is_valid',
+            })
 
     @transaction.atomic
     def save(self, *args, **kwargs):

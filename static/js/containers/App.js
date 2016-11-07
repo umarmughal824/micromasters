@@ -45,8 +45,8 @@ import {
 import { validateProfileComplete } from '../lib/validation/profile';
 import type { DashboardState, CoursePricesState } from '../flow/dashboardTypes';
 import type {
-  ProgramEnrollment,
-  ProgramEnrollmentsState,
+  AvailableProgram,
+  AvailableProgramsState,
 } from '../flow/enrollmentTypes';
 import type { ProfileGetResult } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
@@ -58,11 +58,11 @@ class App extends React.Component {
     children:                 React$Element<*>[],
     userProfile:              ProfileGetResult,
     location:                 Object,
-    currentProgramEnrollment: ProgramEnrollment,
+    currentProgramEnrollment: AvailableProgram,
     dispatch:                 Dispatch,
     dashboard:                DashboardState,
     prices:                   CoursePricesState,
-    programs:                 ProgramEnrollmentsState,
+    programs:                 AvailableProgramsState,
     history:                  Object,
     ui:                       UIState,
     signupDialog:             Object,
@@ -187,7 +187,7 @@ class App extends React.Component {
     dispatch(setEnrollSelectedProgram(programId));
   };
 
-  setCurrentProgramEnrollment = (enrollment: ProgramEnrollment): void => {
+  setCurrentProgramEnrollment = (enrollment: AvailableProgram): void => {
     const { dispatch } = this.props;
     dispatch(setCurrentProgramEnrollment(enrollment));
   };
@@ -219,7 +219,6 @@ class App extends React.Component {
         navDrawerOpen,
       },
       location: { pathname },
-      dashboard,
       userProfile: { profile },
     } = this.props;
     let { children } = this.props;
@@ -251,13 +250,12 @@ class App extends React.Component {
       <Navbar
         addProgramEnrollment={this.addProgramEnrollment}
         currentProgramEnrollment={currentProgramEnrollment}
-        dashboard={dashboard}
         empty={empty}
         enrollDialogError={enrollDialogError}
         enrollDialogVisibility={enrollDialogVisibility}
         enrollSelectedProgram={enrollSelectedProgram}
         pathname={pathname}
-        programs={programs}
+        programs={programs.availablePrograms}
         setCurrentProgramEnrollment={this.setCurrentProgramEnrollment}
         setEnrollDialogError={this.setEnrollDialogError}
         setEnrollDialogVisibility={this.setEnrollDialogVisibility}

@@ -132,7 +132,7 @@ describe('Profile validation functions', () => {
     it('should return an appropriate error if a field is missing', () => {
       let clone = _.cloneDeep(USER_PROFILE_RESPONSE);
       clone.work_history[0].company_name = '';
-      let expectation = {work_history: [{company_name: 'Company Name is required'}]};
+      let expectation = {work_history: [{company_name: 'Name of Employer is required'}]};
       assert.deepEqual(expectation, employmentValidation(clone));
     });
 
@@ -149,7 +149,7 @@ describe('Profile validation functions', () => {
       assert.deepEqual({
         work_history: [{
           city: 'City is required',
-          company_name: 'Company Name is required'
+          company_name: 'Name of Employer is required'
         }]
       }, employmentValidation(clone));
     });

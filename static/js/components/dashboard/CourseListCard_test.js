@@ -10,44 +10,49 @@ import CourseRow from './CourseRow';
 import { DASHBOARD_RESPONSE, COURSE_PRICES_RESPONSE } from '../../constants';
 
 describe('CourseListCard', () => {
-  let defaultCardParams = {
-    coursePrice: _.cloneDeep(COURSE_PRICES_RESPONSE[0]),
-    checkout: () => null,
-    addCourseEnrollment: () => undefined,
-  };
+  let program, defaultCardParams;
+  beforeEach(() => {
+    program = _.cloneDeep(DASHBOARD_RESPONSE[1]);
+    assert(program.courses.length > 0);
+    let coursePrice = COURSE_PRICES_RESPONSE.find(
+      coursePrice => coursePrice.program_id === program.id
+    );
+
+    defaultCardParams = {
+      coursePrice: coursePrice,
+      checkout: () => null,
+      addCourseEnrollment: () => undefined,
+    };
+  });
 
   it('creates a CourseRow for each course', () => {
-    const program = DASHBOARD_RESPONSE[1];
-    assert(program.courses.length > 0);
     let now = moment();
     const wrapper = shallow(
       <CourseListCard program={program} now={now} {...defaultCardParams} />
     );
     assert.equal(wrapper.find(CourseRow).length, program.courses.length);
+    let courses = _.sortBy(program.courses, 'position_in_program');
     wrapper.find(CourseRow).forEach((courseRow, i) => {
       const props = courseRow.props();
       assert.equal(props.now, now);
-      assert.equal(props.course, program.courses[i]);
+      assert.deepEqual(props.course, courses[i]);
       assert.equal(props.checkout, defaultCardParams.checkout);
     });
   });
 
   it("fills in now if it's missing in the props", () => {
-    const program = DASHBOARD_RESPONSE[1];
-    assert(program.courses.length > 0);
     const wrapper = shallow(
       <CourseListCard program={program} {...defaultCardParams} />
     );
     let nows = wrapper.find(CourseRow).map(courseRow => courseRow.props().now);
-    assert(nows.length > 0);
+    assert.isAbove(nows.length, 0);
     for (let now of nows) {
       // Each now must be exactly the same object
-      assert(now === nows[0]);
+      assert.equal(now, nows[0]);
     }
   });
 
   it("doesn't show the personalized pricing box for programs without it", () => {
-    const program = _.cloneDeep(DASHBOARD_RESPONSE[1]);
     program.financial_aid_availability = false;
     const wrapper = shallow(
       <CourseListCard program={program} {...defaultCardParams} />

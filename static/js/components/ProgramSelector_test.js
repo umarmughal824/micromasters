@@ -7,19 +7,17 @@ import sinon from 'sinon';
 
 import ProgramSelector from './ProgramSelector';
 import {
-  DASHBOARD_RESPONSE,
+  PROGRAMS,
 } from '../constants';
 
 describe('ProgramSelector', () => {
   let sandbox;
-  // define our own enrollments
-  const enrollments = DASHBOARD_RESPONSE.map(program => ({
-    id: program.id,
-    title: program.title,
-  }));
-  // remove one enrollment so that not all programs are enrolled
-  const unenrolled = enrollments.splice(0, 1)[0];
-  const selectedEnrollment = enrollments[1];
+  // make a copy of enrollments
+  const programs = _.cloneDeep(PROGRAMS);
+  // remove one enrollment so not all enrollments are enrolled
+  const unenrolled = programs[0];
+  unenrolled.enrolled = false;
+  const selectedEnrollment = programs[1];
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -32,8 +30,7 @@ describe('ProgramSelector', () => {
   let renderProgramSelector = (props) => {
     return shallow(
       <ProgramSelector
-        programs={{programEnrollments: enrollments}}
-        dashboard={{programs: DASHBOARD_RESPONSE}}
+        programs={programs}
         currentProgramEnrollment={selectedEnrollment}
         {...props}
       />
@@ -42,22 +39,21 @@ describe('ProgramSelector', () => {
 
   it('renders an empty div if there are no program enrollments', () => {
     let wrapper = renderProgramSelector({
-      programs: {
-        programEnrollments: []
-      },
+      programs: [],
     });
-    assert.equal(wrapper.find("div").children().length, 0);
+    assert.lengthOf(wrapper.find("div").children(), 0);
   });
 
   it('renders an empty div if it is passed `selectorVisibility === false`', () => {
     let wrapper = renderProgramSelector({ selectorVisibility: false });
-    assert.equal(wrapper.find("div").children().length, 0);
+    assert.lengthOf(wrapper.find("div").children(), 0);
   });
 
   it("renders the currently selected enrollment first, then all other enrollments", () => {
     let wrapper = renderProgramSelector();
     let selectProps = wrapper.find(Select).props();
 
+    let enrollments = programs.filter(program => program.enrolled);
     let sortedEnrollments = _.sortBy(enrollments, 'title');
     // make sure we are testing sorting meaningfully
     assert.notDeepEqual(sortedEnrollments, enrollments);
@@ -65,10 +61,10 @@ describe('ProgramSelector', () => {
     let options = selectProps['options'];
     // include 'Enroll in a new program' which comes at the end if user can enroll in a new program
     let expectedEnrollments = sortedEnrollments.
-      filter(enrollment => enrollment.id !== selectedEnrollment.id).
-      map(enrollment => ({
-        label: enrollment.title,
-        value: enrollment.id,
+      filter(program => program.id !== selectedEnrollment.id).
+      map(program => ({
+        label: program.title,
+        value: program.id,
       })).
       concat({
         label: "Enroll in a new program",
@@ -78,24 +74,24 @@ describe('ProgramSelector', () => {
   });
 
   it("does not render the 'Enroll in a new program' option if there is not at least one available program", () => {
-    let allEnrollments = enrollments.concat(unenrolled);
+    let allEnrollments = programs.map(program => Object.assign({}, program, {
+      enrolled: true
+    }));
     let wrapper = renderProgramSelector({
-      programs: {
-        programEnrollments: allEnrollments
-      }
+      programs: allEnrollments
     });
     let selectProps = wrapper.find(Select).props();
     let sortedEnrollments = _.sortBy(allEnrollments, 'title');
     // make sure we are testing sorting meaningfully
-    assert.notDeepEqual(sortedEnrollments, enrollments);
+    assert.notDeepEqual(sortedEnrollments, allEnrollments);
 
     let options = selectProps['options'];
     // include 'Enroll in a new program' which comes at the end if user can enroll in a new program
     let expectedEnrollments = sortedEnrollments.
-      filter(enrollment => enrollment.id !== selectedEnrollment.id).
-      map(enrollment => ({
-        label: enrollment.title,
-        value: enrollment.id,
+      filter(program => program.id !== selectedEnrollment.id).
+      map(program => ({
+        label: program.title,
+        value: program.id,
       }));
     assert.deepEqual(options, expectedEnrollments);
   });
@@ -123,8 +119,7 @@ describe('ProgramSelector', () => {
       setCurrentProgramEnrollment,
     });
     let onChange = wrapper.find(Select).props()['onChange'];
-    let newSelectedEnrollment = enrollments[0];
-    onChange({value: newSelectedEnrollment.id});
-    assert(setCurrentProgramEnrollment.calledWith(newSelectedEnrollment));
+    onChange({value: unenrolled.id});
+    assert(setCurrentProgramEnrollment.calledWith(unenrolled));
   });
 });

@@ -39,7 +39,16 @@ router = routers.DefaultRouter()
 router.register(r'programs', ProgramViewSet)
 router.register(r'profiles', ProfileViewSet)
 
-urlpatterns = [
+urlpatterns = []
+
+if settings.DEBUG:
+    import debug_toolbar  # pylint: disable=wrong-import-position, wrong-import-order
+    # these urls need to be here (or before wagtail anyway)
+    urlpatterns += [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ]
+
+urlpatterns += [
     url(r'', include('ui.urls')),
     url('', include('social.apps.django_app.urls', namespace='social')),
     url(r'^admin/', include(admin.site.urls)),

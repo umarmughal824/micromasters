@@ -1,6 +1,35 @@
 Release Notes
 =============
 
+Version 0.22.0
+--------------
+
+- Removed react-loader, use react-mdl react (#1653)
+- Correctly handle faculty without images (#1634)
+- Upgrade Wagtail to 1.7 (#1635)
+- Allow to use save button only if photo is selected on &#39;photo upload dialog&#39; (#1654)
+- Dashboard model for edx cache refresh timestamps
+- Added country_of_residence to FinancialAid model (#1650)
+- Fixed education/employment deletion when uploading images (#1675)
+- Fixed program enrollment listing bug in signup page (#1674)
+- Removed cheaper setting for uWSGI (#1673)
+- Reorganized CSS
+- ProfilePage scroll top between steps
+- Save leading zeros in month field
+- Changed url precedence
+- removed list of panels
+- Added Django Debug Toolbar in Debug mode
+- Refactored dashboard API (#1569)
+- Change Company Name field
+- Added model validation to CoursePrice to fix #1410
+- Updated uWSGI to properly use threads and handle static assets (#1648)
+- Improved chai assertions (#1647)
+- Changed education and employment titles (#1629)
+- Upgrade Pillow to 3.4.2 (#1637)
+- Upgrade python-social-auth to 0.2.21 (#1643)
+- Upgrade Django REST Framework to 3.5.2 (#1638)
+- Upgrade NewRelic to 2.72.1.53 (#1642)
+
 Version 0.21.0
 --------------
 

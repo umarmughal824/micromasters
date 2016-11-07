@@ -130,7 +130,7 @@ export function employmentValidation(profile: Profile): ValidationErrors {
   let messages = {
     'position': 'Position is required',
     'industry': 'Industry is required',
-    'company_name': 'Company Name is required',
+    'company_name': 'Name of Employer is required',
     'start_date': 'Please enter a valid start date',
     'city': 'City is required',
     'country': 'Country is required',

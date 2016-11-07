@@ -46,18 +46,18 @@ describe('DashboardPage', () => {
 
   it('shows a spinner when dashboard get is processing', () => {
     return renderComponent('/dashboard').then(([, div]) => {
-      assert.notOk(div.querySelector(".spinner"), "Found spinner but no fetch in progress");
+      assert.notOk(div.querySelector(".loader"), "Found spinner but no fetch in progress");
       helper.store.dispatch({ type: REQUEST_DASHBOARD, payload: { noSpinner: false } });
 
-      assert(div.querySelector(".spinner"), "Unable to find spinner");
+      assert(div.querySelector(".loader"), "Unable to find spinner");
     });
   });
 
   it('has all the cards we expect', () => {
     return renderComponent('/dashboard').then(([wrapper]) => {
-      assert.equal(wrapper.find(".dashboard-user-card").length, 1);
-      assert.equal(wrapper.find(".course-list").length, 1);
-      assert.equal(wrapper.find(".progress-widget").length, 1);
+      assert.lengthOf(wrapper.find(".dashboard-user-card"), 1);
+      assert.lengthOf(wrapper.find(".course-list"), 1);
+      assert.lengthOf(wrapper.find(".progress-widget"), 1);
     });
   });
 

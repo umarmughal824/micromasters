@@ -27,6 +27,7 @@
 @import "profile-image-uploader";
 @import "calculator";
 @import "docs-instructions";
+@import "toast";
 
 .selected {
   font-weight: bold;
@@ -37,6 +38,11 @@
   text-decoration: none !important;
   cursor: default !important;
   color: inherit !important;
+}
+
+// IE: make x's disappear for input items
+input::-ms-clear {
+  display: none;
 }
 
 .Select {
@@ -69,6 +75,19 @@
   // arbitrarily chosen height
   height: 300px;
   width: 100%;
+
+  .mdl-spinner {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+
+    height: 35px;
+    width: 35px;
+
+    .mdl-spinner__layer {
+      border-color: $mm-brand-bg;
+    }
+  }
 }
 
 .upper-case {

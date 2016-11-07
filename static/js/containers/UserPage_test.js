@@ -4,7 +4,6 @@ import TestUtils from 'react-addons-test-utils';
 import { assert } from 'chai';
 import _ from 'lodash';
 import moment from 'moment';
-import sinon from 'sinon';
 
 import {
   RECEIVE_GET_USER_PROFILE_SUCCESS,
@@ -120,10 +119,6 @@ describe("UserPage", function() {
       const getDialog = () => document.querySelector('.personal-dialog');
       const getSave = () => getDialog().querySelector('.save-button');
 
-      beforeEach(() => {
-        HTMLDivElement.prototype.scrollIntoView = sinon.stub();
-      });
-
       let userProfileActions = [
         SET_USER_PAGE_DIALOG_VISIBILITY,
         START_PROFILE_EDIT,
@@ -186,7 +181,7 @@ describe("UserPage", function() {
           }).then(() => {
             return new Promise(resolve => {
               setTimeout(() => { // ensure that the DOM update after clicking 'save' has finished
-                assert(HTMLDivElement.prototype.scrollIntoView.called, "Not called yet");
+                assert(helper.scrollIntoViewStub.called, "Not called yet");
                 resolve();
               }, 100);
             });
@@ -448,6 +443,8 @@ describe("UserPage", function() {
             SET_EDUCATION_DEGREE_LEVEL,
           ], () => {
             TestUtils.Simulate.click(editButton);
+
+            assert.equal(document.querySelector(".profile-form-title").innerHTML, "Edit Education");
           });
         });
       });
@@ -505,6 +502,8 @@ describe("UserPage", function() {
 
           return listenForActions(expectedActions, () => {
             TestUtils.Simulate.click(addButton);
+
+            assert.equal(document.querySelector(".profile-form-title").innerHTML, "Add Education");
 
             let dialog = document.querySelector('.education-dialog');
             let grid = dialog.getElementsByClassName('profile-tab-grid')[0];
@@ -633,6 +632,8 @@ describe("UserPage", function() {
             SET_WORK_DIALOG_VISIBILITY
           ], () => {
             TestUtils.Simulate.click(editButton);
+
+            assert.equal(document.querySelector(".profile-form-title").innerHTML, "Edit Employment");
           });
         });
       });
@@ -658,7 +659,7 @@ describe("UserPage", function() {
             end_date: "2002-01-01",
             end_date_edit: {
               year: "2002",
-              month: "1",
+              month: "01",
               day: undefined
             },
             city: "FoobarVille",
@@ -693,6 +694,8 @@ describe("UserPage", function() {
 
           return listenForActions(expectedActions, () => {
             TestUtils.Simulate.click(addButton);
+
+            assert.equal(document.querySelector(".profile-form-title").innerHTML, "Add Employment");
             let dialog = document.querySelector('.employment-dialog');
             let grid = dialog.querySelector('.profile-tab-grid');
             let inputs = grid.getElementsByTagName('input');
