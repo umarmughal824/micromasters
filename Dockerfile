@@ -15,6 +15,7 @@ RUN curl --silent --location https://bootstrap.pypa.io/get-pip.py | python3 -
 # Add, and run as, non-root user.
 RUN mkdir /src
 RUN adduser --disabled-password --gecos "" mitodl
+RUN mkdir /var/media && chown -R mitodl:mitodl /var/media
 
 # Install project packages
 COPY requirements.txt /tmp/requirements.txt
