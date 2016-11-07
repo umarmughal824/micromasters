@@ -70,7 +70,14 @@ SECRET_KEY = get_var(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = get_var('DEBUG', False)
 
-ALLOWED_HOSTS = get_var('ALLOWED_HOSTS', [])
+if DEBUG:
+    # Disabling the protection added in 1.10.3 against a DNS rebinding vulnerability:
+    # https://docs.djangoproject.com/en/1.10/releases/1.10.3/#dns-rebinding-vulnerability-when-debug-true
+    # Because we never debug against production data, we are not vulnerable
+    # to this problem.
+    ALLOWED_HOSTS = ['*']
+else:
+    ALLOWED_HOSTS = get_var('ALLOWED_HOSTS', [])
 
 SECURE_SSL_REDIRECT = get_var('MICROMASTERS_SECURE_SSL_REDIRECT', True)
 
