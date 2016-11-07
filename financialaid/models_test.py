@@ -1,10 +1,11 @@
 """
 Tests for financialaid models
 """
-from django.core.exceptions import ValidationError
 from django.db.models.signals import post_save
 from factory.django import mute_signals
+from rest_framework.exceptions import ValidationError
 
+from financialaid.constants import FinancialAidStatus
 from financialaid.factories import (
     TierFactory,
     FinancialAidFactory
@@ -12,7 +13,6 @@ from financialaid.factories import (
 from financialaid.models import (
     Tier,
     FinancialAidAudit,
-    FinancialAidStatus
 )
 from micromasters.utils import serialize_model_object
 from profiles.factories import ProfileFactory
@@ -42,7 +42,9 @@ class FinancialAidModelsTests(ESTestCase):
         """
         financial_aid = FinancialAidFactory.create()
         # Test creation of FinancialAid that isn't unique_together with "user" and "tier_program__program"
+        # financial aid with same user and different program (new program created by the factory)
         FinancialAidFactory.create(user=financial_aid.user)
+        # financial aid with same program and different user (new user created by the factory)
         FinancialAidFactory.create(tier_program=financial_aid.tier_program)
         # Test updating the original FinancialAid doesn't raise ValidationError
         financial_aid.income_usd = 100
@@ -53,6 +55,31 @@ class FinancialAidModelsTests(ESTestCase):
                 user=financial_aid.user,
                 tier_program=financial_aid.tier_program
             )
+
+    def test_financial_aid_model_duplicate_if_reset(self):
+        """
+        Tests that FinancialAid objects can not be unique per User and Program
+        if the other are in reset status
+        """
+        financial_aid = FinancialAidFactory.create()
+        # change the first one to any state that is not `reset` will fail to create a new financial aid
+        for status in FinancialAidStatus.ALL_STATUSES:
+            if status == FinancialAidStatus.RESET:
+                continue
+            financial_aid.status = status
+            financial_aid.save()
+            with self.assertRaises(ValidationError):
+                FinancialAidFactory.create(
+                    user=financial_aid.user,
+                    tier_program=financial_aid.tier_program
+                )
+        # reset status will allow a new financial aid
+        financial_aid.status = FinancialAidStatus.RESET
+        financial_aid.save()
+        FinancialAidFactory.create(
+            user=financial_aid.user,
+            tier_program=financial_aid.tier_program
+        )
 
     def test_save_and_log(self):  # pylint: disable=no-self-use
         """

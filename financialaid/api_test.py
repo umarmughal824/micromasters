@@ -290,6 +290,29 @@ class CoursePriceAPITests(FinancialAidBaseTestCase):
             expected_response
         )
 
+    def test_get_course_price_for_learner_with_financial_aid_in_reset(self):
+        """
+        Tests get_course_price_for_learner() who has financial aid request in status `reset`
+        """
+        enrollment = ProgramEnrollment.objects.get(program=self.program, user=self.profile.user)
+        FinancialAidFactory.create(
+            user=self.profile.user,
+            tier_program=self.tier_programs['25k'],
+            status=FinancialAidStatus.RESET,
+        )
+        # Enrolled and has no financial aid
+        course_price = self.program.course_set.first().courserun_set.first().courseprice_set.first()
+        expected_response = {
+            "program_id": enrollment.program.id,
+            "price": course_price.price,
+            "financial_aid_availability": True,
+            "has_financial_aid_request": False
+        }
+        self.assertDictEqual(
+            get_formatted_course_price(enrollment),
+            expected_response
+        )
+
     def test_get_course_price_for_learner_in_no_financial_aid_program(self):
         """
         Tests get_course_price_for_learner() for a program without financial aid

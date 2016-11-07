@@ -5,7 +5,7 @@ import logging
 
 from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
-from financialaid.constants import DEFAULT_INCOME_THRESHOLD
+from financialaid.constants import DEFAULT_INCOME_THRESHOLD, FinancialAidStatus
 from financialaid.exceptions import NotSupportedException
 from financialaid.models import (
     CountryIncomeThreshold,
@@ -135,7 +135,7 @@ def get_formatted_course_price(program_enrollment):
         financial_aid_queryset = FinancialAid.objects.filter(
             user=user,
             tier_program__program=program
-        )
+        ).exclude(status=FinancialAidStatus.RESET)
         if financial_aid_queryset.exists():
             has_financial_aid_request = True
             # FinancialAid.save() only allows one object per (user, tier_program__program) pair
