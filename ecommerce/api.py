@@ -15,12 +15,11 @@ from django.db import transaction
 from django.http.response import Http404
 from django.shortcuts import get_object_or_404
 from edx_api.client import EdxApi
-import pytz
 from rest_framework.exceptions import ValidationError
 
 from backends.edxorg import EdxOrgOAuth2
 from courses.models import CourseRun
-from dashboard.api import update_cached_enrollment
+from dashboard.api_edx_cache import CachedEdxUserData
 from dashboard.models import ProgramEnrollment
 from ecommerce.exceptions import (
     EcommerceEdxApiException,
@@ -297,9 +296,13 @@ def enroll_user_on_success(order):
             )
             exceptions.append(ex)
 
-    now = datetime.now(pytz.UTC)
     for enrollment in enrollments:
-        update_cached_enrollment(order.user, enrollment, enrollment.course_id, now)
+        CachedEdxUserData.update_cached_enrollment(
+            order.user,
+            enrollment,
+            enrollment.course_id,
+            index_user=True,
+        )
 
     if exceptions:
         raise EcommerceEdxApiException(exceptions)
