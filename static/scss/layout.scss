@@ -75,6 +75,19 @@ input::-ms-clear {
   // arbitrarily chosen height
   height: 300px;
   width: 100%;
+
+  .mdl-spinner {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+
+    height: 35px;
+    width: 35px;
+
+    .mdl-spinner__layer {
+      border-color: $mm-brand-bg;
+    }
+  }
 }
 
 .upper-case {
