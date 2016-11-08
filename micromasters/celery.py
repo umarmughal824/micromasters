@@ -10,7 +10,7 @@ from celery import Celery
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'micromasters.settings')
 
-from django.conf import settings  # noqa
+from django.conf import settings  # noqa pylint: disable=wrong-import-position
 
 log = logging.getLogger(__name__)
 
