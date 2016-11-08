@@ -12,6 +12,7 @@
     var SETTINGS = {{ js_settings_json|safe }};
     var CURRENT_PAGE_URL = '{{ request.build_absolute_uri }}';
     </script>
+    <script type="text/javascript" src="{{ common_src }}"></script>
     <script type="text/javascript" src="{{ sentry_client }}"></script>
     {% if style_public_src %}
     <script type="text/javascript" src="{{ style_public_src }}"></script>

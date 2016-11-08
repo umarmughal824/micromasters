@@ -76,6 +76,7 @@ class ReactView(View):  # pylint: disable=unused-argument
             request,
             "dashboard.html",
             context={
+                "common_src": get_bundle_url(request, "common.js"),
                 "sentry_client": get_bundle_url(request, "sentry_client.js"),
                 "zendesk_widget": get_bundle_url(request, "zendesk_widget.js"),
                 "style_src": get_bundle_url(request, "style.js"),
@@ -132,8 +133,8 @@ def standard_error_page(request, status_code, template_filename):
         context={
             "zendesk_widget": get_bundle_url(request, "zendesk_widget.js"),
             "style_src": get_bundle_url(request, "style.js"),
-            "signup_dialog_src": get_bundle_url(request, "signup_dialog.js"),
             "dashboard_src": get_bundle_url(request, "dashboard.js"),
+            "common_src": get_bundle_url(request, "common.js"),
             "sentry_client": get_bundle_url(request, "sentry_client.js"),
             "js_settings_json": json.dumps({
                 "release_version": settings.VERSION,
@@ -163,6 +164,7 @@ def terms_of_service(request):
         context={
             "zendesk_widget": get_bundle_url(request, "zendesk_widget.js"),
             "style_src": get_bundle_url(request, "style.js"),
+            "common_src": get_bundle_url(request, "common.js"),
             "sentry_client": get_bundle_url(request, "sentry_client.js"),
             "js_settings_json": json.dumps({
                 "release_version": settings.VERSION,
@@ -170,7 +172,6 @@ def terms_of_service(request):
                 "sentry_dsn": sentry.get_public_dsn(),
                 "user": serialize_maybe_user(request.user),
             }),
-            "signup_dialog_src": get_bundle_url(request, "signup_dialog.js"),
             "tracking_id": "",
         }
     )

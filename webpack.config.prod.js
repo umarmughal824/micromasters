@@ -20,7 +20,13 @@ module.exports = {
       compress: {
         warnings: false
       }
-    })
+    }),
+    new webpack.optimize.OccurrenceOrderPlugin(),
+    new webpack.optimize.DedupePlugin(),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'common',
+      minChunks: 2,
+    }),
   ],
   devtool: 'source-map'
 };

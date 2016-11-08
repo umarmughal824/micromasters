@@ -19,6 +19,11 @@ module.exports = {
         'NODE_ENV': '"development"'
       }
     }),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'common',
+      minChunks: 2,
+    }),
+
   ],
   devtool: 'source-map'
 };

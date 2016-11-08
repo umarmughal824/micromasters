@@ -58,12 +58,12 @@ class HomePage(Page):
         context["style_src"] = get_bundle_url(request, "style.js")
         context["public_src"] = get_bundle_url(request, "public.js")
         context["style_public_src"] = get_bundle_url(request, "style_public.js")
-        context["signup_dialog_src"] = get_bundle_url(request, "signup_dialog.js")
         context["authenticated"] = not request.user.is_anonymous()
         context["is_staff"] = has_role(request.user, [Staff.ROLE_ID, Instructor.ROLE_ID])
         context["username"] = username
         context["js_settings_json"] = json.dumps(js_settings)
         context["title"] = self.title
+        context["common_src"] = get_bundle_url(request, "common.js")
         context["sentry_client"] = get_bundle_url(request, "sentry_client.js")
         context["tracking_id"] = ""
 
@@ -229,13 +229,11 @@ def get_program_page_context(programpage, request):
     context["public_src"] = get_bundle_url(request, "public.js")
     context["style_public_src"] = get_bundle_url(request, "style_public.js")
     context["authenticated"] = not request.user.is_anonymous()
-    context["signup_dialog_src"] = get_bundle_url(request, "signup_dialog.js")
-    context["faculty_carousel_src"] = get_bundle_url(request, "faculty_carousel.js")
-    context["course_list_src"] = get_bundle_url(request, "course_list.js")
     context["username"] = username
     context["js_settings_json"] = json.dumps(js_settings)
     context["title"] = programpage.title
     context["courses"] = courses_query
+    context["common_src"] = get_bundle_url(request, "common.js")
     context["sentry_client"] = get_bundle_url(request, "sentry_client.js")
     context["tracking_id"] = programpage.program.ga_tracking_id
 
