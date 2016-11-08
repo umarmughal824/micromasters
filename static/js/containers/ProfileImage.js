@@ -6,7 +6,11 @@ import Icon from 'react-mdl/lib/Icon';
 import moment from 'moment';
 import type { Dispatch } from 'redux';
 
-import { makeProfileImageUrl, getPreferredName } from '../util/util';
+import {
+  makeProfileImageUrl,
+  getPreferredName,
+  userPrivilegeCheck,
+} from '../util/util';
 import type { Profile } from '../flow/profileTypes';
 import ProfileImageUploader from '../components/ProfileImageUploader';
 import { createActionHelper } from '../lib/redux';
@@ -62,8 +66,8 @@ class ProfileImage extends React.Component {
     dispatch(fetchUserProfile(SETTINGS.user.username));
   };
 
-  cameraIcon: Function = (editable: bool): React$Element<*>|null => {
-    const { setDialogVisibility } = this.props;
+  cameraIcon: Function = (): React$Element<*>|null => {
+    const { setDialogVisibility, editable } = this.props;
     if ( editable ) {
       return (
         <button className="open-photo-dialog" onClick={() => setDialogVisibility(true)}>
@@ -77,7 +81,7 @@ class ProfileImage extends React.Component {
   }
 
   render () {
-    const { profile, editable } = this.props;
+    const { profile } = this.props;
     const imageUrl = makeProfileImageUrl(profile);
 
     return (
@@ -91,7 +95,7 @@ class ProfileImage extends React.Component {
           alt={`Profile image for ${getPreferredName(profile, false)}`}
           className="card-image"
         />
-        { this.cameraIcon(editable) }
+        { userPrivilegeCheck(profile, this.cameraIcon) }
       </div>
     );
   }
