@@ -94,6 +94,12 @@ class EmploymentForm extends ProfileFormFields {
     setShowWorkDeleteDialog(true);
   };
 
+  addSpaceForError(keySet: string[]){
+    const { errors } = this.props;
+    let value = _.get(errors, keySet);
+    return value === undefined ? "": "top-space";
+  }
+
   editWorkHistoryForm(): React$Element<*> {
     const { ui, profile } = this.props;
     let keySet = (key): any => ['work_history', ui.workDialogIndex, key];
@@ -143,7 +149,7 @@ class EmploymentForm extends ProfileFormFields {
         </Cell>
         <Cell col={6}>
           {this.boundDateField(keySet('end_date'), 'End Date', true)}
-          <span className="end-date-hint">
+          <span className={`end-date-hint ${this.addSpaceForError(keySet('end_date'))}`}>
             Leave blank if this is a current position
           </span>
         </Cell>
