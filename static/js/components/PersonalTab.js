@@ -21,7 +21,10 @@ import type {
   UpdateProfileFunc,
 } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
-import type { AvailablePrograms } from '../flow/enrollmentTypes';
+import type {
+  AvailableProgram,
+  AvailablePrograms,
+} from '../flow/enrollmentTypes';
 import type { Event } from '../flow/eventType';
 import {  validationErrorSelector } from '../util/util';
 
@@ -37,6 +40,7 @@ export default class PersonalTab extends React.Component {
     programs:       AvailablePrograms,
     setProgram:     Function,
     addProgramEnrollment: Function,
+    currentProgramEnrollment: AvailableProgram,
   };
 
   programListing = (programs: AvailablePrograms) => {
@@ -53,20 +57,35 @@ export default class PersonalTab extends React.Component {
       programs,
       setProgram,
     } = this.props;
-    let selected = programs.find(program => program.id === value);
+    let selected = programs.find(program => program.id === parseInt(value));
     setProgram(selected);
   };
+
+  getSelectedProgramId = () : number|null => {
+    const {
+      ui: { selectedProgram },
+      currentProgramEnrollment
+    } = this.props;
+
+    let programId = null;
+    if (selectedProgram) {
+      programId = selectedProgram.id;
+    } else if(currentProgramEnrollment) {
+      programId = currentProgramEnrollment.id;
+    }
+
+    return programId;
+  }
 
   selectProgram = () => {
     const {
       programs,
-      ui: { selectedProgram },
       errors
     } = this.props;
 
     return (
       <SelectField
-        value={selectedProgram ? selectedProgram.id : null}
+        value={this.getSelectedProgramId()}
         style={{width: "65%"}}
         hintText="Select Program"
         onChange={this.setProgramHelper}
@@ -76,6 +95,19 @@ export default class PersonalTab extends React.Component {
         { this.programListing(programs) }
       </SelectField>
     );
+  }
+
+  componentWillMount() {
+    const {
+      programs,
+      currentProgramEnrollment,
+      setProgram,
+    } = this.props;
+
+    if (currentProgramEnrollment) {
+      let selected = programs.find(program => program.id === currentProgramEnrollment.id);
+      setProgram(selected);
+    }
   }
 
   render() {

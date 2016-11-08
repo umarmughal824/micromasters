@@ -34,7 +34,10 @@ import type { ActionHelpers, AsyncActionHelpers } from '../lib/redux';
 import type { Validator, UIValidator } from '../lib/validation/profile';
 import type { Profile, Profiles, ProfileGetResult } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
-import type { AvailableProgramsState } from '../flow/enrollmentTypes';
+import type {
+  AvailableProgram,
+  AvailableProgramsState
+} from '../flow/enrollmentTypes';
 import type { Program } from '../flow/programTypes';
 import { addProgramEnrollment } from '../actions/programs';
 import { ALL_ERRORS_VISIBLE } from '../constants';
@@ -49,7 +52,8 @@ class ProfileFormContainer extends React.Component {
     history:     Object,
     ui:          UIState,
     params:      {[k: string]: string},
-    programs:    AvailableProgramsState
+    programs:    AvailableProgramsState,
+    currentProgramEnrollment: AvailableProgram,
   };
 
   static contextTypes = {
@@ -61,6 +65,7 @@ class ProfileFormContainer extends React.Component {
       profiles: state.profiles,
       ui: state.ui,
       programs: state.programs,
+      currentProgramEnrollment: state.currentProgramEnrollment
     };
   };
 
@@ -176,6 +181,7 @@ class ProfileFormContainer extends React.Component {
       ui,
       programs,
       dispatch,
+      currentProgramEnrollment
     } = this.props;
     let errors, isEdit, profile;
 
@@ -203,6 +209,7 @@ class ProfileFormContainer extends React.Component {
       profile: profile,
       programs: programs.availablePrograms,
       saveProfile: this.saveProfile.bind(this, isEdit),
+      currentProgramEnrollment: currentProgramEnrollment,
       setProgram: this.setProgram,
       startProfileEdit: this.startProfileEdit,
       ui: ui,
