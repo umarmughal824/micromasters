@@ -381,6 +381,9 @@ body.app-media {
 }
 
 .current-programs-section {
+  margin: 0;
+  background-color: #151515;
+
   h3 {
     margin: 0 0 70px;
 
@@ -388,93 +391,79 @@ body.app-media {
       margin: 0 0 40px;
     }
   }
-}
 
-.current-programs-section {
-  margin: 0;
-  background-color: #151515;
+  ul.current-programs-list {
+    list-style: none;
+    text-align: left;
+    padding: 0;
 
-  .col-md-12 {
-    width: 97%;
-    margin: 0 auto;
-    max-width: 1360px;
-    float: none;
+    .program-thumbnail {
+      position: relative;
+      background-color: black;
 
-    .col-md-4 {
-      text-align: left;
+      a.program-link {
+        display: block;
+      }
 
-      @include breakpoint(phone) {
-        margin-bottom: 40px;
+      .program-info {
+        position: absolute;
+        width: 100%;
+        height: 88px;
+        bottom: 0;
+        padding: 25px 22px;
+        background: -moz-linear-gradient(top,  rgba(0,0,0,0) 0%, rgba(0,0,0,1) 100%); /* FF3.6-15 */
+        background: -webkit-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,1) 100%); /* Chrome10-25,Safari5.1-6 */
+        background: linear-gradient(to bottom,  rgba(0,0,0,0) 0%,rgba(0,0,0,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#000000',GradientType=0 ); /* IE6-9 */
+        z-index: 1;
+
+        .program-title, .program-num-courses {
+          margin: 0 0 8px;
+          font-weight: 300;
+          line-height: 1.4em;
+        }
+        .program-title {
+          color: white;
+          font-size: 19px;
+        }
+
+        .program-num-courses {
+          color: rgba(255,255,255,.7);
+          font-size: 15px;
+        }
+      }
+
+      img {
+        width: 100%;
+
+        &.program-default-image {
+          opacity: .4;
+        }
       }
     }
-  }
 
-  .program-thumbnail-description{
-    padding: 20px 10px 30px 15px;
+    .program-description {
+      padding: 20px 10px 30px 15px;
 
-    @include breakpoint(phone) {
+      @include breakpoint(phone) {
         padding: 20px 3px 30px;
       }
 
-    p {
-      color: rgba(255,255,255,0.6);
-      font-weight: 300;
-      font-size: 15px;
-      margin: 0 0 13px;
-    }
-
-    .mailing-list-button {
-      margin-top: 12px;
-    }
-
-    a {
-      color: #289fdc;
-    }
-  }
-
-  .program-thumbnail-image-wrap {
-    width: 100%;
-    background-color: black;
-    position: relative;
-
-    .program-bottom-info {
-      width: 100%;
-      height: 88px;
-      position: absolute;
-      bottom: -1px;
-      padding: 25px 22px;
-      background: -moz-linear-gradient(top,  rgba(0,0,0,0) 0%, rgba(0,0,0,1) 100%); /* FF3.6-15 */
-      background: -webkit-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,1) 100%); /* Chrome10-25,Safari5.1-6 */
-      background: linear-gradient(to bottom,  rgba(0,0,0,0) 0%,rgba(0,0,0,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#000000',GradientType=0 ); /* IE6-9 */
-
-      .num-courses, .program-title {
-        margin: 0 0 8px;
-      }
-
-      .program-title {
-        color: white;
-        font-size: 19px;
+      p {
+        color: rgba(255,255,255,0.6);
         font-weight: 300;
-      }
-
-      .num-courses {
         font-size: 15px;
-        font-weight: 300;
-        color: rgba(255,255,255,.7);
+        margin: 0 0 13px;
+      }
+
+      .mailing-list-button {
+        margin-top: 12px;
+      }
+
+      a {
+        color: #289fdc;
       }
     }
-
-    img {
-      width: 100%;
-    }
-  }
-
-  .dummy-program-thumbnail{
-    width:100%;
-    padding: 0;
-
-    img {width: 100%}
   }
 }
 
