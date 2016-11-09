@@ -201,6 +201,20 @@ class MMTrack:
             current_grade = self.current_grades.get_current_grade(course_id)
             return float(current_grade.percent) * 100
 
+    def get_all_final_grades(self):
+        """
+        Returns a list of final grades for only the passed courses.
+
+        Returns:
+            dict: dictionary of course_ids: floats representing final grades for a course
+        """
+        final_grades = {}
+        for course_id in self.course_ids:
+            final_grade = self.get_final_grade(course_id)
+            if final_grade is not None:
+                final_grades[course_id] = final_grade
+        return final_grades
+
     def get_current_grade(self, course_id):
         """
         Returns the current grade number for the user in the course if enrolled.

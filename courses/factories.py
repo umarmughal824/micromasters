@@ -1,10 +1,11 @@
 """Factories for making test data"""
-import pytz
+from random import randint
 
+import faker
+import pytz
 import factory
 from factory import fuzzy
 from factory.django import DjangoModelFactory
-import faker
 
 from .models import Program, Course, CourseRun
 
@@ -75,7 +76,7 @@ class CourseRunFactory(DjangoModelFactory):
     course = factory.SubFactory(CourseFactory)
     # Try to make sure we escape this correctly
     edx_course_key = factory.LazyAttribute(
-        lambda x: "course:/()+&/" + FAKE.sentence()
+        lambda x: "course:/v{}/{}".format(randint(1, 100), FAKE.slug())
     )
     enrollment_start = factory.LazyAttribute(
         lambda x: FAKE.date_time_this_month(before_now=True, after_now=False, tzinfo=pytz.utc)
@@ -90,10 +91,10 @@ class CourseRunFactory(DjangoModelFactory):
         lambda x: FAKE.date_time_this_year(before_now=False, after_now=True, tzinfo=pytz.utc)
     )
     fuzzy_start_date = factory.LazyAttribute(
-        lambda x: "Starting " + FAKE.sentence()
+        lambda x: "Starting {}".format(FAKE.sentence())
     )
     fuzzy_enrollment_start_date = factory.LazyAttribute(
-        lambda x: "Enrollment starting " + FAKE.sentence()
+        lambda x: "Enrollment starting {}".format(FAKE.sentence())
     )
     enrollment_url = factory.LazyAttribute(
         lambda x: FAKE.url()
