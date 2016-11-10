@@ -40,6 +40,10 @@ export function sendGoogleAnalyticsEvent(category: any, action: any, label: any,
   ga.event(event);
 }
 
+export const isProfileOfLoggedinUser = (profile: Profile): boolean => (
+  SETTINGS.user && profile.username === SETTINGS.user.username
+);
+
 export function userPrivilegeCheck (profile: Profile, privileged: any, unPrivileged: any): any {
   if ( SETTINGS.user && profile.username === SETTINGS.user.username ) {
     return _.isFunction(privileged) ? privileged() : privileged;

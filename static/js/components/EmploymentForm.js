@@ -8,7 +8,10 @@ import IconButton from 'react-mdl/lib/IconButton';
 import _ from 'lodash';
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
 
-import { userPrivilegeCheck } from '../util/util';
+import {
+  userPrivilegeCheck,
+  isProfileOfLoggedinUser
+} from '../util/util';
 import { workEntriesByDate } from '../util/sorting';
 import { employmentValidation } from '../lib/validation/profile';
 import ProfileFormFields from '../util/ProfileFormFields';
@@ -290,8 +293,14 @@ class EmploymentForm extends ProfileFormFields {
 
   renderCard () {
     const {
-      ui: { workHistoryEdit }
+      ui: { workHistoryEdit },
+      profile
     } = this.props;
+
+    if (!isProfileOfLoggedinUser(profile) && (!profile.work_history || profile.work_history.length === 0)) {
+      return null;
+    }
+
     let cardClass = workHistoryEdit ? '' : 'profile-tab-card-greyed';
     return <Card shadow={1} className={`profile-form ${cardClass}`} id={`work-history-card`}>
       <Grid className="profile-form-grid">
