@@ -16,6 +16,7 @@ from dashboard.utils import MMTrack
 from ecommerce.factories import CoursePriceFactory, LineFactory, OrderFactory
 from ecommerce.models import Order
 from financialaid.factories import TierProgramFactory, FinancialAidFactory
+from financialaid.constants import FinancialAidStatus
 from micromasters.factories import UserFactory
 from micromasters.utils import load_json_from_file
 
@@ -202,6 +203,32 @@ class MMTrackTest(TestCase):
         assert mmtrack.financial_aid_applied is True
         assert mmtrack.financial_aid_status == fin_aid.status
         assert mmtrack.financial_aid_id == fin_aid.id
+        assert mmtrack.financial_aid_min_price == 250
+        assert mmtrack.financial_aid_max_price == 1000
+        assert mmtrack.financial_aid_date_documents_sent is None
+
+    def test_init_financial_aid_with_application_in_reset(self):
+        """
+        Sub case of test_init_financial_aid_with_application where
+        there is a financial aid application for the user but the state is `reset`
+        """
+        FinancialAidFactory.create(
+            user=self.user,
+            tier_program=self.min_tier_program,
+            date_documents_sent=None,
+            status=FinancialAidStatus.RESET
+        )
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program_financial_aid,
+            enrollments=self.enrollments,
+            current_grades=self.current_grades,
+            certificates=self.certificates
+        )
+        # the result is like if the user never applied
+        assert mmtrack.financial_aid_applied is False
+        assert mmtrack.financial_aid_status is None
+        assert mmtrack.financial_aid_id is None
         assert mmtrack.financial_aid_min_price == 250
         assert mmtrack.financial_aid_max_price == 1000
         assert mmtrack.financial_aid_date_documents_sent is None

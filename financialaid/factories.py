@@ -62,7 +62,10 @@ class FinancialAidFactory(DjangoModelFactory):
     """
     # user = SubFactory(UserFactory) is implied, since it is created in the cls.create() method
     tier_program = SubFactory(TierProgramFactory)
-    status = FuzzyChoice(FinancialAidStatus.ALL_STATUSES)
+    status = FuzzyChoice(
+        # the reset status is a special case, so removing it from the options
+        [status for status in FinancialAidStatus.ALL_STATUSES if status != FinancialAidStatus.RESET]
+    )
     income_usd = FuzzyFloat(low=0, high=12345)
     original_income = FuzzyFloat(low=0, high=12345)
     original_currency = LazyAttribute(lambda x: FAKE.currency_code())

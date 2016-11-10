@@ -2,11 +2,11 @@
 Models for the Financial Aid App
 """
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
 from django.db import (
     models,
     transaction,
 )
+from rest_framework.exceptions import ValidationError
 
 from courses.models import Program
 from financialaid.constants import FinancialAidStatus
@@ -81,10 +81,15 @@ class FinancialAid(TimestampedModel, AuditableModel):
         """
         Override save to make sure only one FinancialAid object exists for a User and the associated Program
         """
+        # if this is a change just save
+        if FinancialAid.objects.filter(id=self.id).exists():
+            super().save(*args, **kwargs)
+            return
+        # otherwise see if we can create another one
         if FinancialAid.objects.filter(
                 user=self.user,
                 tier_program__program=self.tier_program.program
-        ).exclude(id=self.id).exists():
+        ).exclude(status=FinancialAidStatus.RESET).exists():
             raise ValidationError("Cannot have multiple FinancialAid objects for the same User and Program.")
         super().save(*args, **kwargs)
 
@@ -94,6 +99,12 @@ class FinancialAid(TimestampedModel, AuditableModel):
 
     def to_dict(self):
         return serialize_model_object(self)
+
+    def __str__(self):
+        return 'FA for user "{user}" in status "{status}"'.format(
+            user=self.user.username,
+            status=self.status
+        )
 
 
 class FinancialAidAudit(AuditModel):

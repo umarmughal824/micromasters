@@ -9,6 +9,7 @@ from django.db.models import Max, Min, Q
 
 from courses.models import CourseRun
 from ecommerce.models import Line
+from financialaid.constants import FinancialAidStatus
 from financialaid.models import FinancialAid, TierProgram
 
 
@@ -65,7 +66,8 @@ class MMTrack:
                 ).values_list("course_key", flat=True))
 
                 financial_aid_qset = FinancialAid.objects.filter(
-                    Q(user=user) & Q(tier_program__program=program))
+                    Q(user=user) & Q(tier_program__program=program)
+                ).exclude(status=FinancialAidStatus.RESET)
                 self.financial_aid_applied = financial_aid_qset.exists()
                 if self.financial_aid_applied:
                     financial_aid = financial_aid_qset.first()

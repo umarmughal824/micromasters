@@ -28,6 +28,7 @@ class FinancialAidStatus:
     PENDING_DOCS = 'pending-docs'
     PENDING_MANUAL_APPROVAL = 'pending-manual-approval'
     SKIPPED = 'skipped'
+    RESET = 'reset'
 
     ALL_STATUSES = [
         APPROVED,
@@ -36,7 +37,8 @@ class FinancialAidStatus:
         DOCS_SENT,
         PENDING_DOCS,
         PENDING_MANUAL_APPROVAL,
-        SKIPPED
+        SKIPPED,
+        RESET
     ]
     TERMINAL_STATUSES = [APPROVED, AUTO_APPROVED, SKIPPED]
 
@@ -47,7 +49,7 @@ class FinancialAidStatus:
         DOCS_SENT: "Documents Sent by User",
         PENDING_DOCS: "Started Applications",
         PENDING_MANUAL_APPROVAL: "Pending Approval (Documents Received)",
-        SKIPPED: "Skipped"
+        SKIPPED: "Skipped",
     }
 
 
