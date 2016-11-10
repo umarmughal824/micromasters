@@ -16,7 +16,7 @@
   }
 
   i.material-icons {
-    color: $mm-brand-blue;
+    color: $mm-brand-bg;
   }
 
   .section-header {
@@ -43,8 +43,12 @@
   .profile-radio-switch, .profile-radio-group {
     font-size: 14px;
 
+    .profile-radio-button {
+      margin-bottom: 8px;
+    }
+
     svg:last-child {
-      fill: $mm-brand-blue !important;
+      fill: $mm-brand-bg !important;
     }
   }
 

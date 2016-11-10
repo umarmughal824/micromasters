@@ -62,7 +62,7 @@
       }
 
       .name {
-        font-weight: 500;
+        font-weight: 400;
       }
 
       .program-selector:last-child, .name:last-child {
@@ -152,7 +152,7 @@
 
       @include breakpoint(desktop) {
         img {
-          height: 30px;
+          height: 27px;
           margin-right: 25px;
         }
       }
@@ -172,7 +172,7 @@
 
     .micromasters-header {
       justify-content: space-between;
-      height: 68px;
+      height: 60px;
 
       @include breakpoint(desktop) {
         padding: 0 40px 0 40px;
@@ -221,9 +221,6 @@
   display: inline-block;
   margin-right:10px;
 }
-
-$program_selector_border: rgba(255,255,255,.4);
-$header_font_color: white;
 
 .program-selector {
   font-size: 15px;
@@ -284,4 +281,8 @@ $header_font_color: white;
   color: white;
   text-decoration: none;
   font-weight: 300;
+}
+
+.mdl-layout-title > a:hover, .mdl-layout-title > a:focus {
+  color: white;
 }
