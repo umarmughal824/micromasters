@@ -18,7 +18,7 @@ export const clearCalculatorEdit = createAction(CLEAR_CALCULATOR_EDIT);
 export const UPDATE_CALCULATOR_EDIT = 'UPDATE_CALCULATOR_EDIT';
 export const updateCalculatorEdit = createAction(UPDATE_CALCULATOR_EDIT);
 
-export const UPDATE_CALCULATOR_VALIDATION = 'UPDATE_PROFILE_VALIDATION';
+export const UPDATE_CALCULATOR_VALIDATION = 'UPDATE_CALCULATOR_VALIDATION';
 export const updateCalculatorValidation = createAction(UPDATE_CALCULATOR_VALIDATION);
 
 export const REQUEST_ADD_FINANCIAL_AID = 'REQUEST_ADD_FINANCIAL_AID';
@@ -40,8 +40,11 @@ export const addFinancialAid = (income: number, currency: string, programId: num
         dispatch(fetchDashboard());
         return Promise.resolve();
       },
-      () => {
-        dispatch(receiveAddFinancialAidFailure());
+      err => {
+        dispatch(receiveAddFinancialAidFailure({
+          message: err[0],
+          code: err.errorStatusCode
+        }));
         return Promise.reject();
       });
   };

@@ -26,6 +26,14 @@
     display:  flex;
   }
 
+  .api-error {
+    background-color: $bg-error;
+    color: $link-text;
+    padding: 15px 25px;
+    margin-top: 25px;
+    border-radius: 5px;
+  }
+
   .salary-input {
     background-color: $lightgrey;
     padding: 30px;

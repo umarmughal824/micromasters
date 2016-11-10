@@ -122,7 +122,8 @@ describe('financial aid reducers', () => {
   });
 
   it('should fail to add a financial aid', () => {
-    addFinancialAidStub.returns(Promise.reject());
+    let err = {'0': 'an error message', errorStatusCode: 500};
+    addFinancialAidStub.returns(Promise.reject(err));
     let income = 100000;
     let currency = 'USD';
     let programId = 1;
@@ -133,7 +134,11 @@ describe('financial aid reducers', () => {
     ]).then(state => {
       let expectation = Object.assign({}, FINANCIAL_AID_EDIT, {
         programId: programId,
-        fetchStatus: FETCH_FAILURE
+        fetchStatus: FETCH_FAILURE,
+        fetchError: {
+          message: 'an error message',
+          code: 500
+        }
       });
       assert.deepEqual(state, expectation);
       assert.ok(addFinancialAidStub.calledWith(income, currency, programId));

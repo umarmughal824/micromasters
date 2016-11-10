@@ -1,3 +1,4 @@
+/* global SETTINGS:false */
 import React from 'react';
 import Dialog from 'material-ui/Dialog';
 import { connect } from 'react-redux';
@@ -5,6 +6,8 @@ import R from 'ramda';
 import Button from 'react-mdl/lib/Button';
 import TextField from 'material-ui/TextField';
 import Checkbox from 'react-mdl/lib/Checkbox';
+import Select from 'react-select';
+import _ from 'lodash';
 
 import {
   updateCalculatorEdit,
@@ -18,7 +21,6 @@ import {
   setConfirmSkipDialogVisibility,
 } from '../actions/ui';
 import { createSimpleActionHelpers } from '../lib/redux';
-import SelectField from '../components/inputs/SelectField';
 import { currencyOptions } from '../lib/currency';
 import { validateFinancialAid } from '../lib/validation/profile';
 import { sanitizeNumberString } from '../lib/validation/date';
@@ -26,18 +28,28 @@ import type { AvailableProgram } from '../flow/enrollmentTypes';
 import type {
   FinancialAidState,
   FinancialAidValidation,
+  FetchError,
 } from '../reducers/financial_aid';
 import type { Program } from '../flow/programTypes';
 import { formatPrice } from '../util/util';
 
+const updateCurrency = R.curry((update, financialAid, selection) => {
+  let _financialAid = R.clone(financialAid);
+  _financialAid.currency = selection ? selection.value : null;
+  update(_financialAid);
+});
+
 const currencySelect = (update, current) => (
-  <SelectField
+  <Select
     options={currencyOptions}
-    keySet={['currency']}
-    profile={current}
-    updateProfile={update}
+    value={current.currency}
+    onChange={updateCurrency(update, current)}
     name="currency"
     id="currency-select"
+    inputProps={{
+      'aria-required': "true",
+      'aria-invalid': _.has(current, ['validation', 'currency'])
+    }}
   />
 );
 
@@ -50,6 +62,9 @@ const salaryUpdate = R.curry((update, current, e) => {
 const salaryField = (update, current) => (
   <TextField
     name="salary"
+    required="true"
+    aria-invalid={_.has(current, ['validation', 'income'])}
+    label="income (yearly)"
     id="user-salary-input"
     className="salary-field"
     value={current.income}
@@ -70,6 +85,8 @@ const checkboxUpdate = (update, current, bool) => {
 const checkBox = (update, current) => (
   <Checkbox
     checked={current.checkBox}
+    required="true"
+    aria-invalid={_.has(current, ['validation', 'checkBox'])}
     label={checkboxText}
     onChange={() => checkboxUpdate(update, current, !current.checkBox)}
   />
@@ -84,6 +101,7 @@ const actionButtons = R.map(({ name, onClick, label}) => (
     { label }
   </Button>
 ));
+
 const calculatorActions = (openSkipDialog, cancel, save) => {
   const buttonManifest = [
     { name: 'cancel', onClick: cancel, label: 'Cancel' },
@@ -109,6 +127,16 @@ const validationMessage = (key, errors) => {
   </div>;
 };
 
+const apiError = ({ message, code }: FetchError) => (
+  <div className="api-error">
+    {`There was an error (Error ${code}: ${message}). Please contact `}
+    <a href={`mailto:${SETTINGS.support_email}`}>
+      {`${SETTINGS.support_email}`}
+    </a>
+    {" if you continue to have problems."}
+  </div>
+);
+
 type CalculatorProps = {
   calculatorDialogVisibility: boolean,
   closeDialogAndCancel:       () => void,
@@ -125,7 +153,7 @@ const FinancialAidCalculator = ({
   calculatorDialogVisibility,
   closeDialogAndCancel,
   financialAid,
-  financialAid: { validation },
+  financialAid: { validation, fetchError },
   saveFinancialAid,
   updateCalculatorEdit,
   currentProgramEnrollment: { title, id },
@@ -149,6 +177,7 @@ const FinancialAidCalculator = ({
     className="financial-aid-calculator-wrapper"
     open={calculatorDialogVisibility}
     bodyClassName="financial-aid-calculator-body"
+    autoScrollBodyContent={true}
     onRequestClose={closeDialogAndCancel}
     actions={calculatorActions(openConfirmSkipDialog, closeDialogAndCancel, () => saveFinancialAid(financialAid))}
   >
@@ -158,10 +187,10 @@ const FinancialAidCalculator = ({
     </div>
     <div className="salary-input">
       <div className="income">
-        <div>
+        <label>
           Income (yearly)
-        </div>
-        { salaryField(updateCalculatorEdit, financialAid) }
+          { salaryField(updateCalculatorEdit, financialAid) }
+        </label>
         { validationMessage('income', validation) }
       </div>
       <div className="currency">
@@ -178,6 +207,7 @@ const FinancialAidCalculator = ({
     <div className="checkbox-alert">
       { validationMessage('checkBox', validation) }
     </div>
+    { fetchError ? apiError(fetchError) : null }
   </Dialog>;
 };
 
@@ -188,17 +218,32 @@ const closeDialogAndCancel = dispatch => (
   }
 );
 
+const updateFinancialAidValidation = (dispatch, current) => {
+  let errors = validateFinancialAid(current);
+  if ( ! R.equals(errors, current.validation) ) {
+    dispatch(updateCalculatorValidation(errors));
+  }
+  return R.isEmpty(errors);
+};
+
 const saveFinancialAid = R.curry((dispatch, current) => {
   const { income, currency, programId } = current;
-  let errors = validateFinancialAid(current);
-  if ( ! R.isEmpty(errors) ) {
-    dispatch(updateCalculatorValidation(errors));
-  } else {
+  let valid = updateFinancialAidValidation(dispatch, current);
+  let clone = _.cloneDeep(current);
+  delete clone.validation;
+  if (valid) {
     dispatch(addFinancialAid(income, currency, programId)).then(() => {
       dispatch(clearCalculatorEdit());
       dispatch(setCalculatorDialogVisibility(false));
     });
   }
+});
+
+const updateFinancialAidEdit = R.curry((dispatch, current) => {
+  updateFinancialAidValidation(dispatch, current);
+  let clone = _.cloneDeep(current);
+  delete clone.validation;
+  dispatch(updateCalculatorEdit(clone));
 });
 
 const skipFinancialAidHelper = R.curry((dispatch, programId) => () => {
@@ -235,9 +280,9 @@ const mapDispatchToProps = dispatch => {
     saveFinancialAid: saveFinancialAid(dispatch),
     skipFinancialAid: skipFinancialAidHelper(dispatch),
     openConfirmSkipDialog: openConfirmSkipDialogHelper(dispatch),
+    updateCalculatorEdit: updateFinancialAidEdit(dispatch),
     ...createSimpleActionHelpers(dispatch, [
       ['clearCalculatorEdit', clearCalculatorEdit],
-      ['updateCalculatorEdit', updateCalculatorEdit],
     ]),
   };
 };
