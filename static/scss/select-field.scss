@@ -23,3 +23,36 @@
     border-top-left-radius: 4px!important;
   }
 }
+
+/* React Select styling */
+
+.Select--single > .Select-control {
+
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid #dcdcdc;
+
+  .Select-value {
+    padding-left: 2px;
+    top: 4px;
+  }
+  .Select-input {
+    padding-left: 3px;
+  }
+}
+
+.Select-placeholder {
+  top: 4px;
+  padding-left: 2px;
+}
+
+.select-field {
+  .select-label {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(0,0,0,.5);
+    position: relative;
+    top: 4px;
+    left: 2px;
+  }
+}
