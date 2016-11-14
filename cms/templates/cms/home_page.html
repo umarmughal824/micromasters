@@ -107,7 +107,7 @@
 
       </div>
 
-      <div class="quote-section">
+      <section class="quote-section">
         <div class="row quote">
           <img class="person" src="{% static 'images/reif1.png' %}" alt="">
           <blockquote class="quote-text">“We will find people who never thought they would be able to apply to MIT. And they will discover that they are much stronger in the global competition than they think.”</blockquote>
@@ -118,79 +118,74 @@
           <blockquote class="quote-text">“Inverted admissions has the potential to disrupt traditional modes of access to higher education… We’re democratizing access to a master’s program for learners worldwide.”</blockquote>
           <p class="quote-author">-- Sanjay Sarma, Vice President of Open Learning, MIT  </p>
         </div>
-      </div>
+      </section>
 
-      <div class="row current-programs-section">
-        <div class="col-md-12">
-          <div class="row">
-            <h3>Current MITx MicroMasters Programs</h3>
-            {% for program in programs %}
-              <div class="col-md-4">
-                {% if program.programpage %}
-                  {% if program.programpage.external_program_page_url %}
-                    <a href="{{ program.programpage.external_program_page_url }}" class="program-link">
-                  {% else %}
-                    <a href="{{ program.programpage.url }}" class="program-link">
-                  {% endif %}
+      <section class="row current-programs-section">
+        <h3>Current MITx MicroMasters Programs</h3>
+        <ul class="current-programs-list">
+        {% for program in programs %}
+          <li class="col-md-4">
+            <div class="program-thumbnail">
+              {% if program.programpage %}
+                {% if program.programpage.external_program_page_url %}
+                  <a href="{{ program.programpage.external_program_page_url }}" class="program-link">
+                {% else %}
+                  <a href="{{ program.programpage.url }}" class="program-link">
                 {% endif %}
-                    <div class="program-thumbnail-image-wrap">
-                      {% if program.programpage and program.programpage.thumbnail_image %}
-                        {% image program.programpage.thumbnail_image fill-690x530 as thumbnail_image %}
-                        <img src="{{ thumbnail_image.url }}" alt="course image for {{ program }}"
-                             >
-                      {% else %}
-                        <img src="{% static 'images/course-thumbnail.png' %}"
-                             alt="course image for {{ program }}" style="opacity: .4">
-                      {% endif %}
-                      <div class="program-bottom-info">
-                      <div class="program-title">{{ program.programpage.title }}</div>
-                      <div class="num-courses">
-                        <span class="meta-courses">
-                          {% blocktrans count counter=program.course_set.count %}
-                            {{ counter }} course
-                          {% plural %}
-                            {{ counter }} courses
-                          {% endblocktrans %}
-                        </span>
-                      </div>
-                      </div>
-                    </div>
-
-                {% if program.programpage %}
-                  </a>
-                {% endif %}
-                <div class="program-thumbnail-description">
-                  <p>{{ program.description|default:"No description available for this program." }}</p>
-
-                  {% if program.programpage %}
-                    <p>
-                    {% if program.programpage.external_program_page_url %}
-                      <a href="{{ program.programpage.external_program_page_url }}" class="program-link">
-                    {% else %}
-                      <a href="{{ program.programpage.url }}" class="program-link">
-                    {% endif %}
-                    More about {{ program }}
-                    </a></p>
-                  {% endif %}
+              {% endif %}
+                <div class="program-info">
+                  <h4 class="program-title" aria-describedby="program-{{ program.id }}-description">{{ program.programpage.title }}</h4>
+                  <div class="program-num-courses">
+                    {% blocktrans count counter=program.course_set.count %}
+                      {{ counter }} course
+                    {% plural %}
+                      {{ counter }} courses
+                    {% endblocktrans %}
+                  </div>
                 </div>
-              </div>
-            {% endfor %}
-          <div class="col-md-4">
-            <div class="dummy-program-thumbnail">
+                {% if program.programpage and program.programpage.thumbnail_image %}
+                  {% image program.programpage.thumbnail_image fill-690x530 as thumbnail_image %}
+                  <img src="{{ thumbnail_image.url }}" alt="course image for {{ program }}"
+                       >
+                {% else %}
+                  <img src="{% static 'images/course-thumbnail.png' %}"
+                       alt="course image for {{ program }}" class="program-default-image">
+                {% endif %}
+              {% if program.programpage %}
+                </a>
+              {% endif %}
+            </div>
+            <div class="program-description">
+              <p id="program-{{ program.id }}-description">{{ program.description|default:"No description available for this program." }}</p>
+
+              {% if program.programpage %}
+                <p>
+                {% if program.programpage.external_program_page_url %}
+                  <a href="{{ program.programpage.external_program_page_url }}" class="program-link">
+                {% else %}
+                  <a href="{{ program.programpage.url }}" class="program-link">
+                {% endif %}
+                    More about {{ program }}
+                  </a>
+                </p>
+              {% endif %}
+            </div>
+          </li>
+        {% endfor %}
+
+          <li class="col-md-4">
+            <div class="program-thumbnail">
               <img src="{% static 'images/more-coming-soon.png' %}"
                              alt="More programs coming soon!">
             </div>
-            <div class="program-thumbnail-description">
+            <div class="program-description">
               <p>MIT plans to bring more MicroMasters programs to motivated learners like you. Sign up for our mailing list to hear about new MicroMasters programs.</p>
               <button data-toggle="modal" class="mdl-button gray-button mailing-list-button" data-target="#subscribeAlert">Sign up for mailing list</button>
             </div>
-          </div>
+          </li>
 
-          </div>
-
-        </div>
-      </div>
-
+        </ul>
+      </section>
 
     </section>
   </div>
