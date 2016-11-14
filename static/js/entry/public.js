@@ -3,6 +3,7 @@ __webpack_public_path__ = `http://${SETTINGS.host}:8078/`;  // eslint-disable-li
 import "rrssb/js/rrssb.js";
 import "bootstrap";
 import "ajaxchimp";
+import _ from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
@@ -21,22 +22,30 @@ import SignupDialog from '../containers/SignupDialog';
 
 // Program Page course list
 const courseListEl = document.querySelector('#course-list');
+let courseList = null;
+if (SETTINGS.program) {
+  courseList = SETTINGS.program.courses;
+}
 
-if ( courseListEl ) {
+if ( courseListEl && !_.isEmpty(courseList) ) {
   ReactDOM.render(
     <MuiThemeProvider muiTheme={getMuiTheme()}>
-      <CourseListWithPopover courses={SETTINGS.courses} />
+      <CourseListWithPopover courses={courseList} />
     </MuiThemeProvider>,
     courseListEl
   );
 }
 
 // Program Page carousel div
-const carouselDiv = document.querySelector('#faculty-carousel');
+const carousel = document.querySelector('#faculty-carousel');
+let facultyList = null;
+if (SETTINGS.program) {
+  facultyList = SETTINGS.program.faculty;
+}
 
-if ( carouselDiv ) {
+if ( carouselDiv && !_.isEmpty(facultyList) ) {
   ReactDOM.render(
-    <FacultyCarousel faculty={SETTINGS.faculty}/>,
+    <FacultyCarousel faculty={facultyList}/>,
     carouselDiv
   );
 }
