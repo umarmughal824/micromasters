@@ -47,7 +47,7 @@
 
     .mdl-card {
       padding: 10px;
-      background-color: $bg-light-gray;
+      background-color: #ffffff;
     }
 
     .sk-panel {
@@ -230,7 +230,7 @@
     }
 
     .sk-selected-filters-option {
-      background-color: $bg-light-blue;
+      background-color: $bg-light-gray;
       padding: 6px 10px;
       font-size: 13px;
 
@@ -305,7 +305,7 @@
     }
 
     .learner-result {
-      padding: 11px 0;
+      padding: 9px 0;
       font-size: 14px;
       position: relative;
 
@@ -350,6 +350,10 @@
         height: 43px;
       }
     }
+
+    .learner-result:hover {
+      background: $bg-light-gray;
+    }
   }
 }
 
@@ -359,18 +363,17 @@
   border-radius: 3px;
   border: 1px solid #e4e4e4;
   height: 35px !important;
+  max-height: 35px;
+  background: white;
 
   > select {
-    background-color: $fg-grey;
     border: 0;
-    padding: 5px 30px 5px 0;
+    padding: 7px 26px 7px 0;
   }
 
   .label-before-selected {
-    width: 70px;
-    background-color: $fg-grey;
-    margin-right: -13px;
-    padding: 5px 0 5px 5px;
+    margin-right: 7px;
+    padding: 7px 0 7px 8px;
     font-size: 14px;
     font-weight: normal;
     color: rgba(0,0,0,0.8);
@@ -380,6 +383,7 @@
     font-size: 14px;
     font-weight: normal;
     color: rgba(0,0,0,0.8);
+    line-height: 1.4em;
   }
 }
 

@@ -47,6 +47,10 @@ a {
   color: $link-text;
 }
 
+a:focus, a:hover {
+  color: $link-hover;
+}
+
 blockquote {
   font-family: "Roboto", "Helvetica", "Arial", sans-serif;
   position: static;
