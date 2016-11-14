@@ -37,16 +37,16 @@ if ( courseListEl && !_.isEmpty(courseList) ) {
 }
 
 // Program Page carousel div
-const carousel = document.querySelector('#faculty-carousel');
+const carouselEl = document.querySelector('#faculty-carousel');
 let facultyList = null;
 if (SETTINGS.program) {
   facultyList = SETTINGS.program.faculty;
 }
 
-if ( carouselDiv && !_.isEmpty(facultyList) ) {
+if ( carouselEl && !_.isEmpty(facultyList) ) {
   ReactDOM.render(
     <FacultyCarousel faculty={facultyList}/>,
-    carouselDiv
+    carouselEl
   );
 }
 
