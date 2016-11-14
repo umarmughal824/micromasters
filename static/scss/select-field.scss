@@ -10,8 +10,12 @@
 
 .select-field {
   .select-label {
-    font-size: 13px;
-    font-weight: 700;
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(0,0,0,.5);
+    position: relative;
+    top: 4px;
+    left: 2px;
   }
 
   .menu-outer-top .Select-menu-outer {
@@ -23,8 +27,6 @@
     border-top-left-radius: 4px!important;
   }
 }
-
-/* React Select styling */
 
 .Select--single > .Select-control {
 
@@ -49,15 +51,4 @@
 .Select-placeholder {
   top: 4px;
   padding-left: 2px;
-}
-
-.select-field {
-  .select-label {
-    font-size: 12px;
-    font-weight: 400;
-    color: rgba(0,0,0,.5);
-    position: relative;
-    top: 4px;
-    left: 2px;
-  }
 }
