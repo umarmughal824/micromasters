@@ -137,6 +137,8 @@ def standard_error_page(request, status_code, template_filename):
             "dashboard_src": get_bundle_url(request, "dashboard.js"),
             "common_src": get_bundle_url(request, "common.js"),
             "sentry_client": get_bundle_url(request, "sentry_client.js"),
+            "style_public_src": get_bundle_url(request, "style_public.js"),
+            "public_src": get_bundle_url(request, "public.js"),
             "js_settings_json": json.dumps({
                 "release_version": settings.VERSION,
                 "environment": settings.ENVIRONMENT,
@@ -166,6 +168,8 @@ def terms_of_service(request):
             "zendesk_widget": get_bundle_url(request, "zendesk_widget.js"),
             "style_src": get_bundle_url(request, "style.js"),
             "common_src": get_bundle_url(request, "common.js"),
+            "public_src": get_bundle_url(request, "public.js"),
+            "style_public_src": get_bundle_url(request, "style_public.js"),
             "sentry_client": get_bundle_url(request, "sentry_client.js"),
             "js_settings_json": json.dumps({
                 "release_version": settings.VERSION,
