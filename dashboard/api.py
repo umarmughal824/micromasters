@@ -18,8 +18,9 @@ from django.db import transaction
 from django.db.models import Q
 import pytz
 
-from courses.models import CourseRun
+from courses.models import CourseRun, Program
 from dashboard import models
+from dashboard.utils import MMTrack
 from profiles.api import get_social_username
 
 log = logging.getLogger(__name__)
@@ -121,6 +122,42 @@ class CourseRunUserStatus:
         )
 
 
+def get_user_program_info(user, edx_client):
+    """
+    Provides a detailed serialization all of a User's enrolled Programs with enrollment/grade info
+
+    Args:
+        user (User): A User
+        edx_client (EdxApi): An EdxApi instance
+
+    Returns:
+        list: Enrolled Program information
+    """
+    # get enrollments for the student
+    enrollments = get_student_enrollments(user, edx_client)
+    # get certificates for the student
+    certificates = get_student_certificates(user, edx_client)
+    # get current_grades for the student
+    # the grades should be refreshed always after the enrollments
+    # or else some grades may not get fetched
+    current_grades = get_student_current_grades(user, edx_client)
+
+    response_data = []
+    all_programs = (
+        Program.objects.filter(live=True, programenrollment__user=user).prefetch_related('course_set__courserun_set')
+    )
+    for program in all_programs:
+        mmtrack_info = MMTrack(
+            user,
+            program,
+            enrollments,
+            current_grades,
+            certificates
+        )
+        response_data.append(get_info_for_program(mmtrack_info))
+    return response_data
+
+
 def get_info_for_program(mmtrack):
     """
     Helper function that formats a program with all the courses and runs
@@ -208,17 +245,17 @@ def get_info_for_course(course, mmtrack):
     run_statuses.remove(run_status)
 
     if run_status.status == CourseRunStatus.NOT_ENROLLED:
-        next_run = CourseRun.get_first_unexpired_run(course)
+        next_run = course.first_unexpired_run()
         if next_run is not None:
             _add_run(next_run, mmtrack, CourseStatus.OFFERED)
     elif run_status.status == CourseRunStatus.NOT_PASSED:
         _add_run(run_status.course_run, mmtrack, CourseRunStatus.NOT_PASSED)
-        next_run = CourseRun.get_first_unexpired_run(course)
+        next_run = course.first_unexpired_run()
         if next_run is not None:
             _add_run(next_run, mmtrack, CourseStatus.OFFERED)
     elif run_status.status == CourseRunStatus.MISSED_DEADLINE:
         _add_run(run_status.course_run, mmtrack, CourseStatus.MISSED_DEADLINE)
-        next_run = CourseRun.get_first_unexpired_run(course)
+        next_run = course.first_unexpired_run()
         if next_run is not None:
             _add_run(next_run, mmtrack, CourseStatus.OFFERED)
     elif run_status.status == CourseRunStatus.CURRENTLY_ENROLLED:
@@ -228,7 +265,7 @@ def get_info_for_course(course, mmtrack):
         # if the user never passed the course she needs to enroll in the next one
         if not mmtrack.has_passed_course(run_status.course_run.edx_course_key):
             _add_run(run_status.course_run, mmtrack, CourseRunStatus.NOT_PASSED)
-            next_run = CourseRun.get_first_unexpired_run(course)
+            next_run = course.first_unexpired_run()
             if next_run is not None:
                 _add_run(next_run, mmtrack, CourseStatus.OFFERED)
         else:

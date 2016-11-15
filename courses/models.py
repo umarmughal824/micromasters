@@ -9,6 +9,7 @@ import pytz
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django.conf import settings
+from micromasters.utils import first_matching_item
 
 
 log = logging.getLogger(__name__)
@@ -84,7 +85,7 @@ class Course(models.Model):
         """
         Construct the course page url
         """
-        course_run = CourseRun.get_first_unexpired_run(self)
+        course_run = self.first_unexpired_run()
         if not course_run:
             return ""
         if not course_run.edx_course_key:
@@ -100,7 +101,7 @@ class Course(models.Model):
         Return text that contains start and enrollment
         information about the course.
         """
-        course_run = CourseRun.get_first_unexpired_run(self)
+        course_run = self.first_unexpired_run()
         if not course_run or not course_run.start_date:
             promised_run = self.get_promised_run()
             if promised_run:
@@ -132,6 +133,17 @@ class Course(models.Model):
         else:
             return "Not available"
 
+    def first_unexpired_run(self):
+        """
+        Gets the first unexpired CourseRun associated with this Course
+
+        Returns: CourseRun or None: An unexpired course run
+        """
+        return first_matching_item(
+            self.courserun_set.all(),
+            lambda course_run: course_run.is_unexpired
+        )
+
 
 class CourseRun(models.Model):
     """
@@ -158,6 +170,9 @@ class CourseRun(models.Model):
     enrollment_url = models.URLField(blank=True, null=True)
     prerequisites = models.TextField(blank=True, null=True)
     course = models.ForeignKey(Course, null=True)
+
+    class Meta:
+        ordering = ('start_date', )
 
     def __str__(self):
         return self.title
@@ -216,60 +231,20 @@ class CourseRun(models.Model):
         return (self.upgrade_deadline is None or
                 (self.upgrade_deadline > datetime.now(pytz.utc)))
 
-    @classmethod
-    def get_first_unexpired_run_qset(cls):
+    @property
+    def is_not_beyond_enrollment(self):
         """
-        It generates a queryset for fetching the first available run for a course.
+        Checks if the course is not beyond its enrollment period
         """
         now = datetime.now(pytz.utc)
-        unexpired_courserun_q = (
-            (models.Q(enrollment_end__isnull=True) & (
-                models.Q(end_date__gte=now) | models.Q(end_date__isnull=True)
-            )) |
-            models.Q(enrollment_end__gte=now)
-        )
-        past_courserun_q = (
-            models.Q(end_date__isnull=False) &
-            models.Q(end_date__lt=now)
-        )
-        upgradable_q = (
-            models.Q(upgrade_deadline__isnull=True) |
-            models.Q(upgrade_deadline__gte=now)
-        )
-
         return (
-            cls.objects
-            .filter(unexpired_courserun_q)
-            .exclude(past_courserun_q)
-            .filter(upgradable_q)
-            .order_by('start_date')
-            .select_related('course')
+            (self.enrollment_end is None and (self.end_date is None or self.end_date > now)) or
+            self.enrollment_end > now
         )
 
-    @classmethod
-    def get_first_unexpired_run(cls, course):
+    @property
+    def is_unexpired(self):
         """
-        Gets the soonest unexpired run associated with the provided course.
-        Note that it could be current as long as the enrollment window
-        has not closed.
-
-        Args:
-            course (Course): A Course to look for in the query
-
-        Returns: CourseRun or None: An unexpired course run
-
+        Checks if the course is not expired
         """
-        future_run_queryset = cls.get_first_unexpired_run_qset()
-        # The reason this un-intuitive approach and for looping through the large queryset and not calling
-        # .filter(course=course).first() is that we can pre fetch the generic query once in the dashboard.views
-        # and then, given that at this level the query will be always the same for all the courses,
-        # the query will be cached by django ORM and there will not be a roundtrip to postgres for each course.
-        #
-        # In particular .filter(course=course).first() forces a new query for each course because it translates to
-        # an SQL query that looks like
-        # SELECT ... FROM courserun WHERE course_id=<id> AND ...all other conditions... LIMIT 1
-        #
-        # this approach reduces the number of queries to postgres to 2/3 of the usual approach.
-        for run in future_run_queryset:
-            if run.course.id == course.id:
-                return run
+        return not self.is_past and self.is_upgradable and self.is_not_beyond_enrollment

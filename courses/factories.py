@@ -8,7 +8,6 @@ import faker
 
 from .models import Program, Course, CourseRun
 
-
 FAKE = faker.Factory.create()
 
 
@@ -20,6 +19,32 @@ class ProgramFactory(DjangoModelFactory):
 
     class Meta:  # pylint: disable=missing-docstring
         model = Program
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        full_create = kwargs.pop('full', False)
+        program = model_class(*args, **kwargs)
+        program.save()
+        if full_create:
+            course = CourseFactory.create(program=program)
+            course_run = CourseRunFactory.create(course=course)
+            from ecommerce.factories import CoursePriceFactory
+            course_price = CoursePriceFactory.create(course_run=course_run, is_valid=True)
+            if program.financial_aid_availability:
+                from financialaid.factories import TierProgramFactory
+                TierProgramFactory.create(
+                    program=program,
+                    current=True,
+                    discount_amount=0,
+                    income_threshold=1000
+                )
+                TierProgramFactory.create(
+                    program=program,
+                    current=True,
+                    discount_amount=int(course_price.price / 10),
+                    income_threshold=0
+                )
+        return program
 
 
 class CourseFactory(DjangoModelFactory):

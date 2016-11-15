@@ -22,8 +22,10 @@ from dashboard import (
 )
 from dashboard.utils import MMTrack
 from micromasters.factories import UserFactory
-from micromasters.utils import load_json_from_file
+from micromasters.utils import load_json_from_file, is_subset_dict
 from search.base import ESTestCase
+from seed_data.lib import ensure_cached_edx_data_for_user, set_course_run_past
+from seed_data.management.commands.alter_data import set_course_to_failed, add_past_failed_run
 
 
 # pylint: disable=too-many-lines
@@ -503,9 +505,7 @@ class InfoCourseTest(CourseTests):
             autospec=True,
             side_effect=self.get_mock_run_status_func(
                 api.CourseRunStatus.CHECK_IF_PASSED, self.course_run, api.CourseRunStatus.CHECK_IF_PASSED),
-        ), patch('courses.models.CourseRun.get_first_unexpired_run', new=MagicMock()) as mock_get_run:
-            # this is necessary because for some reason patching a classmethod by default gives a NonCallableMagicMock
-            mock_get_run.return_value = None
+        ), patch('courses.models.Course.first_unexpired_run', return_value=None):
             self.assert_course_equal(
                 self.course,
                 api.get_info_for_course(self.course, self.mmtrack)
@@ -735,6 +735,68 @@ class InfoCourseTest(CourseTests):
         mock_format.assert_called_once_with(run1, api.CourseStatus.OFFERED, None, position=1)
 
 
+class UserProgramInfoIntegrationTest(ESTestCase):
+    """Integration tests for get_user_program_info"""
+    @classmethod
+    def setUpTestData(cls):
+        super(UserProgramInfoIntegrationTest, cls).setUpTestData()
+        cls.user = UserFactory()
+        # create the programs
+        cls.program_non_fin_aid = ProgramFactory.create(full=True, live=True)
+        cls.program_fin_aid = ProgramFactory.create(full=True, live=True, financial_aid_availability=True)
+        cls.program_unenrolled = ProgramFactory.create(full=True, live=True)
+        cls.program_not_live = ProgramFactory.create(live=False)
+        for program in [cls.program_non_fin_aid, cls.program_fin_aid, cls.program_not_live]:
+            models.ProgramEnrollment.objects.create(user=cls.user, program=program)
+
+    def setUp(self):
+        super().setUp()
+        self.expected_programs = [self.program_non_fin_aid, self.program_fin_aid]
+        self.edx_client = MagicMock()
+
+    @patch('dashboard.api.get_student_enrollments', autospec=True)
+    @patch('dashboard.api.get_student_certificates', autospec=True)
+    @patch('dashboard.api.get_student_current_grades', autospec=True)
+    def test_format(self, mock_grades, mock_cert, mock_enr):
+        """Test that get_user_program_info fetches edx data and returns a list of Program data"""
+        result = api.get_user_program_info(self.user, self.edx_client)
+
+        for mocked_edx_get_function in [mock_grades, mock_cert, mock_enr]:
+            assert mocked_edx_get_function.call_count == 1
+            assert mocked_edx_get_function.call_args[0] == (self.user, self.edx_client)
+
+        assert len(result) == 2
+        for i in range(2):
+            expected = {
+                "id": self.expected_programs[i].id,
+                "description": self.expected_programs[i].description,
+                "title": self.expected_programs[i].title,
+                "financial_aid_availability": self.expected_programs[i].financial_aid_availability,
+            }
+            assert is_subset_dict(expected, result[i])
+
+    def test_past_course_runs(self):
+        """Test that past course runs are returned in the API results"""
+        # Set a course run to be failed
+        program = self.program_non_fin_aid
+        course = program.course_set.first()
+        failed_course_run = \
+            set_course_to_failed(user=self.user, course=course)  # pylint: disable=unexpected-keyword-arg
+        # Create a course run previous to that one, and set it to be failed as well
+        previous_failed_course_run = CourseRunFactory.create(course=course)
+        previous_end_date = failed_course_run.end_date - timedelta(days=30)
+        set_course_run_past(previous_failed_course_run, end_date=previous_end_date, save=True)
+        add_past_failed_run(user=self.user, course=course, add_if_exists=True)
+        # Make sure that the test user has all necessary cached data so the EdxApi client isn't needed
+        ensure_cached_edx_data_for_user(self.user)
+
+        result = api.get_user_program_info(self.user, self.edx_client)
+        assert len(result) > 0
+        assert len(result[0]['courses']) > 0
+        assert len(result[0]['courses'][0]['runs']) == 2
+        assert all([run['status'] == api.CourseStatus.NOT_PASSED for run in result[0]['courses'][0]['runs']])
+
+
 class InfoProgramTest(ESTestCase):
     """Tests for get_info_for_program"""
     @classmethod
@@ -848,11 +910,11 @@ class CachedCertificatesTests(ESTestCase):
         cls.all_course_run_ids = []
         for certificate in cls.certificates.all_certs:
             all_runs.append(CourseRunFactory.create(edx_course_key=certificate.course_id))
-            cls.all_course_run_ids.append(certificate.course_id)
         # add an extra course_run not coming from certificates
         fake_cert_id = 'foo+cert+key'
         all_runs.append(CourseRunFactory.create(edx_course_key=fake_cert_id))
-        cls.all_course_run_ids.append(fake_cert_id)
+        all_runs.sort(key=lambda run: run.start_date)
+        cls.all_course_run_ids = [run.edx_course_key for run in all_runs]
 
         for run in all_runs:
             run.course.program.live = True
