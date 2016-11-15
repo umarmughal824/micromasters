@@ -78,7 +78,7 @@ class FinancialAidRequestSerializer(serializers.Serializer):
             country_of_residence=user.profile.country,
         )
 
-        if determine_auto_approval(financial_aid) is True:
+        if determine_auto_approval(financial_aid, tier_program) is True:
             financial_aid.status = FinancialAidStatus.AUTO_APPROVED
         else:
             financial_aid.status = FinancialAidStatus.PENDING_DOCS

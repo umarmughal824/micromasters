@@ -110,17 +110,17 @@ class FinancialAidBaseTestCase(TestCase):
                 discount_amount=0
             ),
         }
-        cls.country_income_threshold_0 = CountryIncomeThreshold.objects.create(
+        CountryIncomeThreshold.objects.create(
             country_code="0",
             income_threshold=0,
         )
-        cls.country_income_threshold_50000 = CountryIncomeThreshold.objects.create(
+        CountryIncomeThreshold.objects.create(
             country_code=cls.profile.country,
             income_threshold=50000,
         )
 
     @staticmethod
-    def assert_http_status(method, url, status, data=None, content_type="application/json", **kwargs):
+    def make_http_request(method, url, status, data=None, content_type="application/json", **kwargs):
         """
         Helper method for asserting an HTTP status. Returns the response for further tests if needed.
         Args:
@@ -202,7 +202,8 @@ class FinancialAidAPITests(FinancialAidBaseTestCase):
             income_usd=income_usd,
             country_of_income=country_code,
         )
-        assert determine_auto_approval(financial_aid) is expected
+        tier_program = determine_tier_program(self.program, income_usd)
+        assert determine_auto_approval(financial_aid, tier_program) is expected
 
     def test_determine_income_usd_from_not_usd(self):
         """
