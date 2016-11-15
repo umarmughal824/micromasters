@@ -111,10 +111,6 @@
 
       i.closed {
         transform: rotate(0.75turn);
-        -webkit-transform: rotate(0.75turn);
-        -moz-transform: rotate(0.75turn);
-        -ms-transform: rotate(0.75turn);
-        -o-transform: rotate(0.75turn);
       }
 
       .sk-panel__content, .sk-hierarchical-menu-list__root {
@@ -293,10 +289,6 @@
   .learner-results {
     width: 100%;
 
-    .learner-result {
-      border-bottom: 1px solid $border-color;
-    }
-
     .learner-result:last-child {
       border-bottom: none;
     }
@@ -309,6 +301,7 @@
       padding: 9px 0;
       font-size: 14px;
       position: relative;
+      border-bottom: 1px solid $border-color;
 
       img {
         border-radius: 50px;

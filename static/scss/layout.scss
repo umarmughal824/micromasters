@@ -29,6 +29,7 @@
 @import "docs-instructions";
 @import "toast";
 @import "select-field";
+@import "blocks";
 
 .selected {
   font-weight: bold;
@@ -42,7 +43,7 @@
 }
 
 // IE: make x's disappear for input items
-input::-ms-clear {
+input::-ms-clear { // sass-lint:disable-line no-vendor-prefixes
   display: none;
 }
 

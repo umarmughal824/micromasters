@@ -15,10 +15,6 @@
     border-radius: 18px;
   }
 
-  .user-menu-dropdown {
-    display: none;
-  }
-
   .user-menu-dropdown.open {
     display: flex;
     flex-direction: column;
@@ -34,6 +30,8 @@
   }
 
   .user-menu-dropdown {
+    display: none;
+
     > a {
       margin: 6px 13px;
       color: rgba(255,255,255,.8);

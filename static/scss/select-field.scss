@@ -1,7 +1,3 @@
-.select-field {
-  padding-top: 9px;
-}
-
 .select-field, .Select {
   .Select-menu-outer {
     z-index: 10000;
@@ -9,6 +5,8 @@
 }
 
 .select-field {
+  padding-top: 9px;
+
   .select-label {
     font-size: 12px;
     font-weight: 400;
@@ -20,11 +18,11 @@
 
   .menu-outer-top .Select-menu-outer {
     top: inherit;
-    bottom: 35px!important;
-    border-bottom-right-radius: 0px!important;
-    border-bottom-left-radius: 0px!important;
-    border-top-right-radius: 4px!important;
-    border-top-left-radius: 4px!important;
+    bottom: 35px !important;
+    border-bottom-right-radius: 0px !important;
+    border-bottom-left-radius: 0px !important;
+    border-top-right-radius: 4px !important;
+    border-top-left-radius: 4px !important;
   }
 }
 

@@ -221,6 +221,9 @@ class ReviewFinancialAidView(UserPassesTestMixin, ListView):
         context["js_settings_json"] = json.dumps(js_settings)
         context["authenticated"] = not self.request.user.is_anonymous()
         context["financial_aid_src"] = get_bundle_url(self.request, "financial_aid.js")
+        context["common_src"] = get_bundle_url(self.request, "common.js")
+        context["public_src"] = get_bundle_url(self.request, "public.js")
+        context["style_public_src"] = get_bundle_url(self.request, "style_public.js")
         return context
 
     def get_queryset(self):
