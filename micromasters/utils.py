@@ -100,3 +100,38 @@ def get_field_names(model):
     return [
         field.name for field in model._meta.get_fields() if not field.auto_created  # pylint: disable=protected-access
     ]
+
+
+def first_matching_item(iterable, predicate):
+    """
+    Gets the first item in an iterable that matches a predicate (or None if nothing matches)
+
+    Returns:
+        Matching item or None
+    """
+    return next(filter(predicate, iterable), None)
+
+
+def is_subset_dict(dict_to_test, master_dict):
+    """
+    Checks if a dictionary is a subset of another dictionary
+
+    Args:
+        dict_to_test (dict): The subset dictionary
+        master_dict (dict): The dictionary to test against
+    Returns:
+        bool: Whether or not the first dictionary is a subset of the second
+    """
+    result = True
+    try:
+        for pkey, pvalue in dict_to_test.items():
+            if isinstance(pvalue, dict):
+                result = is_subset_dict(pvalue, master_dict[pkey])
+                if not result:
+                    return False
+            else:
+                if master_dict[pkey] != pvalue:
+                    return False
+    except KeyError:
+        return False
+    return result

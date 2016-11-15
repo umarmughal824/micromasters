@@ -306,10 +306,21 @@ def update_cached_edx_data_for_run(user, course_run):
             cached_obj.save()
 
 
-def set_course_run_past(course_run, save=True):
+def generate_enrollment_date_range(course_start_date, day_spread=10):
+    """Given a course start date, return an enrollment date range"""
+    day_incr = int(day_spread/2)
+    return course_start_date - timedelta(days=day_incr), course_start_date + timedelta(days=day_incr)
+
+
+def set_course_run_past(course_run, end_date=None, save=True):
     """Sets relevant CourseRun dates to the past relative to now"""
-    course_run.start_date, course_run.end_date = create_past_date_range(ended_days_ago=30, day_spread=30)
-    course_run.enrollment_start, course_run.enrollment_end = create_past_date_range(ended_days_ago=50, day_spread=10)
+    day_spread = 30
+    if end_date:
+        course_run.end_date = end_date
+        course_run.start_date = end_date - timedelta(days=day_spread)
+    else:
+        course_run.start_date, course_run.end_date = create_past_date_range(ended_days_ago=30, day_spread=day_spread)
+    course_run.enrollment_start, course_run.enrollment_end = generate_enrollment_date_range(course_run.start_date)
     if save:
         course_run.save()
     return course_run

@@ -68,14 +68,14 @@ class CourseModelTests(ESTestCase):
 # Silencing a pylint warning caused by ddt
 # pylint: disable=too-many-arguments
 @ddt
-class GetFirstUnexpiredRunTests(CourseModelTests):  # pylint: disable=too-many-public-methods
-    """Tests for get_unexpired_run function"""
+class FirstUnexpiredRunTests(CourseModelTests):  # pylint: disable=too-many-public-methods
+    """Tests for first_unexpired_run function"""
 
     def test_no_run(self):
         """
         No run available
         """
-        assert CourseRun.get_first_unexpired_run(self.course) is None
+        assert self.course.first_unexpired_run() is None
 
     @data(
         # course past, enrollment past
@@ -102,7 +102,7 @@ class GetFirstUnexpiredRunTests(CourseModelTests):  # pylint: disable=too-many-p
     @unpack
     def test_run(self, start_weeks, end_weeks, enr_start_weeks, enr_end_weeks, is_run):
         """
-        Test get_first_unexpired_run for different values
+        Test first_unexpired_run for different values
         """
         course_run = self.create_run(
             start=self.from_weeks(start_weeks),
@@ -110,7 +110,7 @@ class GetFirstUnexpiredRunTests(CourseModelTests):  # pylint: disable=too-many-p
             enr_start=self.from_weeks(enr_start_weeks),
             enr_end=self.from_weeks(enr_end_weeks),
         )
-        unexpired_run = CourseRun.get_first_unexpired_run(self.course)
+        unexpired_run = self.course.first_unexpired_run()
         if is_run:
             assert unexpired_run == course_run
         else:
@@ -133,7 +133,7 @@ class GetFirstUnexpiredRunTests(CourseModelTests):  # pylint: disable=too-many-p
             enr_start=self.from_weeks(40),
             enr_end=self.from_weeks(50),
         )
-        next_run = CourseRun.get_first_unexpired_run(self.course)
+        next_run = self.course.first_unexpired_run()
         assert isinstance(next_run, CourseRun)
         assert next_run.pk == course_run.pk
 
@@ -154,7 +154,7 @@ class GetFirstUnexpiredRunTests(CourseModelTests):  # pylint: disable=too-many-p
             enr_start=self.from_weeks(40),
             enr_end=self.from_weeks(50),
         )
-        next_run = CourseRun.get_first_unexpired_run(self.course)
+        next_run = self.course.first_unexpired_run()
         assert isinstance(next_run, CourseRun)
         assert next_run.pk == course_run.pk
 
@@ -177,7 +177,7 @@ class GetFirstUnexpiredRunTests(CourseModelTests):  # pylint: disable=too-many-p
             enr_start=self.from_weeks(0),
             enr_end=self.from_weeks(5),
         )
-        next_run = CourseRun.get_first_unexpired_run(self.course)
+        next_run = self.course.first_unexpired_run()
         assert isinstance(next_run, CourseRun)
         assert next_run.pk == course_run_later.pk
 

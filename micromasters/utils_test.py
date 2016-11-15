@@ -14,9 +14,9 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError
 
 from ecommerce.factories import (
-    CoursePriceFactory,
     ReceiptFactory,
 )
+from ecommerce.factories import CoursePriceFactory
 from ecommerce.models import Order
 from financialaid.factories import (
     FinancialAidFactory,
@@ -25,6 +25,8 @@ from micromasters.utils import (
     custom_exception_handler,
     get_field_names,
     serialize_model_object,
+    first_matching_item,
+    is_subset_dict,
 )
 
 
@@ -146,3 +148,40 @@ class FieldNamesTests(unittest.TestCase):
             'created_at',
             'modified_at',
         }
+
+
+class UtilTests(unittest.TestCase):
+    """
+    Tests for assorted utility functions
+    """
+
+    def test_first_matching_item(self):
+        """
+        Tests that first_matching_item returns a matching item in an iterable, or None
+        """
+        iterable = [1, 2, 3, 4, 5]
+        first_matching = first_matching_item(iterable, lambda item: item == 1)
+        second_matching = first_matching_item(iterable, lambda item: item == 5)
+        third_matching = first_matching_item(iterable, lambda item: item == 10)
+        assert first_matching == 1
+        assert second_matching == 5
+        assert third_matching is None
+
+    def test_is_subset_dict(self):
+        """
+        Tests that is_subset_dict properly determines whether or not a dict is a subset of another dict
+        """
+        d1 = {'a': 1, 'b': 2, 'c': {'d': 3}}
+        d2 = {'a': 1, 'b': 2, 'c': {'d': 3}, 'e': 4}
+        assert is_subset_dict(d1, d2)
+        assert is_subset_dict(d1, d1)
+        assert not is_subset_dict(d2, d1)
+        new_dict = dict(d1)
+        new_dict['f'] = 5
+        assert not is_subset_dict(new_dict, d2)
+        new_dict = dict(d1)
+        new_dict['a'] = 2
+        assert not is_subset_dict(new_dict, d2)
+        new_dict = dict(d1)
+        new_dict['c']['d'] = 123
+        assert not is_subset_dict(new_dict, d2)

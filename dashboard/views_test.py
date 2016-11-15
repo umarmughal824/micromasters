@@ -12,16 +12,12 @@ from django.core.urlresolvers import reverse
 from requests.exceptions import HTTPError
 from rest_framework import status
 from rest_framework.test import APITestCase
-from edx_api.certificates.models import Certificates
 from edx_api.enrollments.models import Enrollments, Enrollment
-from edx_api.grades.models import CurrentGrades
 
 from backends.edxorg import EdxOrgOAuth2
 from backends.utils import InvalidCredentialStored
 from courses.factories import ProgramFactory, CourseRunFactory
-from courses.models import Program
 from dashboard.models import ProgramEnrollment, CachedEnrollment
-from dashboard.utils import MMTrack
 from micromasters.factories import UserFactory
 from search.base import ESTestCase
 
@@ -63,28 +59,6 @@ class DashboardTest(APITestCase):
         super(DashboardTest, self).setUp()
         self.client.force_login(self.user)
 
-    # pylint: disable=no-value-for-parameter
-    @patch('backends.utils.refresh_user_token', autospec=True)
-    @patch('dashboard.views.get_student_certificates', autospec=True, return_value=Certificates([]))
-    @patch('dashboard.views.get_student_enrollments', autospec=True, return_value=Enrollments([]))
-    @patch('dashboard.views.get_student_current_grades', autospec=True, return_value=CurrentGrades([]))
-    def get_with_mocked_refresh_backends(self, mock_grades, mock_enr, mock_cert, mock_tok):
-        """Helper function to perform get request with mocked backend functions"""
-        def mocked_info_program(mmtrack):
-            """Mocked function for getting info for the program"""
-            assert isinstance(mmtrack, MMTrack)
-            return {'program': mmtrack.program.title, 'id': mmtrack.program.id}
-
-        with patch('dashboard.views.get_info_for_program', autospec=True, side_effect=mocked_info_program):
-            resp = self.client.get(self.url)
-
-        assert mock_grades.call_count == 1
-        assert mock_enr.call_count == 1
-        assert mock_cert.call_count == 1
-        assert mock_tok.call_count == 1
-
-        return resp
-
     def test_anonym_access(self):
         """Test for GET"""
         self.client.logout()
@@ -93,13 +67,10 @@ class DashboardTest(APITestCase):
 
     def test_get_dashboard(self):
         """Test for GET"""
-        res = self.get_with_mocked_refresh_backends()
-
-        assert res.status_code == status.HTTP_200_OK
-        program_ids = [program['id'] for program in res.data]
-        # not live and not enrolled programs are missing
-        assert program_ids == [self.program_1.pk, self.program_2.pk]
-        assert Program.objects.count() == 4
+        with patch('backends.utils.refresh_user_token', autospec=True):
+            result = self.client.get(self.url)
+        assert len(result.data) == 2
+        assert [self.program_1.id, self.program_2.id] == [res_item['id'] for res_item in result.data]
 
 
 class DashboardTokensTest(APITestCase):
