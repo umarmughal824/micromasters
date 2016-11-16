@@ -36,10 +36,10 @@ import {
   REQUEST_COURSE_PRICES,
   RECEIVE_COURSE_PRICES_SUCCESS,
 } from '../actions/index';
+import { DASHBOARD_SUCCESS_ACTIONS } from '../containers/DashboardPage_test';
 
 describe('FinancialAidCalculator', () => {
   let listenForActions, renderComponent, helper, addFinancialAidStub, skipFinancialAidStub;
-
   let financialAidDashboard = _.clone(DASHBOARD_RESPONSE);
   let program = financialAidDashboard.find(program => (
     program.title === "Not passed program"
@@ -64,7 +64,7 @@ describe('FinancialAidCalculator', () => {
   });
 
   it('should let you open and close the financial aid calculator', () => {
-    return renderComponent('/dashboard').then(([wrapper]) => {
+    return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
       wrapper.find('.pricing-actions').find('.dashboard-button').simulate('click');
       assert.equal(helper.store.getState().ui.calculatorDialogVisibility, true);
       let calculator = document.querySelector('.financial-aid-calculator');
@@ -76,7 +76,7 @@ describe('FinancialAidCalculator', () => {
 
   it('should let you skip and pay full price', () => {
     skipFinancialAidStub.returns(Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE));
-    return renderComponent('/dashboard').then(([wrapper]) => {
+    return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
       return listenForActions([
         START_CALCULATOR_EDIT,
         UPDATE_CALCULATOR_EDIT,
@@ -108,7 +108,7 @@ describe('FinancialAidCalculator', () => {
   });
 
   it('should let you enter your income', () => {
-    return renderComponent('/dashboard').then(([wrapper]) => {
+    return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
       return listenForActions([
         START_CALCULATOR_EDIT,
         UPDATE_CALCULATOR_EDIT,
@@ -142,7 +142,7 @@ describe('FinancialAidCalculator', () => {
       assert.isNotNull(input.attributes.getNamedItem(reqdAttr));
     };
 
-    return renderComponent('/dashboard').then(([wrapper]) => {
+    return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
       return listenForActions([
         START_CALCULATOR_EDIT,
         UPDATE_CALCULATOR_EDIT,
@@ -168,7 +168,7 @@ describe('FinancialAidCalculator', () => {
   });
 
   it('should let you enter your preferred currency', () => {
-    return renderComponent('/dashboard').then(([wrapper]) => {
+    return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
       return listenForActions([
         START_CALCULATOR_EDIT,
         UPDATE_CALCULATOR_EDIT,
@@ -198,7 +198,7 @@ describe('FinancialAidCalculator', () => {
 
   it('should let you submit a financial aid request', () => {
     addFinancialAidStub.returns(Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE));
-    return renderComponent('/dashboard').then(([wrapper]) => {
+    return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
       return listenForActions([
         START_CALCULATOR_EDIT,
         UPDATE_CALCULATOR_EDIT,
@@ -234,7 +234,7 @@ describe('FinancialAidCalculator', () => {
       '0': 'an error message',
       errorStatusCode: 500
     }));
-    return renderComponent('/dashboard').then(([wrapper]) => {
+    return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
       return listenForActions([
         START_CALCULATOR_EDIT,
         UPDATE_CALCULATOR_EDIT,
