@@ -39,7 +39,7 @@ class SettingsPage extends ProfileFormContainer {
       <Loader loaded={loaded}>
         <div className="single-column privacy-form">
           <h4 className="privacy-form-heading">Settings</h4>
-          <PrivacyForm {...props} />
+          <PrivacyForm {...props} validator={privacyValidation} />
           <ProfileProgressControls
             nextBtnLabel="Save"
             {...props}
