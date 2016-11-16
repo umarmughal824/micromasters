@@ -26,6 +26,9 @@ import type {
 } from '../flow/enrollmentTypes';
 import {  validationErrorSelector } from '../util/util';
 import type { Option } from '../flow/generalTypes';
+import { setProfileStep } from '../actions/ui';
+import { PERSONAL_STEP } from '../constants';
+
 
 export default class PersonalTab extends React.Component {
   props: {
@@ -40,6 +43,7 @@ export default class PersonalTab extends React.Component {
     setProgram:               Function,
     ui:                       UIState,
     updateProfile:            UpdateProfileFunc,
+    dispatch:                 Function,
   };
 
   sortPrograms = R.sortBy(R.compose(R.toLower, R.prop('title')));
@@ -47,6 +51,11 @@ export default class PersonalTab extends React.Component {
   programOptions = R.compose(
     R.map(program => ({value: program.id, label: program.title})), this.sortPrograms
   );
+
+  componentWillMount() {
+    const { dispatch } = this.props;
+    dispatch(setProfileStep(PERSONAL_STEP));
+  }
 
   onChange = (selection: Option): void => {
     const {
@@ -99,6 +108,7 @@ export default class PersonalTab extends React.Component {
         </Card>
         <ProfileProgressControls
           {...this.props}
+          nextUrl="/profile/education"
           nextBtnLabel="Next"
           programIdForEnrollment={selectedProgram ? selectedProgram.id : null}
           isLastTab={false}

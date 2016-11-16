@@ -11,6 +11,9 @@ import App from './containers/App';
 import DashboardPage from './containers/DashboardPage';
 import SettingsPage from './containers/SettingsPage';
 import ProfilePage from './containers/ProfilePage';
+import PersonalTab from './components/PersonalTab';
+import EducationTab from './components/EducationTab';
+import EmploymentTab from './components/EmploymentTab';
 import UserPage from './containers/UserPage';
 import User from './components/User';
 import LearnerSearchPage from './containers/LearnerSearchPage';
@@ -36,7 +39,12 @@ export default class DashboardRouter extends React.Component {
           <Router history={browserHistory} onUpdate={onRouteUpdate}>
             <Route path="/" component={App}>
               <Route path="dashboard" component={DashboardPage} />
-              <Route path="profile" component={ProfilePage} />
+              <Route path="profile" component={ProfilePage}>
+                <IndexRedirect to="personal"/>
+                <Route path="personal" component={PersonalTab}/>
+                <Route path="education" component={EducationTab}/>
+                <Route path="professional" component={EmploymentTab}/>
+              </Route>
               <Route path="/settings" component={SettingsPage}  />
               <Route path="/learner" component={UserPage} >
                 <IndexRedirect to={username} />

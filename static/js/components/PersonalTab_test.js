@@ -1,4 +1,5 @@
 import React from 'react';
+import { Provider } from 'react-redux';
 import { mount } from 'enzyme';
 import { assert } from 'chai';
 import R from 'ramda';
@@ -7,16 +8,22 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
 import PersonalTab from './PersonalTab';
 import { PROGRAMS } from '../constants';
+import IntegrationTestHelper from '../util/integration_test_helper';
 
 describe("PersonalTab", () => {
+  let helper;
   let renderPersonalTab = (selectedProgram = null, props = {}) => {
+    let { store } = helper;
     return mount(
       <MuiThemeProvider muiTheme={getMuiTheme()}>
-        <PersonalTab
-          programs={PROGRAMS}
-          ui={{selectedProgram: selectedProgram}}
-          {...props}
-        />
+        <Provider store={store}>
+          <PersonalTab
+            programs={PROGRAMS}
+            ui={{selectedProgram: selectedProgram}}
+            dispatch={store.dispatch}
+            {...props}
+          />
+        </Provider>
       </MuiThemeProvider>,
       {
         context: { router: {}},
@@ -24,6 +31,14 @@ describe("PersonalTab", () => {
       }
     );
   };
+
+  beforeEach(() => {
+    helper = new IntegrationTestHelper();
+  });
+
+  afterEach(() => {
+    helper.cleanup();
+  });
 
   it('should show a list of programs to enroll in for the learner page', () => {
     let wrapper = renderPersonalTab();

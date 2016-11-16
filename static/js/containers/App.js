@@ -35,11 +35,11 @@ import {
   setEnrollSelectedProgram,
   setNavDrawerOpen,
   clearUI,
-  setProfileStep,
   setPhotoDialogVisibility,
   setProgram,
 } from '../actions/ui';
 import { validateProfileComplete } from '../lib/validation/profile';
+import { currentOrFirstIncompleteStep } from '../util/util';
 import type {
   AvailableProgram,
   AvailableProgramsState,
@@ -72,7 +72,6 @@ class App extends React.Component {
       this.fetchUserProfile(SETTINGS.user.username);
     }
     this.fetchEnrollments();
-    this.requireProfileFilledOut();
     this.requireCompleteProfile();
   }
 
@@ -121,37 +120,25 @@ class App extends React.Component {
     }
   }
 
-  requireProfileFilledOut() {
-    const { userProfile, location: { pathname } } = this.props;
-    if (
-      userProfile.getStatus === FETCH_SUCCESS &&
-      !userProfile.profile.filled_out &&
-      !(PROFILE_REGEX.test(pathname))
-    ) {
-      this.context.router.push('/profile');
-    }
-  }
-
   requireCompleteProfile() {
     const {
       userProfile,
       userProfile: { profile },
       location: { pathname },
       dispatch,
+      ui: { profileStep }
     } = this.props;
     const [ complete, step, errors] = validateProfileComplete(profile);
     const username = SETTINGS.user ? SETTINGS.user.username : null;
+    const idealStep = currentOrFirstIncompleteStep(profileStep, step);
+
     if (
       userProfile.getStatus === FETCH_SUCCESS &&
       !PROFILE_REGEX.test(pathname) &&
-      !complete
+      (!complete || !profile.filled_out)
     ) {
-      dispatch(startProfileEdit(username));
       dispatch(updateProfileValidation(username, errors));
-      if ( step !== null ) {
-        dispatch(setProfileStep(step));
-      }
-      this.context.router.push('/profile');
+      this.context.router.push(`/profile/${idealStep}`);
     }
   }
 

@@ -34,7 +34,6 @@ import {
   setNavDrawerOpen,
 } from '../actions/ui';
 import { INITIAL_UI_STATE } from '../reducers/ui';
-import { PERSONAL_STEP } from '../constants';
 import rootReducer from '../reducers';
 import { createAssertReducerResultState } from '../util/test_utils';
 import type { AssertReducerResultState } from '../flow/reduxTypes';
@@ -143,7 +142,7 @@ describe('ui reducers', () => {
 
   describe("profile step", () => {
     it(`should let you set the profile step`, () => {
-      assertReducerResultState(setProfileStep, ui => ui.profileStep, PERSONAL_STEP);
+      assertReducerResultState(setProfileStep, ui => ui.profileStep, null);
     });
   });
 

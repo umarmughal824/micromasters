@@ -7,8 +7,8 @@ import type { UIState } from '../reducers/ui';
 
 export default class ProfileProgressControls extends React.Component {
   props: {
-    nextStep:     () => void,
-    prevStep:     () => void,
+    nextUrl?:      string,
+    prevUrl?:      string,
     nextBtnLabel: string,
     isLastTab:    boolean,
     validator:    Function,
@@ -19,9 +19,14 @@ export default class ProfileProgressControls extends React.Component {
     addProgramEnrollment: Function,
   };
 
+  stepBack: Function = (): void => {
+    const { prevUrl } = this.props;
+    this.context.router.push(prevUrl);
+  };
+
   saveAndContinue: Function = (): void => {
     const {
-      nextStep,
+      nextUrl,
       isLastTab,
       validator,
       programIdForEnrollment,
@@ -32,22 +37,22 @@ export default class ProfileProgressControls extends React.Component {
       if (programIdForEnrollment && addProgramEnrollment) {
         addProgramEnrollment(programIdForEnrollment);
       }
-      nextStep();
+      this.context.router.push(nextUrl);
     });
   };
 
   render() {
-    const { nextStep, prevStep, nextBtnLabel } = this.props;
+    const { nextUrl, prevUrl, nextBtnLabel } = this.props;
 
     let prevButton, nextButton;
-    if(prevStep) {
+    if (prevUrl) {
       prevButton = <button
         className="mdl-button gray-button go-back prev"
-        onClick={prevStep}>
+        onClick={this.stepBack}>
         <span>Go Back</span>
       </button>;
     }
-    if(nextStep) {
+    if (nextUrl) {
       nextButton = <button
         role="button"
         className="mdl-button next"

@@ -1,4 +1,5 @@
 /* global SETTINGS: false */
+
 import TestUtils from 'react-addons-test-utils';
 import { assert } from 'chai';
 import _ from 'lodash';
@@ -20,7 +21,6 @@ import {
   CLEAR_PROFILE_EDIT,
 } from '../actions/profile';
 import {
-  setProfileStep,
   setProgram,
   SET_PROFILE_STEP,
 } from '../actions/ui';
@@ -47,15 +47,20 @@ describe("ProfilePage", function() {
   let prevButtonSelector = '.prev';
   let nextButtonSelector = '.next';
 
-  const successActions = [
+  const SUCCESS_ACTIONS = [
     REQUEST_GET_USER_PROFILE,
     RECEIVE_GET_USER_PROFILE_SUCCESS,
     REQUEST_GET_PROGRAM_ENROLLMENTS,
     RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
     START_PROFILE_EDIT,
+    SET_PROFILE_STEP,
   ];
 
-  const setStep = step => helper.store.dispatch(setProfileStep(step));
+  const REDIRECT_ACTIONS = SUCCESS_ACTIONS.concat([
+    SET_PROFILE_STEP,
+  ]);
+
+  const getStep = () => helper.store.getState().ui.profileStep;
 
   beforeEach(() => {
     helper = new IntegrationTestHelper();
@@ -117,8 +122,7 @@ describe("ProfilePage", function() {
         TestUtils.Simulate.change(toggle[0]);
         activeDialog('education-dialog-wrapper');
       };
-      setStep(EDUCATION_STEP);
-      return renderComponent('/profile', successActions).then(dialogTest);
+      return renderComponent('/profile/education', SUCCESS_ACTIONS).then(dialogTest);
     });
 
     it('should launch a dialog to add an entry when an employment switch is set to Yes', () => {
@@ -127,35 +131,55 @@ describe("ProfilePage", function() {
         TestUtils.Simulate.change(toggle[0]);
         activeDialog('employment-dialog-wrapper');
       };
-      setStep(EMPLOYMENT_STEP);
-      return renderComponent('/profile', successActions).then(dialogTest);
+      return renderComponent('/profile/professional', SUCCESS_ACTIONS).then(dialogTest);
+    });
+  });
+
+  describe('profile completeness', () => {
+    it('redirects to /profile/personal if profile is not complete', () => {
+      let response = Object.assign(_.cloneDeep(USER_PROFILE_RESPONSE), {
+        first_name: undefined
+      });
+      helper.profileGetStub.returns(Promise.resolve(response));
+
+      return renderComponent("/profile/education", REDIRECT_ACTIONS).then(() => {
+        assert.equal(helper.currentLocation.pathname, "/profile/personal");
+        assert.equal(getStep(), PERSONAL_STEP);
+      });
+    });
+
+    it('redirects to /profile/education if a field is missing there', () => {
+      let response = _.cloneDeep(USER_PROFILE_RESPONSE);
+      response.education[0].school_name = '';
+      helper.profileGetStub.returns(Promise.resolve(response));
+
+      return renderComponent("/profile/professional", REDIRECT_ACTIONS).then(() => {
+        assert.equal(helper.currentLocation.pathname, "/profile/education");
+        assert.equal(getStep(), EDUCATION_STEP);
+      });
     });
   });
 
   it('navigates backward when Previous button is clicked', () => {
-    setStep(EDUCATION_STEP);
-    const checkStep = () => helper.store.getState().ui.profileStep;
-    return renderComponent('/profile', successActions).then(([, div]) => {
+    return renderComponent('/profile/education', SUCCESS_ACTIONS).then(([, div]) => {
       let button = div.querySelector(prevButtonSelector);
-      assert.equal(checkStep(), EDUCATION_STEP);
+      assert.equal(getStep(), EDUCATION_STEP);
       TestUtils.Simulate.click(button);
-      assert(helper.scrollIntoViewStub.called, "Not called yet");
-      assert.equal(checkStep(), PERSONAL_STEP);
+      assert.equal(getStep(), PERSONAL_STEP);
     });
   });
 
   for (let step of profileSteps.slice(0,2)) {
     for (let filledOutValue of [true, false]) {
       it(`respects the current value (${filledOutValue}) when saving on ${step}`, () => {
-        setStep(step);
         let updatedProfile = Object.assign({}, USER_PROFILE_RESPONSE, {
           filled_out: filledOutValue,
           education: []
         });
         helper.profileGetStub.returns(Promise.resolve(updatedProfile));
-        return renderComponent('/profile', successActions).then(([, div]) => {
+        return renderComponent(`/profile/${step}`, SUCCESS_ACTIONS).then(([, div]) => {
           // close all switches
-          if (`${step}` === 'personal') {
+          if (step === 'personal') {
             return confirmSaveButtonBehavior(updatedProfile, {div: div}, true);
           }
           return confirmSaveButtonBehavior(updatedProfile, {div: div});
@@ -165,7 +189,7 @@ describe("ProfilePage", function() {
   }
 
   it('shows a spinner when profile get is processing', () => {
-    return renderComponent('/profile', successActions).then(([, div]) => {
+    return renderComponent('/profile/personal', SUCCESS_ACTIONS).then(([, div]) => {
       assert.notOk(div.querySelector(".loader"), "Found spinner but no fetch in progress");
       helper.store.dispatch({
         type: REQUEST_GET_USER_PROFILE,
@@ -186,7 +210,7 @@ describe("ProfilePage", function() {
     patchUserProfileStub.returns(Promise.resolve(USER_PROFILE_RESPONSE));
 
     helper.store.dispatch(setProgram(program));
-    return renderComponent(`/profile`, successActions).then(([wrapper]) => {
+    return renderComponent('/profile/personal', SUCCESS_ACTIONS).then(([wrapper]) => {
       assert.isFalse(addEnrollmentStub.called);
 
       return helper.listenForActions([
@@ -213,8 +237,7 @@ describe("ProfilePage", function() {
     [EMPLOYMENT_STEP, 'EmploymentTab'],
   ]) {
     it(`sends the right props to tab components for step ${step}`, () => {
-      setStep(step);
-      return renderComponent('/profile', successActions).then(([wrapper]) => {
+      return renderComponent(`/profile/${step}`, SUCCESS_ACTIONS).then(([wrapper]) => {
         let props = wrapper.find(component).props();
         assert.deepEqual(props['ui'], helper.store.getState().ui);
         assert.deepEqual(props['programs'], helper.store.getState().programs.availablePrograms);

@@ -22,7 +22,7 @@ from profiles.api import get_social_username
 from profiles.factories import ProfileFactory
 from roles.models import Role
 from search.base import ESTestCase
-from ui.urls import DASHBOARD_URL, TERMS_OF_SERVICE_URL
+from ui.url_utils import DASHBOARD_URL, TERMS_OF_SERVICE_URL
 
 
 class ViewsTests(ESTestCase):

@@ -44,15 +44,16 @@ import { SUCCESS_ACTIONS } from './test_util';
 
 const EDIT_PROFILE_ACTIONS = SUCCESS_ACTIONS.concat([
   START_PROFILE_EDIT,
-  START_PROFILE_EDIT,
   UPDATE_PROFILE_VALIDATION,
   SET_PROFILE_STEP,
 ]);
 const REDIRECT_ACTIONS = SUCCESS_ACTIONS.concat([
-  START_PROFILE_EDIT
+  START_PROFILE_EDIT,
+  UPDATE_PROFILE_VALIDATION,
+  SET_PROFILE_STEP,
 ]);
 
-describe('App', () => {
+describe('App', function() {
   let listenForActions, renderComponent, helper;
 
   beforeEach(() => {
@@ -80,48 +81,48 @@ describe('App', () => {
   describe('profile completeness', () => {
     let checkStep = () => helper.store.getState().ui.profileStep;
 
-    it('redirects to /profile if profile is not complete', () => {
+    it('redirects to /profile/personal if profile is not complete', () => {
       let response = Object.assign(_.cloneDeep(USER_PROFILE_RESPONSE), {
         first_name: undefined
       });
       helper.profileGetStub.returns(Promise.resolve(response));
 
-      return renderComponent('/', EDIT_PROFILE_ACTIONS).then(() => {
-        assert.equal(helper.currentLocation.pathname, "/profile");
+      return renderComponent("/", EDIT_PROFILE_ACTIONS).then(() => {
+        assert.equal(helper.currentLocation.pathname, "/profile/personal");
         assert.equal(checkStep(), PERSONAL_STEP);
       });
     });
 
-    it('redirects to /profile if profile is not filled out', () => {
+    it('redirects to /profile/professional if profile is not filled out', () => {
       let response = Object.assign(_.cloneDeep(USER_PROFILE_RESPONSE), {
         filled_out: false
       });
       helper.profileGetStub.returns(Promise.resolve(response));
 
-      return renderComponent('/', REDIRECT_ACTIONS).then(() => {
-        assert.equal(helper.currentLocation.pathname, "/profile");
-        assert.equal(checkStep(), PERSONAL_STEP);
-      });
-    });
-
-    it('redirects to /profile and goes to the employment step if a field is missing there', () => {
-      let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
-      profile.work_history[1].city = "";
-
-      helper.profileGetStub.returns(Promise.resolve(profile));
-      return renderComponent('/', EDIT_PROFILE_ACTIONS).then(() => {
-        assert.equal(helper.currentLocation.pathname, "/profile");
+      return renderComponent("/", REDIRECT_ACTIONS).then(() => {
+        assert.equal(helper.currentLocation.pathname, "/profile/professional");
         assert.equal(checkStep(), EMPLOYMENT_STEP);
       });
     });
 
-    it('redirects to /profile and goes to the education step if a field is missing there', () => {
+    it('redirects to /profile/professional if a field is missing there', () => {
+      let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
+      profile.work_history[1].city = "";
+
+      helper.profileGetStub.returns(Promise.resolve(profile));
+      return renderComponent("/", EDIT_PROFILE_ACTIONS).then(() => {
+        assert.equal(helper.currentLocation.pathname, "/profile/professional");
+        assert.equal(checkStep(), EMPLOYMENT_STEP);
+      });
+    });
+
+    it('redirects to /profile/education if a field is missing there', () => {
       let response = _.cloneDeep(USER_PROFILE_RESPONSE);
       response.education[0].school_name = '';
       helper.profileGetStub.returns(Promise.resolve(response));
 
-      return renderComponent('/', EDIT_PROFILE_ACTIONS).then(() => {
-        assert.equal(helper.currentLocation.pathname, "/profile");
+      return renderComponent("/", EDIT_PROFILE_ACTIONS).then(() => {
+        assert.equal(helper.currentLocation.pathname, "/profile/education");
         assert.equal(checkStep(), EDUCATION_STEP);
       });
     });
