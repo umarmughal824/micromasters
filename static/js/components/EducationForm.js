@@ -275,6 +275,7 @@ class EducationForm extends ProfileFormFields {
             options={fieldOfStudyOptions}
             keySet={keySet('field_of_study')}
             label='Field of Study'
+            allowCreate={true}
             {...this.defaultInputComponentProps()}
           />
         </Cell>;

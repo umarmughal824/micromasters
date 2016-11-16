@@ -2,6 +2,7 @@
 import React from 'react';
 import _ from 'lodash';
 import VirtualizedSelect from 'react-virtualized-select';
+import { Creatable } from 'react-select';
 
 import { validationErrorSelector, classify } from '../../util/util';
 import type { Option } from '../../flow/generalTypes';
@@ -12,36 +13,37 @@ import type {
   UpdateProfileFunc,
 } from '../../flow/profileTypes';
 
+export const CREATE_OPTION_REGEX = /^Create option "|"$/g;
+
+type SelectFieldProps = {
+  allowCreate?:               boolean,
+  className:                  string,
+  errors:                     ValidationErrors,
+  id?:                        string,
+  keySet:                     Array<string>,
+  label:                      string,
+  onChange:                   Function,
+  options:                    Array<Option>,
+  profile:                    Profile,
+  topMenu:                    boolean,
+  updateProfile:              UpdateProfileFunc,
+  updateValidationVisibility: (xs: Array<string>) => void,
+  validator:                  Validator|UIValidator,
+};
+
 class SelectField extends React.Component {
-  props: {
-    className:                  string,
-    errors:                     ValidationErrors,
-    id?:                        string,
-    keySet:                     Array<string>,
-    label:                      string,
-    onChange:                   Function,
-    options:                    Array<Option>,
-    profile:                    Profile,
-    topMenu:                    boolean,
-    updateProfile:              UpdateProfileFunc,
-    updateValidationVisibility: (xs: Array<string>) => void,
-    validator:                  Validator|UIValidator,
-  };
-
-  state: {
-    id: string,
-  };
-
-  componentWillMount: Function = (): void => {
-    const { label } = this.props;
-    let id = this.props.id;
-    if (!id) {
-      id = _.uniqueId(classify(label));
-    }
-    this.setState({id: id});
+  constructor (props: SelectFieldProps) {
+    super(props);
+    this.state = {
+      customOptions: []
+    };
   }
 
-  onChange: Function = (selection: Option): void => {
+  state: {
+    customOptions: Array<Option>
+  };
+
+  onChange = (selection: Option): void => {
     const {
       profile,
       updateProfile,
@@ -49,11 +51,15 @@ class SelectField extends React.Component {
       validator,
     } = this.props;
     let clone = _.cloneDeep(profile);
-    _.set(clone, keySet, selection ? selection.value : "");
+    _.set(
+      clone,
+      keySet,
+      selection && selection.value ? selection.value.replace(CREATE_OPTION_REGEX, '') : ""
+    );
     updateProfile(clone, validator);
   };
 
-  onBlur: Function = (): void => {
+  onBlur = (): void => {
     const {
       updateValidationVisibility,
       validator,
@@ -72,34 +78,56 @@ class SelectField extends React.Component {
     return `select-field ${classify(className)} ${classify(label)}`;
   };
 
+  formattedId = (): string => {
+    const { id, label } = this.props;
+    return id ? id : _.uniqueId(classify(label));
+  }
+
   selectClassName = (): string => {
     const { errors, keySet, topMenu } = this.props;
     return `${validationErrorSelector(errors, keySet)} ${topMenu ? 'menu-outer-top' : ''}`;
   };
 
-  render() {
-    const { errors, keySet, profile, label } = this.props;
-    const { id } = this.state;
-    const select = (
-      <VirtualizedSelect
-        value={_.get(profile, keySet, "")}
-        className={this.selectClassName()}
-        onChange={this.onChange}
-        onBlur={this.onBlur}
-        {...this.props}
-      />
-    );
-    let labelledSelect;
-    if (label) {
-      labelledSelect = <label className="react-select-label">
-        {label}{select}
-      </label>;
-    } else {
-      labelledSelect = select;
+  label = (label: string, element: React$Element<*>) => (
+    <label className="react-select-label">
+      { label }
+      { element }
+    </label>
+  );
+
+  componentDidUpdate () {
+    const { keySet, profile, allowCreate, options } = this.props;
+    const { customOptions } = this.state;
+
+    let value = _.get(profile, keySet);
+    let combinedOptions = options.concat(customOptions);
+    if ( allowCreate && value && !combinedOptions.find(option => option.value === value) ) {
+      this.setState({
+        customOptions: customOptions.concat({ value: value, label: value })
+      });
     }
+  }
+
+  renderSelect = (): React$Element<*> => {
+    const { keySet, profile, allowCreate, options } = this.props;
+    const { customOptions } = this.state;
+
+    return <VirtualizedSelect
+      value={_.get(profile, keySet, "")}
+      className={this.selectClassName()}
+      onChange={this.onChange}
+      onBlur={this.onBlur}
+      selectComponent={allowCreate ? Creatable : null}
+      {...this.props}
+      options={options.concat(customOptions)}
+    />;
+  };
+
+  render() {
+    const { errors, keySet, label } = this.props;
     return (
-      <div className={this.className()} id={id}>
-        { labelledSelect }
+      <div className={this.className()} id={this.formattedId()}>
+        { label ? this.label(label, this.renderSelect()) : this.renderSelect() }
         <span className="validation-error-text">
           {_.get(errors, keySet)}
         </span>
