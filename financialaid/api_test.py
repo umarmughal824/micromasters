@@ -35,7 +35,7 @@ from roles.models import Role
 from roles.roles import Staff, Instructor
 
 
-def create_program():
+def create_program(create_tiers=True):
     """
     Helper function to create a financial aid program
     Returns:
@@ -54,7 +54,20 @@ def create_program():
         course_run=course_run,
         is_valid=True
     )
-    return program
+    tier_programs = None
+    if create_tiers:
+        tier_programs = {
+            "0k": TierProgramFactory.create(program=program, income_threshold=0, current=True),
+            "25k": TierProgramFactory.create(program=program, income_threshold=25000, current=True),
+            "50k": TierProgramFactory.create(program=program, income_threshold=50000, current=True),
+            "75k": TierProgramFactory.create(
+                program=program,
+                income_threshold=75000,
+                current=True,
+                discount_amount=0
+            ),
+        }
+    return program, tier_programs
 
 
 def create_enrolled_profile(program, role=None, **profile_kwargs):
@@ -95,22 +108,11 @@ class FinancialAidBaseTestCase(TestCase):
         # replace imported thresholds with fake ones created here
         CountryIncomeThreshold.objects.all().delete()
 
-        cls.program = create_program()
+        cls.program, cls.tier_programs = create_program()
         cls.profile = create_enrolled_profile(cls.program, country="50")
         cls.staff_user_profile = create_enrolled_profile(cls.program, role=Staff.ROLE_ID)
         cls.instructor_user_profile = create_enrolled_profile(cls.program, role=Instructor.ROLE_ID)
-        cls.tier_programs = {
-            "0k": TierProgramFactory.create(program=cls.program, income_threshold=0, current=True),
-            "25k": TierProgramFactory.create(program=cls.program, income_threshold=25000, current=True),
-            "50k": TierProgramFactory.create(program=cls.program, income_threshold=50000, current=True),
-            "75k": TierProgramFactory.create(
-                program=cls.program,
-                income_threshold=75000,
-                current=True,
-                discount_amount=0
-            ),
-        }
-        CountryIncomeThreshold.objects.create(
+        cls.country_income_threshold_0 = CountryIncomeThreshold.objects.create(
             country_code="0",
             income_threshold=0,
         )
@@ -231,7 +233,7 @@ class FinancialAidAPITests(FinancialAidBaseTestCase):
 
     def test_missing_no_discount_tier(self):
         """It should raise an ImproperlyConfigured if there is no $0 discount TierProgram"""
-        program = create_program()
+        program, _ = create_program(create_tiers=False)
         with self.assertRaises(ImproperlyConfigured):
             # No tier programs have been created for program
             get_no_discount_tier_program(program.id)

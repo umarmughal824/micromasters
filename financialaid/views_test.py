@@ -186,7 +186,7 @@ class ReviewTests(FinancialAidBaseTestCase, APIClient):
 
     def test_staff_of_different_program(self):
         """Not allowed for staff of different program"""
-        program = create_program()
+        program, _ = create_program()
         staff_user = create_enrolled_profile(program, role=Staff.ROLE_ID).user
         self.client.force_login(staff_user)
         self.make_http_request(self.client.get, self.review_url, status.HTTP_403_FORBIDDEN)
@@ -382,7 +382,7 @@ class FinancialAidActionTests(FinancialAidBaseTestCase, APIClient):
 
     def test_not_allowed_staff_of_different_program(self):
         """Not allowed for staff of different program"""
-        program = create_program()
+        program, _ = create_program()
         staff_user = create_enrolled_profile(program, role=Staff.ROLE_ID).user
         self.client.force_login(staff_user)
         self.make_http_request(self.client.patch, self.action_url, status.HTTP_403_FORBIDDEN, data=self.data)
@@ -704,7 +704,7 @@ class CoursePriceDetailViewTests(FinancialAidBaseTestCase, APIClient):
         Tests ReviewFinancialAidView that are not allowed
         """
         # Bad request if not enrolled
-        program = create_program()
+        program, _ = create_program()
         profile = create_enrolled_profile(program)
         self.client.force_login(profile.user)
         self.make_http_request(self.client.get, self.course_price_url, status.HTTP_404_NOT_FOUND)
@@ -865,7 +865,7 @@ class LearnerSkipsFinancialAid(FinancialAidBaseTestCase, APIClient):
         """
         Tests that a FinancialAid object cannot be skipped if the user is not enrolled in program
         """
-        program = create_program()
+        program, _ = create_program()
         url = reverse("financial_aid_skip", kwargs={"program_id": program.id})
         self.make_http_request(self.client.patch, url, status.HTTP_400_BAD_REQUEST)
 
@@ -897,7 +897,7 @@ class CoursePriceListViewTests(FinancialAidBaseTestCase, APIClient):
         super().setUpTestData()
         cls.course_price_url = reverse("course_price_list")
         # create a second program
-        program = create_program()
+        program, _ = create_program()
         ProgramEnrollment.objects.create(
             program=program,
             user=cls.profile.user,

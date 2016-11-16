@@ -145,7 +145,7 @@ class FinancialAidMailViewsTests(FinancialAidBaseTestCase, APITestCase):
 
     def test_different_programs_staff(self):
         """Different program's staff should not be allowed to send email for this program"""
-        program = create_program()
+        program, _ = create_program()
         staff_user = create_enrolled_profile(program, Staff.ROLE_ID).user
         self.client.force_login(staff_user)
         self.make_http_request(self.client.post, self.url, status.HTTP_403_FORBIDDEN, data=self.request_data)

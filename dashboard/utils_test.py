@@ -464,6 +464,19 @@ class MMTrackTest(TestCase):
         assert mmtrack.get_final_grade(course_id) == 69.0
         assert mmtrack.get_final_grade("course-v1:edX+DemoX+Demo_Course") is None
 
+    def test_get_all_final_grades(self):
+        """
+        Test for get_all_final_grades
+        """
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program,
+            enrollments=self.enrollments,
+            current_grades=self.current_grades,
+            certificates=self.certificates
+        )
+        assert mmtrack.get_all_final_grades() == {'course-v1:edX+DemoX+Demo_Course': 98.0}
+
     def test_get_current_grade(self):
         """
         Test for get_current_grade method
