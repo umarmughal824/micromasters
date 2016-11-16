@@ -80,7 +80,10 @@ export const modifySelectField = (field: HTMLElement, text: string): void => {
 };
 
 export const clearSelectField = (field: HTMLElement): void => {
-  TestUtils.Simulate.mouseDown(field.querySelector('.Select-clear'), { button: 1 });
+  let input = field.querySelector('.Select-input').querySelector('input');
+  TestUtils.Simulate.focus(input);
+  TestUtils.Simulate.keyDown(input, { keyCode: 8, key: 'Backspace' });
+  TestUtils.Simulate.keyDown(input, { keyCode: 9, key: 'Tab' });
 };
 
 

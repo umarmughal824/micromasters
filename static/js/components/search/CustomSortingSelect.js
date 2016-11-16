@@ -25,7 +25,7 @@ export default class CustomSortingSelect extends Select {
         text += ` (${countFormatter(item.docCount)})`;
       }
 
-      return <option key={item.key} value={item.key} disable={item.disabled}>
+      return <option key={item.key} value={item.key} disabled={item.disabled}>
         { text }
       </option>;
     });

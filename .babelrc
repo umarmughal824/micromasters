@@ -3,5 +3,5 @@
   "ignore": [
     "node_modules/**"
   ],
-  "plugins": ["transform-flow-strip-types"]
+  "plugins": ["transform-flow-strip-types", "react-hot-loader/babel"]
 }

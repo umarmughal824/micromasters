@@ -5,15 +5,10 @@ import { assert } from 'chai';
 import moment from 'moment';
 import ReactDOM from 'react-dom';
 
-import { SUCCESS_ACTIONS } from './App_test';
 import CourseAction from '../components/dashboard/CourseAction';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import {
   REQUEST_DASHBOARD,
-  RECEIVE_DASHBOARD_SUCCESS,
-  RECEIVE_DASHBOARD_FAILURE,
-  REQUEST_COURSE_PRICES,
-  RECEIVE_COURSE_PRICES_SUCCESS,
   UPDATE_COURSE_STATUS,
   CLEAR_COURSE_PRICES,
   CLEAR_DASHBOARD,
@@ -46,19 +41,7 @@ import {
   STATUS_OFFERED,
 } from '../constants';
 import { findCourse } from '../util/test_utils';
-
-export const DASHBOARD_SUCCESS_ACTIONS = SUCCESS_ACTIONS.concat([
-  REQUEST_DASHBOARD,
-  RECEIVE_DASHBOARD_SUCCESS,
-  REQUEST_COURSE_PRICES,
-  RECEIVE_COURSE_PRICES_SUCCESS,
-]);
-export const DASHBOARD_ERROR_ACTIONS = SUCCESS_ACTIONS.concat([
-  REQUEST_DASHBOARD,
-  RECEIVE_DASHBOARD_FAILURE,
-  REQUEST_COURSE_PRICES,
-  RECEIVE_COURSE_PRICES_SUCCESS,
-]);
+import { DASHBOARD_SUCCESS_ACTIONS } from './test_util';
 
 describe('DashboardPage', () => {
   let renderComponent, helper;

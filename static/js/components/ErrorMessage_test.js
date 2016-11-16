@@ -30,7 +30,7 @@ import * as api from '../lib/api';
 import {
   DASHBOARD_SUCCESS_ACTIONS,
   DASHBOARD_ERROR_ACTIONS,
-} from '../containers/DashboardPage_test';
+} from '../containers/test_util';
 import ErrorMessage from './ErrorMessage';
 
 describe("ErrorMessage", () => {

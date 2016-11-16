@@ -22,7 +22,6 @@ import {
 import {
   CLEAR_ENROLLMENTS,
   REQUEST_GET_PROGRAM_ENROLLMENTS,
-  RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
   RECEIVE_GET_PROGRAM_ENROLLMENTS_FAILURE,
 } from '../actions/programs';
 import * as enrollmentActions from '../actions/programs';
@@ -41,13 +40,8 @@ import {
   EMPLOYMENT_STEP,
 } from '../constants';
 import IntegrationTestHelper from '../util/integration_test_helper';
+import { SUCCESS_ACTIONS } from './test_util';
 
-export const SUCCESS_ACTIONS = [
-  REQUEST_GET_PROGRAM_ENROLLMENTS,
-  RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
-  REQUEST_GET_USER_PROFILE,
-  RECEIVE_GET_USER_PROFILE_SUCCESS,
-];
 const EDIT_PROFILE_ACTIONS = SUCCESS_ACTIONS.concat([
   START_PROFILE_EDIT,
   START_PROFILE_EDIT,

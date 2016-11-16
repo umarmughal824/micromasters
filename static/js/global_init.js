@@ -37,6 +37,10 @@ process.on('unhandledRejection', reason => { // eslint-disable-line no-unused-va
   // throw reason; // uncomment to show promise-related errors
 });
 
+// fix 'unknown prop' error
+import injectTapEventPlugin from 'react-tap-event-plugin';
+injectTapEventPlugin();
+
 // enable chai-as-promised
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
