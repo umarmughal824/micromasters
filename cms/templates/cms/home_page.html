@@ -74,53 +74,8 @@
           </div>
         </div>
       </div>
-      <div class="row reasons-section">
 
-      <div class="centered-content">
-
-        <h3>Why should I enroll?</h3>
-        <div class="enroll-reason col-md-4">
-          <div class="reasons-images-wrap">
-             <img src="{% static 'images/online.png' %}" alt="">
-          </div>
-
-          <h5 class="upper-case">Convenient &amp; Flexible</h5>
-          <p>Take online courses on a schedule that fits your needs, and meet motivated learners who share your interests.</p>
-        </div>
-        <div class="enroll-reason col-md-4">
-          <div class="reasons-images-wrap">
-            <img src="{% static 'images/blended.png' %}" alt="">
-          </div>
-
-          <h5 class="upper-case">Accelerate Your Master’s</h5>
-          <p>MicroMasters is a faster path to a master’s degree from MIT and other universities, and is recognized by employers for providing deep learning in specific career fields.</p>
-
-        </div>
-        <div class="enroll-reason col-md-4">
-          <div class="reasons-images-wrap">
-            <img src="{% static 'images/cost.png' %}" alt="">
-          </div>
-           <h5 class="upper-case">Save Money &amp; Time</h5>
-          <p>MicroMasters is an affordable option for professionals who can’t take off time to earn a traditional master’s degree.</p>
-        </div>
-        </div>
-
-      </div>
-
-      <section class="quote-section">
-        <div class="row quote">
-          <img class="person" src="{% static 'images/reif1.png' %}" alt="">
-          <blockquote class="quote-text">“We will find people who never thought they would be able to apply to MIT. And they will discover that they are much stronger in the global competition than they think.”</blockquote>
-          <p class="quote-author">-- Rafael Reif, MIT President  </p>
-        </div>
-        <div class="row quote">
-          <img class="person" src="{% static 'images/sanjay1.png' %}" alt="">
-          <blockquote class="quote-text">“Inverted admissions has the potential to disrupt traditional modes of access to higher education… We’re democratizing access to a master’s program for learners worldwide.”</blockquote>
-          <p class="quote-author">-- Sanjay Sarma, Vice President of Open Learning, MIT  </p>
-        </div>
-      </section>
-
-      <section class="row current-programs-section">
+            <section class="row current-programs-section">
         <h3>Current MITx MicroMasters Programs</h3>
         <ul class="current-programs-list">
         {% for program in programs %}
@@ -185,6 +140,52 @@
           </li>
 
         </ul>
+      </section>
+
+      <div class="row reasons-section">
+
+      <div class="centered-content">
+
+        <h3>Why should I enroll?</h3>
+        <div class="enroll-reason col-md-4">
+          <div class="reasons-images-wrap">
+             <img src="{% static 'images/online.png' %}" alt="">
+          </div>
+
+          <h5 class="upper-case">Convenient &amp; Flexible</h5>
+          <p>Take online courses on a schedule that fits your needs, and meet motivated learners who share your interests.</p>
+        </div>
+        <div class="enroll-reason col-md-4">
+          <div class="reasons-images-wrap">
+            <img src="{% static 'images/blended.png' %}" alt="">
+          </div>
+
+          <h5 class="upper-case">Accelerate Your Master’s</h5>
+          <p>MicroMasters is a faster path to a master’s degree from MIT and other universities, and is recognized by employers for providing deep learning in specific career fields.</p>
+
+        </div>
+        <div class="enroll-reason col-md-4">
+          <div class="reasons-images-wrap">
+            <img src="{% static 'images/cost.png' %}" alt="">
+          </div>
+           <h5 class="upper-case">Save Money &amp; Time</h5>
+          <p>MicroMasters is an affordable option for professionals who can’t take off time to earn a traditional master’s degree.</p>
+        </div>
+        </div>
+
+      </div>
+
+      <section class="quote-section">
+        <div class="row quote">
+          <img class="person" src="{% static 'images/reif1.png' %}" alt="">
+          <blockquote class="quote-text">“We will find people who never thought they would be able to apply to MIT. And they will discover that they are much stronger in the global competition than they think.”</blockquote>
+          <p class="quote-author">-- Rafael Reif, MIT President  </p>
+        </div>
+        <div class="row quote">
+          <img class="person" src="{% static 'images/sanjay1.png' %}" alt="">
+          <blockquote class="quote-text">“Inverted admissions has the potential to disrupt traditional modes of access to higher education… We’re democratizing access to a master’s program for learners worldwide.”</blockquote>
+          <p class="quote-author">-- Sanjay Sarma, Vice President of Open Learning, MIT  </p>
+        </div>
       </section>
 
     </section>
