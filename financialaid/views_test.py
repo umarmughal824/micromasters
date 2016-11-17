@@ -8,7 +8,6 @@ import ddt
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.db.models import Q
-import pytz
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.test import APIClient
@@ -19,6 +18,7 @@ from financialaid.api import (
     determine_income_usd,
     determine_tier_program,
     get_formatted_course_price,
+    get_no_discount_tier_program,
 )
 from financialaid.api_test import (
     create_program,
@@ -41,6 +41,7 @@ from financialaid.models import (
 )
 from mail.utils import generate_financial_aid_email
 from mail.views_test import mocked_json
+from micromasters.utils import is_near_now
 from roles.models import Staff
 
 
@@ -108,12 +109,12 @@ class RequestAPITests(FinancialAidBaseTestCase, APIClient):
             "original_currency": original_currency,
             "program_id": self.program.id,
         }
-        assert FinancialAid.objects.count() == 0
+        assert FinancialAid.objects.exclude(status=FinancialAidStatus.RESET).count() == 0
         assert FinancialAidAudit.objects.count() == 0
         self.make_http_request(self.client.post, self.request_url, status.HTTP_201_CREATED, data=data)
-        assert FinancialAid.objects.count() == 1
+        assert FinancialAid.objects.exclude(status=FinancialAidStatus.RESET).count() == 1
         assert FinancialAidAudit.objects.count() == 1
-        financial_aid = FinancialAid.objects.first()
+        financial_aid = FinancialAid.objects.exclude(status=FinancialAidStatus.RESET).first()
         income_usd = determine_income_usd(original_income, original_currency)
         assert financial_aid.tier_program == determine_tier_program(self.program, income_usd)
         if not auto_approved:
@@ -126,9 +127,7 @@ class RequestAPITests(FinancialAidBaseTestCase, APIClient):
         assert financial_aid.original_currency == original_currency
         assert financial_aid.country_of_income == self.profile.country
         assert financial_aid.country_of_residence == self.profile.country
-        now = datetime.datetime.now(tz=pytz.UTC)
-        five_seconds = datetime.timedelta(0, 5)
-        assert now - five_seconds < financial_aid.date_exchange_rate < now + five_seconds
+        assert is_near_now(financial_aid.date_exchange_rate)
 
     def test_income_validation_missing_args(self):
         """
@@ -801,21 +800,27 @@ class LearnerSkipsFinancialAid(FinancialAidBaseTestCase, APIClient):
 
     def test_skipped_financialaid_object_created(self):
         """
-        Tests that a FinancialAid object with the status "skipped" is created.
+        Tests that the user can create a skipped FinancialAid if it doesn't already exist
         """
         assert FinancialAidAudit.objects.count() == 0
+        assert FinancialAid.objects.exclude(status=FinancialAidStatus.RESET).count() == 0
         self.make_http_request(self.client.patch, self.skip_url, status.HTTP_200_OK)
-        assert FinancialAid.objects.count() == 1
-        financial_aid = FinancialAid.objects.get(
-            user=self.profile.user,
-        )
-        assert financial_aid.tier_program == self.tier_programs["75k"]
-        assert financial_aid.status == FinancialAidStatus.SKIPPED
-        # Check logging
         assert FinancialAidAudit.objects.count() == 1
+        assert FinancialAid.objects.exclude(status=FinancialAidStatus.RESET).count() == 1
+        financial_aid = FinancialAid.objects.exclude(status=FinancialAidStatus.RESET).first()
+        assert financial_aid.tier_program == get_no_discount_tier_program(self.program)
+        assert financial_aid.user == self.profile.user
+        assert financial_aid.status == FinancialAidStatus.SKIPPED
+        assert is_near_now(financial_aid.date_exchange_rate)
+        assert financial_aid.country_of_income == self.profile.country
+        assert financial_aid.country_of_residence == self.profile.country
 
     @ddt.data(
-        *([status] for status in set(FinancialAidStatus.ALL_STATUSES) - set(FinancialAidStatus.TERMINAL_STATUSES))
+        *([status] for status in (
+            set(FinancialAidStatus.ALL_STATUSES) -
+            set(FinancialAidStatus.TERMINAL_STATUSES) -
+            {FinancialAidStatus.RESET}
+        ))
     )
     @ddt.unpack
     def test_skipped_financialaid_object_updated(self, financial_aid_status):
@@ -830,7 +835,7 @@ class LearnerSkipsFinancialAid(FinancialAidBaseTestCase, APIClient):
 
         assert FinancialAidAudit.objects.count() == 0
         self.make_http_request(self.client.patch, self.skip_url, status.HTTP_200_OK)
-        assert FinancialAid.objects.count() == 1
+        assert FinancialAid.objects.exclude(status=FinancialAidStatus.RESET).count() == 1
         financial_aid.refresh_from_db()
         assert financial_aid.tier_program == self.tier_programs["75k"]
         assert financial_aid.status == FinancialAidStatus.SKIPPED
