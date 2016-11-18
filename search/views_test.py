@@ -1,6 +1,7 @@
 """
 Tests for the search view
 """
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db.models.signals import post_save
 from django.test import override_settings
@@ -17,6 +18,7 @@ from roles.roles import Staff
 from search.base import ESTestCase
 
 
+# pylint: disable=no-self-use
 class SearchTests(ESTestCase, APITestCase):
     """Tests for the search api view"""
 
@@ -70,11 +72,15 @@ class SearchTests(ESTestCase, APITestCase):
         assert resp_post.status_code == status_code
         return resp_post
 
-    def get_program_ids_in_hits(self, hits):  # pylint: disable=no-self-use
+    def get_program_ids_in_hits(self, hits):
         """
         Helper function to extract the program ids in a list of elasticsearch hits.
         """
         return list(set(hit['_source']['program']['id'] for hit in hits))
+
+    def test_default_page_size(self):
+        """Assert the default page size"""
+        assert settings.ELASTICSEARCH_DEFAULT_PAGE_SIZE == 50
 
     def test_access(self):
         """
