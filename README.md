@@ -283,3 +283,25 @@ host machine isn't running Linux. If you are using a Mac, you'll need to run
 
     npm install
     npm run-script flow
+
+## Connecting to external services
+
+#### Elasticsearch
+
+If you want to connect to an ES cluster aside from the one created by Docker, you'll need to do the following:
+
+1. Add these variables to your `.env` file (without parentheses):
+
+
+        ELASTICSEARCH_INDEX=(your_index_name)
+        ELASTICSEARCH_URL=https://(your_elastic_search_url)
+        ELASTICSEARCH_HTTP_AUTH=(your_cluster_name):(key)
+
+1. If any of the above variables are set in the `web` configuration in `docker-compose.yml`, those
+ will override the values you have in `.env`. Delete them.
+1. Restart the `db` and `elastic` docker-compose services if they're running:
+ `docker-compose restart db elastic`
+ 
+You should now be able to connect to the external ES cluster. You
+can run `docker-compose run web ./manage.py recreate_index` to test
+that it's working.
