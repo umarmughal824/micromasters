@@ -43,10 +43,15 @@ def get_conn(verify=True):
 
     do_verify = False
     if _CONN is None:
-        http_auth = None
-        if settings.ELASTICSEARCH_HTTP_AUTH is not None:
-            http_auth = settings.ELASTICSEARCH_HTTP_AUTH
-        _CONN = connections.create_connection(hosts=[settings.ELASTICSEARCH_URL], http_auth=http_auth)
+        http_auth = settings.ELASTICSEARCH_HTTP_AUTH
+        use_ssl = http_auth is not None
+        _CONN = connections.create_connection(
+            hosts=[settings.ELASTICSEARCH_URL],
+            http_auth=http_auth,
+            use_ssl=use_ssl,
+            # make sure we verify SSL certificates (off by default)
+            verify_certs=use_ssl
+        )
         # Verify connection on first connect if verify=True.
         do_verify = verify
 
