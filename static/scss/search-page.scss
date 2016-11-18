@@ -198,8 +198,13 @@
 
         .sk-toggle-option {
           background: #f5f5f5;
-          padding: 5px 12px;
+          padding: 5px 6px;
           border-color: $border-color;
+
+          i.material-icons {
+            position: relative;
+            bottom: 1px;
+          }
         }
       }
 
@@ -356,18 +361,19 @@
   flex-flow: row;
   border-radius: 3px;
   border: 1px solid #e4e4e4;
-  height: 35px !important;
+  height: 30px !important;
   max-height: 35px;
   background: white;
+  min-width: 206px;
 
   > select {
     border: 0;
-    padding: 7px 26px 7px 0;
+    padding: 5px 26px 5px 0;
   }
 
   .label-before-selected {
-    margin-right: 7px;
-    padding: 7px 0 7px 8px;
+    margin-right: 5px;
+    padding: 5px 0 5px 8px;
     font-size: 14px;
     font-weight: normal;
     color: rgba(0,0,0,0.8);
