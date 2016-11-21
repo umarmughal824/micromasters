@@ -105,10 +105,45 @@ class Profile(models.Model):
     edx_name = models.TextField(blank=True, null=True)
     edx_bio = models.TextField(blank=True, null=True)
 
+    # Romanized names
+    romanized_first_name = models.CharField(blank=True, null=True, max_length=30)
+    romanized_last_name = models.CharField(blank=True, null=True, max_length=50)
+
+    address1 = models.CharField(
+        max_length=40,
+        blank=True,
+        null=True
+    )
+    address2 = models.CharField(
+        max_length=40,
+        blank=True,
+        null=True
+    )
+    address3 = models.CharField(
+        max_length=40,
+        blank=True,
+        null=True
+    )
+    postal_code = models.CharField(
+        max_length=16,
+        blank=True,
+        null=True
+    )
     city = models.TextField(blank=True, null=True)
     country = models.TextField(blank=True, null=True)
     state_or_territory = models.CharField(
         max_length=255,
+        blank=True,
+        null=True,
+    )
+
+    phone_number = models.CharField(
+        max_length=35,
+        blank=True,
+        null=True
+    )
+    phone_country_code = models.CharField(
+        max_length=3,
         blank=True,
         null=True,
     )
@@ -141,6 +176,8 @@ class Profile(models.Model):
     date_joined_micromasters = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     linkedin = JSONField(blank=True, null=True)
     student_id = models.IntegerField(blank=True, null=True, unique=True)
+
+    updated_on = models.DateTimeField(blank=True, null=True, auto_now=True)
 
     @transaction.atomic
     def save(self, *args, **kwargs):
