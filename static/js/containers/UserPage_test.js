@@ -771,6 +771,30 @@ describe("UserPage", function() {
         });
       });
 
+      it('should show an email, if present', () => {
+        const username = SETTINGS.user ? SETTINGS.user.username : null;
+        return renderComponent(`/learner/${username}`, userActions).then(([, div]) => {
+          let email = div.querySelector('.profile-email').textContent;
+          assert.deepEqual(email, USER_PROFILE_RESPONSE.email);
+        });
+      });
+
+      it('should not show an email, if not present', () => {
+        helper.profileGetStub.
+          withArgs(SETTINGS.user.username).
+          returns(
+            Promise.resolve(Object.assign({}, USER_PROFILE_RESPONSE, {
+              username: SETTINGS.user.username,
+              email: null,
+            }))
+          );
+
+        const username = SETTINGS.user ? SETTINGS.user.username : null;
+        return renderComponent(`/learner/${username}`, userActions).then(([, div]) => {
+          assert.isNull(div.querySelector('.profile-email'));
+        });
+      });
+
       it('should let you edit personal info', () => {
         const username = SETTINGS.user ? SETTINGS.user.username : null;
         return renderComponent(`/learner/${username}`, userActions).then(([, div]) => {

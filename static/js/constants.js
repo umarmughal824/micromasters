@@ -216,6 +216,7 @@ export const USER_PROFILE_RESPONSE = {
   "filled_out": true,
   "agreed_to_terms_of_service": true,
   "account_privacy": "all_users",
+  "email": "jane@foobar.baz",
   "email_optin": false,
   "first_name": "Jane",
   "last_name": "Garris",
