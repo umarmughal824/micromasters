@@ -11,7 +11,7 @@ import {
   getPreferredName,
   userPrivilegeCheck,
 } from '../util/util';
-import type { Profile } from '../flow/profileTypes';
+import type { Profile, ProfileFetchResponse } from '../flow/profileTypes';
 import ProfileImageUploader from '../components/ProfileImageUploader';
 import { createActionHelper } from '../lib/redux';
 import { setPhotoDialogVisibility } from '../actions/ui';
@@ -30,43 +30,52 @@ const formatPhotoName = photo => (
 
 class ProfileImage extends React.Component {
   props: {
-    profile:              Profile,
+    afterImageUpload:     ?(o: ProfileFetchResponse) => void,
+    clearPhotoEdit:       () => void,
+    dispatch:             Dispatch,
     editable:             boolean,
     imageUpload:          Object,
-    dispatch:             Dispatch,
-    clearPhotoEdit:       () => void,
-    setDialogVisibility:  (b: boolean) => void,
-    updatePhotoEdit:      (b: Blob) => void,
-    startPhotoEdit:       (p: File) => void,
+    linkText:             string,
     photoDialogOpen:      boolean,
+    profile:              Profile,
+    setDialogVisibility:  (b: boolean) => void,
     setPhotoError:        (s: string) => void,
+    showLink:             boolean,
+    startPhotoEdit:       (p: File) => void,
+    updatePhotoEdit:      (b: Blob) => void,
   };
 
   static defaultProps = {
     editable: false
   };
 
-  updateUserPhoto: Function = () => {
+  updateUserPhoto = () => {
     const {
       profile: { username },
       imageUpload: { edit, photo },
       dispatch,
       clearPhotoEdit,
       setDialogVisibility,
+      afterImageUpload,
     } = this.props;
+
     return dispatch(updateUserPhoto(username, edit, formatPhotoName(photo))).then(() => {
       clearPhotoEdit();
       setDialogVisibility(false);
-      this.fetchUserProfile();
+      return this.fetchUserProfile().then(resp => {
+        if ( afterImageUpload ) {
+          afterImageUpload(resp);
+        }
+      });
     });
   };
 
-  fetchUserProfile: Function = () => {
+  fetchUserProfile = () => {
     const { dispatch } = this.props;
-    dispatch(fetchUserProfile(SETTINGS.user.username));
+    return dispatch(fetchUserProfile(SETTINGS.user.username));
   };
 
-  cameraIcon: Function = (): React$Element<*>|null => {
+  cameraIcon = (): React$Element<*>|null => {
     const { setDialogVisibility, editable } = this.props;
     if ( editable ) {
       return (
@@ -80,22 +89,32 @@ class ProfileImage extends React.Component {
     }
   }
 
+  openDialogLink = (): React$Element<*> => {
+    const { linkText, setDialogVisibility } = this.props;
+    return <a onClick={() => setDialogVisibility(true)}>
+      { linkText }
+    </a>;
+  };
+
   render () {
-    const { profile } = this.props;
+    const { profile, showLink } = this.props;
     const imageUrl = makeProfileImageUrl(profile);
 
     return (
-      <div className="avatar">
-        <ProfileImageUploader
-          {...this.props}
-          updateUserPhoto={this.updateUserPhoto}
-        />
-        <img
-          src={imageUrl}
-          alt={`Profile image for ${getPreferredName(profile, false)}`}
-          className="card-image"
-        />
-        { userPrivilegeCheck(profile, this.cameraIcon) }
+      <div className="profile-image">
+        <div className="avatar">
+          <ProfileImageUploader
+            {...this.props}
+            updateUserPhoto={this.updateUserPhoto}
+          />
+          <img
+            src={imageUrl}
+            alt={`Profile image for ${getPreferredName(profile, false)}`}
+            className="card-image"
+          />
+          { userPrivilegeCheck(profile, this.cameraIcon) }
+        </div>
+        { showLink ? this.openDialogLink() : null }
       </div>
     );
   }

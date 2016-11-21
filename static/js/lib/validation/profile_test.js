@@ -12,6 +12,7 @@ import {
   combineValidators,
   emailValidation,
   validateFinancialAid,
+  profileImageValidation,
 } from './profile';
 import {
   USER_PROFILE_RESPONSE,
@@ -83,6 +84,21 @@ describe('Profile validation functions', () => {
         date_of_birth: "Please enter a valid date of birth"
       };
       assert.deepEqual(personalValidation(profile), errors);
+    });
+  });
+
+
+  describe('profileImageValidation', () => {
+    it('should return an error if no image', () => {
+      assert.deepEqual(profileImageValidation({}), {
+        image: 'Please upload a profile image'
+      });
+    });
+
+    it('should return no errors if image is present', () => {
+      assert.deepEqual(profileImageValidation({
+        image: 'some-image.png'
+      }), {});
     });
   });
 

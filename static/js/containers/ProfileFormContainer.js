@@ -108,7 +108,7 @@ class ProfileFormContainer extends React.Component {
 
   startProfileEdit: Function = () => {
     const { dispatch } = this.props;
-    const username = SETTINGS.username;
+    const username = SETTINGS.user.username;
     dispatch(startProfileEdit(username));
   };
 
@@ -183,19 +183,22 @@ class ProfileFormContainer extends React.Component {
       dispatch,
       currentProgramEnrollment
     } = this.props;
-    let errors, isEdit, profile;
+    let errors, isEdit, profile, uneditedProfile;
 
     if ( profileFromStore === undefined ) {
       profile = {};
+      uneditedProfile = {};
       errors = {};
       isEdit = false;
     } else {
       if (profileFromStore.edit !== undefined) {
         errors = profileFromStore.edit.errors;
         profile = profileFromStore.edit.profile;
+        uneditedProfile = profileFromStore.profile;
         isEdit = true;
       } else {
         profile = profileFromStore.profile;
+        uneditedProfile = profileFromStore.profile;
         errors = {};
         isEdit = false;
       }
@@ -207,6 +210,7 @@ class ProfileFormContainer extends React.Component {
       errors: errors,
       fetchProfile: this.fetchProfile,
       profile: profile,
+      uneditedProfile: uneditedProfile,
       programs: programs.availablePrograms,
       saveProfile: this.saveProfile.bind(this, isEdit),
       currentProgramEnrollment: currentProgramEnrollment,

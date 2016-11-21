@@ -223,6 +223,7 @@ export const ELASTICSEARCH_RESPONSE = {
 };
 
 export const USER_PROFILE_RESPONSE = {
+  "image": "some_sort_of_image.png",
   "username": SETTINGS.user ? SETTINGS.user.username : null,
   "filled_out": true,
   "agreed_to_terms_of_service": true,

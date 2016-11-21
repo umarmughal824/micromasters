@@ -218,8 +218,6 @@ describe("UserPage", function() {
               UPDATE_PROFILE_VALIDATION,
               UPDATE_VALIDATION_VISIBILITY,
               UPDATE_VALIDATION_VISIBILITY,
-              UPDATE_VALIDATION_VISIBILITY,
-              START_PROFILE_EDIT,
             ]),
             preferredName,
             { preferred_name: 'Nickname / Preferred name is required' },
@@ -233,7 +231,6 @@ describe("UserPage", function() {
               UPDATE_PROFILE_VALIDATION,
               UPDATE_VALIDATION_VISIBILITY,
               UPDATE_VALIDATION_VISIBILITY,
-              START_PROFILE_EDIT,
             ]),
             preferredName,
           );
@@ -247,7 +244,6 @@ describe("UserPage", function() {
             userProfileActions.concat([
               UPDATE_PROFILE_VALIDATION,
               UPDATE_VALIDATION_VISIBILITY,
-              START_PROFILE_EDIT,
             ]),
             dobMonth,
             { date_of_birth: "Please enter a valid date of birth" },
@@ -260,7 +256,6 @@ describe("UserPage", function() {
             scrollActions.concat([
               UPDATE_PROFILE_VALIDATION,
               UPDATE_VALIDATION_VISIBILITY,
-              START_PROFILE_EDIT,
             ]),
             dobMonth,
           );
@@ -281,7 +276,6 @@ describe("UserPage", function() {
         it('should clearValidationErrors when filling out a required select field', () => {
           return clearValidation(
             userProfileActions.concat([
-              START_PROFILE_EDIT,
               UPDATE_PROFILE_VALIDATION,
               UPDATE_VALIDATION_VISIBILITY,
             ]),
@@ -294,7 +288,6 @@ describe("UserPage", function() {
         it('should scrollIntoView when filling out a required select field', () => {
           return scrollIntoView(
             scrollActions.concat([
-              START_PROFILE_EDIT,
               UPDATE_PROFILE_VALIDATION,
               UPDATE_VALIDATION_VISIBILITY,
             ]),
@@ -335,7 +328,6 @@ describe("UserPage", function() {
           return scrollIntoView(
             scrollActions.concat([
               UPDATE_PROFILE_VALIDATION,
-              START_PROFILE_EDIT,
               UPDATE_VALIDATION_VISIBILITY,
               UPDATE_VALIDATION_VISIBILITY,
             ]),
