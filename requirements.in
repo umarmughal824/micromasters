@@ -12,6 +12,8 @@ djangorestframework==3.5.2
 edx-api-client==0.3.0
 elasticsearch-dsl==2.1.0
 elasticsearch==2.3.0
+factory_boy
+faker
 html5lib==0.999999
 jsonfield==1.0.3
 newrelic
