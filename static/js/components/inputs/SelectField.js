@@ -116,6 +116,7 @@ class SelectField extends React.Component {
       value={_.get(profile, keySet, "")}
       className={this.selectClassName()}
       onChange={this.onChange}
+      clearable={false}
       onBlur={this.onBlur}
       selectComponent={allowCreate ? Creatable : null}
       {...this.props}
