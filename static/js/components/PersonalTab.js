@@ -72,6 +72,7 @@ export default class PersonalTab extends React.Component {
       <Select
         value={this.getSelectedProgramId()}
         onChange={this.onChange}
+        clearable={false}
         className={`program-selectfield ${validationErrorSelector(errors, ['program'])}`}
         errorText={_.get(errors, "program")}
         options={this.programOptions(programs)}
