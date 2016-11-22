@@ -2,6 +2,10 @@
   background: #fff;
 }
 
+h3 {
+  line-height: 1.4em;
+}
+
 body.app-media {
   padding-top: 0;
   font-size: 14px;
@@ -211,7 +215,7 @@ body.app-media {
 }
 
 .sub-banner {
-  background-color: #ffffff;
+  background-color: #ececec;
 
   .sub-banner-section {
     padding: 7vw 0 8vw;
@@ -236,6 +240,10 @@ body.app-media {
         margin: 0 0 30px;
         font-weight: 400;
         color: rgba(0,0,0,.87);
+
+        @include breakpoint(phone) {
+          font-size: 22px;
+        }
 
         @media (min-width: 1200px) {
           font-size: 1.9vw;
@@ -306,16 +314,20 @@ body.app-media {
   }
 
   h3 {
-    margin: 0 0 40px;
-    font-weight: 300;
-    font-size: 25px;
+    margin: 0 5% 40px;
+    font-weight: 400;
+    font-size: 23px;
     color: white;
+
+    @include breakpoint(phone) {
+      font-size: 22px;
+    }
   }
 }
 
 .quote-section {
   background: #fff;
-  padding: 50px 0 67px;
+  padding: 50px 0 157px;
 
   @include breakpoint(phone) {
     padding: 45px 0;
@@ -330,14 +342,13 @@ body.app-media {
     border-bottom: 1px dashed #c5c5c5;
 
     @include breakpoint(phone) {
-      text-align: center;
       width: 87%;
     }
 
     img.person {
       float: left;
       width: 170px;
-      margin-right: 70px;
+      margin: 0 70px 80px;
 
       @include breakpoint(phone) {
         float: none;
@@ -385,10 +396,12 @@ body.app-media {
 
 .current-programs-section {
   margin: 0;
-  background-color: #151515;
+  background-color: #ffffff;
+  border-top: 1px solid #e5e5e5;
 
   h3 {
     margin: 0 0 70px;
+    color: $font-black;
 
     @include breakpoint(phone) {
       margin: 0 0 40px;
@@ -399,6 +412,9 @@ body.app-media {
     list-style: none;
     text-align: left;
     padding: 0;
+    width: 96%;
+    max-width: 1400px;
+    margin: 0 auto;
 
     .program-thumbnail {
       position: relative;
@@ -411,10 +427,10 @@ body.app-media {
       .program-info {
         position: absolute;
         width: 100%;
-        height: 88px;
-        bottom: 0;
+        height: 95px;
+        bottom: -1px;
         padding: 25px 22px;
-        background: linear-gradient(to bottom,  rgba(0,0,0,0) 0%,rgba(0,0,0,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+        background: linear-gradient(to bottom,  rgba(0,0,0,0), rgba(0,0,0,1)); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
         filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#000000',GradientType=0 ); /* IE6-9 */
         z-index: 1;
 
@@ -452,18 +468,14 @@ body.app-media {
       }
 
       p {
-        color: rgba(255,255,255,0.6);
-        font-weight: 300;
+        color: $font-black;
+        font-weight: 400;
         font-size: 15px;
         margin: 0 0 13px;
       }
 
       .mailing-list-button {
         margin-top: 12px;
-      }
-
-      a {
-        color: #289fdc;
       }
     }
   }
