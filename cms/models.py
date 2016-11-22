@@ -15,23 +15,11 @@ from wagtail.wagtailcore.models import Orderable, Page
 from wagtail.wagtailimages.models import Image
 
 from courses.models import Program
-from courses.serializers import CourseSerializer
 from micromasters.serializers import serialize_maybe_user
 from micromasters.utils import webpack_dev_server_host
 from profiles.api import get_social_username
 from roles.models import Instructor, Staff
 from ui.views import get_bundle_url
-
-
-def faculty_for_carousel(faculty):
-    """formats faculty info for the carousel"""
-    from cms.serializers import FacultySerializer
-    return FacultySerializer(faculty, many=True).data
-
-
-def courses_for_popover(courses):
-    """formats course info for the popover"""
-    return CourseSerializer(courses, many=True).data
 
 
 class HomePage(Page):
@@ -58,12 +46,12 @@ class HomePage(Page):
         context["style_src"] = get_bundle_url(request, "style.js")
         context["public_src"] = get_bundle_url(request, "public.js")
         context["style_public_src"] = get_bundle_url(request, "style_public.js")
-        context["signup_dialog_src"] = get_bundle_url(request, "signup_dialog.js")
         context["authenticated"] = not request.user.is_anonymous()
         context["is_staff"] = has_role(request.user, [Staff.ROLE_ID, Instructor.ROLE_ID])
         context["username"] = username
         context["js_settings_json"] = json.dumps(js_settings)
         context["title"] = self.title
+        context["common_src"] = get_bundle_url(request, "common.js")
         context["sentry_client"] = get_bundle_url(request, "sentry_client.js")
         context["tracking_id"] = ""
 
@@ -204,19 +192,19 @@ class ProgramPage(Page):
 
 def get_program_page_context(programpage, request):
     """ Get context for the program page"""
+    from cms.serializers import ProgramPageSerializer
+
     courses_query = (
-        programpage.program.course_set.order_by('position_in_program').all()
+        programpage.program.course_set.all()
     )
     js_settings = {
         "gaTrackingID": settings.GA_TRACKING_ID,
         "host": webpack_dev_server_host(request),
-        "programId": programpage.program.id,
-        "faculty": faculty_for_carousel(programpage.faculty_members.all()),
-        "courses": courses_for_popover(courses_query),
         "environment": settings.ENVIRONMENT,
         "sentry_dsn": sentry.get_public_dsn(),
         "release_version": settings.VERSION,
         "user": serialize_maybe_user(request.user),
+        "program": ProgramPageSerializer(programpage).data,
     }
     username = get_social_username(request.user)
     context = super(ProgramPage, programpage).get_context(request)
@@ -226,13 +214,11 @@ def get_program_page_context(programpage, request):
     context["public_src"] = get_bundle_url(request, "public.js")
     context["style_public_src"] = get_bundle_url(request, "style_public.js")
     context["authenticated"] = not request.user.is_anonymous()
-    context["signup_dialog_src"] = get_bundle_url(request, "signup_dialog.js")
-    context["faculty_carousel_src"] = get_bundle_url(request, "faculty_carousel.js")
-    context["course_list_src"] = get_bundle_url(request, "course_list.js")
     context["username"] = username
     context["js_settings_json"] = json.dumps(js_settings)
     context["title"] = programpage.title
     context["courses"] = courses_query
+    context["common_src"] = get_bundle_url(request, "common.js")
     context["sentry_client"] = get_bundle_url(request, "sentry_client.js")
     context["tracking_id"] = programpage.program.ga_tracking_id
 

@@ -1,6 +1,7 @@
 .mdl-button {
 
   font-weight: 400;
+  border-radius: 3px;
 
   &.gray-button {
     background: $gray-button-color;
@@ -104,17 +105,13 @@
   &.minor-action {
     font-size: 12px;
     color: #333333;
-    border: 1px solid #c7c7c7;
-    background-image: -ms-linear-gradient(top, #f8f8f8   0%, #dedede   100%);
-    background-image: -moz-linear-gradient(top, #f8f8f8   0%, #dedede   100%);
-    background-image: -o-linear-gradient(top, #f8f8f8   0%, #dedede   100%);
-    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #f8f8f8  ), color-stop(100, #dedede  ));
-    background-image: -webkit-linear-gradient(top, #f8f8f8   0%, #dedede   100%);
-    background-image: linear-gradient(to bottom, #f8f8f8   0%, #dedede   100%);
+    border: 1px solid #d2d2d2;
+    background-image: linear-gradient(to bottom, #fbfbfb   0%, #e2e2e2   100%);
   }
 
   &.minor-action:hover, &.minor-action:focus, &.minor-action:active, &.minor-action:focus:not(:active) {
     color: #000;
+    background-image: linear-gradient(to bottom, #f7f7f7   0%, #dadada   100%);
   }
 
   &:hover, &:focus, &:active, &:focus:not(:active) {
@@ -144,14 +141,12 @@
 
   i.material-icons {
     position: static;
-    -webkit-transform: none;
     transform: none;
-
   }
 }
 
 .mdl-button:focus {
-  outline: 0 auto -webkit-focus-ring-color;
+  outline: 0 auto;
   outline-offset: -2px;
 }
 
@@ -161,9 +156,17 @@
 
 .mm-minor-action {
   color: $link-text;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 400;
   cursor: pointer;
+  background: none;
+  border: none;
+  padding: 3px 0;
+
+  &:hover {
+    color: $link-hover;
+    text-decoration: underline;
+  }
 }
 
 .dashboard-button {
@@ -180,8 +183,6 @@
   opacity: 0.3;
   cursor: not-allowed;
 }
-
-
 
 a.btn {
   text-decoration: none;

@@ -20,6 +20,10 @@ import {
   updateProfile,
 } from '../actions/profile';
 import {
+  REQUEST_GET_PROGRAM_ENROLLMENTS,
+  RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
+} from '../actions/programs';
+import {
   SET_WORK_DIALOG_VISIBILITY,
   SET_WORK_DIALOG_INDEX,
   SET_EDUCATION_DEGREE_LEVEL,
@@ -39,13 +43,25 @@ import {
 import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../lib/api';
 import { workEntriesByDate, educationEntriesByDate } from '../util/sorting';
-import { modifyTextField, activeDeleteDialog } from '../util/test_utils';
+import {
+  modifyTextField,
+  activeDeleteDialog,
+  modifySelectField,
+  clearSelectField,
+} from '../util/test_utils';
 
 describe("UserPage", function() {
   this.timeout(10000);
 
   let listenForActions, renderComponent, helper, patchUserProfileStub;
-  let userActions = [RECEIVE_GET_USER_PROFILE_SUCCESS, REQUEST_GET_USER_PROFILE];
+  let userActions = [
+    REQUEST_GET_PROGRAM_ENROLLMENTS,
+    RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
+    REQUEST_GET_USER_PROFILE,
+    RECEIVE_GET_USER_PROFILE_SUCCESS,
+    REQUEST_GET_USER_PROFILE,
+    RECEIVE_GET_USER_PROFILE_SUCCESS,
+  ];
 
   const confirmResumeOrder = (
     editButton,
@@ -170,13 +186,17 @@ describe("UserPage", function() {
         });
       };
 
-      const scrollIntoView = (actions, getInput) => {
+      const scrollIntoView = (actions, getInput, selectField=false) => {
         const username = SETTINGS.user ? SETTINGS.user.username : null;
         return renderComponent(`/learner/${username}`, userActions).then(([, div]) => {
           return listenForActions(actions, () => {
             TestUtils.Simulate.click(getEditPersonalButton(div));
+
             let input = getInput(getDialog());
-            modifyTextField(input, "");
+
+            if ( !selectField ) {
+              modifyTextField(input, "");
+            }
             TestUtils.Simulate.click(getSave());
           }).then(() => {
             return new Promise(resolve => {
@@ -189,48 +209,42 @@ describe("UserPage", function() {
         });
       };
 
-      it(`should clearValidation when filling out a required text field`, () => {
-        const preferredName = dialog => inputs(dialog).find(i => i.name === "Preferred name");
+      describe('text field', () => {
+        const preferredName = dialog => inputs(dialog).find(i => i.name === "Nickname / Preferred name");
 
-        return clearValidation(
-          userProfileActions.concat([
-            UPDATE_PROFILE_VALIDATION,
-            UPDATE_VALIDATION_VISIBILITY,
-            UPDATE_VALIDATION_VISIBILITY,
-            UPDATE_VALIDATION_VISIBILITY,
-            START_PROFILE_EDIT,
-          ]),
-          preferredName,
-          { preferred_name: 'Preferred name is required' },
-          USER_PROFILE_RESPONSE.preferred_name
-        );
+        it('should clearValidation when filling out a required text field', () => {
+          return clearValidation(
+            userProfileActions.concat([
+              UPDATE_PROFILE_VALIDATION,
+              UPDATE_VALIDATION_VISIBILITY,
+              UPDATE_VALIDATION_VISIBILITY,
+              UPDATE_VALIDATION_VISIBILITY,
+              START_PROFILE_EDIT,
+            ]),
+            preferredName,
+            { preferred_name: 'Nickname / Preferred name is required' },
+            USER_PROFILE_RESPONSE.preferred_name
+          );
+        });
+
+        it('should scrollIntoView when filling out a required text field', () => {
+          return scrollIntoView(
+            scrollActions.concat([
+              UPDATE_PROFILE_VALIDATION,
+              UPDATE_VALIDATION_VISIBILITY,
+              UPDATE_VALIDATION_VISIBILITY,
+              START_PROFILE_EDIT,
+            ]),
+            preferredName,
+          );
+        });
       });
 
-      it(`should scrollIntoView when filling out a required text field`, () => {
-        const preferredName = dialog => inputs(dialog).find(i => i.name === "Preferred name");
-
-        return scrollIntoView(
-          scrollActions.concat([
-            UPDATE_PROFILE_VALIDATION,
-            UPDATE_VALIDATION_VISIBILITY,
-            UPDATE_VALIDATION_VISIBILITY,
-            START_PROFILE_EDIT,
-          ]),
-          preferredName,
-          { preferred_name: 'Preferred name is required' },
-          USER_PROFILE_RESPONSE.preferred_name
-        );
-      });
-
-      [
-        [clearValidation, userProfileActions],
-        [scrollIntoView, scrollActions],
-      ].forEach(([testFunc, testActions]) => {
-        it(`should ${testFunc.name} when filling out a required date field`, () => {
-          const dobMonth = dialog => inputs(dialog).find(i => i.id.includes('Dateofbirth'));
-
-          return testFunc(
-            testActions.concat([
+      describe('date field', () => {
+        const dobMonth = dialog => inputs(dialog).find(i => i.id.includes('MM-Month'));
+        it('should clearValidation when filling out a required date field', () => {
+          return clearValidation(
+            userProfileActions.concat([
               UPDATE_PROFILE_VALIDATION,
               UPDATE_VALIDATION_VISIBILITY,
               START_PROFILE_EDIT,
@@ -240,81 +254,94 @@ describe("UserPage", function() {
             String(moment(USER_PROFILE_RESPONSE.date_of_birth).month())
           );
         });
+
+        it('should scrollIntoView when filling out a required date field', () => {
+          return scrollIntoView(
+            scrollActions.concat([
+              UPDATE_PROFILE_VALIDATION,
+              UPDATE_VALIDATION_VISIBILITY,
+              START_PROFILE_EDIT,
+            ]),
+            dobMonth,
+          );
+        });
       });
 
-
-      it('should clearValidationErrors when filling out a required select field', () => {
-        const languageField = dialog => inputs(dialog).find(i => i.id.includes('Preferredlanguage'));
-
-        return clearValidation(
-          userProfileActions.concat([
-            UPDATE_PROFILE,
-            START_PROFILE_EDIT,
-            UPDATE_PROFILE_VALIDATION,
-            UPDATE_PROFILE_VALIDATION,
-            UPDATE_VALIDATION_VISIBILITY,
-          ]),
-          languageField,
-          { preferred_language: "Preferred language is required" },
-          USER_PROFILE_RESPONSE.preferred_language
-        );
-      });
-
-      it('should scrollIntoView when filling out a required select field', () => {
-        const languageField = dialog => inputs(dialog).find(i => i.id.includes('Preferredlanguage'));
-
-        return scrollIntoView(
-          scrollActions.concat([
-            UPDATE_PROFILE_VALIDATION,
-            UPDATE_VALIDATION_VISIBILITY,
-            START_PROFILE_EDIT,
-          ]),
-          languageField,
-          { preferred_language: "Preferred language is required" },
-          USER_PROFILE_RESPONSE.preferred_language
-        );
-      });
-
-      it(`should clearValidationErrors when filling out a required radio field`, () => {
-        const createValidationError = () => {
-          helper.store.dispatch(startProfileEdit(SETTINGS.user.username));
-          let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
-          profile.gender = undefined;
-          helper.store.dispatch(updateProfile(SETTINGS.user.username, profile));
+      describe('select field', () => {
+        const languageField = dialog => {
+          let select = dialog.querySelector('.select-field.preferred-language');
+          clearSelectField(select);
         };
 
-        const removeErrorValue = dialog => {
-          let genderField = inputs(dialog).find(i => i.name === "Gender");
-          genderField.click();
+        const removeError = dialog => {
+          let select = dialog.querySelector('.select-field.preferred-language');
+          modifySelectField(select, USER_PROFILE_RESPONSE.preferred_language);
         };
 
-        return clearValidation(
-          userProfileActions.concat([
-            START_PROFILE_EDIT,
-            UPDATE_VALIDATION_VISIBILITY,
-            UPDATE_VALIDATION_VISIBILITY,
-          ]),
-          createValidationError,
-          { gender: "Gender is required" },
-          removeErrorValue,
-        );
+        it('should clearValidationErrors when filling out a required select field', () => {
+          return clearValidation(
+            userProfileActions.concat([
+              START_PROFILE_EDIT,
+              UPDATE_PROFILE_VALIDATION,
+              UPDATE_VALIDATION_VISIBILITY,
+            ]),
+            languageField,
+            { preferred_language: "Preferred language is required" },
+            removeError,
+          );
+        });
+
+        it('should scrollIntoView when filling out a required select field', () => {
+          return scrollIntoView(
+            scrollActions.concat([
+              START_PROFILE_EDIT,
+              UPDATE_PROFILE_VALIDATION,
+              UPDATE_VALIDATION_VISIBILITY,
+            ]),
+            languageField,
+            true
+          );
+        });
       });
 
-      it(`should scrollIntoView when filling out a required radio field`, () => {
+      describe('radio field', () => {
         const genderField = dialog => inputs(dialog).find(i => i.name === "Gender");
-        const removeErrorValue = dialog => TestUtils.Simulate.click(genderField(dialog));
 
-        return scrollIntoView(
-          scrollActions.concat([
-            UPDATE_PROFILE_VALIDATION,
-            START_PROFILE_EDIT,
-            UPDATE_VALIDATION_VISIBILITY,
-            UPDATE_VALIDATION_VISIBILITY,
-          ]),
-          genderField,
-          { gender: "Gender is required" },
-          removeErrorValue,
-        );
+        it('should clearValidationErrors when filling out a required radio field', () => {
+          const createValidationError = () => {
+            helper.store.dispatch(startProfileEdit(SETTINGS.user.username));
+            let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
+            profile.gender = undefined;
+            helper.store.dispatch(updateProfile(SETTINGS.user.username, profile));
+          };
+
+          const removeErrorValue = dialog => {
+            genderField(dialog).click();
+          };
+
+          return clearValidation(
+            userProfileActions.concat([
+              START_PROFILE_EDIT,
+              UPDATE_VALIDATION_VISIBILITY,
+              UPDATE_VALIDATION_VISIBILITY,
+            ]),
+            createValidationError,
+            { gender: "Gender is required" },
+            removeErrorValue,
+          );
+        });
+
+        it(`should scrollIntoView when filling out a required radio field`, () => {
+          return scrollIntoView(
+            scrollActions.concat([
+              UPDATE_PROFILE_VALIDATION,
+              START_PROFILE_EDIT,
+              UPDATE_VALIDATION_VISIBILITY,
+              UPDATE_VALIDATION_VISIBILITY,
+            ]),
+            genderField,
+          );
+        });
       });
     });
 
@@ -463,12 +490,9 @@ describe("UserPage", function() {
               month: '12',
               day: undefined
             },
-            degree_name_edit: undefined,
             school_name: "A School",
             school_country: "AF",
-            school_country_edit: undefined,
             school_state_or_territory: "AF-BAL",
-            school_state_or_territory_edit: undefined,
             school_city: "FoobarVille"
           });
           expectedProfile.education.push(entry);
@@ -490,10 +514,10 @@ describe("UserPage", function() {
             RECEIVE_PATCH_USER_PROFILE_SUCCESS,
             CLEAR_PROFILE_EDIT,
           ];
-          for (let i = 0; i < 12; i++) {
+          for (let i = 0; i < 8; i++) {
             expectedActions.push(UPDATE_PROFILE);
           }
-          for (let i = 0; i < 11; i++) {
+          for (let i = 0; i < 7; i++) {
             expectedActions.push(UPDATE_PROFILE_VALIDATION);
           }
           for (let i = 0; i < 3; i++) {
@@ -509,8 +533,15 @@ describe("UserPage", function() {
             let grid = dialog.getElementsByClassName('profile-tab-grid')[0];
             let inputs = grid.getElementsByTagName('input');
 
+            const modifyEducationSelect = (label, value) => {
+              modifySelectField(
+                dialog.querySelector(`.select-field${label}`),
+                value
+              );
+            };
+
             // set the degree type
-            modifyTextField(inputs[0], "High School");
+            modifyEducationSelect('.degree-type', 'High School');
 
             // fill out graduation date, school name
             modifyTextField(inputs[1], "A School");
@@ -518,8 +549,8 @@ describe("UserPage", function() {
             modifyTextField(inputs[3], "1999");
 
             // set country, state, and city
-            modifyTextField(inputs[4], "Afghanistan");
-            modifyTextField(inputs[5], "Balkh");
+            modifyEducationSelect('.country', "Afghanistan");
+            modifyEducationSelect('.state', "Balkh");
             modifyTextField(inputs[6], "FoobarVille");
             let save = dialog.querySelector('.save-button');
             TestUtils.Simulate.click(save);
@@ -648,7 +679,6 @@ describe("UserPage", function() {
           let entry = Object.assign({}, generateNewWorkHistory(), {
             position: "Assistant Foobar",
             industry: "Accounting",
-            industry_edit: undefined,
             company_name: "FoobarCorp",
             start_date: "2001-12-01",
             start_date_edit: {
@@ -664,9 +694,7 @@ describe("UserPage", function() {
             },
             city: "FoobarVille",
             country: "AF",
-            country_edit: undefined,
             state_or_territory: "AF-BAL",
-            state_or_territory_edit: undefined,
           });
           updatedProfile.work_history.push(entry);
 
@@ -684,7 +712,7 @@ describe("UserPage", function() {
             REQUEST_PATCH_USER_PROFILE,
             RECEIVE_PATCH_USER_PROFILE_SUCCESS
           ];
-          for (let i = 0; i < 14; i++) {
+          for (let i = 0; i < 10; i++) {
             expectedActions.push(UPDATE_PROFILE);
             expectedActions.push(UPDATE_PROFILE_VALIDATION);
           }
@@ -700,16 +728,23 @@ describe("UserPage", function() {
             let grid = dialog.querySelector('.profile-tab-grid');
             let inputs = grid.getElementsByTagName('input');
 
+            const modifyWorkSelect = (label, value) => {
+              modifySelectField(
+                dialog.querySelector(`.select-field${label}`),
+                value
+              );
+            };
+
             // company name
             modifyTextField(inputs[0], "FoobarCorp");
 
             // country, state, city
-            modifyTextField(inputs[1], "Afghanistan");
-            modifyTextField(inputs[2], "Balkh");
+            modifyWorkSelect('.country', "Afghanistan");
+            modifyWorkSelect('.state-or-territory', "Balkh");
             modifyTextField(inputs[3], "FoobarVille");
 
             // industry
-            modifyTextField(inputs[4], "Accounting");
+            modifyWorkSelect('.industry', "Accounting");
 
             // position
             modifyTextField(inputs[5], "Assistant Foobar");

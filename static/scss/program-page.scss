@@ -276,10 +276,9 @@
       bottom: -1px;
       padding: 25px 22px;
       z-index: 2;
-      background: -moz-linear-gradient(top,  rgba(0,0,0,0) 0%, rgba(0,0,0,1) 100%); /* FF3.6-15 */
-      background: -webkit-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,1) 100%); /* Chrome10-25,Safari5.1-6 */
-      background: linear-gradient(to bottom,  rgba(0,0,0,0) 0%,rgba(0,0,0,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#000000',GradientType=0 ); /* IE6-9 */
+      background: linear-gradient(to bottom,  rgba(0,0,0,0) 0%,rgba(0,0,0,1) 100%);
+      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#000000',GradientType=0 );
+
       @media (max-width: 840px) {
         position: static;
         padding: 6px 9px;
@@ -318,7 +317,6 @@
       text-align: left;
       position: relative;
       width: 500px;
-      margin: 0 auto;
       @media (max-width: 840px) {
         height: auto;
         padding: 0;
@@ -369,6 +367,7 @@
 
     .slick-dots li button:before {
       font-size: 20px;
+      color: $font-gray-light;
     }
 
     .slick-arrow {
@@ -386,10 +385,6 @@
 
     .slick-dots li {
       margin: 0 10px;
-
-      button:before {
-        color: $font-gray-light;
-      }
 
       &.slick-active button:before {
         color: #ffffff;
@@ -433,26 +428,29 @@
 
   .accordion-icon {
     font-size: 30px;
-    vertical-align:top
+    vertical-align: top;
   }
 }
 
 .program-course-popover {
-  padding: 10px;
+  padding: 17px 28px 25px;
+  box-shadow: 0px 1px 15px 6px rgba(0, 0, 0, 0.14) !important;
+  /* important is used here to overwrite the inline style in the popover */
 
   .title {
-    font-weight: 600;
-    font-size: 16px;
+    font-weight: 500;
+    font-size: 17px;
     margin: 0 0 6px 0;
   }
 
   .description {
-    color: $font-gray;
+    color: $font-black;
     font-size: 15px;
     margin-bottom: 1em;
   }
 
   .edx-link {
     display: block;
+    font-size: 16px;
   }
 }

@@ -226,7 +226,7 @@ def course_info(user=None, course=None):
         for date_key in ['enrollment_start', 'enrollment_end', 'upgrade_deadline']:
             if getattr(run, date_key, None):
                 run_result[date_key] = _formatted_datetime(getattr(run, date_key))
-        for model_cls in CACHED_HANDLERS.keys():
+        for model_cls in CACHED_HANDLERS:
             obj = model_cls.objects.filter(user=user, course_run=run).first()
             if obj and obj.data:
                 run_result['edx_data'] = run_result.get('edx_data', {})

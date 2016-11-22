@@ -9,6 +9,7 @@ from django.db.models import Max, Min, Q
 
 from courses.models import CourseRun
 from ecommerce.models import Line
+from financialaid.constants import FinancialAidStatus
 from financialaid.models import FinancialAid, TierProgram
 
 
@@ -65,7 +66,8 @@ class MMTrack:
                 ).values_list("course_key", flat=True))
 
                 financial_aid_qset = FinancialAid.objects.filter(
-                    Q(user=user) & Q(tier_program__program=program))
+                    Q(user=user) & Q(tier_program__program=program)
+                ).exclude(status=FinancialAidStatus.RESET)
                 self.financial_aid_applied = financial_aid_qset.exists()
                 if self.financial_aid_applied:
                     financial_aid = financial_aid_qset.first()
@@ -198,6 +200,20 @@ class MMTrack:
         else:
             current_grade = self.current_grades.get_current_grade(course_id)
             return float(current_grade.percent) * 100
+
+    def get_all_final_grades(self):
+        """
+        Returns a list of final grades for only the passed courses.
+
+        Returns:
+            dict: dictionary of course_ids: floats representing final grades for a course
+        """
+        final_grades = {}
+        for course_id in self.course_ids:
+            final_grade = self.get_final_grade(course_id)
+            if final_grade is not None:
+                final_grades[course_id] = final_grade
+        return final_grades
 
     def get_current_grade(self, course_id):
         """

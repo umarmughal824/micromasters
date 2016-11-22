@@ -10,6 +10,7 @@ const settings = {
   edx_base_url: "/edx/",
   roles: [],
   support_email: "a_real_email@example.com",
+  es_page_size: 40,
 };
 global.SETTINGS = Object.assign({}, settings);
 

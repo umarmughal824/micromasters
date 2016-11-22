@@ -1,6 +1,59 @@
 Release Notes
 =============
 
+Version 0.23.0
+--------------
+
+- Fixed dashboard API course status regression
+- [learners profile] Allow period in url param (#1758)
+- Implemented auto approve for TierProgram where discount is $0 (#1723)
+- Added environment variable to affect Elasticsearch pagination size (#1743)
+- MAINTAINER is deprecated in Dockerfiles (#1759)
+- Pass strings to React directly (#1756)
+- Turn profile links into buttons (#1754)
+- Fix a silly JS error
+- Clean up unnecessary JS references in program page (#1715)
+- code formatting changes
+- slightly move down dropdown error and fix lint error
+- react select styling
+- Make program list on homepage more accessible
+- Replaced Autocomplete with react-select
+- moved a style declaration into a different scss file
+- Added reset status to financial aid
+- Changed webpack config for better splitting and smaller bundles
+- Fixed race condition bug with FinancialAidCalculator (#1732)
+- fixed hits count javascript error
+- style changes
+- Removed empty education and work history cards on learners page (#1704)
+- Added conn max age and ssl settings to app.json (#1728)
+- PGBOUNCER_DEFAULT_POOL_SIZE and PGBOUNCER_MIN_POOL_SIZE need to be json strings (#1724)
+- Hide photo upload on public profile (#1603)
+- Fixed footer display while JS loads (#1720)
+- Updated requirements to use pip-tool (#1649)
+- Implemented sending emails on order errors (#1679)
+- Change &quot;preferred name&quot; to &quot;Nickname / Preferred Name&quot; (#1696)
+- Use &lt;button&gt; for header log in/sign up (#1714)
+- Allowed annoAnonymous users to see public profiles (#1702)
+- Loaded username param of profile page url from SETTINGS (#1690)
+- Zendesk prepopulate program on program page (#1628)
+- Employment Form: make space for date field error
+- Fixing values for PGBouncer in app.json
+- Addressing pylint failures
+- Make camera icon accessible (#1701)
+- Upgrade pylint to 1.6.4
+- Add program name to links on home page (#1700)
+- Switch to `manage.py showmigrations` (#1703)
+- Add repository and license fields to package.json (#1694)
+- Profile: Load existing program enrollments for returning user (#1577)
+- Fixed use of /src in docker images (#1699)
+- Allow all hosts in DEBUG=True mode
+- Import views instead of referencing dotted Python path
+- Upgrade Django to 1.10.3
+- Python-Social-Auth now wants JSON as a dict, not a string (#1693)
+- Added a script to update images on Docker Hub for travis
+- Course queries should be ordered by default (#1692)
+- Docker Compose version 2 (#1641)
+
 Version 0.22.0
 --------------
 

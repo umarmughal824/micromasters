@@ -16,24 +16,27 @@ let countryOptions = _(iso3166.data)
 
 export default class CountrySelectField extends React.Component {
   props: {
-    updateProfile:              UpdateProfileFunc,
-    stateKeySet:                Array<string>,
+    className:                  string,
     countryKeySet:              Array<string>,
     errors:                     ValidationErrors,
-    label:                      Node,
-    maxSearchResults:           number,
     keySet:                     Array<string>,
+    label:                      string,
+    maxSearchResults:           number,
     options:                    Array<Option>,
-    validator:                  Validator|UIValidator,
     profile:                    Profile,
+    stateKeySet:                Array<string>,
+    topMenu:                    boolean,
+    updateProfile:              UpdateProfileFunc,
     updateValidationVisibility: (xs: Array<string>) => void,
+    validator:                  Validator|UIValidator,
   };
 
-  onChange: Function = (newProfile: Profile): void => {
-    const { stateKeySet, updateProfile, validator } = this.props;
+  onChange: Function = (selection: Option): void => {
+    const { stateKeySet, countryKeySet, updateProfile, validator, profile } = this.props;
     // clear state field when country field changes
-    let clone = _.cloneDeep(newProfile);
+    let clone = _.cloneDeep(profile);
     _.set(clone, stateKeySet, null);
+    _.set(clone, countryKeySet, selection ? selection.value : "");
     updateProfile(clone, validator);
   };
 

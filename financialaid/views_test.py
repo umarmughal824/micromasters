@@ -18,6 +18,7 @@ from financialaid.api import (
     determine_income_usd,
     determine_tier_program,
     get_formatted_course_price,
+    get_no_discount_tier_program,
 )
 from financialaid.api_test import (
     create_program,
@@ -33,15 +34,22 @@ from financialaid.factories import (
     TierProgramFactory
 )
 from financialaid.models import (
+    CountryIncomeThreshold,
+    CurrencyExchangeRate,
     FinancialAid,
     FinancialAidAudit,
-    CurrencyExchangeRate
 )
 from mail.utils import generate_financial_aid_email
 from mail.views_test import mocked_json
+from micromasters.utils import is_near_now
 from roles.models import Staff
 
 
+ABC_EXCHANGE_RATE = 3.5
+XYZ_EXCHANGE_RATE = 0.15
+
+
+@ddt.ddt
 class RequestAPITests(FinancialAidBaseTestCase, APIClient):
     """
     Tests for financialaid views for the request API
@@ -51,11 +59,11 @@ class RequestAPITests(FinancialAidBaseTestCase, APIClient):
         super().setUpTestData()
         cls.currency_abc = CurrencyExchangeRate.objects.create(
             currency_code="ABC",
-            exchange_rate=3.5
+            exchange_rate=ABC_EXCHANGE_RATE
         )
         cls.currency_xyz = CurrencyExchangeRate.objects.create(
             currency_code="XYZ",
-            exchange_rate=0.15
+            exchange_rate=XYZ_EXCHANGE_RATE
         )
         # This class of tests requires no FinancialAid objects already exist
         FinancialAid.objects.all().delete()
@@ -67,47 +75,67 @@ class RequestAPITests(FinancialAidBaseTestCase, APIClient):
         self.data = {
             "original_currency": "USD",
             "program_id": self.program.id,
-            "original_income": self.country_income_threshold_50000.income_threshold-1  # Not auto-approved
+            "original_income": 50000
         }
 
-    def test_income_validation_not_auto_approved(self):
+    @ddt.data(
+        # profile income threshold is 100000 but $0 discount tier is 75000
+        [74999, "USD", 100000, False],
+        [75000, "USD", 100000, True],
+        [75001, "USD", 100000, True],
+        # Test around income threshold of 50000. We only auto approve if it's strictly greater than the threshold
+        [49999, "USD", 50000, False],
+        [50000, "USD", 50000, False],
+        [50001, "USD", 50000, True],
+        # Test with an exchange rate greater than 1
+        [49999 * ABC_EXCHANGE_RATE, "ABC", 50000, False],
+        [50000 * ABC_EXCHANGE_RATE, "ABC", 50000, False],
+        [50001 * ABC_EXCHANGE_RATE, "ABC", 50000, True],
+        # Test with an exchange rate less than 1
+        [49999 * XYZ_EXCHANGE_RATE, "XYZ", 50000, False],
+        [50000 * XYZ_EXCHANGE_RATE, "XYZ", 50000, False],
+        [50001 * XYZ_EXCHANGE_RATE, "XYZ", 50000, True],
+    )
+    @ddt.unpack
+    def test_income_validation(self, original_income, original_currency, income_threshold, auto_approved):
         """
-        Tests FinancialAidRequestView post endpoint for not-auto-approval
+        Tests FinancialAidRequestView post endpoint
         """
-        assert FinancialAid.objects.count() == 0
+        CountryIncomeThreshold.objects.filter(country_code=self.profile.country).update(
+            income_threshold=income_threshold
+        )
+        data = {
+            "original_income": original_income,
+            "original_currency": original_currency,
+            "program_id": self.program.id,
+        }
+        assert FinancialAid.objects.exclude(status=FinancialAidStatus.RESET).count() == 0
         assert FinancialAidAudit.objects.count() == 0
-        self.assert_http_status(self.client.post, self.request_url, status.HTTP_201_CREATED, data=self.data)
-        assert FinancialAid.objects.count() == 1
+        self.make_http_request(self.client.post, self.request_url, status.HTTP_201_CREATED, data=data)
+        assert FinancialAid.objects.exclude(status=FinancialAidStatus.RESET).count() == 1
         assert FinancialAidAudit.objects.count() == 1
-        financial_aid = FinancialAid.objects.first()
-        income_usd = determine_income_usd(self.data["original_income"], self.data["original_currency"])
+        financial_aid = FinancialAid.objects.exclude(status=FinancialAidStatus.RESET).first()
+        income_usd = determine_income_usd(original_income, original_currency)
         assert financial_aid.tier_program == determine_tier_program(self.program, income_usd)
-        assert financial_aid.status == FinancialAidStatus.PENDING_DOCS
-        assert financial_aid.income_usd == self.data["original_income"]
-
-    def test_income_validation_auto_approved(self):
-        """
-        Tests FinancialAidRequestView post endpoint for auto-approval
-        """
-        assert FinancialAid.objects.count() == 0
-        assert FinancialAidAudit.objects.count() == 0
-        self.data["original_income"] = self.country_income_threshold_50000.income_threshold+1
-        self.assert_http_status(self.client.post, self.request_url, status.HTTP_201_CREATED, data=self.data)
-        assert FinancialAid.objects.count() == 1
-        assert FinancialAidAudit.objects.count() == 1
-        financial_aid = FinancialAid.objects.first()
-        income_usd = determine_income_usd(self.data["original_income"], self.data["original_currency"])
-        assert financial_aid.tier_program == determine_tier_program(self.program, income_usd)
-        assert financial_aid.status == FinancialAidStatus.AUTO_APPROVED
-        assert financial_aid.income_usd == self.data["original_income"]
+        if not auto_approved:
+            assert financial_aid.status == FinancialAidStatus.PENDING_DOCS
+        else:
+            assert financial_aid.status == FinancialAidStatus.AUTO_APPROVED
+        self.assertAlmostEqual(financial_aid.income_usd, income_usd)
+        assert financial_aid.user == self.profile.user
+        self.assertAlmostEqual(financial_aid.original_income, original_income)
+        assert financial_aid.original_currency == original_currency
+        assert financial_aid.country_of_income == self.profile.country
+        assert financial_aid.country_of_residence == self.profile.country
+        assert is_near_now(financial_aid.date_exchange_rate)
 
     def test_income_validation_missing_args(self):
         """
         Tests FinancialAidRequestView post with missing args
         """
-        for missing_key in self.data.keys():
+        for missing_key in self.data:
             data = {key: value for key, value in self.data.items() if key != missing_key}
-            self.assert_http_status(self.client.post, self.request_url, status.HTTP_400_BAD_REQUEST, data=data)
+            self.make_http_request(self.client.post, self.request_url, status.HTTP_400_BAD_REQUEST, data=data)
 
     def test_income_validation_no_financial_aid_availability(self):
         """
@@ -115,48 +143,14 @@ class RequestAPITests(FinancialAidBaseTestCase, APIClient):
         """
         self.program.financial_aid_availability = False
         self.program.save()
-        self.assert_http_status(self.client.post, self.request_url, status.HTTP_400_BAD_REQUEST, data=self.data)
+        self.make_http_request(self.client.post, self.request_url, status.HTTP_400_BAD_REQUEST, data=self.data)
 
     def test_income_validation_user_not_enrolled(self):
         """
         Tests FinancialAidRequestView post when User not enrolled in program
         """
         ProgramEnrollment.objects.all().delete()
-        self.assert_http_status(self.client.post, self.request_url, status.HTTP_400_BAD_REQUEST, data=self.data)
-
-    def test_income_validation_currency_not_usd_gto(self):
-        """
-        Tests FinancialAidRequestView post with a currency that is not USD with exchange rate greater than 1
-        """
-        self.data["original_currency"] = self.currency_abc.currency_code
-        assert FinancialAid.objects.count() == 0
-        resp = self.client.post(self.request_url, self.data, format="json")
-        assert resp.status_code == status.HTTP_201_CREATED
-        assert FinancialAid.objects.count() == 1
-        financial_aid = FinancialAid.objects.first()
-        income_usd = determine_income_usd(self.data["original_income"], self.data["original_currency"])
-        assert financial_aid.tier_program == determine_tier_program(self.program, income_usd)
-        self.assertAlmostEqual(
-            financial_aid.income_usd,
-            self.data["original_income"] / self.currency_abc.exchange_rate
-        )
-
-    def test_income_validation_currency_not_usd_lto(self):
-        """
-        Tests FinancialAidRequestView post with a currency that is not USD with exchange rate less than 1
-        """
-        assert FinancialAid.objects.count() == 0
-        self.data["original_currency"] = self.currency_xyz.currency_code
-        resp = self.client.post(self.request_url, self.data, format="json")
-        assert resp.status_code == status.HTTP_201_CREATED
-        assert FinancialAid.objects.count() == 1
-        financial_aid = FinancialAid.objects.first()
-        income_usd = determine_income_usd(self.data["original_income"], self.data["original_currency"])
-        assert financial_aid.tier_program == determine_tier_program(self.program, income_usd)
-        self.assertAlmostEqual(
-            financial_aid.income_usd,
-            self.data["original_income"] / self.currency_xyz.exchange_rate
-        )
+        self.make_http_request(self.client.post, self.request_url, status.HTTP_400_BAD_REQUEST, data=self.data)
 
     def test_income_validation_currency_not_supported(self):
         """
@@ -187,24 +181,24 @@ class ReviewTests(FinancialAidBaseTestCase, APIClient):
         Not allowed for default logged-in user
         """
         self.client.force_login(self.profile.user)
-        self.assert_http_status(self.client.get, self.review_url, status.HTTP_403_FORBIDDEN)
+        self.make_http_request(self.client.get, self.review_url, status.HTTP_403_FORBIDDEN)
 
     def test_staff_of_different_program(self):
         """Not allowed for staff of different program"""
-        program = create_program()
+        program, _ = create_program()
         staff_user = create_enrolled_profile(program, role=Staff.ROLE_ID).user
         self.client.force_login(staff_user)
-        self.assert_http_status(self.client.get, self.review_url, status.HTTP_403_FORBIDDEN)
+        self.make_http_request(self.client.get, self.review_url, status.HTTP_403_FORBIDDEN)
 
     def test_instructor(self):
         """Not allowed for instructors"""
         self.client.force_login(self.instructor_user_profile.user)
-        self.assert_http_status(self.client.get, self.review_url, status.HTTP_403_FORBIDDEN)
+        self.make_http_request(self.client.get, self.review_url, status.HTTP_403_FORBIDDEN)
 
     def test_anonymous(self):
         """Not allowed for not logged in users"""
         self.client.logout()
-        self.assert_http_status(self.client.get, self.review_url, status.HTTP_403_FORBIDDEN)
+        self.make_http_request(self.client.get, self.review_url, status.HTTP_403_FORBIDDEN)
 
     def test_unavailable_financial_aid(self):
         """
@@ -212,7 +206,7 @@ class ReviewTests(FinancialAidBaseTestCase, APIClient):
         """
         self.program.financial_aid_availability = False
         self.program.save()
-        self.assert_http_status(self.client.get, self.review_url, status.HTTP_404_NOT_FOUND)
+        self.make_http_request(self.client.get, self.review_url, status.HTTP_404_NOT_FOUND)
 
     def test_not_live(self):
         """
@@ -220,7 +214,7 @@ class ReviewTests(FinancialAidBaseTestCase, APIClient):
         """
         self.program.live = False
         self.program.save()
-        self.assert_http_status(self.client.get, self.review_url, status.HTTP_404_NOT_FOUND)
+        self.make_http_request(self.client.get, self.review_url, status.HTTP_404_NOT_FOUND)
 
     def test_not_valid(self):
         """No valid course_price will raise ImproperlyConfigured"""
@@ -234,7 +228,7 @@ class ReviewTests(FinancialAidBaseTestCase, APIClient):
         Tests ReviewFinancialAidView that are allowed
         """
         # Allowed for staff of program
-        self.assert_http_status(self.client.get, self.review_url, status.HTTP_200_OK)
+        self.make_http_request(self.client.get, self.review_url, status.HTTP_200_OK)
 
     def test_filter(self):
         """
@@ -246,7 +240,7 @@ class ReviewTests(FinancialAidBaseTestCase, APIClient):
                 status=FinancialAidStatus.AUTO_APPROVED
             )
         # Should work with a filter
-        resp = self.assert_http_status(self.client.get, self.review_url_with_filter, status.HTTP_200_OK)
+        resp = self.make_http_request(self.client.get, self.review_url_with_filter, status.HTTP_200_OK)
         resp_obj_id_list = resp.context_data["financial_aid_objects"].values_list("id", flat=True)
         expected_obj_id_list = FinancialAid.objects.filter(
             tier_program__program_id=self.program.id,
@@ -262,7 +256,7 @@ class ReviewTests(FinancialAidBaseTestCase, APIClient):
                 status=FinancialAidStatus.AUTO_APPROVED
             )
         url_with_sorting = "{url}?sort_by=-last_name".format(url=self.review_url)
-        resp = self.assert_http_status(self.client.get, url_with_sorting, status.HTTP_200_OK)
+        resp = self.make_http_request(self.client.get, url_with_sorting, status.HTTP_200_OK)
         resp_obj_id_list = resp.context_data["financial_aid_objects"].values_list("id", flat=True)
         expected_obj_id_list = FinancialAid.objects.filter(
             tier_program__program_id=self.program.id,
@@ -278,7 +272,7 @@ class ReviewTests(FinancialAidBaseTestCase, APIClient):
                 status=FinancialAidStatus.AUTO_APPROVED
             )
         url_with_filter_and_sorting = "{url}?sort_by=-last_name".format(url=self.review_url_with_filter)
-        resp = self.assert_http_status(self.client.get, url_with_filter_and_sorting, status.HTTP_200_OK)
+        resp = self.make_http_request(self.client.get, url_with_filter_and_sorting, status.HTTP_200_OK)
         resp_obj_id_list = resp.context_data["financial_aid_objects"].values_list("id", flat=True)
         expected_obj_id_list = FinancialAid.objects.filter(
             tier_program__program_id=self.program.id,
@@ -292,7 +286,7 @@ class ReviewTests(FinancialAidBaseTestCase, APIClient):
         """
         FinancialAidFactory.create(tier_program=self.tier_programs["0k"])
         url_with_bad_sort_field = "{url}?sort_by=-askjdf".format(url=self.review_url_with_filter)
-        self.assert_http_status(self.client.get, url_with_bad_sort_field, status.HTTP_200_OK)
+        self.make_http_request(self.client.get, url_with_bad_sort_field, status.HTTP_200_OK)
 
     def test_invalid_filter(self):
         """
@@ -306,7 +300,7 @@ class ReviewTests(FinancialAidBaseTestCase, APIClient):
                 "status": "aksdjfk"
             }
         )
-        self.assert_http_status(self.client.get, url_with_bad_filter, status.HTTP_200_OK)
+        self.make_http_request(self.client.get, url_with_bad_filter, status.HTTP_200_OK)
 
     def test_invalid_sorting_and_filter(self):
         """
@@ -321,7 +315,7 @@ class ReviewTests(FinancialAidBaseTestCase, APIClient):
             }
         )
         url_with_bad_filter_and_bad_sorting = "{url}?sort_by=-askjdf".format(url=url_with_bad_filter)
-        self.assert_http_status(self.client.get, url_with_bad_filter_and_bad_sorting, status.HTTP_200_OK)
+        self.make_http_request(self.client.get, url_with_bad_filter_and_bad_sorting, status.HTTP_200_OK)
 
     def test_review_financial_aid_view_with_search(self):
         """
@@ -343,7 +337,7 @@ class ReviewTests(FinancialAidBaseTestCase, APIClient):
             path=self.review_url_with_filter,
             search_query=search_query
         )
-        resp = self.assert_http_status(self.client.get, search_url, status.HTTP_200_OK)
+        resp = self.make_http_request(self.client.get, search_url, status.HTTP_200_OK)
         resp_obj_id_list = resp.context_data["financial_aid_objects"].values_list("id", flat=True)
         expected_obj_id_list = FinancialAid.objects.filter(
             Q(user__profile__first_name__icontains=search_query) | Q(user__profile__last_name__icontains=search_query),
@@ -383,30 +377,30 @@ class FinancialAidActionTests(FinancialAidBaseTestCase, APIClient):
         Not allowed for default logged-in user
         """
         self.client.force_login(self.profile.user)
-        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_403_FORBIDDEN, data=self.data)
+        self.make_http_request(self.client.patch, self.action_url, status.HTTP_403_FORBIDDEN, data=self.data)
 
     def test_not_allowed_staff_of_different_program(self):
         """Not allowed for staff of different program"""
-        program = create_program()
+        program, _ = create_program()
         staff_user = create_enrolled_profile(program, role=Staff.ROLE_ID).user
         self.client.force_login(staff_user)
-        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_403_FORBIDDEN, data=self.data)
+        self.make_http_request(self.client.patch, self.action_url, status.HTTP_403_FORBIDDEN, data=self.data)
 
     def test_not_allowed_instructors(self):
         """Not allowed for instructors (regardless of program)"""
         self.client.force_login(self.instructor_user_profile.user)
-        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_403_FORBIDDEN, data=self.data)
+        self.make_http_request(self.client.patch, self.action_url, status.HTTP_403_FORBIDDEN, data=self.data)
 
     def test_anonymous(self):
         """Not allowed for logged-out user"""
         self.client.logout()
-        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_403_FORBIDDEN, data=self.data)
+        self.make_http_request(self.client.patch, self.action_url, status.HTTP_403_FORBIDDEN, data=self.data)
 
     def test_no_action(self):
         """
         If no action is present, there should be a ValidationError
         """
-        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_400_BAD_REQUEST)
+        self.make_http_request(self.client.patch, self.action_url, status.HTTP_400_BAD_REQUEST)
 
     @ddt.data(
         *([
@@ -419,7 +413,7 @@ class FinancialAidActionTests(FinancialAidBaseTestCase, APIClient):
         """
         Tests FinancialAidActionView when invalid action is posted
         """
-        self.assert_http_status(
+        self.make_http_request(
             self.client.patch,
             self.action_url,
             status.HTTP_400_BAD_REQUEST,
@@ -432,17 +426,17 @@ class FinancialAidActionTests(FinancialAidBaseTestCase, APIClient):
         """
         not_current = TierProgramFactory.create(program=self.program, income_threshold=75000, current=False)
         self.data["tier_program_id"] = not_current.id
-        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
+        self.make_http_request(self.client.patch, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
 
     def test_invalid(self):
         """Not part of the same program"""
         self.data["tier_program_id"] = TierProgramFactory.create().id  # Will be part of a different program
-        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
+        self.make_http_request(self.client.patch, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
 
     def test_no_tier_program(self):
         """No tier program"""
         self.data.pop("tier_program_id")
-        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
+        self.make_http_request(self.client.patch, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
 
     @ddt.data(
         *([
@@ -457,19 +451,19 @@ class FinancialAidActionTests(FinancialAidBaseTestCase, APIClient):
         """
         self.financialaid.status = financial_aid_status
         self.financialaid.save()
-        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
+        self.make_http_request(self.client.patch, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
 
     def test_approve_invalid_justification(self):
         """
         Tests FinancialAidActionView when trying to approve a FinancialAid with an invalid justification
         """
         self.data["justification"] = "somerandomstring"
-        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
+        self.make_http_request(self.client.patch, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
 
     def test_approve_no_justification(self):
         """There should be a ValidationError if there is no justification"""
         self.data.pop("justification")
-        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
+        self.make_http_request(self.client.patch, self.action_url, status.HTTP_400_BAD_REQUEST, data=self.data)
 
     @ddt.data(
         *([
@@ -485,7 +479,7 @@ class FinancialAidActionTests(FinancialAidBaseTestCase, APIClient):
         # FinancialAid object whose documents cannot received
         self.financialaid.status = financial_aid_status
         self.financialaid.save()
-        self.assert_http_status(
+        self.make_http_request(
             self.client.patch,
             self.action_url,
             status.HTTP_400_BAD_REQUEST,
@@ -504,7 +498,7 @@ class FinancialAidActionTests(FinancialAidBaseTestCase, APIClient):
         )
         assert self.financialaid.status != FinancialAidStatus.APPROVED
         assert self.financialaid.justification != FinancialAidJustification.NOT_NOTARIZED
-        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_200_OK, data=self.data)
+        self.make_http_request(self.client.patch, self.action_url, status.HTTP_200_OK, data=self.data)
         # Application is approved for the tier program in the financial aid object
         self.financialaid.refresh_from_db()
         assert self.financialaid.tier_program == self.tier_programs["25k"]
@@ -531,7 +525,7 @@ class FinancialAidActionTests(FinancialAidBaseTestCase, APIClient):
         assert self.financialaid.tier_program != self.tier_programs["50k"]
         assert self.financialaid.status != FinancialAidStatus.APPROVED
         self.data["tier_program_id"] = self.tier_programs["50k"].id
-        self.assert_http_status(self.client.patch, self.action_url, status.HTTP_200_OK, data=self.data)
+        self.make_http_request(self.client.patch, self.action_url, status.HTTP_200_OK, data=self.data)
         # Application is approved for a different tier program
         self.financialaid.refresh_from_db()
         assert self.financialaid.tier_program == self.tier_programs["50k"]
@@ -559,7 +553,7 @@ class FinancialAidActionTests(FinancialAidBaseTestCase, APIClient):
         self.financialaid.status = FinancialAidStatus.PENDING_DOCS
         self.financialaid.save()
         # Set action to pending manual approval from pending-docs
-        self.assert_http_status(
+        self.make_http_request(
             self.client.patch,
             self.action_url,
             status.HTTP_200_OK,
@@ -592,7 +586,7 @@ class FinancialAidActionTests(FinancialAidBaseTestCase, APIClient):
         self.financialaid.status = FinancialAidStatus.DOCS_SENT
         self.financialaid.save()
         # Set action to pending manual approval from pending-docs
-        self.assert_http_status(
+        self.make_http_request(
             self.client.patch,
             self.action_url,
             status.HTTP_200_OK,
@@ -641,7 +635,7 @@ class FinancialAidDetailViewTests(FinancialAidBaseTestCase, APIClient):
         """
         Tests FinancialAidDetailView for user editing their own financial aid document status
         """
-        self.assert_http_status(self.client.patch, self.docs_sent_url, status.HTTP_200_OK, data=self.data)
+        self.make_http_request(self.client.patch, self.docs_sent_url, status.HTTP_200_OK, data=self.data)
         self.financialaid_pending_docs.refresh_from_db()
         assert self.financialaid_pending_docs.status == FinancialAidStatus.DOCS_SENT
         assert self.financialaid_pending_docs.date_documents_sent == datetime.date(2016, 9, 25)
@@ -657,14 +651,14 @@ class FinancialAidDetailViewTests(FinancialAidBaseTestCase, APIClient):
         ]
         for unpermitted_user in unpermitted_users_to_test:
             self.client.force_login(unpermitted_user)
-            self.assert_http_status(self.client.patch, self.docs_sent_url, status.HTTP_403_FORBIDDEN, data=self.data)
+            self.make_http_request(self.client.patch, self.docs_sent_url, status.HTTP_403_FORBIDDEN, data=self.data)
 
     def test_anonymous(self):
         """
         Anonymous users can't update status for docs sent
         """
         self.client.logout()
-        self.assert_http_status(self.client.patch, self.docs_sent_url, status.HTTP_403_FORBIDDEN, data=self.data)
+        self.make_http_request(self.client.patch, self.docs_sent_url, status.HTTP_403_FORBIDDEN, data=self.data)
 
     @ddt.data(
         *([
@@ -679,7 +673,7 @@ class FinancialAidDetailViewTests(FinancialAidBaseTestCase, APIClient):
         """
         self.financialaid_pending_docs.status = financial_aid_status
         self.financialaid_pending_docs.save()
-        self.assert_http_status(self.client.patch, self.docs_sent_url, status.HTTP_400_BAD_REQUEST, data=self.data)
+        self.make_http_request(self.client.patch, self.docs_sent_url, status.HTTP_400_BAD_REQUEST, data=self.data)
 
 
 class CoursePriceDetailViewTests(FinancialAidBaseTestCase, APIClient):
@@ -709,10 +703,10 @@ class CoursePriceDetailViewTests(FinancialAidBaseTestCase, APIClient):
         Tests ReviewFinancialAidView that are not allowed
         """
         # Bad request if not enrolled
-        program = create_program()
+        program, _ = create_program()
         profile = create_enrolled_profile(program)
         self.client.force_login(profile.user)
-        self.assert_http_status(self.client.get, self.course_price_url, status.HTTP_404_NOT_FOUND)
+        self.make_http_request(self.client.get, self.course_price_url, status.HTTP_404_NOT_FOUND)
 
     def test_get_learner_price_for_enrolled_with_financial_aid(self):
         """
@@ -724,7 +718,7 @@ class CoursePriceDetailViewTests(FinancialAidBaseTestCase, APIClient):
             status=FinancialAidStatus.APPROVED,
         )
         course_price = self.program.course_set.first().courserun_set.first().courseprice_set.first()
-        resp = self.assert_http_status(self.client.get, self.course_price_url, status.HTTP_200_OK)
+        resp = self.make_http_request(self.client.get, self.course_price_url, status.HTTP_200_OK)
         expected_response = {
             "program_id": self.program.id,
             "price": course_price.price - financial_aid.tier_program.discount_amount,
@@ -743,7 +737,7 @@ class CoursePriceDetailViewTests(FinancialAidBaseTestCase, APIClient):
             status=FinancialAidStatus.PENDING_MANUAL_APPROVAL,
         )
         course_price = self.program.course_set.first().courserun_set.first().courseprice_set.first()
-        resp = self.assert_http_status(self.client.get, self.course_price_url, status.HTTP_200_OK)
+        resp = self.make_http_request(self.client.get, self.course_price_url, status.HTTP_200_OK)
         expected_response = {
             "program_id": self.program.id,
             "price": course_price.price - financial_aid.tier_program.discount_amount,
@@ -757,7 +751,7 @@ class CoursePriceDetailViewTests(FinancialAidBaseTestCase, APIClient):
         Tests ReviewFinancialAidView for enrolled user who has no financial aid request
         """
         course_price = self.program.course_set.first().courserun_set.first().courseprice_set.first()
-        resp = self.assert_http_status(self.client.get, self.course_price_url, status.HTTP_200_OK)
+        resp = self.make_http_request(self.client.get, self.course_price_url, status.HTTP_200_OK)
         expected_response = {
             "program_id": self.program.id,
             "price": course_price.price,
@@ -773,7 +767,7 @@ class CoursePriceDetailViewTests(FinancialAidBaseTestCase, APIClient):
         course_price = self.program.course_set.first().courserun_set.first().courseprice_set.first()
         self.program.financial_aid_availability = False
         self.program.save()
-        resp = self.assert_http_status(self.client.get, self.course_price_url, status.HTTP_200_OK)
+        resp = self.make_http_request(self.client.get, self.course_price_url, status.HTTP_200_OK)
         expected_response = {
             "program_id": self.program.id,
             "price": course_price.price,
@@ -806,21 +800,27 @@ class LearnerSkipsFinancialAid(FinancialAidBaseTestCase, APIClient):
 
     def test_skipped_financialaid_object_created(self):
         """
-        Tests that a FinancialAid object with the status "skipped" is created.
+        Tests that the user can create a skipped FinancialAid if it doesn't already exist
         """
         assert FinancialAidAudit.objects.count() == 0
-        self.assert_http_status(self.client.patch, self.skip_url, status.HTTP_200_OK)
-        assert FinancialAid.objects.count() == 1
-        financial_aid = FinancialAid.objects.get(
-            user=self.profile.user,
-        )
-        assert financial_aid.tier_program == self.tier_programs["75k"]
-        assert financial_aid.status == FinancialAidStatus.SKIPPED
-        # Check logging
+        assert FinancialAid.objects.exclude(status=FinancialAidStatus.RESET).count() == 0
+        self.make_http_request(self.client.patch, self.skip_url, status.HTTP_200_OK)
         assert FinancialAidAudit.objects.count() == 1
+        assert FinancialAid.objects.exclude(status=FinancialAidStatus.RESET).count() == 1
+        financial_aid = FinancialAid.objects.exclude(status=FinancialAidStatus.RESET).first()
+        assert financial_aid.tier_program == get_no_discount_tier_program(self.program)
+        assert financial_aid.user == self.profile.user
+        assert financial_aid.status == FinancialAidStatus.SKIPPED
+        assert is_near_now(financial_aid.date_exchange_rate)
+        assert financial_aid.country_of_income == self.profile.country
+        assert financial_aid.country_of_residence == self.profile.country
 
     @ddt.data(
-        *([status] for status in set(FinancialAidStatus.ALL_STATUSES) - set(FinancialAidStatus.TERMINAL_STATUSES))
+        *([status] for status in (
+            set(FinancialAidStatus.ALL_STATUSES) -
+            set(FinancialAidStatus.TERMINAL_STATUSES) -
+            {FinancialAidStatus.RESET}
+        ))
     )
     @ddt.unpack
     def test_skipped_financialaid_object_updated(self, financial_aid_status):
@@ -834,8 +834,8 @@ class LearnerSkipsFinancialAid(FinancialAidBaseTestCase, APIClient):
         )
 
         assert FinancialAidAudit.objects.count() == 0
-        self.assert_http_status(self.client.patch, self.skip_url, status.HTTP_200_OK)
-        assert FinancialAid.objects.count() == 1
+        self.make_http_request(self.client.patch, self.skip_url, status.HTTP_200_OK)
+        assert FinancialAid.objects.exclude(status=FinancialAidStatus.RESET).count() == 1
         financial_aid.refresh_from_db()
         assert financial_aid.tier_program == self.tier_programs["75k"]
         assert financial_aid.status == FinancialAidStatus.SKIPPED
@@ -855,7 +855,7 @@ class LearnerSkipsFinancialAid(FinancialAidBaseTestCase, APIClient):
             tier_program=self.tier_programs["25k"],
             status=financial_aid_status,
         )
-        self.assert_http_status(self.client.patch, self.skip_url, status.HTTP_400_BAD_REQUEST)
+        self.make_http_request(self.client.patch, self.skip_url, status.HTTP_400_BAD_REQUEST)
 
     def test_financialaid_object_cannot_be_skipped_if_aid_not_available(self):
         """
@@ -864,15 +864,15 @@ class LearnerSkipsFinancialAid(FinancialAidBaseTestCase, APIClient):
         """
         self.program.financial_aid_availability = False
         self.program.save()
-        self.assert_http_status(self.client.patch, self.skip_url, status.HTTP_400_BAD_REQUEST)
+        self.make_http_request(self.client.patch, self.skip_url, status.HTTP_400_BAD_REQUEST)
 
     def test_financialaid_object_cannot_be_skipped_if_not_enrolled_in_program(self):
         """
         Tests that a FinancialAid object cannot be skipped if the user is not enrolled in program
         """
-        program = create_program()
+        program, _ = create_program()
         url = reverse("financial_aid_skip", kwargs={"program_id": program.id})
-        self.assert_http_status(self.client.patch, url, status.HTTP_400_BAD_REQUEST)
+        self.make_http_request(self.client.patch, url, status.HTTP_400_BAD_REQUEST)
 
     def test_financialaid_object_cannot_be_skipped_for_nonexisting_program(self):
         """
@@ -880,16 +880,16 @@ class LearnerSkipsFinancialAid(FinancialAidBaseTestCase, APIClient):
         """
         Program.objects.all().delete()
         url = reverse("financial_aid_skip", kwargs={"program_id": 1})
-        self.assert_http_status(self.client.patch, url, status.HTTP_404_NOT_FOUND)
+        self.make_http_request(self.client.patch, url, status.HTTP_404_NOT_FOUND)
 
     def test_skip_financial_aid_only_put_allowed(self):
         """
         Tests that methods other than PUT/PATCH are not allowed for skipping financial aid
         """
-        self.assert_http_status(self.client.get, self.skip_url, status.HTTP_405_METHOD_NOT_ALLOWED)
-        self.assert_http_status(self.client.post, self.skip_url, status.HTTP_405_METHOD_NOT_ALLOWED)
-        self.assert_http_status(self.client.head, self.skip_url, status.HTTP_405_METHOD_NOT_ALLOWED)
-        self.assert_http_status(self.client.delete, self.skip_url, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.make_http_request(self.client.get, self.skip_url, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.make_http_request(self.client.post, self.skip_url, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.make_http_request(self.client.head, self.skip_url, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.make_http_request(self.client.delete, self.skip_url, status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class CoursePriceListViewTests(FinancialAidBaseTestCase, APIClient):
@@ -902,7 +902,7 @@ class CoursePriceListViewTests(FinancialAidBaseTestCase, APIClient):
         super().setUpTestData()
         cls.course_price_url = reverse("course_price_list")
         # create a second program
-        program = create_program()
+        program, _ = create_program()
         ProgramEnrollment.objects.create(
             program=program,
             user=cls.profile.user,
@@ -917,7 +917,7 @@ class CoursePriceListViewTests(FinancialAidBaseTestCase, APIClient):
         Anonymous users are restricted
         """
         self.client.logout()
-        self.assert_http_status(self.client.get, self.course_price_url, status.HTTP_403_FORBIDDEN)
+        self.make_http_request(self.client.get, self.course_price_url, status.HTTP_403_FORBIDDEN)
 
     def test_not_live(self):
         """
@@ -927,7 +927,7 @@ class CoursePriceListViewTests(FinancialAidBaseTestCase, APIClient):
             program.live = False
             program.save()
 
-        resp = self.assert_http_status(self.client.get, self.course_price_url, status.HTTP_200_OK)
+        resp = self.make_http_request(self.client.get, self.course_price_url, status.HTTP_200_OK)
         assert resp.data == []
 
     def test_no_enrollments(self):
@@ -935,14 +935,14 @@ class CoursePriceListViewTests(FinancialAidBaseTestCase, APIClient):
         If there are no enrollments there should not be output in the course price API
         """
         ProgramEnrollment.objects.all().delete()
-        resp = self.assert_http_status(self.client.get, self.course_price_url, status.HTTP_200_OK)
+        resp = self.make_http_request(self.client.get, self.course_price_url, status.HTTP_200_OK)
         assert resp.data == []
 
     def test_get_all_course_prices(self):
         """
         Test that the course_price_list route will return a list of formatted course prices
         """
-        resp = self.assert_http_status(self.client.get, self.course_price_url, status.HTTP_200_OK)
+        resp = self.make_http_request(self.client.get, self.course_price_url, status.HTTP_200_OK)
         assert sorted(resp.data, key=lambda x: x['program_id']) == sorted([
             get_formatted_course_price(enrollment)
             for enrollment in ProgramEnrollment.objects.filter(user=self.profile.user)

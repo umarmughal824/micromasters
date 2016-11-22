@@ -14,13 +14,14 @@ from ecommerce.models import CoursePrice
 from micromasters.utils import (
     get_field_names,
     load_json_from_file,
+    first_matching_item,
 )
 from profiles.api import get_social_username
 from profiles.models import Employment, Education, Profile
 from roles.models import Role
 from roles.roles import Staff
 from search.indexing_api import recreate_index
-from seed_data.utils import first_matching_item, filter_dict_by_key_set
+from seed_data.utils import filter_dict_by_key_set
 from seed_data.lib import fake_programs_query
 from seed_data.management.commands import (  # pylint: disable=import-error
     USER_DATA_PATH, PROGRAM_DATA_PATH,

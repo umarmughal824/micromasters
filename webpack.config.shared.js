@@ -7,13 +7,10 @@ let babelQuerySettings = {
 
 module.exports = {
   entry: {
-    'course_list': './static/js/entry/course_list',
     'dashboard': ['babel-polyfill', './static/js/entry/dashboard'],
-    'faculty_carousel': './static/js/entry/faculty_carousel',
     'financial_aid': './static/js/financial_aid/functions',
-    'public': './static/js/entry/public',
+    'public': ['babel-polyfill', './static/js/entry/public'],
     'sentry_client': './static/js/entry/sentry_client.js',
-    'signup_dialog': ['babel-polyfill', './static/js/entry/signup_dialog'],
     'style': './static/js/entry/style',
     'style_public': './static/js/entry/style_public',
     'zendesk_widget': './static/js/entry/zendesk_widget.js',
@@ -36,7 +33,7 @@ module.exports = {
       {
         test: /\.scss$/,
         exclude: /node_modules/,
-        loader: 'style!css!sass'
+        loader: 'style!css!postcss!sass'
       },
       {
         test: /\.css$/,

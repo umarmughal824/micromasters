@@ -10,10 +10,12 @@ import Dialog from 'material-ui/Dialog';
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
 
 import { educationValidation } from '../lib/validation/profile';
-import { userPrivilegeCheck } from '../util/util';
+import {
+  userPrivilegeCheck,
+  isProfileOfLoggedinUser
+} from '../util/util';
 import ProfileFormFields from '../util/ProfileFormFields';
 import ConfirmDeletion from './ConfirmDeletion';
-import FieldsOfStudySelectField from './inputs/FieldsOfStudySelectField';
 import SelectField from './inputs/SelectField';
 import CountrySelectField from './inputs/CountrySelectField';
 import StateSelectField from './inputs/StateSelectField';
@@ -41,6 +43,12 @@ import type {
   UIValidator,
 } from '../lib/validation/profile';
 import { formatMonthDate } from '../util/date';
+import FIELDS_OF_STUDY from '../data/fields_of_study';
+
+const fieldOfStudyOptions = _.map(FIELDS_OF_STUDY, (name, code) => ({
+  value: code,
+  label: name
+}));
 
 const EDUCATION_LEVEL_OPTIONS: Array<Option> = EDUCATION_LEVELS;
 const EDUCATION_LEVEL_LABELS: Object = {};
@@ -93,8 +101,8 @@ class EducationForm extends ProfileFormFields {
         onChange={(event, value)=> this.handleRadioClick(value, level.value)}
         valueSelected={valueSelected}
       >
-        <RadioButton value={"true"} label="Yes" iconStyle={radioIconStyle} style={{'marginRight': '30px'}} />
-        <RadioButton value={"false"} label="No" iconStyle={radioIconStyle} style={{'marginRight': '15px'}} />
+        <RadioButton value="true" label="Yes" iconStyle={radioIconStyle} style={{'marginRight': '30px'}} />
+        <RadioButton value="false" label="No" iconStyle={radioIconStyle} style={{'marginRight': '15px'}} />
       </RadioButtonGroup>
     );
   };
@@ -135,7 +143,7 @@ class EducationForm extends ProfileFormFields {
       levelValue = level.value;
       let label = EDUCATION_LEVEL_LABELS[levelValue];
       filterDegreeName = ([, entry]) => entry.degree_name === level.value;
-      title = <Cell col={12} className="profile-form-row" key={`header-row`}>
+      title = <Cell col={12} className="profile-form-row" key="header-row">
         <strong>{label}</strong>
       </Cell>;
     }
@@ -150,13 +158,13 @@ class EducationForm extends ProfileFormFields {
       title,
       ...renderedEducationRows(profile.education),
       userPrivilegeCheck(profile, () =>
-        <Cell col={12} className="profile-form-row add" key={`add-row`}>
-          <a
+        <Cell col={12} className="profile-form-row add" key="add-row">
+          <button
             className="mm-minor-action"
             onClick={() => this.openNewEducationForm(levelValue, null)}
           >
             Add degree
-          </a>
+          </button>
         </Cell>, null
       ),
     ];
@@ -263,12 +271,13 @@ class EducationForm extends ProfileFormFields {
     let fieldOfStudy = () => {
       if (educationDegreeLevel !== HIGH_SCHOOL) {
         return <Cell col={12}>
-            <FieldsOfStudySelectField
-              keySet={keySet('field_of_study')}
-              label='Field of Study'
-              {...this.defaultInputComponentProps()}
-            />
-          </Cell>;
+          <SelectField
+            options={fieldOfStudyOptions}
+            keySet={keySet('field_of_study')}
+            label='Field of Study'
+            {...this.defaultInputComponentProps()}
+          />
+        </Cell>;
       }
     };
     let levelForm = () => {
@@ -290,10 +299,10 @@ class EducationForm extends ProfileFormFields {
       </Cell>
       { levelForm() }
       { fieldOfStudy() }
-      <Cell col={7}>
+      <Cell col={12}>
         {this.boundTextField(keySet('school_name'), 'School Name')}
       </Cell>
-      <Cell col={5}>
+      <Cell col={12}>
         {this.boundDateField(keySet('graduation_date'), 'Graduation Date', true, true)}
       </Cell>
       <Cell col={4}>
@@ -301,6 +310,7 @@ class EducationForm extends ProfileFormFields {
           stateKeySet={keySet('school_state_or_territory')}
           countryKeySet={keySet('school_country')}
           label='Country'
+          topMenu={true}
           {...this.defaultInputComponentProps()}
         />
       </Cell>
@@ -309,6 +319,7 @@ class EducationForm extends ProfileFormFields {
           stateKeySet={keySet('school_state_or_territory')}
           countryKeySet={keySet('school_country')}
           label='State'
+          topMenu={true}
           {...this.defaultInputComponentProps()}
         />
       </Cell>
@@ -334,6 +345,10 @@ class EducationForm extends ProfileFormFields {
         </Card>;
       });
     } else if (profile !== undefined) {
+      if (!isProfileOfLoggedinUser(profile) && (!profile.education || profile.education.length === 0)) {
+        return null;
+      }
+
       return <Card shadow={1} className="profile-form" id="education-card">
         <Grid className="profile-form-grid">
           <Cell col={12} className="profile-form-row profile-card-header">

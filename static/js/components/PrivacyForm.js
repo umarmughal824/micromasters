@@ -6,6 +6,7 @@ import { Card } from 'react-mdl/lib/Card';
 import ProfileFormFields from '../util/ProfileFormFields';
 import type { Profile, ValidationErrors, UpdateProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
+import type { Validator } from '../lib/validation/profile';
 
 class PrivacyForm extends ProfileFormFields {
   props: {
@@ -13,6 +14,7 @@ class PrivacyForm extends ProfileFormFields {
     ui:             UIState,
     updateProfile:  UpdateProfileFunc,
     errors:         ValidationErrors,
+    validator:      Validator,
   };
 
   privacyOptions: Array<{value: string, label: string, helper: string}> = [

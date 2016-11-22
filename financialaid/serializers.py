@@ -19,7 +19,6 @@ from financialaid.api import (
     determine_auto_approval,
     determine_tier_program,
     determine_income_usd,
-    get_no_discount_tier_program
 )
 from financialaid.constants import (
     FinancialAidJustification,
@@ -78,35 +77,13 @@ class FinancialAidRequestSerializer(serializers.Serializer):
             country_of_residence=user.profile.country,
         )
 
-        if determine_auto_approval(financial_aid) is True:
+        if determine_auto_approval(financial_aid, tier_program) is True:
             financial_aid.status = FinancialAidStatus.AUTO_APPROVED
         else:
             financial_aid.status = FinancialAidStatus.PENDING_DOCS
         financial_aid.save_and_log(user)
 
         return financial_aid
-
-
-class FinancialAidSkipSerializer(serializers.Serializer):
-    """
-    Serializer for skipping financial aid
-    """
-    def validate(self, data):
-        """
-        Validators for this serializer
-        """
-        if self.instance.status in FinancialAidStatus.TERMINAL_STATUSES:
-            raise ValidationError("Financial aid cannot be skipped once it has been approved or skipped.")
-        return data
-
-    def save(self):
-        """
-        Updates and logs status change of FinancialAid object to "skipped"
-        """
-        self.instance.status = FinancialAidStatus.SKIPPED
-        self.instance.tier_program = get_no_discount_tier_program(self.instance.tier_program.program.id)
-        self.instance.save_and_log(self.context["request"].user)
-        return self.instance
 
 
 class FinancialAidActionSerializer(serializers.Serializer):

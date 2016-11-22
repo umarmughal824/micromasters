@@ -27,7 +27,7 @@ const codeToOption = code => (
   { value: code, label: cc.code(code).currency }
 );
 
-const labelSort = R.sortBy(R.compose(R.toLower, R.prop('label')));
+export const labelSort = R.sortBy(R.compose(R.toLower, R.prop('label')));
 
 const invalidCurrency = R.contains(R.__, excludedCurrencyCodes);
 

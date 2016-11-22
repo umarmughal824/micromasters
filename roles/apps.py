@@ -14,4 +14,4 @@ class RolesConfig(AppConfig):
         """
         Ready handler. Import signals.
         """
-        import roles.signals
+        import roles.signals  # pylint: disable=unused-variable

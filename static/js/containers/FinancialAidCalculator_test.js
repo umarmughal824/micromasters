@@ -1,20 +1,31 @@
+/* global SETTINGS:false */
+import React from 'react';
 import { assert } from 'chai';
 import _ from 'lodash';
 import TestUtils from 'react-addons-test-utils';
+import { render } from 'enzyme';
+import { Provider } from 'react-redux';
 
+import FinancialAidCalculator from '../containers/FinancialAidCalculator';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../lib/api';
-import { modifyTextField } from '../util/test_utils';
+import { modifyTextField, modifySelectField, clearSelectField } from '../util/test_utils';
 import { DASHBOARD_RESPONSE, FINANCIAL_AID_PARTIAL_RESPONSE } from '../constants';
 import {
   START_CALCULATOR_EDIT,
   UPDATE_CALCULATOR_EDIT,
   CLEAR_CALCULATOR_EDIT,
+  UPDATE_CALCULATOR_VALIDATION,
   REQUEST_SKIP_FINANCIAL_AID,
   RECEIVE_SKIP_FINANCIAL_AID_SUCCESS,
   REQUEST_ADD_FINANCIAL_AID,
   RECEIVE_ADD_FINANCIAL_AID_SUCCESS,
+  RECEIVE_ADD_FINANCIAL_AID_FAILURE,
 } from '../actions/financial_aid';
+import {
+  receiveGetProgramEnrollmentsSuccess,
+  setCurrentProgramEnrollment,
+} from '../actions/programs';
 import {
   SET_CALCULATOR_DIALOG_VISIBILITY,
   SET_CONFIRM_SKIP_DIALOG_VISIBILITY,
@@ -25,10 +36,10 @@ import {
   REQUEST_COURSE_PRICES,
   RECEIVE_COURSE_PRICES_SUCCESS,
 } from '../actions/index';
+import { DASHBOARD_SUCCESS_ACTIONS } from '../containers/DashboardPage_test';
 
 describe('FinancialAidCalculator', () => {
   let listenForActions, renderComponent, helper, addFinancialAidStub, skipFinancialAidStub;
-
   let financialAidDashboard = _.clone(DASHBOARD_RESPONSE);
   let program = financialAidDashboard.find(program => (
     program.title === "Not passed program"
@@ -53,7 +64,7 @@ describe('FinancialAidCalculator', () => {
   });
 
   it('should let you open and close the financial aid calculator', () => {
-    return renderComponent('/dashboard').then(([wrapper]) => {
+    return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
       wrapper.find('.pricing-actions').find('.dashboard-button').simulate('click');
       assert.equal(helper.store.getState().ui.calculatorDialogVisibility, true);
       let calculator = document.querySelector('.financial-aid-calculator');
@@ -65,7 +76,7 @@ describe('FinancialAidCalculator', () => {
 
   it('should let you skip and pay full price', () => {
     skipFinancialAidStub.returns(Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE));
-    return renderComponent('/dashboard').then(([wrapper]) => {
+    return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
       return listenForActions([
         START_CALCULATOR_EDIT,
         UPDATE_CALCULATOR_EDIT,
@@ -97,11 +108,12 @@ describe('FinancialAidCalculator', () => {
   });
 
   it('should let you enter your income', () => {
-    return renderComponent('/dashboard').then(([wrapper]) => {
+    return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
       return listenForActions([
         START_CALCULATOR_EDIT,
         UPDATE_CALCULATOR_EDIT,
         SET_CALCULATOR_DIALOG_VISIBILITY,
+        UPDATE_CALCULATOR_VALIDATION,
         UPDATE_CALCULATOR_EDIT
       ], () => {
         wrapper.find('.pricing-actions').find('.dashboard-button').simulate('click');
@@ -113,33 +125,72 @@ describe('FinancialAidCalculator', () => {
           checkBox: false,
           fetchStatus: null,
           programId: program.id,
-          validation: {}
+          validation: {
+            'checkBox': 'You must agree to these terms'
+          },
+          fetchError: null,
         });
       });
     });
   });
 
-  it('should let you enter your preferred currency', () => {
-    return renderComponent('/dashboard').then(([wrapper]) => {
+  it('should show validation errors if the user doesnt fill out fields', () => {
+    const checkInvalidInput = (selector, reqdAttr) => {
+      let calculator = document.querySelector('.financial-aid-calculator');
+      let input = calculator.querySelector(selector);
+      assert.ok(input.attributes.getNamedItem('aria-invalid').value, 'should be invalid');
+      assert.isNotNull(input.attributes.getNamedItem(reqdAttr));
+    };
+
+    return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
       return listenForActions([
         START_CALCULATOR_EDIT,
         UPDATE_CALCULATOR_EDIT,
         SET_CALCULATOR_DIALOG_VISIBILITY,
-        UPDATE_CALCULATOR_EDIT,
-        UPDATE_CALCULATOR_EDIT,
+        UPDATE_CALCULATOR_VALIDATION,
         UPDATE_CALCULATOR_EDIT,
       ], () => {
         wrapper.find('.pricing-actions').find('.dashboard-button').simulate('click');
-        modifyTextField(document.querySelector('#currency-select'), 'Pound sterling');
+        clearSelectField(document.querySelector('.currency'));
+        TestUtils.Simulate.click(document.querySelector('.financial-aid-calculator .save-button'));
+      }).then(() => {
+        let state = helper.store.getState().financialAid;
+        assert.deepEqual(state.validation, {
+          'checkBox': 'You must agree to these terms',
+          'income': 'Income is required',
+          'currency': 'Please select a currency'
+        });
+        checkInvalidInput('.salary-field input', 'required');
+        checkInvalidInput('.checkbox input', 'required');
+        checkInvalidInput('.currency .Select-input input', 'aria-required');
+      });
+    });
+  });
+
+  it('should let you enter your preferred currency', () => {
+    return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
+      return listenForActions([
+        START_CALCULATOR_EDIT,
+        UPDATE_CALCULATOR_EDIT,
+        SET_CALCULATOR_DIALOG_VISIBILITY,
+        UPDATE_CALCULATOR_VALIDATION,
+        UPDATE_CALCULATOR_EDIT,
+      ], () => {
+        wrapper.find('.pricing-actions').find('.dashboard-button').simulate('click');
+        let select = document.querySelector('.currency');
+        modifySelectField(select, 'GBP');
       }).then(() => {
         assert.deepEqual(helper.store.getState().financialAid, {
           income: '',
           currency: 'GBP',
-          currency_edit: undefined,
           checkBox: false,
           fetchStatus: null,
           programId: program.id,
-          validation: {}
+          validation: {
+            'checkBox': 'You must agree to these terms',
+            'income': 'Income is required'
+          },
+          fetchError: null,
         });
       });
     });
@@ -147,11 +198,13 @@ describe('FinancialAidCalculator', () => {
 
   it('should let you submit a financial aid request', () => {
     addFinancialAidStub.returns(Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE));
-    return renderComponent('/dashboard').then(([wrapper]) => {
+    return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
       return listenForActions([
         START_CALCULATOR_EDIT,
         UPDATE_CALCULATOR_EDIT,
         SET_CALCULATOR_DIALOG_VISIBILITY,
+        UPDATE_CALCULATOR_VALIDATION,
+        UPDATE_CALCULATOR_VALIDATION,
         UPDATE_CALCULATOR_EDIT,
         UPDATE_CALCULATOR_EDIT,
         REQUEST_ADD_FINANCIAL_AID,
@@ -174,6 +227,67 @@ describe('FinancialAidCalculator', () => {
         );
       });
     });
+  });
+
+  it('should show an error if the financial aid request fails', () => {
+    addFinancialAidStub.returns(Promise.reject({
+      '0': 'an error message',
+      errorStatusCode: 500
+    }));
+    return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
+      return listenForActions([
+        START_CALCULATOR_EDIT,
+        UPDATE_CALCULATOR_EDIT,
+        SET_CALCULATOR_DIALOG_VISIBILITY,
+        UPDATE_CALCULATOR_VALIDATION,
+        UPDATE_CALCULATOR_VALIDATION,
+        UPDATE_CALCULATOR_EDIT,
+        UPDATE_CALCULATOR_EDIT,
+        REQUEST_ADD_FINANCIAL_AID,
+        RECEIVE_ADD_FINANCIAL_AID_FAILURE,
+      ], () => {
+        wrapper.find('.pricing-actions').find('.dashboard-button').simulate('click');
+        let calculator = document.querySelector('.financial-aid-calculator');
+        TestUtils.Simulate.change(calculator.querySelector('.mdl-checkbox__input'));
+        modifyTextField(document.querySelector('#user-salary-input'), '1000');
+        TestUtils.Simulate.click(calculator.querySelector('.save-button'));
+      }).then(() => {
+        assert(
+          addFinancialAidStub.calledWith('1000', 'USD', program.id),
+          'should be called with the right arguments'
+        );
+        assert.equal(
+          document.querySelector('.api-error').textContent,
+          `There was an error (Error 500: an error message). Please contact ${SETTINGS.support_email} \
+if you continue to have problems.`
+        );
+        let state = helper.store.getState();
+        assert.deepEqual(state.financialAid.fetchError, {
+          message: 'an error message', code: 500
+        });
+      });
+    });
+  });
+
+  it('should show nothing if there is no program found', () => {
+    helper.store.dispatch(receiveGetProgramEnrollmentsSuccess(DASHBOARD_RESPONSE));
+    helper.store.dispatch(setCurrentProgramEnrollment({
+      id: 123456
+    }));
+
+    let wrapper = render(
+      <Provider store={helper.store}>
+        <FinancialAidCalculator
+          programs={[]}
+          currentProgramEnrollment={{
+            id: 3,
+            title: 'title'
+          }}
+        />
+      </Provider>
+    );
+
+    assert.lengthOf(wrapper.find(".financial-aid-calculator"), 0);
   });
 });
 

@@ -8,6 +8,7 @@ import _ from 'lodash';
 import iso3166 from 'iso-3166-2';
 import { S } from '../lib/sanctuary';
 const { Maybe, Just, Nothing } = S;
+import R from 'ramda';
 
 import {
   STATUS_PASSED,
@@ -40,8 +41,12 @@ export function sendGoogleAnalyticsEvent(category: any, action: any, label: any,
   ga.event(event);
 }
 
+export const isProfileOfLoggedinUser = (profile: Profile): boolean => (
+  SETTINGS.user && profile.username === SETTINGS.user.username
+);
+
 export function userPrivilegeCheck (profile: Profile, privileged: any, unPrivileged: any): any {
-  if ( profile.username === SETTINGS.user.username ) {
+  if ( SETTINGS.user && profile.username === SETTINGS.user.username ) {
     return _.isFunction(privileged) ? privileged() : privileged;
   } else {
     return _.isFunction(unPrivileged) ? unPrivileged() : unPrivileged;
@@ -419,3 +424,7 @@ export function findCourseRun(
   }
   return [null, null, null];
 }
+
+export const classify: (s: string) => string = (
+  R.compose(R.replace(/_/g,'-'), _.snakeCase, R.defaultTo(""))
+);

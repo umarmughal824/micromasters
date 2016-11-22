@@ -15,10 +15,6 @@ import Toast from '../components/Toast';
 import {
   FETCH_SUCCESS,
   FETCH_FAILURE,
-  fetchDashboard,
-  clearDashboard,
-  fetchCoursePrices,
-  clearCoursePrices,
 } from '../actions';
 import {
   fetchUserProfile,
@@ -41,9 +37,9 @@ import {
   clearUI,
   setProfileStep,
   setPhotoDialogVisibility,
+  setProgram,
 } from '../actions/ui';
 import { validateProfileComplete } from '../lib/validation/profile';
-import type { DashboardState, CoursePricesState } from '../flow/dashboardTypes';
 import type {
   AvailableProgram,
   AvailableProgramsState,
@@ -52,6 +48,7 @@ import type { ProfileGetResult } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 
 const PROFILE_REGEX = /^\/profile\/?[a-z]?/;
+const LEARNER_REGEX = /^\/learner\/?[a-z]?/;
 
 class App extends React.Component {
   props: {
@@ -60,8 +57,6 @@ class App extends React.Component {
     location:                 Object,
     currentProgramEnrollment: AvailableProgram,
     dispatch:                 Dispatch,
-    dashboard:                DashboardState,
-    prices:                   CoursePricesState,
     programs:                 AvailableProgramsState,
     history:                  Object,
     ui:                       UIState,
@@ -76,8 +71,6 @@ class App extends React.Component {
     if (SETTINGS.user) {
       this.fetchUserProfile(SETTINGS.user.username);
     }
-    this.fetchDashboard();
-    this.fetchCoursePrices();
     this.fetchEnrollments();
     this.requireProfileFilledOut();
     this.requireCompleteProfile();
@@ -95,8 +88,6 @@ class App extends React.Component {
     const { dispatch } = this.props;
     const username = SETTINGS.user ? SETTINGS.user.username : null;
     dispatch(clearProfile(username));
-    dispatch(clearDashboard());
-    dispatch(clearCoursePrices());
     dispatch(clearUI());
     dispatch(clearEnrollments());
   }
@@ -112,24 +103,21 @@ class App extends React.Component {
     }
   }
 
-  fetchDashboard() {
-    const { dashboard, dispatch } = this.props;
-    if (dashboard.fetchStatus === undefined) {
-      dispatch(fetchDashboard());
-    }
-  }
-
-  fetchCoursePrices() {
-    const { prices, dispatch } = this.props;
-    if (prices.fetchStatus === undefined) {
-      dispatch(fetchCoursePrices());
-    }
-  }
-
   fetchEnrollments() {
-    const { programs, dispatch } = this.props;
+    const {
+      programs,
+      dispatch,
+      location: { pathname },
+      currentProgramEnrollment,
+      ui: { selectedProgram },
+    } = this.props;
     if (programs.getStatus === undefined) {
-      dispatch(fetchProgramEnrollments());
+      dispatch(fetchProgramEnrollments()).then(({payload}) => {
+        if ( PROFILE_REGEX.test(pathname) && currentProgramEnrollment && !selectedProgram ) {
+          let selected = payload.find(program => program.id === currentProgramEnrollment.id);
+          dispatch(setProgram(selected));
+        }
+      });
     }
   }
 
@@ -227,7 +215,7 @@ class App extends React.Component {
       empty = true;
     }
 
-    if (programs.getStatus === FETCH_FAILURE) {
+    if (programs.getStatus === FETCH_FAILURE && !LEARNER_REGEX.test(pathname)) {
       children = <ErrorMessage errorInfo={programs.getErrorInfo} />;
       empty = true;
     }
@@ -289,8 +277,6 @@ const mapStateToProps = (state) => {
   }
   return {
     userProfile:              profile,
-    dashboard:                state.dashboard,
-    prices:                   state.prices,
     ui:                       state.ui,
     currentProgramEnrollment: state.currentProgramEnrollment,
     programs:                 state.programs,

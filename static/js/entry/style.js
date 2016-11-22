@@ -6,7 +6,7 @@ import 'style!css!bootstrap/dist/css/bootstrap.min.css';
 import 'style!css!react-mdl/extra/material.css';
 // react-virtualized requirement
 import 'style!css!react-virtualized/styles.css';
-
+import 'style!css!react-virtualized-select/styles.css';
 import 'style!css!cropperjs/dist/cropper.css';
 
 // react-select styles

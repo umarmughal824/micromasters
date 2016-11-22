@@ -1,13 +1,18 @@
 /*---------------------------------------
    SECTION:  FOOTER
 -----------------------------------------*/
-footer {
-  background:#000;
-  padding:40px 30px 60px 30px;
+#footer {
+  background: #000;
+  padding: 40px 30px 60px 30px;
   text-align: left;
-  color:#808080;
-  font-size:.83em;
+  color: #808080;
+  font-size: .83em;
   line-height: 1.2em;
+
+  .container {
+    width: 95%;
+    max-width: 1400px;
+  }
 
   .social-buttons-list {
     margin-bottom: 60px;
@@ -17,9 +22,9 @@ footer {
     margin: 24px 0;
 
     a {
-      display:inline-block;
-      margin:0 24px 0 0;
-      color:#4c8399;
+      display: inline-block;
+      margin: 0 24px 0 0;
+      color: #4c8399;
     }
   }
 

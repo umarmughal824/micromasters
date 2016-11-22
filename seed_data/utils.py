@@ -17,11 +17,6 @@ def accepts_or_calculates_now(func):
     return wrapper
 
 
-def first_matching_item(iterable, predicate):
-    """Returns the first item in an iterable that matches a given predicate"""
-    return next(x for x in iterable if predicate(x))
-
-
 def filter_dict_by_key_set(dict_to_filter, key_set):
     """Takes a dictionary and returns a copy without keys that don't exist in a given set"""
     return {key: dict_to_filter[key] for key in dict_to_filter.keys() if key in key_set}

@@ -10,7 +10,7 @@ ADD ./webpack_if_prod.sh /src
 
 USER mitodl
 
-RUN npm install
+RUN mv ./node_modules ./node_modules.tmp && mv ./node_modules.tmp ./node_modules && npm install
 
 COPY . /src
 

@@ -190,7 +190,8 @@ class DashboardTests(ViewsTests):
             WEBPACK_DEV_SERVER_HOST=host,
             EMAIL_SUPPORT=email_support,
             VERSION='0.0.1',
-            RAVEN_CONFIG={'dsn': ''}
+            RAVEN_CONFIG={'dsn': ''},
+            ELASTICSEARCH_DEFAULT_PAGE_SIZE=10
         ):
             resp = self.client.get(DASHBOARD_URL)
             js_settings = json.loads(resp.context['js_settings_json'])
@@ -211,7 +212,8 @@ class DashboardTests(ViewsTests):
                 'support_email': email_support,
                 'environment': 'dev',
                 'release_version': '0.0.1',
-                'sentry_dsn': None
+                'sentry_dsn': None,
+                'es_page_size': 10
             }
 
     def test_roles_setting(self):
@@ -406,10 +408,11 @@ class TestProgramPage(ViewsTests):
         response = self.client.get(self.program_page.url)
         js_settings = json.loads(response.context['js_settings_json'])
         # check that the courses are in the response
-        self.assertIn("courses", js_settings)
-        self.assertEqual(len(js_settings["courses"]), 5)
+        self.assertIn("program", js_settings)
+        self.assertIn("courses", js_settings["program"])
+        self.assertEqual(len(js_settings["program"]["courses"]), 5)
         # check that they're in the correct order
-        for course, js_course in zip(courses, js_settings["courses"]):
+        for course, js_course in zip(courses, js_settings["program"]["courses"]):
             self.assertEqual(course.title, js_course["title"])
             self.assertEqual(course.description, js_course["description"])
             self.assertEqual(course.url, js_course["url"])
@@ -440,7 +443,8 @@ class TestUsersPage(ViewsTests):
             WEBPACK_DEV_SERVER_HOST=host,
             EMAIL_SUPPORT=email_support,
             VERSION='0.0.1',
-            RAVEN_CONFIG={'dsn': ''}
+            RAVEN_CONFIG={'dsn': ''},
+            ELASTICSEARCH_DEFAULT_PAGE_SIZE=10
         ):
             # Mock has_permission so we don't worry about testing permissions here
             has_permission = Mock(return_value=True)
@@ -465,7 +469,8 @@ class TestUsersPage(ViewsTests):
                     'support_email': email_support,
                     'environment': 'dev',
                     'release_version': '0.0.1',
-                    'sentry_dsn': None
+                    'sentry_dsn': None,
+                    'es_page_size': 10
                 }
                 assert has_permission.called
 
@@ -490,7 +495,8 @@ class TestUsersPage(ViewsTests):
             WEBPACK_DEV_SERVER_HOST=host,
             EMAIL_SUPPORT=email_support,
             VERSION='0.0.1',
-            RAVEN_CONFIG={'dsn': ''}
+            RAVEN_CONFIG={'dsn': ''},
+            ELASTICSEARCH_DEFAULT_PAGE_SIZE=10
         ):
             # Mock has_permission so we don't worry about testing permissions here
             has_permission = Mock(return_value=True)
@@ -509,7 +515,8 @@ class TestUsersPage(ViewsTests):
                     'support_email': email_support,
                     'environment': 'dev',
                     'release_version': '0.0.1',
-                    'sentry_dsn': None
+                    'sentry_dsn': None,
+                    'es_page_size': 10
                 }
                 assert has_permission.called
 

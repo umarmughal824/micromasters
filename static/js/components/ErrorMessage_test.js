@@ -4,11 +4,6 @@ import TestUtils from 'react-addons-test-utils';
 import { assert } from 'chai';
 import _ from 'lodash';
 
-import {
-  RECEIVE_DASHBOARD_FAILURE,
-  RECEIVE_DASHBOARD_SUCCESS,
-  RECEIVE_COURSE_PRICES_SUCCESS,
-} from '../actions';
 import { SET_USER_PAGE_DIALOG_VISIBILITY } from '../actions/ui';
 import {
   RECEIVE_GET_USER_PROFILE_SUCCESS,
@@ -20,7 +15,10 @@ import {
   RECEIVE_PATCH_USER_PROFILE_FAILURE,
   CLEAR_PROFILE_EDIT,
 } from '../actions/profile';
-import { RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS } from '../actions/programs';
+import {
+  REQUEST_GET_PROGRAM_ENROLLMENTS,
+  RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
+} from '../actions/programs';
 import {
   DASHBOARD_RESPONSE,
   ERROR_RESPONSE,
@@ -29,6 +27,10 @@ import {
 import IntegrationTestHelper from '../util/integration_test_helper';
 import { makeStrippedHtml } from '../util/util';
 import * as api from '../lib/api';
+import {
+  DASHBOARD_SUCCESS_ACTIONS,
+  DASHBOARD_ERROR_ACTIONS,
+} from '../containers/DashboardPage_test';
 import ErrorMessage from './ErrorMessage';
 
 describe("ErrorMessage", () => {
@@ -74,7 +76,6 @@ describe("ErrorMessage", () => {
 
   describe('showing errors on pages', () => {
     let renderComponent, helper, patchUserProfileStub, listenForActions;
-    let dashboardErrorActions;
 
     const confirmErrorMessage = (div, codeMessage, extraInfo = '') => {
       let alert = div.querySelector('.alert-message');
@@ -89,13 +90,6 @@ describe("ErrorMessage", () => {
       renderComponent = helper.renderComponent.bind(helper);
       patchUserProfileStub = helper.sandbox.stub(api, 'patchUserProfile');
       listenForActions = helper.listenForActions.bind(helper);
-
-      dashboardErrorActions = [
-        RECEIVE_DASHBOARD_FAILURE,
-        RECEIVE_COURSE_PRICES_SUCCESS,
-        RECEIVE_GET_USER_PROFILE_SUCCESS,
-        RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
-      ];
 
       helper.profileGetStub.
         withArgs(SETTINGS.user.username).
@@ -114,7 +108,7 @@ describe("ErrorMessage", () => {
       it('error from the backend triggers error message in dashboard', () => {
         helper.dashboardStub.returns(Promise.reject(ERROR_RESPONSE));
 
-        return renderComponent("/dashboard", dashboardErrorActions, false).then(([, div]) => {
+        return renderComponent("/dashboard", DASHBOARD_ERROR_ACTIONS).then(([, div]) => {
           confirmErrorMessage(div, `AB123 ${errorString}`, 'Additional info: custom error message for the user.');
         });
       });
@@ -124,7 +118,7 @@ describe("ErrorMessage", () => {
         delete response.user_message;
         helper.dashboardStub.returns(Promise.reject(response));
 
-        return renderComponent("/dashboard", dashboardErrorActions, false).then(([, div]) => {
+        return renderComponent("/dashboard", DASHBOARD_ERROR_ACTIONS).then(([, div]) => {
           confirmErrorMessage(div, `AB123 ${errorString}`);
         });
       });
@@ -134,7 +128,7 @@ describe("ErrorMessage", () => {
           errorStatusCode: 500
         }));
 
-        return renderComponent("/dashboard", dashboardErrorActions, false).then(([, div]) => {
+        return renderComponent("/dashboard", DASHBOARD_ERROR_ACTIONS).then(([, div]) => {
           confirmErrorMessage(div, `500 ${errorString}`);
         });
       });
@@ -142,7 +136,7 @@ describe("ErrorMessage", () => {
       it('a regular response does not show the error', () => {
         helper.dashboardStub.returns(Promise.resolve(DASHBOARD_RESPONSE));
 
-        return renderComponent("/dashboard").then(([, div]) => {
+        return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(([, div]) => {
           let message = div.getElementsByClassName('alert-message')[0];
           assert.equal(message, undefined);
         });
@@ -151,7 +145,7 @@ describe("ErrorMessage", () => {
       it('shows an error if there are no programs', () => {
         helper.dashboardStub.returns(Promise.resolve([]));
 
-        return renderComponent("/dashboard").then(([wrapper]) => {
+        return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
           let message = wrapper.find('.page-content').text();
           assert(message.includes("Additional info: No program enrollment is available."));
         });
@@ -160,7 +154,7 @@ describe("ErrorMessage", () => {
       it('shows an error if there is no matching current program enrollment', () => {
         helper.programsGetStub.returns(Promise.resolve([]));
 
-        return renderComponent("/dashboard").then(([wrapper]) => {
+        return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
           let message = wrapper.find('.page-content').text();
           assert(message.includes("Additional info: No program enrollment is available."));
         });
@@ -169,18 +163,16 @@ describe("ErrorMessage", () => {
 
     describe('profile page', () => {
       it('renders errors when there is an error receiving the profile', () => {
-        helper.profileGetStub.
-          withArgs(SETTINGS.user.username).
-          returns(Promise.reject(ERROR_RESPONSE));
+        helper.profileGetStub.withArgs(SETTINGS.user.username).returns(Promise.reject(ERROR_RESPONSE));
 
         const actions = [
-          RECEIVE_DASHBOARD_SUCCESS,
-          RECEIVE_COURSE_PRICES_SUCCESS,
+          REQUEST_GET_USER_PROFILE,
           RECEIVE_GET_USER_PROFILE_FAILURE,
+          REQUEST_GET_PROGRAM_ENROLLMENTS,
           RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
           START_PROFILE_EDIT,
         ];
-        return renderComponent("/profile", actions, false).then(([, div]) => {
+        return renderComponent("/profile", actions).then(([, div]) => {
           confirmErrorMessage(
             div,
             `${ERROR_RESPONSE.error_code} ${errorString}`,
@@ -201,12 +193,13 @@ describe("ErrorMessage", () => {
           returns(Promise.reject(fourOhFour));
         let actions = [
           REQUEST_GET_USER_PROFILE,
-          RECEIVE_DASHBOARD_SUCCESS,
-          RECEIVE_COURSE_PRICES_SUCCESS,
-          RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
+          REQUEST_GET_USER_PROFILE,
           RECEIVE_GET_USER_PROFILE_FAILURE,
+          RECEIVE_GET_USER_PROFILE_FAILURE,
+          REQUEST_GET_PROGRAM_ENROLLMENTS,
+          RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
         ];
-        return renderComponent(`/learner/${SETTINGS.user.username}`, actions, false).then(([, div]) => {
+        return renderComponent(`/learner/${SETTINGS.user.username}`, actions).then(([, div]) => {
           confirmErrorMessage(
             div,
             `404 ${errorString}`,
@@ -218,13 +211,14 @@ describe("ErrorMessage", () => {
       it('should show an error for profile PATCH', () => {
         patchUserProfileStub.returns(Promise.reject({errorStatusCode: 500}));
         let userPageActions = [
+          REQUEST_GET_PROGRAM_ENROLLMENTS,
+          RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
           REQUEST_GET_USER_PROFILE,
-          RECEIVE_DASHBOARD_SUCCESS,
-          RECEIVE_COURSE_PRICES_SUCCESS,
+          REQUEST_GET_USER_PROFILE,
           RECEIVE_GET_USER_PROFILE_SUCCESS,
           RECEIVE_GET_USER_PROFILE_SUCCESS,
         ];
-        return renderComponent(`/learner/${SETTINGS.user.username}`, userPageActions, false).then(([, div]) => {
+        return renderComponent(`/learner/${SETTINGS.user.username}`, userPageActions).then(([, div]) => {
           let editButton = div.querySelector('.mdl-card').querySelector('.mdl-button--icon');
           listenForActions([
             SET_USER_PAGE_DIALOG_VISIBILITY,

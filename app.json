@@ -75,6 +75,14 @@
       "description": "E-mail to send 500 reports to.",
       "required": false
     },
+    "MICROMASTERS_DB_CONN_MAX_AGE": {
+      "required": true,
+      "value": "0"
+    },
+    "MICROMASTERS_DB_DISABLE_SSL": {
+      "required": true,
+      "value": "true"
+    },
     "MICROMASTERS_EMAIL_HOST": {
       "description": "Outgoing e-mail settings",
       "required": false
@@ -122,8 +130,12 @@
     "OPEN_EXCHANGE_RATES_URL": {
       "value": "https://openexchangerates.org/api/"
     },
-    "PGBOUNCER_DEFAULT_POOL_SIZE": 50,
-    "PGBOUNCER_MIN_POOL_SIZE": 5,
+    "PGBOUNCER_DEFAULT_POOL_SIZE": {
+      "value": "50"
+    },
+    "PGBOUNCER_MIN_POOL_SIZE": {
+      "value": "5"
+    },
     "SECRET_KEY": {
       "description": "Django secret key.",
       "generator": "secret"

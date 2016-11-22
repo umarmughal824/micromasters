@@ -5,7 +5,7 @@ import logging
 
 from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
-from financialaid.constants import DEFAULT_INCOME_THRESHOLD
+from financialaid.constants import DEFAULT_INCOME_THRESHOLD, FinancialAidStatus
 from financialaid.exceptions import NotSupportedException
 from financialaid.models import (
     CountryIncomeThreshold,
@@ -42,12 +42,13 @@ def determine_tier_program(program, income):
     return tier_program
 
 
-def determine_auto_approval(financial_aid):
+def determine_auto_approval(financial_aid, tier_program):
     """
     Takes income and country code and returns a boolean if auto-approved. Logs an error if the country of
     financial_aid does not exist in CountryIncomeThreshold.
     Args:
         financial_aid (FinancialAid): the financial aid object to determine auto-approval
+        tier_program (TierProgram): the TierProgram for the user's income level
     Returns:
         boolean: True if auto-approved, False if not
     """
@@ -61,8 +62,14 @@ def determine_auto_approval(financial_aid):
             financial_aid.id
         )
         income_threshold = DEFAULT_INCOME_THRESHOLD
-    # The income_threshold == 0 is because in all cases BUT threshold == 0, it's strictly > instead of >=
-    return financial_aid.income_usd > income_threshold or income_threshold == 0
+    if tier_program.discount_amount == 0:
+        # There is no discount so no reason to go through the financial aid workflow
+        return True
+    elif income_threshold == 0:
+        # There is no income which we need to check the financial aid application
+        return True
+    else:
+        return financial_aid.income_usd > income_threshold
 
 
 def determine_income_usd(original_income, original_currency):
@@ -135,7 +142,7 @@ def get_formatted_course_price(program_enrollment):
         financial_aid_queryset = FinancialAid.objects.filter(
             user=user,
             tier_program__program=program
-        )
+        ).exclude(status=FinancialAidStatus.RESET)
         if financial_aid_queryset.exists():
             has_financial_aid_request = True
             # FinancialAid.save() only allows one object per (user, tier_program__program) pair

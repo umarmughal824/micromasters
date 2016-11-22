@@ -6,9 +6,12 @@ import _ from 'lodash';
 import {
   REQUEST_ADD_PROGRAM_ENROLLMENT,
   RECEIVE_ADD_PROGRAM_ENROLLMENT_SUCCESS,
+  REQUEST_GET_PROGRAM_ENROLLMENTS,
+  RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
 } from '../actions/programs';
 import {
   REQUEST_GET_USER_PROFILE,
+  RECEIVE_GET_USER_PROFILE_SUCCESS,
   REQUEST_PATCH_USER_PROFILE,
   RECEIVE_PATCH_USER_PROFILE_SUCCESS,
   START_PROFILE_EDIT,
@@ -44,6 +47,14 @@ describe("ProfilePage", function() {
   let prevButtonSelector = '.prev';
   let nextButtonSelector = '.next';
 
+  const successActions = [
+    REQUEST_GET_USER_PROFILE,
+    RECEIVE_GET_USER_PROFILE_SUCCESS,
+    REQUEST_GET_PROGRAM_ENROLLMENTS,
+    RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
+    START_PROFILE_EDIT,
+  ];
+
   const setStep = step => helper.store.dispatch(setProfileStep(step));
 
   beforeEach(() => {
@@ -57,12 +68,13 @@ describe("ProfilePage", function() {
     helper.cleanup();
   });
 
-  let confirmSaveButtonBehavior = (updatedProfile, pageElements, validationFailure=false, actions = []) => {
+  let confirmSaveButtonBehavior = (updatedProfile, pageElements, validationFailure=false) => {
     let { div, button } = pageElements;
     button = button || div.querySelector(nextButtonSelector);
     patchUserProfileStub.throws("Invalid arguments");
     patchUserProfileStub.withArgs(SETTINGS.user.username, updatedProfile).returns(Promise.resolve(updatedProfile));
 
+    let actions = [];
     if ( actions.length === 0 ) {
       if (!validationFailure) {
         actions.push(
@@ -106,7 +118,7 @@ describe("ProfilePage", function() {
         activeDialog('education-dialog-wrapper');
       };
       setStep(EDUCATION_STEP);
-      return renderComponent('/profile', [START_PROFILE_EDIT]).then(dialogTest);
+      return renderComponent('/profile', successActions).then(dialogTest);
     });
 
     it('should launch a dialog to add an entry when an employment switch is set to Yes', () => {
@@ -116,14 +128,14 @@ describe("ProfilePage", function() {
         activeDialog('employment-dialog-wrapper');
       };
       setStep(EMPLOYMENT_STEP);
-      return renderComponent('/profile', [START_PROFILE_EDIT]).then(dialogTest);
+      return renderComponent('/profile', successActions).then(dialogTest);
     });
   });
 
   it('navigates backward when Previous button is clicked', () => {
     setStep(EDUCATION_STEP);
     const checkStep = () => helper.store.getState().ui.profileStep;
-    return renderComponent('/profile', [START_PROFILE_EDIT]).then(([, div]) => {
+    return renderComponent('/profile', successActions).then(([, div]) => {
       let button = div.querySelector(prevButtonSelector);
       assert.equal(checkStep(), EDUCATION_STEP);
       TestUtils.Simulate.click(button);
@@ -141,7 +153,7 @@ describe("ProfilePage", function() {
           education: []
         });
         helper.profileGetStub.returns(Promise.resolve(updatedProfile));
-        return renderComponent('/profile', [START_PROFILE_EDIT]).then(([, div]) => {
+        return renderComponent('/profile', successActions).then(([, div]) => {
           // close all switches
           if (`${step}` === 'personal') {
             return confirmSaveButtonBehavior(updatedProfile, {div: div}, true);
@@ -153,7 +165,7 @@ describe("ProfilePage", function() {
   }
 
   it('shows a spinner when profile get is processing', () => {
-    return renderComponent('/profile', [START_PROFILE_EDIT]).then(([, div]) => {
+    return renderComponent('/profile', successActions).then(([, div]) => {
       assert.notOk(div.querySelector(".loader"), "Found spinner but no fetch in progress");
       helper.store.dispatch({
         type: REQUEST_GET_USER_PROFILE,
@@ -174,7 +186,7 @@ describe("ProfilePage", function() {
     patchUserProfileStub.returns(Promise.resolve(USER_PROFILE_RESPONSE));
 
     helper.store.dispatch(setProgram(program));
-    return renderComponent(`/profile`, [START_PROFILE_EDIT]).then(([wrapper]) => {
+    return renderComponent(`/profile`, successActions).then(([wrapper]) => {
       assert.isFalse(addEnrollmentStub.called);
 
       return helper.listenForActions([
@@ -202,7 +214,7 @@ describe("ProfilePage", function() {
   ]) {
     it(`sends the right props to tab components for step ${step}`, () => {
       setStep(step);
-      return renderComponent('/profile', [START_PROFILE_EDIT]).then(([wrapper]) => {
+      return renderComponent('/profile', successActions).then(([wrapper]) => {
         let props = wrapper.find(component).props();
         assert.deepEqual(props['ui'], helper.store.getState().ui);
         assert.deepEqual(props['programs'], helper.store.getState().programs.availablePrograms);

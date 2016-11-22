@@ -21,7 +21,7 @@ from celery.schedules import crontab
 from django.core.exceptions import ImproperlyConfigured
 
 
-VERSION = "0.22.0"
+VERSION = "0.23.0"
 
 CONFIG_PATHS = [
     os.environ.get('MICROMASTERS_CONFIG', ''),
@@ -70,7 +70,14 @@ SECRET_KEY = get_var(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = get_var('DEBUG', False)
 
-ALLOWED_HOSTS = get_var('ALLOWED_HOSTS', [])
+if DEBUG:
+    # Disabling the protection added in 1.10.3 against a DNS rebinding vulnerability:
+    # https://docs.djangoproject.com/en/1.10/releases/1.10.3/#dns-rebinding-vulnerability-when-debug-true
+    # Because we never debug against production data, we are not vulnerable
+    # to this problem.
+    ALLOWED_HOSTS = ['*']
+else:
+    ALLOWED_HOSTS = get_var('ALLOWED_HOSTS', [])
 
 SECURE_SSL_REDIRECT = get_var('MICROMASTERS_SECURE_SSL_REDIRECT', True)
 
@@ -432,7 +439,7 @@ SL_TRACKING_ID = get_var("SL_TRACKING_ID", "")
 
 # Wagtail
 WAGTAIL_SITE_NAME = "MIT MicroMasters"
-MEDIA_ROOT = get_var('MEDIA_ROOT', '/tmp/')
+MEDIA_ROOT = get_var('MEDIA_ROOT', '/var/media/')
 MEDIA_URL = '/media/'
 MICROMASTERS_USE_S3 = get_var('MICROMASTERS_USE_S3', False)
 AWS_ACCESS_KEY_ID = get_var('AWS_ACCESS_KEY_ID', False)
@@ -480,6 +487,7 @@ CELERYBEAT_SCHEDULE = {
 CELERY_TIMEZONE = 'UTC'
 
 # Elasticsearch
+ELASTICSEARCH_DEFAULT_PAGE_SIZE = get_var('ELASTICSEARCH_DEFAULT_PAGE_SIZE', 10)
 ELASTICSEARCH_URL = get_var("ELASTICSEARCH_URL", None)
 ELASTICSEARCH_INDEX = get_var('ELASTICSEARCH_INDEX', 'micromasters')
 ELASTICSEARCH_HTTP_AUTH = get_var("ELASTICSEARCH_HTTP_AUTH", None)

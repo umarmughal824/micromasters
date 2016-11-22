@@ -24,6 +24,8 @@ import {
   formatPrice,
   programCourseInfo,
   findCourseRun,
+  isProfileOfLoggedinUser,
+  classify,
 } from '../util/util';
 import {
   EDUCATION_LEVELS,
@@ -221,7 +223,45 @@ describe('utility functions', () => {
     });
   });
 
+  describe('Profile of logged in user check', () => {
+    let settingsBackup;
+
+    beforeEach(() => {
+      settingsBackup = SETTINGS;
+    });
+
+    afterEach(() => {
+      SETTINGS = settingsBackup;
+    });
+
+    it('when user is not logged in', () => {
+      SETTINGS = Object.assign({}, SETTINGS, {user: null});
+      let profile = { username: "another_user" };
+      assert.isNotTrue(isProfileOfLoggedinUser(profile));
+    });
+
+    it("when other user's profile", () => {
+      let profile = { username: "another_user" };
+      assert.isNotTrue(isProfileOfLoggedinUser(profile));
+    });
+
+    it("when loggedin user's profile", () => {
+      let profile = { username: SETTINGS.user.username };
+      assert.isTrue(isProfileOfLoggedinUser(profile));
+    });
+  });
+
   describe('User privilege check', () => {
+    let settingsBackup;
+
+    beforeEach(() => {
+      settingsBackup = SETTINGS;
+    });
+
+    afterEach(() => {
+      SETTINGS = settingsBackup;
+    });
+
     it('should return the value of the first function if the profile username matches', () => {
       let profile = { username: SETTINGS.user.username };
       let privilegedCallback = () => "hi";
@@ -246,6 +286,14 @@ describe('utility functions', () => {
       let privilegedCallback = () => "vim";
       let unprivilegedString = "emacs";
       assert.equal(userPrivilegeCheck(profile, privilegedCallback, unprivilegedString), "emacs");
+    });
+
+    it('should return the value of the second function if user is not logged in', () => {
+      SETTINGS = Object.assign({}, SETTINGS, {user: null});
+      let profile = { username: "another_user" };
+      let privilegedCallback = () => "vim";
+      let unprivilegedCallback = () => "emacs";
+      assert.equal(userPrivilegeCheck(profile, privilegedCallback, unprivilegedCallback), "emacs");
     });
   });
 
@@ -473,6 +521,21 @@ describe('utility functions', () => {
         findCourseRun(DASHBOARD_RESPONSE, () => false),
         [null, null, null],
       );
+    });
+  });
+
+  describe('classify', () => {
+    it('turns a string into something appropriate for a CSS class', () => {
+      assert.equal(classify('Foo Bar'), 'foo-bar');
+      assert.equal(classify('fooBar'), 'foo-bar');
+      assert.equal(classify('Foobar'), 'foobar');
+      assert.equal(classify('foo_barBaz'), 'foo-bar-baz');
+      assert.equal(classify('foo_bar Baz'), 'foo-bar-baz');
+    });
+
+    it('returns an empty string when passed an empty string or undefined', () => {
+      assert.equal(classify(''), '');
+      assert.equal(classify(undefined), '');
     });
   });
 });

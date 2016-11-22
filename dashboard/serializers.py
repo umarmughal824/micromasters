@@ -3,7 +3,12 @@ Provides functionality for serializing a ProgramEnrollment for the ES index
 """
 from decimal import Decimal
 
-from dashboard.models import CachedEnrollment, CachedCertificate
+from edx_api.certificates.models import Certificate, Certificates
+from edx_api.grades.models import CurrentGrade, CurrentGrades
+from edx_api.enrollments.models import Enrollments
+
+from dashboard.models import CachedEnrollment, CachedCertificate, CachedCurrentGrade
+from dashboard.utils import MMTrack
 from roles.models import (
     NON_LEARNERS,
     Role
@@ -15,13 +20,13 @@ class UserProgramSearchSerializer:
     Provides functions for serializing a ProgramEnrollment for the ES index
     """
     @staticmethod
-    def calculate_certificate_grade_average(certificates):
+    def calculate_final_grade_average(mmtrack):
         """
-        Calculates an average grade (integer) from a list of certificates with <1 decimal grades
+        Calculates an average grade (integer) from the program final grades
         """
-        return None if len(certificates) == 0 else round(
-            (sum((Decimal(certificate['grade']) for certificate in certificates)) / len(certificates)) * 100
-        )
+        final_grades = mmtrack.get_all_final_grades()
+        if final_grades:
+            return round(sum(Decimal(final_grade) for final_grade in final_grades.values()) / len(final_grades))
 
     @classmethod
     def serialize(cls, program_enrollment):
@@ -30,13 +35,23 @@ class UserProgramSearchSerializer:
         """
         user = program_enrollment.user
         program = program_enrollment.program
-        program_cached_enrollments = list(CachedEnrollment.active_data(user, program))
-        program_cached_certificates = list(CachedCertificate.active_data(user, program))
+        enrollments = list(CachedEnrollment.active_data(user, program))
+        certificates = list(CachedCertificate.active_data(user, program))
+        current_grades = list(CachedCurrentGrade.active_data(user, program))
+
+        mmtrack = MMTrack(
+            user,
+            program,
+            Enrollments(enrollments),
+            CurrentGrades([CurrentGrade(grade) for grade in current_grades]),
+            Certificates([Certificate(cert) for cert in certificates])
+        )
         return {
             'id': program.id,
-            'enrollments': program_cached_enrollments,
-            'certificates': program_cached_certificates,
-            'grade_average': cls.calculate_certificate_grade_average(program_cached_certificates),
+            'enrollments': enrollments,
+            'certificates': certificates,
+            'current_grades': current_grades,
+            'grade_average': cls.calculate_final_grade_average(mmtrack),
             'is_learner': cls.is_learner(user, program)
         }
 

@@ -1,5 +1,5 @@
 FROM python:3.5
-MAINTAINER ODL DevOps <mitx-devops@mit.edu>
+LABEL maintainer "ODL DevOps <mitx-devops@mit.edu>"
 
 
 # Add package files, install updated node and pip
@@ -15,6 +15,7 @@ RUN curl --silent --location https://bootstrap.pypa.io/get-pip.py | python3 -
 # Add, and run as, non-root user.
 RUN mkdir /src
 RUN adduser --disabled-password --gecos "" mitodl
+RUN mkdir /var/media && chown -R mitodl:mitodl /var/media
 
 # Install project packages
 COPY requirements.txt /tmp/requirements.txt

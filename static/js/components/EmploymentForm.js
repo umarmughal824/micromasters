@@ -8,7 +8,10 @@ import IconButton from 'react-mdl/lib/IconButton';
 import _ from 'lodash';
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
 
-import { userPrivilegeCheck } from '../util/util';
+import {
+  userPrivilegeCheck,
+  isProfileOfLoggedinUser
+} from '../util/util';
 import { workEntriesByDate } from '../util/sorting';
 import { employmentValidation } from '../lib/validation/profile';
 import ProfileFormFields from '../util/ProfileFormFields';
@@ -94,6 +97,12 @@ class EmploymentForm extends ProfileFormFields {
     setShowWorkDeleteDialog(true);
   };
 
+  addSpaceForError(keySet: string[]){
+    const { errors } = this.props;
+    let value = _.get(errors, keySet);
+    return value === undefined ? "": "top-space";
+  }
+
   editWorkHistoryForm(): React$Element<*> {
     const { ui, profile } = this.props;
     let keySet = (key): any => ['work_history', ui.workDialogIndex, key];
@@ -143,7 +152,7 @@ class EmploymentForm extends ProfileFormFields {
         </Cell>
         <Cell col={6}>
           {this.boundDateField(keySet('end_date'), 'End Date', true)}
-          <span className="end-date-hint">
+          <span className={`end-date-hint ${this.addSpaceForError(keySet('end_date'))}`}>
             Leave blank if this is a current position
           </span>
         </Cell>
@@ -163,13 +172,13 @@ class EmploymentForm extends ProfileFormFields {
       }
       userPrivilegeCheck(profile, () => {
         workHistoryRows.push(
-        <Cell col={12} className="profile-form-row add" key={"I'm unique!"}>
-          <a
+        <Cell col={12} className="profile-form-row add" key="I'm unique!">
+          <button
             className="mm-minor-action"
             onClick={this.openNewWorkHistoryForm}
           >
             Add employment
-          </a>
+          </button>
         </Cell>
         );
       });
@@ -245,12 +254,12 @@ class EmploymentForm extends ProfileFormFields {
     return (
       <RadioButtonGroup
         className="profile-radio-switch"
-        name={"work-history-switch"}
+        name="work-history-switch"
         onChange={(event, value)=> this.handleRadioClick(value)}
         valueSelected={valueSelected}
       >
-        <RadioButton value={"true"} label="Yes" iconStyle={radioIconStyle} style={{'marginRight': '30px'}} />
-        <RadioButton value={"false"} label="No" iconStyle={radioIconStyle} style={{'marginRight': '15px'}} />
+        <RadioButton value="true" label="Yes" iconStyle={radioIconStyle} style={{'marginRight': '30px'}} />
+        <RadioButton value="false" label="No" iconStyle={radioIconStyle} style={{'marginRight': '15px'}} />
       </RadioButtonGroup>
     );
   }
@@ -284,8 +293,14 @@ class EmploymentForm extends ProfileFormFields {
 
   renderCard () {
     const {
-      ui: { workHistoryEdit }
+      ui: { workHistoryEdit },
+      profile
     } = this.props;
+
+    if (!isProfileOfLoggedinUser(profile) && (!profile.work_history || profile.work_history.length === 0)) {
+      return null;
+    }
+
     let cardClass = workHistoryEdit ? '' : 'profile-tab-card-greyed';
     return <Card shadow={1} className={`profile-form ${cardClass}`} id={`work-history-card`}>
       <Grid className="profile-form-grid">

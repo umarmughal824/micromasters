@@ -6,7 +6,6 @@ from datetime import datetime
 
 import pytz
 from django.conf import settings
-from django.db.models import Prefetch
 from edx_api.client import EdxApi
 from rest_framework import (
     authentication,
@@ -19,15 +18,10 @@ from rest_framework.response import Response
 
 from backends import utils
 from backends.edxorg import EdxOrgOAuth2
-from courses.models import Program, CourseRun
 from dashboard.api import (
-    get_info_for_program,
-    get_student_certificates,
-    get_student_current_grades,
-    get_student_enrollments,
+    get_user_program_info,
     update_cached_enrollment,
 )
-from dashboard.utils import MMTrack
 from profiles.api import get_social_username
 
 
@@ -62,33 +56,7 @@ class UserDashboard(APIView):
 
         # create an instance of the client to query edX
         edx_client = EdxApi(user_social.extra_data, settings.EDXORG_BASE_URL)
-        # get enrollments for the student
-        enrollments = get_student_enrollments(request.user, edx_client)
-        # get certificates for the student
-        certificates = get_student_certificates(request.user, edx_client)
-        # get current_grades for the student
-        # the grades should be refreshed always after the enrollments
-        # or else some grades may not get fetched
-        current_grades = get_student_current_grades(request.user, edx_client)
-
-        response_data = []
-
-        all_programs = (
-            Program.objects.filter(live=True, programenrollment__user=request.user)
-            .prefetch_related(
-                Prefetch('course_set__courserun_set', queryset=CourseRun.get_first_unexpired_run_qset())
-            )
-        )
-        for program in all_programs:
-            mmtrack_info = MMTrack(
-                request.user,
-                program,
-                enrollments,
-                current_grades,
-                certificates
-            )
-            response_data.append(get_info_for_program(mmtrack_info))
-        return Response(response_data)
+        return Response(get_user_program_info(request.user, edx_client))
 
 
 class UserCourseEnrollment(APIView):

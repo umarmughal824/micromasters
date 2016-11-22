@@ -25,12 +25,13 @@ import { INITIAL_UI_STATE } from '../../reducers/ui';
 
 describe("FinancialAidCard", () => {
   let sandbox;
-  let openFinancialAidCalculatorStub, setSkipDialogStub;
+  let openFinancialAidCalculatorStub, setSkipDialogStub, setDocsInstructionsVisibility;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     openFinancialAidCalculatorStub = sandbox.stub();
     setSkipDialogStub = sandbox.stub();
+    setDocsInstructionsVisibility = sandbox.stub();
   });
 
   afterEach(() => {
@@ -151,6 +152,14 @@ describe("FinancialAidCard", () => {
         assert.equal(props.selected.format(ISO_8601_FORMAT), '2011-11-11');
         props.onChange(moment("1999-01-01"));
         assert.ok(setDocumentSentDate.calledWith("1999-01-01"));
+      });
+
+      it(`provides a link to open a dialog with complete instruction for status ${FA_STATUS_PENDING_DOCS}`, () => {
+        let program = programWithStatus(FA_STATUS_PENDING_DOCS);
+        let wrapper = renderCard({ program, setDocsInstructionsVisibility });
+        let link = wrapper.find('.financial-aid-box').find('a');
+        link.simulate('click');
+        assert.ok(setDocsInstructionsVisibility.called, 'should have called onClick handler');
       });
 
       it('sends the document date', () => {
