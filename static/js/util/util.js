@@ -428,3 +428,5 @@ export function findCourseRun(
 export const classify: (s: string) => string = (
   R.compose(R.replace(/_/g,'-'), _.snakeCase, R.defaultTo(""))
 );
+
+export const labelSort = R.sortBy(R.compose(R.toLower, R.prop('label')));
