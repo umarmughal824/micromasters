@@ -161,6 +161,7 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 
 SOCIAL_AUTH_LINKEDIN_OAUTH2_KEY = get_var('LINKEDIN_CLIENT_ID', '')
 SOCIAL_AUTH_LINKEDIN_OAUTH2_SECRET = get_var('LINKEDIN_CLIENT_SECRET', '')
