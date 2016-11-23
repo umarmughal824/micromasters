@@ -41,6 +41,7 @@ const updateCurrency = R.curry((update, financialAid, selection) => {
 const currencySelect = (update, current) => (
   <Select
     options={currencyOptions}
+    clearable={false}
     value={current.currency}
     onChange={updateCurrency(update, current)}
     name="currency"
