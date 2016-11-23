@@ -155,6 +155,23 @@ describe('Profile inputs', () => {
         ]
       });
     });
+
+    it('should add a previously saved custom option to this.state', () => {
+      selectField = renderGenderSelectField({
+        allowCreate: true,
+        profile: {
+          gender: 'agender'
+        }
+      });
+      assert.include(selectField.text(), 'agender');
+      let expectedCustomOption = {
+        value: 'agender', label: 'agender'
+      };
+      assert.deepEqual(selectField.state(), {
+        customOptions: [ expectedCustomOption ]
+      });
+      assert.include(selectField.find(VirtualizedSelect).props().options, expectedCustomOption);
+    });
   });
 
   describe("State select field", () => {

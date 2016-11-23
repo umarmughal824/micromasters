@@ -95,7 +95,7 @@ class SelectField extends React.Component {
     </label>
   );
 
-  componentDidUpdate () {
+  addCustomOptions = () => {
     const { keySet, profile, allowCreate, options } = this.props;
     const { customOptions } = this.state;
 
@@ -106,6 +106,14 @@ class SelectField extends React.Component {
         customOptions: customOptions.concat({ value: value, label: value })
       });
     }
+  }
+
+  componentDidUpdate () {
+    this.addCustomOptions();
+  }
+
+  componentDidMount () {
+    this.addCustomOptions();
   }
 
   renderSelect = (): React$Element<*> => {
