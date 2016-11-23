@@ -1,6 +1,24 @@
 Release Notes
 =============
 
+Version 0.24.0
+--------------
+
+- Fixed browser history for profile tabs (#1363)
+- Sort fields of study (#1846)
+- Turn off querystring auth so we don&#39;t expire S3 assets (#1840)
+- Added &#39;Create option&#39; functionality for industry and field of study
+- Refactor UserPage_test (#1845)
+- Setup codecov (#1827)
+- Made email hide on UserInfoCard when not present
+- Upgraded React and several other JS packages
+- Changed seed_db requirements
+- Added SSL parameters to Elasticsearch connection
+- Increased default page size (#1804)
+- Increased test coverage (#1793)
+- fixes the sort by dropdown layout
+- a few small changes and reorder sections on the home page
+
 Version 0.23.0
 --------------
 
