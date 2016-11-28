@@ -17,6 +17,7 @@ from edx_api.enrollments.models import Enrollments, Enrollment
 from backends.edxorg import EdxOrgOAuth2
 from backends.utils import InvalidCredentialStored
 from courses.factories import ProgramFactory, CourseRunFactory
+from dashboard.factories import UserCacheRefreshTimeFactory
 from dashboard.models import ProgramEnrollment, CachedEnrollment
 from micromasters.factories import UserFactory
 from search.base import ESTestCase
@@ -37,6 +38,12 @@ class DashboardTest(APITestCase):
             provider=EdxOrgOAuth2.name,
             uid="{}_edx".format(cls.user.username),
             extra_data={"access_token": "fooooootoken"}
+        )
+        UserCacheRefreshTimeFactory(
+            user=cls.user,
+            enrollment=datetime.now(tz=pytz.utc) + timedelta(minutes=10),
+            certificate=datetime.now(tz=pytz.utc) + timedelta(minutes=10),
+            current_grade=datetime.now(tz=pytz.utc) + timedelta(minutes=10),
         )
 
         # create the programs
@@ -238,14 +245,15 @@ class UserCourseEnrollmentTest(ESTestCase, APITestCase):
         # assert just the second argument, since the first is `self`
         assert mock_edx_enr.call_args[0][1] == self.course_id
 
+    @patch('search.tasks.index_users', autospec=True)
     @patch('edx_api.enrollments.CourseEnrollments.create_audit_student_enrollment', autospec=True)
     @patch('backends.utils.refresh_user_token', autospec=True)
-    def test_enrollment(self, mock_refresh, mock_edx_enr):  # pylint: disable=unused-argument
+    def test_enrollment(self, mock_refresh, mock_edx_enr, mock_index):  # pylint: disable=unused-argument
         """
         Test for happy path
         """
         cache_enr = CachedEnrollment.objects.filter(
-            user=self.user, course_run__edx_course_key=self.course_id).exclude(data=None).first()
+            user=self.user, course_run__edx_course_key=self.course_id).first()
         assert cache_enr is None
 
         enr_json = {'course_details': {'course_id': self.course_id}}
@@ -256,7 +264,8 @@ class UserCourseEnrollmentTest(ESTestCase, APITestCase):
         assert mock_edx_enr.call_count == 1
         assert mock_edx_enr.call_args[0][1] == self.course_id
         assert resp.data == enr_json
+        mock_index.delay.assert_called_once_with([self.user])
 
         cache_enr = CachedEnrollment.objects.filter(
-            user=self.user, course_run__edx_course_key=self.course_id).exclude(data=None).first()
+            user=self.user, course_run__edx_course_key=self.course_id).first()
         assert cache_enr is not None

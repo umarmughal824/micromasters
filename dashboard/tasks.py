@@ -5,6 +5,7 @@ import logging
 import uuid
 from datetime import datetime, timedelta
 
+import pytz
 from celery import group
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -15,12 +16,8 @@ from social.apps.django_app.default.models import UserSocialAuth
 
 from backends import utils
 from backends.edxorg import EdxOrgOAuth2
-from dashboard.models import (
-    CachedCertificate,
-    CachedCurrentGrade,
-    CachedEnrollment,
-)
-from dashboard import api
+from dashboard.models import UserCacheRefreshTime
+from dashboard.api_edx_cache import CachedEdxUserData
 from micromasters.celery import async
 
 
@@ -69,21 +66,13 @@ def batch_update_user_data():
         return cache.delete(lock_id)
 
     if acquire_lock():
-        refresh_time_limit = datetime.utcnow() - timedelta(hours=MAX_HRS_MAIN_TASK)
+        refresh_time_limit = datetime.now(tz=pytz.UTC) - timedelta(hours=MAX_HRS_MAIN_TASK)
 
-        users_expired_enroll = CachedEnrollment.objects.filter(
-            last_request__lt=refresh_time_limit
+        users_expired_cache = UserCacheRefreshTime.objects.filter(
+            Q(enrollment__lt=refresh_time_limit) |
+            Q(certificate__lt=refresh_time_limit) |
+            Q(current_grade__lt=refresh_time_limit)
         ).values_list('user', flat=True).distinct()
-
-        users_expired_certs = CachedCertificate.objects.filter(
-            last_request__lt=refresh_time_limit
-        ).values_list('user', flat=True).distinct()
-
-        users_expired_grades = CachedCurrentGrade.objects.filter(
-            last_request__lt=refresh_time_limit
-        ).values_list('user', flat=True).distinct()
-
-        users_expired_cache = set(users_expired_enroll) | set(users_expired_certs) | set(users_expired_grades)
 
         users_not_in_cache = User.objects.exclude(
             Q(id__in=users_expired_cache)
@@ -130,14 +119,8 @@ def batch_update_user_data_subtasks(students):
 
                 edx_client = EdxApi(user_social.extra_data, settings.EDXORG_BASE_URL)
 
-                # refresh enrollments for the student
-                api.get_student_enrollments(user, edx_client)
-                # refresh certificates for the student
-                api.get_student_certificates(user, edx_client)
-                # refresh current grades for the student
-                # the grades should be refreshed always after the enrollments
-                # or else some grades may not get fetched
-                api.get_student_current_grades(user, edx_client)
+                for cache_type in CachedEdxUserData.SUPPORTED_CACHES:
+                    CachedEdxUserData.update_cache_if_expired(user, edx_client, cache_type)
 
         except Exception as e:
             log.exception(

@@ -28,7 +28,6 @@ from seed_data.lib import (
     set_course_run_current,
     set_course_run_future,
     set_program_financial_aid,
-    ensure_cached_edx_data_for_user,
 )
 
 
@@ -344,8 +343,6 @@ class Command(BaseCommand):
             # Coerce 'grade' to decimal if it exists
             if 'grade' in additional_params:
                 additional_params['grade'] = Decimal(int(additional_params['grade'])/100)
-            # Make sure that cached edX records exist for the user (so we don't go to edX to fetch data)
-            ensure_cached_edx_data_for_user(user)
             # Execute the action
             result = action_func(user=user, course=course, **additional_params)
             if isinstance(result, CourseRun):

@@ -2,14 +2,13 @@
 Library functions for interacting with test data
 """
 import re
-from datetime import timedelta
+from datetime import datetime, timedelta
 from functools import wraps
 from django.db import IntegrityError
-from django.db.models import Q
 
 from django.contrib.auth.models import User
-from courses.models import Program, Course, CourseRun
-from dashboard.models import CachedCertificate, CachedEnrollment, CachedCurrentGrade
+from courses.models import Program, Course
+from dashboard.models import CachedCertificate, CachedEnrollment, CachedCurrentGrade, UserCacheRefreshTime
 from financialaid.factories import TierProgramFactory
 from financialaid.models import TierProgram
 from seed_data.management.commands import DEFAULT_GRADE, FAKE_PROGRAM_DESC_PREFIX
@@ -133,8 +132,6 @@ def cached_obj_editor(editing_func):
             ret_val = None
         else:
             ret_val = editing_func(*args, **kwargs)
-        if kwargs.get('set_last_request', True):
-            obj.last_request = future_date()
         if kwargs.get('save', True):
             obj.save()
         return ret_val
@@ -193,7 +190,7 @@ class CachedHandler(object):
         try:
             return self.model_cls.objects.get_or_create(user=self.user, course_run=course_run)[0]
         except IntegrityError:
-            return self.model_cls.objects.create(user=self.user, course_run=course_run, last_request=future_date())
+            return self.model_cls.objects.create(user=self.user, course_run=course_run)
 
 
 class CachedEnrollmentHandler(CachedHandler):
@@ -217,6 +214,12 @@ class CachedEnrollmentHandler(CachedHandler):
             'enrollment_end': course_run.enrollment_end.isoformat()
         })
 
+    def set_or_create(self, *args, **kwargs):
+        """Updates the specific cache timestamp before taking care of the cached object"""
+        defaults = {'user': self.user, 'enrollment': datetime.utcnow()}
+        UserCacheRefreshTime.objects.update_or_create(user=self.user, defaults=defaults)
+        return super().set_or_create(*args, **kwargs)
+
 
 class CachedCertificateHandler(CachedHandler):
     """Provides functionality to CachedCertificate objects"""
@@ -235,6 +238,12 @@ class CachedCertificateHandler(CachedHandler):
             'grade': str(grade)
         })
 
+    def set_or_create(self, *args, **kwargs):
+        """Updates the specific cache timestamp before taking care of the cached object"""
+        defaults = {'user': self.user, 'certificate': datetime.utcnow()}
+        UserCacheRefreshTime.objects.update_or_create(user=self.user, defaults=defaults)
+        return super().set_or_create(*args, **kwargs)
+
 
 class CachedCurrentGradeHandler(CachedHandler):
     """Provides functionality to CachedCurrentGrade objects"""
@@ -252,32 +261,18 @@ class CachedCurrentGradeHandler(CachedHandler):
             'percent': str(grade)
         })
 
+    def set_or_create(self, *args, **kwargs):
+        """Updates the specific cache timestamp before taking care of the cached object"""
+        defaults = {'user': self.user, 'current_grade': datetime.utcnow()}
+        UserCacheRefreshTime.objects.update_or_create(user=self.user, defaults=defaults)
+        return super().set_or_create(*args, **kwargs)
+
 
 CACHED_HANDLERS = {
     CachedEnrollment: CachedEnrollmentHandler,
     CachedCertificate: CachedCertificateHandler,
     CachedCurrentGrade: CachedCurrentGradeHandler
 }
-
-
-def ensure_cached_edx_data_for_user(user):
-    """
-    For every CourseRun in the database, ensure that a User has an associated cached edX
-    record (eg: CachedEnrollment)
-    """
-    all_course_runs = CourseRun.objects.filter(course__program__live=True).exclude(
-        Q(edx_course_key__isnull=True) | Q(edx_course_key__exact='')
-    ).all()
-    results = []
-    for cached_model, cached_model_handler in CACHED_HANDLERS.items():
-        missing_course_runs = cached_model_handler(user).get_missing_course_runs(all_course_runs)
-        # For any CourseRun that isn't already associated with a cached object, create a new one with data=None
-        create_result = cached_model.objects.bulk_create([
-            cached_model(user=user, course_run=course_run, data=None, last_request=future_date())
-            for course_run in missing_course_runs
-        ])
-        results.extend(create_result)
-    return results
 
 
 def clear_edx_data(user, course=None, course_run=None, models=None):

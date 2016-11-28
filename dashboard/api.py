@@ -4,32 +4,17 @@ Apis for the dashboard
 import datetime
 import logging
 
-from edx_api.certificates import (
-    Certificate,
-    Certificates,
-)
-from edx_api.enrollments import Enrollments
-from edx_api.grades import (
-    CurrentGrade,
-    CurrentGrades
-)
 from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
-from django.db.models import Q
 import pytz
 
-from courses.models import CourseRun, Program
-from dashboard import models
+from courses.models import Program
+from dashboard.api_edx_cache import CachedEdxUserData
 from dashboard.utils import MMTrack
-from profiles.api import get_social_username
 
 log = logging.getLogger(__name__)
 
 # pylint: disable=too-many-branches
-
-REFRESH_CERT_CACHE_HOURS = 6
-REFRESH_GRADES_CACHE_HOURS = 1
-REFRESH_ENROLLMENT_CACHE_MINUTES = 5
 
 
 class CourseStatus:
@@ -133,14 +118,17 @@ def get_user_program_info(user, edx_client):
     Returns:
         list: Enrolled Program information
     """
+    # update cache
+    # NOTE: this part can be moved to an asynchronous task
+    for cache_type in CachedEdxUserData.SUPPORTED_CACHES:
+        CachedEdxUserData.update_cache_if_expired(user, edx_client, cache_type)
+
     # get enrollments for the student
-    enrollments = get_student_enrollments(user, edx_client)
+    enrollments = CachedEdxUserData.get_cached_edx_data(user, CachedEdxUserData.ENROLLMENT)
     # get certificates for the student
-    certificates = get_student_certificates(user, edx_client)
+    certificates = CachedEdxUserData.get_cached_edx_data(user, CachedEdxUserData.CERTIFICATE)
     # get current_grades for the student
-    # the grades should be refreshed always after the enrollments
-    # or else some grades may not get fetched
-    current_grades = get_student_current_grades(user, edx_client)
+    current_grades = CachedEdxUserData.get_cached_edx_data(user, CachedEdxUserData.CURRENT_GRADE)
 
     response_data = []
     all_programs = (
@@ -366,230 +354,3 @@ def format_courserun_for_dashboard(course_run, status_for_user, mmtrack, positio
         formatted_run['current_grade'] = mmtrack.get_current_grade(course_run.edx_course_key)
 
     return formatted_run
-
-
-@transaction.atomic
-def update_cached_enrollment(user, enrollment, course_id, now):
-    """
-    Updates the cached enrollment based on an Enrollment object
-
-    Args:
-        user (User): A user
-        enrollment (Enrollment):
-            An Enrollment object from edx_api_client
-        course_id (str): A course key
-        now (datetime.datetime): The datetime value used as now
-
-    Returns:
-        None
-    """
-    # get the enrollment data or None
-    # None means we will cache the fact that the student
-    # does not have an enrollment for the given course
-    enrollment_data = enrollment.json if enrollment is not None else None
-    course_run = CourseRun.objects.get(edx_course_key=course_id)
-    updated_values = {
-        'user': user,
-        'course_run': course_run,
-        'data': enrollment_data,
-        'last_request': now,
-    }
-    models.CachedEnrollment.objects.update_or_create(
-        user=user,
-        course_run=course_run,
-        defaults=updated_values
-    )
-
-
-def _check_if_refresh(user, cached_model, refresh_delta, limit_to_courses=None):
-    """
-    Helper function to check if cached data in a model need to be refreshed.
-    Args:
-        user (django.contrib.auth.models.User): A user
-        cached_model (dashboard.models.CachedEdxInfoModel): a model containing cached data
-        refresh_delta (datetime.datetime): time limit for refresh the data
-        limit_to_courses (list): a list of course ids to limit the check
-
-    Returns:
-        tuple: a tuple containing:
-            a boolean representing if the data needs to be refreshed
-            a queryset object of the cached objects
-            a list of course ids
-    """
-    course_ids = CourseRun.objects.filter(course__program__live=True).exclude(
-        Q(edx_course_key__isnull=True) | Q(edx_course_key__exact='')
-    ).values_list("edx_course_key", flat=True)
-
-    all_course_count = course_ids.count()
-
-    if limit_to_courses is not None:
-        course_ids = course_ids.filter(edx_course_key__in=limit_to_courses)
-
-    model_queryset = cached_model.objects.filter(
-        user=user,
-        last_request__gt=refresh_delta,
-    )
-    all_cached_elements_count = model_queryset.count()
-    model_queryset = model_queryset.filter(course_run__edx_course_key__in=course_ids)
-
-    is_data_fresh = model_queryset.count() == len(course_ids) and all_cached_elements_count == all_course_count
-    return is_data_fresh, model_queryset, course_ids
-
-
-def get_student_enrollments(user, edx_client):
-    """
-    Return cached enrollment data or fetch enrollment data first if necessary.
-    All CourseRun will have an entry for the user: this entry will contain Null
-    data if the user does not have an enrollment.
-
-    Args:
-        user (django.contrib.auth.models.User): A user
-        edx_client (EdxApi): EdX client to retrieve enrollments
-    Returns:
-        Enrollments: an Enrollments object from edx_api.
-            This may contain more enrollments than
-            what we know about in MicroMasters if more exist from edX,
-            or it may contain fewer enrollments if they don't exist for the course id in edX
-    """
-    # Data in database is refreshed after 5 minutes
-    now = datetime.datetime.now(tz=pytz.utc)
-    refresh_delta = now - datetime.timedelta(minutes=REFRESH_ENROLLMENT_CACHE_MINUTES)
-
-    with transaction.atomic():
-        is_data_fresh, enrollments_queryset, course_ids = _check_if_refresh(
-            user, models.CachedEnrollment, refresh_delta)
-        if is_data_fresh:
-            # everything is cached: return the objects but exclude the not existing enrollments
-            return Enrollments(
-                [enrollment.data for enrollment in enrollments_queryset.exclude(data__isnull=True)]
-            )
-
-    # Data is not available in database or it's expired. Fetch new data.
-    enrollments = edx_client.enrollments.get_student_enrollments()
-
-    # Make sure all enrollments are updated atomically. It's still possible that this function executes twice and
-    # we fetch the data from edX twice, but the data shouldn't be half modified at any point.
-    with transaction.atomic():
-        for course_id in course_ids:
-            enrollment = enrollments.get_enrollment_for_course(course_id)
-            update_cached_enrollment(user, enrollment, course_id, now)
-
-    return enrollments
-
-
-def get_student_certificates(user, edx_client):
-    """
-    Return cached certificate data or fetch certificate data first if necessary.
-    All CourseRun will have an entry for the user: this entry will contain Null
-    data if the user does not have a certificate.
-
-    Args:
-        user (django.contrib.auth.models.User): A user
-        edx_client (EdxApi): EdX client to retrieve enrollments
-    Returns:
-        Certificates: a Certificates object from edx_api. This may contain more certificates than
-            what we know about in MicroMasters if more exist from edX,
-            or it may contain fewer certificates if they don't exist for the course id in edX.
-    """
-    # Certificates in database are refreshed after 6 hours
-    now = datetime.datetime.now(tz=pytz.utc)
-    refresh_delta = now - datetime.timedelta(hours=REFRESH_CERT_CACHE_HOURS)
-
-    with transaction.atomic():
-        is_data_fresh, certificates_queryset, course_ids = _check_if_refresh(
-            user, models.CachedCertificate, refresh_delta)
-        if is_data_fresh:
-            # everything is cached: return the objects but exclude the not existing certs
-            return Certificates([
-                Certificate(certificate.data) for certificate in certificates_queryset.exclude(data__isnull=True)
-            ])
-
-    # Certificates are out of date, so fetch new data from edX.
-    certificates = edx_client.certificates.get_student_certificates(
-        get_social_username(user), list(course_ids))
-
-    # This must be done atomically so the database is not half modified at any point. It's still possible to fetch
-    # from edX twice though.
-    with transaction.atomic():
-        for course_id in course_ids:
-            certificate = certificates.get_verified_cert(course_id)
-            # get the certificate data or None
-            # None means we will cache the fact that the student
-            # does not have a certificate for the given course
-            certificate_data = certificate.json if certificate is not None else None
-            course_run = CourseRun.objects.get(edx_course_key=course_id)
-            updated_values = {
-                'user': user,
-                'course_run': course_run,
-                'data': certificate_data,
-                'last_request': now,
-            }
-            models.CachedCertificate.objects.update_or_create(
-                user=user,
-                course_run=course_run,
-                defaults=updated_values
-            )
-
-    return certificates
-
-
-def get_student_current_grades(user, edx_client):
-    """
-    Return cached current grades data or fetch current grades data first if necessary.
-    All CourseRun will have an entry for the user: this entry will contain Null
-    data if the user does not have a current grade.
-
-    Args:
-        user (django.contrib.auth.models.User): A user
-        edx_client (EdxApi): EdX client to retrieve enrollments
-    Returns:
-        CurrentGrades: a CurrentGrades object from edx_api. This may contain more current grades than
-            what we know about in MicroMasters if more exist from edX,
-            or it may contain fewer current grades if they don't exist for the course id in edX.
-    """
-    # Current Grades in database are refreshed after 1 hour
-    now = datetime.datetime.now(tz=pytz.utc)
-    refresh_delta = now - datetime.timedelta(hours=REFRESH_GRADES_CACHE_HOURS)
-
-    with transaction.atomic():
-        enrolled_courses = models.CachedEnrollment.objects.filter(user=user).exclude(data=None).values_list(
-            "course_run__edx_course_key", flat=True)
-        is_data_fresh, grades_queryset, course_ids = _check_if_refresh(
-            user, models.CachedCurrentGrade, refresh_delta, enrolled_courses)
-        if is_data_fresh:
-            # everything is cached: return the objects but exclude the not existing certs
-            return CurrentGrades([
-                CurrentGrade(grade.data) for grade in grades_queryset.exclude(data__isnull=True)
-            ])
-
-    # Current Grades are out of date, so fetch new data from edX.
-    current_grades = edx_client.current_grades.get_student_current_grades(
-        get_social_username(user), list(course_ids))
-
-    # This must be done atomically so the database is not half modified at any point. It's still possible to fetch
-    # from edX twice though.
-    with transaction.atomic():
-        # update all the course ids and not only the enrolled ones
-        all_mm_course_ids = CourseRun.objects.filter(course__program__live=True).exclude(
-            Q(edx_course_key__isnull=True) | Q(edx_course_key__exact='')
-        ).values_list("edx_course_key", flat=True)
-        for course_id in all_mm_course_ids:
-            current_grade = current_grades.get_current_grade(course_id)
-            # get the current grade data or None
-            # None means we will cache the fact that the student
-            # does not have a current grade for the given course
-            grade_data = current_grade.json if current_grade is not None else None
-            course_run = CourseRun.objects.get(edx_course_key=course_id)
-            updated_values = {
-                'user': user,
-                'course_run': course_run,
-                'data': grade_data,
-                'last_request': now,
-            }
-            models.CachedCurrentGrade.objects.update_or_create(
-                user=user,
-                course_run=course_run,
-                defaults=updated_values
-            )
-
-    return current_grades

@@ -2,9 +2,7 @@
 Views for dashboard REST APIs
 """
 import logging
-from datetime import datetime
 
-import pytz
 from django.conf import settings
 from edx_api.client import EdxApi
 from rest_framework import (
@@ -18,10 +16,8 @@ from rest_framework.response import Response
 
 from backends import utils
 from backends.edxorg import EdxOrgOAuth2
-from dashboard.api import (
-    get_user_program_info,
-    update_cached_enrollment,
-)
+from dashboard.api import get_user_program_info
+from dashboard.api_edx_cache import CachedEdxUserData
 from profiles.api import get_social_username
 
 
@@ -105,7 +101,7 @@ class UserCourseEnrollment(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 data={'error': str(exc)}
             )
-        update_cached_enrollment(request.user, enrollment, enrollment.course_id, datetime.now(pytz.UTC))
+        CachedEdxUserData.update_cached_enrollment(request.user, enrollment, enrollment.course_id, index_user=True)
         return Response(
             data=enrollment.json
         )
