@@ -9,7 +9,7 @@
 
   .circular-progress-widget-fg {
     transition: stroke-dashoffset .5s ease-in-out;
-    stroke: white;
+    stroke: #f33b57;
     transform: rotate(-90deg);
     transform-origin: 50% 50%;
   }
@@ -22,7 +22,7 @@
 }
 
 .progress-widget {
-  background-color: $mm-brand-bg !important;
+  background-color: #1d1d1d !important;
   color: white;
   display: flex;
   align-items: center;
