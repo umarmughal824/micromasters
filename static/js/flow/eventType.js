@@ -1,11 +1,11 @@
 // @flow
 
 export type Event = {
-  preventDefault: Function;
-  target:         EventTarget;
-  initMouseEvent: Function;
+  preventDefault: Function,
+  target:         EventTarget,
+  initMouseEvent: Function,
 };
 
 export type EventTarget = {
-  getAttribute: Function;
+  getAttribute: Function,
 };

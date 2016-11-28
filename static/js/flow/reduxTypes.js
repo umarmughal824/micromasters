@@ -7,7 +7,7 @@ import type {
 
 export type ActionType = string;
 export type Action = {
-  type: ActionType;
+  type: ActionType,
   payload: any
 };
 
