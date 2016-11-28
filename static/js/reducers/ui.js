@@ -40,7 +40,6 @@ import {
   SET_NAV_DRAWER_OPEN,
   SET_PROGRAM,
 } from '../actions/ui';
-import { PERSONAL_STEP } from '../constants';
 import type { ToastMessage } from '../flow/generalTypes';
 import type { Action } from '../flow/reduxTypes';
 import type { AvailableProgram } from '../flow/enrollmentTypes';
@@ -64,7 +63,7 @@ export type UIState = {
   showEducationDeleteDialog:    boolean;
   deletionIndex:                ?number;
   dialog:                       UIDialog;
-  profileStep:                  string;
+  profileStep:                  ?string;
   workDialogIndex:              ?number;
   userMenuOpen:                 boolean;
   searchFilterVisibility:       {[s: string]: boolean};
@@ -96,7 +95,7 @@ export const INITIAL_UI_STATE: UIState = {
   showEducationDeleteDialog: false,
   deletionIndex: null,
   dialog: {},
-  profileStep: PERSONAL_STEP,
+  profileStep: null,
   workDialogIndex:  null,
   userMenuOpen: false,
   searchFilterVisibility: {},

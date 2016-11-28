@@ -18,8 +18,9 @@ export const EDUCATION_LEVELS = [
   {value: DOCTORATE, label: "Doctorate"}
 ];
 
+// NOTE: these need to be kept in sync with ui/url_utils.py
 export const PERSONAL_STEP = 'personal';
-export const EMPLOYMENT_STEP = 'employment';
+export const EMPLOYMENT_STEP = 'professional';
 export const EDUCATION_STEP = 'education';
 
 export const YEAR_VALIDATION_CUTOFF = 120;
@@ -31,6 +32,12 @@ export const PROFILE_STEP_LABELS = new Map([
   [EDUCATION_STEP, "Education"],
   [EMPLOYMENT_STEP, "Professional"]
 ]);
+
+export const PROFILE_STEP_ORDER = [
+  PERSONAL_STEP,
+  EDUCATION_STEP,
+  EMPLOYMENT_STEP
+];
 
 export const DEFAULT_OPTION_LIMIT_COUNT = 10;
 
@@ -216,6 +223,7 @@ export const USER_PROFILE_RESPONSE = {
   "filled_out": true,
   "agreed_to_terms_of_service": true,
   "account_privacy": "all_users",
+  "email": "jane@foobar.baz",
   "email_optin": false,
   "first_name": "Jane",
   "last_name": "Garris",

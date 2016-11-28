@@ -141,6 +141,7 @@ class EmploymentForm extends ProfileFormFields {
             keySet={keySet('industry')}
             label='Industry'
             options={this.industryOptions}
+            allowCreate={true}
             {...this.defaultInputComponentProps()}
           />
         </Cell>

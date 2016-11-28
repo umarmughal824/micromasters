@@ -5,11 +5,8 @@ from django.conf.urls import url
 from django.contrib.auth import views as auth_views
 
 from ui.url_utils import (
-    DASHBOARD_URL,
-    PROFILE_URL,
+    DASHBOARD_URLS,
     TERMS_OF_SERVICE_URL,
-    SETTINGS_URL,
-    SEARCH_URL,
 )
 from ui.views import (
     DashboardView,
@@ -21,12 +18,7 @@ from ui.views import (
 
 dashboard_urlpatterns = [
     url(r'^{}$'.format(dashboard_url.lstrip("/")), DashboardView.as_view(), name='ui-dashboard')
-    for dashboard_url in [
-        DASHBOARD_URL,
-        PROFILE_URL,
-        SETTINGS_URL,
-        SEARCH_URL,
-    ]
+    for dashboard_url in DASHBOARD_URLS
 ]
 
 urlpatterns = [

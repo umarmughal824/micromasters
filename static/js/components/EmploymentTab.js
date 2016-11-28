@@ -11,16 +11,22 @@ import {
 } from '../lib/validation/profile';
 import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
+import { setProfileStep } from '../actions/ui';
+import { EMPLOYMENT_STEP } from '../constants';
 
 class EmploymentTab extends React.Component {
   props: {
     saveProfile:  SaveProfileFunc,
     profile:      Profile,
     ui:           UIState,
-    nextStep:     () => void,
-    prevStep:     () => void,
     addProgramEnrollment: Function,
+    dispatch:     Function,
   };
+
+  componentWillMount() {
+    const { dispatch } = this.props;
+    dispatch(setProfileStep(EMPLOYMENT_STEP));
+  }
 
   render () {
     return (
@@ -29,6 +35,8 @@ class EmploymentTab extends React.Component {
         <ProfileProgressControls
           {...this.props}
           nextBtnLabel="I'm Done!"
+          prevUrl="/profile/education"
+          nextUrl="/dashboard"
           isLastTab={true}
           programIdForEnrollment={null}
           validator={

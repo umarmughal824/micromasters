@@ -1,8 +1,7 @@
 bpython
+codecov
 ddt
 django-debug-toolbar
-factory_boy
-faker
 ipdb
 ipython
 mock

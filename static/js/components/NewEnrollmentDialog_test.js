@@ -7,7 +7,7 @@ import { shallow } from 'enzyme';
 import Dialog from 'material-ui/Dialog';
 import SelectField from 'material-ui/SelectField';
 
-import { DASHBOARD_SUCCESS_ACTIONS } from '../containers/DashboardPage_test';
+import { DASHBOARD_SUCCESS_ACTIONS } from '../containers/test_util';
 import * as enrollmentActions from '../actions/programs';
 import * as uiActions from '../actions/ui';
 

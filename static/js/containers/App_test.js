@@ -1,4 +1,4 @@
-/* global document: false, window: false */
+/* global document: false, window: false, SETTINGS: false */
 import '../global_init';
 
 import ReactDOM from 'react-dom';
@@ -22,13 +22,15 @@ import {
 import {
   CLEAR_ENROLLMENTS,
   REQUEST_GET_PROGRAM_ENROLLMENTS,
-  RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
   RECEIVE_GET_PROGRAM_ENROLLMENTS_FAILURE,
 } from '../actions/programs';
 import * as enrollmentActions from '../actions/programs';
 import {
   CLEAR_UI,
   SET_PROFILE_STEP,
+  setNavDrawerOpen,
+  SET_NAV_DRAWER_OPEN,
+  SET_PHOTO_DIALOG_VISIBILITY,
 } from '../actions/ui';
 import * as uiActions from '../actions/ui';
 import {
@@ -38,24 +40,20 @@ import {
   EMPLOYMENT_STEP,
 } from '../constants';
 import IntegrationTestHelper from '../util/integration_test_helper';
+import { SUCCESS_ACTIONS } from './test_util';
 
-export const SUCCESS_ACTIONS = [
-  REQUEST_GET_PROGRAM_ENROLLMENTS,
-  RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
-  REQUEST_GET_USER_PROFILE,
-  RECEIVE_GET_USER_PROFILE_SUCCESS,
-];
 const EDIT_PROFILE_ACTIONS = SUCCESS_ACTIONS.concat([
-  START_PROFILE_EDIT,
   START_PROFILE_EDIT,
   UPDATE_PROFILE_VALIDATION,
   SET_PROFILE_STEP,
 ]);
 const REDIRECT_ACTIONS = SUCCESS_ACTIONS.concat([
-  START_PROFILE_EDIT
+  START_PROFILE_EDIT,
+  UPDATE_PROFILE_VALIDATION,
+  SET_PROFILE_STEP,
 ]);
 
-describe('App', () => {
+describe('App', function() {
   let listenForActions, renderComponent, helper;
 
   beforeEach(() => {
@@ -83,48 +81,48 @@ describe('App', () => {
   describe('profile completeness', () => {
     let checkStep = () => helper.store.getState().ui.profileStep;
 
-    it('redirects to /profile if profile is not complete', () => {
+    it('redirects to /profile/personal if profile is not complete', () => {
       let response = Object.assign(_.cloneDeep(USER_PROFILE_RESPONSE), {
         first_name: undefined
       });
       helper.profileGetStub.returns(Promise.resolve(response));
 
-      return renderComponent('/', EDIT_PROFILE_ACTIONS).then(() => {
-        assert.equal(helper.currentLocation.pathname, "/profile");
+      return renderComponent("/", EDIT_PROFILE_ACTIONS).then(() => {
+        assert.equal(helper.currentLocation.pathname, "/profile/personal");
         assert.equal(checkStep(), PERSONAL_STEP);
       });
     });
 
-    it('redirects to /profile if profile is not filled out', () => {
+    it('redirects to /profile/professional if profile is not filled out', () => {
       let response = Object.assign(_.cloneDeep(USER_PROFILE_RESPONSE), {
         filled_out: false
       });
       helper.profileGetStub.returns(Promise.resolve(response));
 
-      return renderComponent('/', REDIRECT_ACTIONS).then(() => {
-        assert.equal(helper.currentLocation.pathname, "/profile");
-        assert.equal(checkStep(), PERSONAL_STEP);
-      });
-    });
-
-    it('redirects to /profile and goes to the employment step if a field is missing there', () => {
-      let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
-      profile.work_history[1].city = "";
-
-      helper.profileGetStub.returns(Promise.resolve(profile));
-      return renderComponent('/', EDIT_PROFILE_ACTIONS).then(() => {
-        assert.equal(helper.currentLocation.pathname, "/profile");
+      return renderComponent("/", REDIRECT_ACTIONS).then(() => {
+        assert.equal(helper.currentLocation.pathname, "/profile/professional");
         assert.equal(checkStep(), EMPLOYMENT_STEP);
       });
     });
 
-    it('redirects to /profile and goes to the education step if a field is missing there', () => {
+    it('redirects to /profile/professional if a field is missing there', () => {
+      let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
+      profile.work_history[1].city = "";
+
+      helper.profileGetStub.returns(Promise.resolve(profile));
+      return renderComponent("/", EDIT_PROFILE_ACTIONS).then(() => {
+        assert.equal(helper.currentLocation.pathname, "/profile/professional");
+        assert.equal(checkStep(), EMPLOYMENT_STEP);
+      });
+    });
+
+    it('redirects to /profile/education if a field is missing there', () => {
       let response = _.cloneDeep(USER_PROFILE_RESPONSE);
       response.education[0].school_name = '';
       helper.profileGetStub.returns(Promise.resolve(response));
 
-      return renderComponent('/', EDIT_PROFILE_ACTIONS).then(() => {
-        assert.equal(helper.currentLocation.pathname, "/profile");
+      return renderComponent("/", EDIT_PROFILE_ACTIONS).then(() => {
+        assert.equal(helper.currentLocation.pathname, "/profile/education");
         assert.equal(checkStep(), EDUCATION_STEP);
       });
     });
@@ -176,6 +174,45 @@ describe('App', () => {
         stub.returns({type: "fake"});
         props.setCurrentProgramEnrollment("value");
         assert(stub.calledWith("value"));
+      });
+    });
+  });
+
+  describe('navbar', () => {
+    for (const [title, url] of [
+      ['Dashboard', '/dashboard'],
+      ['View Profile', `/learner/${SETTINGS.user.username}`],
+      ['Settings', '/settings'],
+    ]) {
+      it(`closes the drawer and changes the URL when ${title} is clicked`, () => {
+        helper.store.dispatch(setNavDrawerOpen(true));
+        return renderComponent("/").then(([wrapper]) => {
+          let node = wrapper.find(".nav-drawer").find("Link").filterWhere(x => x.text() === title);
+          assert.equal(node.props().to, url);
+
+          return listenForActions([SET_NAV_DRAWER_OPEN], () => {
+            node.simulate('click');
+          }).then(state => {
+            assert.isFalse(state.ui.navDrawerOpen);
+          });
+        });
+      });
+    }
+  });
+
+  it('closes the drawer and shows the photo dialog when edit photo is clicked', () => {
+    helper.store.dispatch(setNavDrawerOpen(true));
+    return renderComponent("/").then(([wrapper]) => {
+      let node = wrapper.find("button").filterWhere(x => x.text() === "Edit Photo");
+
+      return listenForActions([
+        SET_NAV_DRAWER_OPEN,
+        SET_PHOTO_DIALOG_VISIBILITY,
+      ], () => {
+        node.simulate('click');
+      }).then(state => {
+        assert.isFalse(state.ui.navDrawerOpen);
+        assert.isTrue(state.ui.photoDialogVisibility);
       });
     });
   });

@@ -35,6 +35,5 @@ elif [[ -z "$WEBPACK_DEV_SERVER_HOST" || "$IS_OSX_HOST_MACHINE" == 'true' ]] ; t
     npm install && echo "Finished npm install"
   fi
   # Start the webpack dev server on the appropriate host and port
-  node ./node_modules/webpack-dev-server/bin/webpack-dev-server.js --config webpack.config.dev.js -d \
-       --content-base ./static --host "$WEBPACK_HOST" --port "$WEBPACK_PORT" --progress --inline --hot
+  node ./hot-reload-dev-server.js --host "$WEBPACK_HOST" --port "$WEBPACK_PORT"
 fi

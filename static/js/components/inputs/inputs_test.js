@@ -2,32 +2,33 @@ import React from 'react';
 import { assert } from 'chai';
 import _ from 'lodash';
 import sinon from 'sinon';
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import VirtualizedSelect from 'react-virtualized-select';
 import R from 'ramda';
 
 import { USER_PROFILE_RESPONSE } from '../../constants';
 import iso3166 from 'iso-3166-2';
-
+import { modifyWrapperSelectField } from '../../util/test_utils';
 import SelectField from './SelectField';
 import CountrySelectField from './CountrySelectField';
 import StateSelectField from './StateSelectField';
 
 describe('Profile inputs', () => {
-  let inputProps, sandbox;
+  let inputProps, sandbox, updateProfileStub;
 
   const change = (newProfile) => inputProps.profile = newProfile;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    updateProfileStub = sandbox.stub();
   });
 
   afterEach(() => {
     sandbox.restore();
   });
 
-  const renderTestSelectField = () => (
-    shallow(<SelectField {...inputProps} />)
+  const renderTestSelectField = props => (
+    mount(<SelectField {...props} />)
   );
 
   describe('Select field', () => {
@@ -39,13 +40,15 @@ describe('Profile inputs', () => {
       {value: 'o', label: 'Other/Prefer not to say'}
     ];
 
-    let renderGenderSelectField = () => {
-      Object.assign(inputProps, {
-        keySet: ['gender'],
-        label: "Gender",
-        options: genderOptions
-      });
-      return renderTestSelectField();
+    let renderGenderSelectField = (props = {}) => {
+      return renderTestSelectField(
+        Object.assign({}, inputProps, {
+          keySet: ['gender'],
+          label: "Gender",
+          options: genderOptions,
+          updateProfile: updateProfileStub,
+        }, props)
+      );
     };
 
     beforeEach(() => {
@@ -78,18 +81,79 @@ describe('Profile inputs', () => {
 
     it('should update the selected option when onChange fires with an option', () => {
       selectField = renderGenderSelectField().find(VirtualizedSelect);
-      let option = genderOptions[1];
-      selectField.props().onChange({
-        text: option.label,
-        value: option.value
-      });
-      assert.equal(inputProps.profile.gender, 'f');
+      modifyWrapperSelectField(selectField, 'f');
+      assert.ok(updateProfileStub.calledWith({
+        account_privacy: 'private',
+        first_name: '',
+        date_of_birth: '',
+        gender: 'f',
+        date_field: ''
+      }));
     });
 
     it('should have the correct option selected', () => {
       inputProps.profile.gender = 'f';
       selectField = renderGenderSelectField().find(VirtualizedSelect);
       assert.equal(selectField.props().value, 'f');
+    });
+
+    it('should let you enter a new option, if the allowCreate option is passed', () => {
+      selectField = renderGenderSelectField({allowCreate: true}).find(VirtualizedSelect);
+      modifyWrapperSelectField(selectField, 'genderqueer');
+      assert.ok(updateProfileStub.calledWith({
+        account_privacy: 'private',
+        first_name: '',
+        date_of_birth: '',
+        gender: 'genderqueer',
+        date_field: ''
+      }), 'should be called with the right thing');
+    });
+
+    it('should set the correct className and id', () => {
+      let selectFieldWrapper = renderGenderSelectField({allowCreate: true});
+      let wrapperDiv = selectFieldWrapper.find('div').first();
+      assert.ok(wrapperDiv.hasClass('select-field'), 'should have the right class');
+      assert.ok(wrapperDiv.hasClass('gender'), 'should have the right class');
+      assert.include(wrapperDiv.props().id, 'gender');
+    });
+
+    it('should enter the new option in the options list', () => {
+      let selectField = renderGenderSelectField({allowCreate: true}).find(VirtualizedSelect);
+      modifyWrapperSelectField(selectField, 'genderqueer');
+      let newOption = selectField.props().options.find(option => (
+        option.value === 'genderqueer'
+      ));
+      assert.deepEqual(newOption, {
+        value: 'genderqueer',
+        label: 'genderqueer',
+        className: 'Select-create-option-placeholder'
+      });
+    });
+
+    it('should broadcast the new option back to the store', () => {
+      selectField = renderGenderSelectField({
+        allowCreate: true,
+        updateProfile: change,
+        profile: {},
+      }).find(VirtualizedSelect);
+      modifyWrapperSelectField(selectField, 'genderqueer');
+      assert.equal(inputProps.profile.gender, 'genderqueer');
+    });
+
+    it('should properly add options to this.state', () => {
+      inputProps.profile = {};
+      let props = {
+        allowCreate: true,
+        updateProfile: change,
+      };
+      selectField = renderGenderSelectField(props);
+      modifyWrapperSelectField(selectField.find(VirtualizedSelect), 'genderqueer');
+      selectField.setProps(Object.assign({}, inputProps, props));
+      assert.deepEqual(selectField.state(), {
+        customOptions: [
+          { value: 'genderqueer', label: 'genderqueer' }
+        ]
+      });
     });
   });
 
@@ -106,13 +170,13 @@ describe('Profile inputs', () => {
     });
 
     const renderStateSelect = () => (
-      shallow(<StateSelectField {...inputProps} />)
+      mount(<StateSelectField {...inputProps} />)
     );
 
     it('lists no states when an invalid country is selected', () => {
       inputProps.profile.country_key = 'MISSING';
       let stateField = renderStateSelect();
-      assert.lengthOf(stateField.props().options, 0);
+      assert.lengthOf(stateField.find(SelectField).props().options, 0);
     });
 
     it('renders a select field with sorted states for the given country', () => {
@@ -125,7 +189,7 @@ describe('Profile inputs', () => {
       }).value();
       inputProps.profile.country_key = country;
       let stateField = renderStateSelect();
-      let optionValueList = stateField.props().options.map((option) => {
+      let optionValueList = stateField.find(SelectField).props().options.map((option) => {
         return option.value;
       });
       assert.deepEqual(optionValueList, orderedUSStateValues);
@@ -145,14 +209,14 @@ describe('Profile inputs', () => {
     });
 
     const renderCountrySelect = () => (
-      shallow(<CountrySelectField {...inputProps} />)
+      mount(<CountrySelectField {...inputProps} />)
     );
 
     it('shows a list of countries', () => {
       inputProps.profile.country_key = null;
       inputProps.profile.country = null;
       let countryField = renderCountrySelect();
-      let props = countryField.props();
+      let props = countryField.find(SelectField).props();
       assert.lengthOf(props.options, _.keys(iso3166.data).length);
       // Check for a random list of country values that should exist as options in the select field
       let countriesToFind = ['AF', 'AL', 'US', 'IN', 'NZ'];
@@ -164,7 +228,7 @@ describe('Profile inputs', () => {
       inputProps.profile.country_key = 'US';
       inputProps.profile.state_key = 'US-MA';
       let countryField = renderCountrySelect();
-      countryField.props().onChange({ value: 'AL' });
+      countryField.find(SelectField).props().onChange({ value: 'AL' });
       assert.equal(inputProps.profile.country_key, 'AL');
       assert.equal(inputProps.profile.state_key, null);
     });

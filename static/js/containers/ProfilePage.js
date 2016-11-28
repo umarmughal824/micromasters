@@ -2,105 +2,88 @@
 /* global SETTINGS */
 import React from 'react';
 import { connect } from 'react-redux';
-import ReactDOM from 'react-dom';
+import R from 'ramda';
 
-import Loader from '../components/Loader';
-import { makeProfileProgressDisplay } from '../util/util';
 import { FETCH_PROCESSING } from '../actions';
-import { setProfileStep } from '../actions/ui';
+import { startProfileEdit } from '../actions/profile';
+import Loader from '../components/Loader';
 import WelcomeBanner from '../components/WelcomeBanner';
 import ErrorMessage from '../components/ErrorMessage';
 import ProfileFormContainer from './ProfileFormContainer';
-import PersonalTab from '../components/PersonalTab';
-import EmploymentTab from '../components/EmploymentTab';
-import EducationTab from '../components/EducationTab';
+import { validateProfileComplete } from '../lib/validation/profile';
+import type { Profile, ProfileGetResult } from '../flow/profileTypes';
 import {
-  PERSONAL_STEP,
-  EDUCATION_STEP,
-  EMPLOYMENT_STEP,
-} from '../constants';
-import { createActionHelper } from '../lib/redux';
-import type { Profile } from '../flow/profileTypes';
-import { startProfileEdit } from '../actions/profile';
+  makeProfileProgressDisplay,
+  currentOrFirstIncompleteStep,
+} from '../util/util';
 
 class ProfilePage extends ProfileFormContainer {
-  currentStep: Function = (): string => {
-    const { ui: { profileStep } } = this.props;
-    return profileStep;
-  };
-
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch(startProfileEdit(SETTINGS.user.username));
   }
 
-  stepTransitions: Function = (): [void|() => void, () => void] => {
-    const { dispatch } = this.props;
-    let setStep = createActionHelper(dispatch, setProfileStep);
-    let createStepFunc = step => () => {
-      setStep(step);
-      ReactDOM.findDOMNode(this).querySelector(".profile-pagination").scrollIntoView();
-    };
-    switch ( this.currentStep() ) {
-    case EDUCATION_STEP:
-      return [createStepFunc(PERSONAL_STEP), createStepFunc(EMPLOYMENT_STEP)];
-    case EMPLOYMENT_STEP:
-      return [
-        createStepFunc(EDUCATION_STEP),
-        () => this.context.router.push('/dashboard')
-      ];
-    default:
-      return [undefined, createStepFunc(EDUCATION_STEP)];
-    }
-  };
+  componentDidUpdate() {
+    const username = SETTINGS.user.username;
+    const {
+      profiles: {
+        [username]: profileInfo,
+      },
+      ui: { profileStep },
+    } = this.props;
 
-  currentComponent: Function = (props): React$Element<*> => {
-    switch ( this.currentStep() ) {
-    case EDUCATION_STEP:
-      return <EducationTab {...props} />;
-    case EMPLOYMENT_STEP:
-      return <EmploymentTab {...props} />;
-    default:
-      return <PersonalTab {...props} />;
+    if (profileStep !== null &&
+        profileInfo !== undefined &&
+        profileInfo.getStatus !== FETCH_PROCESSING) {
+      const { profile } = this.profileProps(profileInfo);
+
+      const [ , step, ] = validateProfileComplete(profile);
+      let idealStep = currentOrFirstIncompleteStep(profileStep, step);
+      if (profileStep !== idealStep) {
+        this.context.router.push(`/profile/${idealStep}`);
+      }
     }
-  };
+  }
+
+  renderContent(username: string, profileInfo: ProfileGetResult, profile: Profile, currentStep: ?string) {
+    if (R.isNil(profileInfo)) {
+      return '';
+    }
+
+    if (profileInfo.errorInfo !== undefined) {
+      return <ErrorMessage errorInfo={profileInfo.errorInfo} />;
+    }
+
+    return (
+      <div>
+        <WelcomeBanner profile={profile} />
+        <div className="profile-pagination">
+          {makeProfileProgressDisplay(currentStep)}
+        </div>
+        <section className="profile-form">
+          {this.childrenWithProps(profileInfo)}
+        </section>
+      </div>
+    );
+  }
+
 
   render() {
-    const { profiles } = this.props;
-    const profileInfo = profiles[SETTINGS.user.username];
-    let props;
-    let [prev, next] = this.stepTransitions();
-    props = Object.assign({}, this.profileProps(profileInfo), {
-      prevStep: prev,
-      nextStep: next
-    });
-    let profile: Profile = props.profile;
-
-    let loaded, content, errorMessage;
-    if (profileInfo !== undefined) {
-      loaded = profileInfo.getStatus !== FETCH_PROCESSING;
-      if (profileInfo.errorInfo !== undefined) {
-        errorMessage = <ErrorMessage errorInfo={profileInfo.errorInfo} />;
-      } else {
-        content = <div>
-          <WelcomeBanner profile={profile} />
-          <div className="profile-pagination">
-            {makeProfileProgressDisplay(this.currentStep())}
-          </div>
-          <section className="profile-form">
-            {this.currentComponent(props)}
-          </section>
-        </div>;
-      }
-    } else {
-      loaded = false;
-    }
+    const username = SETTINGS.user.username;
+    const {
+      profiles: {
+        [username]: profileInfo,
+      },
+      ui: { profileStep }
+    } = this.props;
+    const loaded = profileInfo !== undefined &&
+        profileInfo.getStatus !== FETCH_PROCESSING;
+    const { profile } = this.profileProps(profileInfo);
 
     return (
       <div className="single-column">
         <Loader loaded={loaded}>
-          {errorMessage}
-          {content}
+          {this.renderContent(username, profileInfo, profile, profileStep)}
         </Loader>
       </div>
     );

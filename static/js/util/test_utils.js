@@ -79,8 +79,18 @@ export const modifySelectField = (field: HTMLElement, text: string): void => {
   TestUtils.Simulate.keyDown(input, { keyCode: 9, key: 'Tab' });
 };
 
+export const modifyWrapperSelectField = (wrapper: Object, text: string): void => {
+  let input = wrapper.find('input');
+  input.simulate('focus');
+  input.simulate('change', { target: { value: text }});
+  input.simulate('keyDown', { keyCode: 9, key: 'Tab' });
+};
+
 export const clearSelectField = (field: HTMLElement): void => {
-  TestUtils.Simulate.mouseDown(field.querySelector('.Select-clear'), { button: 1 });
+  let input = field.querySelector('.Select-input').querySelector('input');
+  TestUtils.Simulate.focus(input);
+  TestUtils.Simulate.keyDown(input, { keyCode: 8, key: 'Backspace' });
+  TestUtils.Simulate.keyDown(input, { keyCode: 9, key: 'Tab' });
 };
 
 

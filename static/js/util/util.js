@@ -13,7 +13,8 @@ import R from 'ramda';
 import {
   STATUS_PASSED,
   EDUCATION_LEVELS,
-  PROFILE_STEP_LABELS
+  PROFILE_STEP_LABELS,
+  PROFILE_STEP_ORDER,
 } from '../constants';
 import type {
   Profile,
@@ -53,7 +54,7 @@ export function userPrivilegeCheck (profile: Profile, privileged: any, unPrivile
   }
 }
 
-export function makeProfileProgressDisplay(active: string) {
+export function makeProfileProgressDisplay(active: ?string) {
   const width = 750, height = 100, radius = 20, paddingX = 40, paddingY = 5;
   const numCircles = PROFILE_STEP_LABELS.size;
 
@@ -179,6 +180,21 @@ export function makeProfileProgressDisplay(active: string) {
     {elements}
   </svg>;
 }
+
+const getStepIndices = R.map(R.indexOf(R.__, PROFILE_STEP_ORDER));
+const lastStep = R.last(PROFILE_STEP_ORDER);
+
+/**
+ * Determine the lesser of the current step or the first incomplete step
+ */
+export const currentOrFirstIncompleteStep = R.compose(
+    R.nth(R.__, PROFILE_STEP_ORDER),
+    R.reduce(R.min, Infinity),
+    getStepIndices,
+    R.reject(R.isNil),
+    R.append(lastStep),
+    R.pair
+);
 
 /* eslint-disable camelcase */
 /**
@@ -428,3 +444,5 @@ export function findCourseRun(
 export const classify: (s: string) => string = (
   R.compose(R.replace(/_/g,'-'), _.snakeCase, R.defaultTo(""))
 );
+
+export const labelSort = R.sortBy(R.compose(R.toLower, R.prop('label')));

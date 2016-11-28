@@ -25,7 +25,9 @@ import {
   programCourseInfo,
   findCourseRun,
   isProfileOfLoggedinUser,
+  labelSort,
   classify,
+  currentOrFirstIncompleteStep,
 } from '../util/util';
 import {
   EDUCATION_LEVELS,
@@ -38,6 +40,8 @@ import {
   PROFILE_STEP_LABELS,
   CYBERSOURCE_CHECKOUT_RESPONSE,
   DASHBOARD_RESPONSE,
+  PERSONAL_STEP,
+  EDUCATION_STEP,
 } from '../constants';
 import { assertMaybeEquality, assertIsNothing } from '../lib/sanctuary_test';
 import { program } from '../components/ProgressWidget_test';
@@ -220,6 +224,32 @@ describe('utility functions', () => {
           );
         }
       });
+    });
+  });
+
+  describe('currentOrFirstIncompleteStep', () => {
+    it('should return the validated step if current step is null', () => {
+      let step = currentOrFirstIncompleteStep(null, PERSONAL_STEP);
+
+      assert.equal(step, PERSONAL_STEP);
+    });
+
+    it('should return the current step if validated step is null', () => {
+      let step = currentOrFirstIncompleteStep(PERSONAL_STEP, null);
+
+      assert.equal(step, PERSONAL_STEP);
+    });
+
+    it('should return the current step if validated step is greater', () => {
+      let step = currentOrFirstIncompleteStep(PERSONAL_STEP, EDUCATION_STEP);
+
+      assert.equal(step, PERSONAL_STEP);
+    });
+
+    it('should return the validated step if current step is greater', () => {
+      let step = currentOrFirstIncompleteStep(EDUCATION_STEP, PERSONAL_STEP);
+
+      assert.equal(step, PERSONAL_STEP);
     });
   });
 
@@ -536,6 +566,32 @@ describe('utility functions', () => {
     it('returns an empty string when passed an empty string or undefined', () => {
       assert.equal(classify(''), '');
       assert.equal(classify(undefined), '');
+    });
+  });
+
+  describe('labelSort', () => {
+    it('sorts options by lowercase alphabetical order', () => {
+      let input = [
+        {
+          value: '1',
+          label: 'One',
+        },
+        {
+          value: '2',
+          label: 'two',
+        },
+        {
+          value: '3',
+          label: 'Three',
+        }
+      ];
+
+      let expected = [
+        input[0],
+        input[2],
+        input[1],
+      ];
+      assert.deepEqual(expected, labelSort(input));
     });
   });
 });

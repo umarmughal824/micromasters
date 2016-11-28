@@ -21,7 +21,7 @@ import {
   RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
 } from '../actions/programs';
 import rootReducer from '../reducers';
-import { makeDashboardRoutes } from '../dashboard_routes';
+import DashboardRouter from '../DashboardRouter';
 import { localStorageMock } from '../util/test_utils';
 import { configureMainTestStore } from '../store/configureStore';
 import type { Action } from '../flow/reduxTypes';
@@ -102,7 +102,11 @@ export default class IntegrationTestHelper {
       div = document.createElement("div");
       wrapper = mount(
         <div>
-          { makeDashboardRoutes(this.browserHistory, this.store, () => null) }
+          <DashboardRouter
+            browserHistory={this.browserHistory}
+            store={this.store}
+            onRouteUpdate={() => null}
+          />
         </div>,
         {
           attachTo: div

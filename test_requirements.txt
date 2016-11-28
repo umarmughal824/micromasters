@@ -5,20 +5,20 @@
 #    pip-compile --output-file test_requirements.txt test_requirements.in
 #
 apipkg==1.4               # via execnet
+argparse==1.4.0           # via codecov
 astroid==1.4.8            # via pylint, pylint-plugin-utils
 blessings==1.6            # via curtsies
 blinker==1.4              # via nplusone
 bpython==0.16
 click==6.6                # via pip-tools
-coverage==4.2             # via pytest-cov
+codecov==2.0.5
+coverage==4.2             # via codecov, pytest-cov
 curtsies==0.2.11          # via bpython
 ddt==1.1.1
 decorator==4.0.10         # via ipython, traitlets
 django-debug-toolbar==1.6
+Django==1.10.3            # via django-debug-toolbar
 execnet==1.4.1            # via pytest-cache
-factory-boy==2.7.0
-fake-factory==0.7.2       # via factory-boy
-faker==0.7.3
 fancycompleter==0.5       # via pdbpp
 first==2.0.1              # via pip-tools
 greenlet==0.4.10          # via bpython
@@ -51,11 +51,10 @@ pytest-django==3.0.0
 pytest-pep8==1.0.6
 pytest-pylint==0.6.0
 pytest==3.0.3
-python-dateutil==2.5.3    # via fake-factory, faker
-requests==2.11.1          # via bpython
+requests==2.11.1          # via bpython, codecov
 semantic-version==2.6.0
 simplegeneric==0.8.1      # via ipython
-six==1.10.0               # via astroid, bpython, fake-factory, faker, mock, nplusone, pip-tools, prompt-toolkit, pylint, pytest-pylint, python-dateutil, traitlets
+six==1.10.0               # via astroid, bpython, mock, nplusone, pip-tools, prompt-toolkit, pylint, pytest-pylint, traitlets
 sqlparse==0.2.2           # via django-debug-toolbar
 testfixtures==4.13.1
 tox==2.4.1

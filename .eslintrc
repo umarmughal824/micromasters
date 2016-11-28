@@ -21,6 +21,7 @@
         "location"
       ]}],
     "react/display-name" : [0],
+    "react/no-find-dom-node": [0],
     "no-unused-vars": [ 2, {
       "vars": "local",
       "argsIgnorePattern": "action"

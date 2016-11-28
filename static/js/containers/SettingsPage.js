@@ -23,10 +23,7 @@ class SettingsPage extends ProfileFormContainer {
 
   render() {
     const { profiles } = this.props;
-    let props = Object.assign({}, this.profileProps(profiles[SETTINGS.user.username]), {
-      nextStep: () => this.context.router.push('/dashboard'),
-      prevStep: undefined
-    });
+    let props = Object.assign({}, this.profileProps(profiles[SETTINGS.user.username]));
     let loaded = false;
     const username = SETTINGS.user.username;
 
@@ -41,8 +38,9 @@ class SettingsPage extends ProfileFormContainer {
           <h4 className="privacy-form-heading">Settings</h4>
           <PrivacyForm {...props} validator={privacyValidation} />
           <ProfileProgressControls
-            nextBtnLabel="Save"
             {...props}
+            nextBtnLabel="Save"
+            nextUrl="/dashboard"
             isLastTab={true}
             validator={privacyValidation}
           />

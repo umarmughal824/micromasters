@@ -36,7 +36,7 @@ import {
   REQUEST_COURSE_PRICES,
   RECEIVE_COURSE_PRICES_SUCCESS,
 } from '../actions/index';
-import { DASHBOARD_SUCCESS_ACTIONS } from '../containers/DashboardPage_test';
+import { DASHBOARD_SUCCESS_ACTIONS } from './test_util';
 
 describe('FinancialAidCalculator', () => {
   let listenForActions, renderComponent, helper, addFinancialAidStub, skipFinancialAidStub;

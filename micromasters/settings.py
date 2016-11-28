@@ -21,7 +21,7 @@ from celery.schedules import crontab
 from django.core.exceptions import ImproperlyConfigured
 
 
-VERSION = "0.23.0"
+VERSION = "0.24.0"
 
 CONFIG_PATHS = [
     os.environ.get('MICROMASTERS_CONFIG', ''),
@@ -445,6 +445,7 @@ MICROMASTERS_USE_S3 = get_var('MICROMASTERS_USE_S3', False)
 AWS_ACCESS_KEY_ID = get_var('AWS_ACCESS_KEY_ID', False)
 AWS_SECRET_ACCESS_KEY = get_var('AWS_SECRET_ACCESS_KEY', False)
 AWS_STORAGE_BUCKET_NAME = get_var('AWS_STORAGE_BUCKET_NAME', False)
+AWS_QUERYSTRING_AUTH = get_var('AWS_QUERYSTRING_AUTH', False)
 # Provide nice validation of the configuration
 if (
         MICROMASTERS_USE_S3 and
@@ -487,7 +488,7 @@ CELERYBEAT_SCHEDULE = {
 CELERY_TIMEZONE = 'UTC'
 
 # Elasticsearch
-ELASTICSEARCH_DEFAULT_PAGE_SIZE = get_var('ELASTICSEARCH_DEFAULT_PAGE_SIZE', 10)
+ELASTICSEARCH_DEFAULT_PAGE_SIZE = get_var('ELASTICSEARCH_DEFAULT_PAGE_SIZE', 50)
 ELASTICSEARCH_URL = get_var("ELASTICSEARCH_URL", None)
 ELASTICSEARCH_INDEX = get_var('ELASTICSEARCH_INDEX', 'micromasters')
 ELASTICSEARCH_HTTP_AUTH = get_var("ELASTICSEARCH_HTTP_AUTH", None)

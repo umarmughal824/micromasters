@@ -13,6 +13,8 @@ import {
   setEducationDialogVisibility,
   setEducationDialogIndex,
   setEducationDegreeLevel,
+  setEducationLevelAnswers,
+  setWorkHistoryAnswer,
   setUserPageDialogVisibility,
   setShowEducationDeleteDialog,
   setShowWorkDeleteDialog,
@@ -32,7 +34,6 @@ import {
   setNavDrawerOpen,
 } from '../actions/ui';
 import { INITIAL_UI_STATE } from '../reducers/ui';
-import { PERSONAL_STEP } from '../constants';
 import rootReducer from '../reducers';
 import { createAssertReducerResultState } from '../util/test_utils';
 import type { AssertReducerResultState } from '../flow/reduxTypes';
@@ -95,6 +96,10 @@ describe('ui reducers', () => {
     it('should set a work history dialog index', () => {
       assertReducerResultState(setWorkDialogIndex, ui => ui.workDialogIndex, null);
     });
+
+    it('should set the work history answer', () => {
+      assertReducerResultState(setWorkHistoryAnswer, ui => ui.workHistoryAnswer, null);
+    });
   });
 
   describe('education reducers', () => {
@@ -108,6 +113,10 @@ describe('ui reducers', () => {
 
     it('should let you set education dialog index', () => {
       assertReducerResultState(setEducationDialogIndex, ui => ui.educationDialogIndex, -1);
+    });
+
+    it('should set the education level answers', () => {
+      assertReducerResultState(setEducationLevelAnswers, ui => ui.educationLevelAnswers, {});
     });
   });
 
@@ -133,7 +142,7 @@ describe('ui reducers', () => {
 
   describe("profile step", () => {
     it(`should let you set the profile step`, () => {
-      assertReducerResultState(setProfileStep, ui => ui.profileStep, PERSONAL_STEP);
+      assertReducerResultState(setProfileStep, ui => ui.profileStep, null);
     });
   });
 

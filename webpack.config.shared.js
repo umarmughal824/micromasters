@@ -24,7 +24,7 @@ module.exports = {
       {
         test: /\.jsx?$/,
         exclude: /node_modules/,
-        loaders: ['react-hot', 'babel-loader?' + JSON.stringify(babelQuerySettings)]
+        loader: 'babel-loader?' + JSON.stringify(babelQuerySettings)
       },  // to transform JSX into JS
       {
         test: /\.(svg|ttf|woff|woff2|eot|gif)$/,

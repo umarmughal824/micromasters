@@ -19,6 +19,13 @@ export default class UserInfoCard extends React.Component {
     toggleShowPersonalDialog: () => void
   };
 
+  email = (email: string): React$Element<*> => (
+    <div>
+      <Icon name="email" className="email-icon" />
+      <span className="profile-email">{email}</span>
+    </div>
+  );
+
   render() {
     const { profile, toggleShowPersonalDialog } = this.props;
 
@@ -29,10 +36,7 @@ export default class UserInfoCard extends React.Component {
           <div className="col user-info">
             <div className="profile-title">{getPreferredName(profile)}</div>
             <div className="profile-company-name">{mstr(getEmployer(profile))}</div>
-            <div>
-              <Icon name="email" className="email-icon" />
-              <span className="profile-email">{profile.email}</span>
-            </div>
+            { profile.email ? this.email(profile.email) : null }
           </div>
           <div className="edit-profile-holder">
             {userPrivilegeCheck(profile, () => <IconButton name="edit" onClick={toggleShowPersonalDialog}/>)}
