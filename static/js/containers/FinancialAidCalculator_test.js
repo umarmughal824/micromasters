@@ -160,7 +160,7 @@ describe('FinancialAidCalculator', () => {
           'income': 'Income is required',
           'currency': 'Please select a currency'
         });
-        checkInvalidInput('.salary-field input', 'required');
+        checkInvalidInput('.salary-field input', 'aria-required');
         checkInvalidInput('.checkbox input', 'required');
         checkInvalidInput('.currency .Select-input input', 'aria-required');
       });
