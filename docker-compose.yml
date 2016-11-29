@@ -70,6 +70,7 @@ services:
       - "8078:8078"
     volumes:
       - .:/src
+      - yarn-cache:/home/mitodl/.cache/yarn
     environment:
       NODE_ENV: 'development'
     env_file: .env
@@ -100,3 +101,4 @@ services:
 
 volumes:
   django_media: {}
+  yarn-cache: {}

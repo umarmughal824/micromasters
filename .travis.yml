@@ -21,8 +21,3 @@ matrix:
         - docker
       env:
         name: JavaScript
-
-cache:
-  bundler: true
-  directories:
-    - $HOME/.npm

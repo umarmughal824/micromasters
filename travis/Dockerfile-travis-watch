@@ -1,16 +1,16 @@
-FROM mitodl/mm_watch_travis
+FROM mitodl/mm_watch_travis_yarn
 
 WORKDIR /src
 
 COPY package.json /src
 
-COPY npm-shrinkwrap.json /src
+COPY yarn.lock /src
 
 ADD ./webpack_if_prod.sh /src
 
 USER mitodl
 
-RUN mv ./node_modules ./node_modules.tmp && mv ./node_modules.tmp ./node_modules && npm install
+RUN yarn install --pure-lockfile
 
 COPY . /src
 
