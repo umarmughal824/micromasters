@@ -5,6 +5,7 @@ import logging
 
 from django.conf import settings
 from edx_api.client import EdxApi
+from requests.exceptions import HTTPError
 from rest_framework import (
     authentication,
     permissions,
@@ -18,6 +19,7 @@ from backends import utils
 from backends.edxorg import EdxOrgOAuth2
 from dashboard.api import get_user_program_info
 from dashboard.api_edx_cache import CachedEdxUserData
+from micromasters.exceptions import PossiblyImproperlyConfigured
 from profiles.api import get_social_username
 
 
@@ -91,9 +93,29 @@ class UserCourseEnrollment(APIView):
 
         try:
             enrollment = edx_client.enrollments.create_audit_student_enrollment(course_id)
-        except Exception as exc:  # pylint: disable=broad-except
+        except HTTPError as exc:
+            if exc.response.status_code == status.HTTP_400_BAD_REQUEST:
+                raise PossiblyImproperlyConfigured(
+                    'Got a 400 status code from edX server while trying to create '
+                    'audit enrollment. This might happen if the course is improperly '
+                    'configured on MicroMasters. Course key '
+                    '{course_key}, edX user "{edX_user}"'.format(
+                        edX_user=get_social_username(request.user),
+                        course_key=course_id,
+                    )
+                )
             log.error(
-                "Error creating audit enrollment for course key %s for user %s",
+                "Http error from edX while creating audit enrollment for course key %s for edX user %s",
+                course_id,
+                get_social_username(request.user),
+            )
+            return Response(
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                data={'error': str(exc)}
+            )
+        except Exception as exc:  # pylint: disable=broad-except
+            log.exception(
+                "Error creating audit enrollment for course key %s for edX user %s",
                 course_id,
                 get_social_username(request.user),
             )
