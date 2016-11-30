@@ -57,6 +57,7 @@ export type Profile = {
   email_optin: boolean;
   agreed_to_terms_of_service: boolean;
   image: ?string;
+  about_me: ?string;
 };
 
 export type Profiles = {
