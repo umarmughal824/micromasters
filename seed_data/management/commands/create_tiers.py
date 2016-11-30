@@ -7,6 +7,22 @@ from courses.models import Program
 from financialaid.factories import TierProgramFactory
 
 
+def create_tiers(programs, num_tiers):
+    """Given a list of Programs, creates a specified number of TierPrograms associated with each"""
+    tiers_created = 0
+    programs_with_tiers_created = 0
+    for program in programs:
+        # Create TierPrograms
+        tiers_to_create_count = num_tiers - program.tier_programs.count()
+        if tiers_to_create_count <= 0:
+            # Program already has or has more than the specified number of TierPrograms to create
+            continue
+        programs_with_tiers_created += 1
+        created_tier_programs = TierProgramFactory.create_batch(tiers_to_create_count, program=program)
+        tiers_created += len(created_tier_programs)
+    return programs_with_tiers_created, tiers_created
+
+
 class Command(BaseCommand):
     """
     Generates fake Tier and TierProgram data
@@ -38,28 +54,14 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         programs = Program.objects.all()
+        num_tiers = int(options["tiers"])
         if options["program_id"] is not None:
             # Filter to a just the specified id
             programs = programs.filter(id=options["program_id"])
         if not options["add_to_existing"]:
             # Filter to just those that don't have any TierPrograms
             programs = programs.filter(tier_programs__isnull=True)
-
-        tiers_created = 0
-        programs_with_tiers_created = 0
-        for program in programs:
-            # Create TierPrograms
-            tiers_to_create_count = int(options["tiers"]) - program.tier_programs.count()
-            if tiers_to_create_count <= 0:
-                # Program already has or has more than the specified number of TierPrograms to create
-                continue
-            programs_with_tiers_created += 1
-            for _ in range(tiers_to_create_count):
-                TierProgramFactory.create(
-                    program=program
-                )
-                tiers_created += 1
-
+        programs_with_tiers_created, tiers_created = create_tiers(programs, num_tiers)
         self.stdout.write(
             "Created {tiers_created} Tiers/TierPrograms for {programs_created} Programs.".format(
                 tiers_created=tiers_created,

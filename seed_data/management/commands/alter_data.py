@@ -167,7 +167,7 @@ def add_future_run(user=None, course=None, now=None):
             )
             key_append += 1
     set_course_run_future(new_course_run, save=True)
-    CachedEnrollmentHandler(user).set_or_create(course_run=new_course_run, blank=True)
+    CachedEnrollmentHandler(user).set_blank(course_run=new_course_run)
     return new_course_run
 
 
@@ -186,7 +186,7 @@ def add_past_failed_run(user=None, course=None, now=None, grade=DEFAULT_FAILED_G
     ).exclude(end_date=None).order_by('-end_date').all()
     # Loop through past course runs and find one without CachedCurrentGrade data
     for past_run in past_runs:
-        if not CachedCurrentGradeHandler(user).get_or_create(past_run).data:
+        if not CachedCurrentGradeHandler(user).get_or_create(past_run)[0].data:
             chosen_past_run = past_run
             continue
         elif not add_if_exists:

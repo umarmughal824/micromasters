@@ -1,7 +1,7 @@
 """
 Generates a set of realistic users/programs to help us test search functionality
 """
-from datetime import datetime, timedelta
+from decimal import Decimal
 from django.core.management import BaseCommand
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
@@ -9,8 +9,8 @@ from factory.django import mute_signals
 
 from backends.edxorg import EdxOrgOAuth2
 from courses.models import Program, Course, CourseRun
-from dashboard.models import ProgramEnrollment, CachedCertificate, CachedEnrollment
-from ecommerce.models import CoursePrice
+from dashboard.models import ProgramEnrollment
+from ecommerce.models import Order, Line, CoursePrice
 from micromasters.utils import (
     get_field_names,
     load_json_from_file,
@@ -22,11 +22,32 @@ from roles.models import Role
 from roles.roles import Staff
 from search.indexing_api import recreate_index
 from seed_data.utils import filter_dict_by_key_set
-from seed_data.lib import fake_programs_query
+from seed_data.lib import (
+    CachedEnrollmentHandler,
+    CachedCertificateHandler,
+    CachedCurrentGradeHandler,
+    fake_programs_query,
+    ensure_cached_data_freshness,
+)
 from seed_data.management.commands import (  # pylint: disable=import-error
     USER_DATA_PATH, PROGRAM_DATA_PATH,
     FAKE_USER_USERNAME_PREFIX, FAKE_PROGRAM_DESC_PREFIX
 )
+from seed_data.management.commands.create_tiers import create_tiers
+
+
+MODEL_DEFAULTS = {
+    Profile: {
+        'account_privacy': 'private',
+        'edx_requires_parental_consent': False,
+        'email_optin': True,
+        'filled_out': True,
+        'has_profile_image': False,
+    },
+    Education: {
+        'online_degree': False
+    }
+}
 
 
 def deserialize_model_data_on_object(model_obj, data, save=True):
@@ -46,93 +67,31 @@ def deserialize_model_data(model_cls, data, relational_data=None):
     Creates a new instance of a model class and fills in field values using some supplied data
     """
     non_relation_field_names = get_field_names(model_cls)
-    model_data = filter_dict_by_key_set(data, non_relation_field_names)
+    model_data = {}
+    # If default values have been specified, set them on the model data dict
+    if model_cls in MODEL_DEFAULTS:
+        model_data.update(MODEL_DEFAULTS[model_cls])
+    # For all keys that match valid model fields, update the model data dict
+    model_data.update(filter_dict_by_key_set(data, non_relation_field_names))
+    # For any other data that has been specifically passed in, update the model data dict
     if relational_data:
         model_data.update(relational_data)
+    # Create a new model object based on the computed data
     return model_cls.objects.create(**model_data)
+
+
+def add_paid_order_for_course(user, course_run):
+    """
+    Adds an Order and Line for a FA-enabled CourseRun and a User
+    """
+    course_price_value = course_run.course.program.get_course_price()
+    order = Order.objects.create(user=user, status=Order.FULFILLED, total_price_paid=course_price_value)
+    Line.objects.create(order=order, course_key=course_run.edx_course_key, price=course_price_value)
 
 
 # User data deserialization
 
-class CachedModelDeserializer:
-    """
-    Base class for deserializing a model used for edX data caching (eg: Enrollments, Certificates)
-    """
-    model_cls = None
-
-    @classmethod
-    def _get_edx_course_key(cls, data):   # pylint: disable=unused-argument
-        """Gets the edx_course_key value from the data dictionary"""
-        raise NotImplementedError
-
-    @classmethod
-    def _fill_in_missing_data(cls, data, user, course_run):   # pylint: disable=unused-argument
-        """Fills in data using the associated User and CourseRun objects"""
-        raise NotImplementedError
-
-    @classmethod
-    def deserialize(cls, user, data, course_runs):
-        """
-        Creates a new cached model object and returns the associated CourseRun
-        """
-        edx_course_key = cls._get_edx_course_key(data)
-        course_run = first_matching_item(course_runs, lambda cr: cr.edx_course_key == edx_course_key)
-        data = cls._fill_in_missing_data(data, user, course_run)
-        cls.model_cls.objects.create(
-            user=user,
-            course_run=course_run,
-            data=data,
-            last_request=datetime.now() + timedelta(days=365)
-        )
-        return course_run
-
-
-class CertificateDeserializer(CachedModelDeserializer):
-    """
-    CachedCertificate deserializer
-    """
-
-    model_cls = CachedCertificate
-    data_key = 'certificates'
-
-    @classmethod
-    def _get_edx_course_key(cls, data):
-        return data['course_id']
-
-    @classmethod
-    def _fill_in_missing_data(cls, data, user, course_run):
-        data['username'] = get_social_username(user)
-        return data
-
-
-class EnrollmentDeserializer(CachedModelDeserializer):
-    """
-    CachedEnrollment deserializer
-    """
-
-    model_cls = CachedEnrollment
-    data_key = 'enrollments'
-
-    @classmethod
-    def _get_edx_course_key(cls, data):
-        return data['course_details']['course_id']
-
-    @classmethod
-    def _fill_in_missing_data(cls, data, user, course_run):
-        data['user'] = get_social_username(user)
-        data['course_details'].update({
-            'course_start': course_run.start_date.isoformat(),
-            'course_end': course_run.end_date.isoformat(),
-            'enrollment_start': course_run.enrollment_start.isoformat(),
-            'enrollment_end': course_run.enrollment_end.isoformat()
-        })
-        return data
-
-
-CACHED_MODEL_DESERIALIZERS = [EnrollmentDeserializer, CertificateDeserializer]
-
-
-def deserialize_user_data(user_data, course_runs):
+def deserialize_user_data(user_data, programs):
     """
     Deserializes a dict of mixed User/Profile data and returns the newly-inserted User
     """
@@ -151,28 +110,65 @@ def deserialize_user_data(user_data, course_runs):
         provider=EdxOrgOAuth2.name,
         uid=user.username,
     )
-    # Create new cached edX data records for each type we care about and associate them with a User and CourseRun
-    for cached_model_deserializer in CACHED_MODEL_DESERIALIZERS:
-        if cached_model_deserializer.data_key in user_data:
-            accounted_course_runs = [
-                cached_model_deserializer.deserialize(user, data, course_runs)
-                for data in user_data[cached_model_deserializer.data_key]
-            ]
-            unaccounted_course_runs = set(course_runs) - set(accounted_course_runs)
-            # Add a ProgramEnrollment for this user/program combination if it doesn't exist yet
-            program = accounted_course_runs[0].course.program
-            ProgramEnrollment.objects.get_or_create(user=user, program=program)
-        else:
-            unaccounted_course_runs = course_runs
-        # For each course run that didn't have associated cached edX data (for Enrollments, Certificates, etc),
-        # create an 'empty' record (data=None)
-        for course_run in unaccounted_course_runs:
-            cached_model_deserializer.model_cls.objects.create(
-                user=user,
-                course_run=course_run,
-                last_request=datetime.now() + timedelta(days=365)
-            )
+    deserialize_edx_data(user, user_data, programs)
+    ensure_cached_data_freshness(user)
     return user
+
+
+def deserialize_edx_data(user, user_data, programs):
+    """
+    Deserializes enrollment/grade data for a user
+    """
+    fake_course_runs = CourseRun.objects.filter(
+        course__program__in=programs
+    ).select_related('course__program').all()
+    social_username = get_social_username(user)
+    enrollment_list = user_data.get('_enrollments', [])
+    grade_list = user_data.get('_grades', [])
+    deserialize_enrollment_data(user, social_username, fake_course_runs, enrollment_list)
+    deserialize_grade_data(user, social_username, fake_course_runs, grade_list)
+
+
+def deserialize_enrollment_data(user, social_username, course_runs, enrollment_data_list):
+    """
+    Deserializes enrollment data for a user
+    """
+    enrollment_handler = CachedEnrollmentHandler(user, social_username=social_username)
+    enrolled_programs = set()
+    edx_course_key = None
+    for enrollment_data in enrollment_data_list:
+        edx_course_key = enrollment_data['edx_course_key']
+        course_run = first_matching_item(
+            course_runs,
+            lambda cr: cr.edx_course_key == edx_course_key
+        )
+        enrollment_handler.set_or_create(course_run)
+        enrolled_programs.add(course_run.course.program)
+        if course_run.course.program.financial_aid_availability:
+            add_paid_order_for_course(user, course_run)
+    # Add ProgramEnrollments for any Program that has an associated CachedEnrollment
+    for enrolled_program in enrolled_programs:
+        ProgramEnrollment.objects.get_or_create(user=user, program=enrolled_program)
+
+
+def deserialize_grade_data(user, social_username, course_runs, grade_data_list):
+    """
+    Deserializes grade data for a user
+    """
+    cert_handler = CachedCertificateHandler(user, social_username=social_username)
+    cur_grade_handler = CachedCurrentGradeHandler(user, social_username=social_username)
+    edx_course_key = None
+    for grade_data in grade_data_list:
+        edx_course_key = grade_data['edx_course_key']
+        course_run = first_matching_item(
+            course_runs,
+            lambda cr: cr.edx_course_key == edx_course_key
+        )
+        grade = Decimal(grade_data['grade'])
+        if course_run.course.program.financial_aid_availability:
+            cur_grade_handler.set_or_create(course_run, grade=grade)
+        else:
+            cert_handler.set_or_create(course_run, grade=grade)
 
 
 def deserialize_profile_detail_data(profile, model_cls, profile_detail_data):
@@ -183,13 +179,13 @@ def deserialize_profile_detail_data(profile, model_cls, profile_detail_data):
         deserialize_model_data(model_cls, profile_detail, dict(profile=profile))
 
 
-def deserialize_user_data_list(user_data_list, course_runs):
+def deserialize_user_data_list(user_data_list, programs):
     """
     Deserializes a list of user data and returns the count of new Users created
     """
     new_user_count = 0
     for user_data in user_data_list:
-        new_user = deserialize_user_data(user_data, course_runs)
+        new_user = deserialize_user_data(user_data, programs)
         new_user_count += 1
         # This function is run with mute_signals(post_save) so we need to create the profile explicitly.
         profile = Profile.objects.create(user=new_user)
@@ -201,23 +197,23 @@ def deserialize_user_data_list(user_data_list, course_runs):
 
 # Program data deserialization
 
-def deserialize_course_price_data(course_run, course_price_data):
-    """Deserializes a CoursePrice object"""
+def deserialize_course_price_data(program, program_data):
+    """Deserializes price information from program data"""
     # set `is_valid` to True, so we don't have to specify it in the JSON file
-    course_price_data["is_valid"] = True
-    course_price = deserialize_model_data(
-        CoursePrice, course_price_data, dict(course_run=course_run)
+    first_course_run = program.course_set.first().courserun_set.first()
+    course_price = CoursePrice.objects.create(
+        course_run=first_course_run,
+        price=Decimal(program_data['_price']),
+        is_valid=True
     )
     return course_price
 
 
 def deserialize_course_run_data(course, course_run_data):
     """Deserializes a CourseRun object"""
-    course_price_data = course_run_data.pop('course_price')
     course_run = deserialize_model_data(
         CourseRun, course_run_data, dict(course=course)
     )
-    deserialize_course_price_data(course_run, course_price_data)
     return course_run
 
 
@@ -244,7 +240,9 @@ def deserialize_program_data_list(program_data_list):
         # Set the description to make this Program easily identifiable as a 'fake'
         program_data['description'] = FAKE_PROGRAM_DESC_PREFIX + program_data['description']
         program_data['live'] = True
-        programs.append(deserialize_program_data(program_data))
+        program = deserialize_program_data(program_data)
+        deserialize_course_price_data(program, program_data)
+        programs.append(program)
     return programs
 
 
@@ -255,6 +253,13 @@ class Command(BaseCommand):
     help = "Seed the database with a set of realistic data, for development purposes."
 
     def add_arguments(self, parser):
+        parser.add_argument(
+            "--tiers",
+            dest="tiers",
+            default=4,
+            help="Number of TierPrograms to generate per Program.",
+            type=int
+        )
         parser.add_argument(
             '--staff-user',
             action='store',
@@ -289,10 +294,14 @@ class Command(BaseCommand):
             # recreate_index() is run afterwards to do this indexing in bulk.
             with mute_signals(post_save):
                 fake_programs = deserialize_program_data_list(program_data_list)
-                fake_course_runs = CourseRun.objects.filter(
-                    course__program__description__contains=FAKE_PROGRAM_DESC_PREFIX
-                ).all()
-                fake_user_count = deserialize_user_data_list(user_data_list, fake_course_runs)
+                fake_user_count = deserialize_user_data_list(user_data_list, fake_programs)
+
+            # Handle FA programs
+            fake_financial_aid_programs = filter(lambda program: program.financial_aid_availability, fake_programs)
+            tiered_program_count, tiers_created = (
+                create_tiers(fake_financial_aid_programs, int(options["tiers"]))
+            )
+
             recreate_index()
             program_msg = (
                 "Created {num} new programs from '{path}'."
@@ -300,6 +309,12 @@ class Command(BaseCommand):
                 num=len(fake_programs),
                 path=PROGRAM_DATA_PATH
             )
+            if tiers_created:
+                program_msg = "{}\nCreated {} tiers for {} FA-enabled programs".format(
+                    program_msg,
+                    tiers_created,
+                    tiered_program_count
+                )
             user_msg = (
                 "Created {num} new users from '{path}'."
             ).format(
@@ -308,6 +323,7 @@ class Command(BaseCommand):
             )
             self.stdout.write(program_msg)
             self.stdout.write(user_msg)
+
         if fake_programs and options.get('staff_user'):
             self.assign_staff_user_to_programs(options['staff_user'], fake_programs)
             msg = (
