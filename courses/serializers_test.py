@@ -3,6 +3,7 @@ Tests for serializers
 """
 
 from unittest.mock import Mock
+
 from django.test import override_settings
 
 from cms.factories import ProgramPageFactory

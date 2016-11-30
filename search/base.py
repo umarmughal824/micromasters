@@ -1,7 +1,7 @@
 """
 Base test classes for search
 """
-from mock import patch
+from unittest.mock import patch
 
 from django.test import (
     override_settings,

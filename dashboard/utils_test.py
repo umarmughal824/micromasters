@@ -2,6 +2,7 @@
 Tests for the utils module
 """
 from datetime import datetime, timedelta
+from unittest.mock import patch
 
 import pytz
 from django.core.exceptions import ImproperlyConfigured
@@ -9,7 +10,6 @@ from django.test import TestCase
 from edx_api.enrollments.models import Enrollments
 from edx_api.certificates.models import Certificate, Certificates
 from edx_api.grades.models import CurrentGrade, CurrentGrades
-from mock import patch
 
 from courses.factories import ProgramFactory, CourseFactory, CourseRunFactory
 from dashboard.utils import MMTrack
