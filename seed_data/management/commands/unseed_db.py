@@ -1,17 +1,43 @@
 """
 Deletes a set of realistic users/programs that were added to help us test search functionality
 """
+from contextlib import contextmanager
 from factory.django import mute_signals
 from django.core.management import BaseCommand
+from django.db import connection
+from django.db.models import Q
 from django.db.models.signals import post_delete
 from django.contrib.auth.models import User
 
 from courses.models import Program
-from dashboard.models import CachedEnrollment, CachedCertificate
+from dashboard.models import CachedEnrollment, CachedCertificate, CachedCurrentGrade
+from financialaid.models import FinancialAid, FinancialAidAudit
+from mail.models import FinancialAidEmailAudit
 from search.indexing_api import recreate_index
 from seed_data.management.commands import (  # pylint: disable=import-error
-    FAKE_USER_USERNAME_PREFIX, FAKE_PROGRAM_DESC_PREFIX,
+    FAKE_USER_USERNAME_PREFIX,
+    FAKE_PROGRAM_DESC_PREFIX,
 )
+
+
+@contextmanager
+def remove_delete_protection(*models):
+    """
+    Temporarily removes delete protection on any number of models
+
+    Args:
+        *models: One or more models whose tables will have delete protection temporarily removed
+    """
+    table_names = [model._meta.db_table for model in models]
+    with connection.cursor() as cursor:
+        for table_name in table_names:
+            cursor.execute("DROP RULE delete_protect ON {}".format(table_name))
+        try:
+            yield
+        finally:
+            table_names.reverse()
+            for table_name in table_names:
+                cursor.execute("CREATE RULE delete_protect AS ON DELETE TO {} DO INSTEAD NOTHING".format(table_name))
 
 
 class Command(BaseCommand):
@@ -24,14 +50,27 @@ class Command(BaseCommand):
         # pylint: disable=bad-continuation
         fake_program_ids = (
             Program.objects
-              .filter(description__startswith=FAKE_PROGRAM_DESC_PREFIX)  # noqa
-              .values_list('id', flat=True)
+            .filter(description__startswith=FAKE_PROGRAM_DESC_PREFIX)
+            .values_list('id', flat=True)
         )
-        # pylint: enable=bad-continuation
+        fake_user_ids = (
+            User.objects
+            .filter(username__startswith=FAKE_USER_USERNAME_PREFIX)
+            .values_list('id', flat=True)
+        )
+        financial_aid_ids = (
+            FinancialAid.objects
+            .filter(Q(user_id__in=fake_user_ids) | Q(tier_program__program__id__in=fake_program_ids))
+            .values_list('id', flat=True)
+        )
+        audit_models_to_clear = [FinancialAidAudit, FinancialAidEmailAudit]
 
         with mute_signals(post_delete):
-            for model_cls in [CachedEnrollment, CachedCertificate]:
+            with remove_delete_protection(*audit_models_to_clear):
+                for audit_model in audit_models_to_clear:
+                    audit_model.objects.filter(financial_aid__id__in=financial_aid_ids).delete()
+            for model_cls in [CachedEnrollment, CachedCertificate, CachedCurrentGrade]:
                 model_cls.objects.filter(course_run__course__program__id__in=fake_program_ids).delete()
             Program.objects.filter(id__in=fake_program_ids).delete()
-            User.objects.filter(username__startswith=FAKE_USER_USERNAME_PREFIX).delete()
+            User.objects.filter(id__in=fake_user_ids).delete()
         recreate_index()
