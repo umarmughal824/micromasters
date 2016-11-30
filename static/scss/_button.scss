@@ -1,7 +1,9 @@
 .mdl-button {
 
   font-weight: 400;
-  border-radius: 3px;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  transition: all 0.1s cubic-bezier(.25,.8,.25,1);
 
   &.gray-button {
     background: $gray-button-color;
@@ -95,11 +97,13 @@
   }
 
   &.progress-button {
-    color: $mm-brand-bg !important;
-    background-color: $progress-button-background !important;
+    color: #ffffff !important;
+    background-color: #989898 !important;
     box-shadow: none;
-    height: 46px;
-    line-height: 46px;
+  }
+
+  &.progress-button:hover {
+    box-shadow: none;
   }
 
   &.minor-action {
@@ -107,17 +111,21 @@
     color: #333333;
     border: 1px solid #d2d2d2;
     background: linear-gradient(to bottom, #ffffff, #e2e2e2);
+    box-shadow: none;
   }
 
   &.minor-action:hover, &.minor-action:focus, &.minor-action:active, &.minor-action:focus:not(:active) {
     color: #000;
-    background: linear-gradient(to bottom, #fbfbfb, #dadada);
+    background: linear-gradient(to bottom, #ffffff, #e2e2e2);
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.05), 0 1px 5px rgba(0, 0, 0, 0.12);
+
   }
 
   &:hover, &:focus, &:active, &:focus:not(:active) {
-    background-color: $mm-brand-bg;
+    background: $button-color;
     color: white;
     text-decoration: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15), 0 3px 7px rgba(0, 0, 0, 0.22);
   }
 }
 
@@ -180,7 +188,7 @@
 }
 
 .disabled {
-  opacity: 0.3;
+  opacity: 0.15;
   cursor: not-allowed;
 }
 
