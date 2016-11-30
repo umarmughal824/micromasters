@@ -122,7 +122,7 @@ export default class PersonalTab extends React.Component {
             {_.get(errors, ['program'])}
           </span>
         </Card>
-        <Card shadow={1} className="profile-image">
+        <Card shadow={1} className={`profile-image ${validationErrorSelector(errors, ['image'])}`}>
           <CardTitle>
             Upload a Profile Photo
           </CardTitle>
