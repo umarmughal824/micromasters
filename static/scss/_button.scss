@@ -142,9 +142,11 @@
   color: inherit;
   line-height: normal;
   background: none;
+  box-shadow: none;
 
   &:hover, &:focus, &:active, &:focus:not(:active)  {
     background: #eee;
+    box-shadow: none;
   }
 
   i.material-icons {
