@@ -2,13 +2,13 @@
 Test end to end django views.
 """
 import json
+from unittest.mock import patch, Mock
 
 from django.db.models.signals import post_save
 from django.core.urlresolvers import reverse
 from django.test import override_settings
 from factory.django import mute_signals
 from factory.fuzzy import FuzzyText
-from mock import patch, Mock
 from rest_framework import status
 from rolepermissions.shortcuts import available_perm_status
 from wagtail.wagtailimages.models import Image

@@ -2,15 +2,11 @@
 Tests for tasks
 """
 from itertools import product
+from unittest import mock
 
 from django.test import (
     override_settings,
     TestCase,
-)
-from mock import (
-    MagicMock,
-    mock,
-    patch,
 )
 
 from backends.edxorg import EdxOrgOAuth2
@@ -58,8 +54,8 @@ class TasksTest(TestCase):
         self.assertTrue(batch_update_user_data.delay())
 
     @override_settings(CELERY_ALWAYS_EAGER=True)
-    @patch('dashboard.api_edx_cache.CachedEdxUserData.update_cache_if_expired', new_callable=MagicMock)
-    @patch('backends.utils.refresh_user_token', autospec=True)
+    @mock.patch('dashboard.api_edx_cache.CachedEdxUserData.update_cache_if_expired', new_callable=mock.MagicMock)
+    @mock.patch('backends.utils.refresh_user_token', autospec=True)
     def test_student_enrollments_called_task(
             self, mocked_refresh, mocked_refresh_cache):
         """

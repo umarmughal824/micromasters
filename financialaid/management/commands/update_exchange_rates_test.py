@@ -1,8 +1,9 @@
 """
 Test for management command generating exchange rates
 """
+from unittest.mock import patch
+
 from django.test import TestCase
-from mock import patch
 
 from financialaid.constants import CURRENCY_EXCHANGE_RATE_API_REQUEST_URL
 from financialaid.management.commands import update_exchange_rates

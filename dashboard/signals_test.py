@@ -2,13 +2,14 @@
 Tests for signals
 """
 
+from unittest.mock import patch
+
 from django.db.models.signals import post_save
 from django.test import (
     override_settings,
     TestCase,
 )
 from factory.django import mute_signals
-from mock import patch
 
 from courses.factories import ProgramFactory, CourseFactory
 

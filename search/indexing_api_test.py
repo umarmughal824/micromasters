@@ -1,12 +1,12 @@
 """
 Tests for search API functions.
 """
+from unittest.mock import patch
 
 from django.conf import settings
 from django.db.models.signals import post_save
 from factory.django import mute_signals
 from requests import get
-from mock import patch
 
 from dashboard.factories import (
     CachedCertificateFactory,

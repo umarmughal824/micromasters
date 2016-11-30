@@ -2,7 +2,7 @@
 Tests for the dashboard api functions
 """
 from datetime import datetime, timedelta
-from mock import patch, MagicMock
+from unittest.mock import patch, MagicMock
 
 import pytz
 from django.core.exceptions import ImproperlyConfigured

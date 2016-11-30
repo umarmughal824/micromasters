@@ -2,7 +2,7 @@
 Tests for the dashboard views
 """
 from datetime import datetime, timedelta
-from mock import (
+from unittest.mock import (
     MagicMock,
     patch,
 )

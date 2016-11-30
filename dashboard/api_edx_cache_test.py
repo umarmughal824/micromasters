@@ -3,7 +3,7 @@ Tests for the dashboard APIs functions that deal with the edx cached data
 """
 
 from datetime import datetime, timedelta
-from mock import patch, MagicMock
+from unittest.mock import patch, MagicMock
 
 import pytz
 from edx_api.certificates.models import Certificate, Certificates

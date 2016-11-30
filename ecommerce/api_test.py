@@ -5,15 +5,15 @@ from base64 import b64encode
 from datetime import datetime
 import hashlib
 import hmac
+from unittest.mock import (
+    MagicMock,
+    patch,
+)
 from urllib.parse import quote_plus
 
 from django.core.exceptions import ImproperlyConfigured
 from django.http.response import Http404
 from django.test import override_settings
-from mock import (
-    MagicMock,
-    patch,
-)
 from rest_framework.exceptions import ValidationError
 from edx_api.enrollments import Enrollment
 

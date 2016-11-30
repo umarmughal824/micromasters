@@ -3,7 +3,7 @@ Tests for profile view
 """
 import json
 from io import BytesIO
-from mock import patch
+from unittest.mock import patch
 
 from dateutil.parser import parse
 from django.core.urlresolvers import resolve, reverse
