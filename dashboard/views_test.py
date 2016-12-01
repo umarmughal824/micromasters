@@ -19,6 +19,7 @@ from backends.utils import InvalidCredentialStored
 from courses.factories import ProgramFactory, CourseRunFactory
 from dashboard.factories import UserCacheRefreshTimeFactory
 from dashboard.models import ProgramEnrollment, CachedEnrollment
+from micromasters.exceptions import PossiblyImproperlyConfigured
 from micromasters.factories import UserFactory
 from search.base import ESTestCase
 
@@ -238,12 +239,36 @@ class UserCourseEnrollmentTest(ESTestCase, APITestCase):
         """
         Test error when backend raises an exception
         """
-        mock_edx_enr.side_effect = HTTPError()
+        error = HTTPError()
+        error.response = MagicMock()
+        error.response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        mock_edx_enr.side_effect = error
         resp = self.client.post(self.url, {'course_id': self.course_id}, format='json')
         assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        # the response has a structure like {"error": "<message>"}
+        assert isinstance(resp.data, dict)
+        assert 'error' in resp.data
         assert mock_edx_enr.call_count == 1
         # assert just the second argument, since the first is `self`
         assert mock_edx_enr.call_args[0][1] == self.course_id
+
+        # if instead edX returns a 400 error, an exception is raised by
+        # the view and the user gets a different error message
+        error.response.status_code = status.HTTP_400_BAD_REQUEST
+        mock_edx_enr.side_effect = error
+        resp = self.client.post(self.url, {'course_id': self.course_id}, format='json')
+        assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        assert isinstance(resp.data, list)
+        assert len(resp.data) == 1
+        assert PossiblyImproperlyConfigured.__name__ in resp.data[0]
+
+        # if the error from the call to edX is is not HTTPError, the user gets a normal json error
+        mock_edx_enr.side_effect = ValueError()  # pylint: disable=redefined-variable-type
+        resp = self.client.post(self.url, {'course_id': self.course_id}, format='json')
+        assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        # the response has a structure like {"error": "<message>"}
+        assert isinstance(resp.data, dict)
+        assert 'error' in resp.data
 
     @patch('search.tasks.index_users', autospec=True)
     @patch('edx_api.enrollments.CourseEnrollments.create_audit_student_enrollment', autospec=True)
