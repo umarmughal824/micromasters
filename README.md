@@ -198,12 +198,6 @@ most of the database tables:
 
     docker-compose run web ./manage.py seed_db
 
-`seed_db` doesn't install example data for program tiers, but the `create_tiers`
-management command will do that. (This hasn't yet been integrated into the
-`seed_db` command, but it should be in the future.)
-
-    docker-compose run web ./manage.py create_tiers
-
 #### 6) Run the container
 
 Start Django, PostgreSQL, and other related services:

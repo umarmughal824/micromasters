@@ -151,7 +151,7 @@ def set_course_to_needs_upgrade(**kwargs):
 
 
 @accepts_or_calculates_now
-def add_future_run(user=None, course=None, now=None):
+def add_future_run(user=None, course=None, now=None):  # pylint: disable=unused-argument
     """Adds a future enrollable course run for a course"""
     base_edx_course_key = '{}-{}'.format(NEW_COURSE_RUN_PREFIX, now.strftime('%m-%d-%Y'))
     default_title = base_edx_course_key
@@ -167,7 +167,6 @@ def add_future_run(user=None, course=None, now=None):
             )
             key_append += 1
     set_course_run_future(new_course_run, save=True)
-    CachedEnrollmentHandler(user).set_blank(course_run=new_course_run)
     return new_course_run
 
 
@@ -186,7 +185,7 @@ def add_past_failed_run(user=None, course=None, now=None, grade=DEFAULT_FAILED_G
     ).exclude(end_date=None).order_by('-end_date').all()
     # Loop through past course runs and find one without CachedCurrentGrade data
     for past_run in past_runs:
-        if not CachedCurrentGradeHandler(user).get_or_create(past_run)[0].data:
+        if not CachedCurrentGradeHandler(user).exists(past_run):
             chosen_past_run = past_run
             continue
         elif not add_if_exists:
@@ -227,12 +226,9 @@ def course_info(user=None, course=None):
                 run_result[date_key] = _formatted_datetime(getattr(run, date_key))
         for model_cls in CACHED_HANDLERS:
             obj = model_cls.objects.filter(user=user, course_run=run).first()
-            if obj and obj.data:
+            if obj:
                 run_result['edx_data'] = run_result.get('edx_data', {})
-                run_result['edx_data'][model_cls.__name__] = {
-                    'data': obj.data,
-                    'last_request': _formatted_datetime(obj.last_request)
-                }
+                run_result['edx_data'][model_cls.__name__] = obj.data
         run_results.append(run_result)
     results['course_runs'] = run_results
     return results
