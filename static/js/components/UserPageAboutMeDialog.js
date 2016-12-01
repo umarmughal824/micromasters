@@ -3,18 +3,19 @@ import React from 'react';
 import Dialog from 'material-ui/Dialog';
 import Button from 'react-mdl/lib/Button';
 
-import { personalValidation } from '../lib/validation/profile';
 import ProfileFormFields from '../util/ProfileFormFields';
 import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
+import type { Validator } from '../lib/validation/profile';
 
 export default class UserPageAboutMeDialog extends ProfileFormFields {
   props: {
-    ui:                           UIState,
-    profile:                      Profile,
-    saveProfile:                  SaveProfileFunc,
-    clearProfileEdit:             () => void,
-    setUserPageAboutMeDialogVisibility:  () => void,
+    ui:                                   UIState,
+    profile:                              Profile,
+    saveProfile:                          SaveProfileFunc,
+    clearProfileEdit:                     () => void,
+    setUserPageAboutMeDialogVisibility:   () => void,
+    validator:                            Validator,
   };
 
   closeAboutMeDialog: Function = (): void => {
@@ -28,8 +29,8 @@ export default class UserPageAboutMeDialog extends ProfileFormFields {
   };
 
   saveAboutMeInfo: Function = (): void => {
-    const { profile, ui, saveProfile } = this.props;
-    saveProfile(personalValidation, profile, ui).then(() => {
+    const { profile, ui, saveProfile, validator } = this.props;
+    saveProfile(validator, profile, ui).then(() => {
       this.closeAboutMeDialog();
     });
   };

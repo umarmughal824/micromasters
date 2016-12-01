@@ -9,6 +9,7 @@ import UserInfoCard from './UserInfoCard';
 import {
   educationValidation,
   employmentValidation,
+  personalValidation,
 } from '../lib/validation/profile';
 import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
@@ -49,7 +50,7 @@ export default class User extends React.Component {
 
     return <div className="single-column">
       <UserPagePersonalDialog {...this.props} />
-      <UserPageAboutMeDialog {...this.props} />
+      <UserPageAboutMeDialog {...this.props} validator={personalValidation} />
       <UserInfoCard
         profile={profile}
         toggleShowAboutMeDialog={this.toggleShowAboutMeDialog}
