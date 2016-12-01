@@ -304,7 +304,7 @@ body.app-media {
   margin-bottom: 20px;
 }
 
-.reasons-section, .current-programs-section {
+.reasons-section, .current-programs-section, .how-it-works-section {
   padding: 7vw 0 8vw;
   margin: 0;
   text-align: center;
@@ -395,6 +395,7 @@ body.app-media {
 }
 
 .current-programs-section {
+  padding: 7vw 0 4vw;
   margin: 0;
   background-color: #ffffff;
   border-top: 1px solid #e5e5e5;
@@ -457,7 +458,6 @@ body.app-media {
 
       img {
         width: 100%;
-        min-height: 23vw;
 
         &.program-default-image {
           opacity: .4;
@@ -492,10 +492,10 @@ body.app-media {
   }
 }
 
-.reasons-section {
+.reasons-section, .how-it-works-section {
   background-color: $mm-brand-bg;
 
-  .col-md-4 {
+  .col-md-4, .col-md-3 {
     padding: 0 3%;
 
     @include breakpoint(phone) {
@@ -510,13 +510,16 @@ body.app-media {
     font-weight: 300;
   }
 
-  h5 {
-    font-size: 19px;
+  h4 {
+    font-size: 20px;
+    font-weight: 400;
+    margin-bottom: 25px;
   }
 
   p {
     font-size: 16px;
-    color: rgba(255,255,255,.9);
+    color: rgba(255,255,255,.8);
+    line-height: 1.4em;
   }
 
   h3 {
@@ -527,11 +530,40 @@ body.app-media {
     max-width: 300px;
     margin: 0 auto;
     width: 100%;
+    position: relative;
 
     img {
       margin: auto auto;
       width: 123px;
     }
+  }
+}
+
+.how-it-works-section {
+  background: #1a1a1a;
+
+  .reasons-images-wrap::after {
+    content: url(/static/images/hiw-arrow2.png);
+    position: absolute;
+    left: 103%;
+    top: 18px;
+    @media (max-width: 992px) {
+      content: none;
+    }
+  }
+
+  .col-md-3:last-child {
+    .reasons-images-wrap::after {
+      content: none;
+    }
+  }
+
+  h4 {
+    color: rgba(255,255,255,.85);
+  }
+
+  p {
+    color: rgba(255,255,255,.45);
   }
 }
 
