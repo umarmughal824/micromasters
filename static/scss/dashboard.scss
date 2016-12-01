@@ -301,6 +301,14 @@
     padding: 0 2px;
   }
 
+  .primary-button, .secondary-button {
+    box-shadow: none;
+
+    &:hover, &:focus, &:active, &:focus:not(:active) {
+      box-shadow: none;
+    }
+  }
+
   .primary-button {
     color: #0c92e0;
     margin-right: 20px;
