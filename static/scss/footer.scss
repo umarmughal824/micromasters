@@ -9,9 +9,18 @@
   font-size: .83em;
   line-height: 1.2em;
 
+  @include breakpoint(phone) {
+    padding: 40px 15px 60px 15px;
+  }
+
   .container {
     width: 95%;
     max-width: 1400px;
+
+    @include breakpoint(phone) {
+      width: 100%;
+    }
+
   }
 
   .social-buttons-list {
@@ -49,6 +58,10 @@
     &.non-marketing-pages {
       min-width: 300px;
       margin-bottom: 50px;
+
+      @include breakpoint(phone) {
+        min-width: 0;
+      }
     }
 
     a {
