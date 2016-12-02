@@ -54,16 +54,6 @@ class HomePage(Page):
         return context
 
 
-class CategorizedFaqsPage(Page):
-    """
-    CMS page for categorized questions
-    """
-    content_panels = Page.content_panels + [
-        InlinePanel('faqs', label='Frequently Asked Questions'),
-    ]
-    parent_page_types = ['FaqsPage']
-
-
 class ProgramChildPage(Page):
     """
     Abstract page representing a child of ProgramPage
@@ -82,6 +72,16 @@ class ProgramChildPage(Page):
         context['child_page'] = self
         context['active_tab'] = self.title
         return context
+
+
+class CategorizedFaqsPage(ProgramChildPage):
+    """
+    CMS page for categorized questions
+    """
+    content_panels = Page.content_panels + [
+        InlinePanel('faqs', label='Frequently Asked Questions'),
+    ]
+    parent_page_types = ['FaqsPage']
 
 
 class FaqsPage(ProgramChildPage):
