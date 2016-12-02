@@ -3,7 +3,9 @@ Tests for the utils module
 """
 import datetime
 import unittest
+from unittest.mock import patch
 
+import ddt
 from django.core.exceptions import ImproperlyConfigured
 from django.template import RequestContext
 from django.test import (
@@ -23,6 +25,7 @@ from ecommerce.models import Order
 from financialaid.factories import (
     FinancialAidFactory,
 )
+from micromasters.exceptions import PossiblyImproperlyConfigured
 from micromasters.utils import (
     custom_exception_handler,
     get_field_names,
@@ -33,6 +36,7 @@ from micromasters.utils import (
 )
 
 
+@ddt.ddt
 class ExceptionHandlerTest(TestCase):
     """
     Tests for the custom_exception_handler function.\
@@ -44,7 +48,8 @@ class ExceptionHandlerTest(TestCase):
         cls.request = RequestFactory()
         cls.context = RequestContext(cls.request)
 
-    def test_validation_error(self):
+    @patch('raven.contrib.django.raven_compat.models.client.captureException', autospec=True)
+    def test_validation_error(self, mock_sentry):
         """
         Test a standard exception handled by default by the rest framework
         """
@@ -52,23 +57,32 @@ class ExceptionHandlerTest(TestCase):
         resp = custom_exception_handler(exp, self.context)
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
         assert resp.data == ['validation error']
+        assert mock_sentry.called is False
 
-    def test_improperly_configured(self):
+    @patch('raven.contrib.django.raven_compat.models.client.captureException', autospec=True)
+    @ddt.data(
+        ImproperlyConfigured,
+        PossiblyImproperlyConfigured,
+    )
+    def test_improperly_configured(self, exception_to_raise, mock_sentry):
         """
         Test a standard exception not handled by default by the rest framework
         """
-        exp = ImproperlyConfigured('improperly configured')
+        exp = exception_to_raise('improperly configured')
         resp = custom_exception_handler(exp, self.context)
         assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-        assert resp.data == ['ImproperlyConfigured: improperly configured']
+        assert resp.data == ['{0}: improperly configured'.format(exception_to_raise.__name__)]
+        mock_sentry.assert_called_once_with()
 
-    def test_index_error(self):
+    @patch('raven.contrib.django.raven_compat.models.client.captureException', autospec=True)
+    def test_index_error(self, mock_sentry):
         """
         Test a other kind of exceptions are not handled
         """
         exp = IndexError('index error')
         resp = custom_exception_handler(exp, self.context)
         assert resp is None
+        assert mock_sentry.called is False
 
 
 def format_as_iso8601(time):

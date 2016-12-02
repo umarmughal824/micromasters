@@ -65,6 +65,20 @@ class SearchAPITests(TestCase):  # pylint: disable=missing-docstring
             role=Staff.ROLE_ID
         )
 
+        with mute_signals(post_save):
+            profile = ProfileFactory.create(email_optin=True)
+            profile2 = ProfileFactory.create(email_optin=False)
+
+        cls.learner = profile.user
+        cls.learner2 = profile2.user
+
+        # self.user with role staff on program
+        for user in [cls.learner, cls.learner2, cls.user]:
+            ProgramEnrollmentFactory(
+                user=user,
+                program=cls.program,
+            )
+
     def test_execute_search(self):  # pylint: disable=no-self-use
         """
         Test that the execute_search method invokes the right method on the Search object
@@ -141,8 +155,17 @@ class SearchAPITests(TestCase):  # pylint: disable=missing-docstring
         mock_search_func = Mock(name='execute', return_value=['result1', 'result2'])
         params = {'size': 50}
         with patch('search.api.create_search_obj', autospec=True, return_value=None) as mock_create_search_obj:
-            results = prepare_and_execute_search(self.user, search_param_dict=params, search_func=mock_search_func)
-            mock_create_search_obj.assert_called_with(self.user, search_param_dict=params)
+            results = prepare_and_execute_search(
+                self.user,
+                search_param_dict=params,
+                search_func=mock_search_func,
+                filter_on_email_optin=True
+            )
+            mock_create_search_obj.assert_called_with(
+                self.user,
+                search_param_dict=params,
+                filter_on_email_optin=True
+            )
             assert results == ['result1', 'result2']
 
     def test_search_user(self):
@@ -150,31 +173,32 @@ class SearchAPITests(TestCase):  # pylint: disable=missing-docstring
         Assert learner in search result and staff excluded
         """
         params = {'size': 50}
-        with mute_signals(post_save):
-            profile = ProfileFactory.create()
-            profile2 = ProfileFactory.create()
-
-        learner = profile.user
-        learner2 = profile2.user
-
-        # self.user with role staff on program
-        for user in [learner, learner2, self.user]:
-            ProgramEnrollmentFactory(
-                user=user,
-                program=self.program,
-            )
-
         results = prepare_and_execute_search(self.user, search_param_dict=params)
 
         self.assertEqual(len(results), 2)
         self.assertListEqual(
             sorted([results[0].user_id, results[1].user_id]),
-            [learner.id, learner2.id]
+            [self.learner.id, self.learner2.id]
         )
         self.assertTrue(results[0].program.is_learner)
         self.assertTrue(results[1].program.is_learner)
 
-    # def test_all_query_matching_results(self):
+    def test_search_user_on_email_optin_filter(self):
+        """
+        when filter_on_email_optin is enable.
+        """
+        params = {'size': 50}
+        results = prepare_and_execute_search(
+            self.user,
+            search_param_dict=params,
+            filter_on_email_optin=True
+        )
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].user_id, self.learner.id)
+        self.assertTrue(results[0].program.is_learner)
+        self.assertTrue(results[0].program.email_optin)
+
     def test_all_query_matching_emails(self):  # pylint: disable=no-self-use
         """
         Test that a set of search results will yield an expected set of emails

@@ -15,12 +15,11 @@ from django.db import transaction
 from django.http.response import Http404
 from django.shortcuts import get_object_or_404
 from edx_api.client import EdxApi
-import pytz
 from rest_framework.exceptions import ValidationError
 
 from backends.edxorg import EdxOrgOAuth2
 from courses.models import CourseRun
-from dashboard.api import update_cached_enrollment
+from dashboard.api_edx_cache import CachedEdxUserData
 from dashboard.models import ProgramEnrollment
 from ecommerce.exceptions import (
     EcommerceEdxApiException,
@@ -210,6 +209,9 @@ def generate_cybersource_sa_payload(order, dashboard_url):
         'transaction_type': 'sale',
         'transaction_uuid': uuid.uuid4().hex,
         'unsigned_field_names': '',
+        'merchant_defined_data1': 'course',
+        'merchant_defined_data2': '{}'.format(course_run.title),
+        'merchant_defined_data3': '{}'.format(course_key),
     }
 
     field_names = sorted(list(payload.keys()) + ['signed_field_names'])
@@ -297,9 +299,13 @@ def enroll_user_on_success(order):
             )
             exceptions.append(ex)
 
-    now = datetime.now(pytz.UTC)
     for enrollment in enrollments:
-        update_cached_enrollment(order.user, enrollment, enrollment.course_id, now)
+        CachedEdxUserData.update_cached_enrollment(
+            order.user,
+            enrollment,
+            enrollment.course_id,
+            index_user=True,
+        )
 
     if exceptions:
         raise EcommerceEdxApiException(exceptions)

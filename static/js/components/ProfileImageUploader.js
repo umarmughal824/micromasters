@@ -32,14 +32,14 @@ const uploaderBodyHeight = (): number => (
 const imageError = err => <div className="img-error">{err}</div>;
 
 type ImageUploadProps = {
-  photoDialogOpen:      boolean;
-  setDialogVisibility:  (b: boolean) => void;
-  startPhotoEdit:       (p: File) => void;
-  clearPhotoEdit:       () => void;
-  imageUpload:          ImageUploadState;
+  photoDialogOpen:      boolean,
+  setDialogVisibility:  (b: boolean) => void,
+  startPhotoEdit:       (p: File) => void,
+  clearPhotoEdit:       () => void,
+  imageUpload:          ImageUploadState,
   updateUserPhoto:      (i: string) => Promise<string>,
-  updatePhotoEdit:      (b: Blob) => void;
-  setPhotoError:        (s: string) => void;
+  updatePhotoEdit:      (b: Blob) => void,
+  setPhotoError:        (s: string) => void,
 };
 
 const ProfileImageUploader = ({
@@ -76,7 +76,7 @@ const ProfileImageUploader = ({
         type='button'
         className={`save-button ${photo ? 'primary-button' : 'secondary-button disabled'}`}
         key="save"
-        onClick={updateUserPhoto}>
+        onClick={photo ? updateUserPhoto : undefined}>
         Save
       </Button>
     ]}

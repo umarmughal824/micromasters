@@ -1,4 +1,7 @@
 /* global SETTINGS: false */
+import urljoin from 'url-join';
+import deepFreeze from 'deep-freeze';
+
 export const HIGH_SCHOOL = 'hs';
 export const ASSOCIATE = 'a';
 export const BACHELORS = 'b';
@@ -84,7 +87,9 @@ export const FA_APPROVED_STATUSES = [FA_STATUS_APPROVED, FA_STATUS_AUTO_APPROVED
 export const TOAST_SUCCESS = 'success';
 export const TOAST_FAILURE = 'failure';
 
-export const ELASTICSEARCH_RESPONSE = {
+export const EDX_LINK_BASE = urljoin(SETTINGS.edx_base_url, 'courses/');
+
+export const ELASTICSEARCH_RESPONSE = deepFreeze({
   "took": 22,
   "timed_out": false,
   "_shards": {
@@ -216,9 +221,10 @@ export const ELASTICSEARCH_RESPONSE = {
       }
     }
   }
-};
+});
 
-export const USER_PROFILE_RESPONSE = {
+export const USER_PROFILE_RESPONSE = deepFreeze({
+  "image": "some_sort_of_image.png",
   "username": SETTINGS.user ? SETTINGS.user.username : null,
   "filled_out": true,
   "agreed_to_terms_of_service": true,
@@ -285,13 +291,13 @@ export const USER_PROFILE_RESPONSE = {
     "online_degree": false
   }],
   "edx_level_of_education": null,
-};
+});
 
-export const USER_PROGRAM_RESPONSE = {
+export const USER_PROGRAM_RESPONSE = deepFreeze({
   "grade_average": 83
-};
+});
 
-export const DASHBOARD_RESPONSE = [
+export const DASHBOARD_RESPONSE = deepFreeze([
   {
     "description": "Not passed program",
     "title": "Not passed program",
@@ -314,6 +320,7 @@ export const DASHBOARD_RESPONSE = [
             "title": "Gio Test Course #14",
             "course_id": "course-v1:odl+GIO101+FALL14",
             "status": STATUS_NOT_PASSED,
+            "final_grade": "33",
             "id": 2,
             "course_start_date": "2016-08-22T11:48:27Z",
             "fuzzy_start_date": "Fall 2017",
@@ -324,7 +331,7 @@ export const DASHBOARD_RESPONSE = [
             "title": "Gio Test Course #13",
             "status": STATUS_PASSED,
             "position": 3,
-            "grade": "0.66",
+            "final_grade": "66",
             "course_id": "course-v1:odl+GIO101+FALL13",
             "id": 3,
             "course_start_date": "2016-08-22T11:48:27Z",
@@ -400,7 +407,7 @@ export const DASHBOARD_RESPONSE = [
             "id": 5,
             "status": STATUS_PASSED,
             "title": "Demo course",
-            "grade": "0.88",
+            "final_grade": "88",
             "position": 0,
             "course_start_date": "2016-08-22T11:48:27Z",
             "fuzzy_start_date": "Fall 2017",
@@ -418,6 +425,27 @@ export const DASHBOARD_RESPONSE = [
         ],
         "description": null,
         "prerequisites": null
+      },
+      {
+        "id": 6789,
+        "position_in_program": 11,
+        "title": "Current verified course - grade is 88%",
+        "runs": [
+          {
+            "certificate_url": "www.google.com",
+            "course_id": "course-v1:current",
+            "id": 5678,
+            "status": STATUS_CURRENTLY_ENROLLED,
+            "title": "Current course run",
+            "current_grade": "23",
+            "position": 0,
+            "course_start_date": "2016-08-22T11:48:27Z",
+            "fuzzy_start_date": "Fall 2017",
+            "course_end_date": "2016-09-09T10:20:10Z",
+          }
+        ],
+        "description": "The demo course",
+        "prerequisites": ""
       },
       {
         "id": 8,
@@ -596,37 +624,37 @@ export const DASHBOARD_RESPONSE = [
     "financial_aid_availability": false,
     "id": 6
   },
-];
+]);
 
-export const PROGRAMS = DASHBOARD_RESPONSE.map(program => ({
+export const PROGRAMS = deepFreeze(DASHBOARD_RESPONSE.map(program => ({
   id: program.id,
   title: program.title,
   programpage_url: `/program${program.id}/`,
   enrolled: true
-}));
+})));
 
-export const FINANCIAL_AID_PARTIAL_RESPONSE = {
+export const FINANCIAL_AID_PARTIAL_RESPONSE = deepFreeze({
   application_status: null,
   has_user_applied: false,
   max_possible_cost: 1000,
   min_possible_cost: 1000
-};
+});
 
-export const COURSE_PRICES_RESPONSE = DASHBOARD_RESPONSE.map(program => ({
+export const COURSE_PRICES_RESPONSE = deepFreeze(DASHBOARD_RESPONSE.map(program => ({
   program_id: program.id,
-  price: program.id * 100,
+  price: program.id * 1000,
   financial_aid_availability: false,
   has_financial_aid_request: false
-}));
+})));
 
-export const ERROR_RESPONSE = {
+export const ERROR_RESPONSE = deepFreeze({
   "errorStatusCode": 500,
   "error_code": "AB123",
   "user_message": "custom error message for the user."
-};
+});
 
 /* eslint-disable max-len */
-export const CYBERSOURCE_CHECKOUT_RESPONSE = {
+export const CYBERSOURCE_CHECKOUT_RESPONSE = deepFreeze({
   "payload": {
     "access_key": "access_key",
     "amount": "123.45",
@@ -646,10 +674,10 @@ export const CYBERSOURCE_CHECKOUT_RESPONSE = {
   },
   "url": "https://testsecureacceptance.cybersource.com/pay",
   "method": "POST"
-};
-export const EDX_CHECKOUT_RESPONSE = {
+});
+export const EDX_CHECKOUT_RESPONSE = deepFreeze({
   "payload": {},
   "url": "http://edx.org",
   "method": "GET"
-};
+});
 /* eslint-enable max-len */

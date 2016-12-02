@@ -72,7 +72,7 @@ export default class CourseAction extends React.Component {
     if (needsPriceCalculation) {
       text = 'Calculate Cost';
     } else {
-      text = `Pay Now - ${this.getCoursePrice()}`;
+      text = `Pay Now ${this.getCoursePrice()}`;
     }
 
     if (this.hasPendingFinancialAid()) {
@@ -152,8 +152,9 @@ export default class CourseAction extends React.Component {
       break;
     }
     case STATUS_WILL_ATTEND: {
-      let startDate = moment(run.course_start_date);
-      let text = ifValidDate('', date => `Course starts in ${date.diff(now, 'days')} days`, startDate);
+      let startDate = moment(run.course_start_date).startOf('day');
+      let nowDate = moment(now).startOf('day');
+      let text = ifValidDate('', date => `Course starts in ${date.diff(nowDate, 'days')} days`, startDate);
       description = this.renderBoxedDescription(text);
       break;
     }

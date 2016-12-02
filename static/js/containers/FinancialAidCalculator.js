@@ -41,6 +41,7 @@ const updateCurrency = R.curry((update, financialAid, selection) => {
 const currencySelect = (update, current) => (
   <Select
     options={currencyOptions}
+    clearable={false}
     value={current.currency}
     onChange={updateCurrency(update, current)}
     name="currency"
@@ -61,7 +62,7 @@ const salaryUpdate = R.curry((update, current, e) => {
 const salaryField = (update, current) => (
   <TextField
     name="salary"
-    required="true"
+    aria-required="true"
     aria-invalid={_.has(current, ['validation', 'income'])}
     label="income (yearly)"
     id="user-salary-input"

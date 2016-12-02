@@ -2,13 +2,13 @@
 Test end to end django views.
 """
 import json
+from unittest.mock import patch, Mock
 
 from django.db.models.signals import post_save
 from django.core.urlresolvers import reverse
 from django.test import override_settings
 from factory.django import mute_signals
 from factory.fuzzy import FuzzyText
-from mock import patch, Mock
 from rest_framework import status
 from rolepermissions.shortcuts import available_perm_status
 from wagtail.wagtailimages.models import Image
@@ -116,6 +116,9 @@ class TestHomePage(ViewsTests):
             assert response.context['authenticated'] is False
             assert response.context['username'] is None
             assert response.context['title'] == HomePage.objects.first().title
+            assert response.context['is_public'] is True
+            assert response.context['has_zendesk_widget'] is False
+            self.assertContains(response, 'Share this page')
             js_settings = json.loads(response.context['js_settings_json'])
             assert js_settings['gaTrackingID'] == ga_tracking_id
 
@@ -133,6 +136,9 @@ class TestHomePage(ViewsTests):
             assert response.context['authenticated'] is True
             assert response.context['username'] == get_social_username(user)
             assert response.context['title'] == HomePage.objects.first().title
+            assert response.context['is_public'] is True
+            assert response.context['has_zendesk_widget'] is False
+            self.assertContains(response, 'Share this page')
             js_settings = json.loads(response.context['js_settings_json'])
             assert js_settings['gaTrackingID'] == ga_tracking_id
 
@@ -152,6 +158,9 @@ class TestHomePage(ViewsTests):
             assert response.context['authenticated'] is True
             assert response.context['username'] is None
             assert response.context['title'] == HomePage.objects.first().title
+            assert response.context['is_public'] is True
+            assert response.context['has_zendesk_widget'] is False
+            self.assertContains(response, 'Share this page')
             js_settings = json.loads(response.context['js_settings_json'])
             assert js_settings['gaTrackingID'] == ga_tracking_id
 
@@ -215,6 +224,9 @@ class DashboardTests(ViewsTests):
                 'sentry_dsn': None,
                 'es_page_size': 10
             }
+            assert resp.context['is_public'] is False
+            assert resp.context['has_zendesk_widget'] is True
+            self.assertNotContains(resp, 'Share this page')
 
     def test_roles_setting(self):
         """
@@ -272,18 +284,22 @@ class HandlerTests(ViewsTests):
         # case with specific page
         with override_settings(EMAIL_SUPPORT='support'):
             response = self.client.get('/404/')
-            assert response.status_code == status.HTTP_404_NOT_FOUND
             assert response.context['authenticated'] is True
             assert response.context['name'] == profile.preferred_name
             assert response.context['support_email'] == 'support'
+            assert response.context['is_public'] is True
+            assert response.context['has_zendesk_widget'] is True
+            self.assertContains(response, 'Share this page', status_code=status.HTTP_404_NOT_FOUND)
 
             # case with a fake page
             with self.settings(DEBUG=False):
                 response = self.client.get('/gfh0o4n8741387jfmnub134fn348fr38f348f/')
-                assert response.status_code == status.HTTP_404_NOT_FOUND
                 assert response.context['authenticated'] is True
                 assert response.context['name'] == profile.preferred_name
                 assert response.context['support_email'] == 'support'
+                assert response.context['is_public'] is True
+                assert response.context['has_zendesk_widget'] is True
+                self.assertContains(response, 'Share this page', status_code=status.HTTP_404_NOT_FOUND)
 
     def test_404_error_context_logged_out(self):
         """
@@ -291,16 +307,20 @@ class HandlerTests(ViewsTests):
         """
         # case with specific page
         response = self.client.get('/404/')
-        assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.context['authenticated'] is False
         assert response.context['name'] == ""
+        assert response.context['is_public'] is True
+        assert response.context['has_zendesk_widget'] is True
+        self.assertContains(response, 'Share this page', status_code=status.HTTP_404_NOT_FOUND)
 
         # case with a fake page
         with self.settings(DEBUG=False):
             response = self.client.get('/gfh0o4n8741387jfmnub134fn348fr38f348f/')
-            assert response.status_code == status.HTTP_404_NOT_FOUND
             assert response.context['authenticated'] is False
             assert response.context['name'] == ""
+            assert response.context['is_public'] is True
+            assert response.context['has_zendesk_widget'] is True
+            self.assertContains(response, 'Share this page', status_code=status.HTTP_404_NOT_FOUND)
 
     def test_500_error_context_logged_in(self):
         """
@@ -312,10 +332,12 @@ class HandlerTests(ViewsTests):
 
         with override_settings(EMAIL_SUPPORT='support'):
             response = self.client.get('/500/')
-            assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
             assert response.context['authenticated'] is True
             assert response.context['name'] == profile.preferred_name
             assert response.context['support_email'] == 'support'
+            assert response.context['is_public'] is True
+            assert response.context['has_zendesk_widget'] is True
+            self.assertContains(response, 'Share this page', status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def test_500_error_context_logged_out(self):
         """
@@ -323,9 +345,11 @@ class HandlerTests(ViewsTests):
         """
         # case with specific page
         response = self.client.get('/500/')
-        assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         assert response.context['authenticated'] is False
         assert response.context['name'] == ""
+        assert response.context['is_public'] is True
+        assert response.context['has_zendesk_widget'] is True
+        self.assertContains(response, 'Share this page', status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class TestProgramPage(ViewsTests):
@@ -353,6 +377,9 @@ class TestProgramPage(ViewsTests):
             assert response.context['authenticated'] is False
             assert response.context['username'] is None
             assert response.context['title'] == "Test Program"
+            assert response.context['is_public'] is True
+            assert response.context['has_zendesk_widget'] is True
+            self.assertContains(response, 'Share this page')
             js_settings = json.loads(response.context['js_settings_json'])
             assert js_settings['gaTrackingID'] == ga_tracking_id
 
@@ -451,6 +478,9 @@ class TestUsersPage(ViewsTests):
             with patch('profiles.permissions.CanSeeIfNotPrivate.has_permission', has_permission):
                 resp = self.client.get(reverse('ui-users', kwargs={'user': username}))
                 assert resp.status_code == 200
+                assert resp.context['is_public'] is False
+                assert resp.context['has_zendesk_widget'] is True
+                self.assertNotContains(resp, 'Share this page')
                 js_settings = json.loads(resp.context['js_settings_json'])
                 assert js_settings == {
                     'gaTrackingID': ga_tracking_id,
@@ -503,6 +533,9 @@ class TestUsersPage(ViewsTests):
             with patch('profiles.permissions.CanSeeIfNotPrivate.has_permission', has_permission):
                 resp = self.client.get(reverse('ui-users', kwargs={'user': username}))
                 assert resp.status_code == 200
+                assert resp.context['is_public'] is False
+                assert resp.context['has_zendesk_widget'] is True
+                self.assertNotContains(resp, 'Share this page')
                 js_settings = json.loads(resp.context['js_settings_json'])
                 assert js_settings == {
                     'gaTrackingID': ga_tracking_id,
@@ -557,4 +590,7 @@ class TestTermsOfService(ViewsTests):
         """
         response = self.client.get(TERMS_OF_SERVICE_URL)
         js_settings = json.loads(response.context['js_settings_json'])
+        assert response.context['is_public'] is True
+        assert response.context['has_zendesk_widget'] is True
+        self.assertContains(response, 'Share this page')
         assert {'environment', 'release_version', 'sentry_dsn'}.issubset(set(js_settings.keys()))

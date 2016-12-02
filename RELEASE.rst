@@ -1,6 +1,33 @@
 Release Notes
 =============
 
+Version 0.25.0
+--------------
+
+- Decrease padding for button within course action column (#1885)
+- Remove SETTINGS.username, update tests (#1880)
+- Remove red border around income input on Firefox
+- Upgrade Raven (#1788)
+- Deep freeze for test constants (#1879)
+- Fixed exception when clicking &#39;save&#39; without adding a photo
+- Fixed future course start date display
+- Made profile image required in signup flow
+- Fixed ambiguous virgin islands entries
+- Use external URL if one exists (#1873)
+- CSS fallbacks for home page (#1786)
+- Remove border between row and sub rows (#1847)
+- Added merchant_defined_data fields (#1727)
+- Refactored edX user cached objects
+- Updated session to use cookie session instead of DB
+- Re-label  &#39;Current Grade&#39; on the dashboard to &#39;Course Progress&#39; and link to EDx Progress tab (#1852)
+- Applied email preference when staff emails students in bulk (#1842)
+- Increased coverage reporting precision to 2
+- Fixed bug with custom select input
+- added this option to the currency select in the financial aid calendar
+- Set learners name on search to first and last name pair (#1808)
+- rebasing
+- removes the x in the react select component
+
 Version 0.24.0
 --------------
 

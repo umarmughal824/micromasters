@@ -94,7 +94,11 @@ export function boundRadioGroupField(keySet: string[], label: string, options: O
  *
  * ["top-level-key", index, "nested_object_key"] or just ["top_level_key"]
  */
-export function boundTextField(keySet: string[], label: string): React$Element<*> {
+export function boundTextField(
+  keySet: string[],
+  label: string,
+  multiLine: boolean=false
+): React$Element<*> {
   const {
     profile,
     errors,
@@ -127,6 +131,7 @@ export function boundTextField(keySet: string[], label: string): React$Element<*
     <TextField
       onBlur={onBlur}
       name={label}
+      multiLine={multiLine}
       className={validationErrorSelector(errors, keySet)}
       floatingLabelText={label}
       value={getValue()}

@@ -40,7 +40,7 @@ import { DASHBOARD_SUCCESS_ACTIONS } from './test_util';
 
 describe('FinancialAidCalculator', () => {
   let listenForActions, renderComponent, helper, addFinancialAidStub, skipFinancialAidStub;
-  let financialAidDashboard = _.clone(DASHBOARD_RESPONSE);
+  let financialAidDashboard = _.cloneDeep(DASHBOARD_RESPONSE);
   let program = financialAidDashboard.find(program => (
     program.title === "Not passed program"
   ));
@@ -160,7 +160,7 @@ describe('FinancialAidCalculator', () => {
           'income': 'Income is required',
           'currency': 'Please select a currency'
         });
-        checkInvalidInput('.salary-field input', 'required');
+        checkInvalidInput('.salary-field input', 'aria-required');
         checkInvalidInput('.checkbox input', 'required');
         checkInvalidInput('.currency .Select-input input', 'aria-required');
       });

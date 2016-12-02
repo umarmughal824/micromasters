@@ -75,7 +75,46 @@
         </div>
       </div>
 
-            <section class="row current-programs-section">
+      <div class="row how-it-works-section">
+
+      <div class="centered-content">
+
+        <h3>How It Works</h3>
+        <div class="hiw col-md-3">
+          <div class="reasons-images-wrap">
+             <img src="{% static 'images/hiw1.png' %}" alt="">
+          </div>
+
+          <h4>Online Learning</h4>
+          <p>Take a series of online courses on edX, and pass all the course requirements.</p>
+        </div>
+        <div class="hiw col-md-3">
+          <div class="reasons-images-wrap">
+            <img src="{% static 'images/hiw2.png' %}" alt="">
+          </div>
+
+          <h4>Proctored Tests</h4>
+          <p>Pass one (or more) proctored exams—either a single final exam, or one exam for each course, depending on the program.</p>
+
+        </div>
+        <div class="hiw col-md-3">
+          <div class="reasons-images-wrap">
+            <img src="{% static 'images/hiw3.png' %}" alt="">
+          </div>
+          <h4>Earn a Valuable Credential</h4>
+          <p>A MicroMasters credential from MITx proves that you’ve gained the knowledge and skills to give you a competitive advantage for career success.</p>
+        </div>
+        <div class="hiw col-md-3">
+          <div class="reasons-images-wrap">
+            <img src="{% static 'images/hiw4.png' %}" alt="">
+          </div>
+          <h4>Pursue a Master’s</h4>
+          <p>Learners who complete the MicroMasters program can apply for the Master’s degree program at MIT or other universities.</p>
+        </div>
+        </div>
+
+      </div>
+      <section class="row current-programs-section">
         <h3>Current MITx MicroMasters Programs</h3>
         <ul class="current-programs-list">
         {% for program in programs %}
@@ -111,10 +150,10 @@
               {% endif %}
             </div>
             <div class="program-description">
-              <p id="program-{{ program.id }}-description">{{ program.description|default:"No description available for this program." }}</p>
+              <p class="program-description-text" id="program-{{ program.id }}-description">{{ program.description|default:"No description available for this program." }}</p>
 
               {% if program.programpage %}
-                <p>
+                <p class="program-description-link">
                 {% if program.programpage.external_program_page_url %}
                   <a href="{{ program.programpage.external_program_page_url }}" class="program-link">
                 {% else %}
@@ -152,7 +191,7 @@
              <img src="{% static 'images/online.png' %}" alt="">
           </div>
 
-          <h5 class="upper-case">Convenient &amp; Flexible</h5>
+          <h4>Convenient &amp; Flexible</h4>
           <p>Take online courses on a schedule that fits your needs, and meet motivated learners who share your interests.</p>
         </div>
         <div class="enroll-reason col-md-4">
@@ -160,7 +199,7 @@
             <img src="{% static 'images/blended.png' %}" alt="">
           </div>
 
-          <h5 class="upper-case">Accelerate Your Master’s</h5>
+          <h4>Accelerate Your Master’s</h4>
           <p>MicroMasters is a faster path to a master’s degree from MIT and other universities, and is recognized by employers for providing deep learning in specific career fields.</p>
 
         </div>
@@ -168,7 +207,7 @@
           <div class="reasons-images-wrap">
             <img src="{% static 'images/cost.png' %}" alt="">
           </div>
-           <h5 class="upper-case">Save Money &amp; Time</h5>
+           <h4>Save Money &amp; Time</h4>
           <p>MicroMasters is an affordable option for professionals who can’t take off time to earn a traditional master’s degree.</p>
         </div>
         </div>
@@ -292,7 +331,7 @@
 
   </div>
 </div>
-<script type="text/javascript" src="{{ public_src }}"></script>
+{% load render_bundle %}
+{% render_bundle "public" %}
+</div>
 {% endblock %}
-
-</a>div>

@@ -9,6 +9,7 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import PersonalTab from './PersonalTab';
 import { PROGRAMS } from '../constants';
 import IntegrationTestHelper from '../util/integration_test_helper';
+import { USER_PROFILE_RESPONSE } from '../constants';
 
 describe("PersonalTab", () => {
   let helper;
@@ -21,6 +22,7 @@ describe("PersonalTab", () => {
             programs={PROGRAMS}
             ui={{selectedProgram: selectedProgram}}
             dispatch={store.dispatch}
+            uneditedProfile={USER_PROFILE_RESPONSE}
             {...props}
           />
         </Provider>

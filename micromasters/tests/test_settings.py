@@ -6,11 +6,11 @@ import importlib
 import os
 import sys
 import tempfile
+from unittest import mock
 
 from django.conf import settings
 from django.core import mail
 from django.core.exceptions import ImproperlyConfigured
-import mock
 import semantic_version
 import yaml
 

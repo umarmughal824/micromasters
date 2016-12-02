@@ -60,7 +60,7 @@ EDUCATION_LEVEL_OPTIONS.forEach(level => {
 class EducationForm extends ProfileFormFields {
   props: {
     profile:                          Profile,
-    ui:                               UIState;
+    ui:                               UIState,
     updateProfile:                    UpdateProfileFunc,
     saveProfile:                      SaveProfileFunc,
     clearProfileEdit:                 () => void,

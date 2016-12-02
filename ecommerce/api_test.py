@@ -5,15 +5,15 @@ from base64 import b64encode
 from datetime import datetime
 import hashlib
 import hmac
+from unittest.mock import (
+    MagicMock,
+    patch,
+)
 from urllib.parse import quote_plus
 
 from django.core.exceptions import ImproperlyConfigured
 from django.http.response import Http404
 from django.test import override_settings
-from mock import (
-    MagicMock,
-    patch,
-)
 from rest_framework.exceptions import ValidationError
 from edx_api.enrollments import Enrollment
 
@@ -360,6 +360,9 @@ class CybersourceTests(ESTestCase):
             'transaction_type': 'sale',
             'transaction_uuid': transaction_uuid,
             'unsigned_field_names': '',
+            'merchant_defined_data1': 'course',
+            'merchant_defined_data2': '{}'.format(course_run.title),
+            'merchant_defined_data3': '{}'.format(course_run.edx_course_key),
         }
 
 

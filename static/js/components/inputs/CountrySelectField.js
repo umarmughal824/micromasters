@@ -2,17 +2,33 @@
 import React from 'react';
 import _ from 'lodash';
 import iso3166 from 'iso-3166-2';
+import R from 'ramda';
+
 import SelectField from './SelectField';
 import type { Profile, UpdateProfileFunc, ValidationErrors } from '../../flow/profileTypes';
 import type { Validator, UIValidator } from '../../lib/validation/profile';
 import type { Option } from '../../flow/generalTypes';
+import { labelSort } from '../../util/util';
 
-let countryOptions = _(iso3166.data)
-  .map((countryInfoObj, countryCode) => ({
-    value: countryCode,
-    label: countryInfoObj.name
-  }))
-  .sortBy('label').value();
+// VI is US Virgin Islands, VG is British
+const adjustVIEntries = R.compose(
+  R.set(R.lensProp('VI'), 'US Virgin Islands'),
+  R.set(R.lensProp('VG'), 'British Virgin Islands')
+);
+
+const countryOption = (name, code) => (
+  { value: code, label: name }
+);
+
+const makeCountryOptions = R.compose(
+  labelSort,
+  R.values,
+  R.mapObjIndexed(countryOption),
+  adjustVIEntries,
+  R.map(R.prop('name')),
+);
+
+const countryOptions = makeCountryOptions(iso3166.data);
 
 export default class CountrySelectField extends React.Component {
   props: {

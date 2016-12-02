@@ -17,6 +17,7 @@ import {
   SET_EDUCATION_LEVEL_ANSWERS,
 
   SET_USER_PAGE_DIALOG_VISIBILITY,
+  SET_USER_PAGE_ABOUT_ME_DIALOG_VISIBILITY,
 
   SET_SHOW_EDUCATION_DELETE_DIALOG,
   SET_SHOW_WORK_DELETE_DIALOG,
@@ -45,41 +46,42 @@ import type { Action } from '../flow/reduxTypes';
 import type { AvailableProgram } from '../flow/enrollmentTypes';
 
 export type UIDialog = {
-  title?: string;
-  text?: string;
-  visible?: boolean;
+  title?: string,
+  text?: string,
+  visible?: boolean,
 };
 
 export type UIState = {
-  educationDialogVisibility:    boolean;
-  educationDialogIndex:         number;
-  educationDegreeLevel:         string;
-  educationLevelAnswers:        {};
-  workHistoryEdit:              boolean;
-  workDialogVisibility:         boolean;
-  workHistoryAnswer:            ?boolean;
-  userPageDialogVisibility:     boolean;
-  showWorkDeleteDialog:         boolean;
-  showEducationDeleteDialog:    boolean;
-  deletionIndex:                ?number;
-  dialog:                       UIDialog;
-  profileStep:                  ?string;
-  workDialogIndex:              ?number;
-  userMenuOpen:                 boolean;
-  searchFilterVisibility:       {[s: string]: boolean};
-  tosDialogVisibility:          boolean;
-  emailDialogVisibility:        boolean;
-  enrollDialogError:            ?string;
-  enrollDialogVisibility:       boolean;
-  toastMessage:                 ?ToastMessage;
-  enrollSelectedProgram:        ?number;
-  photoDialogVisibility:        boolean;
-  calculatorDialogVisibility:   boolean;
-  documentSentDate:             Object;
-  selectedProgram:              ?AvailableProgram;
-  skipDialogVisibility:         boolean;
-  docsInstructionsVisibility:   boolean;
-  navDrawerOpen:                boolean;
+  educationDialogVisibility:        boolean,
+  educationDialogIndex:             number,
+  educationDegreeLevel:             string,
+  educationLevelAnswers:            {},
+  workHistoryEdit:                  boolean,
+  workDialogVisibility:             boolean,
+  workHistoryAnswer:                ?boolean,
+  userPageDialogVisibility:         boolean,
+  showWorkDeleteDialog:             boolean,
+  userPageAboutMeDialogVisibility:  boolean,
+  showEducationDeleteDialog:        boolean,
+  deletionIndex:                    ?number,
+  dialog:                           UIDialog,
+  profileStep:                      ?string,
+  workDialogIndex:                  ?number,
+  userMenuOpen:                     boolean,
+  searchFilterVisibility:           {[s: string]: boolean},
+  tosDialogVisibility:              boolean,
+  emailDialogVisibility:            boolean,
+  enrollDialogError:                ?string,
+  enrollDialogVisibility:           boolean,
+  toastMessage:                     ?ToastMessage,
+  enrollSelectedProgram:            ?number,
+  photoDialogVisibility:            boolean,
+  calculatorDialogVisibility:       boolean,
+  documentSentDate:                 Object,
+  selectedProgram:                  ?AvailableProgram,
+  skipDialogVisibility:             boolean,
+  docsInstructionsVisibility:       boolean,
+  navDrawerOpen:                    boolean,
 };
 
 export const INITIAL_UI_STATE: UIState = {
@@ -91,6 +93,7 @@ export const INITIAL_UI_STATE: UIState = {
   workDialogVisibility:       false,
   workHistoryAnswer:          null,
   userPageDialogVisibility: false,
+  userPageAboutMeDialogVisibility: false,
   showWorkDeleteDialog: false,
   showEducationDeleteDialog: false,
   deletionIndex: null,
@@ -181,6 +184,11 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
   case SET_USER_PAGE_DIALOG_VISIBILITY: {
     return Object.assign({}, state, {
       userPageDialogVisibility: action.payload
+    });
+  }
+  case SET_USER_PAGE_ABOUT_ME_DIALOG_VISIBILITY: {
+    return Object.assign({}, state, {
+      userPageAboutMeDialogVisibility: action.payload
     });
   }
   case SET_SHOW_EDUCATION_DELETE_DIALOG: {

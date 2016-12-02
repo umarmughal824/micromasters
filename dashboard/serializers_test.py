@@ -1,6 +1,7 @@
 """
 Test cases for the UserProgramSearchSerializer
 """
+import ddt
 import faker
 import pytz
 from django.test import TestCase
@@ -36,10 +37,12 @@ from profiles.factories import (
     EmploymentFactory,
     ProfileFactory,
 )
+from profiles.models import Profile
 from roles.models import Role
 from roles.roles import Staff
 
 
+@ddt.ddt
 class UserProgramSearchSerializerTests(TestCase):
     """
     Test cases for the UserProgramSearchSerializer
@@ -70,7 +73,7 @@ class UserProgramSearchSerializerTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         with mute_signals(post_save):
-            profile = ProfileFactory.create()
+            cls.profile = profile = ProfileFactory.create()
         cls.user = profile.user
         EducationFactory.create(profile=profile)
         EmploymentFactory.create(profile=profile)
@@ -129,6 +132,8 @@ class UserProgramSearchSerializerTests(TestCase):
         """
         Tests that full ProgramEnrollment serialization works as expected
         """
+        Profile.objects.filter(pk=self.profile.pk).update(email_optin=True)
+        self.profile.refresh_from_db()
         program = self.program_enrollment.program
         assert UserProgramSearchSerializer.serialize(self.program_enrollment) == {
             'id': program.id,
@@ -136,7 +141,26 @@ class UserProgramSearchSerializerTests(TestCase):
             'certificates': list(CachedCertificate.active_data(self.user, program)),
             'current_grades': list(CachedCurrentGrade.active_data(self.user, program)),
             'grade_average': 75,
-            'is_learner': True
+            'is_learner': True,
+            'email_optin': True
+        }
+
+    @ddt.data(False, True)
+    def test_full_program_user_serialization_email_optin_changes(self, email_optin_flag):
+        """
+        Tests that full ProgramEnrollment serialization works as expected on email_optin changes.
+        """
+        Profile.objects.filter(pk=self.profile.pk).update(email_optin=email_optin_flag)
+        self.profile.refresh_from_db()
+        program = self.program_enrollment.program
+        assert UserProgramSearchSerializer.serialize(self.program_enrollment) == {
+            'id': program.id,
+            'enrollments': list(CachedEnrollment.active_data(self.user, program)),
+            'certificates': list(CachedCertificate.active_data(self.user, program)),
+            'current_grades': list(CachedCurrentGrade.active_data(self.user, program)),
+            'grade_average': 75,
+            'is_learner': True,
+            'email_optin': email_optin_flag
         }
 
     def test_full_program_user_serialization_financial_aid(self):
@@ -146,13 +170,16 @@ class UserProgramSearchSerializerTests(TestCase):
         the difference with test_full_program_user_serialization
         is that the grade is calculated using the current grades
         """
+        Profile.objects.filter(pk=self.profile.pk).update(email_optin=True)
+        self.profile.refresh_from_db()
         expected_result = {
             'id': self.fa_program.id,
             'enrollments': list(CachedEnrollment.active_data(self.user, self.fa_program)),
             'certificates': [],
             'current_grades': list(CachedCurrentGrade.active_data(self.user, self.fa_program)),
             'grade_average': 95,
-            'is_learner': True
+            'is_learner': True,
+            'email_optin': True
         }
         assert UserProgramSearchSerializer.serialize(self.fa_program_enrollment) == expected_result
 
@@ -160,6 +187,8 @@ class UserProgramSearchSerializerTests(TestCase):
         """
         Tests that when user has staff role, the serialization shows that she is not a learner.
         """
+        Profile.objects.filter(pk=self.profile.pk).update(email_optin=True)
+        self.profile.refresh_from_db()
         program = self.program_enrollment.program
         Role.objects.create(
             user=self.user,
@@ -173,7 +202,8 @@ class UserProgramSearchSerializerTests(TestCase):
             'certificates': list(CachedCertificate.active_data(self.user, program)),
             'current_grades': list(CachedCurrentGrade.active_data(self.user, program)),
             'grade_average': 75,
-            'is_learner': False
+            'is_learner': False,
+            'email_optin': True
         }
 
     def test_cached_edx_model_serialization(self):

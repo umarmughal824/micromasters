@@ -241,11 +241,35 @@ describe('CourseAction', () => {
       course.runs.length > 0 &&
       course.runs[0].status === STATUS_WILL_ATTEND
     ));
-    let startDate = moment(now).add(10, 'days').toISOString();
-    let firstRun = alterFirstRun(course, {course_start_date: startDate});
+    let startDate = moment(now).add(10, 'days');
+    let firstRun = alterFirstRun(course, {course_start_date: startDate.toISOString()});
     const wrapper = shallow(<CourseAction courseRun={firstRun} {...defaultParamsNow} />);
     let elements = getElements(wrapper);
 
+    assert.include(elements.descriptionText, 'Course starts in 10 days');
+  });
+
+  it('ignores time of day when showing the number of days until a future course starts', () => {
+    let course = findAndCloneCourse(course => (
+      course.runs.length > 0 &&
+      course.runs[0].status === STATUS_WILL_ATTEND
+    ));
+
+    let currentDate = moment(now).set('hour', 12);
+    let startDate = moment(currentDate).add(10, 'days');
+
+    // Set the course to start in 10 days + 10 minutes
+    startDate.add(10, 'minutes');
+    let firstRun = alterFirstRun(course, {course_start_date: startDate.toISOString()});
+    let wrapper = shallow(<CourseAction courseRun={firstRun} {...defaultParamsNow} />);
+    let elements = getElements(wrapper);
+    assert.include(elements.descriptionText, 'Course starts in 10 days');
+
+    // Set the course to start in 10 days - 10 minutes
+    startDate.add(-20, 'minutes');
+    firstRun = alterFirstRun(course, {course_start_date: startDate.toISOString()});
+    wrapper = shallow(<CourseAction courseRun={firstRun} {...defaultParamsNow} />);
+    elements = getElements(wrapper);
     assert.include(elements.descriptionText, 'Course starts in 10 days');
   });
 

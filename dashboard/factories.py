@@ -3,21 +3,21 @@ Factories for dashboard
 """
 from datetime import datetime, timedelta
 from random import randint
-import pytz
 
+import faker
+import pytz
 from factory import SubFactory, LazyAttribute
 from factory.django import DjangoModelFactory
 from factory.fuzzy import (
-    FuzzyAttribute,
     FuzzyDateTime,
 )
-import faker
 
 from dashboard.models import (
     CachedCertificate,
     CachedCurrentGrade,
     CachedEnrollment,
     ProgramEnrollment,
+    UserCacheRefreshTime,
 )
 from courses.factories import (
     CourseRunFactory,
@@ -38,9 +38,8 @@ class CachedCertificateFactory(DjangoModelFactory):
         "certificate_type": "verified",
         "grade": randint(60, 100)/100.0,
         "course_id": x.course_run.edx_course_key,
+        "username": x.user.username,
     })
-    # certificates expire after 6 hours, this generates a last request between 6:15 hours ago and now
-    last_request = FuzzyDateTime(datetime.now(tz=pytz.utc) - timedelta(hours=6, minutes=15))
 
     class Meta:  # pylint: disable=missing-docstring,no-init,too-few-public-methods,old-style-class
         model = CachedCertificate
@@ -51,13 +50,11 @@ class CachedCurrentGradeFactory(DjangoModelFactory):
     user = SubFactory(UserFactory)
     course_run = SubFactory(CourseRunFactory)
     data = LazyAttribute(lambda x: {
-        "passed": FuzzyAttribute(FAKE.boolean),
+        "passed": FAKE.boolean(),
         "percent": randint(60, 100)/100.0,
         "course_key": x.course_run.edx_course_key,
+        "username": x.user.username,
     })
-
-    # certificates expire after 6 hours, this generates a last request between 6:15 hours ago and now
-    last_request = FuzzyDateTime(datetime.now(tz=pytz.utc) - timedelta(hours=6, minutes=15))
 
     class Meta:  # pylint: disable=missing-docstring,no-init,too-few-public-methods,old-style-class
         model = CachedCurrentGrade
@@ -70,15 +67,28 @@ class CachedEnrollmentFactory(DjangoModelFactory):
     data = LazyAttribute(lambda x: {
         "is_active": True,
         "mode": "verified",
+        "user": x.user.username,
         "course_details": {
             "course_id": x.course_run.edx_course_key,
         }
     })
-    # enrollments expire after 5 minutes, this generates a last request between 10 minutes ago and now
-    last_request = FuzzyDateTime(datetime.now(tz=pytz.utc) - timedelta(minutes=10))
 
     class Meta:  # pylint: disable=missing-docstring,no-init,too-few-public-methods,old-style-class
         model = CachedEnrollment
+
+
+class UserCacheRefreshTimeFactory(DjangoModelFactory):
+    """Factory for UserCacheRefreshTime"""
+    user = SubFactory(UserFactory)
+    # enrollments expire after 5 minutes, this generates a last request between 10 minutes ago and now
+    enrollment = FuzzyDateTime(datetime.now(tz=pytz.utc) - timedelta(minutes=10))
+    # certificates expire after 6 hours, this generates a last request between 6:15 hours ago and now
+    certificate = FuzzyDateTime(datetime.now(tz=pytz.utc) - timedelta(hours=6, minutes=15))
+    # current grades expire after 1 hour, this generates a last request between 1:15 hours ago and now
+    current_grade = FuzzyDateTime(datetime.now(tz=pytz.utc) - timedelta(hours=1, minutes=15))
+
+    class Meta:  # pylint: disable=missing-docstring,no-init,too-few-public-methods,old-style-class
+        model = UserCacheRefreshTime
 
 
 class ProgramEnrollmentFactory(DjangoModelFactory):
@@ -100,5 +110,6 @@ class ProgramEnrollmentFactory(DjangoModelFactory):
         course_run = CourseRunFactory.create(course=course)
         CachedEnrollmentFactory.create(user=user, course_run=course_run)
         CachedCertificateFactory.create(user=user, course_run=course_run)
+        CachedCurrentGradeFactory.create(user=user, course_run=course_run)
         program_enrollment = ProgramEnrollment.objects.create(user=user, program=program)
         return program_enrollment

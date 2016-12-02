@@ -29,7 +29,7 @@ def execute_search(search_obj):
     return search_obj.execute()
 
 
-def create_program_limit_query(user):
+def create_program_limit_query(user, filter_on_email_optin=False):
     """
     Constructs and returns a query that limits a user to data for their allowed programs
     """
@@ -41,6 +41,13 @@ def create_program_limit_query(user):
     if not users_allowed_programs:
         raise NoProgramAccessException()
 
+    must = [
+        Q('term', **{'program.is_learner': True})
+    ]
+
+    if filter_on_email_optin:
+        must.append(Q('term', **{'program.email_optin': True}))
+
     # no matter what the query is, limit the programs to the allowed ones
     # if this is a superset of what searchkit sends, this will not impact the result
     return Q(
@@ -50,13 +57,11 @@ def create_program_limit_query(user):
         ],
         # require that at least one program id matches the user's allowed programs
         minimum_should_match=1,
-        must=[
-            Q('term', **{'program.is_learner': True})
-        ],
+        must=must,
     )
 
 
-def create_search_obj(user, search_param_dict=None):
+def create_search_obj(user, search_param_dict=None, filter_on_email_optin=False):
     """
     Creates a search object and prepares it with metadata and query parameters that
     we want to apply for all ES requests
@@ -70,7 +75,10 @@ def create_search_obj(user, search_param_dict=None):
     """
     search_obj = Search(index=settings.ELASTICSEARCH_INDEX, doc_type=DOC_TYPES)
     # the following filter should come first because the sequence matters in applying them
-    search_obj = search_obj.filter(create_program_limit_query(user))
+    search_obj = search_obj.filter(create_program_limit_query(
+        user,
+        filter_on_email_optin=filter_on_email_optin
+    ))
     if search_param_dict is not None:
         search_param_dict['size'] = settings.ELASTICSEARCH_DEFAULT_PAGE_SIZE
     else:
@@ -80,11 +88,15 @@ def create_search_obj(user, search_param_dict=None):
     return search_obj
 
 
-def prepare_and_execute_search(user, search_param_dict=None, search_func=execute_search):
+def prepare_and_execute_search(user, search_param_dict=None, search_func=execute_search, filter_on_email_optin=False):
     """
     Prepares a Search object and executes the search against ES
     """
-    search_obj = create_search_obj(user, search_param_dict=search_param_dict)
+    search_obj = create_search_obj(
+        user,
+        search_param_dict=search_param_dict,
+        filter_on_email_optin=filter_on_email_optin
+    )
     return search_func(search_obj)
 
 

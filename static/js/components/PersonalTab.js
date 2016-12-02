@@ -3,6 +3,7 @@
 import React from 'react';
 import _ from 'lodash';
 import Card from 'react-mdl/lib/Card/Card';
+import CardTitle from 'react-mdl/lib/Card/CardTitle';
 import R from 'ramda';
 import Select from 'react-select';
 
@@ -12,9 +13,11 @@ import {
   combineValidators,
   personalValidation,
   programValidation,
+  profileImageValidation,
 } from '../lib/validation/profile';
 import type {
   Profile,
+  ProfileFetchResponse,
   SaveProfileFunc,
   ValidationErrors,
   UpdateProfileFunc,
@@ -28,7 +31,13 @@ import {  validationErrorSelector } from '../util/util';
 import type { Option } from '../flow/generalTypes';
 import { setProfileStep } from '../actions/ui';
 import { PERSONAL_STEP } from '../constants';
+import ProfileImage from '../containers/ProfileImage';
 
+const personalTabValidator = combineValidators(
+  personalValidation,
+  programValidation,
+  profileImageValidation,
+);
 
 export default class PersonalTab extends React.Component {
   props: {
@@ -38,6 +47,7 @@ export default class PersonalTab extends React.Component {
     nextStep:                 () => void,
     prevStep:                 () => void,
     profile:                  Profile,
+    uneditedProfile:          Profile,
     programs:                 AvailablePrograms,
     saveProfile:              SaveProfileFunc,
     setProgram:               Function,
@@ -81,6 +91,7 @@ export default class PersonalTab extends React.Component {
       <Select
         value={this.getSelectedProgramId()}
         onChange={this.onChange}
+        clearable={false}
         className={`program-selectfield ${validationErrorSelector(errors, ['program'])}`}
         errorText={_.get(errors, "program")}
         options={this.programOptions(programs)}
@@ -88,8 +99,16 @@ export default class PersonalTab extends React.Component {
     );
   };
 
+  afterImageUpload = (fetchResponse: ProfileFetchResponse): void => {
+    const { profile, updateProfile } = this.props;
+    let editState = _.cloneDeep(profile);
+    let { payload: { profile: { image } }} = fetchResponse;
+    let newEditState = Object.assign({}, editState, { image });
+    updateProfile(newEditState, personalTabValidator);
+  };
+
   render() {
-    const { ui: { selectedProgram }, errors } = this.props;
+    const { ui: { selectedProgram }, errors, uneditedProfile } = this.props;
 
     return (
       <div>
@@ -103,6 +122,21 @@ export default class PersonalTab extends React.Component {
             {_.get(errors, ['program'])}
           </span>
         </Card>
+        <Card shadow={1} className={`profile-image ${validationErrorSelector(errors, ['image'])}`}>
+          <CardTitle>
+            Upload a Profile Photo
+          </CardTitle>
+          <ProfileImage
+            profile={uneditedProfile}
+            editable={true}
+            showLink={true}
+            linkText="Click here to add a profile photo"
+            afterImageUpload={this.afterImageUpload}
+          />
+          <span className="validation-error-text">
+            {_.get(errors, ['image'])}
+          </span>
+        </Card>
         <Card shadow={1} className="profile-form">
           <PersonalForm {...this.props} validator={personalValidation} />
         </Card>
@@ -112,12 +146,7 @@ export default class PersonalTab extends React.Component {
           nextBtnLabel="Next"
           programIdForEnrollment={selectedProgram ? selectedProgram.id : null}
           isLastTab={false}
-          validator={
-            combineValidators(
-              personalValidation,
-              programValidation
-            )
-          }
+          validator={personalTabValidator}
         />
       </div>
     );

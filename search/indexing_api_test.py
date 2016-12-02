@@ -1,16 +1,17 @@
 """
 Tests for search API functions.
 """
+from unittest.mock import patch
 
 from django.conf import settings
 from django.db.models.signals import post_save
 from factory.django import mute_signals
 from requests import get
-from mock import patch
 
 from dashboard.factories import (
     CachedCertificateFactory,
     CachedEnrollmentFactory,
+    CachedCurrentGradeFactory,
     ProgramEnrollmentFactory
 )
 from dashboard.models import ProgramEnrollment
@@ -215,11 +216,12 @@ class IndexTests(ESTestCase):
         Test that cached edX records are indexed after being added
         """
         program_enrollment = ProgramEnrollmentFactory.create()
-        for edx_cached_model_factory in [CachedCertificateFactory, CachedEnrollmentFactory]:
+        for edx_cached_model_factory in [CachedCertificateFactory, CachedEnrollmentFactory, CachedCurrentGradeFactory]:
             assert es.search()['total'] == 1
             course = CourseFactory.create(program=program_enrollment.program)
             course_run = CourseRunFactory.create(course=course)
             edx_cached_model_factory.create(user=program_enrollment.user, course_run=course_run)
+            index_program_enrolled_users([program_enrollment])
             assert_search(es.search(), [program_enrollment])
 
     def test_update_edx_record(self):
@@ -227,13 +229,15 @@ class IndexTests(ESTestCase):
         Test that a cached edX record is reindexed after being updated
         """
         program_enrollment = ProgramEnrollmentFactory.create()
-        for edx_cached_model_factory in [CachedCertificateFactory, CachedEnrollmentFactory]:
+        for edx_cached_model_factory in [CachedCertificateFactory, CachedEnrollmentFactory, CachedCurrentGradeFactory]:
             assert es.search()['total'] == 1
             course = CourseFactory.create(program=program_enrollment.program)
             course_run = CourseRunFactory.create(course=course)
             edx_record = edx_cached_model_factory.create(user=program_enrollment.user, course_run=course_run)
+            index_program_enrolled_users([program_enrollment])
             edx_record.data.update({'new': 'data'})
             edx_record.save()
+            index_program_enrolled_users([program_enrollment])
             assert_search(es.search(), [program_enrollment])
 
     def test_delete_edx_record(self):
@@ -241,12 +245,14 @@ class IndexTests(ESTestCase):
         Test that a cached edX record is removed from index after being deleted
         """
         program_enrollment = ProgramEnrollmentFactory.create()
-        for edx_cached_model_factory in [CachedCertificateFactory, CachedEnrollmentFactory]:
+        for edx_cached_model_factory in [CachedCertificateFactory, CachedEnrollmentFactory, CachedCurrentGradeFactory]:
             course = CourseFactory.create(program=program_enrollment.program)
             course_run = CourseRunFactory.create(course=course)
             edx_record = edx_cached_model_factory.create(user=program_enrollment.user, course_run=course_run)
+            index_program_enrolled_users([program_enrollment])
             assert_search(es.search(), [program_enrollment])
             edx_record.delete()
+            index_program_enrolled_users([program_enrollment])
             assert_search(es.search(), [program_enrollment])
 
     def test_not_analyzed(self):

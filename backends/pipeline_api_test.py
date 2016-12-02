@@ -1,10 +1,8 @@
 """
 Tests for the pipeline APIs
 """
-
+from unittest import mock
 from urllib.parse import urljoin
-
-import mock
 
 from backends import pipeline_api, edxorg
 from backends.pipeline_api import update_from_linkedin

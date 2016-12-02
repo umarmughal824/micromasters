@@ -2,17 +2,20 @@
 Library functions for interacting with test data
 """
 import re
-from datetime import timedelta
+from datetime import datetime, timedelta
 from functools import wraps
-from django.db import IntegrityError
-from django.db.models import Q
 
 from django.contrib.auth.models import User
-from courses.models import Program, Course, CourseRun
-from dashboard.models import CachedCertificate, CachedEnrollment, CachedCurrentGrade
+from courses.models import Program, Course
+from dashboard.api_edx_cache import CachedEdxUserData
+from dashboard.models import CachedCertificate, CachedEnrollment, CachedCurrentGrade, UserCacheRefreshTime
 from financialaid.factories import TierProgramFactory
 from financialaid.models import TierProgram
-from seed_data.management.commands import DEFAULT_GRADE, FAKE_PROGRAM_DESC_PREFIX
+from seed_data.management.commands import (
+    DEFAULT_GRADE,
+    FAKE_PROGRAM_DESC_PREFIX,
+    PASSING_GRADE
+)
 from seed_data.utils import (
     create_active_date_range,
     create_future_date_range,
@@ -105,7 +108,7 @@ class CourseFinder(ModelFinder):
 
 
 def course_state_editor(func):
-    """Decorator for any method that will be used to alter a Course's 'state'"""
+    """Decorator for any method that will be used to alter a Course's 'state' """
     @wraps(func)
     def wrapper(*args, **kwargs):  # pylint: disable=missing-docstring
         user = kwargs['user']
@@ -123,134 +126,118 @@ def course_state_editor(func):
     return wrapper
 
 
-def cached_obj_editor(editing_func):
-    """Decorator for any method that changes information for a cached edX model object"""
-    @wraps(editing_func)
-    def wrapper(*args, **kwargs):  # pylint: disable=missing-docstring
-        obj = args[1]
-        if kwargs.get('blank', False):
-            obj.data = None
-            ret_val = None
-        else:
-            ret_val = editing_func(*args, **kwargs)
-        if kwargs.get('set_last_request', True):
-            obj.last_request = future_date()
-        if kwargs.get('save', True):
-            obj.save()
-        return ret_val
-    return wrapper
-
-
 class CachedHandler(object):
     """Provides common functionality to retrieve/manipulate cached edX model objects"""
     model_cls = None
+    cache_type = None
 
-    def __init__(self, user):
+    def __init__(self, user, social_username=None):
         self.user = user
+        self.social_username = social_username
 
-    def get_missing_course_runs(self, course_runs):
-        """Given a list of CourseRuns, return the ones that do not have a cached edX object for the User"""
-        course_run_ids = set(course_run.id for course_run in course_runs)
-        cached_course_run_ids = self.model_cls.objects.filter(user=self.user).values_list("course_run__id", flat=True)
-        missing_course_run_ids = course_run_ids.difference(set(cached_course_run_ids))
-        return [cr for cr in course_runs if cr.id in missing_course_run_ids]
+    @property
+    def username(self):
+        """Username to use when setting edX data"""
+        return self.social_username or self.user.username
 
     def clear_all(self, course=None, course_run=None):
-        """Sets data to None for all cached edX objects associated with a User (and Course/CourseRun, if provided)"""
+        """Clears all cached edX objects associated with a User (and Course/CourseRun, if provided)"""
         params = {'user': self.user}
         if course:
             params['course_run__course'] = course
         if course_run:
             params['course_run'] = course_run
-        return self.model_cls.objects.filter(**params).update(data=None)
-
-    def refresh_all(self):
-        """Ensures that all of a User's cached edX objects are valid and will not trigger an edX API call"""
-        self.model_cls.objects.filter(user=self.user).update(last_request=future_date())
+        return self.model_cls.objects.filter(**params).delete()
 
     @classmethod
     def set_edx_key(cls, obj, course_run):
         """Sets the edX course id, wherever it exists in the cached object data property"""
         raise NotImplementedError
 
-    def set_data(self, obj, course_run, **kwargs):
-        """Properly sets values on the cached edX object data property"""
+    def build_data_property(self, course_run, **kwargs):
+        """Builds the value of the data property for a cached edX object"""
         raise NotImplementedError
 
     def set_or_create(self, course_run, **kwargs):
         """Ensures that a cached edX object exists, then properly sets values on the data property"""
-        obj = self.get_or_create(course_run)
-        obj.data = obj.data or {}
-        self.set_data(obj, course_run, **kwargs)
+        data = self.build_data_property(course_run, **kwargs)
+        obj, created = self.get_or_create(course_run, data=data)
+        if not created:
+            obj.data = data
+            obj.save()
+        CachedEdxUserData.update_cache_last_access(self.user, self.cache_type, timestamp=datetime.utcnow())
         return obj
 
-    def get(self, course_run):
+    def find(self, course_run):
         """Gets a cached edX object for a given User and CourseRun"""
-        return self.model_cls.objects.get(user=self.user, course_run=course_run)
+        return self.model_cls.objects.filter(user=self.user, course_run=course_run).first()
 
-    def get_or_create(self, course_run):
+    def get_or_create(self, course_run, data=None):
         """Gets or creates a cached edX object for a given User and CourseRun"""
-        try:
-            return self.model_cls.objects.get_or_create(user=self.user, course_run=course_run)[0]
-        except IntegrityError:
-            return self.model_cls.objects.create(user=self.user, course_run=course_run, last_request=future_date())
+        defaults = dict(data=data)
+        return self.model_cls.objects.get_or_create(user=self.user, course_run=course_run, defaults=defaults)
+
+    def exists(self, course_run):
+        """Returns True if a User has an associated cached edX record for the given CourseRun"""
+        return self.model_cls.objects.filter(user=self.user, course_run=course_run).exists()
 
 
 class CachedEnrollmentHandler(CachedHandler):
     """Provides functionality to CachedEnrollment objects"""
     model_cls = CachedEnrollment
+    cache_type = 'enrollment'
 
     @classmethod
     def set_edx_key(cls, obj, course_run):
         obj.data['course_details']['course_id'] = course_run.edx_course_key
 
-    @cached_obj_editor
-    def set_data(self, obj, course_run, verified=True, **kwargs):
-        obj.data.update({
-            'user': self.user.username,
-            'mode': 'verified' if verified else 'not verified'
-        })
-        obj.data['course_details'] = obj.data.get('course_details', {})
-        obj.data['course_details'].update({
-            'course_id': course_run.edx_course_key,
-            'enrollment_start': course_run.enrollment_start.isoformat(),
-            'enrollment_end': course_run.enrollment_end.isoformat()
-        })
+    def build_data_property(self, course_run, verified=True, **kwargs):
+        return {
+            'user': self.username,
+            'mode': 'verified' if verified else 'not verified',
+            'is_active': True,
+            'course_details': {
+                'course_id': course_run.edx_course_key,
+                'enrollment_start': course_run.enrollment_start.isoformat(),
+                'enrollment_end': course_run.enrollment_end.isoformat()
+            }
+        }
 
 
 class CachedCertificateHandler(CachedHandler):
     """Provides functionality to CachedCertificate objects"""
     model_cls = CachedCertificate
+    cache_type = 'certificate'
 
     @classmethod
     def set_edx_key(cls, obj, course_run):
         obj.data['course_id'] = course_run.edx_course_key
 
-    @cached_obj_editor
-    def set_data(self, obj, course_run, grade=DEFAULT_GRADE, **kwargs):
-        obj.data.update({
-            'username': self.user.username,
+    def build_data_property(self, course_run, grade=DEFAULT_GRADE, **kwargs):
+        return {
+            'username': self.username,
             'course_id': course_run.edx_course_key,
             'certificate_type': 'verified',
             'grade': str(grade)
-        })
+        }
 
 
 class CachedCurrentGradeHandler(CachedHandler):
     """Provides functionality to CachedCurrentGrade objects"""
     model_cls = CachedCurrentGrade
+    cache_type = 'current_grade'
 
     @classmethod
     def set_edx_key(cls, obj, course_run):
         obj.data['course_key'] = course_run.edx_course_key
 
-    @cached_obj_editor
-    def set_data(self, obj, course_run, grade=DEFAULT_GRADE, **kwargs):
-        obj.data.update({
+    def build_data_property(self, course_run, grade=DEFAULT_GRADE, **kwargs):
+        return {
             'course_key': course_run.edx_course_key,
-            'username': self.user.username,
-            'percent': str(grade)
-        })
+            'username': self.username,
+            'percent': str(grade),
+            'passed': grade >= PASSING_GRADE
+        }
 
 
 CACHED_HANDLERS = {
@@ -260,24 +247,14 @@ CACHED_HANDLERS = {
 }
 
 
-def ensure_cached_edx_data_for_user(user):
+def ensure_cached_data_freshness(user):
     """
-    For every CourseRun in the database, ensure that a User has an associated cached edX
-    record (eg: CachedEnrollment)
+    Ensure that all cached edX data will be considered 'fresh' for a User
     """
-    all_course_runs = CourseRun.objects.filter(course__program__live=True).exclude(
-        Q(edx_course_key__isnull=True) | Q(edx_course_key__exact='')
-    ).all()
-    results = []
-    for cached_model, cached_model_handler in CACHED_HANDLERS.items():
-        missing_course_runs = cached_model_handler(user).get_missing_course_runs(all_course_runs)
-        # For any CourseRun that isn't already associated with a cached object, create a new one with data=None
-        create_result = cached_model.objects.bulk_create([
-            cached_model(user=user, course_run=course_run, data=None, last_request=future_date())
-            for course_run in missing_course_runs
-        ])
-        results.extend(create_result)
-    return results
+    future = future_date()
+    updated_values = {cache: future for cache in CachedEdxUserData.SUPPORTED_CACHES}
+    updated_values['user'] = user
+    UserCacheRefreshTime.objects.update_or_create(user=user, defaults=updated_values)
 
 
 def clear_edx_data(user, course=None, course_run=None, models=None):
@@ -290,18 +267,15 @@ def clear_edx_data(user, course=None, course_run=None, models=None):
         cached_model_handler(user).clear_all(course=course, course_run=course_run)
 
 
-def refresh_all_cached_edx_data(user):
-    """Refreshes all cached edX data for a User"""
-    for cached_handler in CACHED_HANDLERS.values():
-        cached_handler(user).refresh_all()
-
-
 def update_cached_edx_data_for_run(user, course_run):
-    """Updates the course id in a User's cached edX objects based on a CourseRun.edx_course_key value"""
+    """
+    Convenience method to updates the course id in a User's cached edX records
+    based on a CourseRun.edx_course_key value
+    """
     for cached_handler_cls in CACHED_HANDLERS.values():
         cached_handler = cached_handler_cls(user)
-        cached_obj = cached_handler.get_or_create(course_run)
-        if cached_obj.data:
+        cached_obj = cached_handler.find(course_run)
+        if cached_obj:
             cached_handler.set_edx_key(cached_obj, course_run)
             cached_obj.save()
 

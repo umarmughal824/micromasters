@@ -126,7 +126,7 @@ window.financialAidReview = (function(window, document, $) {
    */
   function initiateSearch() {
     var searchQuery = $("#search-query").val();
-    location = BASE_PATH + searchQuery;
+    window.location = BASE_PATH + searchQuery;
   }
   
   /**

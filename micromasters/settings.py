@@ -21,7 +21,7 @@ from celery.schedules import crontab
 from django.core.exceptions import ImproperlyConfigured
 
 
-VERSION = "0.24.0"
+VERSION = "0.25.0"
 
 CONFIG_PATHS = [
     os.environ.get('MICROMASTERS_CONFIG', ''),
@@ -82,6 +82,21 @@ else:
 SECURE_SSL_REDIRECT = get_var('MICROMASTERS_SECURE_SSL_REDIRECT', True)
 
 
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'CACHE': not DEBUG,
+        'BUNDLE_DIR_NAME': 'bundles/',
+        'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json'),
+        'POLL_INTERVAL': 0.1,
+        'TIMEOUT': None,
+        'IGNORE': [
+            r'.+\.hot-update\.+',
+            r'.+\.js\.map'
+        ]
+    }
+}
+
+
 # Application definition
 
 INSTALLED_APPS = (
@@ -114,6 +129,7 @@ INSTALLED_APPS = (
     # other third party APPS
     'rolepermissions',
     'raven.contrib.django.raven_compat',
+    'webpack_loader',
 
     # Our INSTALLED_APPS
     'backends',
@@ -161,6 +177,7 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 
 SOCIAL_AUTH_LINKEDIN_OAUTH2_KEY = get_var('LINKEDIN_CLIENT_ID', '')
 SOCIAL_AUTH_LINKEDIN_OAUTH2_SECRET = get_var('LINKEDIN_CLIENT_SECRET', '')
@@ -471,7 +488,7 @@ BROKER_URL = get_var("BROKER_URL", get_var("REDISCLOUD_URL", None))
 CELERY_RESULT_BACKEND = get_var(
     "CELERY_RESULT_BACKEND", get_var("REDISCLOUD_URL", None)
 )
-CELERY_ALWAYS_EAGER = get_var("CELERY_ALWAYS_EAGER", True)
+CELERY_ALWAYS_EAGER = get_var("CELERY_ALWAYS_EAGER", False)
 CELERY_EAGER_PROPAGATES_EXCEPTIONS = get_var(
     "CELERY_EAGER_PROPAGATES_EXCEPTIONS", True)
 CELERYBEAT_SCHEDULE = {

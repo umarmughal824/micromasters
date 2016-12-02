@@ -143,11 +143,6 @@
       font-size: 11pt;
       align-items: center;
       padding: 14px 20px;
-      border-bottom: 1px solid $lightgrey;
-
-      &:last-child {
-        border-bottom: none;
-      }
 
       .course-description {
         .course-title {
@@ -199,8 +194,10 @@
         }
 
         .mdl-button {
-          display: flex;
-          margin-bottom: 10px;
+          margin-bottom: 6px;
+          min-width: 120px;
+          padding: 0;
+          text-align: center;
         }
 
         .description {
@@ -303,6 +300,14 @@
     font-weight: 500;
     margin: 6px 10px;
     padding: 0 2px;
+  }
+
+  .primary-button, .secondary-button {
+    box-shadow: none;
+
+    &:hover, &:focus, &:active, &:focus:not(:active) {
+      box-shadow: none;
+    }
   }
 
   .primary-button {

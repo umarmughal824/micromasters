@@ -52,7 +52,8 @@ class UserProgramSearchSerializer:
             'certificates': certificates,
             'current_grades': current_grades,
             'grade_average': cls.calculate_final_grade_average(mmtrack),
-            'is_learner': cls.is_learner(user, program)
+            'is_learner': cls.is_learner(user, program),
+            'email_optin': user.profile.email_optin,
         }
 
     @classmethod

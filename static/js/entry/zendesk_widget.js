@@ -1,5 +1,7 @@
 /* global SETTINGS:false zE:false _:false */
 __webpack_public_path__ = `http://${SETTINGS.host}:8078/`;  // eslint-disable-line no-undef, camelcase
+import "element-closest";
+import R from 'ramda';
 
 // Start of odl Zendesk Widget script
 /*<![CDATA[*/
@@ -74,7 +76,7 @@ const zendeskCallbacks = {
 
   launcherLoaded: () => {
     const iframe = document.querySelector("iframe.zEWidget-launcher");
-    const btn = iframe.contentDocument.querySelector(".Button--launcher");
+    const btn = iframe.contentDocument.querySelector(".u-userBackgroundColor");
 
     const regularBackgroundColor = "rgba(0, 0, 0, .14)";
     const hoverBackgroundColor = window.getComputedStyle(btn).backgroundColor;
@@ -116,6 +118,41 @@ const zendeskCallbacks = {
         }, 100);
       };
     }
+  },
+  ticketSubmissionFormLoaded: () => {
+    const iframe = document.querySelector("iframe.zEWidget-ticketSubmissionForm");
+
+    const fieldSelector = name => (
+      `input[name="${name}"], select[name="${name}"]`
+    );
+    const fieldElement = name => (
+      iframe.contentDocument.querySelector(fieldSelector(name))
+    );
+
+    // Zendesk uses the ID 24690866 to refer to the MicroMasters program selector
+    const programFieldName = '24690866';
+    const fieldVisibility = {
+      'name':  !(SETTINGS.user && SETTINGS.user.first_name
+                 && SETTINGS.user.last_name),
+      'email': !(SETTINGS.user && SETTINGS.user.email),
+      [programFieldName]: !(SETTINGS.program && SETTINGS.program.slug),
+    };
+
+    const adjustFieldsVisibility = R.map(name => {
+      if ( !fieldVisibility[name] ) {
+        const label = fieldElement(name).closest('label');
+        label.style.setProperty("display", "none", "important");
+      }
+    });
+
+    adjustFieldsVisibility([
+      'name', 'email', programFieldName
+    ]);
+
+    // adjust the iframe to the correct (smaller) height
+    const height = iframe.contentDocument.body.childNodes[0].offsetHeight;
+    // zendesk adds a 15px margin
+    iframe.style.height = `${height + 15}px`;
   }
 };
 

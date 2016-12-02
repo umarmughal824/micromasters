@@ -4,7 +4,7 @@ General util functions for database seeding
 from datetime import datetime, timedelta
 from functools import wraps
 import math
-from pytz import timezone
+from pytz import timezone, utc
 
 
 def accepts_or_calculates_now(func):
@@ -12,7 +12,7 @@ def accepts_or_calculates_now(func):
     @wraps(func)
     def wrapper(*args, **kwargs):  # pylint: disable=missing-docstring
         if not kwargs.get('now'):
-            kwargs['now'] = datetime.now()
+            kwargs['now'] = datetime.now(tz=utc)
         return func(*args, **kwargs)
     return wrapper
 

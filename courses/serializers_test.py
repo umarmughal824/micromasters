@@ -2,8 +2,9 @@
 Tests for serializers
 """
 
+from unittest.mock import Mock
+
 from django.test import override_settings
-from mock import Mock
 
 from cms.factories import ProgramPageFactory
 from cms.models import HomePage
@@ -97,6 +98,26 @@ class ProgramSerializerTests(ESTestCase):
             'enrolled': False,
         }
         assert len(programpage.url) > 0
+
+    def test_program_with_external_url(self):
+        """
+        Test ProgramSerializer with a program page that has an external url
+        """
+        url = 'http://example.com/external-url/'
+        programpage = ProgramPageFactory.build(
+            program=self.program,
+            external_program_page_url=url,
+        )
+        homepage = HomePage.objects.first()
+        homepage.add_child(instance=programpage)
+        data = ProgramSerializer(self.program, context=self.context).data
+        assert data == {
+            'id': self.program.id,
+            'title': self.program.title,
+            'programpage_url': url,
+            'enrolled': False,
+        }
+        assert programpage.url != url
 
     def test_program_enrolled(self):
         """

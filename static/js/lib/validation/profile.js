@@ -57,6 +57,10 @@ export function programValidation(_: Profile, ui: UIState): ValidationErrors {
   return errors;
 }
 
+export const profileImageValidation = (profile: Profile) => (
+  profile.image ? {} : { image: 'Please upload a profile image' }
+);
+
 export function personalValidation(profile: Profile): ValidationErrors {
   let requiredFields = [
     ['first_name'],

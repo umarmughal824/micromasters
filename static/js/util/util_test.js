@@ -28,6 +28,7 @@ import {
   labelSort,
   classify,
   currentOrFirstIncompleteStep,
+  getUserDisplayName,
 } from '../util/util';
 import {
   EDUCATION_LEVELS,
@@ -254,18 +255,8 @@ describe('utility functions', () => {
   });
 
   describe('Profile of logged in user check', () => {
-    let settingsBackup;
-
-    beforeEach(() => {
-      settingsBackup = SETTINGS;
-    });
-
-    afterEach(() => {
-      SETTINGS = settingsBackup;
-    });
-
     it('when user is not logged in', () => {
-      SETTINGS = Object.assign({}, SETTINGS, {user: null});
+      SETTINGS.user = null;
       let profile = { username: "another_user" };
       assert.isNotTrue(isProfileOfLoggedinUser(profile));
     });
@@ -282,16 +273,6 @@ describe('utility functions', () => {
   });
 
   describe('User privilege check', () => {
-    let settingsBackup;
-
-    beforeEach(() => {
-      settingsBackup = SETTINGS;
-    });
-
-    afterEach(() => {
-      SETTINGS = settingsBackup;
-    });
-
     it('should return the value of the first function if the profile username matches', () => {
       let profile = { username: SETTINGS.user.username };
       let privilegedCallback = () => "hi";
@@ -319,7 +300,7 @@ describe('utility functions', () => {
     });
 
     it('should return the value of the second function if user is not logged in', () => {
-      SETTINGS = Object.assign({}, SETTINGS, {user: null});
+      SETTINGS.user = null;
       let profile = { username: "another_user" };
       let privilegedCallback = () => "vim";
       let unprivilegedCallback = () => "emacs";
@@ -592,6 +573,37 @@ describe('utility functions', () => {
         input[1],
       ];
       assert.deepEqual(expected, labelSort(input));
+    });
+  });
+
+  describe('getUserDisplayName', () => {
+    let profile;
+    beforeEach(() => {
+      profile = {
+        username: 'jane_username',
+        first_name: 'jane',
+        last_name: 'doe',
+        preferred_name: 'test'
+      };
+    });
+
+    it('shows first, last, and preferred names', () => {
+      assert.equal('jane doe (test)', getUserDisplayName(profile));
+    });
+
+    it('shows username when first name is blank', () => {
+      profile.first_name = null;
+      assert.equal('jane_username doe (test)', getUserDisplayName(profile));
+    });
+
+    it('does not show preferred name when that value is blank', () => {
+      profile.preferred_name = null;
+      assert.equal('jane doe', getUserDisplayName(profile));
+    });
+
+    it('does not show preferred name when first name has same value', () => {
+      profile.first_name = 'test';
+      assert.equal('test doe', getUserDisplayName(profile));
     });
   });
 });

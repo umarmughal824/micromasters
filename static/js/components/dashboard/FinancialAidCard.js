@@ -30,17 +30,16 @@ const price = price => <span className="price">{ formatPrice(price) }</span>;
 
 export default class FinancialAidCard extends React.Component {
   props: {
-    program:                        Program,
     coursePrice:                    CoursePrice,
-    openFinancialAidCalculator:     () => void,
-    skipFinancialAid:               (p: number) => void,
     documents:                      DocumentsState,
-    setDocumentSentDate:            (sentDate: string) => void,
-    updateDocumentSentDate:         (financialAidId: number, sentDate: string) => Promise<*>,
+    openFinancialAidCalculator:     () => void,
+    program:                        Program,
     setConfirmSkipDialogVisibility: (b: boolean) => void,
-    ui:                             UIState,
-    skipFinancialAid:               () => void,
     setDocsInstructionsVisibility:  (b: boolean) => void,
+    setDocumentSentDate:            (sentDate: string) => void,
+    skipFinancialAid:               (p: number) => void,
+    ui:                             UIState,
+    updateDocumentSentDate:         (financialAidId: number, sentDate: string) => Promise<*>,
   };
 
   submitDocuments = (): void => {

@@ -1,11 +1,12 @@
 """
 Tests for ecommerce permissions
 """
+from unittest.mock import MagicMock
+
 from django.test import (
     override_settings,
     TestCase,
 )
-from mock import MagicMock
 
 from ecommerce.api import generate_cybersource_sa_signature
 from ecommerce.permissions import IsSignedByCyberSource

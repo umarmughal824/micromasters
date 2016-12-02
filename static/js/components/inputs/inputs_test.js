@@ -155,6 +155,23 @@ describe('Profile inputs', () => {
         ]
       });
     });
+
+    it('should add a previously saved custom option to this.state', () => {
+      selectField = renderGenderSelectField({
+        allowCreate: true,
+        profile: {
+          gender: 'agender'
+        }
+      });
+      assert.include(selectField.text(), 'agender');
+      let expectedCustomOption = {
+        value: 'agender', label: 'agender'
+      };
+      assert.deepEqual(selectField.state(), {
+        customOptions: [ expectedCustomOption ]
+      });
+      assert.include(selectField.find(VirtualizedSelect).props().options, expectedCustomOption);
+    });
   });
 
   describe("State select field", () => {
@@ -212,6 +229,11 @@ describe('Profile inputs', () => {
       mount(<CountrySelectField {...inputProps} />)
     );
 
+    const checkFieldText = text => {
+      let countryField = renderCountrySelect();
+      assert.include(countryField.text(), text);
+    };
+
     it('shows a list of countries', () => {
       inputProps.profile.country_key = null;
       inputProps.profile.country = null;
@@ -231,6 +253,14 @@ describe('Profile inputs', () => {
       countryField.find(SelectField).props().onChange({ value: 'AL' });
       assert.equal(inputProps.profile.country_key, 'AL');
       assert.equal(inputProps.profile.state_key, null);
+    });
+
+    it('should have different labels for the different virgin islands', () => {
+      inputProps.profile.country_key = 'VI';
+      checkFieldText('US Virgin Islands');
+
+      inputProps.profile.country_key = 'VG';
+      checkFieldText('British Virgin Islands');
     });
   });
 });
