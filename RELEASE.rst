@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.25.2
+--------------
+
+- Use enrollment_url if provided for URL (#1963)
+
 Version 0.25.1
 --------------
 

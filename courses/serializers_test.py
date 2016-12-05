@@ -4,8 +4,6 @@ Tests for serializers
 
 from unittest.mock import Mock
 
-from django.test import override_settings
-
 from cms.factories import ProgramPageFactory
 from cms.models import HomePage
 from courses.factories import (
@@ -43,15 +41,14 @@ class CourseSerializerTests(ESTestCase):
         }
         assert data == expected
 
-    @override_settings(EDXORG_BASE_URL="http://192.168.33.10:8000")
     def test_course_with_run(self):
         """
         Make sure the course URL serializes properly
         """
-        course_run = CourseRunFactory.create(edx_course_key='my-course-key')
+        course_run = CourseRunFactory.create()
         course = course_run.course
         data = CourseSerializer(course).data
-        assert data['url'] == 'http://192.168.33.10:8000/courses/my-course-key/about'
+        assert data['url'] == course_run.enrollment_url
         assert data['enrollment_text'] == course.enrollment_text
 
 
