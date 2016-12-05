@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.25.3
+--------------
+
+-  Changed image uploader to not use png, it is too big  (#1972)
+
 Version 0.25.2
 --------------
 
