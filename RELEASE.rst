@@ -1,6 +1,21 @@
 Release Notes
 =============
 
+Version 0.25.3
+--------------
+
+-  Changed image uploader to not use png, it is too big  (#1972)
+
+Version 0.25.2
+--------------
+
+- Use enrollment_url if provided for URL (#1963)
+
+Version 0.25.1
+--------------
+
+- Updated address for sending financial aid documents (#1953)
+
 Version 0.25.0
 --------------
 
