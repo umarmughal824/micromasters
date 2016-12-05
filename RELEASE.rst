@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.25.1
+--------------
+
+- Updated address for sending financial aid documents (#1953)
+
 Version 0.25.0
 --------------
 
