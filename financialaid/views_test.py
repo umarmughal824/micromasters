@@ -243,8 +243,19 @@ class ReviewTests(FinancialAidBaseTestCase, APIClient):
             GA_TRACKING_ID=ga_tracking_id,
             REACT_GA_DEBUG=react_ga_debug,
             EDXORG_BASE_URL=base_url,
-        ):
+        ), patch('ui.templatetags.render_bundle._get_bundle') as get_bundle:
             response = self.client.get(self.review_url)
+
+            bundles = [bundle[0][1] for bundle in get_bundle.call_args_list]
+            assert set(bundles) == {
+                'common',
+                'financial_aid',
+                'sentry_client',
+                'style',
+                'style_public',
+                'zendesk_widget',
+            }
+
             assert response.context['has_zendesk_widget'] is True
             assert response.context['is_public'] is True
             self.assertContains(response, 'Share this page')
