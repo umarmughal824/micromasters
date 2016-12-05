@@ -25,7 +25,7 @@ import {
 import { fetchUserProfile } from '../actions/profile';
 
 const formatPhotoName = photo => (
-  `${photo.name.replace(/\.\w*$/, '')}-${moment().format()}.png`
+  `${photo.name.replace(/\.\w*$/, '')}-${moment().format()}.jpg`
 );
 
 class ProfileImage extends React.Component {
