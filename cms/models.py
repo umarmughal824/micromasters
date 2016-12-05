@@ -185,6 +185,7 @@ class ProgramPage(Page):
         FieldPanel('title_over_image'),
         FieldPanel('faculty_description'),
         InlinePanel('courses', label='Program Courses'),
+        InlinePanel('info_links', label='More Info Links'),
         InlinePanel('faculty_members', label='Faculty'),
     ]
 
@@ -224,6 +225,31 @@ def get_program_page_context(programpage, request):
     context["tracking_id"] = programpage.program.ga_tracking_id
 
     return context
+
+
+class InfoLinks(Orderable):
+    """
+    Links listed under 'More Info' for the program
+    """
+    program_page = ParentalKey(ProgramPage, related_name='info_links')
+    url = models.URLField(
+        blank=True,
+        null=True,
+        help_text="A url for an external page. There will be a link to this url from the program page."
+    )
+    title_url = models.TextField(
+        blank=True,
+        help_text='The text for the link to an external homepage.'
+    )
+
+    content_panels = [
+        MultiFieldPanel(
+            [
+                FieldPanel('url'),
+                FieldPanel('title_url')
+            ]
+        )
+    ]
 
 
 class ProgramCourse(Orderable):
