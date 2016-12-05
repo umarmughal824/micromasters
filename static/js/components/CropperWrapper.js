@@ -13,7 +13,7 @@ export default class CropperWrapper extends React.Component {
     const { updatePhotoEdit } = this.props;
     let canvas = this.refs.cropper.getCroppedCanvas();
     if (canvas.toBlob !== undefined) {
-      canvas.toBlob(blob => updatePhotoEdit(blob));
+      canvas.toBlob(blob => updatePhotoEdit(blob), 'image/jpeg');
     }
   };
 
