@@ -29,10 +29,13 @@
   }
 
   label.react-select-label {
+    font-weight: 400;
+  }
+
+  label.react-select-label, legend {
     display: block;
     font-size: 13px;
     color: rgba(0, 0, 0, 0.5);
-    font-weight: 400;
 
     .Select-value, .Select-multi-value-wrapper {
       font-size: 16px;
@@ -41,10 +44,9 @@
 
   legend {
     border: 0;
-    display: inline-block;
-    margin: 0 15px 0 0;
     width: auto;
-    font-size: 16px;
+    margin: 0 15px 0 0;
+    font-weight: 600;
   }
 
   [data-id='tooltip'] {

@@ -4,9 +4,10 @@ import _ from 'lodash';
 import TextField from 'material-ui/TextField';
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
 import Checkbox from 'material-ui/Checkbox';
+import R from 'ramda';
 
 import DateField from '../components/inputs/DateField';
-import { validationErrorSelector } from './util';
+import { validationErrorSelector, classify } from './util';
 import type { Validator, UIValidator } from '../lib/validation/profile';
 import type { Profile } from '../flow/profileTypes';
 import type { Option } from '../flow/generalTypes';
@@ -21,15 +22,37 @@ import type { Option } from '../flow/generalTypes';
  * to update radio buttons.
  * pass in the name (used as placeholder), key for profile, and the options.
  */
+const radioStyles = {
+  labelStyle: {
+    left: -10,
+    width: '100%'
+  }
+};
+
+const radioButtonLabelSelector = label => `radio-label-${classify(label)}`;
+
+const radioButtonLabel = label => (
+  <label
+    id={radioButtonLabelSelector(label)}
+    className="radio-label"
+  >
+    { label }
+  </label>
+);
+
+const radioButtons = R.map(option => (
+  <RadioButton
+    className="profile-radio-button"
+    labelStyle={radioStyles.labelStyle}
+    value={option.value}
+    aria-labelledby={radioButtonLabelSelector(option.label)}
+    label={radioButtonLabel(option.label)}
+    key={radioButtonLabel(option.label)}
+  />
+));
+
 export function boundRadioGroupField(keySet: string[], label: string, options: Option[]): React$Element<*> {
   const { profile, updateProfile, errors, validator, updateValidationVisibility } = this.props;
-  const styles = {
-    labelStyle: {
-      left: -10,
-      width: '100%'
-    }
-  };
-
   let onChange = e => {
     let clone = _.cloneDeep(profile);
     let value = e.target.value;
@@ -43,47 +66,24 @@ export function boundRadioGroupField(keySet: string[], label: string, options: O
     updateProfile(clone, validator);
   };
 
-  const radioButtons = options.map(obj => {
-    let helper = "";
-    if (obj.helper) {
-      helper = `${obj.helper}`;
-    }
-    let label = (
-      <span className="radio-label">
-        {obj.label}
-        <p className="radio-label-hint">{helper}</p>
-      </span>
-    );
-
-    return (
-      <RadioButton
-        className="profile-radio-button"
-        key={obj.value}
-        labelStyle={styles.labelStyle}
-        value={obj.value}
-        label={label}
-      />
-    );
-  });
-
   const value = String(_.get(profile, keySet));
   return (
-    <div className={validationErrorSelector(errors, keySet)}>
-      <span className="profile-radio-group-label">
+    <fieldset className={validationErrorSelector(errors, keySet)}>
+      <legend className="profile-radio-group-label">
         {label}
-      </span>
+      </legend>
       <RadioButtonGroup
         className="profile-radio-group"
         name={label}
         onChange={onChange}
         valueSelected={value}
       >
-        {radioButtons}
+        {radioButtons(options)}
       </RadioButtonGroup>
       <span className="validation-error-text">
         {_.get(errors, keySet)}
       </span>
-    </div>
+    </fieldset>
   );
 }
 
