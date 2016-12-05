@@ -1880,6 +1880,11 @@
       "from": "destroy@>=1.0.4 <1.1.0",
       "resolved": "https://registry.npmjs.org/destroy/-/destroy-1.0.4.tgz"
     },
+    "detect-browser": {
+      "version": "1.5.0",
+      "from": "detect-browser@latest",
+      "resolved": "https://registry.npmjs.org/detect-browser/-/detect-browser-1.5.0.tgz"
+    },
     "detect-indent": {
       "version": "4.0.0",
       "from": "detect-indent@>=4.0.0 <5.0.0",
