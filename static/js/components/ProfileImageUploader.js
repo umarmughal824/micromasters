@@ -6,6 +6,7 @@ import Dropzone from 'react-dropzone';
 import Button from 'react-mdl/lib/Button';
 
 import CropperWrapper from './CropperWrapper';
+import { FETCH_PROCESSING } from '../actions';
 import type { ImageUploadState } from '../reducers/image_upload';
 
 const onDrop = R.curry((startPhotoEdit, files) => startPhotoEdit(...files));
@@ -48,11 +49,13 @@ const ProfileImageUploader = ({
   startPhotoEdit,
   clearPhotoEdit,
   updatePhotoEdit,
-  imageUpload: { photo, error },
+  imageUpload: { photo, error, patchStatus },
   updateUserPhoto,
   setPhotoError,
-}: ImageUploadProps) => (
-  <Dialog
+}: ImageUploadProps) => {
+  const disabled = patchStatus === FETCH_PROCESSING || !photo;
+
+  return <Dialog
     title="Upload a Profile Photo"
     titleClassName="dialog-title"
     contentClassName="dialog photo-upload-dialog"
@@ -74,9 +77,9 @@ const ProfileImageUploader = ({
       </Button>,
       <Button
         type='button'
-        className={`save-button ${photo ? 'primary-button' : 'secondary-button disabled'}`}
+        className={`save-button ${disabled ? 'secondary-button disabled': 'primary-button'}`}
         key="save"
-        onClick={photo ? updateUserPhoto : undefined}>
+        onClick={disabled ? undefined: updateUserPhoto}>
         Save
       </Button>
     ]}
@@ -85,7 +88,7 @@ const ProfileImageUploader = ({
    { photo ? <CropperWrapper
      {...{updatePhotoEdit, photo, uploaderBodyHeight}} /> : dropZone(startPhotoEdit, setPhotoError)
    }
-  </Dialog>
-);
+  </Dialog>;
+};
 
 export default ProfileImageUploader;
