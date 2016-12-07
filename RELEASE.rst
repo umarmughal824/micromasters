@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.28.0
+--------------
+
+- Remove extra lines which were accidentally committed (#2023)
+- Increase socket-timeout (#2010)
+- Added redirect when visitors are using the herokuapp domain (#1998)
+- Use HTML elements that are more semantic (#2003)
+- Removed &#39;Clear all filters&#39; link when user switch pages of unfiltered search (#1989)
+- fixes a layout issue on the FAQ tab
+
 Version 0.27.1
 --------------
 
