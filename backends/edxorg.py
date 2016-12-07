@@ -68,15 +68,16 @@ class EdxOrgOAuth2(BaseOAuth2):
                 the following keys:
                 <remote_id>, `username`, `email`, `fullname`, `first_name`, `last_name`
         """
-        full, first, last = self.get_user_names(response['name'])
+        full, _, _ = self.get_user_names(response['name'])
 
         return {
             'edx_id': response['username'],
             'username': response['username'],
             'email': response['email'],
             'fullname': full,
-            'first_name': first,
-            'last_name': last,
+            # the following are not necessary because they are used only inside the User object.
+            'first_name': '',
+            'last_name': '',
         }
 
     def get_user_id(self, details, response):
