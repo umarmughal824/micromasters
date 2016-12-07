@@ -25,8 +25,8 @@ class EdxOrgOAuth2Tests(TestCase):
             'username': 'darth',
             'fullname': 'Darth Vader',
             'email': 'darth@deathst.ar',
-            'first_name': 'Darth',
-            'last_name': 'Vader'
+            'first_name': '',
+            'last_name': ''
         } == result
 
     def test_single_name(self):
@@ -46,6 +46,6 @@ class EdxOrgOAuth2Tests(TestCase):
             'username': 'staff',
             'fullname': 'staff',
             'email': 'staff@example.com',
-            'first_name': 'staff',
+            'first_name': '',
             'last_name': ''
         } == result
