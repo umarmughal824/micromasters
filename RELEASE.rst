@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.27.1
+--------------
+
+- Removed First and Last Name from the edxorg pipeline
+
 Version 0.27.0
 --------------
 
