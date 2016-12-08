@@ -4,6 +4,11 @@ import _ from 'lodash';
 import { SearchkitComponent } from 'searchkit';
 import Icon from 'react-mdl/lib/Icon';
 
+const FILTER_ID_ADJUST = {
+  "birth_location": "profile.birth_country4",
+  "courses": "program.enrollments.title3"
+};
+
 export default class FilterVisibilityToggle extends SearchkitComponent {
   props: {
     filterName:             string,
@@ -19,7 +24,7 @@ export default class FilterVisibilityToggle extends SearchkitComponent {
 
   isInResults: Function = (id: string): boolean => {
     if (this.getResults()) {
-      const elmId = (id === "birth_location") ? "profile.birth_country3" : id;
+      const elmId = FILTER_ID_ADJUST[id] || id;
       const docCount = _.get(this.getResults(), ['aggregations', elmId, 'doc_count'], 0);
 
       if (docCount > 0) {
@@ -27,7 +32,7 @@ export default class FilterVisibilityToggle extends SearchkitComponent {
       }
     }
     return false;
-  }
+  };
 
   openStateIcon: Function = (children: React$Element<*>): React$Element<*>|null => {
     if (!this.isInResults(children.props.id)) {
@@ -39,7 +44,7 @@ export default class FilterVisibilityToggle extends SearchkitComponent {
       onClick={this.toggleFilterVisibility}
       className={this.openClass()}
     />;
-  }
+  };
 
   toggleFilterVisibility: Function = (): void => {
     const {
