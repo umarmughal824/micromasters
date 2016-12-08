@@ -54,9 +54,7 @@ export function programValidation(_: Profile, ui: UIState): ValidationErrors {
 /*
  * Profile Image Validator
  */
-export const profileImageValidation = (profile: Profile) => (
-  profile.image ? {} : { image: 'Please upload a profile image' }
-);
+export const profileImageValidation = () => ({});
 
 /*
  * Personal Validation

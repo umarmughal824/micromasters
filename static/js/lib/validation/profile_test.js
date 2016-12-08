@@ -89,10 +89,8 @@ describe('Profile validation functions', () => {
 
 
   describe('profileImageValidation', () => {
-    it('should return an error if no image', () => {
-      assert.deepEqual(profileImageValidation({}), {
-        image: 'Please upload a profile image'
-      });
+    it('should return no errors if no image is present', () => {
+      assert.deepEqual(profileImageValidation({}), {});
     });
 
     it('should return no errors if image is present', () => {
