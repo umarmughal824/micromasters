@@ -1,28 +1,28 @@
 """
 Provides functionality for serializing a ProgramEnrollment for the ES index
 """
-from decimal import Decimal
-
 from dashboard.api_edx_cache import CachedEdxUserData
+from dashboard.models import CachedEnrollment
 from dashboard.utils import MMTrack
-from roles.models import (
-    NON_LEARNERS,
-    Role
-)
+from roles.api import is_learner
 
 
 class UserProgramSearchSerializer:
     """
     Provides functions for serializing a ProgramEnrollment for the ES index
     """
-    @staticmethod
-    def calculate_final_grade_average(mmtrack):
+    @classmethod
+    def serialize_enrollments(cls, enrollments):
         """
-        Calculates an average grade (integer) from the program final grades
+        Serializes a user's enrollment data for search results
+
+        Args:
+            enrollments (iterable): An iterable of CachedEnrollments
+        Returns:
+            list: Serialized courses
         """
-        final_grades = mmtrack.get_all_final_grades()
-        if final_grades:
-            return round(sum(Decimal(final_grade) for final_grade in final_grades.values()) / len(final_grades))
+        enrolled_courses = set(enrollment.course_run.course for enrollment in enrollments)
+        return [{'title': course.title} for course in enrolled_courses]
 
     @classmethod
     def serialize(cls, program_enrollment):
@@ -31,7 +31,7 @@ class UserProgramSearchSerializer:
         """
         user = program_enrollment.user
         program = program_enrollment.program
-        edx_user_data = CachedEdxUserData(user, program=program, include_raw_data=True)
+        edx_user_data = CachedEdxUserData(user, program=program)
 
         mmtrack = MMTrack(
             user,
@@ -40,23 +40,8 @@ class UserProgramSearchSerializer:
         )
         return {
             'id': program.id,
-            'enrollments': edx_user_data.raw_enrollments,
-            'certificates': edx_user_data.raw_certificates,
-            'current_grades': edx_user_data.raw_current_grades,
-            'grade_average': cls.calculate_final_grade_average(mmtrack),
-            'is_learner': cls.is_learner(user, program),
+            'enrollments': cls.serialize_enrollments(CachedEnrollment.user_course_qset(user, program=program)),
+            'grade_average': mmtrack.calculate_final_grade_average(),
+            'is_learner': is_learner(user, program),
             'email_optin': user.profile.email_optin,
         }
-
-    @classmethod
-    def is_learner(cls, user, program):
-        """
-        Returns true if user is learner or false
-
-        Args:
-            user (django.contrib.auth.models.User): A user
-            program (Program): Program object
-        """
-        return (
-            not Role.objects.filter(user=user, role__in=NON_LEARNERS, program=program).exists()
-        )

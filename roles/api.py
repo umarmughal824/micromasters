@@ -3,7 +3,10 @@ API for roles
 """
 from rolepermissions.verifications import has_object_permission
 
-from roles.models import Role
+from roles.models import (
+    Role,
+    NON_LEARNERS
+)
 
 
 def get_advance_searchable_programs(user):
@@ -21,3 +24,16 @@ def get_advance_searchable_programs(user):
         if has_object_permission('can_advance_search', user, role.program)
     ]
     return programs
+
+
+def is_learner(user, program):
+    """
+    Returns true if user is a learner
+
+    Args:
+        user (django.contrib.auth.models.User): A user
+        program (courses.models.Program): Program object
+    """
+    return (
+        not Role.objects.filter(user=user, role__in=NON_LEARNERS, program=program).exists()
+    )

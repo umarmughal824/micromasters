@@ -38,19 +38,33 @@ class CachedEdxInfoModel(Model):
     @classmethod
     def user_qset(cls, user, program=None):
         """
-        Returns a queryset for the active records associated with a User
+        Returns a queryset for the records associated with a User
 
         Args:
             user (User): an User object
             program (Program): optional Program to filter on
 
         Returns:
-            QuerySet: a queryset of all the elements for the provided user
+            QuerySet: a queryset of all records for the provided user
         """
         query_params = dict(user=user)
         if program is not None:
             query_params.update(dict(course_run__course__program=program))
         return cls.objects.filter(**query_params)
+
+    @classmethod
+    def user_course_qset(cls, user, program=None):
+        """
+        Returns a queryset for the records associated with a User and prefetched Course data
+
+        Args:
+            user (User): an User object
+            program (Program): optional Program to filter on
+
+        Returns:
+            QuerySet: a queryset of all records for the provided user with prefetched Course data
+        """
+        return cls.user_qset(user, program=program).select_related('course_run__course')
 
     @classmethod
     def data_qset(cls, user, program=None):
