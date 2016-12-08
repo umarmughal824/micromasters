@@ -10,17 +10,26 @@
   }
 
   .photo-dropzone {
+    font-size: 20px;
+    font-weight: 300;
+  }
+
+  .photo-active-item {
+    width: 100%;
+  }
+
+  .dashed-border {
     background-color: $fg-grey;
     border-radius: 7px;
     border: 2px dashed $medgrey;
-    font-size: 20px;
-    font-weight: 300;
     display: flex;
     align-items: center;
     justify-content: space-around;
   }
 
-  .photo-active-item {
-    width: 100%;
+  .spinner {
+    .mdl-spinner__layer {
+      border-color: $mm-brand-bg;
+    }
   }
 }
