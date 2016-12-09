@@ -3,7 +3,9 @@ import React from 'react';
 import Dialog from 'material-ui/Dialog';
 import Button from 'react-mdl/lib/Button';
 
+import { FETCH_PROCESSING } from '../actions';
 import ProfileFormFields from '../util/ProfileFormFields';
+import SpinnerButton from './SpinnerButton';
 import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 import type { Validator } from '../lib/validation/profile';
@@ -12,6 +14,7 @@ export default class UserPageAboutMeDialog extends ProfileFormFields {
   props: {
     ui:                                   UIState,
     profile:                              Profile,
+    profilePatchStatus:                   ?string,
     saveProfile:                          SaveProfileFunc,
     clearProfileEdit:                     () => void,
     setUserPageAboutMeDialogVisibility:   () => void,
@@ -36,7 +39,8 @@ export default class UserPageAboutMeDialog extends ProfileFormFields {
   };
 
   render () {
-    const { ui: { userPageAboutMeDialogVisibility } } = this.props;
+    const { ui: { userPageAboutMeDialogVisibility }, profilePatchStatus } = this.props;
+    const inFlight = profilePatchStatus === FETCH_PROCESSING;
 
     const actions = [
       <Button
@@ -46,13 +50,15 @@ export default class UserPageAboutMeDialog extends ProfileFormFields {
         onClick={this.closeAboutMeDialog}>
         Cancel
       </Button>,
-      <Button
+      <SpinnerButton
+        component={Button}
+        spinning={inFlight}
         type='button'
-        className='primary-button save-button'
+        className="primary-button save-button"
         key='save'
         onClick={this.saveAboutMeInfo}>
         Save
-      </Button>
+      </SpinnerButton>
     ];
 
     return (

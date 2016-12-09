@@ -5,7 +5,6 @@ import Grid, { Cell } from 'react-mdl/lib/Grid';
 import Dialog from 'material-ui/Dialog';
 import Card from 'react-mdl/lib/Card/Card';
 import IconButton from 'react-mdl/lib/IconButton';
-import Spinner from 'react-mdl/lib/Spinner';
 import _ from 'lodash';
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
 
@@ -23,6 +22,7 @@ import {
   deleteWorkHistoryEntry,
 } from '../util/profile_history_edit';
 import ConfirmDeletion from './ConfirmDeletion';
+import SpinnerButton from './SpinnerButton';
 import SelectField from './inputs/SelectField';
 import CountrySelectField from './inputs/CountrySelectField';
 import StateSelectField from './inputs/StateSelectField';
@@ -331,13 +331,15 @@ class EmploymentForm extends ProfileFormFields {
         onClick={this.closeWorkDialog}>
         Cancel
       </Button>,
-      <Button
+      <SpinnerButton
+        component={Button}
+        spinning={inFlight}
         type='button'
-        className={`primary-button save-button ${inFlight ? 'disabled-with-spinner' : ''}`}
+        className="primary-button save-button"
         key='save'
-        onClick={inFlight ? undefined : this.saveWorkHistoryEntry}>
-        {inFlight ? <Spinner singleColor /> : 'Save'}
-      </Button>
+        onClick={this.saveWorkHistoryEntry}>
+        Save
+      </SpinnerButton>
     ];
 
     return (

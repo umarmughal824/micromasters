@@ -2,37 +2,24 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { assert } from 'chai';
 import sinon from 'sinon';
-import _ from 'lodash';
-
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import TestUtils from 'react-addons-test-utils';
 
+import { FETCH_PROCESSING } from '../actions';
 import UserPageAboutMeDialog from './UserPageAboutMeDialog';
 import { USER_PROFILE_RESPONSE } from '../constants';
 
 describe('UserPageAboutMeDialog', () => {
   let sandbox;
-  let defaultRowProps, setUserPageDialogVisibility, clearProfileEdit, saveProfile;
+  let setUserPageDialogVisibility, clearProfileEdit, saveProfile;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     setUserPageDialogVisibility = sandbox.stub();
     clearProfileEdit = sandbox.stub();
     saveProfile = sandbox.stub();
-    saveProfile.returns({
-      then: () => {}
-    });
-
-    defaultRowProps = {
-      profile: USER_PROFILE_RESPONSE,
-      setUserPageAboutMeDialogVisibility: setUserPageDialogVisibility,
-      clearProfileEdit: clearProfileEdit,
-      saveProfile: saveProfile,
-      ui: {
-        userPageAboutMeDialogVisibility: true
-      }
-    };
+    saveProfile.returns(Promise.resolve());
   });
 
   afterEach(() => {
@@ -40,10 +27,19 @@ describe('UserPageAboutMeDialog', () => {
   });
 
   const getDialog = () => document.querySelector('.about-me-dialog');
-  const renderDialog = () => (
+  const renderDialog = (props = {}) => (
     mount (
       <MuiThemeProvider muiTheme={getMuiTheme()}>
-        <UserPageAboutMeDialog {...defaultRowProps} />
+        <UserPageAboutMeDialog
+          profile={USER_PROFILE_RESPONSE}
+          setUserPageAboutMeDialogVisibility={setUserPageDialogVisibility}
+          clearProfileEdit={clearProfileEdit}
+          saveProfile={saveProfile}
+          ui={{
+            userPageAboutMeDialogVisibility: true
+          }}
+          {...props}
+        />
       </MuiThemeProvider>,
       {
         context: { router: {}},
@@ -53,10 +49,12 @@ describe('UserPageAboutMeDialog', () => {
   );
 
   it('render dialog with data', () => {
-    defaultRowProps['profile'] = Object.assign(_.cloneDeep(USER_PROFILE_RESPONSE), {
-      about_me: "Hello world"
+    renderDialog({
+      profile: {
+        ...USER_PROFILE_RESPONSE,
+        about_me: "Hello world"
+      }
     });
-    renderDialog();
     assert.equal(document.querySelector('h3.dialog-title').textContent, "About Me");
     assert.equal(document.querySelector("textarea").textContent, "Hello world");
   });
@@ -68,10 +66,11 @@ describe('UserPageAboutMeDialog', () => {
   });
 
   it('render dialog when visibility set to false', () => {
-    defaultRowProps['ui'] = {
-      userPageAboutMeDialogVisibility: false
-    };
-    renderDialog();
+    renderDialog({
+      ui: {
+        userPageAboutMeDialogVisibility: false
+      }
+    });
     assert.isNull(document.querySelector('h3.dialog-title'));
     assert.isNull(document.querySelector("textarea"));
   });
@@ -86,5 +85,16 @@ describe('UserPageAboutMeDialog', () => {
     renderDialog();
     TestUtils.Simulate.click(getDialog().querySelector(".save-button"));
     assert.equal(saveProfile.callCount, 1);
+  });
+
+  it('disables the save button during profile update', () => {
+    renderDialog({
+      profilePatchStatus: FETCH_PROCESSING
+    });
+    let saveButton = getDialog().querySelector(".save-button");
+    assert(saveButton.className.includes("disabled-with-spinner"));
+    assert(saveButton.querySelector(".mdl-spinner"));
+    TestUtils.Simulate.click(saveButton);
+    assert.equal(saveProfile.callCount, 0);
   });
 });
