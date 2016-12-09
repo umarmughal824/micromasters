@@ -2,7 +2,7 @@
 Utility functions and classes for the dashboard
 """
 import logging
-
+from decimal import Decimal
 from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
 from django.db.models import Max, Min, Q
@@ -212,6 +212,14 @@ class MMTrack:
             if final_grade is not None:
                 final_grades[course_id] = final_grade
         return final_grades
+
+    def calculate_final_grade_average(self):
+        """
+        Calculates an average grade (integer) from the program final grades
+        """
+        final_grades = self.get_all_final_grades()
+        if final_grades:
+            return round(sum(Decimal(final_grade) for final_grade in final_grades.values()) / len(final_grades))
 
     def get_current_grade(self, course_id):
         """

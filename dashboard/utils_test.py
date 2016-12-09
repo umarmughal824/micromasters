@@ -3,7 +3,6 @@ Tests for the utils module
 """
 from datetime import datetime, timedelta
 from unittest.mock import patch, MagicMock
-
 import pytz
 from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase
@@ -34,7 +33,6 @@ class MMTrackTest(TestCase):
         super().setUpTestData()
         # create an user
         cls.user = UserFactory.create()
-
         cls.cached_edx_user_data = MagicMock(
             spec=CachedEdxUserData,
             enrollments=CachedEnrollment.deserialize_edx_data(cls.enrollments_json),

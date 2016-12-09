@@ -1,7 +1,9 @@
 // @flow
 import React from 'react';
+import Spinner from 'react-mdl/lib/Spinner';
 
 import { saveProfileStep } from '../util/profile_edit';
+import { FETCH_PROCESSING } from '../actions';
 import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 
@@ -13,6 +15,7 @@ export default class ProfileProgressControls extends React.Component {
     isLastTab:    boolean,
     validator:    Function,
     profile:      Profile,
+    profilePatchStatus: ?string,
     ui:           UIState,
     saveProfile:  SaveProfileFunc,
     programIdForEnrollment: ?number,
@@ -42,8 +45,9 @@ export default class ProfileProgressControls extends React.Component {
   };
 
   render() {
-    const { nextUrl, prevUrl, nextBtnLabel } = this.props;
+    const { nextUrl, prevUrl, nextBtnLabel, profilePatchStatus } = this.props;
 
+    const inFlight = profilePatchStatus === FETCH_PROCESSING;
     let prevButton, nextButton;
     if (prevUrl) {
       prevButton = <button
@@ -55,9 +59,9 @@ export default class ProfileProgressControls extends React.Component {
     if (nextUrl) {
       nextButton = <button
         role="button"
-        className="mdl-button next"
-        onClick={this.saveAndContinue}>
-        <span>{nextBtnLabel}</span>
+        className={`mdl-button next ${inFlight ? 'disabled-with-spinner' : ''}`}
+        onClick={inFlight ? undefined : this.saveAndContinue}>
+        {inFlight ? <Spinner singleColor /> : nextBtnLabel}
       </button>;
     }
     return <div className="profile-progress-controls">

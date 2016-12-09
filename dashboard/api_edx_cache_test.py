@@ -12,7 +12,10 @@ from edx_api.grades.models import CurrentGrade, CurrentGrades
 
 from courses.factories import ProgramFactory, CourseFactory, CourseRunFactory
 from dashboard import models
-from dashboard.api_edx_cache import CachedEdxUserData, CachedEdxDataApi
+from dashboard.api_edx_cache import (
+    CachedEdxUserData,
+    CachedEdxDataApi
+)
 from dashboard.factories import (
     CachedEnrollmentFactory,
     CachedCertificateFactory,
@@ -62,9 +65,9 @@ class CachedEdxUserDataTests(ESTestCase):
 
     def assert_edx_data_has_given_ids(self, edx_user_data, ids):
         """Asserts that all edX object course id sets match the given list of ids"""
-        assert sorted(edx_user_data.enrollments.get_enrolled_course_ids()) == ids
-        assert sorted(edx_user_data.certificates.all_courses_verified_certs) == ids
-        assert sorted(edx_user_data.current_grades.all_course_ids) == ids
+        assert sorted(edx_user_data.enrollments.get_enrolled_course_ids()) == sorted(ids)
+        assert sorted(edx_user_data.certificates.all_courses_verified_certs) == sorted(ids)
+        assert sorted(edx_user_data.current_grades.all_course_ids) == sorted(ids)
 
     def test_edx_data_fetch_and_set(self):
         """Test that a user's edX data is properly fetched and set onto object properties"""
@@ -82,13 +85,6 @@ class CachedEdxUserDataTests(ESTestCase):
         p2_course_run_program = self.p2_course_run_1.course.program
         edx_user_data = CachedEdxUserData(self.user, program=p2_course_run_program)
         self.assert_edx_data_has_given_ids(edx_user_data, self.p2_course_run_keys)
-
-    def test_raw_data_fetch_and_set(self):
-        """Test that a user's raw edX data is properly fetched and set onto object properties"""
-        edx_user_data = CachedEdxUserData(self.user, include_raw_data=True)
-        assert edx_user_data.raw_enrollments == [obj.data for obj in self.enrollments]
-        assert edx_user_data.raw_certificates == [obj.data for obj in self.certificates]
-        assert edx_user_data.raw_current_grades == [obj.data for obj in self.current_grades]
 
 
 class CachedEdxDataApiTests(ESTestCase):

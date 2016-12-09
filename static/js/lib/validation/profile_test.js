@@ -89,10 +89,8 @@ describe('Profile validation functions', () => {
 
 
   describe('profileImageValidation', () => {
-    it('should return an error if no image', () => {
-      assert.deepEqual(profileImageValidation({}), {
-        image: 'Please upload a profile image'
-      });
+    it('should return no errors if no image is present', () => {
+      assert.deepEqual(profileImageValidation({}), {});
     });
 
     it('should return no errors if image is present', () => {
@@ -110,7 +108,7 @@ describe('Profile validation functions', () => {
     it('should return an appropriate error if a field is missing', () => {
       let clone = _.cloneDeep(USER_PROFILE_RESPONSE);
       clone.education[0].school_name = '';
-      let expectation = {education: [{school_name: 'School name is required'}]};
+      let expectation = {education: [{school_name: 'School name is required'}, {}]};
       assert.deepEqual(expectation, educationValidation(clone));
     });
 
@@ -135,7 +133,7 @@ describe('Profile validation functions', () => {
         education: [{
           school_name: 'School name is required',
           school_city: 'City is required'
-        }]
+        }, {}]
       }, educationValidation(clone));
     });
   });
@@ -148,7 +146,7 @@ describe('Profile validation functions', () => {
     it('should return an appropriate error if a field is missing', () => {
       let clone = _.cloneDeep(USER_PROFILE_RESPONSE);
       clone.work_history[0].company_name = '';
-      let expectation = {work_history: [{company_name: 'Name of Employer is required'}]};
+      let expectation = {work_history: [{company_name: 'Name of Employer is required'}, {}]};
       assert.deepEqual(expectation, employmentValidation(clone));
     });
 
@@ -166,13 +164,13 @@ describe('Profile validation functions', () => {
         work_history: [{
           city: 'City is required',
           company_name: 'Name of Employer is required'
-        }]
+        },{}]
       }, employmentValidation(clone));
     });
 
     it('should reject end date before start date', () => {
       let errors = {
-        work_history: [, // eslint-disable-line no-sparse-arrays
+        work_history: [{},
           {
             end_date: "End date cannot be before start date"
           }
@@ -187,7 +185,7 @@ describe('Profile validation functions', () => {
     it('should reject an end date in the future', () => {
       sandbox.useFakeTimers(moment('2016-10-01').valueOf());
       let expectation = {
-        work_history: [, // eslint-disable-line no-sparse-arrays
+        work_history: [{},
           { end_date: 'End date cannot be in the future' }
         ]
       };
@@ -212,7 +210,7 @@ describe('Profile validation functions', () => {
 
     for (let field of ['year', 'month']) {
       let errors = {
-        work_history: [, // eslint-disable-line no-sparse-arrays
+        work_history: [{},
           {
             end_date: "Please enter a valid end date or leave it blank"
           }
@@ -234,7 +232,7 @@ describe('Profile validation functions', () => {
 
     it(`should error if end_date has a number in year`, () => {
       let errors = {
-        work_history: [, // eslint-disable-line no-sparse-arrays
+        work_history: [{},
           {
             end_date: "Please enter a valid end date or leave it blank"
           }
@@ -301,7 +299,7 @@ describe('Profile validation functions', () => {
       profile = _.cloneDeep(USER_PROFILE_RESPONSE);
       _.set(profile, ['work_history', 0, 'country'], '');
       let expectation = [false, EMPLOYMENT_STEP, {
-        work_history: [{country: "Country is required"}]
+        work_history: [{country: "Country is required"}, {}]
       }];
       assert.deepEqual(validateProfileComplete(profile), expectation);
     });

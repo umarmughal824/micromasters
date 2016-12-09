@@ -7,6 +7,7 @@ import {
   Hits,
   SelectedFilters,
   RefinementListFilter,
+  MenuFilter,
   HitsStats,
   Pagination,
   ResetFilters,
@@ -33,7 +34,7 @@ import type { Option } from '../flow/generalTypes';
 import type { Email } from '../flow/emailTypes';
 import type { AvailableProgram } from '../flow/enrollmentTypes';
 
-let makeSearchkitTranslations: () => Object = () => {
+const makeSearchkitTranslations: () => Object = () => {
   let translations = {};
   for (let code of Object.keys(iso3166.data)) {
     translations[code] = iso3166.data[code].name;
@@ -129,7 +130,7 @@ export default class LearnerSearch extends SearchkitComponent {
         </Cell>
       </Grid>
     );
-  }
+  };
 
   renderFacets: Function = (currentProgram: AvailableProgram): React$Element<*> => {
     if (_.isNull(this.getResults())) {
@@ -145,6 +146,17 @@ export default class LearnerSearch extends SearchkitComponent {
     return (
       <Sticky>
         <Card className="fullwidth" shadow={1}>
+          <FilterVisibilityToggle
+            {...this.props}
+            filterName="courses"
+          >
+            <MenuFilter
+              field="program.enrollments.title"
+              fieldOptions={{type: 'nested', options: { path: 'program.enrollments' } }}
+              title="Course"
+              id="courses"
+            />
+          </FilterVisibilityToggle>
           <FilterVisibilityToggle
             {...this.props}
             filterName="birth-location"
@@ -184,7 +196,7 @@ export default class LearnerSearch extends SearchkitComponent {
         </Card>
       </Sticky>
     );
-  }
+  };
 
   render () {
     const {

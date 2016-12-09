@@ -6,6 +6,17 @@ Version 0.28.1
 - Revert &quot;Changed profile validation to not require a photo&quot;
 
 
+Version 0.29.0
+--------------
+
+- Created course facet to filter learners by course enrollment
+- Open external links in new tabs on public pages (#2021)
+- Disabled buttons on signup and settings pages during profile update (#2031)
+- Revert &quot;Revert &quot;Changed profile validation to not require a photo&quot;&quot;
+- Refactored profile validation code
+- Added grades app
+- Revert &quot;Changed profile validation to not require a photo&quot;
+
 Version 0.28.0
 --------------
 
