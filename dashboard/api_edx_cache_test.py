@@ -3,18 +3,20 @@ Tests for the dashboard APIs functions that deal with the edx cached data
 """
 
 from datetime import datetime, timedelta
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, ANY
 
 import pytz
 from edx_api.certificates.models import Certificate, Certificates
 from edx_api.enrollments.models import Enrollment, Enrollments
 from edx_api.grades.models import CurrentGrade, CurrentGrades
 
+from backends.edxorg import EdxOrgOAuth2
 from courses.factories import ProgramFactory, CourseFactory, CourseRunFactory
 from dashboard import models
 from dashboard.api_edx_cache import (
     CachedEdxUserData,
-    CachedEdxDataApi
+    CachedEdxDataApi,
+    UserCachedRunData,
 )
 from dashboard.factories import (
     CachedEnrollmentFactory,
@@ -86,6 +88,18 @@ class CachedEdxUserDataTests(ESTestCase):
         edx_user_data = CachedEdxUserData(self.user, program=p2_course_run_program)
         self.assert_edx_data_has_given_ids(edx_user_data, self.p2_course_run_keys)
 
+    def test_get_run_data(self):
+        """Test for the get_run_data method"""
+        edx_user_data = CachedEdxUserData(self.user)
+        run_data = edx_user_data.get_run_data(self.p1_course_run_keys[0])
+        assert isinstance(run_data, UserCachedRunData)
+        assert isinstance(run_data.enrollment, Enrollment)
+        assert isinstance(run_data.certificate, Certificate)
+        assert isinstance(run_data.current_grade, CurrentGrade)
+        assert run_data.enrollment.course_id == self.p1_course_run_keys[0]
+        assert run_data.certificate.course_id == self.p1_course_run_keys[0]
+        assert run_data.current_grade.course_id == self.p1_course_run_keys[0]
+
 
 class CachedEdxDataApiTests(ESTestCase):
     """
@@ -98,6 +112,11 @@ class CachedEdxDataApiTests(ESTestCase):
         Set up data
         """
         cls.user = UserFactory.create()
+        cls.user.social_auth.create(
+            provider=EdxOrgOAuth2.name,
+            uid="{}_edx".format(cls.user.username),
+            extra_data={"access_token": "fooooootoken"}
+        )
 
         certificates_json = load_json_from_file('dashboard/fixtures/certificates.json')
         cls.certificates = Certificates([Certificate(cert_json) for cert_json in certificates_json])
@@ -360,3 +379,17 @@ class CachedEdxDataApiTests(ESTestCase):
             CachedEdxDataApi.update_cache_if_expired(self.user, self.edx_client, cache_type)
         for mock_func in all_mocks:
             assert mock_func.called is True
+
+    @patch('dashboard.api_edx_cache.CachedEdxDataApi.update_cached_current_grades')
+    @patch('dashboard.api_edx_cache.CachedEdxDataApi.update_cached_certificates')
+    @patch('dashboard.api_edx_cache.CachedEdxDataApi.update_cached_enrollments')
+    @patch('backends.utils.refresh_user_token', autospec=True)
+    def test_update_all_cached_grade_data(self, mock_refr, mock_enr, mock_cert, mock_grade):
+        """Test for update_all_cached_grade_data"""
+        for mock_func in (mock_refr, mock_enr, mock_cert, mock_grade, ):
+            assert mock_func.called is False
+        CachedEdxDataApi.update_all_cached_grade_data(self.user)
+        assert mock_enr.called is False
+        mock_refr.assert_called_once_with(self.user.social_auth.get(provider=EdxOrgOAuth2.name))
+        for mock_func in (mock_cert, mock_grade, ):
+            mock_func.assert_called_once_with(self.user, ANY)
