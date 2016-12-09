@@ -5,9 +5,11 @@ import Grid, { Cell } from 'react-mdl/lib/Grid';
 import Dialog from 'material-ui/Dialog';
 import Card from 'react-mdl/lib/Card/Card';
 import IconButton from 'react-mdl/lib/IconButton';
+import Spinner from 'react-mdl/lib/Spinner';
 import _ from 'lodash';
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
 
+import { FETCH_PROCESSING } from '../actions';
 import {
   userPrivilegeCheck,
   isProfileOfLoggedinUser
@@ -46,6 +48,7 @@ class EmploymentForm extends ProfileFormFields {
 
   props: {
     profile:                          Profile,
+    profilePatchStatus:               ?string,
     ui:                               UIState,
     updateProfile:                    UpdateProfileFunc,
     saveProfile:                      SaveProfileFunc,
@@ -175,7 +178,7 @@ class EmploymentForm extends ProfileFormFields {
         workHistoryRows.push(
         <Cell col={12} className="profile-form-row add" key="I'm unique!">
           <button
-            className="mm-minor-action"
+            className="mm-minor-action add-employment-button"
             onClick={this.openNewWorkHistoryForm}
           >
             Add employment
@@ -316,7 +319,10 @@ class EmploymentForm extends ProfileFormFields {
         workDialogVisibility,
         showWorkDeleteDialog,
       },
+      profilePatchStatus,
     } = this.props;
+
+    const inFlight = profilePatchStatus === FETCH_PROCESSING;
     const actions = [
       <Button
         type='button'
@@ -327,10 +333,10 @@ class EmploymentForm extends ProfileFormFields {
       </Button>,
       <Button
         type='button'
-        className="primary-button save-button"
+        className={`primary-button save-button ${inFlight ? 'disabled-with-spinner' : ''}`}
         key='save'
-        onClick={this.saveWorkHistoryEntry}>
-        Save
+        onClick={inFlight ? undefined : this.saveWorkHistoryEntry}>
+        {inFlight ? <Spinner singleColor /> : 'Save'}
       </Button>
     ];
 
