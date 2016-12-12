@@ -4,6 +4,7 @@ import Dialog from 'material-ui/Dialog';
 import R from 'ramda';
 import Dropzone from 'react-dropzone';
 import Button from 'react-mdl/lib/Button';
+import Spinner from 'react-mdl/lib/Spinner';
 
 import CropperWrapper from './CropperWrapper';
 import { FETCH_PROCESSING } from '../actions';
@@ -15,7 +16,7 @@ const dropZone = (startPhotoEdit, setPhotoError) => (
   <Dropzone
     onDrop={onDrop(startPhotoEdit)}
     style={{height: uploaderBodyHeight()}}
-    className="photo-active-item photo-dropzone"
+    className="photo-active-item photo-dropzone dashed-border"
     activeClassName="photo-active-item photo-dropzone active"
     accept="image/*"
     onDropRejected={() => setPhotoError('Please select a valid photo')}
@@ -31,6 +32,31 @@ const uploaderBodyHeight = (): number => (
 );
 
 const imageError = err => <div className="img-error">{err}</div>;
+
+const dialogContents = (
+  updatePhotoEdit,
+  photo,
+  startPhotoEdit,
+  setPhotoError,
+  inFlight
+) => {
+  if ( inFlight ) {
+    return <div
+      className="photo-active-item dashed-border spinner"
+      style={{height: uploaderBodyHeight()}}
+    >
+      <Spinner singleColor />
+    </div>;
+  } else if ( photo ) {
+    return <CropperWrapper
+      updatePhotoEdit={updatePhotoEdit}
+      photo={photo}
+      uploaderBodyHeight={uploaderBodyHeight}
+    />;
+  } else {
+    return dropZone(startPhotoEdit, setPhotoError);
+  }
+};
 
 type ImageUploadProps = {
   photoDialogOpen:      boolean,
@@ -53,6 +79,7 @@ const ProfileImageUploader = ({
   updateUserPhoto,
   setPhotoError,
 }: ImageUploadProps) => {
+  const inFlight = patchStatus === FETCH_PROCESSING;
   const disabled = patchStatus === FETCH_PROCESSING || !photo;
 
   return <Dialog
@@ -77,7 +104,7 @@ const ProfileImageUploader = ({
       </Button>,
       <Button
         type='button'
-        className={`save-button ${disabled ? 'secondary-button disabled': 'primary-button'}`}
+        className={`save-button ${disabled ? 'secondary-button disabled' : 'primary-button'}`}
         key="save"
         onClick={disabled ? undefined: updateUserPhoto}>
         Save
@@ -85,9 +112,13 @@ const ProfileImageUploader = ({
     ]}
   >
    { imageError(error) }
-   { photo ? <CropperWrapper
-     {...{updatePhotoEdit, photo, uploaderBodyHeight}} /> : dropZone(startPhotoEdit, setPhotoError)
-   }
+   { dialogContents(
+     updatePhotoEdit,
+     photo,
+     startPhotoEdit,
+     setPhotoError,
+     inFlight
+   )}
   </Dialog>;
 };
 

@@ -1,6 +1,7 @@
 // @flow
 import React from 'react';
 import Cropper from 'react-cropper';
+import browser from 'detect-browser';
 
 export default class CropperWrapper extends React.Component {
   props: {
@@ -11,10 +12,16 @@ export default class CropperWrapper extends React.Component {
 
   cropperHelper = () => {
     const { updatePhotoEdit } = this.props;
-    let canvas = this.refs.cropper.getCroppedCanvas();
-    if (canvas.toBlob !== undefined) {
-      canvas.toBlob(blob => updatePhotoEdit(blob), 'image/jpeg');
+    let canvas;
+    if ( browser.name === 'safari' || browser.name === 'ios' ) {
+      canvas = this.refs.cropper.getCroppedCanvas();
+    } else {
+      canvas = this.refs.cropper.getCroppedCanvas({
+        width: 512,
+        height: 512,
+      });
     }
+    canvas.toBlob(blob => updatePhotoEdit(blob), 'image/jpeg');
   };
 
   render () {

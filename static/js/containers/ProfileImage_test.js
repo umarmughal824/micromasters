@@ -133,6 +133,7 @@ describe('ProfileImage', () => {
         let dialog = document.querySelector(".photo-upload-dialog");
         let saveButton = dialog.querySelector('.save-button');
         assert.isFalse(saveButton.className.includes('disabled'));
+        assert.isNull(dialog.querySelector('.mdl-spinner'));
         TestUtils.Simulate.click(saveButton);
         assert.isTrue(updateProfileImageStub.called);
       });
@@ -147,9 +148,21 @@ describe('ProfileImage', () => {
         assert.isTrue(saveButton.className.includes('disabled'));
         TestUtils.Simulate.click(saveButton);
         assert.isFalse(updateProfileImageStub.called);
+        assert.isNull(dialog.querySelector('.mdl-spinner'));
       });
 
-      it('should disable the save button while uploading the image', () => {
+      it('should show a spinner while uploading the image', () => {
+        renderProfileImage(true, {
+          profile: thatProfile
+        });
+        helper.store.dispatch(startPhotoEdit({name: 'a name'}));
+        helper.store.dispatch(setPhotoDialogVisibility(true));
+        helper.store.dispatch(requestPatchUserPhoto(SETTINGS.user.username));
+        let dialog = document.querySelector(".photo-upload-dialog");
+        assert.isNotNull(dialog.querySelector('.mdl-spinner'));
+      });
+
+      it('should disable the save button when uploading an image', () => {
         renderProfileImage(true, {
           profile: thatProfile
         });
@@ -158,7 +171,7 @@ describe('ProfileImage', () => {
         helper.store.dispatch(requestPatchUserPhoto(SETTINGS.user.username));
         let dialog = document.querySelector(".photo-upload-dialog");
         let saveButton = dialog.querySelector('.save-button');
-        assert.isTrue(saveButton.className.includes('disabled'));
+        assert.include(saveButton.className, 'disabled');
         TestUtils.Simulate.click(saveButton);
         assert.isFalse(updateProfileImageStub.called);
       });

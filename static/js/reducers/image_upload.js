@@ -31,14 +31,19 @@ export type ImageUploadState = {
 
 export const imageUpload = (state: ImageUploadState = INITIAL_IMAGE_UPLOAD_STATE, action: Action) => {
   switch (action.type) {
-  case START_PHOTO_EDIT:
-    return { ...state,
-      photo: action.payload,
-      edit: null,
-      error: null,
-    };
+  case START_PHOTO_EDIT: {
+    if ( state.patchStatus === FETCH_PROCESSING ) {
+      return state;
+    } else {
+      return { ...state,
+        photo: action.payload,
+        edit: null,
+        error: null,
+      };
+    }
+  }
   case CLEAR_PHOTO_EDIT:
-    return INITIAL_IMAGE_UPLOAD_STATE;
+    return state.patchStatus === FETCH_PROCESSING ? state : INITIAL_IMAGE_UPLOAD_STATE;
   case UPDATE_PHOTO_EDIT:
     return { ...state, edit: action.payload };
   case SET_PHOTO_ERROR:

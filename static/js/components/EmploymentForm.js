@@ -8,6 +8,7 @@ import IconButton from 'react-mdl/lib/IconButton';
 import _ from 'lodash';
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
 
+import { FETCH_PROCESSING } from '../actions';
 import {
   userPrivilegeCheck,
   isProfileOfLoggedinUser
@@ -21,6 +22,7 @@ import {
   deleteWorkHistoryEntry,
 } from '../util/profile_history_edit';
 import ConfirmDeletion from './ConfirmDeletion';
+import SpinnerButton from './SpinnerButton';
 import SelectField from './inputs/SelectField';
 import CountrySelectField from './inputs/CountrySelectField';
 import StateSelectField from './inputs/StateSelectField';
@@ -46,6 +48,7 @@ class EmploymentForm extends ProfileFormFields {
 
   props: {
     profile:                          Profile,
+    profilePatchStatus:               ?string,
     ui:                               UIState,
     updateProfile:                    UpdateProfileFunc,
     saveProfile:                      SaveProfileFunc,
@@ -175,7 +178,7 @@ class EmploymentForm extends ProfileFormFields {
         workHistoryRows.push(
         <Cell col={12} className="profile-form-row add" key="I'm unique!">
           <button
-            className="mm-minor-action"
+            className="mm-minor-action add-employment-button"
             onClick={this.openNewWorkHistoryForm}
           >
             Add employment
@@ -316,7 +319,10 @@ class EmploymentForm extends ProfileFormFields {
         workDialogVisibility,
         showWorkDeleteDialog,
       },
+      profilePatchStatus,
     } = this.props;
+
+    const inFlight = profilePatchStatus === FETCH_PROCESSING;
     const actions = [
       <Button
         type='button'
@@ -325,13 +331,15 @@ class EmploymentForm extends ProfileFormFields {
         onClick={this.closeWorkDialog}>
         Cancel
       </Button>,
-      <Button
+      <SpinnerButton
+        component={Button}
+        spinning={inFlight}
         type='button'
         className="primary-button save-button"
         key='save'
         onClick={this.saveWorkHistoryEntry}>
         Save
-      </Button>
+      </SpinnerButton>
     ];
 
     return (

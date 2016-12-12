@@ -157,5 +157,26 @@ describe('image upload reducer', () => {
         });
       });
     });
+
+    it('should not clear the edit state if FETCH_PROCESSING', () => {
+      let photo = new Blob;
+      store.dispatch(startPhotoEdit(photo));
+      store.dispatch(requestPatchUserPhoto());
+      let expectation = {
+        edit: null,
+        error: null,
+        photo: photo,
+        patchStatus: FETCH_PROCESSING
+      };
+      let state = store.getState().imageUpload;
+      assert.deepEqual(state, expectation);
+      store.dispatch(clearPhotoEdit());
+      state = store.getState().imageUpload;
+      assert.deepEqual(state, expectation);
+      assert.deepEqual(state, expectation);
+      store.dispatch(startPhotoEdit(photo));
+      state = store.getState().imageUpload;
+      assert.deepEqual(state, expectation);
+    });
   });
 });

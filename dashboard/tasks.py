@@ -99,31 +99,42 @@ def batch_update_user_data_subtasks(students):
     Args:
         students (List): List of students.
     """
+    # pylint: disable=bare-except
     for user_id in students:
         try:
-            # pylint: disable=broad-except
             user = User.objects.get(pk=user_id)
+        except:
+            log.exception('edX data refresh task: unable to get user "%s"', user_id)
+            continue
 
-            if UserSocialAuth.objects.filter(user=user).exists():
-                # get the credentials for the current user for edX
-                user_social = user.social_auth.get(provider=EdxOrgOAuth2.name)
+        try:
+            UserSocialAuth.objects.get(user=user)
+        except:
+            log.exception('user "%s" does not have python social auth object', user.username)
+            continue
 
-                try:
-                    utils.refresh_user_token(user_social)
-                except utils.InvalidCredentialStored as exc:
-                    log.error(
-                        "Unable to refresh token for student %s, status code is %d and error is %s",
-                        user.username, exc.http_status_code, str(exc)
-                    )
-                    continue
+        # get the credentials for the current user for edX
+        try:
+            user_social = user.social_auth.get(provider=EdxOrgOAuth2.name)
+        except:
+            log.exception('user "%s" does not have edX credentials', user.username)
+            continue
 
-                edx_client = EdxApi(user_social.extra_data, settings.EDXORG_BASE_URL)
+        try:
+            utils.refresh_user_token(user_social)
+        except:
+            log.exception("Unable to refresh token for student %s", user.username)
+            continue
 
-                for cache_type in CachedEdxDataApi.SUPPORTED_CACHES:
-                    CachedEdxDataApi.update_cache_if_expired(user, edx_client, cache_type)
+        try:
+            edx_client = EdxApi(user_social.extra_data, settings.EDXORG_BASE_URL)
+        except:
+            log.exception("Unable to create an edX client object for student %s", user.username)
+            continue
 
-        except Exception as e:
-            log.exception(
-                "Unable to refresh token for student_id %d, error is %s",
-                user_id, str(e)
-            )
+        for cache_type in CachedEdxDataApi.SUPPORTED_CACHES:
+            try:
+                CachedEdxDataApi.update_cache_if_expired(user, edx_client, cache_type)
+            except:
+                log.exception("Unable to refresh cache %s for student %s", cache_type, user.username)
+                continue

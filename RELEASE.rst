@@ -1,6 +1,23 @@
 Release Notes
 =============
-Version 0.28.1
+
+Version 0.30.0
+--------------
+
+- Made the profile gender radio buttons more accessible
+- Refactored task code to refresh users edX data.
+- Remove react-sticky (#2046)
+- Fixed search facet left indentation
+- Updated Facebook sharing image
+- fixes minor layout issue
+- Disable buttons during profile upload for about me and personal info dialogs (#2042)
+- Limited profile image size on the client to 512x512
+- Prevented the user from issuing multiple image upload requests
+- this should do it
+- Disable buttons on employment and education dialogs during profile update (#2033)
+- Used render methods for tests, use sandbox for sinon (#2045)
+- svg logos added with error
+
 --------------
 
 - Revert &quot;Changed profile validation to not require a photo&quot;

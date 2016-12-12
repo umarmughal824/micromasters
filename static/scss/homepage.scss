@@ -32,16 +32,47 @@ body.app-media {
       .brand-logo {
         float: left;
         margin-right: 15px;
+        background: url(/static/images/mit_logo.svg) no-repeat;
+        height: 36px;
+        width: 51px;
+        overflow: visible;
+        position: relative;
+        top: 5px;
+      }
 
-        img {
-          width: 60px;
-        }
+      .brand-logo:hover {
+        background: url(/static/images/mit_logo_on.svg) no-repeat;
+        height: 36px;
+        width: 51px;
+        overflow: visible;
+        position: relative;
+        top: 5px;
+      }
+
+      .micromasters-logo {
+        float: left;
+        background: url(/static/images/micromasters_logo.svg) no-repeat;
+        height: 23px;
+        width: 155px;
+        overflow: visible;
+        position: relative;
+        top: 13px;
+      }
+
+      .micromasters-logo:hover {
+        float: left;
+        background: url(/static/images/micromasters_logo_on.svg) no-repeat;
+        height: 23px;
+        width: 155px;
+        overflow: visible;
+        position: relative;
+        top: 13px;
       }
 
       .divider-large {
-        width: 14px;
-        height: 34px;
-        margin: 4px 15px 0 0;
+        width: 1px;
+        height: 32px;
+        margin: 3px 18px 0 0;
         border-left: 1px solid rgba(255, 255, 255, 0.5);
         float: left;
       }

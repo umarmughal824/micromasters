@@ -16,6 +16,7 @@ import {
   UPDATE_VALIDATION_VISIBILITY,
   CLEAR_PROFILE_EDIT,
 
+  requestPatchUserProfile,
   startProfileEdit,
   updateProfile,
 } from '../actions/profile';
@@ -474,8 +475,7 @@ describe("UserPage", function() {
       it('should let you add an education entry', () => {
         const username = SETTINGS.user.username;
         return renderComponent(`/learner/${username}`, userActions).then(([, div]) => {
-          let addButton = div.getElementsByClassName('profile-form')[1].
-            querySelector('.mm-minor-action');
+          let addButton = div.querySelector('.add-education-button');
 
           let expectedProfile = _.cloneDeep(userProfile);
           let entry = Object.assign({}, generateNewEducation(HIGH_SCHOOL), {
@@ -549,6 +549,30 @@ describe("UserPage", function() {
             modifyTextField(inputs[6], "FoobarVille");
             let save = dialog.querySelector('.save-button');
             TestUtils.Simulate.click(save);
+          });
+        });
+      });
+
+      it('should disable the save button while a PATCH is in progress', () => {
+        const username = SETTINGS.user.username;
+        return renderComponent(`/learner/${username}`, userActions).then(([, div]) => {
+          let addButton = div.querySelector(".add-education-button");
+
+          TestUtils.Simulate.click(addButton);
+
+          let dialog = document.querySelector('.education-dialog');
+
+          return listenForActions([
+            REQUEST_PATCH_USER_PROFILE,
+          ], () => {
+            helper.store.dispatch(requestPatchUserProfile(username));
+          }).then(() => {
+            let button = dialog.querySelector(".save-button");
+            assert(button.className.includes("disabled-with-spinner"));
+            assert(button.querySelector(".mdl-spinner"));
+
+            TestUtils.Simulate.click(button);
+            assert.isFalse(patchUserProfileStub.called);
           });
         });
       });
@@ -755,6 +779,30 @@ describe("UserPage", function() {
           });
         });
       });
+
+      it('should disable the save button while a PATCH is in progress', () => {
+        const username = SETTINGS.user.username;
+        return renderComponent(`/learner/${username}`, userActions).then(([, div]) => {
+          let addButton = div.querySelector(".add-employment-button");
+
+          TestUtils.Simulate.click(addButton);
+
+          let dialog = document.querySelector('.employment-dialog');
+
+          return listenForActions([
+            REQUEST_PATCH_USER_PROFILE,
+          ], () => {
+            helper.store.dispatch(requestPatchUserProfile(username));
+          }).then(() => {
+            let button = dialog.querySelector(".save-button");
+            assert(button.className.includes("disabled-with-spinner"));
+            assert(button.querySelector(".mdl-spinner"));
+
+            TestUtils.Simulate.click(button);
+            assert.isFalse(patchUserProfileStub.called);
+          });
+        });
+      });
     });
 
     describe('Personal Info', () => {
@@ -800,7 +848,7 @@ describe("UserPage", function() {
           returns(Promise.resolve(expectedProfile));
 
         return renderComponent(`/learner/${username}`, userActions).then(([wrapper]) => {
-          let personalButton = wrapper.find('.edit-profile-holder').find('.mdl-button');
+          let personalButton = wrapper.find('.edit-personal-info-button');
 
           return listenForActions([
             SET_USER_PAGE_DIALOG_VISIBILITY,
@@ -844,8 +892,7 @@ describe("UserPage", function() {
           returns(Promise.resolve(expectedProfile));
 
         return renderComponent(`/learner/${username}`, userActions).then(([, div]) => {
-          let aboutMEBtn = div.querySelector('.edit-about-me-holder').
-            getElementsByClassName('mdl-button')[0];
+          let aboutMEBtn = div.querySelector('.edit-about-me-button');
 
           return listenForActions([
             SET_USER_PAGE_ABOUT_ME_DIALOG_VISIBILITY,
@@ -874,6 +921,30 @@ describe("UserPage", function() {
                 assert.deepEqual(state.profiles[username].profile, expectedProfile);
               });
             });
+          });
+        });
+      });
+
+      it('should disable the save button while a PATCH is in progress', () => {
+        const username = SETTINGS.user.username;
+        return renderComponent(`/learner/${username}`, userActions).then(([, div]) => {
+          let addButton = div.querySelector(".edit-personal-info-button");
+
+          TestUtils.Simulate.click(addButton);
+
+          let dialog = document.querySelector('.personal-dialog');
+
+          return listenForActions([
+            REQUEST_PATCH_USER_PROFILE,
+          ], () => {
+            helper.store.dispatch(requestPatchUserProfile(username));
+          }).then(() => {
+            let button = dialog.querySelector(".save-button");
+            assert(button.className.includes("disabled-with-spinner"));
+            assert(button.querySelector(".mdl-spinner"));
+
+            TestUtils.Simulate.click(button);
+            assert.isFalse(patchUserProfileStub.called);
           });
         });
       });
