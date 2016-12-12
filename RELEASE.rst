@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.30.1
+--------------
+
+- Removed eslint rule disables on entry/public.js
+- Check for cross-domain security for Zendesk widget (#2075)
+
 Version 0.30.0
 --------------
 
