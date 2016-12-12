@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars, no-undef, no-var */
+/* global SETTINGS: false $:false jQuery: false CURRENT_PAGE_URL: false */
 __webpack_public_path__ = `http://${SETTINGS.host}:8078/`;  // eslint-disable-line no-undef, camelcase
 import "rrssb/js/rrssb.js";
 import "bootstrap";
@@ -84,7 +84,7 @@ jQuery(window).load(function() {
 
 /* Full screen header */
 function alturaMaxima() {
-  var altura = $(window).height();
+  let altura = $(window).height();
   $(".full-screen").css('min-height', altura);
 }
 
@@ -95,7 +95,7 @@ $(document).ready(function() {
 
 /* Bootstrap Internet Explorer 10 in Windows 8 and Windows Phone 8 FIX */
 if (navigator.userAgent.match(/IEMobile\/10\.0/)) {
-  var msViewportStyle = document.createElement('style');
+  let msViewportStyle = document.createElement('style');
   msViewportStyle.appendChild(
     document.createTextNode(
       '@-ms-viewport{width:auto!important}'
@@ -148,7 +148,7 @@ $("input[name=MMERGE2]").click(function() {
  * Set social media sharing links
  */
 jQuery(document).ready(function ($) {
-  var description = 'MicroMasters is a ' +
+  const description = 'MicroMasters is a ' +
     'new digital credential for online learners. The MicroMasters ' +
     'credential will be granted to learners who complete an ' +
     'integrated set of graduate-level online courses. With the MicroMasters ' +
