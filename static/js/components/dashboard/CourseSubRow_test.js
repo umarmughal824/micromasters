@@ -12,6 +12,7 @@ import {
   COURSE_PRICES_RESPONSE,
   FINANCIAL_AID_PARTIAL_RESPONSE,
   STATUS_NOT_PASSED,
+  STATUS_PASSED,
   STATUS_OFFERED,
 } from '../../constants';
 
@@ -88,7 +89,6 @@ describe('CourseSubRow', () => {
       courseRun: courseRun,
     });
     assert.include(wrapper.find(".course-description").html(), "Enrollment starts:");
-    assert.equal(wrapper.find(".course-action").text(), "");
   });
 
   it('shows fuzzy start date for offered course run if start date is missing', () => {
@@ -130,6 +130,20 @@ describe('CourseSubRow', () => {
     assert.equal(wrapper.find(".course-grade").text(), "50%");
     assert.equal(wrapper.find(".course-action").text(), "Failed");
   });
+
+  it('should course information if a course was passed', () => {
+    let courseRun = {
+      ...courseRun,
+      status: STATUS_PASSED,
+      final_grade: 100
+    };
+    const wrapper = renderSubRow({
+      courseRun: courseRun,
+    });
+    assert.equal(wrapper.find(".course-grade").text(), "100%");
+    assert.equal(wrapper.find(".course-action").text(), "Passed");
+  });
+
 
   it('shows a course date range for a failed course run', () => {
     Object.assign(courseRun, {

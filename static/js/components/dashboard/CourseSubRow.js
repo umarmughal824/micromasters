@@ -10,21 +10,22 @@ import { isCurrentlyEnrollable, formatGrade } from './util';
 import {
   STATUS_OFFERED,
   STATUS_NOT_PASSED,
+  STATUS_PASSED,
   DASHBOARD_FORMAT,
   DASHBOARD_MONTH_FORMAT,
 } from '../../constants';
 
 export default class CourseSubRow extends React.Component {
   props: {
-    courseRun: CourseRun,
-    courseEnrollAddStatus?: string,
-    checkout: Function,
-    coursePrice: CoursePrice,
-    now: moment$Moment,
-    financialAid: FinancialAidUserInfo,
-    hasFinancialAid: boolean,
-    openFinancialAidCalculator: () => void,
-    addCourseEnrollment: (courseId: string) => void,
+    courseRun:                   CourseRun,
+    checkout:                    Function,
+    courseEnrollAddStatus?:      string,
+    coursePrice:                 CoursePrice,
+    now:                         moment$Moment,
+    financialAid:                FinancialAidUserInfo,
+    hasFinancialAid:             boolean,
+    openFinancialAidCalculator:  () => void,
+    addCourseEnrollment:         (courseId: string) => void,
   };
 
   getFormattedDateOrFuzzy(dateKey: string, fuzzyDateKey: string): string|null {
@@ -97,9 +98,17 @@ export default class CourseSubRow extends React.Component {
     </div>;
   }
 
-  renderAction(): React$Element<any> {
+  renderAction(): ?React$Element<any> {
+    const { courseRun } = this.props;
+    if ( courseRun.status === STATUS_OFFERED ) {
+      return this.renderCourseRunAction(courseRun);
+    } else if ( this.isCompletedCourseRun(courseRun) ) {
+      return this.renderCourseRunStatus(courseRun);
+    }
+  }
+
+  renderCourseRunAction = (courseRun: CourseRun) => {
     const {
-      courseRun,
       coursePrice,
       checkout,
       now,
@@ -109,25 +118,42 @@ export default class CourseSubRow extends React.Component {
       addCourseEnrollment
     } = this.props;
 
-    if (courseRun.status === STATUS_OFFERED) {
-      let enrollStartDate = courseRun.enrollment_start_date ? moment(courseRun.enrollment_start_date) : null;
-      if (isCurrentlyEnrollable(enrollStartDate, now)) {
-        return <CourseAction
-          courseRun={courseRun}
-          coursePrice={coursePrice}
-          checkout={checkout}
-          now={now}
-          hasFinancialAid={hasFinancialAid}
-          financialAid={financialAid}
-          openFinancialAidCalculator={openFinancialAidCalculator}
-          addCourseEnrollment={addCourseEnrollment}
-        />;
-      }
+    let enrollStartDate = courseRun.enrollment_start_date ? moment(courseRun.enrollment_start_date) : null;
+    if (isCurrentlyEnrollable(enrollStartDate, now)) {
+      return <CourseAction
+        courseRun={courseRun}
+        coursePrice={coursePrice}
+        checkout={checkout}
+        now={now}
+        hasFinancialAid={hasFinancialAid}
+        financialAid={financialAid}
+        openFinancialAidCalculator={openFinancialAidCalculator}
+        addCourseEnrollment={addCourseEnrollment}
+      />;
     }
-    return <div className="course-action">
-      { courseRun.status === STATUS_NOT_PASSED ? 'Failed' : '' }
-    </div>;
-  }
+  };
+
+  courseRunStatus = (courseRun: CourseRun) => {
+    if (courseRun.status === STATUS_NOT_PASSED ) {
+      return 'Failed';
+    } else if ( courseRun.status === STATUS_PASSED ) {
+      return 'Passed';
+    }
+  };
+
+  renderCourseRunStatus = (courseRun: CourseRun) => (
+    <div className="course-action">
+      { this.courseRunStatus(courseRun) }
+    </div>
+  );
+
+  isCompletedCourseRun = (courseRun: CourseRun) => (
+    [STATUS_NOT_PASSED, STATUS_PASSED].includes(courseRun.status) 
+  );
+
+  courseRunGrade = (courseRun: CourseRun) => (
+    this.isCompletedCourseRun(courseRun) ? formatGrade(courseRun.final_grade) : ''
+  );
 
   render() {
     const { courseRun } = this.props;
@@ -145,15 +171,15 @@ export default class CourseSubRow extends React.Component {
         </Cell>,
         <Cell col={2} key="2">
           <div className="course-grade">
-            { (courseRun.status === STATUS_NOT_PASSED) ? formatGrade(courseRun.final_grade) : '' }
+            { this.courseRunGrade(courseRun) }
           </div>
         </Cell>,
         <Cell col={4} key="3">
           { this.renderAction() }
         </Cell>
       ];
-      if (courseRun.status === STATUS_NOT_PASSED) {
-        subRowClass = `${subRowClass} course-not-passed`;
+      if ( this.isCompletedCourseRun(courseRun) ) {
+        subRowClass = `${subRowClass} course-completed`;
       }
     }
 
