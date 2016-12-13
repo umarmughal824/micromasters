@@ -68,13 +68,33 @@ export default class CourseDescription extends React.Component {
     return _.compact([dateMessage, additionalDetail]);
   }
 
-  renderViewCourseLink = (courseRun: CourseRun): React$Element<*>|null => (
-    (courseRun && courseRun.course_id) ?
-      <a href={`${EDX_LINK_BASE}${courseRun.course_id}`} target="_blank">
-        View on edX
-      </a> :
-      null
-  );
+  isCurrentOrPastEnrolled = (courseRun: CourseRun): boolean => {
+    if([STATUS_CURRENTLY_ENROLLED, STATUS_PASSED, STATUS_NOT_PASSED].includes(courseRun.status)) {
+      return true;
+    } else {
+      if ([STATUS_CAN_UPGRADE, STATUS_MISSED_DEADLINE].includes(courseRun.status)) {
+        let now = moment();
+        return courseRun.course_start_date && moment(courseRun.course_start_date).isBefore(now);
+      } else {
+        return false;
+      }
+    }
+  };
+
+  renderViewCourseLink = (courseRun: CourseRun): React$Element<*>|null => {
+    if (!courseRun || !courseRun.course_id) {
+      return null;
+    }
+    let url = null;
+
+    if (this.isCurrentOrPastEnrolled(courseRun)) {
+      url = `${EDX_LINK_BASE}${courseRun.course_id}`;
+    } else {
+      url = courseRun.enrollment_url;
+    }
+
+    return url ? <a href={url} target="_blank">View on edX</a> : null;
+  }
 
   render() {
     const { courseRun, courseTitle } = this.props;
