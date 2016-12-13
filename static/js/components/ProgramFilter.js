@@ -29,6 +29,7 @@ export default class ProgramFilter extends SearchkitComponent {
   componentDidUpdate(prevProps: Object): void {
     if (!_.isEqual(prevProps.currentProgramEnrollment, this.props.currentProgramEnrollment)) {
       // (╯°□°)╯︵ ┻━┻
+      this.context.searchkit.resetState();
       this.context.searchkit.reloadSearch();
     }
   }
