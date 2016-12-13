@@ -61,14 +61,15 @@ import { ALL_ERRORS_VISIBLE } from '../constants';
 export const INITIAL_PROFILES_STATE = {};
 export const profiles = (state: Profiles = INITIAL_PROFILES_STATE, action: Action) => {
   let patchProfile = newProfile => {
-    let clone = Object.assign({}, state);
     let username = action.payload.username;
-    clone[username] = Object.assign(
-      { profile: {} },
-      clone[username],
-      newProfile
-    );
-    return clone;
+    return {
+      ...state,
+      [username]: {
+        ...{ profile: {} },
+        ...state[username],
+        ...newProfile,
+      },
+    };
   };
 
   let getProfile = (): ProfileGetResult|void => {
@@ -94,7 +95,7 @@ export const profiles = (state: Profiles = INITIAL_PROFILES_STATE, action: Actio
       errorInfo: action.payload.errorInfo
     });
   case CLEAR_PROFILE: {
-    let clone = Object.assign({}, state);
+    let clone = {...state};
     delete clone[action.payload.username];
     return clone;
   }
@@ -105,9 +106,10 @@ export const profiles = (state: Profiles = INITIAL_PROFILES_STATE, action: Actio
       return state;
     }
     return patchProfile({
-      edit: Object.assign({}, profile.edit, {
-        profile: action.payload.profile
-      })
+      edit: {
+        ...profile.edit,
+        profile: action.payload.profile,
+      }
     });
   case START_PROFILE_EDIT:
     profile = getProfile();
@@ -156,7 +158,10 @@ export const profiles = (state: Profiles = INITIAL_PROFILES_STATE, action: Actio
         });
       }
       return patchProfile({
-        edit: Object.assign({}, profile.edit, { errors })
+        edit: {
+          ...profile.edit,
+          errors,
+        }
       });
     }
   case UPDATE_VALIDATION_VISIBILITY:
@@ -166,9 +171,10 @@ export const profiles = (state: Profiles = INITIAL_PROFILES_STATE, action: Actio
     } else {
       let visibility = profile.edit.visibility;
       return patchProfile({
-        edit: Object.assign({}, profile.edit, {
-          visibility: R.append(action.payload.keySet, visibility)
-        })
+        edit: {
+          ...profile.edit,
+          visibility: R.append(action.payload.keySet, visibility),
+        }
       });
     }
   default:
@@ -186,20 +192,23 @@ export const dashboard = (state: DashboardState = INITIAL_DASHBOARD_STATE, actio
     if (action.payload.noSpinner) {
       return state;
     } else {
-      return Object.assign({}, state, {
+      return {
+        ...state,
         fetchStatus: FETCH_PROCESSING
-      });
+      };
     }
   case RECEIVE_DASHBOARD_SUCCESS:
-    return Object.assign({}, state, {
+    return {
+      ...state,
       fetchStatus: FETCH_SUCCESS,
       programs: action.payload.programs
-    });
+    };
   case RECEIVE_DASHBOARD_FAILURE:
-    return Object.assign({}, state, {
+    return {
+      ...state,
       fetchStatus: FETCH_FAILURE,
-      errorInfo: action.payload.errorInfo
-    });
+      errorInfo: action.payload.errorInfo,
+    };
   case UPDATE_COURSE_STATUS: {
     const { courseId, status } = action.payload;
     let programs = _.cloneDeep(state.programs);
@@ -212,7 +221,10 @@ export const dashboard = (state: DashboardState = INITIAL_DASHBOARD_STATE, actio
         }
       }
     }
-    return Object.assign({}, state, { programs });
+    return {
+      ...state,
+      programs,
+    };
   }
   case CLEAR_DASHBOARD:
     return INITIAL_DASHBOARD_STATE;
@@ -228,17 +240,20 @@ const INITIAL_CHECKOUT_STATE = {};
 export const checkout = (state: CheckoutState = INITIAL_CHECKOUT_STATE, action: Action) => {
   switch (action.type) {
   case REQUEST_CHECKOUT:
-    return Object.assign({}, state, {
-      fetchStatus: FETCH_PROCESSING
-    });
+    return {
+      ...state,
+      fetchStatus: FETCH_PROCESSING,
+    };
   case RECEIVE_CHECKOUT_SUCCESS:
-    return Object.assign({}, state, {
-      fetchStatus: FETCH_SUCCESS
-    });
+    return {
+      ...state,
+      fetchStatus: FETCH_SUCCESS,
+    };
   case RECEIVE_CHECKOUT_FAILURE:
-    return Object.assign({}, state, {
-      fetchStatus: FETCH_FAILURE
-    });
+    return {
+      ...state,
+      fetchStatus: FETCH_FAILURE,
+    };
   default:
     return state;
   }
@@ -250,19 +265,22 @@ const INITIAL_COURSE_PRICES_STATE: CoursePricesState = {
 export const prices = (state: CoursePricesState = INITIAL_COURSE_PRICES_STATE, action: Action) => {
   switch (action.type) {
   case REQUEST_COURSE_PRICES:
-    return Object.assign({}, state, {
+    return {
+      ...state,
       fetchStatus: FETCH_PROCESSING
-    });
+    };
   case RECEIVE_COURSE_PRICES_SUCCESS:
-    return Object.assign({}, state, {
+    return {
+      ...state,
       fetchStatus: FETCH_SUCCESS,
       coursePrices: action.payload
-    });
+    };
   case RECEIVE_COURSE_PRICES_FAILURE:
-    return Object.assign({}, state, {
+    return {
+      ...state,
       fetchStatus: FETCH_FAILURE,
       errorInfo: action.payload
-    });
+    };
   case CLEAR_COURSE_PRICES:
     return INITIAL_COURSE_PRICES_STATE;
   default:
