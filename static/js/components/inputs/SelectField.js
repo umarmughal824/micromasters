@@ -5,6 +5,7 @@ import VirtualizedSelect from 'react-virtualized-select';
 import { Creatable } from 'react-select';
 
 import { validationErrorSelector, classify } from '../../util/util';
+import { sendFormFieldEvent } from '../../lib/google_analytics';
 import type { Option } from '../../flow/generalTypes';
 import type { Validator, UIValidator } from '../../lib/validation/profile';
 import type {
@@ -71,6 +72,7 @@ class SelectField extends React.Component {
       updateValidationVisibility(keySet);
     }
     updateProfile(profile, validator);
+    sendFormFieldEvent(keySet);
   };
 
   className = (): string => {

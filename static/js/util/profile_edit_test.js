@@ -3,6 +3,7 @@ import sinon from 'sinon';
 import { shallow } from 'enzyme';
 import moment from 'moment';
 import R from 'ramda';
+import ga from 'react-ga';
 
 import {
   boundTextField,
@@ -14,10 +15,11 @@ import * as dateValidation from '../lib/validation/date';
 import { YEAR_VALIDATION_CUTOFF } from '../constants';
 
 describe('Profile Editing utility functions', () => {
-  let that, sandbox;
+  let that, sandbox, gaEvent;
   const change = (clone) => that.props.profile = clone;
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    gaEvent = sandbox.stub(ga, 'event');
     that = {
       props: {
         profile: {
@@ -37,6 +39,7 @@ describe('Profile Editing utility functions', () => {
         },
         updateProfile: change,
         updateValidationVisibility: sandbox.stub(),
+        updateProfileValidation: sandbox.stub(),
         ui: {}
       }
     };
@@ -90,6 +93,15 @@ describe('Profile Editing utility functions', () => {
       assert.deepEqual("public_to_mm", that.props.profile.account_privacy);
       assert.deepEqual("public_to_mm", radioGroup.props.valueSelected);
     });
+
+    it('should send a form field event to Google Analytics when onChange fires', () => {
+      radioGroup.props.onChange({target: {value: "public_to_mm"}});
+      assert(gaEvent.calledWith({
+        category: 'profile-form-field',
+        action: 'completed-account_privacy',
+        label: 'jane'
+      }));
+    });
   });
 
   describe('Bound Text field', () => {
@@ -116,6 +128,15 @@ describe('Profile Editing utility functions', () => {
     it('should use an empty string instead of undefined for the value prop', () => {
       let blankTextField = boundTextField.call(that, ["missing"], "Missing");
       assert.equal('', blankTextField.props.value);
+    });
+
+    it('should send a form field event to Google Analytics when onBlur fires', () => {
+      textField.props.onBlur();
+      assert(gaEvent.calledWith({
+        category: 'profile-form-field',
+        action: 'completed-first_name',
+        label: 'jane'
+      }));
     });
   });
 
@@ -522,6 +543,16 @@ describe('Profile Editing utility functions', () => {
         month: "02",
         year: ""
       });
+    });
+
+    it('send a form field event to Google Analytics when onBlur is called', () => {
+      let wrapper = renderDateField();
+      getYearProps(wrapper).onBlur();
+      assert(gaEvent.calledWith({
+        category: 'profile-form-field',
+        action: 'completed-date_of_birth',
+        label: 'jane'
+      }));
     });
   });
 

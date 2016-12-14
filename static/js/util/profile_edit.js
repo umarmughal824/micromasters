@@ -8,6 +8,7 @@ import R from 'ramda';
 
 import DateField from '../components/inputs/DateField';
 import { validationErrorSelector, classify } from './util';
+import { sendFormFieldEvent } from '../lib/google_analytics';
 import type { Validator, UIValidator } from '../lib/validation/profile';
 import type { Profile } from '../flow/profileTypes';
 import type { Option } from '../flow/generalTypes';
@@ -64,6 +65,7 @@ export function boundRadioGroupField(keySet: string[], label: string, options: O
     _.set(clone, keySet, value);
     updateValidationVisibility(keySet);
     updateProfile(clone, validator);
+    sendFormFieldEvent(keySet);
   };
 
   const value = String(_.get(profile, keySet));
@@ -118,6 +120,7 @@ export function boundTextField(
   let onBlur = () => {
     updateValidationVisibility(keySet);
     updateProfileValidation(profile, validator);
+    sendFormFieldEvent(keySet);
   };
 
   let getValue = () => {
@@ -159,6 +162,7 @@ export function boundDateField(keySet: string[], label: string, omitDay: boolean
   let onBlur = () => {
     updateValidationVisibility(keySet);
     updateProfileValidation(profile, validator);
+    sendFormFieldEvent(keySet);
   };
 
 
@@ -189,6 +193,7 @@ export function boundCheckbox(keySet: string[], label: string|React$Element<*>):
     _.set(clone, keySet, e.target.checked);
     updateValidationVisibility(keySet);
     updateProfile(clone, validator);
+    sendFormFieldEvent(keySet);
   };
 
   const style = {

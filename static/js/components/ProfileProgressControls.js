@@ -1,4 +1,5 @@
 // @flow
+/* global SETTINGS:false */
 import React from 'react';
 
 import SpinnerButton from './SpinnerButton';
@@ -7,6 +8,7 @@ import { FETCH_PROCESSING } from '../actions';
 import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 import type { Validator } from '../lib/validation/profile';
+import { sendGAEvent } from '../lib/google_analytics';
 
 export default class ProfileProgressControls extends React.Component {
   props: {
@@ -40,6 +42,10 @@ export default class ProfileProgressControls extends React.Component {
     saveProfileStep.call(this, validator, isLastTab).then(() => {
       if (programIdForEnrollment && addProgramEnrollment) {
         addProgramEnrollment(programIdForEnrollment);
+      }
+
+      if ( isLastTab ) {
+        sendGAEvent('profile-form', 'completed', SETTINGS.user.username);
       }
       this.context.router.push(nextUrl);
     });

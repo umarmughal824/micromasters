@@ -47,14 +47,14 @@ type UpdateProfile = (isEdit: boolean, profile: Profile, validator: Validator|UI
 
 class ProfileFormContainer extends React.Component {
   props: {
-    profiles:    Profiles,
-    children:    React$Element<*>[],
-    dispatch:    Dispatch,
-    history:     Object,
-    ui:          UIState,
-    params:      {[k: string]: string},
-    programs:    AvailableProgramsState,
-    currentProgramEnrollment: AvailableProgram,
+    profiles:                  Profiles,
+    children:                  React$Element<*>[],
+    dispatch:                  Dispatch,
+    history:                   Object,
+    ui:                        UIState,
+    params:                    {[k: string]: string},
+    programs:                  AvailableProgramsState,
+    currentProgramEnrollment:  AvailableProgram,
   };
 
   static contextTypes = {

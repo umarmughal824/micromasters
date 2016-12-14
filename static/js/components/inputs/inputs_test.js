@@ -5,6 +5,7 @@ import sinon from 'sinon';
 import { mount } from 'enzyme';
 import VirtualizedSelect from 'react-virtualized-select';
 import R from 'ramda';
+import ga from 'react-ga';
 
 import { USER_PROFILE_RESPONSE } from '../../constants';
 import iso3166 from 'iso-3166-2';
@@ -32,7 +33,7 @@ describe('Profile inputs', () => {
   );
 
   describe('Select field', () => {
-    let selectField;
+    let selectField, gaEvent;
 
     let genderOptions = [
       {value: 'm', label: 'Male'},
@@ -52,6 +53,7 @@ describe('Profile inputs', () => {
     };
 
     beforeEach(() => {
+      gaEvent = sandbox.stub(ga, 'event');
       inputProps = {
         profile: {
           "account_privacy": "private",
@@ -171,6 +173,16 @@ describe('Profile inputs', () => {
         customOptions: [ expectedCustomOption ]
       });
       assert.include(selectField.find(VirtualizedSelect).props().options, expectedCustomOption);
+    });
+
+    it('should send a form field event to Google Analytics when onBlur is called', () => {
+      selectField = renderGenderSelectField().find(VirtualizedSelect);
+      selectField.props().onBlur();
+      assert(gaEvent.calledWith({
+        category: 'profile-form-field',
+        action: 'completed-gender',
+        label: 'jane'
+      }));
     });
   });
 

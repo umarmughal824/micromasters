@@ -2,7 +2,6 @@
 /* global SETTINGS:false */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import ga from 'react-ga';
 import striptags from 'striptags';
 import _ from 'lodash';
 import iso3166 from 'iso-3166-2';
@@ -29,18 +28,6 @@ import type {
 } from '../flow/programTypes';
 import { workEntriesByDate } from './sorting';
 import type { CheckoutPayload } from '../flow/checkoutTypes';
-
-export function sendGoogleAnalyticsEvent(category: any, action: any, label: any, value: any) {
-  let event: any = {
-    category: category,
-    action: action,
-    label: label,
-  };
-  if (value !== undefined) {
-    event.value = value;
-  }
-  ga.event(event);
-}
 
 export const isProfileOfLoggedinUser = (profile: Profile): boolean => (
   SETTINGS.user && profile.username === SETTINGS.user.username
