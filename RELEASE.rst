@@ -1,6 +1,24 @@
 Release Notes
 =============
 
+Version 0.31.0
+--------------
+
+- Made twitter description tag shorter (#2083)
+- Disable enroll and pay later button during API activity (#2056)
+- Added cropper to object types (#2114)
+- Fixed race condition with getCroppedCanvas
+- Replace utcnow() with now(tz=pytz.UTC) (#2107)
+- Fixed &quot;View on edx&quot; links to wrong URLs (#2073)
+- Ensured that search query is reset when changing programs
+- Added do not set income tax statement by email instruction message (#2091)
+- Limited the birth country facet to 15 options
+- Display tagline on mobile (#2085)
+- Filter out *_test.js files from test coverage (#1968)
+- Replace Object.assign with spread syntax (#2069)
+- Changed to https-only in npm-shrinkwrap
+- Fixed faulty hiding for facets that use nested fields
+
 Version 0.30.1
 --------------
 
