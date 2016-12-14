@@ -5174,7 +5174,7 @@
     "raven-js": {
       "version": "3.8.1",
       "from": "raven-js@3.8.1",
-      "resolved": "http://registry.npmjs.org/raven-js/-/raven-js-3.8.1.tgz"
+      "resolved": "https://registry.npmjs.org/raven-js/-/raven-js-3.8.1.tgz"
     },
     "rc": {
       "version": "1.1.6",

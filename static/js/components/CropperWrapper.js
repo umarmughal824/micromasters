@@ -4,6 +4,7 @@ import Cropper from 'react-cropper';
 import browser from 'detect-browser';
 
 export default class CropperWrapper extends React.Component {
+  cropper: Cropper;
   props: {
     updatePhotoEdit:    (b: Blob) => void,
     photo:              Object,
@@ -13,22 +14,24 @@ export default class CropperWrapper extends React.Component {
   cropperHelper = () => {
     const { updatePhotoEdit } = this.props;
     let canvas;
-    if ( browser.name === 'safari' || browser.name === 'ios' ) {
-      canvas = this.refs.cropper.getCroppedCanvas();
-    } else {
-      canvas = this.refs.cropper.getCroppedCanvas({
-        width: 512,
-        height: 512,
-      });
+    if ( this.cropper ) {
+      if ( browser.name === 'safari' || browser.name === 'ios' ) {
+        canvas = this.cropper.getCroppedCanvas();
+      } else {
+        canvas = this.cropper.getCroppedCanvas({
+          width: 512,
+          height: 512,
+        });
+      }
+      canvas.toBlob(blob => updatePhotoEdit(blob), 'image/jpeg');
     }
-    canvas.toBlob(blob => updatePhotoEdit(blob), 'image/jpeg');
   };
 
   render () {
     const { photo, uploaderBodyHeight } = this.props;
 
     return <Cropper
-      ref='cropper'
+      ref={cropper => this.cropper = cropper}
       style={{'height': uploaderBodyHeight()}}
       className="photo-active-item cropper"
       src={photo.preview}

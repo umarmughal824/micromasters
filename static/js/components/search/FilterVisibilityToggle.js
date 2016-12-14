@@ -22,11 +22,20 @@ export default class FilterVisibilityToggle extends SearchkitComponent {
     return checkFilterVisibility(filterName) ? "" : "closed";
   };
 
-  isInResults: Function = (id: string): boolean => {
-    if (this.getResults()) {
-      const elmId = FILTER_ID_ADJUST[id] || id;
-      const docCount = _.get(this.getResults(), ['aggregations', elmId, 'doc_count'], 0);
+  getChildFacetDocCount: Function = (results: Object, resultId: string): number => {
+    const elementResult = _.get(results, ['aggregations', resultId]);
+    if (elementResult['inner']) {
+      return elementResult['inner']['doc_count'];
+    } else {
+      return elementResult['doc_count'];
+    }
+  };
 
+  isInResults: Function = (id: string): boolean => {
+    let results = this.getResults();
+    if (results) {
+      const resultId = FILTER_ID_ADJUST[id] || id;
+      const docCount = this.getChildFacetDocCount(results, resultId);
       if (docCount > 0) {
         return true;
       }

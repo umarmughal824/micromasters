@@ -6,6 +6,7 @@ import moment from 'moment';
 import { assert } from 'chai';
 import sinon from 'sinon';
 
+import { FETCH_PROCESSING } from '../../actions';
 import CourseAction from './CourseAction';
 import {
   DASHBOARD_FORMAT,
@@ -50,8 +51,8 @@ describe('CourseAction', () => {
     }
     let description = renderedComponent.find(".description");
     let descriptionText = description.length === 1 ? description.text() : undefined;
-    let link = renderedComponent.find("button.enroll-pay-later");
-    let linkText = link.length === 1 ? link.text() : undefined;
+    let link = renderedComponent.find("SpinnerButton.enroll-pay-later");
+    let linkText = link.length === 1 ? link.children().text() : undefined;
     return {
       button: button,
       buttonText: buttonText,
@@ -137,9 +138,7 @@ describe('CourseAction', () => {
     assert.equal(elements.linkText, 'Enroll and pay later');
     assertCheckoutButton(elements.button, firstRun.course_id);
 
-    wrapper.find(".enroll-pay-later").simulate('click', {
-      preventDefault: sandbox.stub()
-    });
+    wrapper.find(".enroll-pay-later").simulate('click');
     assert(addCourseEnrollmentStub.calledWith(firstRun.course_id));
   });
 
@@ -420,6 +419,20 @@ describe('CourseAction', () => {
         assert.include(elements.buttonText, 'Pay Now');
         assert.equal(elements.linkText, 'Enroll and pay later');
       });
+    });
+
+    it('shows a spinner in place of the enroll button while API call is in progress', () => {
+      let course = findCourse(course => (
+        course.runs.length > 0 &&
+        course.runs[0].status === STATUS_OFFERED
+      ));
+      let firstRun = course.runs[0];
+      const wrapper = renderCourseAction({
+        courseRun: firstRun,
+        courseEnrollAddStatus: FETCH_PROCESSING
+      });
+      let link = wrapper.find("SpinnerButton.enroll-pay-later");
+      assert.isTrue(link.props().spinning);
     });
   });
 });
