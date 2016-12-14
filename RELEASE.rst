@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.32.0
+--------------
+
+- Correct spacing for course search facet (#2125)
+- Made function for dialog actions (#2118)
+- Added ECOMMERCE_EMAIL setting, added decision to email subject (#2103)
+- Disabled Pay Now button during API activity (#2067)
+
 Version 0.31.0
 --------------
 
