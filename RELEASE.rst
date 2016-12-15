@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.33.0
+--------------
+
+- Updated app to proxy requests through Nginx (#2063)
+
 Version 0.32.0
 --------------
 
