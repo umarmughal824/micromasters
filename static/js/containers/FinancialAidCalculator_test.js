@@ -12,6 +12,8 @@ import * as api from '../lib/api';
 import { modifyTextField, modifySelectField, clearSelectField } from '../util/test_utils';
 import { DASHBOARD_RESPONSE, FINANCIAL_AID_PARTIAL_RESPONSE } from '../constants';
 import {
+  requestAddFinancialAid,
+
   START_CALCULATOR_EDIT,
   UPDATE_CALCULATOR_EDIT,
   CLEAR_CALCULATOR_EDIT,
@@ -123,7 +125,8 @@ describe('FinancialAidCalculator', () => {
           income: '1000',
           currency: 'USD',
           checkBox: false,
-          fetchStatus: null,
+          fetchAddStatus: undefined,
+          fetchSkipStatus: undefined,
           programId: program.id,
           validation: {
             'checkBox': 'You must agree to these terms'
@@ -184,7 +187,8 @@ describe('FinancialAidCalculator', () => {
           income: '',
           currency: 'GBP',
           checkBox: false,
-          fetchStatus: null,
+          fetchAddStatus: undefined,
+          fetchSkipStatus: undefined,
           programId: program.id,
           validation: {
             'checkBox': 'You must agree to these terms',
@@ -228,6 +232,33 @@ describe('FinancialAidCalculator', () => {
       });
     });
   });
+
+  for (let activity of [true, false]) {
+    it(`has appropriate state for financial aid submit button, activity=${activity.toString()}`, () => {
+      addFinancialAidStub.returns(Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE));
+      if (activity) {
+        helper.store.dispatch(requestAddFinancialAid());
+      }
+
+      return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
+        wrapper.find('.pricing-actions').find('.dashboard-button').simulate('click');
+        let calculator = document.querySelector('.financial-aid-calculator');
+        TestUtils.Simulate.change(calculator.querySelector('.mdl-checkbox__input'));
+        modifyTextField(document.querySelector('#user-salary-input'), '1000');
+
+        let saveButton = calculator.querySelector('.save-button');
+        assert.equal(saveButton.className.includes('disabled-with-spinner'), activity);
+        assert(saveButton.innerHTML.includes(activity ? 'mdl-spinner' : 'Calculate'));
+
+        TestUtils.Simulate.click(saveButton);
+      }).then(() => {
+        assert.equal(
+          addFinancialAidStub.calledWith('1000', 'USD', program.id),
+          !activity
+        );
+      });
+    });
+  }
 
   it('should show an error if the financial aid request fails', () => {
     addFinancialAidStub.returns(Promise.reject({
