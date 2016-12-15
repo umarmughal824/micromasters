@@ -20,7 +20,7 @@ export default class UserPageAboutMeDialog extends ProfileFormFields {
     validator:                            Validator,
   };
 
-  closeAboutMeDialog: Function = (): void => {
+  closeAboutMeDialog = (): void => {
     const {
       setUserPageAboutMeDialogVisibility,
       clearProfileEdit,
@@ -30,7 +30,7 @@ export default class UserPageAboutMeDialog extends ProfileFormFields {
     clearProfileEdit(username);
   };
 
-  saveAboutMeInfo: Function = (): void => {
+  saveAboutMeInfo = (): void => {
     const { profile, ui, saveProfile, validator } = this.props;
     saveProfile(validator, profile, ui).then(() => {
       this.closeAboutMeDialog();

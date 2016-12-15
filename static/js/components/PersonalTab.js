@@ -41,7 +41,7 @@ const personalTabValidator = combineValidators(
 
 export default class PersonalTab extends React.Component {
   props: {
-    addProgramEnrollment:     Function,
+    addProgramEnrollment:     (p: number) => void,
     currentProgramEnrollment: AvailableProgram,
     errors:                   ValidationErrors,
     nextStep:                 () => void,

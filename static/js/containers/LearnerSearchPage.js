@@ -41,27 +41,27 @@ class LearnerSearchPage extends React.Component {
     ui:                       UIState,
   };
 
-  checkFilterVisibility: Function = (filterName: string): boolean => {
+  checkFilterVisibility = (filterName: string): boolean => {
     const { ui: { searchFilterVisibility } } = this.props;
     let visibility = searchFilterVisibility[filterName];
     return visibility === undefined ? SEARCH_FILTER_DEFAULT_VISIBILITY : visibility;
   };
 
-  setFilterVisibility: Function = (filterName: string, visibility: boolean): void => {
+  setFilterVisibility = (filterName: string, visibility: boolean): void => {
     const { ui: { searchFilterVisibility }, dispatch } = this.props;
     let clone = _.clone(searchFilterVisibility);
     clone[filterName] = visibility;
     dispatch(setSearchFilterVisibility(clone));
   };
 
-  openEmailComposer: Function = (searchkit) => {
+  openEmailComposer = (searchkit) => {
     const { dispatch } = this.props;
     const query = searchkit.query.query;
     dispatch(startEmailEdit(query));
     dispatch(setEmailDialogVisibility(true));
   };
 
-  closeEmailComposerAndCancel: Function = () => {
+  closeEmailComposerAndCancel = () => {
     const { dispatch } = this.props;
     dispatch(clearEmailEdit());
     dispatch(setEmailDialogVisibility(false));
@@ -85,7 +85,7 @@ class LearnerSearchPage extends React.Component {
     }
   };
 
-  updateEmailEdit: Function = R.curry((fieldName, e) => {
+  updateEmailEdit = R.curry((fieldName, e) => {
     const { email: { email, validationErrors }, dispatch } = this.props;
     let emailClone = R.clone(email);
     emailClone[fieldName] = e.target.value;

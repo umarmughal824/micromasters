@@ -6,28 +6,29 @@ import { saveProfileStep } from '../util/profile_edit';
 import { FETCH_PROCESSING } from '../actions';
 import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
+import type { Validator } from '../lib/validation/profile';
 
 export default class ProfileProgressControls extends React.Component {
   props: {
-    nextUrl?:      string,
-    prevUrl?:      string,
-    nextBtnLabel: string,
-    isLastTab:    boolean,
-    validator:    Function,
-    profile:      Profile,
-    profilePatchStatus: ?string,
-    ui:           UIState,
-    saveProfile:  SaveProfileFunc,
-    programIdForEnrollment: ?number,
-    addProgramEnrollment: Function,
+    addProgramEnrollment:    (p: number) => void,
+    isLastTab:               boolean,
+    nextBtnLabel:            string,
+    nextUrl?:                string,
+    prevUrl?:                string,
+    profile:                 Profile,
+    profilePatchStatus:      ?string,
+    programIdForEnrollment?:  ?number,
+    saveProfile:             SaveProfileFunc,
+    ui:                      UIState,
+    validator:               Validator,
   };
 
-  stepBack: Function = (): void => {
+  stepBack = (): void => {
     const { prevUrl } = this.props;
     this.context.router.push(prevUrl);
   };
 
-  saveAndContinue: Function = (): void => {
+  saveAndContinue = (): void => {
     const {
       nextUrl,
       isLastTab,

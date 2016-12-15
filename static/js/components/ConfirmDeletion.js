@@ -15,7 +15,7 @@ export default class ConfirmDeletion extends React.Component {
     itemText:     string,
   };
 
-  deleteAndClose: Function = (): void => {
+  deleteAndClose = (): void => {
     const { close, deleteFunc } = this.props;
     deleteFunc().then(close);
   };

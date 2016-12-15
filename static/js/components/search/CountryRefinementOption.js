@@ -10,7 +10,7 @@ export default class CountryRefinementOption extends React.Component {
     count:    number,
   };
 
-  countryName: Function = (countryCode: string): string => (
+  countryName = (countryCode: string): string => (
     iso3166.country(countryCode).name
   );
 

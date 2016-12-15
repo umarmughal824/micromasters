@@ -70,14 +70,14 @@ class ProfileFormContainer extends React.Component {
     };
   };
 
-  fetchProfile: Function = (username: string): void => {
+  fetchProfile = (username: string): void => {
     const { dispatch, profiles } = this.props;
     if (profiles[username] === undefined || profiles[username].getStatus === undefined) {
       dispatch(fetchUserProfile(username));
     }
   };
 
-  updateProfileValidation: Function = (profile: Profile, validator: Validator|UIValidator): void => {
+  updateProfileValidation = (profile: Profile, validator: Validator|UIValidator): void => {
     const username = SETTINGS.user.username;
     const { dispatch, ui } = this.props;
     let errors = validator(profile, ui);
@@ -97,7 +97,7 @@ class ProfileFormContainer extends React.Component {
     }
   };
 
-  updateValidationVisibility: Function = keySet => {
+  updateValidationVisibility = (keySet: Array<string>) => {
     const { dispatch, profiles } = this.props;
     const username = SETTINGS.user.username;
     if ( !profiles[username].edit ) {
@@ -107,7 +107,7 @@ class ProfileFormContainer extends React.Component {
     }
   };
 
-  startProfileEdit: Function = () => {
+  startProfileEdit = () => {
     const { dispatch } = this.props;
     const username = SETTINGS.user.username;
     dispatch(startProfileEdit(username));
@@ -152,7 +152,7 @@ class ProfileFormContainer extends React.Component {
     dispatch(setProgram(program));
   };
 
-  simpleActionHelpers: Function = (): ActionHelpers => {
+  simpleActionHelpers = (): ActionHelpers => {
     const { dispatch } = this.props;
     return createSimpleActionHelpers(dispatch, [
       ['clearProfileEdit', clearProfileEdit],
@@ -171,7 +171,7 @@ class ProfileFormContainer extends React.Component {
     ]);
   };
 
-  asyncActionHelpers: Function = (): AsyncActionHelpers => {
+  asyncActionHelpers = (): AsyncActionHelpers => {
     const { dispatch } = this.props;
     return createAsyncActionHelpers(dispatch, [
       ['setWorkHistoryEdit', setWorkHistoryEdit],
@@ -229,7 +229,7 @@ class ProfileFormContainer extends React.Component {
     };
   };
 
-  childrenWithProps: Function = (profileFromStore: ProfileGetResult) => {
+  childrenWithProps = (profileFromStore: ProfileGetResult) => {
     return React.Children.map(this.props.children, (child) => (
       React.cloneElement(child, this.profileProps(profileFromStore))
     ));

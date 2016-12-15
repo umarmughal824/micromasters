@@ -19,7 +19,7 @@ export default class UserPagePersonalDialog extends React.Component {
     clearProfileEdit:             () => void,
   };
 
-  closePersonalDialog: Function = (): void => {
+  closePersonalDialog = (): void => {
     const {
       setUserPageDialogVisibility,
       clearProfileEdit,
@@ -29,7 +29,7 @@ export default class UserPagePersonalDialog extends React.Component {
     clearProfileEdit(username);
   };
 
-  savePersonalInfo: Function = (): void => {
+  savePersonalInfo = (): void => {
     const { profile, ui, saveProfile } = this.props;
     saveProfile(personalValidation, profile, ui).then(() => {
       this.closePersonalDialog();

@@ -24,7 +24,7 @@ export default class UserInfoCard extends React.Component {
     <span className="profile-email">{email}</span>
   );
 
-  renderAboutMeSection: Function = (
+  renderAboutMeSection = (
     profile: Profile, toggleShowAboutMeDialog: Function
   ): React$Element<*> => {
     let aboutMeContent = userPrivilegeCheck(

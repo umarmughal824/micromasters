@@ -34,10 +34,10 @@ export function createSimpleActionHelpers(dispatch: Dispatch, actionList: Action
  * returns an array of async action helpers from async action creators (those
  * that return a function taking dispatch as an argument)
  */
-export type AsyncActionHelpers = Array<{[k: string]: AsyncActionHelper}>;
+export type AsyncActionHelpers = {[k: string]: AsyncActionHelper};
 export type AsyncActionManifest = Array<[string, AsyncActionCreator<any>]>;
 export function createAsyncActionHelpers(dispatch: Dispatch, actionList: AsyncActionManifest): AsyncActionHelpers {
-  return actionList.map(([name, actionCreator]) => (
-    { [name]: createActionHelper(dispatch, actionCreator) }
-  ));
+  return R.fromPairs(actionList.map(([name, actionCreator]) => (
+     [name, createActionHelper(dispatch, actionCreator)]
+  )));
 }

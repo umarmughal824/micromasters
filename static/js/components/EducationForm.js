@@ -74,7 +74,7 @@ class EducationForm extends ProfileFormFields {
     updateValidationVisibility:       (xs: Array<string>) => void,
   };
 
-  openEditEducationForm: Function = (index: number): void => {
+  openEditEducationForm = (index: number): void => {
     const {
       profile,
       setEducationDialogIndex,
@@ -88,7 +88,7 @@ class EducationForm extends ProfileFormFields {
     setEducationDialogVisibility(true);
   };
 
-  openNewEducationForm: Function = (level: string): void => {
+  openNewEducationForm = (level: string): void => {
     const {
       profile,
       updateProfile,
@@ -107,7 +107,7 @@ class EducationForm extends ProfileFormFields {
     setEducationDialogVisibility(true);
   };
 
-  deleteEducationEntry: Function = (): Promise<*> => {
+  deleteEducationEntry = (): Promise<*> => {
     const { saveProfile, profile, ui } = this.props;
     let clone = _.cloneDeep(profile);
     if (ui.deletionIndex !== undefined && ui.deletionIndex !== null) {
@@ -116,7 +116,7 @@ class EducationForm extends ProfileFormFields {
     return saveProfile(educationValidation, clone, ui);
   };
 
-  educationLevelRadioSwitch: Function = (level: Object): React$Element<*> => {
+  educationLevelRadioSwitch = (level: Option): React$Element<*> => {
     const {
       ui: { educationLevelAnswers }
     } = this.props;
@@ -210,7 +210,7 @@ class EducationForm extends ProfileFormFields {
     }
   }
 
-  educationRow: Function = R.curry((showLevel: boolean, [index, education]: [number, EducationEntry]) => {
+  educationRow = R.curry((showLevel: boolean, [index, education]: [number, EducationEntry]) => {
     const { errors, profile } = this.props;
     if (!('id' in education)) {
       // don't show new educations, wait until we saved on the server before showing them
@@ -263,7 +263,7 @@ class EducationForm extends ProfileFormFields {
     );
   }
 
-  clearEducationEdit: Function = (): void => {
+  clearEducationEdit = (): void => {
     const {
       setEducationDialogVisibility,
       setEducationDegreeLevel,
@@ -277,18 +277,18 @@ class EducationForm extends ProfileFormFields {
     clearProfileEdit(username);
   };
 
-  saveEducationForm: Function = (): void => {
+  saveEducationForm = (): void => {
     const { saveProfile, profile, ui } = this.props;
     saveProfile(educationValidation, profile, ui).then(this.clearEducationEdit);
   };
 
-  openEducationDeleteDialog: Function = (index: number): void => {
+  openEducationDeleteDialog = (index: number): void => {
     const { setDeletionIndex, setShowEducationDeleteDialog } = this.props;
     setDeletionIndex(index);
     setShowEducationDeleteDialog(true);
   };
 
-  editEducationForm: Function = (): void => {
+  editEducationForm = (): void => {
     const {
       ui: { educationDialogIndex },
       showSwitch,

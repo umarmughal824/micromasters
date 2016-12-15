@@ -101,7 +101,7 @@ export default class LearnerSearch extends SearchkitComponent {
 
   searchkitTranslations: Object = makeSearchkitTranslations();
 
-  renderSearchHeader: Function = (openEmailComposer: Function): React$Element<*>|null => {
+  renderSearchHeader = (openEmailComposer: Function): React$Element<*>|null => {
     if (_.isNull(this.getResults())) {
       return null;
     }
@@ -131,7 +131,7 @@ export default class LearnerSearch extends SearchkitComponent {
     );
   };
 
-  renderFacets: Function = (currentProgram: AvailableProgram): React$Element<*> => {
+  renderFacets = (currentProgram: AvailableProgram): React$Element<*> => {
     if (_.isNull(this.getResults())) {
       return (
         <Card className="fullwidth" shadow={1}>

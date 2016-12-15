@@ -13,7 +13,7 @@ export default class ProgressWidget extends React.Component {
     program: Program
   };
 
-  circularProgressWidget: Function = (
+  circularProgressWidget = (
     radius: number,
     strokeWidth: number,
     totalPassedCourses: number,

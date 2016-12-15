@@ -23,7 +23,7 @@ describe('CustomNoHits', () => {
     makeStrippedHtml(<CustomNoHits />)
   );
 
-  const stubCommon: Function = (): void => {
+  const stubCommon = (): void => {
     sandbox.stub(CustomNoHits.prototype, 'componentWillMount');
     sandbox.stub(CustomNoHits.prototype, 'getSuggestion').returns("NoHits.NoResultsFound");
     sandbox.stub(CustomNoHits.prototype, 'translate').returns("No results found for search students");

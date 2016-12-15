@@ -21,18 +21,18 @@ class UserMenu extends React.Component {
     ui:       UIState,
   };
 
-  openStateIcon: Function = (): React$Element<*> => {
+  openStateIcon = (): React$Element<*> => {
     const { ui: { userMenuOpen } } = this.props;
     return <Icon name={`${userMenuOpen ? "arrow_drop_up" : "arrow_drop_down"}`} />;
   };
 
-  toggleMenuOpen: Function = (): void => {
+  toggleMenuOpen = (): void => {
     const { ui: { userMenuOpen }, dispatch } = this.props;
     const setMenuOpenState = createActionHelper(dispatch, setUserMenuOpen);
     setMenuOpenState(!userMenuOpen);
   };
 
-  linkMenu: Function = (): React$Element<*> => {
+  linkMenu = (): React$Element<*> => {
     const { ui: { userMenuOpen } } = this.props;
     return (
       <div className={`user-menu-dropdown ${userMenuOpen ? "open" : ""}`}>

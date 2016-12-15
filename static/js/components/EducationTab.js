@@ -15,7 +15,7 @@ class EducationTab extends React.Component {
     profilePatchStatus:    ?string,
     ui:                    UIState,
     saveProfile:           SaveProfileFunc,
-    addProgramEnrollment:  Function,
+    addProgramEnrollment:  (p: number) => void,
     dispatch:              Function,
   };
 
