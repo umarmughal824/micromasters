@@ -33,10 +33,6 @@ from profiles.serializers import (
     ProfileSerializer,
     ProfileFilledOutSerializer,
 )
-from profiles.util import (
-    GravatarImgSize,
-    format_gravatar_url,
-)
 from search.base import ESTestCase
 
 
@@ -77,11 +73,6 @@ class ProfileTests(ESTestCase):
             'gender': profile.gender,
             'date_of_birth': "1980-01-02",
             'account_privacy': profile.account_privacy,
-            'has_profile_image': profile.has_profile_image,
-            'profile_url_full': format_gravatar_url(profile.user.email, GravatarImgSize.FULL),
-            'profile_url_large': format_gravatar_url(profile.user.email, GravatarImgSize.LARGE),
-            'profile_url_medium': format_gravatar_url(profile.user.email, GravatarImgSize.MEDIUM),
-            'profile_url_small': format_gravatar_url(profile.user.email, GravatarImgSize.SMALL),
             'country': profile.country,
             'state_or_territory': profile.state_or_territory,
             'city': profile.city,
@@ -111,11 +102,6 @@ class ProfileTests(ESTestCase):
             'preferred_name': profile.preferred_name,
             'gender': profile.gender,
             'account_privacy': profile.account_privacy,
-            'has_profile_image': profile.has_profile_image,
-            'profile_url_full': format_gravatar_url(profile.user.email, GravatarImgSize.FULL),
-            'profile_url_large': format_gravatar_url(profile.user.email, GravatarImgSize.LARGE),
-            'profile_url_medium': format_gravatar_url(profile.user.email, GravatarImgSize.MEDIUM),
-            'profile_url_small': format_gravatar_url(profile.user.email, GravatarImgSize.SMALL),
             'country': profile.country,
             'state_or_territory': profile.state_or_territory,
             'city': profile.city,

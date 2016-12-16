@@ -17,10 +17,6 @@ from profiles.models import (
     Employment,
     Profile,
 )
-from profiles.util import (
-    GravatarImgSize,
-    format_gravatar_url,
-)
 
 
 def update_work_history(work_history_list, profile_id):
@@ -161,36 +157,16 @@ class ProfileBaseSerializer(ModelSerializer):
     """Base class for all the profile serializers"""
 
     username = SerializerMethodField()
-    profile_url_full = SerializerMethodField()
-    profile_url_large = SerializerMethodField()
-    profile_url_medium = SerializerMethodField()
-    profile_url_small = SerializerMethodField()
+    work_history = EmploymentSerializer(many=True)
+    education = EducationSerializer(many=True)
 
     def get_username(self, obj):  # pylint: disable=no-self-use
         """Getter for the username field"""
         return get_social_username(obj.user)
 
-    def get_profile_url_full(self, obj):  # pylint: disable=no-self-use
-        """Getter for the profile full image url"""
-        return format_gravatar_url(obj.user.email, GravatarImgSize.FULL)
-
-    def get_profile_url_large(self, obj):  # pylint: disable=no-self-use
-        """Getter for the profile large image url"""
-        return format_gravatar_url(obj.user.email, GravatarImgSize.LARGE)
-
-    def get_profile_url_medium(self, obj):  # pylint: disable=no-self-use
-        """Getter for the profile medium url"""
-        return format_gravatar_url(obj.user.email, GravatarImgSize.MEDIUM)
-
-    def get_profile_url_small(self, obj):  # pylint: disable=no-self-use
-        """Getter for the profile small url"""
-        return format_gravatar_url(obj.user.email, GravatarImgSize.SMALL)
-
 
 class ProfileSerializer(ProfileBaseSerializer):
     """Serializer for Profile objects"""
-    work_history = EmploymentSerializer(many=True)
-    education = EducationSerializer(many=True)
     about_me = CharField(allow_null=True, allow_blank=True, required=False)
 
     def update(self, instance, validated_data):
@@ -225,11 +201,6 @@ class ProfileSerializer(ProfileBaseSerializer):
             'city',
             'birth_country',
             'nationality',
-            'has_profile_image',
-            'profile_url_full',
-            'profile_url_large',
-            'profile_url_medium',
-            'profile_url_small',
             'date_of_birth',
             'preferred_language',
             'gender',
@@ -248,8 +219,6 @@ class ProfileLimitedSerializer(ProfileBaseSerializer):
     Serializer for Profile objects, limited to fields that other users are
     allowed to see if a profile is marked public.
     """
-    work_history = EmploymentSerializer(many=True)
-    education = EducationSerializer(many=True)
 
     class Meta:  # pylint: disable=missing-docstring
         model = Profile
@@ -263,11 +232,6 @@ class ProfileLimitedSerializer(ProfileBaseSerializer):
             'state_or_territory',
             'city',
             'birth_country',
-            'has_profile_image',
-            'profile_url_full',
-            'profile_url_large',
-            'profile_url_medium',
-            'profile_url_small',
             'preferred_language',
             'gender',
             'work_history',
