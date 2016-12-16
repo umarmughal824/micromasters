@@ -35,51 +35,58 @@ USAGE_DETAILS = (
     """
     Example commands:
 
-    # Turn financial aid off/on for a program with a title that contains 'Digital'
-    alter_data --action=turn_financial_aid_off --program-title="Digital"
-    alter_data --action=turn_financial_aid_on --program-title="Digital"
+    # Turn financial aid off/on for a program with a title that contains 'Analog'
+    alter_data --action=turn_financial_aid_off --program-title="Analog"
+    alter_data --action=turn_financial_aid_on --program-title="Analog"
 
-    # For a user with a username 'staff', set the 'Digital Learning' 100-level course to enrolled
-    alter_data --action=set_course_to_enrolled --username=staff --program-title='Digital' --course-title='100'
+    # For a user with a username 'staff', set the 'Analog Learning' 100-level course to enrolled
+    alter_data --action=set_course_to_enrolled --username=staff --program-title='Analog' --course-title='100'
 
-    # Set the 'Digital Learning' 200-level course to failed with a specific grade
-    alter_data --action=set_course_to_failed --username=staff --program-title='Digital' --course-title='200' --grade=45
+    # Set the 'Analog Learning' 200-level course to failed with a specific grade
+    alter_data --action=set_course_to_failed --username=staff --program-title='Analog' --course-title='200' --grade=45
 
-    # Set the 'Digital Learning' 300-level course to enrolled
-    alter_data --action=set_course_to_enrolled --username=staff --program-title='Digital' --course-title='300'
+    # Set the 'Analog Learning' 300-level course to enrolled
+    alter_data --action=set_course_to_enrolled --username=staff --program-title='Analog' --course-title='300'
 
-    # Set the 'Digital Learning' 300-level course to enrolled, and set it to start in the future
+    # Set the 'Analog Learning' 300-level course to enrolled, and set it to start in the future
     """
-    "alter_data --action=set_course_to_enrolled --username=staff --program-title='Digital' --course-title='300' "
+    "alter_data --action=set_course_to_enrolled --username=staff --program-title='Analog' --course-title='300' "
     "--in-future"
     """
 
-    # Set the 'Digital Learning' 300-level course to enrolled, but in need of upgrade (aka 'audit')
-    alter_data --action=set_course_to_needs_upgrade --username=staff --program-title='Digital' --course-title='300'
+    # Set the 'Analog Learning' 300-level course to enrolled, but in need of upgrade (aka 'audit')
+    alter_data --action=set_course_to_needs_upgrade --username=staff --program-title='Analog' --course-title='300'
 
     # (Another way to achieve the result of the above command...)
-    alter_data --action=set_course_to_enrolled --username=staff --program-title='Digital' --course-title='100' --audit
+    alter_data --action=set_course_to_enrolled --username=staff --program-title='Analog' --course-title='100' --audit
 
-    # Set the 'Digital Learning' 300-level course to enrolled and in need of upgrade, but past the deadline
+    # Set the 'Analog Learning' 300-level course to enrolled and in need of upgrade, but past the deadline
     """
-    "alter_data --action=set_course_to_needs_upgrade --username=staff --program-title='Digital' "
+    "alter_data --action=set_course_to_needs_upgrade --username=staff --program-title='Analog' "
     "--course-title='300' --missed-deadline"
     """
 
-    # Set the 'Digital Learning' 100-level course to have an offered course run (and no enrollments)
-    alter_data --action=set_course_to_offered --username=staff --program-title='Digital' --course-title='100'
+    # Set the 'Analog Learning' 100-level course to have an offered course run (and no enrollments)
+    alter_data --action=set_course_to_offered --username=staff --program-title='Analog' --course-title='100'
 
-    # Set the 'Digital Learning' 100-level course to have an offered course run with a fuzzy start date
-    alter_data --action=set_course_to_offered --username=staff --program-title='Digital' --course-title='100' --fuzzy
+    # Set the 'Analog Learning' 100-level course to have an offered course run with a fuzzy start date
+    alter_data --action=set_course_to_offered --username=staff --program-title='Analog' --course-title='100' --fuzzy
 
     # Add a past failed course run with a specific grade
-    alter_data --action=add_past_failed_run --username=staff --program-title='Digital' --course-title='100' --grade=30
+    alter_data --action=add_past_failed_run --username=staff --program-title='Analog' --course-title='100' --grade=30
 
     # Add a past failed course run, even if a previous failed run already exists
     """
-    "alter_data --action=add_past_failed_run --username=staff --program-title='Digital' --course-title='100' "
+    "alter_data --action=add_past_failed_run --username=staff --program-title='Analog' --course-title='100' "
     "--add-if-exists"
     """
+
+    # Add a past passed course run with a specific grade
+    """
+    "alter_data --action=add_past_passed_run --username=staff --program-title='Analog' --course-title='100'"
+    "--add-if-exists"
+    """
+
 
     # Add an enrollable future course run for a program called 'Test Program' and a course called 'Test Course'
     alter_data --action=add_future_run --username=staff --program-title='Test Program' --course-title='Test Course'
@@ -175,29 +182,46 @@ def clear_future_runs(user=None, course=None):  # pylint: disable=unused-argumen
     return CourseRun.objects.filter(course=course, edx_course_key__startswith=NEW_COURSE_RUN_PREFIX).delete()
 
 
-@accepts_or_calculates_now
-def add_past_failed_run(user=None, course=None, now=None, grade=DEFAULT_FAILED_GRADE, add_if_exists=False):
-    """Adds a past failed course run for a given user and course"""
+def get_past_course_run(user=None, course=None, now=None, add_if_exists=False):
+    """Loop through past course runs and find one without CachedCurrentGrade data"""
     chosen_past_run = None
     past_runs = CourseRun.objects.filter(
         course=course,
         end_date__lt=now,
     ).exclude(end_date=None).order_by('-end_date').all()
-    # Loop through past course runs and find one without CachedCurrentGrade data
     for past_run in past_runs:
-        if not CachedCurrentGradeHandler(user).exists(past_run):
+        if not (CachedCurrentGradeHandler(user).exists(past_run) or
+                CachedCertificateHandler(user).exists(past_run)):
             chosen_past_run = past_run
-            continue
         elif not add_if_exists:
-            raise Exception("Past failed course run already exists (id: {}, title: {})".format(
+            raise Exception("Past failed/passed course run already exists (id: {}, title: {})".format(
                 past_run.id,
                 past_run.title
             ))
     if not chosen_past_run:
         raise Exception("Can't find past run w/o CachedCurrentGrade")
+    return chosen_past_run
+
+
+@accepts_or_calculates_now
+def add_past_failed_run(user=None, course=None, now=None, grade=DEFAULT_FAILED_GRADE, add_if_exists=False):
+    """Adds a past failed course run for a given user and course"""
+    chosen_past_run = get_past_course_run(user, course, now, add_if_exists)
+
     # Add enrollment and failed grade for course run
     CachedEnrollmentHandler(user).set_or_create(course_run=chosen_past_run)
     CachedCurrentGradeHandler(user).set_or_create(course_run=chosen_past_run, grade=grade)
+    return chosen_past_run
+
+
+@accepts_or_calculates_now
+def add_past_passed_run(user=None, course=None, now=None, grade=DEFAULT_GRADE, add_if_exists=False):
+    """Adds a past passed course run for a given user and course"""
+    chosen_past_run = get_past_course_run(user, course, now, add_if_exists)
+    # Add enrollment and  certificate for course run
+    CachedEnrollmentHandler(user).set_or_create(course_run=chosen_past_run)
+    CachedCertificateHandler(user).set_or_create(course_run=chosen_past_run, grade=grade)
+
     return chosen_past_run
 
 
@@ -244,6 +268,7 @@ COURSE_COMMAND_FUNCTIONS = {
         add_future_run,
         clear_future_runs,
         add_past_failed_run,
+        add_past_passed_run,
         course_info,
     ]
 }
