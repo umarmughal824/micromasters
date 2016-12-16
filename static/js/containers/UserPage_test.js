@@ -666,16 +666,24 @@ describe("UserPage", function() {
         return renderComponent(`/learner/${username}`, userActions).then(([, div]) => {
           let updatedProfile = _.cloneDeep(USER_PROFILE_RESPONSE);
           updatedProfile.username = SETTINGS.user.username;
-          updatedProfile.work_history.splice(0,1);
+
+          let rowOfInterest = div.querySelector('#work-history-card').
+            querySelectorAll('.profile-form-row')[1];
+
+          let deleteButton = rowOfInterest.querySelector('.delete-button');
+
+          let employerName = rowOfInterest.querySelector('.profile-row-name').textContent.split(',')[0];
+
+          let indexToDelete = USER_PROFILE_RESPONSE.work_history.findIndex(entry => (
+            entry.company_name === employerName
+          ));
+
+          updatedProfile.work_history.splice(indexToDelete, 1);
 
           patchUserProfileStub.throws("Invalid arguments");
           patchUserProfileStub.withArgs(SETTINGS.user.username, updatedProfile).returns(
             Promise.resolve(updatedProfile)
           );
-
-          let deleteButton = div.getElementsByClassName('profile-form')[2].
-            getElementsByClassName('profile-row-icons')[0].
-            getElementsByClassName('mdl-button')[1];
 
           return listenForActions([
             SET_DELETION_INDEX,
