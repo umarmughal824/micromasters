@@ -77,7 +77,9 @@
     .sk-panel__content .sk-item-list-option__text,
     .sk-panel__content .sk-item-list-option__count,
     .sk-hierarchical-menu-list__root .sk-hierarchical-menu-option__text,
-    .sk-hierarchical-menu-list__root .sk-hierarchical-menu-option__count {
+    .sk-hierarchical-menu-list__root .sk-hierarchical-menu-option__count,
+    .sk-hierarchical-refinement-list__root .sk-hierarchical-refinement-option__text,
+    .sk-hierarchical-refinement-list__root .sk-hierarchical-refinement-option__count {
       color: $font-gray;
     }
 
@@ -116,7 +118,9 @@
         transform: rotate(0.75turn);
       }
 
-      .sk-panel__content, .sk-hierarchical-menu-list__root {
+      .sk-panel__content,
+      .sk-hierarchical-menu-list__root,
+      .sk-hierarchical-refinement-list__root {
         display: none;
       }
     }

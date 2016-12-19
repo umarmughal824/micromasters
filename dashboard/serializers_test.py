@@ -13,13 +13,17 @@ from courses.factories import (
     CourseFactory,
     CourseRunFactory,
 )
+from dashboard.api_edx_cache import CachedEdxUserData
 from dashboard.factories import (
     CachedCertificateFactory,
     CachedCurrentGradeFactory,
     CachedEnrollmentFactory,
+    CachedEnrollmentVerifiedFactory,
+    CachedEnrollmentUnverifiedFactory
 )
 from dashboard.models import ProgramEnrollment
 from dashboard.serializers import UserProgramSearchSerializer
+from dashboard.utils import MMTrack
 from ecommerce.factories import (
     OrderFactory,
     LineFactory,
@@ -75,7 +79,6 @@ class UserProgramSearchSerializerTests(TestCase):
         # create a normal program
         program = ProgramFactory.create()
         cls.enrollments = cls._generate_cached_enrollments(cls.user, program, num_course_runs=2)
-        cls.serialized_enrollments = UserProgramSearchSerializer.serialize_enrollments(cls.enrollments)
         certificate_grades_vals = [0.7, 0.8]
         cls.current_grades_vals = [0.9, 1.0]
         cls.certificates = []
@@ -103,12 +106,14 @@ class UserProgramSearchSerializerTests(TestCase):
                     }
                 )
             )
+        non_fa_cached_edx_data = CachedEdxUserData(cls.user, program=program)
+        non_fa_mmtrack = MMTrack(cls.user, program, non_fa_cached_edx_data)
+        cls.serialized_enrollments = UserProgramSearchSerializer.serialize_enrollments(non_fa_mmtrack, cls.enrollments)
         cls.program_enrollment = ProgramEnrollment.objects.create(user=cls.user, program=program)
         # create a financial aid program
         cls.fa_program, _ = create_program()
         cls.fa_program_enrollment = ProgramEnrollment.objects.create(user=cls.user, program=cls.fa_program)
         cls.fa_enrollments = cls._generate_cached_enrollments(cls.user, cls.fa_program, num_course_runs=2)
-        cls.fa_serialized_enrollments = UserProgramSearchSerializer.serialize_enrollments(cls.fa_enrollments)
         cls.current_grades = []
         for i, enrollment in enumerate(cls.fa_enrollments):
             order = OrderFactory.create(user=cls.user, status='fulfilled')
@@ -124,6 +129,11 @@ class UserProgramSearchSerializerTests(TestCase):
                     }
                 )
             )
+        fa_cached_edx_data = CachedEdxUserData(cls.user, program=cls.fa_program)
+        fa_mmtrack = MMTrack(cls.user, cls.fa_program, fa_cached_edx_data)
+        cls.fa_serialized_enrollments = (
+            UserProgramSearchSerializer.serialize_enrollments(fa_mmtrack, cls.fa_enrollments)
+        )
 
     def test_full_program_user_serialization(self):
         """
@@ -202,42 +212,65 @@ class UserProgramSearchSerializerEdxTests(TestCase):
     """
 
     @staticmethod
-    def generate_course_with_run(program, course_params=None, course_run_params=None):
+    def generate_course_with_runs(program, course_params=None, course_run_count=1):
         """
-        Helper method to generate a Course and CourseRun for a Program
+        Helper method to generate a Course with CourseRuns for a Program
         """
         course_params = course_params or {}
-        course_run_params = course_run_params or {}
         course = CourseFactory.create(program=program, **course_params)
-        course_run = CourseRunFactory.create(course=course, **course_run_params)
-        return course, course_run
+        course_runs = CourseRunFactory.create_batch(course_run_count, course=course)
+        return course, course_runs
 
-    @staticmethod
-    def is_course_serialized(serialized_enrollments, course):
+    @classmethod
+    def is_course_serialized(cls, serialized_enrollments, course):
         """
         Helper method to test if a course appears in serialized enrollments
 
         Args:
             serialized_enrollments (list): A list of serialized enrollments
-            courses (dashboard.models.Course): A Course Object
+            course (dashboard.models.Course): A Course Object
         """
-        return {'title': course.title} in serialized_enrollments
+        return any([
+            enrollment['value'] == course.title and enrollment['level'] == 1
+            for enrollment in serialized_enrollments
+        ])
 
-    @staticmethod
-    def all_courses_serialized(serialized_enrollments, courses):
+    @classmethod
+    def is_course_serialized_with_status(cls, serialized_enrollments, course, is_verified=True):
         """
-        Helper method to test that serialized enrollments match a list of courses and have the correct format
+        Helper method to test if a course is serialized with the proper verified status
+
+        Args:
+            serialized_enrollments (list): A list of serialized enrollments
+            course (dashboard.models.Course): A Course Object
+            is_verified (bool): Flag to indicate if the enrollment should be verified
+        """
+        expected_serialization = [
+            {'level': 1, 'value': course.title, 'ancestors': []},
+            {'level': 2, 'value': 'Paid' if is_verified else 'Auditing', 'ancestors': [course.title]}
+        ]
+        return all(line in serialized_enrollments for line in expected_serialization)
+
+    @classmethod
+    def all_courses_serialized(cls, serialized_enrollments, courses):
+        """
+        Helper method to test that all given courses appear in a list of serialized enrollments
 
         Args:
             serialized_enrollments (list): A list of serialized enrollments
             courses (iterable): An iterable of Course objects
         """
-        return serialized_enrollments == [{'title': course.title} for course in courses]
+        return all([cls.is_course_serialized(serialized_enrollments, course) for course in courses])
 
     @classmethod
-    def enroll(cls, user, course_run):
-        """Helper method to enroll the test user in a course run"""
-        return CachedEnrollmentFactory.create(user=user, course_run=course_run)
+    def verified_enroll(cls, user, course_run):
+        """Helper method to create a verified enrollment for the test user in a course run"""
+        return CachedEnrollmentVerifiedFactory.create(user=user, course_run=course_run)
+
+    @classmethod
+    def unverified_enroll(cls, user, course_run):
+        """Helper method to create an unverified enrollment for the test user in a course run"""
+        return CachedEnrollmentUnverifiedFactory.create(user=user, course_run=course_run)
 
     @classmethod
     def setUpTestData(cls):
@@ -246,29 +279,57 @@ class UserProgramSearchSerializerEdxTests(TestCase):
         cls.user = profile.user
         # Create non-FA program data
         cls.non_fa_program = ProgramFactory.create()
-        _, course_run = cls.generate_course_with_run(
+        _, course_runs = cls.generate_course_with_runs(
             cls.non_fa_program,
             course_params=dict(title='Non FA Course 1')
         )
-        cls.non_fa_enrollments = [cls.enroll(cls.user, course_run)]
+        cls.non_fa_enrollments = [cls.verified_enroll(cls.user, course_runs[0])]
         cls.non_fa_program_enrollment = ProgramEnrollment.objects.create(user=cls.user, program=cls.non_fa_program)
         # Create FA program data
         cls.fa_program = ProgramFactory.create(financial_aid_availability=False)
-        _, course_run = cls.generate_course_with_run(
+        _, course_runs = cls.generate_course_with_runs(
             cls.fa_program,
             course_params=dict(title='FA Course 1')
         )
-        cls.fa_enrollments = [cls.enroll(cls.user, course_run)]
+        cls.fa_enrollments = [cls.verified_enroll(cls.user, course_runs[0])]
         cls.fa_program_enrollment = ProgramEnrollment.objects.create(user=cls.user, program=cls.fa_program)
 
-    def test_enrollment_serialization(self):
+    def test_all_courses_serialized(self):
         """
-        Tests that a user's course enrollments are properly serialized
+        Tests that all of user's course enrollments are serialized
         """
         for program_enrollment in (self.non_fa_program_enrollment, self.fa_program_enrollment):
             serialized_program_user = UserProgramSearchSerializer.serialize(program_enrollment)
             serialized_enrollments = serialized_program_user['enrollments']
             assert self.all_courses_serialized(serialized_enrollments, program_enrollment.program.course_set.all())
+
+    def test_course_serialization_format(self):
+        """
+        Tests that a user's course enrollments are serialized in a specific format
+        """
+        for program_enrollment in (self.non_fa_program_enrollment, self.fa_program_enrollment):
+            program = program_enrollment.program
+            # Generate a new course run on an existing course, and create an unverified enrollment in it
+            existing_course = program.course_set.first()
+            new_course_run = CourseRunFactory(course=existing_course)
+            self.unverified_enroll(self.user, course_run=new_course_run)
+            # Generate a new course with only unverified course run enrollments
+            unver_course, unver_course_runs = self.generate_course_with_runs(
+                program,
+                course_params=dict(title='Unverified Course'),
+                course_run_count=2
+            )
+            for course_run in unver_course_runs:
+                self.unverified_enroll(self.user, course_run=course_run)
+            # Serialize the program enrollment and make sure each course is serialized properly
+            serialized_program_user = UserProgramSearchSerializer.serialize(program_enrollment)
+            serialized_enrollments = serialized_program_user['enrollments']
+            # Serialized enrollments have 2 lines per enrolled course
+            assert len(serialized_enrollments) == 4
+            # A course with a mix of verified and unverified course runs should be serialized as verified
+            assert self.is_course_serialized_with_status(serialized_enrollments, existing_course, is_verified=True)
+            # A course with a mix of all unverified course runs should be serialized as unverified
+            assert self.is_course_serialized_with_status(serialized_enrollments, unver_course, is_verified=False)
 
     def test_other_programs_not_serialized(self):
         """
@@ -278,8 +339,8 @@ class UserProgramSearchSerializerEdxTests(TestCase):
         # We want to test serialization for a new course in the enrolled program and a different program
         programs_to_test = [program_enrollment_to_test.program, ProgramFactory.create()]
         for program in programs_to_test:
-            course, course_run = self.generate_course_with_run(program)
-            self.enroll(self.user, course_run)
+            course, course_runs = self.generate_course_with_runs(program)
+            self.verified_enroll(self.user, course_run=course_runs[0])
             serialized_program_user = UserProgramSearchSerializer.serialize(program_enrollment_to_test)
             # If the new course's program is the same one we just serialized, we expect the course to be serialized.
             course_is_expected_serialized = program == program_enrollment_to_test.program
@@ -291,9 +352,11 @@ class UserProgramSearchSerializerEdxTests(TestCase):
         Tests that enrollments in multiple runs of the same course won't result in multiple serializations
         """
         # Create an enrollment for a different course run of an already-enrolled course
+        serialized_program_user = UserProgramSearchSerializer.serialize(self.non_fa_program_enrollment)
+        serialized_count_before_addition = len(serialized_program_user['enrollments'])
         first_enrollment = self.non_fa_enrollments[0]
         new_course_run = CourseRunFactory.create(course=first_enrollment.course_run.course)
-        self.enroll(self.user, new_course_run)
+        self.verified_enroll(self.user, course_run=new_course_run)
         serialized_program_user = UserProgramSearchSerializer.serialize(self.non_fa_program_enrollment)
         # Number of serialized enrollments should be unaffected
-        assert len(serialized_program_user['enrollments']) == len(self.non_fa_enrollments)
+        assert len(serialized_program_user['enrollments']) == serialized_count_before_addition

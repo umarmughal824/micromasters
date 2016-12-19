@@ -6,6 +6,7 @@ from random import randint
 
 import faker
 import pytz
+import factory
 from factory import SubFactory, LazyAttribute
 from factory.django import DjangoModelFactory
 from factory.fuzzy import (
@@ -25,6 +26,8 @@ from courses.factories import (
     ProgramFactory,
 )
 from micromasters.factories import UserFactory
+from ecommerce.factories import LineFactory
+from ecommerce.models import Order
 
 
 FAKE = faker.Factory.create()
@@ -75,6 +78,30 @@ class CachedEnrollmentFactory(DjangoModelFactory):
 
     class Meta:  # pylint: disable=missing-docstring,no-init,too-few-public-methods,old-style-class
         model = CachedEnrollment
+
+
+class CachedEnrollmentVerifiedFactory(CachedEnrollmentFactory):
+    """Factory for verified enrollments"""
+    @factory.post_generation
+    def post_gen(self, create, extracted, **kwargs):  # pylint: disable=unused-argument
+        """Function that is called automatically after the factory creates a new object"""
+        if not create:
+            return
+        program = self.course_run.course.program
+        if program.financial_aid_availability:
+            LineFactory.create(course_key=self.course_run.edx_course_key, order__status=Order.FULFILLED)
+
+
+class CachedEnrollmentUnverifiedFactory(CachedEnrollmentFactory):
+    """Factory for unverified enrollments"""
+    data = LazyAttribute(lambda x: {
+        "is_active": True,
+        "mode": "not verified",
+        "user": x.user.username,
+        "course_details": {
+            "course_id": x.course_run.edx_course_key,
+        }
+    })
 
 
 class UserCacheRefreshTimeFactory(DjangoModelFactory):

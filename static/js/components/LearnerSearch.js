@@ -4,10 +4,10 @@ import React from 'react';
 import {
   SearchkitComponent,
   HierarchicalMenuFilter,
+  HierarchicalRefinementFilter,
   Hits,
   SelectedFilters,
   RefinementListFilter,
-  MenuFilter,
   HitsStats,
   Pagination,
   ResetFilters,
@@ -148,9 +148,8 @@ export default class LearnerSearch extends SearchkitComponent {
           {...this.props}
           filterName="courses"
         >
-          <MenuFilter
-            field="program.enrollments.title"
-            fieldOptions={{type: 'nested', options: { path: 'program.enrollments' } }}
+          <HierarchicalRefinementFilter
+            field={"program.enrollments"}
             title="Course"
             id="courses"
           />
