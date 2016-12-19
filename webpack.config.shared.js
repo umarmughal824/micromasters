@@ -1,5 +1,5 @@
-var path = require("path");
-var webpack = require("webpack");
+const path = require("path");
+const webpack = require("webpack");
 
 module.exports = {
   config: {
@@ -13,35 +13,47 @@ module.exports = {
       'zendesk_widget': './static/js/entry/zendesk_widget.js',
     },
     module: {
-      loaders: [
+      rules: [
         {
           test: /\.(svg|ttf|woff|woff2|eot|gif)$/,
-          loader: 'url-loader'
+          use: 'url-loader'
         },
         {
           test: /\.scss$/,
           exclude: /node_modules/,
-          loader: 'style!css!postcss!sass'
+          use: [
+            { loader: 'style-loader' },
+            { loader: 'css-loader' },
+            { loader: 'postcss-loader' },
+            { loader: 'sass-loader' },
+          ]
         },
         {
           test: /\.css$/,
           exclude: /node_modules/,
-          loader: 'style!css'
+          use: [
+            { loader: 'style-loader' },
+            { loader: 'css-loader' }
+          ]
         },
       ]
     },
-
     resolve: {
-      modulesDirectories: ['node_modules'],
-      extensions: ['', '.js', '.jsx'],
+      modules: [
+        path.join(__dirname, "static/js"),
+        "node_modules"
+      ],
+      extensions: ['.js', '.jsx'],
       alias: {
         react: path.resolve('./node_modules/react')
       }
+    },
+    performance: {
+      hints: false
     }
   },
-
   babelSharedLoader: {
-    text: /\.jsx?$/,
+    test: /\.jsx?$/,
     exclude: /node_modules/,
     loader: 'babel-loader',
     query: {
@@ -54,7 +66,8 @@ module.exports = {
         "react-hot-loader/babel",
         "transform-object-rest-spread",
         "transform-class-properties",
+        "syntax-dynamic-import",
       ]
     }
-  }
-}
+  },
+};

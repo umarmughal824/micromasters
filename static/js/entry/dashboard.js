@@ -1,6 +1,6 @@
 require('react-hot-loader/patch');
 /* global SETTINGS:false */
-__webpack_public_path__ = `http://${SETTINGS.host}:8078/`;  // eslint-disable-line no-undef, camelcase
+__webpack_public_path__ = `${SETTINGS.public_path}`;  // eslint-disable-line no-undef, camelcase
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
@@ -9,6 +9,7 @@ import configureStore from '../store/configureStore';
 import ga from 'react-ga';
 import { browserHistory } from 'react-router';
 import DashboardRouter from '../DashboardRouter';
+import { routes } from '../dashboard_routes';
 
 // requirements for react-mdl which uses a modified version of material-design-lite
 import 'react-mdl/extra/material.js';
@@ -42,6 +43,7 @@ const renderApp = Component => {
         browserHistory={browserHistory}
         store={store}
         onRouteUpdate={() => ga.pageview(window.location.pathname)}
+        routes={routes}
       />
     </AppContainer>,
     rootEl

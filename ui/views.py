@@ -21,6 +21,7 @@ from profiles.api import get_social_username
 from profiles.permissions import CanSeeIfNotPrivate
 from roles.models import Instructor, Staff
 from ui.decorators import require_mandatory_urls
+from ui.templatetags.render_bundle import public_path
 
 log = logging.getLogger(__name__)
 
@@ -57,6 +58,7 @@ class ReactView(View):  # pylint: disable=unused-argument
             "support_email": settings.EMAIL_SUPPORT,
             "user": serialize_maybe_user(request.user),
             "es_page_size": settings.ELASTICSEARCH_DEFAULT_PAGE_SIZE,
+            "public_path": public_path(request),
         }
 
         return render(

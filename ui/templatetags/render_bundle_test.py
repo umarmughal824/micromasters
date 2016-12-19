@@ -13,7 +13,7 @@ from django.test import (
 )
 from micromasters.utils import webpack_dev_server_url
 
-from ui.templatetags.render_bundle import render_bundle
+from ui.templatetags.render_bundle import render_bundle, public_path
 
 
 FAKE_COMMON_BUNDLE = [
@@ -52,6 +52,8 @@ class TestRenderBundle(TestCase):
                 )
             )
 
+            assert public_path(request) == webpack_dev_server_url(request) + "/"
+
             get_bundle.assert_called_with(bundle_name)
             get_loader.assert_called_with('DEFAULT')
 
@@ -76,6 +78,8 @@ class TestRenderBundle(TestCase):
                     filename=FAKE_COMMON_BUNDLE[0]['name'],
                 )
             )
+
+            assert public_path(request) == "/static/bundles/"
 
             get_bundle.assert_called_with(bundle_name)
             get_loader.assert_called_with('DEFAULT')

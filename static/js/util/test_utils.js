@@ -1,4 +1,7 @@
+/* global SETTINGS: false */
 // @flow
+import React from 'react';
+import { Route, IndexRedirect } from 'react-router';
 import TestUtils from 'react-addons-test-utils';
 import { assert } from 'chai';
 import sinon from 'sinon';
@@ -14,6 +17,16 @@ import type {
 import type { Action } from '../flow/reduxTypes';
 import type { Sandbox } from '../flow/sinonTypes';
 import type { Store } from 'redux';
+import App from '../containers/App';
+import DashboardPage from '../containers/DashboardPage';
+import SettingsPage from '../containers/SettingsPage';
+import ProfilePage from '../containers/ProfilePage';
+import PersonalTab from '../components/PersonalTab';
+import EducationTab from '../components/EducationTab';
+import EmploymentTab from '../components/EmploymentTab';
+import UserPage from '../containers/UserPage';
+import User from '../components/User';
+import LearnerSearchPage from '../containers/LearnerSearchPage';
 
 export function findCourse(courseSelector: (course: Course, program: Program) => boolean): Course {
   let [, course, ] = findCourseRun(
@@ -246,3 +259,23 @@ export function createAssertReducerResultState<State>(store: Store, getReducerSt
     }
   };
 }
+
+const username = SETTINGS.user ? SETTINGS.user.username : '';
+
+export const testRoutes = (
+  <Route path="/" component={App}>
+    <Route path="dashboard" component={DashboardPage} />
+    <Route path="profile" component={ProfilePage}>
+      <IndexRedirect to="personal"/>
+      <Route path="personal" component={PersonalTab}/>
+      <Route path="education" component={EducationTab}/>
+      <Route path="professional" component={EmploymentTab}/>
+    </Route>
+    <Route path="/settings" component={SettingsPage}  />
+    <Route path="/learner" component={UserPage} >
+      <IndexRedirect to={username} />
+      <Route path=":username" component={User} />
+    </Route>
+    <Route path="/learners" component={LearnerSearchPage} />
+  </Route>
+);

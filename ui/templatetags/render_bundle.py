@@ -13,19 +13,31 @@ from micromasters.utils import webpack_dev_server_url
 register = template.Library()
 
 
+def ensure_trailing_slash(url):
+    """ensure a url has a trailing slash"""
+    return url if url.endswith("/") else url + "/"
+
+
+def public_path(request):
+    """
+    Return the correct public_path for Webpack to use
+    """
+    if settings.DEBUG and settings.USE_WEBPACK_DEV_SERVER:
+        return ensure_trailing_slash(webpack_dev_server_url(request))
+    else:
+        return ensure_trailing_slash(static("bundles/"))
+
+
 def _get_bundle(request, bundle_name):
     """
     Update bundle URLs to handle webpack hot reloading correctly if DEBUG=True
     """
     for chunk in get_loader('DEFAULT').get_bundle(bundle_name):
         chunk_copy = dict(chunk)
-        if settings.DEBUG and settings.USE_WEBPACK_DEV_SERVER:
-            chunk_copy['url'] = "{host_url}/{bundle}".format(
-                host_url=webpack_dev_server_url(request),
-                bundle=chunk['name'],
-            )
-        else:
-            chunk_copy['url'] = static("bundles/{bundle}".format(bundle=chunk['name']))
+        chunk_copy['url'] = "{host_url}/{bundle}".format(
+            host_url=public_path(request).rstrip("/"),
+            bundle=chunk['name']
+        )
         yield chunk_copy
 
 

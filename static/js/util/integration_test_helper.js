@@ -23,6 +23,7 @@ import {
 } from '../actions/programs';
 import rootReducer from '../reducers';
 import DashboardRouter from '../DashboardRouter';
+import { testRoutes } from './test_utils';
 import { localStorageMock } from '../util/test_utils';
 import { configureMainTestStore } from '../store/configureStore';
 import type { Action } from '../flow/reduxTypes';
@@ -107,6 +108,7 @@ export default class IntegrationTestHelper {
             browserHistory={this.browserHistory}
             store={this.store}
             onRouteUpdate={() => null}
+            routes={testRoutes}
           />
         </div>,
         {

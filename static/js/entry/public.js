@@ -1,5 +1,5 @@
 /* global SETTINGS: false $:false jQuery: false CURRENT_PAGE_URL: false */
-__webpack_public_path__ = `http://${SETTINGS.host}:8078/`;  // eslint-disable-line no-undef, camelcase
+__webpack_public_path__ = `${SETTINGS.public_path}`;  // eslint-disable-line no-undef, camelcase
 import "rrssb/js/rrssb.js";
 import "bootstrap";
 import "ajaxchimp";

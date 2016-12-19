@@ -11,13 +11,15 @@ prodBabelConfig.query.plugins.push(
 );
 
 const prodConfig = Object.assign({}, config);
-prodConfig.module.loaders = [prodBabelConfig, ...config.module.loaders];
+prodConfig.module.rules = [prodBabelConfig, ...config.module.rules];
 
 module.exports = Object.assign(prodConfig, {
   context: __dirname,
   output: {
     path: path.resolve('./static/bundles/'),
-    filename: "[name]-[chunkhash].js"
+    filename: "[name]-[chunkhash].js",
+    chunkFilename: "[id]-[chunkhash].js",
+    crossOriginLoading: "use-credentials",
   },
 
   plugins: [
@@ -29,17 +31,20 @@ module.exports = Object.assign(prodConfig, {
     new webpack.optimize.UglifyJsPlugin({
       compress: {
         warnings: false
-      }
+      },
+      sourceMap: true,
     }),
-    new webpack.optimize.OccurrenceOrderPlugin(),
-    new webpack.optimize.DedupePlugin(),
     new webpack.optimize.CommonsChunkPlugin({
       name: 'common',
       minChunks: 2,
     }),
     new BundleTracker({
       filename: './webpack-stats.json'
-    })
+    }),
+    new webpack.LoaderOptionsPlugin({
+      minimize: true
+    }),
+    new webpack.optimize.AggressiveMergingPlugin(),
   ],
   devtool: 'source-map'
 });

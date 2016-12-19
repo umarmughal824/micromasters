@@ -312,7 +312,8 @@ class DashboardTests(ViewsTests):
                 'environment': 'dev',
                 'release_version': '0.0.1',
                 'sentry_dsn': None,
-                'es_page_size': 10
+                'es_page_size': 10,
+                'public_path': '/static/bundles/',
             }
             assert resp.context['is_public'] is False
             assert resp.context['has_zendesk_widget'] is True
@@ -703,7 +704,8 @@ class TestUsersPage(ViewsTests):
                     'environment': 'dev',
                     'release_version': '0.0.1',
                     'sentry_dsn': None,
-                    'es_page_size': 10
+                    'es_page_size': 10,
+                    'public_path': '/static/bundles/',
                 }
                 assert has_permission.called
 
@@ -764,7 +766,8 @@ class TestUsersPage(ViewsTests):
                     'environment': 'dev',
                     'release_version': '0.0.1',
                     'sentry_dsn': None,
-                    'es_page_size': 10
+                    'es_page_size': 10,
+                    'public_path': '/static/bundles/'
                 }
                 assert has_permission.called
 

@@ -12,7 +12,7 @@ const insertHotReload = (host, port, entries) => (
   R.map(R.compose(R.flatten, v => [v].concat(hotEntry(host, port))), entries)
 );
 
-Object.assign(config, {
+const devConfig = Object.assign({}, config, {
   context: __dirname,
   output: {
     path: path.resolve('./static/bundles/'),
@@ -28,18 +28,16 @@ Object.assign(config, {
       name: 'common',
       minChunks: 2,
     }),
-    new webpack.optimize.OccurenceOrderPlugin(),
     new webpack.HotModuleReplacementPlugin(),
+    new webpack.NamedModulesPlugin(),
     new webpack.NoErrorsPlugin(),
     new BundleTracker({filename: './webpack-stats.json'})
   ],
   devtool: 'source-map'
 });
 
-const devConfig = config;
-
-devConfig.module.loaders = [
-  babelSharedLoader, ...config.module.loaders
+devConfig.module.rules = [
+  babelSharedLoader, ...config.module.rules
 ];
 
 const makeDevConfig = (host, port) => (
