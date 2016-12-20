@@ -52,10 +52,13 @@ class UserProgramSearchSerializer:
             edx_user_data
         )
         enrollments_qset = CachedEnrollment.user_course_qset(user, program=program)
+
         return {
             'id': program.id,
             'enrollments': cls.serialize_enrollments(mmtrack, enrollments_qset),
             'grade_average': mmtrack.calculate_final_grade_average(),
             'is_learner': is_learner(user, program),
             'email_optin': user.profile.email_optin,
+            'num_courses_passed': mmtrack.count_courses_passed(),
+            'total_courses': program.course_set.count()
         }

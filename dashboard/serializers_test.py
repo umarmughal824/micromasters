@@ -1,6 +1,7 @@
 """
 Test cases for the UserProgramSearchSerializer
 """
+from unittest.mock import patch
 import ddt
 import faker
 import pytz
@@ -147,7 +148,9 @@ class UserProgramSearchSerializerTests(TestCase):
             'enrollments': self.serialized_enrollments,
             'grade_average': 75,
             'is_learner': True,
-            'email_optin': True
+            'email_optin': True,
+            'num_courses_passed': 1,
+            'total_courses': 1
         }
 
     @ddt.data(False, True)
@@ -163,7 +166,9 @@ class UserProgramSearchSerializerTests(TestCase):
             'enrollments': self.serialized_enrollments,
             'grade_average': 75,
             'is_learner': True,
-            'email_optin': email_optin_flag
+            'email_optin': email_optin_flag,
+            'num_courses_passed': 1,
+            'total_courses': 1
         }
 
     def test_full_program_user_serialization_financial_aid(self):
@@ -180,7 +185,9 @@ class UserProgramSearchSerializerTests(TestCase):
             'enrollments': self.fa_serialized_enrollments,
             'grade_average': 95,
             'is_learner': True,
-            'email_optin': True
+            'email_optin': True,
+            'num_courses_passed': 1,
+            'total_courses': 2
         }
         assert UserProgramSearchSerializer.serialize(self.fa_program_enrollment) == expected_result
 
@@ -202,8 +209,29 @@ class UserProgramSearchSerializerTests(TestCase):
             'enrollments': self.serialized_enrollments,
             'grade_average': 75,
             'is_learner': False,
-            'email_optin': True
+            'email_optin': True,
+            'num_courses_passed': 1,
+            'total_courses': 1
         }
+
+    def test_full_program_user_serialization_with__no_passed_course(self):
+        """
+        Tests that full ProgramEnrollment serialization works as expected when user
+        has no passed courses.
+        """
+        with patch.object(MMTrack, 'count_courses_passed', return_value=0):
+            Profile.objects.filter(pk=self.profile.pk).update(email_optin=True)
+            self.profile.refresh_from_db()
+            program = self.program_enrollment.program
+            assert UserProgramSearchSerializer.serialize(self.program_enrollment) == {
+                'id': program.id,
+                'enrollments': self.serialized_enrollments,
+                'grade_average': 75,
+                'is_learner': True,
+                'email_optin': True,
+                'num_courses_passed': 0,
+                'total_courses': 1
+            }
 
 
 class UserProgramSearchSerializerEdxTests(TestCase):
