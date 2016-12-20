@@ -1,6 +1,30 @@
 Release Notes
 =============
 
+Version 0.34.0
+--------------
+
+- Fix django template comment (#2177)
+- Added Facet on number of courses completed (#2133)
+- Clean up how API keys are passed into templates (#2161)
+- Switched to Yarn for JavaScript package management
+- Deleted some checked-in JavaScript dependencies
+- Removed foo: Function = () =&gt; style annotations
+- Moved NON_LEARNERS inside Role class (#2154)
+- Created course payment status facet
+- Fixed a bug with deleting work history entries
+- Remove gravatar-related code (#2144)
+- Added add_past_passed_run command in alter_data (#2119)
+- Added minimal .editorconfig
+- Use dialogActions for photo upload dialog (#2143)
+- Disable skip financial aid button during API activity (#2130)
+- Changed CourseSubRow to show grades for prior passed courses
+- Disabled send button during Email (#2136)
+- Disable employment and education delete buttons during API activity (#2129)
+- Disable document sent button during API activity (#2108)
+- Disabled enroll in new program save button during API activity (#2110)
+- Disables financial aid application button during API activity (#2109)
+
 Version 0.33.0
 --------------
 
