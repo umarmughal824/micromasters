@@ -19,9 +19,10 @@ import {
   STATUS_WILL_ATTEND,
   STATUS_OFFERED,
   STATUS_PENDING_ENROLLMENT,
+  STATUS_PAID_BUT_NOT_ENROLLED,
   DASHBOARD_FORMAT,
   FA_PENDING_STATUSES,
-  FA_STATUS_SKIPPED
+  FA_STATUS_SKIPPED,
 } from '../../constants';
 import { isCurrentlyEnrollable } from './util';
 import { formatPrice } from '../../util/util';
@@ -197,7 +198,17 @@ export default class CourseAction extends React.Component {
       action = this.renderEnrollButton(run);
       description = this.renderTextDescription('Processing...');
       break;
-    }
+    case STATUS_PAID_BUT_NOT_ENROLLED: {
+      const contactText = 'Contact us for help.';
+      const contactHref = `mailto:${SETTINGS.support_email}`;
+      const descriptionText = 'Something went wrong. You paid for this course but are not enrolled.';
+      description = (
+        <div className='description' key='2'>
+          {descriptionText} <a href={contactHref}>{contactText}</a>
+        </div>
+      );
+      break;
+    }}
 
     return _.compact([action, description]);
   }

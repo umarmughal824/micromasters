@@ -21,7 +21,8 @@ import {
   STATUS_MISSED_DEADLINE,
   STATUS_PENDING_ENROLLMENT,
   FA_PENDING_STATUSES,
-  FA_STATUS_SKIPPED
+  FA_STATUS_SKIPPED,
+  STATUS_PAID_BUT_NOT_ENROLLED,
 } from '../../constants';
 import {
   findCourse,
@@ -120,6 +121,26 @@ describe('CourseAction', () => {
     let elements = getElements(wrapper);
 
     assert.equal(elements.descriptionText, 'In Progress');
+  });
+
+  it('shows a message for course user paid but not enrolled', () => {
+    let course = findCourse(course => (
+      course.runs.length > 0 &&
+      course.runs[0].status === STATUS_PAID_BUT_NOT_ENROLLED
+    ));
+    let firstRun = course.runs[0];
+    const wrapper = renderCourseAction({
+      courseRun: firstRun
+    });
+    let description = wrapper.find(".description");
+    let contactLink = description.find('a');
+
+    assert.equal(
+      description.text(),
+      'Something went wrong. You paid for this course but are not enrolled. Contact us for help.'
+    );
+    assert.isAbove(contactLink.props().href.length, 0);
+    assert.include(contactLink.props().href, SETTINGS.support_email);
   });
 
   it('shows a button to enroll and pay, and a link to enroll and pay later', () => {

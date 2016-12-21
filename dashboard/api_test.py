@@ -238,7 +238,10 @@ class CourseRunTest(CourseTests):
 
     def test_status_for_run_not_enrolled(self):
         """test for get_status_for_courserun for course without enrollment"""
-        self.mmtrack.configure_mock(**{'is_enrolled.return_value': False})
+        self.mmtrack.configure_mock(**{
+            'is_enrolled.return_value': False,
+            'has_paid.return_value': False
+        })
         crun = self.create_run(
             start=self.now+timedelta(weeks=52),
             end=self.now+timedelta(weeks=62),
@@ -253,7 +256,11 @@ class CourseRunTest(CourseTests):
 
     def test_currently_mmtrack_enrolled(self):
         """test for get_status_for_courserun for an enrolled and paid current course"""
-        self.mmtrack.configure_mock(**{'is_enrolled.return_value': True, 'is_enrolled_mmtrack.return_value': True})
+        self.mmtrack.configure_mock(**{
+            'is_enrolled.return_value': True,
+            'is_enrolled_mmtrack.return_value': True,
+            'has_paid.return_value': True
+        })
         # create a run that is current
         crun = self.create_run(
             start=self.now-timedelta(weeks=1),
@@ -268,7 +275,11 @@ class CourseRunTest(CourseTests):
 
     def test_check_if_passed(self):
         """test for get_status_for_courserun for a finished course"""
-        self.mmtrack.configure_mock(**{'is_enrolled.return_value': True, 'is_enrolled_mmtrack.return_value': True})
+        self.mmtrack.configure_mock(**{
+            'is_enrolled.return_value': True,
+            'is_enrolled_mmtrack.return_value': True,
+            'has_paid.return_value': True
+        })
         # create a run that is past
         crun = self.create_run(
             start=self.now-timedelta(weeks=52),
@@ -283,7 +294,11 @@ class CourseRunTest(CourseTests):
 
     def test_read_will_attend(self):
         """test for get_status_for_courserun for an enrolled and paid future course"""
-        self.mmtrack.configure_mock(**{'is_enrolled.return_value': True, 'is_enrolled_mmtrack.return_value': True})
+        self.mmtrack.configure_mock(**{
+            'is_enrolled.return_value': True,
+            'is_enrolled_mmtrack.return_value': True,
+            'has_paid.return_value': True
+        })
         # create a run that is future
         crun = self.create_run(
             start=self.now+timedelta(weeks=52),
@@ -298,7 +313,11 @@ class CourseRunTest(CourseTests):
 
     def test_enrolled_not_paid_course(self):
         """test for get_status_for_courserun for present and future course with audit enrollment"""
-        self.mmtrack.configure_mock(**{'is_enrolled.return_value': True, 'is_enrolled_mmtrack.return_value': False})
+        self.mmtrack.configure_mock(**{
+            'is_enrolled.return_value': True,
+            'is_enrolled_mmtrack.return_value': False,
+            'has_paid.return_value': False
+        })
         # create a run that is future
         future_run = self.create_run(
             start=self.now+timedelta(weeks=52),
@@ -324,7 +343,11 @@ class CourseRunTest(CourseTests):
 
     def test_enrolled_upgradable(self):
         """test for get_status_for_courserun with check if course can be upgraded to paid"""
-        self.mmtrack.configure_mock(**{'is_enrolled.return_value': True, 'is_enrolled_mmtrack.return_value': False})
+        self.mmtrack.configure_mock(**{
+            'is_enrolled.return_value': True,
+            'is_enrolled_mmtrack.return_value': False,
+            'has_paid.return_value': False
+        })
         # create a run that is current with upgrade deadline None
         current_run = self.create_run(
             start=self.now-timedelta(weeks=1),
@@ -351,7 +374,11 @@ class CourseRunTest(CourseTests):
 
     def test_not_paid_not_passed(self):
         """test for get_status_for_courserun for course not paid but that is past"""
-        self.mmtrack.configure_mock(**{'is_enrolled.return_value': True, 'is_enrolled_mmtrack.return_value': False})
+        self.mmtrack.configure_mock(**{
+            'is_enrolled.return_value': True,
+            'is_enrolled_mmtrack.return_value': False,
+            'has_paid.return_value': False
+        })
         # create a run that is past
         crun = self.create_run(
             start=self.now-timedelta(weeks=52),
@@ -362,6 +389,25 @@ class CourseRunTest(CourseTests):
         )
         run_status = api.get_status_for_courserun(crun, self.mmtrack)
         assert run_status.status == api.CourseRunStatus.NOT_PASSED
+        assert run_status.course_run == crun
+
+    def test_status_for_run_not_enrolled_but_paid(self):
+        """test for get_status_for_courserun for course without enrollment and it is paid"""
+        self.mmtrack.configure_mock(**{
+            'is_enrolled.return_value': False,
+            'is_enrolled_mmtrack.return_value': False,
+            'has_paid.return_value': True
+        })
+        crun = self.create_run(
+            start=self.now+timedelta(weeks=52),
+            end=self.now+timedelta(weeks=62),
+            enr_start=self.now+timedelta(weeks=40),
+            enr_end=self.now+timedelta(weeks=50),
+            edx_key='foo_edx_key'
+        )
+        run_status = api.get_status_for_courserun(crun, self.mmtrack)
+        assert isinstance(run_status, api.CourseRunUserStatus)
+        assert run_status.status == api.CourseRunStatus.PAID_BUT_NOT_ENROLLED
         assert run_status.course_run == crun
 
 
@@ -474,6 +520,28 @@ class InfoCourseTest(CourseTests):
                 api.get_info_for_course(self.course, None)
             )
         mock_format.assert_called_once_with(self.course_run, api.CourseStatus.OFFERED, None, position=1)
+
+    @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
+    def test_info_not_enrolled_but_paid(self, mock_format):
+        """test for get_info_for_course for course with with a paid but not enrolled run"""
+        with patch(
+            'dashboard.api.get_status_for_courserun',
+            autospec=True,
+            return_value=api.CourseRunUserStatus(
+                status=api.CourseRunStatus.PAID_BUT_NOT_ENROLLED,
+                course_run=self.course_run
+            )
+        ):
+            self.assert_course_equal(
+                self.course,
+                api.get_info_for_course(self.course, None)
+            )
+        mock_format.assert_called_once_with(
+            self.course_run,
+            api.CourseStatus.PAID_BUT_NOT_ENROLLED,
+            None,
+            position=1
+        )
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
     def test_info_not_passed_offered(self, mock_format):
