@@ -6,7 +6,6 @@ import Icon from 'react-mdl/lib/Icon';
 
 const FILTER_ID_ADJUST = {
   "birth_location": "profile.birth_country4",
-  "courses": "program.enrollments.title3"
 };
 
 export default class FilterVisibilityToggle extends SearchkitComponent {
@@ -14,15 +13,15 @@ export default class FilterVisibilityToggle extends SearchkitComponent {
     filterName:             string,
     checkFilterVisibility:  (filterName: string) => boolean,
     setFilterVisibility:    (filterName: string, visibility: boolean) => void,
-    children:               React$Element<*>[],
+    children:               React$Element<*>,
   };
 
-  openClass: Function = (): string => {
+  openClass = (): string => {
     const { filterName, checkFilterVisibility } = this.props;
     return checkFilterVisibility(filterName) ? "" : "closed";
   };
 
-  getChildFacetDocCount: Function = (results: Object, resultId: string): number => {
+  getChildFacetDocCount = (results: Object, resultId: string): number => {
     const elementResult = _.get(results, ['aggregations', resultId]);
     if (elementResult['inner']) {
       return elementResult['inner']['doc_count'];
@@ -31,7 +30,7 @@ export default class FilterVisibilityToggle extends SearchkitComponent {
     }
   };
 
-  isInResults: Function = (id: string): boolean => {
+  isInResults = (id: string): boolean => {
     let results = this.getResults();
     if (results) {
       const resultId = FILTER_ID_ADJUST[id] || id;
@@ -43,7 +42,7 @@ export default class FilterVisibilityToggle extends SearchkitComponent {
     return false;
   };
 
-  openStateIcon: Function = (children: React$Element<*>): React$Element<*>|null => {
+  openStateIcon = (children: React$Element<*>): React$Element<*>|null => {
     if (!this.isInResults(children.props.id)) {
       return null;
     }
@@ -55,7 +54,7 @@ export default class FilterVisibilityToggle extends SearchkitComponent {
     />;
   };
 
-  toggleFilterVisibility: Function = (): void => {
+  toggleFilterVisibility = (): void => {
     const {
       filterName,
       checkFilterVisibility,

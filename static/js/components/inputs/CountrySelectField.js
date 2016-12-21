@@ -47,7 +47,7 @@ export default class CountrySelectField extends React.Component {
     validator:                  Validator|UIValidator,
   };
 
-  onChange: Function = (selection: Option): void => {
+  onChange = (selection: Option): void => {
     const { stateKeySet, countryKeySet, updateProfile, validator, profile } = this.props;
     // clear state field when country field changes
     let clone = _.cloneDeep(profile);

@@ -55,6 +55,7 @@ import type {
 } from '../reducers/documents';
 import type { CoursePricesState, DashboardState } from '../flow/dashboardTypes';
 import type { AvailableProgram, CourseEnrollmentsState } from '../flow/enrollmentTypes';
+import type { FinancialAidState } from '../reducers/financial_aid';
 import type { ProfileGetResult } from '../flow/profileTypes';
 import type { Course, CourseRun } from '../flow/programTypes';
 import type { CheckoutState } from '../reducers';
@@ -80,6 +81,7 @@ class DashboardPage extends React.Component {
     orderReceipt:             OrderReceiptState,
     courseEnrollments:        CourseEnrollmentsState,
     checkout:                 CheckoutState,
+    financialAid:             FinancialAidState,
   };
 
   componentDidMount() {
@@ -262,6 +264,7 @@ class DashboardPage extends React.Component {
       ui,
       courseEnrollments,
       checkout,
+      financialAid,
     } = this.props;
     const loaded = dashboard.fetchStatus !== FETCH_PROCESSING && prices.fetchStatus !== FETCH_PROCESSING;
     let errorMessage;
@@ -292,6 +295,7 @@ class DashboardPage extends React.Component {
           setConfirmSkipDialogVisibility={this.setConfirmSkipDialogVisibility}
           setDocsInstructionsVisibility={this.setDocsInstructionsVisibility}
           ui={ui}
+          financialAid={financialAid}
         />;
       }
 
@@ -350,6 +354,7 @@ const mapStateToProps = (state) => {
     orderReceipt: state.orderReceipt,
     courseEnrollments: state.courseEnrollments,
     checkout: state.checkout,
+    financialAid: state.financialAid,
   };
 };
 

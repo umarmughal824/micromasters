@@ -25,7 +25,7 @@ export default class ProfileFormFields extends React.Component {
   boundRadioGroupField: Function;
   boundCheckbox: Function;
 
-  defaultInputComponentProps: Function = (): Object => {
+  defaultInputComponentProps = (): Object => {
     return {
       profile: this.props.profile,
       updateProfile: this.props.updateProfile,
@@ -53,7 +53,7 @@ export default class ProfileFormFields extends React.Component {
     updateValidationVisibility:   React.PropTypes.func,
   };
 
-  closeConfirmDeleteDialog: Function = (): void => {
+  closeConfirmDeleteDialog = (): void => {
     const {
       setDeletionIndex,
       setShowEducationDeleteDialog,

@@ -26,7 +26,7 @@ export default class User extends React.Component {
     setUserPageAboutMeDialogVisibility: () => void,
   };
 
-  toggleShowPersonalDialog: Function = (): void => {
+  toggleShowPersonalDialog = (): void => {
     const {
       setUserPageDialogVisibility,
       ui: { userPageDialogVisibility },
@@ -36,7 +36,7 @@ export default class User extends React.Component {
     startProfileEdit();
   };
 
-  toggleShowAboutMeDialog: Function = (): void => {
+  toggleShowAboutMeDialog = (): void => {
     const {
       setUserPageAboutMeDialogVisibility,
       ui: { userPageAboutMeDialogVisibility },

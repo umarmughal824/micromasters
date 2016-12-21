@@ -15,11 +15,6 @@ import {
 import { workEntriesByDate } from '../util/sorting';
 import { employmentValidation } from '../lib/validation/profile';
 import ProfileFormFields from '../util/ProfileFormFields';
-import {
-  openEditWorkHistoryForm,
-  openNewWorkHistoryForm,
-  deleteWorkHistoryEntry,
-} from '../util/profile_history_edit';
 import { dialogActions } from './inputs/util';
 import ConfirmDeletion from './ConfirmDeletion';
 import SelectField from './inputs/SelectField';
@@ -38,6 +33,7 @@ import type {
 } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 import type { AsyncActionHelper } from '../flow/reduxTypes';
+import { generateNewWorkHistory } from "../util/util";
 
 class EmploymentForm extends ProfileFormFields {
   industryOptions: Array<Option> = INDUSTRIES.map(industry => ({
@@ -64,26 +60,49 @@ class EmploymentForm extends ProfileFormFields {
     validator:                        Validator|UIValidator,
   };
 
-  openNewWorkHistoryForm: Function = (): void => {
-    openNewWorkHistoryForm.call(this);
+  openNewWorkHistoryForm = (): void => {
+    const {
+      updateProfile,
+      profile,
+      setWorkDialogIndex,
+      setWorkDialogVisibility,
+      validator,
+    } = this.props;
+    let clone = {
+      ...profile,
+      work_history: [...profile.work_history, generateNewWorkHistory()]
+    };
+    updateProfile(clone, validator, true);
+    setWorkDialogIndex(clone.work_history.length - 1);
+    setWorkDialogVisibility(true);
   };
 
-  openEditWorkHistoryForm: Function = (index: number): void => {
-    openEditWorkHistoryForm.call(this, index);
+  openEditWorkHistoryForm = (index: number): void => {
+    const {
+      setWorkDialogVisibility,
+      setWorkDialogIndex,
+    } = this.props;
+    setWorkDialogIndex(index);
+    setWorkDialogVisibility(true);
   };
 
-  deleteWorkHistoryEntry: Function = (): void => {
-    deleteWorkHistoryEntry.call(this);
+  deleteWorkHistoryEntry = (): Promise<*> => {
+    const { saveProfile, profile, ui } = this.props;
+    let clone = _.cloneDeep(profile);
+    if (ui.deletionIndex !== undefined && ui.deletionIndex !== null) {
+      clone['work_history'].splice(ui.deletionIndex, 1);
+    }
+    return saveProfile(employmentValidation, clone, ui);
   };
 
-  saveWorkHistoryEntry: Function = (): void => {
+  saveWorkHistoryEntry = (): void => {
     const { saveProfile, profile, ui } = this.props;
     saveProfile(employmentValidation, profile, ui).then(() => {
       this.closeWorkDialog();
     });
   };
 
-  closeWorkDialog: Function = (): void => {
+  closeWorkDialog = (): void => {
     const {
       setWorkDialogVisibility,
       clearProfileEdit,
@@ -93,7 +112,7 @@ class EmploymentForm extends ProfileFormFields {
     clearProfileEdit(username);
   };
 
-  openWorkDeleteDialog: Function = (index: number): void => {
+  openWorkDeleteDialog = (index: number): void => {
     const { setDeletionIndex, setShowWorkDeleteDialog } = this.props;
     setDeletionIndex(index);
     setShowWorkDeleteDialog(true);
@@ -205,7 +224,7 @@ class EmploymentForm extends ProfileFormFields {
     let endDateText = () => (
       _.isEmpty(position.end_date) ? "Current" : formatMonthDate(position.end_date)
     );
-    let deleteEntry = () => this.openWorkDeleteDialog();
+    let deleteEntry = () => this.openWorkDeleteDialog(index);
     let editEntry = () => this.openEditWorkHistoryForm(index);
     let validationAlert = () => {
       if (_.get(errors, ['work_history', String(index)])) {
@@ -267,7 +286,7 @@ class EmploymentForm extends ProfileFormFields {
     );
   }
 
-  handleRadioClick: Function = (value: string): void => {
+  handleRadioClick = (value: string): void => {
     const {
       setWorkHistoryAnswer,
       ui: { workHistoryAnswer }
@@ -329,6 +348,7 @@ class EmploymentForm extends ProfileFormFields {
           open={showWorkDeleteDialog}
           close={this.closeConfirmDeleteDialog}
           itemText="position"
+          inFlight={inFlight}
         />
         <Dialog
           title="Employment"

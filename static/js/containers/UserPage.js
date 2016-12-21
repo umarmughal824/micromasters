@@ -32,14 +32,16 @@ class UserPage extends ProfileFormContainer {
     const { params: { username }, profiles } = this.props;
 
     let profile = {};
+    let children = null;
     let loaded = false;
     if (profiles[username] !== undefined) {
       profile = profiles[username];
       loaded = profiles[username].getStatus !== FETCH_PROCESSING;
+      children = this.childrenWithProps(profile);
     }
     const { errorInfo } = profile;
     return <Loader loaded={loaded}>
-      {errorInfo && loaded ? <ErrorMessage errorInfo={errorInfo} /> : this.childrenWithProps(profile)}
+      {errorInfo && loaded ? <ErrorMessage errorInfo={errorInfo} /> : children }
     </Loader>;
   }
 }

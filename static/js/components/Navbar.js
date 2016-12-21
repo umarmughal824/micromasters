@@ -23,13 +23,14 @@ const PROFILE_REGEX = /^\/profile\/?/;
 
 export default class Navbar extends React.Component {
   props: {
-    addProgramEnrollment:        (programId: number) => void,
+    addProgramEnrollment:        (programId: number) => Promise<*>,
     children?:                   React$Element<*>[],
     currentProgramEnrollment:    AvailableProgram,
     empty:                       boolean,
     enrollDialogError:           ?string,
     enrollDialogVisibility:      boolean,
     enrollSelectedProgram:       ?number,
+    fetchAddStatus?:             string,
     programs:                    AvailablePrograms,
     navDrawerOpen:               boolean,
     pathname:                    string,
@@ -52,12 +53,12 @@ export default class Navbar extends React.Component {
     <span className="mdl-layout-title" key="header-text-link"><Link to={link}>MITx MicroMasters</Link></span>
   ]);
 
-  userMenu: Function = (): void|React$Element<*> => {
+  userMenu = (): void|React$Element<*> => {
     const { empty } = this.props;
     return empty === true ? undefined : <UserMenu />;
   };
 
-  programSelector: Function = (): React$Element<*> => {
+  programSelector = (): React$Element<*> => {
     const { pathname } = this.props;
     return (
       <ProgramSelector
@@ -67,7 +68,7 @@ export default class Navbar extends React.Component {
     );
   };
 
-  navDrawer: Function = (drawerClass: string): React$Element<*>|null => {
+  navDrawer = (drawerClass: string): React$Element<*>|null => {
     if (!SETTINGS.user) {
       return null;
     }

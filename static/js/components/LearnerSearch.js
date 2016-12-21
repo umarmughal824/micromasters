@@ -4,10 +4,10 @@ import React from 'react';
 import {
   SearchkitComponent,
   HierarchicalMenuFilter,
+  HierarchicalRefinementFilter,
   Hits,
   SelectedFilters,
   RefinementListFilter,
-  MenuFilter,
   HitsStats,
   Pagination,
   ResetFilters,
@@ -101,6 +101,18 @@ export default class LearnerSearch extends SearchkitComponent {
 
   searchkitTranslations: Object = makeSearchkitTranslations();
 
+  getNumberOfCoursesInProgram: Function = (): number => {
+    let results = this.getResults();
+    if (!results) {
+      return 0;
+    }
+
+    const hit = (
+       results.hits && results.hits.hits && results.hits.hits.length > 0 ? results.hits.hits[0] : null
+    );
+    return hit !== null ? hit._source.program.total_courses : 0;
+  }
+
   renderSearchHeader: Function = (openEmailComposer: Function): React$Element<*>|null => {
     if (_.isNull(this.getResults())) {
       return null;
@@ -131,7 +143,7 @@ export default class LearnerSearch extends SearchkitComponent {
     );
   };
 
-  renderFacets: Function = (currentProgram: AvailableProgram): React$Element<*> => {
+  renderFacets = (currentProgram: AvailableProgram): React$Element<*> => {
     if (_.isNull(this.getResults())) {
       return (
         <Card className="fullwidth" shadow={1}>
@@ -148,9 +160,8 @@ export default class LearnerSearch extends SearchkitComponent {
           {...this.props}
           filterName="courses"
         >
-          <MenuFilter
-            field="program.enrollments.title"
-            fieldOptions={{type: 'nested', options: { path: 'program.enrollments' } }}
+          <HierarchicalRefinementFilter
+            field={"program.enrollments"}
             title="Course"
             id="courses"
           />
@@ -191,6 +202,18 @@ export default class LearnerSearch extends SearchkitComponent {
             showHistogram={true}
             title="Average Grade in Program"
           />
+        </FilterVisibilityToggle>
+        <FilterVisibilityToggle
+          {...this.props}
+          filterName="num-courses-passed"
+        >
+          <RangeFilter
+            field="program.num_courses_passed"
+            id="num-courses-passed"
+            min={0}
+            max={this.getNumberOfCoursesInProgram()}
+            showHistogram={false}
+            title="# of Courses Passed" />
         </FilterVisibilityToggle>
       </Card>
     );

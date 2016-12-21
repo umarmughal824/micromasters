@@ -20,11 +20,6 @@ import ConfirmDeletion from './ConfirmDeletion';
 import SelectField from './inputs/SelectField';
 import CountrySelectField from './inputs/CountrySelectField';
 import StateSelectField from './inputs/StateSelectField';
-import {
-  openEditEducationForm,
-  openNewEducationForm,
-  deleteEducationEntry,
-} from '../util/profile_history_edit';
 import { educationEntriesByDate } from '../util/sorting';
 import { dialogActions } from './inputs/util';
 import {
@@ -46,6 +41,7 @@ import type {
 } from '../lib/validation/profile';
 import { formatMonthDate } from '../util/date';
 import FIELDS_OF_STUDY from '../data/fields_of_study';
+import { generateNewEducation } from "../util/util";
 
 const fieldOfStudyOptions = labelSort(_.map(FIELDS_OF_STUDY, (name, code) => ({
   value: code,
@@ -78,19 +74,49 @@ class EducationForm extends ProfileFormFields {
     updateValidationVisibility:       (xs: Array<string>) => void,
   };
 
-  openEditEducationForm: Function = (index: number): void => {
-    openEditEducationForm.call(this, index);
+  openEditEducationForm = (index: number): void => {
+    const {
+      profile,
+      setEducationDialogIndex,
+      setEducationDegreeLevel,
+      setEducationDialogVisibility,
+    } = this.props;
+
+    let education = profile['education'][index];
+    setEducationDialogIndex(index);
+    setEducationDegreeLevel(education.degree_name);
+    setEducationDialogVisibility(true);
   };
 
-  openNewEducationForm: Function = (level: string, index: number): void => {
-    openNewEducationForm.call(this, level, index);
+  openNewEducationForm = (level: string): void => {
+    const {
+      profile,
+      updateProfile,
+      setEducationDialogIndex,
+      setEducationDegreeLevel,
+      setEducationDialogVisibility,
+      validator,
+    } = this.props;
+    let clone = {
+      ...profile,
+      education: [...profile.education, generateNewEducation(level)]
+    };
+    updateProfile(clone, validator, true);
+    setEducationDialogIndex(clone.education.length - 1);
+    setEducationDegreeLevel(level);
+    setEducationDialogVisibility(true);
   };
 
-  deleteEducationEntry: Function = (): void => {
-    deleteEducationEntry.call(this);
+  deleteEducationEntry = (): Promise<*> => {
+    const { saveProfile, profile, ui } = this.props;
+    let clone = _.cloneDeep(profile);
+    if (ui.deletionIndex !== undefined && ui.deletionIndex !== null) {
+      clone['education'].splice(ui.deletionIndex, 1);
+    }
+    return saveProfile(educationValidation, clone, ui);
   };
 
-  educationLevelRadioSwitch: Function = (level: Object): React$Element<*> => {
+  educationLevelRadioSwitch = (level: Option): React$Element<*> => {
     const {
       ui: { educationLevelAnswers }
     } = this.props;
@@ -119,7 +145,7 @@ class EducationForm extends ProfileFormFields {
       if (level in educationLevelAnswers) {
         setEducationLevelAnswers(_.omit(educationLevelAnswers, [level]));
       }
-      this.openNewEducationForm(level, null);
+      this.openNewEducationForm(level);
     } else {
       setEducationLevelAnswers({
         ...educationLevelAnswers,
@@ -167,7 +193,7 @@ class EducationForm extends ProfileFormFields {
         <Cell col={12} className="profile-form-row add" key="add-row">
           <button
             className="mm-minor-action add-education-button"
-            onClick={() => this.openNewEducationForm(levelValue, null)}
+            onClick={() => this.openNewEducationForm(levelValue)}
           >
             Add degree
           </button>
@@ -184,7 +210,7 @@ class EducationForm extends ProfileFormFields {
     }
   }
 
-  educationRow: Function = R.curry((showLevel: boolean, [index, education]: [number, EducationEntry]) => {
+  educationRow = R.curry((showLevel: boolean, [index, education]: [number, EducationEntry]) => {
     const { errors, profile } = this.props;
     if (!('id' in education)) {
       // don't show new educations, wait until we saved on the server before showing them
@@ -237,7 +263,7 @@ class EducationForm extends ProfileFormFields {
     );
   }
 
-  clearEducationEdit: Function = (): void => {
+  clearEducationEdit = (): void => {
     const {
       setEducationDialogVisibility,
       setEducationDegreeLevel,
@@ -251,18 +277,18 @@ class EducationForm extends ProfileFormFields {
     clearProfileEdit(username);
   };
 
-  saveEducationForm: Function = (): void => {
+  saveEducationForm = (): void => {
     const { saveProfile, profile, ui } = this.props;
     saveProfile(educationValidation, profile, ui).then(this.clearEducationEdit);
   };
 
-  openEducationDeleteDialog: Function = (index: number): void => {
+  openEducationDeleteDialog = (index: number): void => {
     const { setDeletionIndex, setShowEducationDeleteDialog } = this.props;
     setDeletionIndex(index);
     setShowEducationDeleteDialog(true);
   };
 
-  editEducationForm: Function = (): void => {
+  editEducationForm = (): void => {
     const {
       ui: { educationDialogIndex },
       showSwitch,
@@ -389,6 +415,7 @@ class EducationForm extends ProfileFormFields {
           open={showEducationDeleteDialog}
           close={this.closeConfirmDeleteDialog}
           itemText="degree"
+          inFlight={inFlight}
         />
         <Dialog
           title="Education"

@@ -20,7 +20,7 @@ class EmploymentTab extends React.Component {
     profile:               Profile,
     profilePatchStatus:    ?string,
     ui:                    UIState,
-    addProgramEnrollment:  Function,
+    addProgramEnrollment:  (p: number) => void,
     dispatch:              Function,
   };
 

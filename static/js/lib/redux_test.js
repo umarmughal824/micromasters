@@ -85,15 +85,15 @@ describe('redux helpers', () => {
       actions = createAsyncActionHelpers(asyncDispatch, actionList);
     });
 
-    it('should return an array of objects containing functions', () => {
-      assert.isArray(actions);
-      let [ { asyncActionCreator } ] = actions;
+    it('should return an object containing functions', () => {
+      assert.isObject(actions);
+      let { asyncActionCreator } = actions;
       assert.isFunction(asyncActionCreator);
     });
 
 
-    it('should return an array of asyncActionCreators', () => {
-      let [ { asyncActionCreator } ] = actions;
+    it('should return an object full of asyncActionCreators', () => {
+      let { asyncActionCreator } = actions;
       let dispatched = asyncActionCreator(2);
       assert.isFulfilled(dispatched);
       assert(dispatchSpy.calledWith({

@@ -58,7 +58,7 @@
     "minimist": "^1.2.0",
     "mocha": "2.4.5",
     "moment": "^2.17.0",
-    "node-sass": "3.7.0",
+    "node-sass": "^4.1.0",
     "object.entries": "1.0.3",
     "postcss-loader": "^1.1.1",
     "ramda": "^0.22.1",
@@ -94,8 +94,8 @@
     "rrssb": "^1.10.0",
     "sanctuary": "^0.11.1",
     "sass-lint": "^1.10.2",
-    "sass-loader": "3.2.0",
-    "searchkit": "^0.10.0",
+    "sass-loader": "^4.1.0",
+    "searchkit": "0.10.0",
     "sinon": "1.17.4",
     "slick-carousel": "^1.6.0",
     "striptags": "2.1.1",
@@ -109,7 +109,8 @@
     "webpack-hot-middleware": "^2.13.2"
   },
   "engines": {
-    "node": "6.2.0"
+    "node": "6.2.0",
+    "yarn": "0.17.10"
   },
   "scripts": {
     "postinstall": "./webpack_if_prod.sh",

@@ -120,11 +120,6 @@ export const ELASTICSEARCH_RESPONSE = deepFreeze({
             "city": "Kabul",
             "birth_country": "AF",
             "nationality": "US",
-            "has_profile_image": false,
-            "profile_url_full": "https://www.gravatar.com/avatar/3149fb060c93eaff7bd33583e209b5df?r=PG&s=800&d=https%3A%2F%2Fs3.amazonaws.com%2Fodl-micromasters-production%2Favatar_default.png", // eslint-disable-line max-len
-            "profile_url_large": "https://www.gravatar.com/avatar/3149fb060c93eaff7bd33583e209b5df?r=PG&s=500&d=https%3A%2F%2Fs3.amazonaws.com%2Fodl-micromasters-production%2Favatar_default.png", // eslint-disable-line max-len
-            "profile_url_medium": "https://www.gravatar.com/avatar/3149fb060c93eaff7bd33583e209b5df?r=PG&s=250&d=https%3A%2F%2Fs3.amazonaws.com%2Fodl-micromasters-production%2Favatar_default.png", // eslint-disable-line max-len
-            "profile_url_small": "https://www.gravatar.com/avatar/3149fb060c93eaff7bd33583e209b5df?r=PG&s=100&d=https%3A%2F%2Fs3.amazonaws.com%2Fodl-micromasters-production%2Favatar_default.png", // eslint-disable-line max-len
             "date_of_birth": "1986-08-12",
             "preferred_language": "ab",
             "gender": "f",
@@ -239,11 +234,6 @@ export const USER_PROFILE_RESPONSE = deepFreeze({
   "city": "Cambridge",
   "birth_country": "US",
   "nationality": "DE",
-  "has_profile_image": true,
-  "profile_url_full": "http://192.168.33.10:8000/static/images/profiles/default_500.png",
-  "profile_url_large": "http://192.168.33.10:8000/static/images/profiles/default_120.png",
-  "profile_url_medium": "http://192.168.33.10:8000/static/images/profiles/default_50.png",
-  "profile_url_small": "http://192.168.33.10:8000/static/images/profiles/default_30.png",
   "date_of_birth": '1984-04-13',
   "preferred_language": 'en',
   "gender": "f",
@@ -491,7 +481,49 @@ export const DASHBOARD_RESPONSE = deepFreeze([
         "prerequisites": null
       },
       {
-        "id": 12,
+        "id": 1278,
+        "title": "Passed course, most recent run non-passed, older passed",
+        "position_in_program": 7,
+        "runs": [
+          {
+            "certificate_url": "www.google.com",
+            "title": "Passed run missing grade",
+            "status": STATUS_PASSED,
+            "position": 2,
+            "course_id": "course_id_one",
+            "id": 100,
+            "course_start_date": "2015-08-22T11:48:27Z",
+            "fuzzy_start_date": "Fall 2015",
+            "course_end_date": "2015-09-09T10:20:10Z",
+          },
+          {
+            "certificate_url": "www.google.com",
+            "title": "Passed run missing grade",
+            "status": STATUS_PASSED,
+            "position": 1,
+            "course_id": "course_id_two",
+            "final_grade": "88",
+            "id": 102,
+            "course_start_date": "2015-08-22T11:48:27Z",
+            "fuzzy_start_date": "Fall 2015",
+            "course_end_date": "2015-09-09T10:20:10Z",
+          },
+          {
+            "certificate_url": "www.google.com",
+            "title": "Passed run missing grade",
+            "status": STATUS_NOT_PASSED,
+            "position": 0,
+            "course_id": "course_id_three",
+            "final_grade": "43",
+            "id": 101,
+            "course_start_date": "2016-08-22T11:48:27Z",
+            "fuzzy_start_date": "Fall 2017",
+            "course_end_date": "2016-09-09T10:20:10Z",
+          }
+        ]
+      },
+      {
+        "id": 17,
         "title": "Passed course missing grade - check mark, no grade",
         "position_in_program": 6,
         "runs": [

@@ -7,8 +7,11 @@ import Icon from 'react-mdl/lib/Icon';
 import DatePicker from 'react-datepicker';
 import moment from 'moment';
 
+import { FETCH_PROCESSING } from '../../actions';
+import SpinnerButton from '../SpinnerButton';
 import type { CoursePrice } from '../../flow/dashboardTypes';
 import type { Program } from '../../flow/programTypes';
+import type { FinancialAidState } from '../../reducers/financial_aid';
 import type {
   DocumentsState,
 } from '../../reducers/documents';
@@ -32,6 +35,7 @@ export default class FinancialAidCard extends React.Component {
   props: {
     coursePrice:                    CoursePrice,
     documents:                      DocumentsState,
+    financialAid:                   FinancialAidState,
     openFinancialAidCalculator:     () => void,
     program:                        Program,
     setConfirmSkipDialogVisibility: (b: boolean) => void,
@@ -56,7 +60,10 @@ export default class FinancialAidCard extends React.Component {
   renderDocumentStatus() {
     const {
       setDocumentSentDate,
-      documents,
+      documents: {
+        documentSentDate,
+        fetchStatus,
+      },
       program: {
         financial_aid_user_info: {
           application_status: applicationStatus,
@@ -76,19 +83,24 @@ export default class FinancialAidCard extends React.Component {
     case FA_STATUS_PENDING_DOCS:
       return <div>
         <Grid>
-          <Cell col={12}>
+          <Cell col={12} >
             Please tell us the date you sent the documents
           </Cell>
         </Grid>
         <Grid className="document-row">
-          <Cell col={12}>
+          <Cell col={12} className="document-sent-button-container">
             <DatePicker
-              selected={moment(documents.documentSentDate)}
+              selected={moment(documentSentDate)}
               onChange={(obj) => setDocumentSentDate(obj.format(ISO_8601_FORMAT))}
             />
-            <Button className="dashboard-button" onClick={this.submitDocuments}>
+            <SpinnerButton
+              className="dashboard-button document-sent-button"
+              component={Button}
+              onClick={this.submitDocuments}
+              spinning={fetchStatus === FETCH_PROCESSING}
+            >
               Submit
-            </Button>
+            </SpinnerButton>
           </Cell>
         </Grid>
       </div>;
@@ -122,7 +134,7 @@ export default class FinancialAidCard extends React.Component {
       </div>
       <div className="pricing-actions">
         <button
-          className="mdl-button dashboard-button"
+          className="mdl-button dashboard-button calculate-cost-button"
           onClick={openFinancialAidCalculator}
         >
           Calculate your cost
@@ -224,6 +236,7 @@ export default class FinancialAidCard extends React.Component {
       ui: { skipDialogVisibility },
       setConfirmSkipDialogVisibility,
       skipFinancialAid,
+      financialAid,
     } = this.props;
 
     let contents;
@@ -239,6 +252,8 @@ export default class FinancialAidCard extends React.Component {
         cancel={() => setConfirmSkipDialogVisibility(false)}
         skip={() => skipFinancialAid(program.id)}
         fullPrice={price(maxPossibleCost)}
+        fetchAddStatus={financialAid.fetchAddStatus}
+        fetchSkipStatus={financialAid.fetchSkipStatus}
       />
       <CardTitle>Pricing Based on Income</CardTitle>
       <div>

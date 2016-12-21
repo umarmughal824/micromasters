@@ -9,7 +9,7 @@ Portal for learners and course teams to access MITx MicroMasters programs
 - docker-compose
   - Recommended install: pip (`pip install docker-compose`)
 - Virtualbox (https://www.virtualbox.org/wiki/Downloads)
-- _(OSX only)_ Node/NPM
+- _(OSX only)_ Node/NPM, and Yarn
   - OSX recommended install method: [Installer on Node website](https://nodejs.org/en/download/)
   - No specific version has been chosen yet.
 
@@ -160,6 +160,15 @@ In the development environment, our static assets are served from the webpack
 dev server. When this environment variable is set, the script sources will
 look for the webpack server at that host instead of the host where Docker is running.
 
+You'll need to install the [yarn](https://yarnpkg.com/en/docs/cli/)
+package manager. You can do:
+
+    npm install -g yarn@0.17.10
+
+To install it. Nice! You can check which version is installed in
+`Dockerfile-node` to be make you're getting the version we are
+standardized on.
+
 Now, in a separate terminal tab, use the webpack helper script to install npm modules and run the dev server:
 
     ./webpack_dev_server.sh --install
@@ -169,7 +178,7 @@ to the packages in ``./package.json``. If you've installed those packages and th
 updates, you can run this without the ``--install`` flag: ``./webpack_dev_server.sh``
 
 **DEBUGGING NOTE:** If you see an error related to node-sass when you run this script, try running
-``npm rebuild node-sass``
+``yarn install`` again.
 
 #### 3) Build the containers
 Run this command:
@@ -277,7 +286,7 @@ Note that running [`flow`](https://flowtype.org) may not work properly if your
 host machine isn't running Linux. If you are using a Mac, you'll need to run
 `flow` on your host machine, like this:
 
-    npm install
+    yarn install --pure-lockfile
     npm run-script flow
 
 ## Connecting to external services

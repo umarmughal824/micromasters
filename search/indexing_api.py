@@ -229,15 +229,10 @@ def program_enrolled_user_mapping():
         'filled_out': BOOL_TYPE,
         'first_name': NOT_ANALYZED_STRING_TYPE,
         'gender': NOT_ANALYZED_STRING_TYPE,
-        'has_profile_image': BOOL_TYPE,
         'last_name': NOT_ANALYZED_STRING_TYPE,
         'preferred_language': NOT_ANALYZED_STRING_TYPE,
         'preferred_name': NOT_ANALYZED_STRING_TYPE,
         'pretty_printed_student_id': NOT_ANALYZED_STRING_TYPE,
-        'profile_url_full': NOT_ANALYZED_STRING_TYPE,
-        'profile_url_large': NOT_ANALYZED_STRING_TYPE,
-        'profile_url_medium': NOT_ANALYZED_STRING_TYPE,
-        'profile_url_small': NOT_ANALYZED_STRING_TYPE,
         'username': NOT_ANALYZED_STRING_TYPE,
         'work_history': {'type': 'nested', 'properties': {
             'city': NOT_ANALYZED_STRING_TYPE,
@@ -253,18 +248,15 @@ def program_enrolled_user_mapping():
     mapping.field("program", "object", properties={
         'id': LONG_TYPE,
         'grade_average': LONG_TYPE,
+        'num_courses_passed': LONG_TYPE,
+        'total_courses': LONG_TYPE,
         'is_learner': BOOL_TYPE,
         'enrollments': {'type': 'nested', 'properties': {
-            'course_details': {
-                'type': 'object',
-                'properties': {
-                    'course_modes': {
-                        'type': 'nested',
-                    }
-                }
-            }
-        }},
-        'certificates': {'type': 'nested'}
+            'level': LONG_TYPE,
+            'ancestors': NOT_ANALYZED_STRING_TYPE,
+            'value': NOT_ANALYZED_STRING_TYPE,
+            'order': LONG_TYPE
+        }}
     })
     # Make strings not_analyzed by default
     mapping.meta('dynamic_templates', [{
