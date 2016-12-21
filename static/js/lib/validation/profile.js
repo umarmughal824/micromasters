@@ -2,6 +2,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import R from 'ramda';
+import PhoneNumber from 'awesome-phonenumber';
 
 import type {
   Profile,
@@ -72,14 +73,16 @@ const personalMessages: ErrorMessages = {
   'country': "Country is required",
   'birth_country': "Country is required",
   'nationality': "Nationality is required",
-  'date_of_birth': 'Please enter a valid date of birth'
+  'date_of_birth': 'Please enter a valid date of birth',
+  'phone_number': 'A phone number is required',
 };
 
 export const personalValidation = (profile: Profile) => {
   let errors = findErrors(profile, R.keys(personalMessages), personalMessages);
-  if (!moment(profile.date_of_birth).isBefore(moment(), 'day')) {
+  if ( !moment(profile.date_of_birth).isBefore(moment(), 'day') ) {
     errors.date_of_birth = personalMessages.date_of_birth;
   }
+
   if (shouldRenderRomanizedFields(profile)) {
     if (!profile.romanized_first_name || !CP1252_REGEX.test(profile.romanized_first_name)) {
       errors.romanized_first_name = "Latin first name is required";
@@ -87,6 +90,13 @@ export const personalValidation = (profile: Profile) => {
 
     if (!profile.romanized_last_name || !CP1252_REGEX.test(profile.romanized_last_name)) {
       errors.romanized_last_name = "Latin last name is required";
+    }
+  }
+
+  if ( profile.phone_number ) {
+    let number = new PhoneNumber(profile.phone_number);
+    if ( ! number.isValid() ) {
+      errors.phone_number = 'Please enter a valid phone number';
     }
   }
   return errors;

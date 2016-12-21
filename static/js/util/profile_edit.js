@@ -1,11 +1,12 @@
 // @flow
 import React from 'react';
 import _ from 'lodash';
-import R from 'ramda';
 import TextField from 'material-ui/TextField';
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
 import Checkbox from 'material-ui/Checkbox';
 import Geosuggest from 'react-geosuggest';
+import R from 'ramda';
+import ReactTelInput from 'react-telephone-input';
 
 import DateField from '../components/inputs/DateField';
 import { validationErrorSelector, classify } from './util';
@@ -306,6 +307,54 @@ export function boundGeosuggest(
       <Geosuggest id={id}
         initialValue={initial} label={label} placeholder={placeholder} types={types}
         onSuggestSelect={onSuggestSelect} onBlur={onBlur}
+      />
+      <span className="validation-error-text">
+        {_.get(errors, keySet)}
+      </span>
+    </div>
+  );
+}
+
+const onTelChange = R.curry((
+  keySet,
+  profile,
+  updateProfile,
+  validator,
+  newPhoneNumber,
+) => {
+  let currentPhoneNumber = _.get(profile, keySet);
+  if ( currentPhoneNumber !== newPhoneNumber ) {
+    let clone = _.cloneDeep(profile);
+    _.set(clone, keySet, newPhoneNumber);
+    updateProfile(clone, validator);
+  }
+});
+
+export function boundTelephoneInput(keySet: string[]): React$Element<*> {
+  const {
+    profile,
+    errors,
+    updateProfile,
+    validator,
+    updateProfileValidation,
+    updateValidationVisibility,
+  } = this.props;
+
+  let onBlur = () => {
+    updateValidationVisibility(keySet);
+    updateProfileValidation(profile, validator);
+    sendFormFieldEvent(keySet);
+  };
+
+  let currentCountry = R.toLower(R.pathOr("", ['country'], profile));
+  return (
+    <div className={`bound-telephone ${validationErrorSelector(errors, keySet)}`}>
+      <ReactTelInput
+        defaultCountry={currentCountry}
+        flagsImagePath='/static/images/flags.png'
+        onChange={onTelChange(keySet, profile, updateProfile, validator)}
+        onBlur={onBlur}
+        value={R.pathOr("", keySet, profile)}
       />
       <span className="validation-error-text">
         {_.get(errors, keySet)}

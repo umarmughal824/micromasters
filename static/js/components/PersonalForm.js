@@ -152,6 +152,10 @@ export default class PersonalForm extends ProfileFormFields {
             </Cell>
           </Grid>
         </section>
+        <section>
+          <h3>Telephone</h3>
+          { this.boundTelephoneInput(['phone_number']) }
+        </section>
       </section>
     );
   }

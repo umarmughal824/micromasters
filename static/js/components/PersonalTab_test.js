@@ -23,6 +23,7 @@ describe("PersonalTab", () => {
             ui={{selectedProgram: selectedProgram}}
             dispatch={store.dispatch}
             uneditedProfile={USER_PROFILE_RESPONSE}
+            profile={USER_PROFILE_RESPONSE}
             {...props}
           />
         </Provider>

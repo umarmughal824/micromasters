@@ -136,8 +136,18 @@ describe('Profile validation functions', () => {
       };
       assert.deepEqual(personalValidation(profile), errors);
     });
-  });
 
+    it('should complain if you enter an invalid phone number', () => {
+      let profile = {
+        ...USER_PROFILE_RESPONSE,
+        phone_number: "+1 222"
+      };
+      let errors = {
+        phone_number: "Please enter a valid phone number"
+      };
+      assert.deepEqual(personalValidation(profile), errors);
+    });
+  });
 
   describe('profileImageValidation', () => {
     it('should return no errors if no image is present', () => {
@@ -327,6 +337,7 @@ describe('Profile validation functions', () => {
         'country': "Country",
         'nationality': "Nationality",
         'birth_country': "Country",
+        'phone_number': 'A phone number'
       }).map(([k,v]) => ({[k]: `${v} is required`})));
       errors.date_of_birth = "Please enter a valid date of birth";
       const expectation = [false, PERSONAL_STEP, errors];

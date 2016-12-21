@@ -206,6 +206,7 @@ class BaseTSVWriterTest(TSVWriterTestCase):
         assert self.tsv_value == "Prop1\r\n"
 
 
+@ddt
 class CDDWriterTest(TSVWriterTestCase):
     """
     Tests for CDDWriter
@@ -223,6 +224,34 @@ class CDDWriterTest(TSVWriterTestCase):
         profile.country = 'XXXX'
         with self.assertRaises(InvalidProfileDataException):
             CDDWriter.profile_country_to_alpha3(profile)
+
+    def test_profile_phone_number_functions(self):  # pylint: disable=no-self-use
+        """
+        A profile with a valid phone number should be parsed correctly
+        """
+        with mute_signals(post_save):
+            profile = ProfileFactory.create()
+        profile.phone_number = "+1 899 293-3423"
+        assert CDDWriter.profile_phone_number_to_raw_number(profile) == "899 293-3423"
+        assert CDDWriter.profile_phone_number_to_country_code(profile) == "1"
+
+    @data(
+        '',
+        None,
+        'bad string',
+        '120272727',
+    )
+    def test_profile_phone_number_exceptions(self, bad_number):  # pylint: disable=no-self-use
+        """
+        It should raise exceptions for bad data
+        """
+        with mute_signals(post_save):
+            profile = ExamProfileFactory.create()
+        profile.phone_number = bad_number
+        with self.assertRaises(InvalidProfileDataException):
+            CDDWriter.profile_phone_number_to_raw_number(profile)
+        with self.assertRaises(InvalidProfileDataException):
+            CDDWriter.profile_phone_number_to_country_code(profile)
 
     def test_write_profiles_cdd_header(self):
         """
@@ -252,8 +281,7 @@ class CDDWriterTest(TSVWriterTestCase):
             'profile__state_or_territory': 'Massachusetts',
             'profile__country': 'US',
             'profile__postal_code': '02115',
-            'profile__phone_number': '999-999-9999',
-            'profile__phone_country_code': '1',
+            'profile__phone_number': '+1 999-999-9999',
         }
 
         with mute_signals(post_save):

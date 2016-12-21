@@ -143,15 +143,6 @@ describe("UserPage", function() {
       const getDialog = () => document.querySelector('.personal-dialog');
       const getSave = () => getDialog().querySelector('.save-button');
 
-      let userProfileActions = [
-        SET_USER_PAGE_DIALOG_VISIBILITY,
-        START_PROFILE_EDIT,
-        UPDATE_PROFILE,
-        UPDATE_PROFILE_VALIDATION,
-        UPDATE_PROFILE,
-        UPDATE_PROFILE_VALIDATION,
-      ];
-
       let scrollActions = [
         SET_USER_PAGE_DIALOG_VISIBILITY,
         START_PROFILE_EDIT,
@@ -159,6 +150,10 @@ describe("UserPage", function() {
         UPDATE_PROFILE_VALIDATION,
       ];
 
+      let userProfileActions = scrollActions.concat([
+        UPDATE_PROFILE,
+        UPDATE_PROFILE_VALIDATION,
+      ]);
 
       const clearValidation = (actions, getInput, validationExpectation, removeErrorValue) => {
         const username = SETTINGS.user.username;

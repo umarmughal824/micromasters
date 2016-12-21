@@ -94,6 +94,7 @@ class ProfileTests(ESTestCase):
             'about_me': profile.about_me,
             'romanized_first_name': profile.romanized_first_name,
             'romanized_last_name': profile.romanized_last_name,
+            'phone_number': profile.phone_number,
         }
 
     def test_limited(self):  # pylint: disable=no-self-use

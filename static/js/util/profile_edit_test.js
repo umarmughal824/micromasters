@@ -11,6 +11,7 @@ import {
   boundDateField,
   boundRadioGroupField,
   boundGeosuggest,
+  boundTelephoneInput,
   saveProfileStep,
   shouldRenderRomanizedFields
 } from './profile_edit';
@@ -34,6 +35,7 @@ describe('Profile Editing utility functions', () => {
           "gender": undefined,
           "date_field": "",
           "email_optin": false,
+          "phone_number": USER_PROFILE_RESPONSE.phone_number,
         },
         errors: {
           "first_name": "First name is required",
@@ -650,6 +652,60 @@ describe('Profile Editing utility functions', () => {
       assert.equal(that.props.profile.country, null);
     });
 
+  });
+
+  describe('boundTelephoneInput', () => {
+    let input, telephoneInput, telephoneSpan;
+
+    let rerender = () => {
+      input = boundTelephoneInput.call(
+        that,
+        ['phone_number'],
+      );
+      [telephoneInput, telephoneSpan] = input.props.children;
+    };
+
+    beforeEach(() => {
+      rerender();
+    });
+
+    it('should correctly set props on itself', () => {
+      let { value, onChange, onBlur, flagsImagePath } = telephoneInput.props;
+      assert.equal(value, USER_PROFILE_RESPONSE.phone_number);
+      assert.isFunction(onChange);
+      assert.isFunction(onBlur);
+      assert.equal(flagsImagePath, "/static/images/flags.png");
+    });
+
+    it('should send a form event to Google Analytics when onBlur fires', () => {
+      telephoneInput.props.onBlur();
+      assert(gaEvent.calledWith({
+        category: 'profile-form-field',
+        action: 'completed-phone_number',
+        label: 'jane'
+      }));
+    });
+
+    it('should render validation errors', () => {
+      that.props.errors.phone_number = 'an error';
+      rerender();
+      let { className } = input.props;
+      let { children } = telephoneSpan.props;
+      assert.equal(children, "an error");
+      assert.equal(className, "bound-telephone invalid-input");
+    });
+
+    it('should render without a value', () => {
+      that.props.profile.phone_number = null;
+      rerender();
+      let { value } = telephoneInput.props;
+      assert.equal(value, '');
+    });
+
+    it('should call updateProfile when onChange fires', () => {
+      telephoneInput.props.onChange('+44 0207 123 4567');
+      assert.equal(that.props.profile.phone_number, '+44 0207 123 4567');
+    });
   });
 
   describe('saveProfileStep', () => {

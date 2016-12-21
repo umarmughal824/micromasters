@@ -54,8 +54,7 @@ class ProfileFactory(DjangoModelFactory):
     country = Faker('country_code')
     state_or_territory = Faker('state')
 
-    phone_number = Faker('numerify', text='###-###-####')
-    phone_country_code = Faker('numerify', text='###')
+    phone_number = Faker('numerify', text='+# (###) ###-####')
 
     birth_country = Faker('country_code')
     nationality = Faker('country_code')

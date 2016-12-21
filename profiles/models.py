@@ -144,14 +144,9 @@ class Profile(models.Model):
     )
 
     phone_number = models.CharField(
-        max_length=35,
+        max_length=50,
         blank=True,
         null=True
-    )
-    phone_country_code = models.CharField(
-        max_length=3,
-        blank=True,
-        null=True,
     )
 
     birth_country = models.TextField(blank=True, null=True)

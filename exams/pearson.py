@@ -5,6 +5,7 @@ import csv
 import logging
 from collections import OrderedDict
 from operator import attrgetter
+import re
 
 import pycountry
 import pysftp
@@ -142,6 +143,14 @@ class BaseTSVWriter(object):
         return (valid_rows, invalid_rows)
 
 
+def split_phone_number(num):
+    """
+    split a phone number into the calling code and the rest of the number
+    """
+    reg = re.compile(r'^\+(\d*)\s?(.*)')
+    return reg.findall(num)[0]
+
+
 class CDDWriter(BaseTSVWriter):
     """
     A writer for Pearson Candidate Demographic Data (CDD) files
@@ -163,10 +172,32 @@ class CDDWriter(BaseTSVWriter):
             ('State', 'state_or_territory'),
             ('PostalCode', 'postal_code'),
             ('Country', self.profile_country_to_alpha3),
-            ('Phone', 'phone_number'),
-            ('PhoneCountryCode', 'phone_country_code'),
+            ('Phone', self.profile_phone_number_to_raw_number),
+            ('PhoneCountryCode', self.profile_phone_number_to_country_code),
             ('LastUpdate', lambda profile: self.format_datetime(profile.updated_on)),
         ], field_prefix='profile')
+
+    @classmethod
+    def profile_phone_number_to_country_code(cls, profile):
+        """
+        get the country code for a profile's phone number
+        """
+        try:
+            code, _ = split_phone_number(profile.phone_number)
+        except BaseException as ex:
+            raise InvalidProfileDataException() from ex
+        return code
+
+    @classmethod
+    def profile_phone_number_to_raw_number(cls, profile):
+        """
+        get just the number for a profile's phone number
+        """
+        try:
+            _, number = split_phone_number(profile.phone_number)
+        except BaseException as ex:
+            raise InvalidProfileDataException() from ex
+        return number
 
     @classmethod
     def profile_country_to_alpha3(cls, profile):

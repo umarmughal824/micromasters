@@ -7,6 +7,7 @@ import {
   boundRadioGroupField,
   boundCheckbox,
   boundGeosuggest,
+  boundTelephoneInput,
 } from './profile_edit';
 
 export default class ProfileFormFields extends React.Component {
@@ -19,6 +20,7 @@ export default class ProfileFormFields extends React.Component {
     this.boundRadioGroupField = boundRadioGroupField.bind(this);
     this.boundCheckbox = boundCheckbox.bind(this);
     this.boundGeosuggest = boundGeosuggest.bind(this);
+    this.boundTelephoneInput = boundTelephoneInput.bind(this);
   }
 
   // type declarations
@@ -27,6 +29,7 @@ export default class ProfileFormFields extends React.Component {
   boundRadioGroupField: Function;
   boundCheckbox: Function;
   boundGeosuggest: Function;
+  boundTelephoneInput: Function;
 
   defaultInputComponentProps = (): Object => {
     return {

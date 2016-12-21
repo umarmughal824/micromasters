@@ -21,5 +21,8 @@ import 'style-loader!css-loader!react-datepicker/dist/react-datepicker.css';
 // react-geosuggest styles
 import 'style-loader!css-loader!react-geosuggest/module/geosuggest.css';
 
+// react-telephone-input stylesheet
+import 'style-loader!css-loader!react-telephone-input/css/default.css';
+
 // This should come last to override other styles
 import '../../scss/layout.scss';
