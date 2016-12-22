@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.36.0
+--------------
+
+- Added access control header for static assets (#2197)
+- Fixed errors when viewing profile as anonymous user (#2193)
+- Changed travis JS Dockerfile back to inheriting from mm_watch_travis
+
 Version 0.35.0
 --------------
 
