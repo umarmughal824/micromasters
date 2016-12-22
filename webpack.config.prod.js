@@ -1,18 +1,24 @@
 var webpack = require('webpack');
 var path = require("path");
-var sharedConfig = require(path.resolve("./webpack.config.shared.js"));
 var BundleTracker = require('webpack-bundle-tracker');
+const { config, babelSharedLoader } = require(path.resolve("./webpack.config.shared.js"));
 
-module.exports = {
+const prodBabelConfig = Object.assign({}, babelSharedLoader);
+
+prodBabelConfig.query.plugins.push(
+  "transform-react-constant-elements",
+  "transform-react-inline-elements"
+);
+
+const prodConfig = Object.assign({}, config);
+prodConfig.module.loaders = [prodBabelConfig, ...config.module.loaders];
+
+module.exports = Object.assign(prodConfig, {
   context: __dirname,
-  entry: sharedConfig.entry,
   output: {
     path: path.resolve('./static/bundles/'),
     filename: "[name]-[chunkhash].js"
   },
-  module: sharedConfig.module,
-  sassLoader: sharedConfig.sassLoader,
-  resolve: sharedConfig.resolve,
 
   plugins: [
     new webpack.DefinePlugin({
@@ -36,4 +42,4 @@ module.exports = {
     })
   ],
   devtool: 'source-map'
-};
+});

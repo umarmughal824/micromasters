@@ -19,9 +19,6 @@
       {% render_bundle "style_public" %}
     {% endif %}
     {% render_bundle "style" %}
-    {% if has_zendesk_widget %}
-      {% render_bundle "zendesk_widget" %}
-    {% endif %}
     <title>{% block title %}{% endblock %}</title>
     <meta name="description" content="{% block description %}{% endblock %}">
     <meta name="keywords" content="{% block keywords %}{% endblock %}">
@@ -71,5 +68,8 @@
         footer.style.display = "";
       }
     </script>
+    {% if has_zendesk_widget %}
+      {% render_bundle "zendesk_widget" %}
+    {% endif %}
   </body>
 </html>

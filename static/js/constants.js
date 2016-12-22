@@ -53,6 +53,7 @@ export const STATUS_WILL_ATTEND = 'will-attend';
 export const STATUS_CAN_UPGRADE = 'can-upgrade';
 export const STATUS_MISSED_DEADLINE = 'missed-deadline';
 export const STATUS_OFFERED = 'offered';
+export const STATUS_PAID_BUT_NOT_ENROLLED = 'paid-but-not-enrolled';
 
 // note: this status is not sent from the server
 export const STATUS_PENDING_ENROLLMENT = 'pending-enrollment';
@@ -66,6 +67,7 @@ export const ALL_COURSE_STATUSES = [
   STATUS_WILL_ATTEND,
   STATUS_PENDING_ENROLLMENT,
   STATUS_MISSED_DEADLINE,
+  STATUS_PAID_BUT_NOT_ENROLLED,
 ];
 
 // financial aid statuses
@@ -612,7 +614,7 @@ export const DASHBOARD_RESPONSE = deepFreeze([
       "prerequisites": "",
       "runs": [{
         "course_id": "course-v1:edX+missed+deadline",
-        "id": 6,
+        "id": 12,
         "status": STATUS_MISSED_DEADLINE,
         "title": "Course run for the missed deadline program",
         "position": 0,
@@ -655,6 +657,31 @@ export const DASHBOARD_RESPONSE = deepFreeze([
     ],
     "financial_aid_availability": false,
     "id": 6
+  },
+  {
+    "title": "Paid but not enrolled",
+    "description": "Paid but not enrolled",
+    "courses": [{
+      "id": 24,
+      "position_in_program": 1,
+      "title": "Course for paid but not enrolled program",
+      "description": "Course for paid but not enrolled program",
+      "prerequisites": "",
+      "runs": [{
+        "position": 1,
+        "course_id": "course-v1:MITx+paid+not+enrolled+100+Jan_2015",
+        "id": 66,
+        "course_start_date": "2016-12-20T00:00:00Z",
+        "course_end_date": "2018-05-15T00:00:00Z",
+        "enrollment_url": "",
+        "fuzzy_start_date": "",
+        "current_grade": null,
+        "title": "Digital Learning 100 - January 2015",
+        "status": STATUS_PAID_BUT_NOT_ENROLLED
+      }]
+    }],
+    "financial_aid_availability": true,
+    "id": 7
   },
 ]);
 

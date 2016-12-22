@@ -1,8 +1,8 @@
 var webpack = require('webpack');
 var path = require("path");
-var sharedConfig = require(path.resolve("./webpack.config.shared.js"));
 var R = require('ramda');
 var BundleTracker = require('webpack-bundle-tracker');
+const { config, babelSharedLoader } = require(path.resolve("./webpack.config.shared.js"));
 
 const hotEntry = (host, port) => (
   `webpack-hot-middleware/client?path=http://${host}:${port}/__webpack_hmr&timeout=20000&reload=true`
@@ -12,15 +12,12 @@ const insertHotReload = (host, port, entries) => (
   R.map(R.compose(R.flatten, v => [v].concat(hotEntry(host, port))), entries)
 );
 
-const devConfig = {
+Object.assign(config, {
   context: __dirname,
   output: {
     path: path.resolve('./static/bundles/'),
     filename: "[name].js"
   },
-  module: sharedConfig.module,
-  sassLoader: sharedConfig.sassLoader,
-  resolve: sharedConfig.resolve,
   plugins: [
     new webpack.DefinePlugin({
       'process.env': {
@@ -37,11 +34,17 @@ const devConfig = {
     new BundleTracker({filename: './webpack-stats.json'})
   ],
   devtool: 'source-map'
-};
+});
+
+const devConfig = config;
+
+devConfig.module.loaders = [
+  babelSharedLoader, ...config.module.loaders
+];
 
 const makeDevConfig = (host, port) => (
   Object.assign({}, devConfig, { 
-    entry: insertHotReload(host, port, sharedConfig.entry),
+    entry: insertHotReload(host, port, devConfig.entry),
   })
 );
 
