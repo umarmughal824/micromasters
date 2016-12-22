@@ -1,6 +1,29 @@
 Release Notes
 =============
 
+Version 0.35.0
+--------------
+
+- Updated yarn to 0.18.1
+- added video to home page
+- Added two babel plugins for a little react performance boost
+- Moved the zendesk widget &lt;script&gt; tag
+- Notified user when enrollment status doesn&#39;t match paid status (#2048)
+- Remove debug static conf
+- Add prepending slash, remove args
+- WIP
+- Add back args
+- Remove static asset handling for dev environments
+- Remove webpack, use *~
+- Revert
+- Revert args remove
+- Add back static-map
+- Remove $args
+- Remove staticmap
+- Add it back
+- Remove static line from uwsgi.ini
+- Use staticfiles
+
 Version 0.34.0
 --------------
 
