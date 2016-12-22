@@ -5,7 +5,6 @@ import { connect } from 'react-redux';
 import R from 'ramda';
 
 import { FETCH_PROCESSING } from '../actions';
-import { startProfileEdit } from '../actions/profile';
 import Loader from '../components/Loader';
 import WelcomeBanner from '../components/WelcomeBanner';
 import ErrorMessage from '../components/ErrorMessage';
@@ -18,11 +17,6 @@ import {
 } from '../util/util';
 
 class ProfilePage extends ProfileFormContainer {
-  componentDidMount() {
-    const { dispatch } = this.props;
-    dispatch(startProfileEdit(SETTINGS.user.username));
-  }
-
   componentDidUpdate() {
     const username = SETTINGS.user.username;
     const {

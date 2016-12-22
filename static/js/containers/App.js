@@ -21,6 +21,7 @@ import {
   clearProfile,
   startProfileEdit,
   updateProfileValidation,
+  updateValidationVisibility,
 } from '../actions/profile';
 import {
   addProgramEnrollment,
@@ -46,6 +47,7 @@ import type {
 } from '../flow/enrollmentTypes';
 import type { ProfileGetResult } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
+import { ALL_ERRORS_VISIBLE } from '../constants';
 
 const PROFILE_REGEX = /^\/profile\/?[a-z]?/;
 const LEARNER_REGEX = /^\/learner\/?[a-z]?/;
@@ -137,6 +139,8 @@ class App extends React.Component {
       !PROFILE_REGEX.test(pathname) &&
       (!complete || !profile.filled_out)
     ) {
+      dispatch(startProfileEdit(SETTINGS.user.username));
+      dispatch(updateValidationVisibility(username, ALL_ERRORS_VISIBLE));
       dispatch(updateProfileValidation(username, errors));
       this.context.router.push(`/profile/${idealStep}`);
     }

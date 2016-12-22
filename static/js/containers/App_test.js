@@ -17,6 +17,7 @@ import {
   RECEIVE_GET_USER_PROFILE_SUCCESS,
   CLEAR_PROFILE,
   START_PROFILE_EDIT,
+  UPDATE_VALIDATION_VISIBILITY,
   UPDATE_PROFILE_VALIDATION,
 } from '../actions/profile';
 import {
@@ -42,14 +43,10 @@ import {
 import IntegrationTestHelper from '../util/integration_test_helper';
 import { SUCCESS_ACTIONS } from './test_util';
 
-const EDIT_PROFILE_ACTIONS = SUCCESS_ACTIONS.concat([
-  START_PROFILE_EDIT,
-  UPDATE_PROFILE_VALIDATION,
-  SET_PROFILE_STEP,
-]);
 const REDIRECT_ACTIONS = SUCCESS_ACTIONS.concat([
   START_PROFILE_EDIT,
   UPDATE_PROFILE_VALIDATION,
+  UPDATE_VALIDATION_VISIBILITY,
   SET_PROFILE_STEP,
 ]);
 
@@ -88,7 +85,7 @@ describe('App', function() {
       };
       helper.profileGetStub.withArgs(SETTINGS.user.username).returns(Promise.resolve(response));
 
-      return renderComponent("/", EDIT_PROFILE_ACTIONS).then(() => {
+      return renderComponent("/", REDIRECT_ACTIONS).then(() => {
         assert.equal(helper.currentLocation.pathname, "/profile/personal");
         assert.equal(checkStep(), PERSONAL_STEP);
       });
@@ -112,7 +109,7 @@ describe('App', function() {
       profile.work_history[1].city = "";
 
       helper.profileGetStub.withArgs(SETTINGS.user.username).returns(Promise.resolve(profile));
-      return renderComponent("/", EDIT_PROFILE_ACTIONS).then(() => {
+      return renderComponent("/", REDIRECT_ACTIONS).then(() => {
         assert.equal(helper.currentLocation.pathname, "/profile/professional");
         assert.equal(checkStep(), EMPLOYMENT_STEP);
       });
@@ -123,7 +120,7 @@ describe('App', function() {
       response.education[0].school_name = '';
       helper.profileGetStub.withArgs(SETTINGS.user.username).returns(Promise.resolve(response));
 
-      return renderComponent("/", EDIT_PROFILE_ACTIONS).then(() => {
+      return renderComponent("/", REDIRECT_ACTIONS).then(() => {
         assert.equal(helper.currentLocation.pathname, "/profile/education");
         assert.equal(checkStep(), EDUCATION_STEP);
       });
