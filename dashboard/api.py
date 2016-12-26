@@ -301,8 +301,8 @@ def get_status_for_courserun(course_run, mmtrack):
             status = CourseRunStatus.CHECK_IF_PASSED
         # this last check needs to be done as last one
         elif course_run.is_past:
-            version = settings.FEATURES.get("FINAL_GRADE_ALGO", "v0")
-            if version == "v1":
+            get_grade_algorithm_version = settings.FEATURES.get("FINAL_GRADE_ALGORITHM", "v0")
+            if get_grade_algorithm_version == "v1":
                 status = CourseRunStatus.CURRENTLY_ENROLLED
             else:
                 status = CourseRunStatus.CHECK_IF_PASSED
@@ -325,10 +325,9 @@ def get_status_for_courserun(course_run, mmtrack):
                 if not course_run.has_frozen_grades:
                     status = CourseRunStatus.CAN_UPGRADE
                 else:
-                    # NOTE: move this call to MMTrack after we modify the logic for the final grade there
                     final_grade = None
                     try:
-                        final_grade = FinalGrade.objects.get(user=mmtrack.user, course_run=course_run)
+                        final_grade = mmtrack.extract_final_grade(course_run.edx_course_key)
                     except FinalGrade.DoesNotExist:
                         # this is a very special case that happens if the user has logged in
                         # for the first time after we have already frozen the final grades

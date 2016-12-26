@@ -2,9 +2,15 @@
 Tests for the utils module
 """
 from datetime import datetime, timedelta
-from unittest.mock import patch, MagicMock
+from unittest.mock import (
+    patch,
+    MagicMock,
+    Mock,
+)
+
 import pytz
 from django.core.exceptions import ImproperlyConfigured
+from django.test import override_settings
 
 from courses.factories import ProgramFactory, CourseFactory, CourseRunFactory
 from dashboard.api_edx_cache import CachedEdxUserData
@@ -17,6 +23,8 @@ from ecommerce.factories import CoursePriceFactory, LineFactory, OrderFactory
 from ecommerce.models import Order
 from financialaid.factories import TierProgramFactory, FinancialAidFactory
 from financialaid.constants import FinancialAidStatus
+from grades.constants import FinalGradeStatus
+from grades.models import FinalGrade
 from micromasters.factories import UserFactory
 from micromasters.utils import load_json_from_file
 from search.base import MockedESTestCase
@@ -366,9 +374,145 @@ class MMTrackTest(MockedESTestCase):
         )
         assert mmtrack.is_enrolled_mmtrack(course_id) is True
 
-    def test_has_passed_course_normal(self):
+    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v1"})
+    @patch('dashboard.utils.MMTrack.extract_final_grade', autospec=True)
+    def test_has_passed_course(self, extr_grade_mock):
+        """
+        Test for has_passed_course method.
+        V1 new behavior soon to be default
+        """
+        course_id = "course-v1:odl+FOO101+CR-FALL15"
+        grade_mock = Mock(passed=True)
+        extr_grade_mock.return_value = grade_mock
+
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program,
+            edx_user_data=self.cached_edx_user_data
+        )
+
+        assert mmtrack.has_passed_course(course_id) is True
+        extr_grade_mock.assert_called_once_with(mmtrack, course_id)
+
+    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v1"})
+    @patch('dashboard.utils.MMTrack.extract_final_grade', autospec=True)
+    def test_has_passed_course_raises(self, extr_grade_mock):
+        """
+        Test for has_passed_course method in case the called function raises.
+        V1 new behavior soon to be default
+        """
+        course_id = "course-v1:odl+FOO101+CR-FALL15"
+        grade_mock = Mock(passed=True)
+        extr_grade_mock.return_value = grade_mock
+
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program,
+            edx_user_data=self.cached_edx_user_data
+        )
+
+        extr_grade_mock.side_effect = FinalGrade.DoesNotExist
+        with self.assertRaises(FinalGrade.DoesNotExist):
+            mmtrack.has_passed_course(course_id)
+        extr_grade_mock.assert_called_once_with(mmtrack, course_id)
+
+    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v1"})
+    @patch('dashboard.utils.MMTrack.extract_final_grade', autospec=True)
+    def test_get_final_grade(self, extr_grade_mock):
+        """
+        Test for has_passed_course method.
+        V1 new behavior soon to be default
+        """
+        course_id = "course-v1:odl+FOO101+CR-FALL15"
+        grade_mock = Mock(grade=0.57)
+        extr_grade_mock.return_value = grade_mock
+
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program,
+            edx_user_data=self.cached_edx_user_data
+        )
+
+        # calling round here because we do not want to add it in `get_final_grade` and let the frontend handle it
+        assert round(mmtrack.get_final_grade(course_id)) == 57.0
+        extr_grade_mock.assert_called_once_with(mmtrack, course_id)
+
+    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v1"})
+    @patch('dashboard.utils.MMTrack.extract_final_grade', autospec=True)
+    def test_get_final_grade_raises(self, extr_grade_mock):
+        """
+        Test for has_passed_course method in case the called function raises.
+        V1 new behavior soon to be default
+        """
+        course_id = "course-v1:odl+FOO101+CR-FALL15"
+        grade_mock = Mock(grade=0.57)
+        extr_grade_mock.return_value = grade_mock
+
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program,
+            edx_user_data=self.cached_edx_user_data
+        )
+
+        extr_grade_mock.side_effect = FinalGrade.DoesNotExist
+        with self.assertRaises(FinalGrade.DoesNotExist):
+            mmtrack.has_passed_course(course_id)
+        extr_grade_mock.assert_called_once_with(mmtrack, course_id)
+
+    @patch('grades.models.FinalGrade.objects.get', autospec=True)
+    def test_extract_final_grade(self, get_grades_mock):
+        """
+        Test for extract_final_grade method.
+        """
+        course_id = "course-v1:odl+FOO101+CR-FALL15"
+        grade_mock = Mock(grade=0.97, passed=True)
+        get_grades_mock.return_value = grade_mock
+
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program,
+            edx_user_data=self.cached_edx_user_data
+        )
+
+        res = mmtrack.extract_final_grade(course_id)
+        assert res.grade == 0.97
+        assert res.passed is True
+        get_grades_mock.assert_called_once_with(
+            course_run__edx_course_key=course_id,
+            status=FinalGradeStatus.COMPLETE,
+            user=self.user
+        )
+
+    @patch('grades.models.FinalGrade.objects.get', autospec=True)
+    def test_extract_final_grade_raises(self, get_grades_mock):
+        """
+        Test for extract_final_grade method in case the called model raises.
+        """
+        course_id = "course-v1:odl+FOO101+CR-FALL15"
+        grade_mock = Mock(grade=0.97, passed=True)
+        get_grades_mock.return_value = grade_mock
+
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program,
+            edx_user_data=self.cached_edx_user_data
+        )
+
+        # it raises if the FinalGrade model raises
+        get_grades_mock.side_effect = FinalGrade.DoesNotExist
+        mmtrack.final_grades = {}
+        with self.assertRaises(FinalGrade.DoesNotExist):
+            mmtrack.extract_final_grade(course_id)
+        get_grades_mock.assert_called_once_with(
+            course_run__edx_course_key=course_id,
+            status=FinalGradeStatus.COMPLETE,
+            user=self.user
+        )
+
+    def test_has_passed_course_normal_v0(self):
         """
         Test for has_passed_course method in case of a normal program
+        V0 default behavior soon to be deprecated
         """
         mmtrack = MMTrack(
             user=self.user,
@@ -380,9 +524,10 @@ class MMTrackTest(MockedESTestCase):
         # this is a audit enrollment and a non verified certificate from edx
         assert mmtrack.has_passed_course("course-v1:MITx+8.MechCX+2014_T1") is False
 
-    def test_has_passed_course_fa(self):
+    def test_has_passed_course_fa_v0(self):
         """
         Test for has_passed_course method in case of a financial aid program
+        V0 default behavior soon to be deprecated
         """
         course_id = "course-v1:odl+FOO101+CR-FALL15"
         self.pay_for_fa_course(course_id)
@@ -408,9 +553,10 @@ class MMTrackTest(MockedESTestCase):
         with self.assertRaises(ImproperlyConfigured):
             mmtrack.has_passed_course(course_id)
 
-    def test_get_final_grade_normal(self):
+    def test_get_final_grade_normal_v0(self):
         """
         Test for get_final_grade method in case of a normal program
+        V0 default behavior soon to be deprecated
         """
         mmtrack = MMTrack(
             user=self.user,
@@ -422,9 +568,10 @@ class MMTrackTest(MockedESTestCase):
         # this is a audit enrollment and a non verified certificate from edx
         assert mmtrack.get_final_grade("course-v1:MITx+8.MechCX+2014_T1") is None
 
-    def test_get_final_grade_fa(self):
+    def test_get_final_grade_fa_v0(self):
         """
         Test for get_final_grade method in case of a financial aid program
+        V0 default behavior soon to be deprecated
         """
         course_id = "course-v1:odl+FOO101+CR-FALL15"
         self.pay_for_fa_course(course_id)

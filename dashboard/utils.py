@@ -3,7 +3,9 @@ Utility functions and classes for the dashboard
 """
 import logging
 from decimal import Decimal
+
 from django.core.exceptions import ImproperlyConfigured
+from django.conf import settings
 from django.db import transaction
 from django.db.models import Max, Min, Q
 
@@ -12,6 +14,8 @@ from dashboard.api_edx_cache import CachedEdxUserData
 from ecommerce.models import Line
 from financialaid.constants import FinancialAidStatus
 from financialaid.models import FinancialAid, TierProgram
+from grades.constants import FinalGradeStatus
+from grades.models import FinalGrade
 
 
 log = logging.getLogger(__name__)
@@ -168,6 +172,27 @@ class MMTrack:
         """
         return self.certificates.has_verified_cert(course_id)
 
+    def extract_final_grade(self, course_id):
+        """
+        Function that extract a final grade tuple from a global class dictionary
+        or extracts the value from the database and updates such dictionary.
+
+        Args:
+            course_id (str): an edX course run id
+        Returns:
+            FinalGrade: a Final Grade object
+        """
+        try:
+            final_grade = FinalGrade.objects.get(
+                course_run__edx_course_key=course_id,
+                user=self.user,
+                status=FinalGradeStatus.COMPLETE,
+            )
+        except FinalGrade.DoesNotExist:
+            log.exception('No final grade found for user %s in course %s', self.user.username, course_id)
+            raise
+        return final_grade
+
     def has_passed_course(self, course_id):
         """
         Returns whether the user has passed a course run.
@@ -180,6 +205,12 @@ class MMTrack:
         Returns:
             bool: whether the user has passed the course
         """
+        get_grade_algorithm_version = settings.FEATURES.get("FINAL_GRADE_ALGORITHM", "v0")
+        if get_grade_algorithm_version == "v1":
+            final_grade = self.extract_final_grade(course_id)
+            return final_grade.passed
+
+        # part for get_grade_algorithm_version == v0
         if not self.is_enrolled_mmtrack(course_id):
             return False
 
@@ -204,8 +235,6 @@ class MMTrack:
     def get_final_grade(self, course_id):
         """
         Returns the course final grade number for the user if she passed.
-        This means the grade in the certificate for normal programs
-        or the current_grade for ended courses.
 
         Args:
             course_id (str): an edX course run id
@@ -213,6 +242,12 @@ class MMTrack:
         Returns:
             float: the final grade of the user in the course
         """
+        get_grade_algorithm_version = settings.FEATURES.get("FINAL_GRADE_ALGORITHM", "v0")
+        if get_grade_algorithm_version == "v1":
+            final_grade = self.extract_final_grade(course_id)
+            return final_grade.grade * 100
+
+        # part for get_grade_algorithm_version == v0
         if not self.has_passed_course(course_id):
             return
         # for normal programs need to pull from the certificate
