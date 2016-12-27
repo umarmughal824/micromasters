@@ -247,7 +247,7 @@ class UserCoupon(Model):
 
     def __str__(self):
         """Description for UserCoupon"""
-        return "UserCoupon for user {username} and coupon {coupon}, {available_redemptions} redemptions left".format(
+        return "UserCoupon for {username} and {coupon}, {available_redemptions} redemptions left".format(
             username=self.user.username,
             coupon=self.coupon,
             available_redemptions=self.available_redemptions,
