@@ -3,6 +3,7 @@ Tests for profile view
 """
 import json
 from io import BytesIO
+import itertools
 from unittest.mock import patch
 
 from dateutil.parser import parse
@@ -402,8 +403,7 @@ class ProfilePATCHTests(ProfileBaseTests):
         assert profile.work_history.count() == 1
 
     @ddt.data(
-        [True, False],
-        [True, False]
+        *itertools.product([True, False], [True, False])
     )
     @ddt.unpack
     def test_no_thumbnail_change_if_image_upload(self, image_already_exists, thumb_already_exists):
