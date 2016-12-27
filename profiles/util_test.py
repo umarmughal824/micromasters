@@ -98,6 +98,15 @@ class ImageTests(TestCase):
         assert full_path.startswith("profile/")
         assert full_path.endswith(".jpg")
 
+    def test_too_long_prefix(self):
+        """
+        A name which is too long should get truncated to 100 characters
+        """
+        filename = '{}.jpg'.format('a' * 150)
+        with self.assertRaises(ValueError) as ex:
+            util._generate_upload_to_uri("x"*150)(None, filename)  # pylint: disable=protected-access
+        assert ex.exception.args[0].startswith("path is longer than max length even without name")
+
     def test_make_small_dimensions(self):
         """Tests for make_small_dimensions"""
         # If dimensions are too small no resizing should be done
