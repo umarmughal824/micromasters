@@ -268,7 +268,7 @@ class RedeemedCoupon(Model):
 
     def __str__(self):
         """Description for RedeemedCoupon"""
-        return "RedeemedCoupon for order {order}, coupon {coupon}".format(
+        return "RedeemedCoupon for {order}, {coupon}".format(
             order=self.order,
             coupon=self.coupon,
         )
