@@ -431,8 +431,7 @@ class ProfilePATCHTests(ProfileBaseTests):
         assert bool(profile.image_small) == thumb_already_exists
 
     @ddt.data(
-        [True, False],
-        [True, False]
+        *itertools.product([True, False], [True, False])
     )
     @ddt.unpack
     def test_upload_image_creates_thumbnail(self, image_already_exists, thumb_already_exists):
