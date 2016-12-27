@@ -198,7 +198,7 @@ class Coupon(Model):
     # Number of people this coupon can be redeemed by
     num_coupons_available = IntegerField(null=False)
     # Number of times a person can redeem a coupon
-    num_redemptions = IntegerField(null=False)
+    num_redemptions_per_user = IntegerField(null=False)
     # After this time the coupons will not be redeemable
     expiration_date = DateTimeField(null=True)
     # If true, coupons are not presently redeemable
