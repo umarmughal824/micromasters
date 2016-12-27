@@ -5,7 +5,6 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import (
@@ -240,28 +239,6 @@ class Coupon(Model):
             amount=self.amount,
             product=self.content_object,
             num_coupons_available=self.num_coupons_available,
-        )
-
-
-class UserCoupon(Model):
-    """
-    Model for uses of a coupon by a user.
-    """
-    coupon = ForeignKey(Coupon, on_delete=SET_NULL, null=True)
-    user = ForeignKey(settings.AUTH_USER_MODEL, on_delete=SET_NULL, null=True)
-
-    # Number of times left the user can use the coupon in a purchase
-    available_redemptions = PositiveIntegerField()
-
-    class Meta:
-        unique_together = ('coupon', 'user',)
-
-    def __str__(self):
-        """Description for UserCoupon"""
-        return "UserCoupon for {username} and {coupon}, {available_redemptions} redemptions left".format(
-            username=self.user.username,
-            coupon=self.coupon,
-            available_redemptions=self.available_redemptions,
         )
 
 
