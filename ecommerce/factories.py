@@ -104,12 +104,26 @@ class CouponFactory(DjangoModelFactory):
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
         """Override _create to populate content_object"""
+        content_object = kwargs.pop('content_object', None)
         instance = model_class(*args, **kwargs)
         course_run = CourseRunFactory.create()
-        instance.content_object = FuzzyChoice([course_run, course_run.course, course_run.course.program]).fuzz()
+        if content_object is not None:
+            instance.content_object = content_object
+        else:
+            instance.content_object = FuzzyChoice([course_run, course_run.course, course_run.course.program]).fuzz()
 
-        if instance.amount_type == Coupon.PERCENT_DISCOUNT:
-            instance.amount = FuzzyDecimal(0, 1).fuzz()
-        elif instance.amount_type == Coupon.FIXED_DISCOUNT:
-            instance.amount = FuzzyDecimal(100, 1000).fuzz()
+        amount_type = kwargs.pop('amount_type', None)
+        if amount_type is None:
+            instance.amount_type = FuzzyChoice(Coupon.AMOUNT_TYPES).fuzz()
+        else:
+            instance.amount_type = amount_type
+
+        amount = kwargs.pop('amount', None)
+        if amount is None:
+            if instance.amount_type == Coupon.PERCENT_DISCOUNT:
+                instance.amount = FuzzyDecimal(0, 1).fuzz()
+            elif instance.amount_type == Coupon.FIXED_DISCOUNT:
+                instance.amount = FuzzyDecimal(100, 1000).fuzz()
+        else:
+            instance.amount = amount
         instance.save()

@@ -17,6 +17,7 @@ from ecommerce.factories import (
     OrderFactory,
     ReceiptFactory,
 )
+from ecommerce.models import Coupon
 from micromasters.utils import serialize_model_object
 from profiles.factories import UserFactory
 
@@ -135,7 +136,7 @@ class CoursePriceTests(TestCase):
 class CouponTests(TestCase):
     """Tests for Coupon"""
 
-    def test_validate_content_object_create(self):
+    def test_validate_content_object(self):
         """
         Coupon.content_object should only accept Course, CourseRun, or Program
         """
@@ -147,4 +148,26 @@ class CouponTests(TestCase):
 
         with self.assertRaises(ValidationError) as ex:
             CouponFactory.create(content_object=user)
-        assert ex.exception.args[0] == ""
+        assert ex.exception.args[0]['__all__'][0].args[0] == (
+            'content_object must be of type Course, CourseRun, or Program'
+        )
+
+    def test_validate_amount(self):
+        """
+        Coupon.amount should be between 0 and 1 if amount_type is percent-discount
+        """
+        with self.assertRaises(ValidationError) as ex:
+            CouponFactory.create(amount=3, amount_type=Coupon.PERCENT_DISCOUNT)
+        assert ex.exception.args[0]['__all__'][0].args[0] == (
+            'amount must be between 0 and 1 if amount_type is percent-discount'
+        )
+
+    def test_validate_amount_type(self):
+        """
+        Coupon.amount_type should be one of Coupon.AMOUNT_TYPES
+        """
+        with self.assertRaises(ValidationError) as ex:
+            CouponFactory.create(amount_type='xyz')
+        assert ex.exception.args[0]['__all__'][0].args[0] == (
+            'amount_type must be one of percent-discount, fixed-discount'
+        )
