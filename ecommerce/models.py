@@ -207,7 +207,8 @@ class Coupon(Model):
 
     num_coupons_available = IntegerField(null=False, help_text="Number of people this coupon can be redeemed by")
     num_redemptions_per_user = IntegerField(null=False, help_text="Number of times a person can redeem a coupon")
-    expiration_date = DateTimeField(null=True, help_text="After this time the coupons will not be redeemable")
+    expiration_date = DateTimeField(null=True, help_text="If set, the coupons will not be redeemable after this")
+    activation_date = DateTimeField(null=True, help_text="If set, the coupons will not be redeemable before this")
     disabled = BooleanField(default=False, help_text="If true, coupons are not presently redeemable")
 
     def save(self, *args, **kwargs):
