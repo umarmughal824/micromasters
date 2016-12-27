@@ -69,9 +69,9 @@ class ImageTests(ESTestCase):
         """
         Image upload_to should have a function which creates a path
         """
-        now_mock = Mock(return_value=datetime.now(tz=pytz.UTC))
         # pin the timestamps used in creating the URL
-        with patch('profiles.util.datetime', now=now_mock):
+        with patch('profiles.util.datetime', autospec=True) as mocked_datetime:
+            mocked_datetime.now = Mock(return_value=datetime.now(tz=pytz.UTC))
             with mute_signals(post_save):
                 profile = ProfileFactory.create()
 
