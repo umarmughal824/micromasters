@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('coupon_code', models.TextField(blank=True, help_text='The coupon code used for redemption by the purchaser in the user interface.\n    If blank, the purchaser may not redeem this coupon through the user interface,\n    though it may be redeemed in their name by an administrator.', null=True)),
                 ('object_id', models.PositiveIntegerField()),
-                ('amount_type', models.CharField(choices=[('percent-discount', 'percent-discount'), ('fixed-discount', 'fixed-discount')], help_text='Whether amount is a percent or fixed discount', max_length=30, validators=[ecommerce.models.Coupon._validate_amount])),
+                ('amount_type', models.CharField(choices=[('percent-discount', 'percent-discount'), ('fixed-discount', 'fixed-discount')], help_text='Whether amount is a percent or fixed discount', max_length=30)),
                 ('amount', models.DecimalField(decimal_places=2, help_text='Either a number from 0 to 1 representing a percent, or the fixed value for discount', max_digits=20)),
                 ('num_coupons_available', models.PositiveIntegerField(help_text='Number of people this coupon can be redeemed by')),
                 ('num_redemptions_per_user', models.PositiveIntegerField(help_text='Number of times a person can redeem a coupon')),

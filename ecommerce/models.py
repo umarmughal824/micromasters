@@ -176,10 +176,6 @@ class Coupon(Model):
 
     AMOUNT_TYPES = [PERCENT_DISCOUNT, FIXED_DISCOUNT]
 
-    def _validate_amount(self, amount):
-        if amount not in self.AMOUNT_TYPES:
-            raise ValidationError("Amount must be one of {}".format(", ".join(self.AMOUNT_TYPES)))
-
     coupon_code = TextField(
         null=True,
         blank=True,
@@ -200,7 +196,6 @@ class Coupon(Model):
         choices=[(_type, _type) for _type in AMOUNT_TYPES],
         max_length=30,
         help_text="Whether amount is a percent or fixed discount",
-        validators=[_validate_amount],
     )
     amount = DecimalField(
         decimal_places=2,
@@ -220,8 +215,10 @@ class Coupon(Model):
     activation_date = DateTimeField(null=True, help_text="If set, the coupons will not be redeemable before this")
     enabled = BooleanField(default=True, help_text="If true, coupons are presently redeemable")
 
-    def save(self, *args, **kwargs):
-        """Override save to do certain validations"""
+    def clean(self):
+        """Validate amount and content_object"""
+        super().clean()
+
         if self.content_type.model_class() not in (
                 Course,
                 CourseRun,
@@ -229,6 +226,15 @@ class Coupon(Model):
         ):
             raise ValidationError("content_object must be of type Course, CourseRun, or Program")
 
+        if self.amount_type == self.PERCENT_DISCOUNT:
+            if not 0 <= self.amount <= 1:
+                raise ValidationError("amount must be between 0 and 1 if amount_type is {}".format(self.PERCENT_DISCOUNT))
+
+        if self.amount_type not in self.AMOUNT_TYPES:
+            raise ValidationError("amount_type must be one of {}".format(", ".join(self.AMOUNT_TYPES)))
+
+    def save(self, *args, **kwargs):
+        """Override save to do certain validations"""
         self.full_clean()
         super().save(*args, **kwargs)
 
