@@ -25,7 +25,11 @@ from django.db.models.fields.related import (
     ForeignKey,
 )
 
-from courses.models import CourseRun
+from courses.models import (
+    Course,
+    CourseRun,
+    Program,
+)
 from ecommerce.exceptions import EcommerceModelException
 from micromasters.models import (
     AuditableModel,
@@ -200,13 +204,23 @@ class Coupon(Model):
     # If true, coupons are not presently redeemable
     disabled = BooleanField(default=False)
 
+    def save(self, *args, **kwargs):
+        """Override save to do certain validations"""
+        if self.content_type.model_class() not in (
+            Course,
+            CourseRun,
+            Program,
+        ):
+            raise ValidationError("content_object must be of type Course, CourseRun, or Program")
+
+        super().save(*args, **kwargs)
+
     def __str__(self):
         """Description for Coupon"""
-        product = self.course_run or self.course or self.program
         return "Coupon {amount_type} {amount} for {product}, {num_coupons_available} left".format(
             amount_type=self.amount_type,
             amount=self.amount,
-            product=product,
+            product=self.content_object,
             num_coupons_available=self.num_coupons_available,
         )
 
