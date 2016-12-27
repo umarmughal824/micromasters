@@ -60,7 +60,7 @@ def _generate_upload_to_uri(suffix=""):
             name='',
         )
         if len(path_without_name) >= IMAGE_PATH_MAX_LENGTH:
-            raise Exception("path is longer than max length even without name: {}".format(path_without_name))
+            raise ValueError("path is longer than max length even without name: {}".format(path_without_name))
 
         max_name_length = IMAGE_PATH_MAX_LENGTH - len(path_without_name)
         full_path = path_format.format(
