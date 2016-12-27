@@ -117,11 +117,9 @@ def make_thumbnail(full_size_image):
         BytesIO:
             A jpeg image which is a thumbnail of full_size_image
     """
-    in_memory_image = full_size_image
-    pil_image = Image.open(in_memory_image)
+    pil_image = Image.open(full_size_image)
     pil_image.thumbnail(make_small_dimensions(pil_image.width, pil_image.height), Image.ANTIALIAS)
     image_small_buffer = BytesIO()
     pil_image.save(image_small_buffer, "JPEG", quality=90)
     image_small_buffer.seek(0)
-    in_memory_image.seek(0)
     return image_small_buffer
