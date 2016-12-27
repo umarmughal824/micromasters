@@ -178,18 +178,22 @@ class Coupon(Model):
 
     AMOUNT_TYPES = [PERCENT_DISCOUNT, FIXED_DISCOUNT]
 
+    def _validate_amount(self, amount):
+        if amount not in self.AMOUNT_TYPES:
+            raise ValidationError("Amount must be one of {}".format(", ".join(self.AMOUNT_TYPES)))
+
     coupon_code = TextField(
         null=True,
         blank=True,
         help_text="""The coupon code used for redemption by the purchaser in the user interface.
     If blank, the purchaser may not redeem this coupon through the user interface,
-    though it may be redeemed in their name by an administrator."""
+    though it may be redeemed in their name by an administrator.""",
     )
     content_type = ForeignKey(
         ContentType,
         on_delete=SET_NULL,
         null=True,
-        help_text="content_object is a link to either a Course, CourseRun, or a Program"
+        help_text="content_object is a link to either a Course, CourseRun, or a Program",
     )
     object_id = PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
@@ -197,12 +201,13 @@ class Coupon(Model):
     amount_type = CharField(
         choices=[(_type, _type) for _type in AMOUNT_TYPES],
         max_length=30,
-        help_text="Whether amount is a percent or fixed discount"
+        help_text="Whether amount is a percent or fixed discount",
+        validators=[_validate_amount],
     )
     amount = DecimalField(
         decimal_places=2,
         max_digits=20,
-        help_text="Either a number from 0 to 1 representing a percent, or the fixed value for discount"
+        help_text="Either a number from 0 to 1 representing a percent, or the fixed value for discount",
     )
 
     num_coupons_available = IntegerField(null=False, help_text="Number of people this coupon can be redeemed by")
@@ -220,6 +225,7 @@ class Coupon(Model):
         ):
             raise ValidationError("content_object must be of type Course, CourseRun, or Program")
 
+        self.full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
