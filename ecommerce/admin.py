@@ -12,7 +12,6 @@ from ecommerce.models import (
     OrderAudit,
     Receipt,
     RedeemedCoupon,
-    UserCoupon,
 )
 from micromasters.utils import get_field_names
 
@@ -84,12 +83,6 @@ class CouponAdmin(admin.ModelAdmin):
     readonly_fields = get_field_names(Coupon)
 
 
-class UserCouponAdmin(admin.ModelAdmin):
-    """Admin for UserCoupon"""
-    model = UserCoupon
-    readonly_fields = get_field_names(UserCoupon)
-
-
 class RedeemedCouponAdmin(admin.ModelAdmin):
     """Admin for RedeemedCoupon"""
     model = RedeemedCoupon
@@ -103,4 +96,3 @@ admin.site.register(Order, OrderAdmin)
 admin.site.register(OrderAudit, OrderAuditAdmin)
 admin.site.register(RedeemedCoupon, RedeemedCouponAdmin)
 admin.site.register(Receipt, ReceiptAdmin)
-admin.site.register(UserCoupon, UserCouponAdmin)
