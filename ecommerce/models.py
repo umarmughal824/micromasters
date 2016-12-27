@@ -185,7 +185,7 @@ class Coupon(Model):
     # content_object is a link to either a Course, CourseRun, or a Program
     content_type = ForeignKey(ContentType, on_delete=SET_NULL, null=True)
     object_id = PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id', )
+    content_object = GenericForeignKey('content_type', 'object_id')
 
     # percent or fixed discount
     amount_type = CharField(
@@ -207,9 +207,9 @@ class Coupon(Model):
     def save(self, *args, **kwargs):
         """Override save to do certain validations"""
         if self.content_type.model_class() not in (
-            Course,
-            CourseRun,
-            Program,
+                Course,
+                CourseRun,
+                Program,
         ):
             raise ValidationError("content_object must be of type Course, CourseRun, or Program")
 

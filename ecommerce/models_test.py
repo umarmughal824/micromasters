@@ -8,14 +8,17 @@ from django.test import (
     override_settings,
 )
 
+from courses.factories import CourseRunFactory
 from ecommerce.exceptions import EcommerceModelException
 from ecommerce.factories import (
+    CouponFactory,
     CoursePriceFactory,
     LineFactory,
     OrderFactory,
     ReceiptFactory,
 )
 from micromasters.utils import serialize_model_object
+from profiles.factories import UserFactory
 
 
 # pylint: disable=no-self-use
@@ -127,3 +130,21 @@ class CoursePriceTests(TestCase):
         assert str(course_price) == "CoursePrice for {}, price={}, is_valid={}".format(
             course_price.course_run, course_price.price, course_price.is_valid
         )
+
+
+class CouponTests(TestCase):
+    """Tests for Coupon"""
+
+    def test_validate_content_object_create(self):
+        """
+        Coupon.content_object should only accept Course, CourseRun, or Program
+        """
+        course_run = CourseRunFactory.create()
+        user = UserFactory.create()
+        coupons = []
+        for obj in (course_run, course_run.course, course_run.course.program):
+            coupons.append(CouponFactory.create(content_object=obj))
+
+        with self.assertRaises(ValidationError) as ex:
+            CouponFactory.create(content_object=user)
+        assert ex.exception.args[0] == ""

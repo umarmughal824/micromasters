@@ -21,6 +21,7 @@ from ecommerce.api import (
     generate_cybersource_sa_signature,
 )
 from ecommerce.models import (
+    Coupon,
     CoursePrice,
     Line,
     Order,
@@ -87,3 +88,25 @@ class CoursePriceFactory(DjangoModelFactory):
 
     class Meta:  # pylint: disable=missing-docstring,no-init,too-few-public-methods,old-style-class
         model = CoursePrice
+
+
+class CouponFactory(DjangoModelFactory):
+    """Factory for Coupon"""
+    amount_type = FuzzyChoice(Coupon.AMOUNT_TYPES)
+    coupon_code = FuzzyChoice([None, FuzzyText().fuzz()])
+
+    class Meta:  # pylint: disable=missing-docstring,no-init,too-few-public-methods,old-style-class
+        model = Coupon
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        """Override _create to populate content_object"""
+        instance = model_class(*args, **kwargs)
+        course_run = CourseRunFactory.create()
+        instance.content_object = FuzzyChoice([course_run, course_run.course, course_run.course.program]).fuzz()
+
+        if instance.amount_type == Coupon.PERCENT_DISCOUNT:
+            instance.amount = FuzzyDecimal(0, 1).fuzz()
+        elif instance.amount_type == Coupon.FIXED_DISCOUNT:
+            instance.amount = FuzzyDecimal(100, 1000).fuzz()
+        instance.save()
