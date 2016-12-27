@@ -25,11 +25,7 @@ from django.db.models.fields.related import (
     ForeignKey,
 )
 
-from courses.models import (
-    CourseRun,
-    Course,
-    Program,
-)
+from courses.models import CourseRun
 from ecommerce.exceptions import EcommerceModelException
 from micromasters.models import (
     AuditableModel,
@@ -182,10 +178,10 @@ class Coupon(Model):
     # If blank, the purchaser may not redeem this coupon through the user interface,
     # though it may be redeemed in their name by an administrator.
     coupon_code = TextField(null=True, blank=True)
-    # One and only one of these three foreign keys must be set to not null
+    # content_object is a link to either a Course, CourseRun, or a Program
     content_type = ForeignKey(ContentType, on_delete=SET_NULL, null=True)
     object_id = PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey('content_type', 'object_id', )
 
     # percent or fixed discount
     amount_type = CharField(
