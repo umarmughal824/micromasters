@@ -2,6 +2,8 @@
 Models for storing ecommerce data
 """
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import JSONField
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -16,6 +18,7 @@ from django.db.models.fields import (
     DateTimeField,
     DecimalField,
     IntegerField,
+    PositiveIntegerField,
     TextField,
 )
 from django.db.models.fields.related import (
@@ -180,9 +183,9 @@ class Coupon(Model):
     # though it may be redeemed in their name by an administrator.
     coupon_code = TextField(null=True, blank=True)
     # One and only one of these three foreign keys must be set to not null
-    course_run = ForeignKey(CourseRun, on_delete=SET_NULL, null=True)
-    course = ForeignKey(Course, on_delete=SET_NULL, null=True)
-    program = ForeignKey(Program, on_delete=SET_NULL, null=True)
+    content_type = ForeignKey(ContentType, on_delete=SET_NULL, null=True)
+    object_id = PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
 
     # percent or fixed discount
     amount_type = CharField(
