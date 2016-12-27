@@ -3,7 +3,7 @@ Model tests
 """
 # pylint: disable=no-self-use
 from datetime import datetime
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 
 from django.db.models.signals import post_save
 from factory.django import mute_signals
@@ -71,7 +71,7 @@ class ImageTests(ESTestCase):
         """
         # pin the timestamps used in creating the URL
         with patch('profiles.util.datetime', autospec=True) as mocked_datetime:
-            mocked_datetime.now = Mock(return_value=datetime.now(tz=pytz.UTC))
+            mocked_datetime.now.return_value = datetime.now(tz=pytz.UTC)
             with mute_signals(post_save):
                 profile = ProfileFactory.create()
 
