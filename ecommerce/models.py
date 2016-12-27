@@ -211,8 +211,16 @@ class Coupon(Model):
         null=False,
         help_text="Number of times a person can redeem a coupon",
     )
-    expiration_date = DateTimeField(null=True, help_text="If set, the coupons will not be redeemable after this")
-    activation_date = DateTimeField(null=True, help_text="If set, the coupons will not be redeemable before this")
+    expiration_date = DateTimeField(
+        null=True,
+        blank=True,
+        help_text="If set, the coupons will not be redeemable after this time",
+    )
+    activation_date = DateTimeField(
+        null=True,
+        blank=True,
+        help_text="If set, the coupons will not be redeemable before this time",
+    )
     enabled = BooleanField(default=True, help_text="If true, coupons are presently redeemable")
 
     def clean(self):

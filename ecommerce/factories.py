@@ -11,6 +11,7 @@ from factory.fuzzy import (
     FuzzyAttribute,
     FuzzyChoice,
     FuzzyDecimal,
+    FuzzyInteger,
     FuzzyText,
 )
 import faker
@@ -94,6 +95,8 @@ class CouponFactory(DjangoModelFactory):
     """Factory for Coupon"""
     amount_type = FuzzyChoice(Coupon.AMOUNT_TYPES)
     coupon_code = FuzzyChoice([None, FuzzyText().fuzz()])
+    num_redemptions_per_user = FuzzyInteger(1, 10)
+    num_coupons_available = FuzzyInteger(1, 100)
 
     class Meta:  # pylint: disable=missing-docstring,no-init,too-few-public-methods,old-style-class
         model = Coupon
