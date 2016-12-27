@@ -178,31 +178,37 @@ class Coupon(Model):
 
     AMOUNT_TYPES = [PERCENT_DISCOUNT, FIXED_DISCOUNT]
 
-    # The coupon code used for redemption by the purchaser in the user interface.
-    # If blank, the purchaser may not redeem this coupon through the user interface,
-    # though it may be redeemed in their name by an administrator.
-    coupon_code = TextField(null=True, blank=True)
-    # content_object is a link to either a Course, CourseRun, or a Program
-    content_type = ForeignKey(ContentType, on_delete=SET_NULL, null=True)
+    coupon_code = TextField(
+        null=True,
+        blank=True,
+        help_text="""The coupon code used for redemption by the purchaser in the user interface.
+    If blank, the purchaser may not redeem this coupon through the user interface,
+    though it may be redeemed in their name by an administrator."""
+    )
+    content_type = ForeignKey(
+        ContentType,
+        on_delete=SET_NULL,
+        null=True,
+        help_text="content_object is a link to either a Course, CourseRun, or a Program"
+    )
     object_id = PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
 
-    # percent or fixed discount
     amount_type = CharField(
         choices=[(_type, _type) for _type in AMOUNT_TYPES],
         max_length=30,
+        help_text="Whether amount is a percent or fixed discount"
     )
-    # Either a number from 0 to 1 representing a percent, or a fixed value for discount
-    amount = DecimalField(decimal_places=2, max_digits=20)
+    amount = DecimalField(
+        decimal_places=2,
+        max_digits=20,
+        help_text="Either a number from 0 to 1 representing a percent, or the fixed value for discount"
+    )
 
-    # Number of people this coupon can be redeemed by
-    num_coupons_available = IntegerField(null=False)
-    # Number of times a person can redeem a coupon
-    num_redemptions_per_user = IntegerField(null=False)
-    # After this time the coupons will not be redeemable
-    expiration_date = DateTimeField(null=True)
-    # If true, coupons are not presently redeemable
-    disabled = BooleanField(default=False)
+    num_coupons_available = IntegerField(null=False, help_text="Number of people this coupon can be redeemed by")
+    num_redemptions_per_user = IntegerField(null=False, help_text="Number of times a person can redeem a coupon")
+    expiration_date = DateTimeField(null=True, help_text="After this time the coupons will not be redeemable")
+    disabled = BooleanField(default=False, help_text="If true, coupons are not presently redeemable")
 
     def save(self, *args, **kwargs):
         """Override save to do certain validations"""
