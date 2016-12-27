@@ -236,7 +236,9 @@ class Coupon(Model):
 
         if self.amount_type == self.PERCENT_DISCOUNT:
             if self.amount is None or not 0 <= self.amount <= 1:
-                raise ValidationError("amount must be between 0 and 1 if amount_type is {}".format(self.PERCENT_DISCOUNT))
+                raise ValidationError("amount must be between 0 and 1 if amount_type is {}".format(
+                    self.PERCENT_DISCOUNT
+                ))
 
         if self.amount_type not in self.AMOUNT_TYPES:
             raise ValidationError("amount_type must be one of {}".format(", ".join(self.AMOUNT_TYPES)))
