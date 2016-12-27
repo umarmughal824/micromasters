@@ -17,7 +17,6 @@ from django.db.models.fields import (
     CharField,
     DateTimeField,
     DecimalField,
-    IntegerField,
     PositiveIntegerField,
     TextField,
 )
@@ -210,8 +209,14 @@ class Coupon(Model):
         help_text="Either a number from 0 to 1 representing a percent, or the fixed value for discount",
     )
 
-    num_coupons_available = IntegerField(null=False, help_text="Number of people this coupon can be redeemed by")
-    num_redemptions_per_user = IntegerField(null=False, help_text="Number of times a person can redeem a coupon")
+    num_coupons_available = PositiveIntegerField(
+        null=False,
+        help_text="Number of people this coupon can be redeemed by",
+    )
+    num_redemptions_per_user = PositiveIntegerField(
+        null=False,
+        help_text="Number of times a person can redeem a coupon",
+    )
     expiration_date = DateTimeField(null=True, help_text="If set, the coupons will not be redeemable after this")
     activation_date = DateTimeField(null=True, help_text="If set, the coupons will not be redeemable before this")
     enabled = BooleanField(default=True, help_text="If true, coupons are presently redeemable")
@@ -246,7 +251,7 @@ class UserCoupon(Model):
     user = ForeignKey(settings.AUTH_USER_MODEL, on_delete=SET_NULL, null=True)
 
     # Number of times left the user can use the coupon in a purchase
-    available_redemptions = IntegerField()
+    available_redemptions = PositiveIntegerField()
 
     class Meta:
         unique_together = ('coupon', 'user',)
