@@ -3,8 +3,10 @@ Factories for ecommerce models
 """
 from factory import (
     LazyAttribute,
+    post_generation,
     SelfAttribute,
     SubFactory,
+    Trait,
 )
 from factory.django import DjangoModelFactory
 from factory.fuzzy import (
@@ -16,7 +18,11 @@ from factory.fuzzy import (
 )
 import faker
 
-from courses.factories import CourseRunFactory
+from courses.factories import (
+    CourseRunFactory,
+    CourseFactory,
+    ProgramFactory,
+)
 from ecommerce.api import (
     make_reference_id,
     generate_cybersource_sa_signature,
@@ -93,37 +99,40 @@ class CoursePriceFactory(DjangoModelFactory):
 
 class CouponFactory(DjangoModelFactory):
     """Factory for Coupon"""
-    amount_type = FuzzyChoice(Coupon.AMOUNT_TYPES)
-    coupon_code = FuzzyChoice([None, FuzzyText().fuzz()])
-    num_redemptions_per_user = FuzzyInteger(1, 10)
-    num_coupons_available = FuzzyInteger(1, 100)
+    coupon_code = FuzzyText()
+    amount_type = 'percent-discount'
+    amount = 0.5
+    num_coupons_available = 15
+    num_redemptions_per_user = 2
 
-    class Meta:  # pylint: disable=missing-docstring,no-init,too-few-public-methods,old-style-class
+    class Meta:
         model = Coupon
 
-    @classmethod
-    def _create(cls, model_class, *args, **kwargs):
-        """Override _create to populate content_object"""
-        content_object = kwargs.pop('content_object', None)
-        instance = model_class(*args, **kwargs)
-        course_run = CourseRunFactory.create()
-        if content_object is not None:
-            instance.content_object = content_object
-        else:
-            instance.content_object = FuzzyChoice([course_run, course_run.course, course_run.course.program]).fuzz()
+    content_object = SubFactory(ProgramFactory)
 
-        amount_type = kwargs.pop('amount_type', None)
-        if amount_type is None:
-            instance.amount_type = FuzzyChoice(Coupon.AMOUNT_TYPES).fuzz()
-        else:
-            instance.amount_type = amount_type
+    @post_generation
+    def content_type(self, create, extracted, **kwargs):
+        return self.content_object.__class__
 
-        amount = kwargs.pop('amount', None)
-        if amount is None:
-            if instance.amount_type == Coupon.PERCENT_DISCOUNT:
-                instance.amount = FuzzyDecimal(0, 1).fuzz()
-            elif instance.amount_type == Coupon.FIXED_DISCOUNT:
-                instance.amount = FuzzyDecimal(100, 1000).fuzz()
-        else:
-            instance.amount = amount
-        instance.save()
+    @post_generation
+    def object_id(self, create, extracted, **kwargs):
+        return self.content_object.id
+
+    class Params:
+        percent = Trait(
+            amount_type='percent-discount',
+            amount=0.5, # 50% off
+        )
+        fixed = Trait(
+            amount_type='fixed-discount',
+            amount=100, # $100 off
+        )
+        program = Trait(
+            content_object=SubFactory(ProgramFactory)
+        )
+        course = Trait(
+            content_object=SubFactory(CourseFactory)
+        )
+        course_run = Trait(
+            content_object=SubFactory(CourseRunFactory)
+        )
