@@ -101,31 +101,23 @@ class CouponFactory(DjangoModelFactory):
     """Factory for Coupon"""
     coupon_code = FuzzyText()
     amount_type = 'percent-discount'
-    amount = 0.5
-    num_coupons_available = 15
-    num_redemptions_per_user = 2
+    amount = FuzzyDecimal(0, 1)
+    num_coupons_available = FuzzyInteger(0, 15)
+    num_redemptions_per_user = FuzzyInteger(0, 5)
 
-    class Meta:
+    class Meta:  # pylint: disable=missing-docstring
         model = Coupon
 
     content_object = SubFactory(ProgramFactory)
 
-    @post_generation
-    def content_type(self, create, extracted, **kwargs):
-        return self.content_object.__class__
-
-    @post_generation
-    def object_id(self, create, extracted, **kwargs):
-        return self.content_object.id
-
-    class Params:
+    class Params:  # pylint: disable=missing-docstring
         percent = Trait(
             amount_type='percent-discount',
-            amount=0.5, # 50% off
+            amount=FuzzyDecimal(0, 1),
         )
         fixed = Trait(
             amount_type='fixed-discount',
-            amount=100, # $100 off
+            amount=FuzzyDecimal(50, 1000),
         )
         program = Trait(
             content_object=SubFactory(ProgramFactory)
