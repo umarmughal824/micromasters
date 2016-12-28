@@ -101,8 +101,8 @@ class CouponFactory(DjangoModelFactory):
     coupon_code = FuzzyText()
     amount_type = 'percent-discount'
     amount = FuzzyDecimal(0, 1)
-    num_coupons_available = FuzzyInteger(0, 15)
-    num_redemptions_per_user = FuzzyInteger(0, 5)
+    num_coupons_available = FuzzyInteger(1, 15)
+    num_redemptions_per_user = FuzzyInteger(1, 5)
 
     class Meta:  # pylint: disable=missing-docstring
         model = Coupon
