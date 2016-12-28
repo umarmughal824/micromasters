@@ -5,6 +5,7 @@ import json
 
 from django.conf import settings
 from django.db import models
+from django.utils.text import slugify
 from modelcluster.fields import ParentalKey
 from raven.contrib.django.raven_compat.models import client as sentry
 from rolepermissions.verifications import has_role
@@ -303,12 +304,29 @@ class FrequentlyAskedQuestion(Orderable):
     faqs_page = ParentalKey(CategorizedFaqsPage, related_name='faqs', null=True)
     question = models.TextField()
     answer = RichTextField()
+    slug = models.SlugField(unique=True, default=None, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            max_length = FrequentlyAskedQuestion._meta.get_field('slug').max_length
+            slug = orig_slug = slugify(self.question)[:max_length]
+            slug_is_unique = not FrequentlyAskedQuestion.objects.filter(slug=orig_slug).exists()
+            count = 1
+            while not slug_is_unique:
+                slug = "{orig}-{count}".format(
+                    orig=orig_slug[:max_length - len(str(count)) - 1],
+                    count=count)
+                slug_is_unique = not FrequentlyAskedQuestion.objects.filter(slug=slug).exists()
+                count += 1
+            self.slug = slug
+        super(FrequentlyAskedQuestion, self).save(*args, **kwargs)
 
     content_panels = [
         MultiFieldPanel(
             [
                 FieldPanel('question'),
-                FieldPanel('answer')
+                FieldPanel('answer'),
+                FieldPanel('slug')
             ],
             heading='Frequently Asked Questions',
             classname='collapsible'
