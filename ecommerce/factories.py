@@ -3,7 +3,6 @@ Factories for ecommerce models
 """
 from factory import (
     LazyAttribute,
-    post_generation,
     SelfAttribute,
     SubFactory,
     Trait,
