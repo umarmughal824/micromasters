@@ -138,6 +138,7 @@ INSTALLED_APPS = (
     'courses',
     'dashboard',
     'ecommerce',
+    'exams',
     'financialaid',
     'grades',
     'mail',
@@ -553,3 +554,10 @@ if DEBUG:
         return not excluded
 
     DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": show_toolbar, }
+
+# Exams SFTP
+EXAMS_SFTP_HOST = get_var('EXAMS_SFTP_HOST', 'localhost')
+EXAMS_SFTP_PORT = get_var('EXAMS_SFTP_PORT', '22')
+EXAMS_SFTP_USERNAME = get_var('EXAMS_SFTP_USERNAME', None)
+EXAMS_SFTP_PASSWORD = get_var('EXAMS_SFTP_PASSWORD', None)
+EXAMS_SFTP_UPLOAD_DIR = get_var('EXAMS_SFTP_UPLOAD_DIR', 'results/topvue')
