@@ -5,22 +5,29 @@ from factory import (
     LazyAttribute,
     SelfAttribute,
     SubFactory,
+    Trait,
 )
 from factory.django import DjangoModelFactory
 from factory.fuzzy import (
     FuzzyAttribute,
     FuzzyChoice,
     FuzzyDecimal,
+    FuzzyInteger,
     FuzzyText,
 )
 import faker
 
-from courses.factories import CourseRunFactory
+from courses.factories import (
+    CourseRunFactory,
+    CourseFactory,
+    ProgramFactory,
+)
 from ecommerce.api import (
     make_reference_id,
     generate_cybersource_sa_signature,
 )
 from ecommerce.models import (
+    Coupon,
     CoursePrice,
     Line,
     Order,
@@ -87,3 +94,36 @@ class CoursePriceFactory(DjangoModelFactory):
 
     class Meta:  # pylint: disable=missing-docstring,no-init,too-few-public-methods,old-style-class
         model = CoursePrice
+
+
+class CouponFactory(DjangoModelFactory):
+    """Factory for Coupon"""
+    coupon_code = FuzzyText()
+    amount_type = 'percent-discount'
+    amount = FuzzyDecimal(0, 1)
+    num_coupons_available = FuzzyInteger(1, 15)
+    num_redemptions_per_user = FuzzyInteger(1, 5)
+
+    class Meta:  # pylint: disable=missing-docstring
+        model = Coupon
+
+    content_object = SubFactory(ProgramFactory)
+
+    class Params:  # pylint: disable=missing-docstring
+        percent = Trait(
+            amount_type='percent-discount',
+            amount=FuzzyDecimal(0, 1),
+        )
+        fixed = Trait(
+            amount_type='fixed-discount',
+            amount=FuzzyDecimal(50, 1000),
+        )
+        program = Trait(
+            content_object=SubFactory(ProgramFactory)
+        )
+        course = Trait(
+            content_object=SubFactory(CourseFactory)
+        )
+        course_run = Trait(
+            content_object=SubFactory(CourseRunFactory)
+        )
