@@ -27,12 +27,13 @@ from financialaid.factories import (
 )
 from micromasters.exceptions import PossiblyImproperlyConfigured
 from micromasters.utils import (
+    chunks,
     custom_exception_handler,
-    get_field_names,
-    serialize_model_object,
     first_matching_item,
+    get_field_names,
     is_near_now,
     is_subset_dict,
+    serialize_model_object,
 )
 
 
@@ -213,3 +214,23 @@ class UtilTests(unittest.TestCase):
         assert is_near_now(later) is False
         earlier = now - datetime.timedelta(0, 6)
         assert is_near_now(earlier) is False
+
+    def test_chunks(self):
+        """
+        test for chunks
+        """
+        input_list = list(range(113))
+        output_list = []
+        for nums in chunks(input_list):
+            output_list += nums
+        assert output_list == input_list
+
+        output_list = []
+        for nums in chunks(input_list, chunk_size=1):
+            output_list += nums
+        assert output_list == input_list
+
+        output_list = []
+        for nums in chunks(input_list, chunk_size=124):
+            output_list += nums
+        assert output_list == input_list

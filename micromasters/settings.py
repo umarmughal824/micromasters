@@ -508,7 +508,6 @@ CELERYBEAT_SCHEDULE = {
         'schedule': crontab(minute=0, hour='3')
     },
 }
-
 CELERY_TIMEZONE = 'UTC'
 
 # Elasticsearch

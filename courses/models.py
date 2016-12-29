@@ -2,13 +2,15 @@
 Models for course structure
 """
 import logging
-from datetime import datetime
 import urllib.parse
+from datetime import datetime
 
 import pytz
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models
-from django.conf import settings
+
+from grades.constants import FinalGradeStatus
 from micromasters.utils import first_matching_item
 
 
@@ -160,6 +162,7 @@ class CourseRun(models.Model):
     enrollment_end = models.DateTimeField(blank=True, null=True, db_index=True)
     end_date = models.DateTimeField(blank=True, null=True, db_index=True)
     upgrade_deadline = models.DateTimeField(blank=True, null=True, db_index=True)
+    freeze_grade_date = models.DateTimeField(blank=True, null=True, db_index=True)
     fuzzy_start_date = models.CharField(
         max_length=255, blank=True, null=True,
         help_text="If you don't know when your course will run exactly, "
@@ -250,3 +253,25 @@ class CourseRun(models.Model):
         Checks if the course is not expired
         """
         return not self.is_past and self.is_upgradable and self.is_not_beyond_enrollment
+
+    @property
+    def can_freeze_grades(self):
+        """
+        Checks if the final grades can be frozen.
+        """
+        if self.freeze_grade_date is None:
+            raise ImproperlyConfigured('Missing freeze_grade_date')
+        return datetime.now(pytz.utc) > self.freeze_grade_date
+
+    @classmethod
+    def get_freezable(cls):
+        """
+        Returns a queryset of all the runs that can freeze final grade according to the freeze date.
+        """
+        course_runs = cls.objects.exclude(
+            freeze_grade_date=None
+        ).exclude(
+            courserungradingstatus__status=FinalGradeStatus.COMPLETE
+        ).filter(freeze_grade_date__lt=datetime.now(pytz.utc))
+
+        return course_runs

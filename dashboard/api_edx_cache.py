@@ -3,15 +3,24 @@ APIs that deal with the edx cached data
 """
 import datetime
 import logging
+from collections import namedtuple
+
 import pytz
 from django.db import transaction
+from django.conf import settings
+from edx_api.client import EdxApi
 
+from backends import utils
+from backends.edxorg import EdxOrgOAuth2
 from courses.models import CourseRun
 from dashboard import models
 from profiles.api import get_social_username
 from search import tasks
 
 log = logging.getLogger(__name__)
+
+UserCachedRunData = namedtuple(
+    'UserCachedRunData', ['edx_course_key', 'enrollment', 'certificate', 'current_grade'])
 
 
 class CachedEdxUserData:
@@ -31,6 +40,23 @@ class CachedEdxUserData:
         self.enrollments = models.CachedEnrollment.get_edx_data(self.user, program=self.program)
         self.certificates = models.CachedCertificate.get_edx_data(self.user, program=self.program)
         self.current_grades = models.CachedCurrentGrade.get_edx_data(self.user, program=self.program)
+
+    def get_run_data(self, course_id):
+        """
+        Returns cached data for the user in a specific course run
+
+        Args:
+            course_id (str): a string representing the edx course key for a course run
+
+        Returns:
+            UserCachedRunData: a namedtuple containing the cached data for the user in the course run
+        """
+        return UserCachedRunData(
+            edx_course_key=course_id,
+            enrollment=self.enrollments.get_enrollment_for_course(course_id),
+            certificate=self.certificates.get_cert(course_id),
+            current_grade=self.current_grades.get_current_grade(course_id),
+        )
 
 
 class CachedEdxDataApi:
@@ -280,3 +306,22 @@ class CachedEdxDataApi:
         if not cls.is_cache_fresh(user, cache_type):
             update_func = cache_update_methods[cache_type]
             update_func(user, edx_client)
+
+    @classmethod
+    def update_all_cached_grade_data(cls, user):
+        """
+        Updates only certificates and Current grade.
+        Used before a final grade freeze.
+
+        Args:
+            user (django.contrib.auth.models.User): A user
+        Returns:
+            None
+        """
+        # get the credentials for the current user for edX
+        user_social = user.social_auth.get(provider=EdxOrgOAuth2.name)
+        utils.refresh_user_token(user_social)
+        # create an instance of the client to query edX
+        edx_client = EdxApi(user_social.extra_data, settings.EDXORG_BASE_URL)
+        cls.update_cached_certificates(user, edx_client)
+        cls.update_cached_current_grades(user, edx_client)
