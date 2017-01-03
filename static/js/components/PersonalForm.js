@@ -9,6 +9,7 @@ import SelectField from './inputs/SelectField';
 import CountrySelectField from './inputs/CountrySelectField';
 import StateSelectField from './inputs/StateSelectField';
 import ProfileFormFields from '../util/ProfileFormFields';
+import { shouldRenderRomanizedFields } from '../util/profile_edit';
 import type {
   Profile,
   SaveProfileFunc,
@@ -39,6 +40,26 @@ export default class PersonalForm extends ProfileFormFields {
     ui:                     UIState,
   };
 
+  renderRomanizedFields = (): React$Element<*> => (
+    <Cell col={12}>
+      <section className="romanized-name">
+        <h3>Please enter your name in Latin characters</h3>
+        <Grid className="profile-form-grid">
+          <Cell col={6}>
+            {this.boundTextField(["romanized_first_name"], "Given name")}
+          </Cell>
+          <Cell col={6}>
+            {this.boundTextField(["romanized_last_name"], "Family name")}
+          </Cell>
+        </Grid>
+      </section>
+    </Cell>
+  );
+
+  showRomanizedFields = (): React$Element<*>|null => (
+    shouldRenderRomanizedFields(this.props.profile) ? this.renderRomanizedFields() : null
+  );
+
   render() {
     const whyWeAskThis = 'Some program sponsors and employers offer benefits or scholarships ' +
       'to learners with specific backgrounds.';
@@ -57,6 +78,7 @@ export default class PersonalForm extends ProfileFormFields {
           <Cell col={6}>
             {this.boundTextField(["last_name"], "Family name")}
           </Cell>
+          {this.showRomanizedFields()}
           <Cell col={12}>
             {this.boundTextField(["preferred_name"], "Nickname / Preferred name")}
           </Cell>

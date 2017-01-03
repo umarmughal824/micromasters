@@ -20,7 +20,9 @@ import {
   PERSONAL_STEP,
   EDUCATION_STEP,
   EMPLOYMENT_STEP,
+  CP1252_REGEX
 } from '../../constants';
+import { shouldRenderRomanizedFields } from '../../util/profile_edit';
 
 type ErrorMessages = {[key: string]: string};
 
@@ -77,6 +79,15 @@ export const personalValidation = (profile: Profile) => {
   let errors = findErrors(profile, R.keys(personalMessages), personalMessages);
   if (!moment(profile.date_of_birth).isBefore(moment(), 'day')) {
     errors.date_of_birth = personalMessages.date_of_birth;
+  }
+  if (shouldRenderRomanizedFields(profile)) {
+    if (!profile.romanized_first_name || !CP1252_REGEX.test(profile.romanized_first_name)) {
+      errors.romanized_first_name = "Latin first name is required";
+    }
+
+    if (!profile.romanized_last_name || !CP1252_REGEX.test(profile.romanized_last_name)) {
+      errors.romanized_last_name = "Latin last name is required";
+    }
   }
   return errors;
 };

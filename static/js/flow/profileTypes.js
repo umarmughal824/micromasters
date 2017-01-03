@@ -42,6 +42,7 @@ export type ValidationErrors = {
 
 export type Profile = {
   first_name:                  string,
+  last_name:                   string,
   education:                   EducationEntry[],
   work_history:                WorkHistoryEntry[],
   getStatus:                   string,
@@ -60,6 +61,8 @@ export type Profile = {
   image_small:                 ?string,
   image_medium:                ?string,
   about_me:                    ?string,
+  romanized_first_name:        ?string,
+  romanized_last_name:         ?string,
 };
 
 export type Profiles = {
