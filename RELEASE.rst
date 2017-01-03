@@ -1,6 +1,64 @@
 Release Notes
 =============
 
+Version 0.37.0
+--------------
+
+- Use image_medium for profile images (#2225)
+- Added infrustructure for feature flags
+- Remove CELERY_ALWAYS_EAGER overrides where it already matches the default (#2226)
+- Implement lazy loading for UserChip (#2220)
+- Added APIs, tasks and management commands to compute final grades
+- Added image_medium field to model and REST API (#2218)
+- Fixed layout of profile page (#2208)
+- Updated redirect to preserve request URI (#2166)
+- Added export tasks for Pearson profiles (#1795)
+- Check for OSError during image migration (#2217)
+- Added slug to FrequesntlyAskedQuestion (#2191)
+- Change range to start with 1
+- Lint
+- Update factory
+- Update factories
+- Lint
+- Remove redundant words
+- Validation
+- Validations
+- More validations
+- Add back migration
+- Remove UserCoupon from admin
+- Remove UserCoupon
+- Use PositiveIntegerField
+- Validation
+- Remove redundant words
+- Change disabled to enabled
+- Add activation_date
+- Use help_text
+- Rename num_redemptions
+- Remove migration
+- Add factory, test
+- Validation
+- Lint
+- Use GenericForeignKey
+- Add migration
+- Remove product_type
+- Add available_redemptions to __str__
+- Review comments
+- Change everything
+- WIP
+- Don&#39;t use type which is a builtin type
+- Added model for Coupon
+- Wagtail 1.8 (#2185)
+- Don&#39;t make a new Mock, use one already present
+- Fix test
+- Fix parameterized test
+- Test for path too long
+- Remove extra seek
+- ValueError
+- autospec
+- Store a smaller version of the avatar
+- Fixed a bug with startProfileEdit
+- Added more Google Analytics events
+
 Version 0.36.0
 --------------
 
