@@ -531,6 +531,26 @@ CYBERSOURCE_REFERENCE_PREFIX = get_var("CYBERSOURCE_REFERENCE_PREFIX", None)
 OPEN_EXCHANGE_RATES_URL = get_var("OPEN_EXCHANGE_RATES_URL", None)
 OPEN_EXCHANGE_RATES_APP_ID = get_var("OPEN_EXCHANGE_RATES_APP_ID", "")
 
+# Exams SFTP
+EXAMS_SFTP_HOST = get_var('EXAMS_SFTP_HOST', 'localhost')
+EXAMS_SFTP_PORT = get_var('EXAMS_SFTP_PORT', '22')
+EXAMS_SFTP_USERNAME = get_var('EXAMS_SFTP_USERNAME', None)
+EXAMS_SFTP_PASSWORD = get_var('EXAMS_SFTP_PASSWORD', None)
+EXAMS_SFTP_UPLOAD_DIR = get_var('EXAMS_SFTP_UPLOAD_DIR', 'results/topvue')
+
+
+# features flags
+def get_all_config_keys():
+    """Returns all the configuration keys from both environment and configuration files"""
+    return list(set(os.environ.keys()).union(set(FALLBACK_CONFIG.keys())))
+
+MM_FEATURES_PREFIX = get_var('MM_FEATURES_PREFIX', 'FEATURE_')
+FEATURES = {
+    key[len(MM_FEATURES_PREFIX):]: get_var(key, None) for key
+    in get_all_config_keys() if key.startswith(MM_FEATURES_PREFIX)
+}
+
+
 # django debug toolbar only in debug mode
 if DEBUG:
     INSTALLED_APPS += ('debug_toolbar', )
@@ -553,10 +573,3 @@ if DEBUG:
         return not excluded
 
     DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": show_toolbar, }
-
-# Exams SFTP
-EXAMS_SFTP_HOST = get_var('EXAMS_SFTP_HOST', 'localhost')
-EXAMS_SFTP_PORT = get_var('EXAMS_SFTP_PORT', '22')
-EXAMS_SFTP_USERNAME = get_var('EXAMS_SFTP_USERNAME', None)
-EXAMS_SFTP_PASSWORD = get_var('EXAMS_SFTP_PASSWORD', None)
-EXAMS_SFTP_UPLOAD_DIR = get_var('EXAMS_SFTP_UPLOAD_DIR', 'results/topvue')
