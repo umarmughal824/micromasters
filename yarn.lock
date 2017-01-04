@@ -2055,6 +2055,12 @@ eslint-plugin-flowtype@^2.28.2:
   dependencies:
     lodash "^4.15.0"
 
+eslint-plugin-mocha@^4.8.0:
+  version "4.8.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-mocha/-/eslint-plugin-mocha-4.8.0.tgz#7627b35a61e5a720412da96eab06f0e03a1dcdb6"
+  dependencies:
+    ramda "^0.22.1"
+
 eslint-plugin-react@^6.7.1:
   version "6.8.0"
   resolved "https://registry.yarnpkg.com/eslint-plugin-react/-/eslint-plugin-react-6.8.0.tgz#741ab5438a094532e5ce1bbb935d6832356f492d"

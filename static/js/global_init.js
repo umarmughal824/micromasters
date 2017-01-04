@@ -28,7 +28,7 @@ if (!Object.entries) {
 require('jsdom-global')();
 
 // cleanup after each test run
-afterEach(function (){
+afterEach(function (){ // eslint-disable-line mocha/no-top-level-hooks
   document.body.innerHTML = '';
   global.SETTINGS = _createSettings();
 });
