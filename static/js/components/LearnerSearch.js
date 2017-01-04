@@ -34,14 +34,23 @@ import EmailCompositionDialog from './EmailCompositionDialog';
 import type { Option } from '../flow/generalTypes';
 import type { Email } from '../flow/emailTypes';
 import type { AvailableProgram } from '../flow/enrollmentTypes';
+import { EDUCATION_LEVELS } from '../constants';
 
-const makeSearchkitTranslations: () => Object = () => {
+const makeCountryNameTranslations: () => Object = () => {
   let translations = {};
   for (let code of Object.keys(iso3166.data)) {
     translations[code] = iso3166.data[code].name;
     for (let stateCode of Object.keys(iso3166.data[code].sub)) {
       translations[stateCode] = iso3166.data[code].sub[stateCode].name;
     }
+  }
+  return translations;
+};
+
+const makeDegreeTranslations: () => Object = () => {
+  let translations = {};
+  for(let level of EDUCATION_LEVELS) {
+    translations[level.value] = level.label;
   }
   return translations;
 };
@@ -118,7 +127,8 @@ export default class LearnerSearch extends SearchkitComponent {
     { value: 'dob', label: "Sort: dob" },
   ];
 
-  searchkitTranslations: Object = makeSearchkitTranslations();
+  countryNameTranslations: Object = makeCountryNameTranslations();
+  degreeTranslations: Object = makeDegreeTranslations();
 
   getNumberOfCoursesInProgram: Function = (): number => {
     let results = this.getResults();
@@ -218,7 +228,19 @@ export default class LearnerSearch extends SearchkitComponent {
             fields={["profile.country", "profile.state_or_territory"]}
             title="Current Residence"
             id="country"
-            translations={this.searchkitTranslations}
+            translations={this.countryNameTranslations}
+          />
+        </FilterVisibilityToggle>
+        <FilterVisibilityToggle
+          {...this.props}
+          filterName="education-level"
+        >
+          <PatchedMenuFilter
+            id="education_level"
+            title="Degree"
+            field="profile.education.degree_name"
+            fieldOptions={{type: 'nested', options: { path: 'profile.education' } }}
+            translations={this.degreeTranslations}
           />
         </FilterVisibilityToggle>
         <FilterVisibilityToggle
