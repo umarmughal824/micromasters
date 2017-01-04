@@ -5,7 +5,9 @@ import _ from 'lodash';
 import TestUtils from 'react-addons-test-utils';
 import { render } from 'enzyme';
 import { Provider } from 'react-redux';
+import sinon from 'sinon';
 
+import * as inputUtil from '../components/inputs/util';
 import FinancialAidCalculator from '../containers/FinancialAidCalculator';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../lib/api';
@@ -113,20 +115,16 @@ describe('FinancialAidCalculator', () => {
 
   for (let activity of [true, false]) {
     it(`has proper spinner state for the skip dialog save button for activity=${activity.toString()}`, () => {
+      let dialogActionsSpy = helper.sandbox.spy(inputUtil, 'dialogActions');
       skipFinancialAidStub.returns(Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE));
       helper.store.dispatch(setConfirmSkipDialogVisibility(true));
+
       if (activity) {
         helper.store.dispatch(requestSkipFinancialAid());
       }
-
       return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(() => {
-        let confirmDialog = document.querySelector('.skip-financial-aid-dialog-wrapper');
-        let skipButton = confirmDialog.querySelector('.skip-button');
-
-        assert.equal(skipButton.className.includes('disabled-with-spinner'), activity);
-        assert(skipButton.innerHTML.includes(activity ? 'mdl-spinner' : 'Pay Full Price'));
-        TestUtils.Simulate.click(skipButton);
-        assert.equal(skipFinancialAidStub.calledWith(program.id), !activity);
+        // assert inFlight arg
+        assert.isTrue(dialogActionsSpy.calledWith(sinon.match.any, sinon.match.any, activity, "Pay Full Price"));
       });
     });
   }
@@ -274,28 +272,14 @@ describe('FinancialAidCalculator', () => {
 
   for (let activity of [true, false]) {
     it(`has appropriate state for financial aid submit button, activity=${activity.toString()}`, () => {
-      addFinancialAidStub.returns(Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE));
+      let dialogActionsSpy = helper.sandbox.spy(inputUtil, 'dialogActions');
+
       if (activity) {
         helper.store.dispatch(requestAddFinancialAid());
       }
-
-      return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
-        wrapper.find('.pricing-actions').find('.dashboard-button').simulate('click');
-        let calculator = document.querySelector('.financial-aid-calculator');
-        TestUtils.Simulate.change(calculator.querySelector('.mdl-checkbox__input'));
-        modifyTextField(document.querySelector('#user-salary-input'), '1000');
-
-        let saveButton = calculator.querySelector('.save-button');
-        assert.equal(saveButton.className.includes('disabled-with-spinner'), activity);
-        assert.equal(saveButton.disabled, activity);
-        assert(saveButton.innerHTML.includes(activity ? 'mdl-spinner' : 'Calculate'));
-
-        TestUtils.Simulate.click(saveButton);
-      }).then(() => {
-        assert.equal(
-          addFinancialAidStub.calledWith('1000', 'USD', program.id),
-          !activity
-        );
+      addFinancialAidStub.returns(Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE));
+      return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(() => {
+        assert.isTrue(dialogActionsSpy.calledWith(sinon.match.any, sinon.match.any, activity, "Calculate"));
       });
     });
   }
