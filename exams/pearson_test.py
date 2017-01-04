@@ -70,7 +70,7 @@ class ExamPearsonTest(TestCase):
         content = file.getvalue()
 
         assert content == (
-            "ClientCandidateId\tFirstName\tLastName\t"
+            "ClientCandidateID\tFirstName\tLastName\t"
             "Email\tAddress1\tAddress2\tAddress3\t"
             "City\tState\tPostalCode\tCountry\t"
             "Phone\tPhoneCountryCode\tLastUpdate\r\n"

@@ -124,7 +124,7 @@ def _profile_country_to_alpha3(profile):
 
 
 write_cdd_file = _tsv_writer([
-    ('ClientCandidateId', 'student_id'),
+    ('ClientCandidateID', 'student_id'),
     ('FirstName', 'romanized_first_name'),
     ('LastName', 'romanized_last_name'),
     ('Email', 'user.email'),
