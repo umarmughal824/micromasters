@@ -9,7 +9,7 @@ from django.db.models.signals import post_save
 from django.test import TestCase
 from factory.django import mute_signals
 
-from exams.exceptions import RetryableSFTPException
+from exams.pearson.exceptions import RetryableSFTPException
 from exams.factories import (
     ExamAuthorizationFactory,
     ExamProfileFactory,
@@ -53,7 +53,7 @@ class ExamTasksTest(TestCase):
         Verify that when a retryable error occurs that the task retries
         """
 
-        with patch(task_retry) as retry, patch('exams.pearson.upload_tsv') as upload_tsv_mock:
+        with patch(task_retry) as retry, patch('exams.pearson.upload.upload_tsv') as upload_tsv_mock:
             upload_tsv_mock.side_effect = error = RetryableSFTPException()
             task.delay()
 
@@ -75,7 +75,7 @@ class ExamProfileTasksTest(TestCase):
             cls.expected_invalid_profiles = ExamProfileFactory.create_batch(5, status=ExamProfile.PROFILE_PENDING)
             cls.all_profiles = cls.expected_in_progress_profiles + cls.expected_invalid_profiles
 
-    @patch('exams.pearson.upload_tsv')
+    @patch('exams.pearson.upload.upload_tsv')
     def test_export_exam_profiles(self, upload_tsv_mock):  # pylint: disable=no-self-use
         """
         Verify that export_exam_profiles makes calls to export the pending profiles
@@ -98,7 +98,7 @@ class ExamProfileTasksTest(TestCase):
 
             return (self.expected_in_progress_profiles, self.expected_invalid_profiles)
 
-        with patch('exams.pearson.CDDWriter') as cdd_writer_mock_cls:
+        with patch('exams.pearson.writers.CDDWriter') as cdd_writer_mock_cls:
             cdd_writer_instance = cdd_writer_mock_cls.return_value
             cdd_writer_instance.write.side_effect = side_effect
             export_exam_profiles.delay()
@@ -135,7 +135,7 @@ class ExamAuthorizationTasksTest(TestCase):
         with mute_signals(post_save):
             cls.exam_auths = ExamAuthorizationFactory.create_batch(10, status=ExamAuthorization.STATUS_PENDING)
 
-    @patch('exams.pearson.upload_tsv')
+    @patch('exams.pearson.upload.upload_tsv')
     def test_export_exam_authorizations(self, upload_tsv_mock):  # pylint: disable=no-self-use
         """
         Verify that export_exam_authorizations exports pending exam auths
@@ -159,7 +159,7 @@ class ExamAuthorizationTasksTest(TestCase):
 
             return (self.exam_auths, [])
 
-        with patch('exams.pearson.EADWriter') as ead_writer_mock_cls:
+        with patch('exams.pearson.writers.EADWriter') as ead_writer_mock_cls:
             ead_writer_instance = ead_writer_mock_cls.return_value
             ead_writer_instance.write.side_effect = side_effect
 

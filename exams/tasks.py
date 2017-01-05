@@ -9,12 +9,15 @@ from django.conf import settings
 from django.db import transaction
 import pytz
 
-from exams.exceptions import RetryableSFTPException
+from exams.pearson.exceptions import RetryableSFTPException
 from exams.models import (
     ExamAuthorization,
     ExamProfile,
 )
-from exams import pearson
+from exams.pearson import (
+    upload,
+    writers,
+)
 from micromasters.celery import async
 
 PEARSON_CDD_FILE_PREFIX = "cdd-%Y%m%d%H_"
@@ -51,7 +54,7 @@ def export_exam_profiles(self):
         suffix=PEARSON_FILE_EXTENSION,
         mode='w',
     ) as tsv:
-        cdd_writer = pearson.CDDWriter()
+        cdd_writer = writers.CDDWriter()
         valid_profiles, invalid_profiles = cdd_writer.write(tsv, exam_profiles)
 
         # flush data to disk before upload
@@ -59,7 +62,7 @@ def export_exam_profiles(self):
 
         try:
             # upload to SFTP server
-            pearson.upload_tsv(tsv.name)
+            upload.upload_tsv(tsv.name)
         except RetryableSFTPException as exc:
             log.exception('Retryable error during upload of CDD file to Pearson SFTP')
             # retry up to 3 times w/ exponential backoff if this was a connection error
@@ -106,7 +109,7 @@ def export_exam_authorizations(self):
         suffix=PEARSON_FILE_EXTENSION,
         mode='w',
     ) as tsv:
-        ead_writer = pearson.EADWriter()
+        ead_writer = writers.EADWriter()
         valid_auths, _ = ead_writer.write(tsv, exam_authorizations)
 
         # flush data to disk before upload
@@ -114,7 +117,7 @@ def export_exam_authorizations(self):
 
         try:
             # upload to SFTP server
-            pearson.upload_tsv(tsv.name)
+            upload.upload_tsv(tsv.name)
         except RetryableSFTPException as exc:
             log.exception('Retryable error during upload of EAD file to Pearson SFTP')
             # retry up to 3 times w/ exponential backoff if this was a connection error

@@ -1,57 +1,36 @@
 """
-Tests for exams.pearson module
+Tests for TSV writers
 """
 import io
 from datetime import date, datetime
 from unittest.mock import (
-    ANY,
     Mock,
     NonCallableMock,
-    patch,
 )
 
+import ddt
 import pytz
-from django.core.exceptions import ImproperlyConfigured
 from django.db.models.signals import post_save
-from django.test import SimpleTestCase, TestCase
-from ddt import ddt, data
+from django.test import TestCase
 from factory.django import mute_signals
-from paramiko import SSHException
-from pysftp.exceptions import ConnectionException
 
-from exams.exceptions import (
+from exams.pearson.exceptions import (
     InvalidProfileDataException,
     InvalidTsvRowException,
-    RetryableSFTPException,
 )
 from exams.factories import (
     ExamAuthorizationFactory,
     ExamProfileFactory,
 )
-from exams.pearson import (
+from exams.pearson.writers import (
     CDDWriter,
     EADWriter,
     BaseTSVWriter,
 )
 from profiles.factories import ProfileFactory
 
-
 FIXED_DATETIME = datetime(2016, 5, 15, 15, 2, 55, tzinfo=pytz.UTC)
 FIXED_DATE = date(2016, 5, 15)
-
-EXAMS_SFTP_FILENAME = 'FILENAME'
-EXAMS_SFTP_HOST = 'l0calh0st'
-EXAMS_SFTP_PORT = '345'
-EXAMS_SFTP_USERNAME = 'username'
-EXAMS_SFTP_PASSWORD = 'password'
-EXAMS_SFTP_UPLOAD_DIR = 'tmp'
-EXAMS_SFTP_SETTINGS = {
-    'EXAMS_SFTP_HOST': EXAMS_SFTP_HOST,
-    'EXAMS_SFTP_PORT': EXAMS_SFTP_PORT,
-    'EXAMS_SFTP_USERNAME': EXAMS_SFTP_USERNAME,
-    'EXAMS_SFTP_PASSWORD': EXAMS_SFTP_PASSWORD,
-    'EXAMS_SFTP_UPLOAD_DIR': EXAMS_SFTP_UPLOAD_DIR,
-}
 
 
 class TSVWriterTestCase(TestCase):
@@ -206,7 +185,7 @@ class BaseTSVWriterTest(TSVWriterTestCase):
         assert self.tsv_value == "Prop1\r\n"
 
 
-@ddt
+@ddt.ddt
 class CDDWriterTest(TSVWriterTestCase):
     """
     Tests for CDDWriter
@@ -235,7 +214,7 @@ class CDDWriterTest(TSVWriterTestCase):
         assert CDDWriter.profile_phone_number_to_raw_number(profile) == "899 293-3423"
         assert CDDWriter.profile_phone_number_to_country_code(profile) == "1"
 
-    @data(
+    @ddt.data(
         '',
         None,
         'bad string',
@@ -344,70 +323,3 @@ class EADWriterTest(TSVWriterTestCase):
             "\t2016/05/15\t2016/10/15\t"  # accommodation blank intentionally
             "2016/05/15 15:02:55"
         )
-
-
-@ddt
-class PearsonUploadTest(SimpleTestCase):
-    """
-    Tests for Pearson upload
-    """
-
-    def test_upload_tsv(self):
-        """
-        Tests that upload uses the correct settings values
-        """
-
-        with self.settings(**EXAMS_SFTP_SETTINGS), patch('pysftp.Connection') as connection_mock:
-            from exams.pearson import upload_tsv
-
-            upload_tsv(EXAMS_SFTP_FILENAME)
-            connection_mock.assert_called_once_with(
-                host=EXAMS_SFTP_HOST,
-                port=int(EXAMS_SFTP_PORT),
-                username=EXAMS_SFTP_USERNAME,
-                password=EXAMS_SFTP_PASSWORD,
-                cnopts=ANY,
-            )
-
-            ftp_mock = connection_mock.return_value.__enter__.return_value
-            ftp_mock.cd.assert_called_once_with(EXAMS_SFTP_UPLOAD_DIR)
-            ftp_mock.put.assert_called_once_with(EXAMS_SFTP_FILENAME)
-
-    @data(
-        SSHException(),
-        ConnectionException('localhost', 22),
-    )
-    def test_retryable_exceptions(self, expected_exc):
-        """
-        Test that if {exc_cls} is raised that it results in a RetryableSFTPException
-        """
-        from exams.pearson import upload_tsv
-
-        with self.settings(**EXAMS_SFTP_SETTINGS), patch('pysftp.Connection') as pysftp_connection_mock:
-            pysftp_connection_mock.side_effect = expected_exc
-            with self.assertRaises(RetryableSFTPException) as cm:
-                upload_tsv(EXAMS_SFTP_FILENAME)
-
-        assert isinstance(cm.exception, RetryableSFTPException)
-        assert cm.exception.__cause__ == expected_exc
-
-    @data(
-        'EXAMS_SFTP_HOST',
-        'EXAMS_SFTP_PORT',
-        'EXAMS_SFTP_USERNAME',
-        'EXAMS_SFTP_PASSWORD',
-        'EXAMS_SFTP_UPLOAD_DIR',
-    )
-    def test_upload_tsv_fails_if_settings_missing(self, settings_key):
-        """
-        Tests that upload raises ImproperlyConfigured if settings.{0} is not set
-        """
-        kwargs = {settings_key: None}
-
-        with self.settings(**kwargs), patch('pysftp.Connection') as connection_mock:
-            from exams.pearson import upload_tsv
-
-            with self.assertRaises(ImproperlyConfigured):
-                upload_tsv('file.tsv')
-
-            connection_mock.assert_not_called()

@@ -1,5 +1,5 @@
 """
-Pearson specific exam code
+Pearson TSV writers
 """
 import csv
 import logging
@@ -8,36 +8,22 @@ from operator import attrgetter
 import re
 
 import pycountry
-import pysftp
-from pysftp.exceptions import ConnectionException
-from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
-from paramiko import SSHException
 
-from exams.exceptions import (
+from exams.pearson.constants import (
+    PEARSON_CSV_DIALECT,
+    PEARSON_DATE_FORMAT,
+    PEARSON_DATETIME_FORMAT,
+)
+from exams.pearson.exceptions import (
     InvalidProfileDataException,
     InvalidTsvRowException,
-    RetryableSFTPException,
 )
-
-PEARSON_CSV_DIALECT = 'pearsontsv'
 
 # custom csv dialect for Pearson
 csv.register_dialect(
     PEARSON_CSV_DIALECT,
     delimiter='\t',
 )
-
-PEARSON_DATE_FORMAT = "%Y/%m/%d"
-PEARSON_DATETIME_FORMAT = "%Y/%m/%d %H:%M:%S"
-
-PEARSON_UPLOAD_REQUIRED_SETTINGS = [
-    "EXAMS_SFTP_HOST",
-    "EXAMS_SFTP_PORT",
-    "EXAMS_SFTP_USERNAME",
-    "EXAMS_SFTP_PASSWORD",
-    "EXAMS_SFTP_UPLOAD_DIR",
-]
 
 log = logging.getLogger(__name__)
 
@@ -239,38 +225,3 @@ class EADWriter(BaseTSVWriter):
             ('EligibilityApptDateLast', lambda exam_auth: self.format_date(exam_auth.date_last_eligible)),
             ('LastUpdate', lambda exam_auth: self.format_datetime(exam_auth.updated_on)),
         ])
-
-
-def upload_tsv(file_path):
-    """
-    Upload the given TSV files to the remote
-
-    Args:
-        file_path (str): absolute path to the file to be uploaded
-    """
-    for key in PEARSON_UPLOAD_REQUIRED_SETTINGS:
-        if getattr(settings, key) is None:
-            raise ImproperlyConfigured(
-                "The {} setting is required".format(key)
-            )
-
-    cnopts = pysftp.CnOpts()
-    cnopts.hostkeys = None  # ignore knownhosts
-
-    try:
-        connection = pysftp.Connection(
-            host=str(settings.EXAMS_SFTP_HOST),
-            port=int(settings.EXAMS_SFTP_PORT),
-            username=str(settings.EXAMS_SFTP_USERNAME),
-            password=str(settings.EXAMS_SFTP_PASSWORD),
-            cnopts=cnopts,
-        )
-    except (ConnectionException, SSHException) as ex:
-        raise RetryableSFTPException() from ex
-
-    try:
-        with connection as sftp:
-            with sftp.cd(settings.EXAMS_SFTP_UPLOAD_DIR):
-                sftp.put(file_path)
-    except SSHException as ex:
-        raise RetryableSFTPException() from ex
