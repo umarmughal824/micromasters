@@ -271,6 +271,17 @@ class CourseRun(models.Model):
             raise ImproperlyConfigured('Missing freeze_grade_date')
         return datetime.now(pytz.utc) > self.freeze_grade_date
 
+    @property
+    def has_frozen_grades(self):
+        """
+        Checks if the grades for the course have been frozen
+        """
+        try:
+            freeze_status = self.courserungradingstatus
+        except self._meta.model.courserungradingstatus.RelatedObjectDoesNotExist:
+            return False
+        return freeze_status.status == FinalGradeStatus.COMPLETE
+
     @classmethod
     def get_freezable(cls):
         """
