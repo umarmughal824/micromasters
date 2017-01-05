@@ -56,9 +56,10 @@ from search.base import ESTestCase
 
 def format_image_expectation(profile):
     """formats a profile image to match what will be in JSON"""
-    profile["image"] = "http://testserver{}".format(profile["image"])
-    profile["image_small"] = "http://testserver{}".format(profile["image_small"])
-    profile["image_medium"] = "http://testserver{}".format(profile["image_medium"])
+    image_fields = ['image', 'image_medium', 'image_small']
+    for field in image_fields:
+        if field in profile:
+            profile[field] = "http://testserver{}".format(profile[field])
     return profile
 
 
@@ -139,7 +140,7 @@ class ProfileGETTests(ProfileBaseTests):
         profile_data = ProfileLimitedSerializer(profile).data
         self.client.logout()
         resp = self.client.get(self.url2)
-        assert resp.json() == profile_data
+        assert resp.json() == format_image_expectation(profile_data)
 
     def test_mm_user_get_public_profile(self):
         """
@@ -151,7 +152,7 @@ class ProfileGETTests(ProfileBaseTests):
         profile_data = ProfileLimitedSerializer(profile).data
         self.client.force_login(self.user1)
         resp = self.client.get(self.url2)
-        assert resp.json() == profile_data
+        assert resp.json() == format_image_expectation(profile_data)
 
     def test_vermm_user_get_public_profile(self):
         """
@@ -163,7 +164,7 @@ class ProfileGETTests(ProfileBaseTests):
         profile_data = ProfileLimitedSerializer(profile).data
         self.client.force_login(self.user1)
         resp = self.client.get(self.url2)
-        assert resp.json() == profile_data
+        assert resp.json() == format_image_expectation(profile_data)
 
     def test_anonym_user_get_public_to_mm_profile(self):
         """
@@ -196,7 +197,7 @@ class ProfileGETTests(ProfileBaseTests):
         profile_data = ProfileLimitedSerializer(profile).data
         self.client.force_login(self.user1)
         resp = self.client.get(self.url2)
-        assert resp.json() == profile_data
+        assert resp.json() == format_image_expectation(profile_data)
 
     def test_anonym_user_get_private_profile(self):
         """
