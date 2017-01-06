@@ -134,3 +134,26 @@ def make_thumbnail(full_size_image, max_dimension):
     pil_image.save(buffer, "JPEG", quality=90)
     buffer.seek(0)
     return buffer
+
+
+def full_name(user):
+    """
+    returns users full name.
+
+    Args:
+        user (User): user object.
+
+    Returns:
+        str: full name from profile.
+    """
+    if not user or not user.profile:
+        return None
+
+    profile = user.profile
+    first = profile.first_name or profile.user.username
+    last = " {}".format(profile.last_name or '')
+
+    return "{first_name}{last_name}".format(
+        first_name=first,
+        last_name=last
+    )
