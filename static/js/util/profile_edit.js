@@ -1,16 +1,19 @@
 // @flow
 import React from 'react';
 import _ from 'lodash';
+import R from 'ramda';
 import TextField from 'material-ui/TextField';
 import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton';
 import Checkbox from 'material-ui/Checkbox';
-import R from 'ramda';
+import Geosuggest from 'react-geosuggest';
 
 import DateField from '../components/inputs/DateField';
 import { validationErrorSelector, classify } from './util';
 import { sendFormFieldEvent } from '../lib/google_analytics';
 import type { Validator, UIValidator } from '../lib/validation/profile';
-import type { Profile } from '../flow/profileTypes';
+import type {
+  Profile, AddressComponentKeyMapping, GoogleMapsAddressComponent
+} from '../flow/profileTypes';
 import type { Option } from '../flow/generalTypes';
 import { CP1252_REGEX } from '../constants';
 
@@ -213,6 +216,97 @@ export function boundCheckbox(keySet: string[], label: string|React$Element<*>):
           { label }
         </span>
       </div>
+      <span className="validation-error-text">
+        {_.get(errors, keySet)}
+      </span>
+    </div>
+  );
+}
+
+const hasValue = R.and(
+  R.compose(R.not, R.isEmpty),
+  R.compose(R.not, R.isNil),
+);
+
+const getComponentForType = (components: GoogleMapsAddressComponent[], type: string) => (
+  R.find(R.propSatisfies(R.contains(type), "types"), components)
+);
+
+const profileFields = (addressMapping: AddressComponentKeyMapping, components: GoogleMapsAddressComponent[]) => {
+  let profile = {};
+  _.forOwn(addressMapping, (keySet, gmapType) => {
+    const component = getComponentForType(components, gmapType);
+    _.set(profile, keySet, component.long_name);
+  });
+  return profile;
+};
+
+const pathHasValue = R.flip(R.pathSatisfies(hasValue, R.__));
+
+const allPathsHaveValue = (addressMapping) => (
+  R.compose(R.all(R.__, R.values(addressMapping)), pathHasValue)
+);
+
+export function boundGeosuggest(
+  addressMapping: AddressComponentKeyMapping,
+  id: string,
+  label: string|React$Element<*>,
+  { placeholder, types }: { placeholder: string, types: string[] } = {}
+): React$Element<*> {
+  const keySet = [id];
+  const {
+    profile,
+    errors,
+    updateProfile,
+    validator,
+    updateValidationVisibility,
+  } = this.props;
+
+  const hasAllAddressProps = allPathsHaveValue(addressMapping);
+
+  const onSuggestSelect = (suggest) => {
+    if (!suggest || !suggest.gmaps || !suggest.gmaps.address_components) {
+      return;
+    }
+
+    const newProfile = R.merge(
+      R.clone(profile),
+      profileFields(addressMapping, suggest.gmaps.address_components)
+    );
+    updateValidationVisibility(keySet);
+    updateProfile(newProfile, validator);
+  };
+
+  const onBlur = (value) => {
+    if (!value) {
+      let clone = _.cloneDeep(profile);
+      _.forOwn(addressMapping, (addressKeySet, gmapType) => {  // eslint-disable-line no-unused-vars
+        _.set(clone, addressKeySet, null);
+      });
+      updateValidationVisibility(keySet);
+      updateProfile(clone, validator);
+    }
+  };
+
+  const hasExistingAddress = R.allPass([
+    hasValue,
+    R.unary(hasAllAddressProps),
+  ]);
+
+  const formatInitialAddress = R.ifElse(
+    hasExistingAddress,
+    R.compose(R.join(", "), R.props(R.values(addressMapping))),
+    R.always(""),
+  );
+
+  const initial = formatInitialAddress(profile);
+
+  return (
+    <div className={`bound-geosuggest ${validationErrorSelector(errors, keySet)}`}>
+      <Geosuggest id={id}
+        initialValue={initial} label={label} placeholder={placeholder} types={types}
+        onSuggestSelect={onSuggestSelect} onBlur={onBlur}
+      />
       <span className="validation-error-text">
         {_.get(errors, keySet)}
       </span>
