@@ -27,10 +27,10 @@ django-webpack-loader==0.4.1
 django==1.10.3
 djangorestframework==3.5.2
 edx-api-client==0.3.0
+edx-opaque-keys==0.4
 elasticsearch-dsl==2.1.0
 elasticsearch==2.3.0
-factory-boy==2.7.0
-fake-factory==0.7.2       # via factory-boy
+factory-boy==2.8.1
 faker==0.7.3
 html5lib==0.999999
 idna==2.1                 # via cryptography
@@ -39,12 +39,14 @@ kombu==3.0.37             # via celery, django-server-status
 newrelic==2.72.1.53
 oauthlib==2.0.0           # via python-social-auth, requests-oauthlib
 paramiko==2.0.2           # via pysftp
+pbr==1.10.0               # via stevedore
 pillow==3.4.2
 psycopg2==2.6
 pyasn1==0.1.9             # via cryptography, paramiko
 pycountry==16.11.27.1
 pycparser==2.17           # via cffi
 pyjwt==1.4.2              # via python-social-auth
+pymongo==3.4.0            # via edx-opaque-keys
 pysftp==0.2.9
 python-dateutil==2.5.3
 python-social-auth==0.2.21
@@ -55,14 +57,14 @@ raven==5.32.0
 redis==2.10.5
 requests-oauthlib==0.7.0  # via python-social-auth
 requests==2.11.1
-six==1.10.0               # via cryptography, django-role-permissions, django-server-status, edx-api-client, elasticsearch-dsl, fake-factory, faker, html5lib, python-dateutil, python-social-auth
+six==1.10.0               # via cryptography, django-role-permissions, django-server-status, edx-api-client, edx-opaque-keys, elasticsearch-dsl, faker, html5lib, python-dateutil, python-social-auth, stevedore
 static3==0.5.1
+stevedore==1.19.1         # via edx-opaque-keys
 unidecode==0.4.19         # via wagtail
 urllib3==1.19             # via elasticsearch
 uwsgi==2.0.14
 wagtail==1.8
 willow==0.4               # via wagtail
 
-# The following packages are commented out because they are
-# considered to be unsafe in a requirements file:
+# The following packages are considered to be unsafe in a requirements file:
 # setuptools                # via cryptography
