@@ -1,18 +1,22 @@
 """
 Pearson specific exam code
 """
-from operator import attrgetter
 import csv
 import logging
+from collections import OrderedDict
+from operator import attrgetter
 
-from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 import pycountry
 import pysftp
+from pysftp.exceptions import ConnectionException
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
+from paramiko import SSHException
 
 from exams.exceptions import (
     InvalidProfileDataException,
-    InvalidTsvRow,
+    InvalidTsvRowException,
+    RetryableSFTPException,
 )
 
 PEARSON_CSV_DIALECT = 'pearsontsv'
@@ -23,6 +27,7 @@ csv.register_dialect(
     delimiter='\t',
 )
 
+PEARSON_DATE_FORMAT = "%Y/%m/%d"
 PEARSON_DATETIME_FORMAT = "%Y/%m/%d %H:%M:%S"
 
 PEARSON_UPLOAD_REQUIRED_SETTINGS = [
@@ -36,109 +41,173 @@ PEARSON_UPLOAD_REQUIRED_SETTINGS = [
 log = logging.getLogger(__name__)
 
 
-def _format_datetime(dt):
+class BaseTSVWriter(object):
     """
-    Formats a datetime to Pearson's required format
+    Base class for TSV file writers.
+
+    It handles the high-level mapping and writing of the data.
+    Subclasses specify how the fields map.
     """
-    return dt.strftime(PEARSON_DATETIME_FORMAT)
+    def __init__(self, fields, field_prefix=None):
+        """
+        Initializes a new TSV writer
 
+        The first value of each fields tuple is the destination field name.
+        The second value is a str property path (e.g. "one.two.three") or
+        a callable that when passed a row returns a computed field value
 
-def _get_field_mapper(field):
-    """
-    Returns a field mapper, accepts either a property path in str form or a callable
-    """
-    if isinstance(field, str):
-        return attrgetter(field)
-    elif callable(field):
-        return field
-    else:
-        raise TypeError("field_mapper must be a str or a callable")
+        Arguments:
+            fields (List): list of (str, str|callable) tuples
+            field_prefix (str): path prefix to prefix field lookups with
+        """
+        self.fields = OrderedDict(fields)
+        self.columns = self.fields.keys()
+        self.field_mappers = {column: self.get_field_mapper(field) for (column, field) in fields}
+        self.prefix_mapper = attrgetter(field_prefix) if field_prefix is not None else None
 
+    @classmethod
+    def format_date(cls, date):
+        """
+        Formats a date to Pearson's required format
+        """
+        return date.strftime(PEARSON_DATE_FORMAT)
 
-def _tsv_writer(fields, field_prefix=None):
-    """
-    Creates a new writer for the given field mappings
+    @classmethod
+    def format_datetime(cls, dt):
+        """
+        Formats a datetime to Pearson's required format
+        """
+        return dt.strftime(PEARSON_DATETIME_FORMAT)
 
-    The first value of the fields tuple is the destination field name.
-    The second value is a str property path (e.g. "one.two.three") or
-    a callable that when passed a row returns a computed field value
+    @classmethod
+    def get_field_mapper(cls, field):
+        """
+        Returns a field mapper, accepts either a property path in str form or a callable
+        """
+        if isinstance(field, str):
+            return attrgetter(field)
+        elif callable(field):
+            return field
+        else:
+            raise TypeError("field_mapper must be a str or a callable")
 
-    Arguments:
-        fields (List): list of (str, str|callable) tuples
-        field_prefix (str): path prefix to prefix field lookups with
+    def map_row(self, row):
+        """
+        Maps a row object to a row dict
 
-    Examples:
-        test_writer = writer([
-            ('OutputField1', 'prop1'),
-            ...
-        ], field_prefix="nested")
+        Args:
+            row: the row to map to a dict
 
-        obj = SourceObj(nested=Nested(prop1=1234))
+        Returns:
+            dict:
+                row mapped to a dict using the field mappers
+        """
+        if self.prefix_mapper is not None:
+            row = self.prefix_mapper(row)
+        return {column: field_mapper(row) for column, field_mapper in self.field_mappers.items()}
 
-        test_writer(file, [obj])
-    """
-    columns = [column for column, _ in fields]
-    field_mappers = [(column, _get_field_mapper(field)) for column, field in fields]
-    prefix_mapper = attrgetter(field_prefix) if field_prefix is not None else None
+    def write(self, tsv_file, rows):
+        """
+        Writes the rows to the designated file using the configured fields.
 
-    def _map_row(row):
-        if prefix_mapper:
-            row = prefix_mapper(row)
-        return {column: field_mapper(row) for column, field_mapper in field_mappers}
+        Invalid records are not written.
 
-    def _writer(file, rows):
-        tsv_writer = csv.DictWriter(
-            file,
-            columns,
+        Arguments:
+            tsv_file: a file-like object to write the data to
+            rows: list of records to write to the tsv file
+
+        Returns:
+            (valid_record, invalid_records):
+                a tuple of which records were valid or invalid
+        """
+        file_writer = csv.DictWriter(
+            tsv_file,
+            self.columns,
             dialect=PEARSON_CSV_DIALECT,
             restval='',  # ensure we don't print 'None' into the file for optional fields
         )
 
-        tsv_writer.writeheader()
+        file_writer.writeheader()
 
         valid_rows, invalid_rows = [], []
 
         for row in rows:
             try:
-                tsv_writer.writerow(_map_row(row))
+                file_writer.writerow(self.map_row(row))
                 valid_rows.append(row)
-            except InvalidTsvRow:
+            except InvalidTsvRowException:
                 log.exception("Invalid tsv row")
                 invalid_rows.append(row)
 
         return (valid_rows, invalid_rows)
 
-    return _writer
 
-
-def _profile_country_to_alpha3(profile):
+class CDDWriter(BaseTSVWriter):
     """
-    Returns the alpha3 code of a profile's country
+    A writer for Pearson Candidate Demographic Data (CDD) files
     """
-    # Pearson requires ISO-3166 alpha3 codes, but we store as alpha2
-    try:
-        country = pycountry.countries.get(alpha_2=profile.country)
-    except KeyError as exc:
-        raise InvalidProfileDataException() from exc
-    return country.alpha_3
+
+    def __init__(self):
+        """
+        Initializes a new CDD writer
+        """
+        super().__init__([
+            ('ClientCandidateID', 'student_id'),
+            ('FirstName', 'romanized_first_name'),
+            ('LastName', 'romanized_last_name'),
+            ('Email', 'user.email'),
+            ('Address1', 'address1'),
+            ('Address2', 'address2'),
+            ('Address3', 'address3'),
+            ('City', 'city'),
+            ('State', 'state_or_territory'),
+            ('PostalCode', 'postal_code'),
+            ('Country', self.profile_country_to_alpha3),
+            ('Phone', 'phone_number'),
+            ('PhoneCountryCode', 'phone_country_code'),
+            ('LastUpdate', lambda profile: self.format_datetime(profile.updated_on)),
+        ], field_prefix='profile')
+
+    @classmethod
+    def profile_country_to_alpha3(cls, profile):
+        """
+        Returns the alpha3 code of a profile's country
+
+        Arguments:
+            profile: the profile to extract the alpha3 country code from
+
+        Returns:
+            str:
+                the alpha3 country code
+        """
+        # Pearson requires ISO-3166 alpha3 codes, but we store as alpha2
+        try:
+            country = pycountry.countries.get(alpha_2=profile.country)
+        except KeyError as exc:
+            raise InvalidProfileDataException() from exc
+        return country.alpha_3
 
 
-write_cdd_file = _tsv_writer([
-    ('ClientCandidateID', 'student_id'),
-    ('FirstName', 'romanized_first_name'),
-    ('LastName', 'romanized_last_name'),
-    ('Email', 'user.email'),
-    ('Address1', 'address1'),
-    ('Address2', 'address2'),
-    ('Address3', 'address3'),
-    ('City', 'city'),
-    ('State', 'state_or_territory'),
-    ('PostalCode', 'postal_code'),
-    ('Country', _profile_country_to_alpha3),
-    ('Phone', 'phone_number'),
-    ('PhoneCountryCode', 'phone_country_code'),
-    ('LastUpdate', lambda profile: _format_datetime(profile.updated_on)),
-], field_prefix='profile')
+class EADWriter(BaseTSVWriter):
+    """
+    A writer for Pearson Exam Authorization Data (EAD) files
+    """
+
+    def __init__(self):
+        """
+        Initializes a new EAD writer
+        """
+        super().__init__([
+            ('AuthorizationTransactionType', 'operation'),
+            ('ClientAuthorizationID', 'id'),
+            ('ClientCandidateID', 'user.profile.student_id'),
+            ('ExamSeriesCode', 'course.program.exam_series_code'),
+            ('Modules', 'course.exam_module'),
+            ('Accommodations', lambda _: ''),
+            ('EligibilityApptDateFirst', lambda exam_auth: self.format_date(exam_auth.date_first_eligible)),
+            ('EligibilityApptDateLast', lambda exam_auth: self.format_date(exam_auth.date_last_eligible)),
+            ('LastUpdate', lambda exam_auth: self.format_datetime(exam_auth.updated_on)),
+        ])
 
 
 def upload_tsv(file_path):
@@ -156,12 +225,21 @@ def upload_tsv(file_path):
 
     cnopts = pysftp.CnOpts()
     cnopts.hostkeys = None  # ignore knownhosts
-    with pysftp.Connection(
-        host=str(settings.EXAMS_SFTP_HOST),
-        port=int(settings.EXAMS_SFTP_PORT),
-        username=str(settings.EXAMS_SFTP_USERNAME),
-        password=str(settings.EXAMS_SFTP_PASSWORD),
-        cnopts=cnopts,
-    ) as sftp:
-        with sftp.cd(settings.EXAMS_SFTP_UPLOAD_DIR):
-            sftp.put(file_path)
+
+    try:
+        connection = pysftp.Connection(
+            host=str(settings.EXAMS_SFTP_HOST),
+            port=int(settings.EXAMS_SFTP_PORT),
+            username=str(settings.EXAMS_SFTP_USERNAME),
+            password=str(settings.EXAMS_SFTP_PASSWORD),
+            cnopts=cnopts,
+        )
+    except (ConnectionException, SSHException) as ex:
+        raise RetryableSFTPException() from ex
+
+    try:
+        with connection as sftp:
+            with sftp.cd(settings.EXAMS_SFTP_UPLOAD_DIR):
+                sftp.put(file_path)
+    except SSHException as ex:
+        raise RetryableSFTPException() from ex

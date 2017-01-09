@@ -27,6 +27,10 @@ class Program(models.Model):
     financial_aid_availability = models.BooleanField(default=False, null=False)
     ga_tracking_id = models.CharField(max_length=255, blank=True, default="")
 
+    # ExamSeriesCode for Pearson exams, used for authorizations
+    # tuple of (Program.exam_series_code, Course.exam_module) is used to identify an exam
+    exam_series_code = models.CharField(max_length=20, null=True, blank=True)
+
     def __str__(self):
         return self.title
 
@@ -65,6 +69,10 @@ class Course(models.Model):
     thumbnail = models.ImageField(null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     prerequisites = models.TextField(blank=True, null=True)
+
+    # ExamModule for Pearson exams, used for authorizations
+    # tuple of (Program.exam_series_code, Course.exam_module) is used to identify an exam
+    exam_module = models.CharField(max_length=20, null=True, blank=True)
 
     def __str__(self):
         return self.title
