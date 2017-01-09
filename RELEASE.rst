@@ -1,6 +1,33 @@
 Release Notes
 =============
 
+Version 0.38.0
+--------------
+
+- Upgrade test dependencies (#2269)
+- README badge for Travis CI (#2292)
+- Added exam authorization export to Pearson (#2076)
+- Use address type rather than geocode type (#2291)
+- Added Facet by Degree
+- Fixed progress widget ignores prior (passed) runs issue (#2274)
+- Document how to get a Google API key (#2267)
+- Address field with Google Places Autocomplete (#2167)
+- For staff mail to learners, pointed the return address to be help desk (#2206)
+- Added course semester facet
+- Change default log level to INFO (#2255)
+- Added NODE_MODULES_CACHE (#2259)
+- Upgrade Ramda to 0.23 (#2257)
+- Fixed test names (#2251)
+- Add image_medium to ProfileLimitedSerializer (#2205)
+- Updated alter_data commands and fixed various issues
+- Split up URLs into respective apps (#2246)
+- Fixed casing on CCD column name
+- Show spinner only on currently active button (#2228)
+- Installed eslint-plugin-mocha
+- Remove LinkedIn integration (#2231)
+- Added find_test.sh (#2239)
+- Ask users with non-Latin names to enter a Latin first name and last name (#2215)
+
 Version 0.37.0
 --------------
 
