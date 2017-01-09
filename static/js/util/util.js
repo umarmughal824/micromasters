@@ -386,7 +386,8 @@ export function programCourseInfo(program: Program): Object {
   if (program.courses) {
     totalCourses = program.courses.length;
     passedCourses = program.courses.filter(
-      course => course.runs.length > 0 && course.runs[0].status === STATUS_PASSED
+      // returns true if any course run has a `status` property set to STATUS_PASSED.
+      course => _.some(course.runs, ["status", STATUS_PASSED])
     );
     totalPassedCourses = passedCourses.length;
   }
