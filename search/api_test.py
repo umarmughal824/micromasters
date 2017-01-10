@@ -2,7 +2,7 @@
 Tests for search API functionality
 """
 import math
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 from elasticsearch_dsl import Search, Q
 from factory.django import mute_signals
 from django.test import (
@@ -66,8 +66,8 @@ class SearchAPITests(TestCase):  # pylint: disable=missing-docstring
         )
 
         with mute_signals(post_save):
-            profile = ProfileFactory.create(email_optin=True)
-            profile2 = ProfileFactory.create(email_optin=False)
+            profile = ProfileFactory.create(email_optin=True, filled_out=True)
+            profile2 = ProfileFactory.create(email_optin=False, filled_out=True)
 
         cls.learner = profile.user
         cls.learner2 = profile2.user
@@ -90,9 +90,9 @@ class SearchAPITests(TestCase):  # pylint: disable=missing-docstring
             assert search_obj.execute.called
             assert mock_get_conn.called
 
-    def test_create_search_obj_program_limit(self):
+    def test_create_search_obj_filter(self):
         """
-        Test that Search objects are created with program-limiting query parameters
+        Test that Search objects are created with program-limiting and filled_out=True query parameters
         """
         search_obj = create_search_obj(self.user)
         search_query_dict = search_obj.to_dict()
@@ -106,11 +106,20 @@ class SearchAPITests(TestCase):  # pylint: disable=missing-docstring
                 Q('term', **{'program.is_learner': True})
             ]
         )
+        expected_filled_out_query = Q(
+            'bool',
+            must=[
+                Q('term', **{'profile.filled_out': True})
+            ]
+        )
         assert 'query' in search_query_dict
         assert 'bool' in search_query_dict['query']
         assert 'filter' in search_query_dict['query']['bool']
-        assert len(search_query_dict['query']['bool']['filter']) == 1
-        assert search_query_dict['query']['bool']['filter'][0] == expected_program_query.to_dict()
+        assert len(search_query_dict['query']['bool']['filter']) == 2
+        assert search_query_dict['query']['bool']['filter'] == [
+            expected_program_query.to_dict(),
+            expected_filled_out_query.to_dict(),
+        ]
 
     @override_settings(ELASTICSEARCH_DEFAULT_PAGE_SIZE=5)
     def test_size_param_in_query(self):
@@ -126,18 +135,12 @@ class SearchAPITests(TestCase):  # pylint: disable=missing-docstring
         """
         Test that Search objects are created with proper metadata
         """
-        mock_filter_obj = MagicMock(spec=Search)
-        mock_update_from_dict_obj = MagicMock(spec=Search)
-        mock_filter_obj.filter.return_value = mock_update_from_dict_obj
         search_param_dict = {'size': 50}
-        with patch('search.api.Search', autospec=True, return_value=mock_filter_obj) as mock_search_cls:
-            create_search_obj(self.user, search_param_dict=search_param_dict)
-        mock_search_cls.assert_called_with(
-            doc_type=DOC_TYPES,
-            index=settings.ELASTICSEARCH_INDEX
-        )
-        assert mock_filter_obj.filter.call_count == 1
-        mock_update_from_dict_obj.update_from_dict.assert_called_with(search_param_dict)
+        with patch('search.api.Search.update_from_dict', autospec=True) as mock_update_from_dict:
+            search_obj = create_search_obj(self.user, search_param_dict=search_param_dict)
+        assert search_obj._doc_type == list(DOC_TYPES)  # pylint: disable=protected-access
+        assert search_obj._index == [settings.ELASTICSEARCH_INDEX]  # pylint: disable=protected-access
+        mock_update_from_dict.assert_called_with(search_obj, search_param_dict)
 
     def test_user_with_no_program_access(self):
         """
