@@ -19,7 +19,7 @@ module.exports = Object.assign(prodConfig, {
     path: path.resolve('./static/bundles/'),
     filename: "[name]-[chunkhash].js",
     chunkFilename: "[id]-[chunkhash].js",
-    crossOriginLoading: "use-credentials",
+    crossOriginLoading: "anonymous",
   },
 
   plugins: [
