@@ -1,6 +1,8 @@
 // @flow
 import React from 'react';
-import iso3166 from 'iso-3166-2';
+import R from 'ramda';
+
+import { codeToCountryName } from '../../lib/location';
 
 export default class CountryRefinementOption extends React.Component {
   props: {
@@ -10,17 +12,13 @@ export default class CountryRefinementOption extends React.Component {
     count:    number,
   };
 
-  countryName = (countryCode: string): string => (
-    iso3166.country(countryCode).name
-  );
-
   render () {
     const { active, onClick, count, label } = this.props;
     let activeClass = () => active ? "is-active" : "";
     let option = "sk-item-list-option";
     return (
       <div className={`${option} sk-item-list__item ${activeClass()}`} onClick={onClick}>
-        <input 
+        <input
           type="checkbox"
           data-qa="checkbox"
           checked={active}
@@ -29,7 +27,7 @@ export default class CountryRefinementOption extends React.Component {
         >
         </input>
         <div className={`${option}__text`}>
-          { this.countryName(label) }
+          { R.when(R.equals(""), () => 'N/A', codeToCountryName(label)) }
         </div>
         <div className={`${option}__count`}>
           { count }

@@ -4,7 +4,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import striptags from 'striptags';
 import _ from 'lodash';
-import iso3166 from 'iso-3166-2';
+import { codeToCountryName } from '../lib/location';
 import { S } from '../lib/sanctuary';
 const { Maybe, Just, Nothing } = S;
 import R from 'ramda';
@@ -273,15 +273,17 @@ export function getPreferredName(profile: Profile, last: boolean = true): string
 export function getLocation(profile: Profile, showState: boolean = true): string {
   let { country, state_or_territory, city } = profile;
   let subCountryLocation, countryLocation;
+  city = city ? `${city}, ` : "";
+
   if ( country === 'US' ) {
     let state = state_or_territory.replace(/^\D{2}-/, '');
-    subCountryLocation = showState ? `${city}, ${state}` : city;
+    subCountryLocation = showState ? `${city}${state}, ` : city;
     countryLocation = 'US';
   } else {
     subCountryLocation = city;
-    countryLocation = iso3166.country(country).name;
+    countryLocation = codeToCountryName(country);
   }
-  return `${subCountryLocation}, ${countryLocation}`;
+  return `${subCountryLocation}${countryLocation}`;
 }
 
 /**
