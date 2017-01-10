@@ -1,5 +1,6 @@
 // @flow
 /* global SETTINGS: false */
+import _ from 'lodash';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { assert } from 'chai';
@@ -19,7 +20,8 @@ import {
 } from '../../util/util';
 import {
   USER_PROFILE_RESPONSE,
-  USER_PROGRAM_RESPONSE
+  USER_PROGRAM_RESPONSE,
+  ELASTICSEARCH_RESPONSE,
 } from '../../constants';
 
 describe('LearnerResult', () => {
@@ -31,20 +33,23 @@ describe('LearnerResult', () => {
     helper.cleanup();
   });
 
-  let renderLearnerResult = (props = {}) => mount(
+  let renderElasticSearchResult = (result, props = {}) => mount(
     <MuiThemeProvider muiTheme={getMuiTheme()}>
       <Provider store={helper.store}>
         <LearnerResult
-          result={{
-            _source: {
-              profile: USER_PROFILE_RESPONSE,
-              program: USER_PROGRAM_RESPONSE,
-            }
-          }}
+          result={result}
           {...props}
         />
       </Provider>
     </MuiThemeProvider>
+  );
+
+  let renderLearnerResult = (props = {}) => renderElasticSearchResult(
+    { _source: {
+      profile: USER_PROFILE_RESPONSE,
+      program: USER_PROGRAM_RESPONSE,
+    }},
+    props
   );
 
   it("should include the user's name", () => {
@@ -119,4 +124,14 @@ describe('LearnerResult', () => {
       assert.equal(state.ui.userChipVisibility, null);
     });
   });
+
+  for (const [index, profile] of ELASTICSEARCH_RESPONSE.hits.hits.entries()) {
+    it(`should render without error with ES profile result at index ${index}`, () => {
+      let esResult = _.cloneDeep(profile);
+      esResult['program'] = USER_PROGRAM_RESPONSE;
+      assert.doesNotThrow(() => {
+        renderElasticSearchResult(esResult);
+      });
+    });
+  }
 });

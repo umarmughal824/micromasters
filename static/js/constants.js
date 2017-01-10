@@ -158,6 +158,65 @@ export const ELASTICSEARCH_RESPONSE = deepFreeze({
           },
           "id": 3
         }
+      },
+      { // worse-case profile with null props
+        "_index": "micromasters",
+        "_type": "user",
+        "_id": "4",
+        "_score": 1,
+        "_source": {
+          "profile": {
+            "username": null,
+            "filled_out": true,
+            "account_privacy": null,
+            "email_optin": true,
+            "first_name": null,
+            "last_name": null,
+            "preferred_name": null,
+            "country": null,
+            "state_or_territory": null,
+            "city": null,
+            "birth_country": null,
+            "nationality": null,
+            "date_of_birth": null,
+            "preferred_language": null,
+            "gender": null,
+            "pretty_printed_student_id": null,
+            "work_history": [
+              {
+                "id": 15,
+                "city": null,
+                "state_or_territory": null,
+                "country": null,
+                "company_name": null,
+                "position": null,
+                "industry": null,
+                "end_date": null,
+                "start_date": null
+              }
+            ],
+            "edx_level_of_education": null,
+            "education": [
+              {
+                "id": 12,
+                "degree_name": null,
+                "graduation_date": null,
+                "field_of_study": null,
+                "online_degree": false,
+                "school_name": null,
+                "school_city": null,
+                "school_state_or_territory": null,
+                "school_country": null
+              }
+            ]
+          },
+          "id": 4
+        }
+      },
+      { // extreme worst-case empty profile
+        '_source': {
+          "profile": {}
+        }
       }
     ]
   },
@@ -191,6 +250,10 @@ export const ELASTICSEARCH_RESPONSE = deepFreeze({
           "buckets": [
             {
               "key": "AF",
+              "doc_count": 2
+            },
+            {
+              "key": null,
               "doc_count": 2
             }
           ]
