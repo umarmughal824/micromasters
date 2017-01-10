@@ -160,6 +160,7 @@ def get_info_for_program(mmtrack):
         "title": mmtrack.program.title,
         "financial_aid_availability": mmtrack.financial_aid_available,
         "courses": [],
+        "pearson_exam_status": mmtrack.pearson_exam_status,
     }
     if mmtrack.financial_aid_available:
         data["financial_aid_user_info"] = {

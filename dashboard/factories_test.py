@@ -9,6 +9,7 @@ from dashboard.factories import CachedEnrollmentVerifiedFactory
 from ecommerce.models import Line, Order
 from micromasters.factories import UserFactory
 from search.base import MockedESTestCase
+from profiles.factories import ProfileFactory
 
 
 class DashboardFactoryTests(MockedESTestCase):
@@ -22,6 +23,7 @@ class DashboardFactoryTests(MockedESTestCase):
         assert Line.objects.count() == 0
         with mute_signals(post_save):
             user = UserFactory.create()
+            ProfileFactory.create(user=user)
         fa_program = ProgramFactory.create(financial_aid_availability=True, full=True)
         CachedEnrollmentVerifiedFactory.create(user=user, course_run__course__program=fa_program)
         lines = Line.objects.all()

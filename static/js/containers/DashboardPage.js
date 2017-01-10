@@ -40,6 +40,7 @@ import { findCourseRun } from '../util/util';
 import CourseListCard from '../components/dashboard/CourseListCard';
 import DashboardUserCard from '../components/dashboard/DashboardUserCard';
 import FinancialAidCard from '../components/dashboard/FinancialAidCard';
+import FinalExamCard from '../components/dashboard/FinalExamCard';
 import ErrorMessage from '../components/ErrorMessage';
 import ProgressWidget from '../components/ProgressWidget';
 import { setCalculatorDialogVisibility } from '../actions/ui';
@@ -377,6 +378,10 @@ class DashboardPage extends React.Component {
     />;
   }
 
+  navigateToProfile = () => {
+    this.context.router.push("/learner");
+  };
+
   render() {
     const {
       dashboard,
@@ -436,6 +441,11 @@ class DashboardPage extends React.Component {
           {this.renderCouponDialog()}
           <div className="first-column">
             <DashboardUserCard profile={profile} program={program}/>
+            <FinalExamCard
+              profile={profile}
+              program={program}
+              navigateToProfile={this.navigateToProfile}
+            />
             {financialAidCard}
             <CourseListCard
               program={program}

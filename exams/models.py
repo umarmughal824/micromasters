@@ -21,6 +21,9 @@ class ExamProfile(Model):
     PROFILE_FAILED = 'failed'
     PROFILE_SUCCESS = 'success'
 
+    PROFILE_ABSENT = 'absent'
+    PROFILE_SCHEDULABLE = 'schedulable'
+
     PROFILE_STATUS_CHOICES = (
         (PROFILE_PENDING, 'Sync Pending'),
         (PROFILE_IN_PROGRESS, 'Sync in Progress'),

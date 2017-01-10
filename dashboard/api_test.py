@@ -14,6 +14,8 @@ import pytz
 from django.core.exceptions import ImproperlyConfigured
 from django.test import override_settings
 
+from exams.models import ExamProfile
+
 from courses.factories import (
     CourseFactory,
     CourseRunFactory,
@@ -1030,7 +1032,8 @@ class InfoProgramTest(MockedESTestCase):
         """Test happy path"""
         self.mmtrack.configure_mock(**{
             'program': self.program,
-            'financial_aid_available': False
+            'financial_aid_available': False,
+            'pearson_exam_status': ExamProfile.PROFILE_SUCCESS,
         })
         mock_info_course.return_value = {'position_in_program': 1}
         res = api.get_info_for_program(self.mmtrack)
@@ -1042,6 +1045,7 @@ class InfoProgramTest(MockedESTestCase):
             "title": self.program.title,
             "courses": [{'position_in_program': 1}, {'position_in_program': 1}],
             "financial_aid_availability": False,
+            "pearson_exam_status": ExamProfile.PROFILE_SUCCESS,
         }
         self.assertEqual(res, expected_data)
 
@@ -1050,7 +1054,8 @@ class InfoProgramTest(MockedESTestCase):
         """Test program with no courses"""
         self.mmtrack.configure_mock(**{
             'program': self.program_no_courses,
-            'financial_aid_available': False
+            'financial_aid_available': False,
+            'pearson_exam_status': ExamProfile.PROFILE_INVALID,
         })
         res = api.get_info_for_program(self.mmtrack)
         assert mock_info_course.called is False
@@ -1060,6 +1065,7 @@ class InfoProgramTest(MockedESTestCase):
             "title": self.program_no_courses.title,
             "courses": [],
             "financial_aid_availability": False,
+            'pearson_exam_status': ExamProfile.PROFILE_INVALID,
         }
         self.assertEqual(res, expected_data)
 
@@ -1074,7 +1080,8 @@ class InfoProgramTest(MockedESTestCase):
             'financial_aid_status': 'WHO-KNOWS',
             'financial_aid_min_price': 123,
             'financial_aid_max_price': 456,
-            'financial_aid_date_documents_sent': datetime.now(pytz.utc) - timedelta(hours=12)
+            'financial_aid_date_documents_sent': datetime.now(pytz.utc) - timedelta(hours=12),
+            'pearson_exam_status': ExamProfile.PROFILE_IN_PROGRESS,
         }
         self.mmtrack.configure_mock(**kwargs)
         mock_info_course.return_value = {'position_in_program': 1}
@@ -1094,6 +1101,7 @@ class InfoProgramTest(MockedESTestCase):
                 "min_possible_cost": kwargs['financial_aid_min_price'],
                 "max_possible_cost": kwargs['financial_aid_max_price'],
                 "date_documents_sent": kwargs['financial_aid_date_documents_sent'],
-            }
+            },
+            "pearson_exam_status": ExamProfile.PROFILE_IN_PROGRESS,
         }
         self.assertEqual(res, expected_data)

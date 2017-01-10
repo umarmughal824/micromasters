@@ -5,6 +5,11 @@ import Decimal from 'decimal.js-light';
 import {
   STATUS_OFFERED,
   FA_STATUS_APPROVED,
+  PEARSON_PROFILE_ABSENT,
+  PEARSON_PROFILE_SUCCESS,
+  PEARSON_PROFILE_IN_PROGRESS,
+  PEARSON_PROFILE_INVALID,
+  PEARSON_PROFILE_SCHEDULABLE
 } from '../constants';
 import type {
   Coupon,
@@ -75,6 +80,15 @@ export const makeCourse = (positionInProgram: number): Course => {
   };
 };
 
+const PEARSON_STATUSES = [
+  PEARSON_PROFILE_ABSENT,
+  PEARSON_PROFILE_SUCCESS,
+  PEARSON_PROFILE_IN_PROGRESS,
+  PEARSON_PROFILE_INVALID,
+  PEARSON_PROFILE_SCHEDULABLE,
+  "",
+];
+
 export const makeProgram = (): Program => {
   let programId = newProgramId();
   return {
@@ -89,7 +103,10 @@ export const makeProgram = (): Program => {
       max_possible_cost: 50,
       min_possible_cost: 1000,
       id: newFinancialAidId(),
-    }
+    },
+    pearson_exam_status: PEARSON_STATUSES[
+      Math.floor(Math.random() * PEARSON_STATUSES.length)
+    ],
   };
 };
 

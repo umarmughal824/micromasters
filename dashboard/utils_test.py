@@ -11,6 +11,7 @@ from unittest.mock import (
 import pytz
 from django.core.exceptions import ImproperlyConfigured
 from django.test import override_settings
+import ddt
 
 from courses.factories import ProgramFactory, CourseFactory, CourseRunFactory
 from dashboard.api_edx_cache import CachedEdxUserData
@@ -28,8 +29,11 @@ from grades.models import FinalGrade
 from micromasters.factories import UserFactory
 from micromasters.utils import load_json_from_file
 from search.base import MockedESTestCase
+from exams.models import ExamProfile, ExamAuthorization
+from exams.factories import ExamProfileFactory, ExamAuthorizationFactory
 
 
+@ddt.ddt
 class MMTrackTest(MockedESTestCase):
     """
     Tests for the MMTrack class
@@ -717,3 +721,50 @@ class MMTrackTest(MockedESTestCase):
         key = self.crun_fa.edx_course_key
         assert mmtrack.user == self.user
         assert mmtrack.has_paid(key) is True
+
+    @ddt.data(
+        ["", "", False, False, False],
+        ["", ExamProfile.PROFILE_ABSENT, True, False, False],
+        [ExamProfile.PROFILE_INVALID, ExamProfile.PROFILE_INVALID, True, True, False],
+        [ExamProfile.PROFILE_FAILED, ExamProfile.PROFILE_INVALID, True, True, False],
+        ["", ExamProfile.PROFILE_INVALID, True, True, False],
+        [ExamProfile.PROFILE_PENDING, ExamProfile.PROFILE_IN_PROGRESS, True, True, False],
+        [ExamProfile.PROFILE_IN_PROGRESS, ExamProfile.PROFILE_IN_PROGRESS, True, True, False],
+        [ExamProfile.PROFILE_SUCCESS, ExamProfile.PROFILE_SUCCESS, True, True, False],
+        [ExamProfile.PROFILE_SUCCESS, ExamProfile.PROFILE_SCHEDULABLE, True, True, True],
+    )
+    @ddt.unpack  # pylint: disable=too-many-arguments
+    def test_get_pearson_exam_status(self, profile_status, expected_status, set_series_code, make_profile, make_auth):
+        """
+        test get_pearson_exam_status
+        """
+
+        if not set_series_code:
+            exam_series_code = self.program.exam_series_code
+            self.program.exam_series_code = None
+
+        if make_profile:
+            ExamProfileFactory.create(
+                profile=self.user.profile,
+                status=profile_status,
+            )
+
+        if make_auth:
+            now = datetime.now(pytz.utc)
+            ExamAuthorizationFactory.create(
+                user=self.user,
+                status=ExamAuthorization.STATUS_SUCCESS,
+                date_last_eligible=now + timedelta(weeks=1),
+                date_first_eligible=now - timedelta(weeks=1),
+            )
+
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program,
+            edx_user_data=self.cached_edx_user_data
+        )
+
+        assert mmtrack.get_pearson_exam_status() == expected_status
+
+        if not set_series_code:
+            self.program.exam_series_code = exam_series_code

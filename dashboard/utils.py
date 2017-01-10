@@ -4,10 +4,12 @@ Utility functions and classes for the dashboard
 import logging
 from decimal import Decimal
 
+from datetime import datetime
 from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
 from django.db import transaction
 from django.db.models import Max, Min, Q
+from pytz import utc
 
 from courses.models import CourseRun
 from dashboard.api_edx_cache import CachedEdxUserData
@@ -16,6 +18,8 @@ from financialaid.constants import FinancialAidStatus
 from financialaid.models import FinancialAid, TierProgram
 from grades.constants import FinalGradeStatus
 from grades.models import FinalGrade
+from exams.models import ExamProfile, ExamAuthorization
+from exams.utils import course_has_exam
 
 
 log = logging.getLogger(__name__)
@@ -43,6 +47,7 @@ class MMTrack:
     financial_aid_min_price = None
     financial_aid_max_price = None
     financial_aid_date_documents_sent = None
+    pearson_exam_status = None
 
     def __init__(self, user, program, edx_user_data):
         """
@@ -66,6 +71,7 @@ class MMTrack:
                 ).values_list("edx_course_key", "course__id")
             )
             self.course_ids = self.edx_key_course_map.keys()
+            self.pearson_exam_status = self.get_pearson_exam_status()
 
             if self.financial_aid_available:
                 self.paid_course_ids = set(Line.objects.filter(
@@ -311,6 +317,54 @@ class MMTrack:
             if self.has_passed_course(course_id):
                 passed_courses.add(self.edx_key_course_map[course_id])
         return len(passed_courses)
+
+    def get_pearson_exam_status(self):  # pylint: disable=too-many-return-statements
+        """
+        Get the pearson exam status for the user / program combo
+
+        Returns:
+            str: description of Pearson profile status
+        """
+
+        course_runs_for_program = CourseRun.objects.filter(
+            course__program=self.program
+        )
+
+        if not any(course_has_exam(self, cr) for cr in course_runs_for_program):
+            return ""
+
+        user = self.user
+        try:
+            exam_profile = ExamProfile.objects.get(profile=user.profile)
+        except ExamProfile.DoesNotExist:
+            return ExamProfile.PROFILE_ABSENT
+
+        if exam_profile.status in (ExamProfile.PROFILE_PENDING, ExamProfile.PROFILE_IN_PROGRESS):
+            return ExamProfile.PROFILE_IN_PROGRESS
+
+        elif exam_profile.status == ExamProfile.PROFILE_INVALID:
+            return ExamProfile.PROFILE_INVALID
+
+        elif exam_profile.status == ExamProfile.PROFILE_SUCCESS:
+            now = datetime.now(utc)
+            auths = ExamAuthorization.objects.filter(
+                user=user,
+                status=ExamAuthorization.STATUS_SUCCESS,
+                date_first_eligible__lt=now,
+                date_last_eligible__gt=now,
+            )
+
+            if auths.exists():
+                return ExamProfile.PROFILE_SCHEDULABLE
+            else:
+                return ExamProfile.PROFILE_SUCCESS
+
+        else:
+            log.error(
+                'Unexpected ExamProfile status for ExamProfile %s',
+                exam_profile.id
+            )
+            return ExamProfile.PROFILE_INVALID
 
 
 def get_mmtrack(user, program):

@@ -13,6 +13,19 @@ from seed_data.utils import add_year
 log = logging.getLogger(__name__)
 
 
+def course_has_exam(mmtrack, course_run):
+    """
+    Check if the user is authorized for an exam for a course run
+    """
+    return bool(
+        course_run and
+        course_run.edx_course_key and
+        course_run.course and
+        course_run.course.exam_module and
+        mmtrack.program.exam_series_code
+    )
+
+
 def authorize_for_exam(mmtrack, course_run):
     """
     Authorize user for exam if he has paid for course and passed course.
@@ -21,16 +34,7 @@ def authorize_for_exam(mmtrack, course_run):
         mmtrack (dashboard.utils.MMTrack): a instance of all user information about a program.
         course_run (CourseRun): A CourseRun object.
     """
-    ok_for_exam = (
-        course_run and
-        course_run.edx_course_key and
-        course_run.course and
-        course_run.course.exam_module and
-        mmtrack.program.exam_series_code and
-        mmtrack.has_paid(course_run.edx_course_key)
-    )
-
-    if ok_for_exam:
+    if course_has_exam(mmtrack, course_run) and mmtrack.has_paid(course_run.edx_course_key):
         now = datetime.datetime.now(tz=pytz.UTC)
         # if user paid for a course then create his exam profile if it is not creaated yet.
         ExamProfile.objects.get_or_create(profile=mmtrack.user.profile)

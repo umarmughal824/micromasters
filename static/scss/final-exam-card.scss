@@ -1,0 +1,58 @@
+.final-exam-card {
+  font-size: 14px;
+
+  .card-header {
+    display: flex;
+    flex-direction: row;
+
+    .exam-icon {
+      width: 40px;
+      margin-right: 10px;
+    }
+  }
+
+  .info-box {
+    background-color: $lightgrey;
+    margin: 0 5px 10px;
+    padding: 20px 22px;
+    display: flex;
+    align-items: center;
+    white-space: pre-wrap;
+
+    .flow {
+      white-space: normal;
+    }
+
+    &.split {
+      flex-direction: row;
+      white-space: pre-wrap;
+
+      > * {
+        width: 50%;
+      }
+
+      > :first-child {
+        border-right: 2px solid $histogramgrey;
+      }
+
+      .address-info {
+        padding-left: 22px;
+        display: flex;
+        justify-content: space-between;
+
+        .address {
+          display: flex;
+          flex-direction: column;
+
+          .name {
+            font-weight: 600;
+          }
+        }
+      }
+    }
+  }
+
+  .currently-ineligible {
+    margin-left: 6px;
+  }
+}

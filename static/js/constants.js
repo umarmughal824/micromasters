@@ -99,3 +99,9 @@ export const COUPON_CONTENT_TYPE_PROGRAM = 'program';
 
 export const COUPON_AMOUNT_TYPE_PERCENT_DISCOUNT = 'percent-discount';
 export const COUPON_AMOUNT_TYPE_FIXED_DISCOUNT = 'fixed-discount';
+
+export const PEARSON_PROFILE_ABSENT = 'absent';
+export const PEARSON_PROFILE_SUCCESS = 'success';
+export const PEARSON_PROFILE_IN_PROGRESS = 'in-progress';
+export const PEARSON_PROFILE_INVALID = 'invalid';
+export const PEARSON_PROFILE_SCHEDULABLE = 'schedulable';
