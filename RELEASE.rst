@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.39.0
+--------------
+
+- Use factory.Faker() (#2306)
+- Test learner search against null/undefined props
+- Add --reuse-db flag to speed up running tests locally (#2309)
+- Change status for enrollment to audit, since it&#39;s used in FA programs (#2290)
+- Fixed learner search for DEDP fails issues (#2287)
+- Don&#39;t need to make pylint disable missing-docstring for serializer Meta (#2300)
+- remove extraneous about_me serializer fields (#2296)
+
 Version 0.38.0
 --------------
 
