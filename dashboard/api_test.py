@@ -2,8 +2,9 @@
 Tests for the dashboard api functions
 """
 from datetime import datetime, timedelta
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, PropertyMock
 
+import ddt
 import pytz
 from django.core.exceptions import ImproperlyConfigured
 
@@ -19,6 +20,8 @@ from dashboard import (
 from dashboard.api_edx_cache import CachedEdxDataApi
 from dashboard.factories import CachedEnrollmentFactory, CachedCurrentGradeFactory, UserCacheRefreshTimeFactory
 from dashboard.utils import MMTrack
+from grades.constants import FinalGradeStatus
+from grades.models import FinalGrade, CourseRunGradingStatus
 from micromasters.factories import UserFactory
 from micromasters.utils import is_subset_dict
 from search.base import ESTestCase
@@ -228,6 +231,7 @@ class FormatRunTest(CourseTests):
             api.format_courserun_for_dashboard(crun, 'foo_status', self.mmtrack)
 
 
+@ddt.ddt
 class CourseRunTest(CourseTests):
     """Tests for get_status_for_courserun"""
 
@@ -273,8 +277,13 @@ class CourseRunTest(CourseTests):
         assert run_status.status == api.CourseRunStatus.CURRENTLY_ENROLLED
         assert run_status.course_run == crun
 
-    def test_check_if_passed(self):
-        """test for get_status_for_courserun for a finished course"""
+    @ddt.data(
+        (True, api.CourseRunStatus.CHECK_IF_PASSED),
+        (False, api.CourseRunStatus.CURRENTLY_ENROLLED)
+    )
+    @ddt.unpack
+    def test_check_if_passed(self, has_frozen_grades, expected_status):
+        """test for get_status_for_courserun for a finished course if enrolled"""
         self.mmtrack.configure_mock(**{
             'is_enrolled.return_value': True,
             'is_enrolled_mmtrack.return_value': True,
@@ -288,8 +297,10 @@ class CourseRunTest(CourseTests):
             enr_end=self.now-timedelta(weeks=53),
             edx_key="course-v1:edX+DemoX+Demo_Course"
         )
-        run_status = api.get_status_for_courserun(crun, self.mmtrack)
-        assert run_status.status == api.CourseRunStatus.CHECK_IF_PASSED
+        with patch('courses.models.CourseRun.has_frozen_grades', new_callable=PropertyMock) as frozen_mock:
+            frozen_mock.return_value = has_frozen_grades
+            run_status = api.get_status_for_courserun(crun, self.mmtrack)
+        assert run_status.status == expected_status
         assert run_status.course_run == crun
 
     def test_read_will_attend(self):
@@ -372,7 +383,32 @@ class CourseRunTest(CourseTests):
         run_status = api.get_status_for_courserun(current_run, self.mmtrack)
         assert run_status.status == api.CourseRunStatus.MISSED_DEADLINE
 
-    def test_not_paid_not_passed(self):
+    def test_no_past_present_future(self):
+        """
+        Test in case the course run returns False to all the
+        checks is_current, is_past, is_future, has_frozen_grades
+        """
+        self.mmtrack.configure_mock(**{
+            'is_enrolled.return_value': True,
+            'is_enrolled_mmtrack.return_value': True,
+            'has_paid.return_value': True
+        })
+        crun = self.create_run(
+            start=None,
+            end=None,
+            enr_start=None,
+            enr_end=None,
+            edx_key="course-v1:MITx+8.MechCX+2014_T1"
+        )
+        with self.assertRaises(ImproperlyConfigured):
+            api.get_status_for_courserun(crun, self.mmtrack)
+
+    @ddt.data(
+        (False, None, api.CourseRunStatus.MISSED_DEADLINE),
+        (True, False, api.CourseRunStatus.CAN_UPGRADE),
+    )
+    @ddt.unpack
+    def test_not_paid_in_past(self, is_upgradable, has_frozen_grades, expected_status):
         """test for get_status_for_courserun for course not paid but that is past"""
         self.mmtrack.configure_mock(**{
             'is_enrolled.return_value': True,
@@ -387,9 +423,59 @@ class CourseRunTest(CourseTests):
             enr_end=self.now-timedelta(weeks=53),
             edx_key="course-v1:MITx+8.MechCX+2014_T1"
         )
+        with patch('courses.models.CourseRun.is_upgradable', new_callable=PropertyMock) as upgr_mock, patch(
+            'courses.models.CourseRun.has_frozen_grades', new_callable=PropertyMock
+        ) as froz_mock:
+            upgr_mock.return_value = is_upgradable
+            froz_mock.return_value = has_frozen_grades
+            run_status = api.get_status_for_courserun(crun, self.mmtrack)
+        assert run_status.status == expected_status
+        assert run_status.course_run == crun
+
+    @patch('grades.models.FinalGrade.objects.get', autospect=True)
+    @patch('courses.models.CourseRun.is_upgradable', new_callable=PropertyMock)
+    @patch('courses.models.CourseRun.has_frozen_grades', new_callable=PropertyMock)
+    def test_not_paid_in_past_grade_frozen(self, froz_mock, upgr_mock, final_grades_mock):
+        """
+        test for get_status_for_courserun for course
+        not paid but that is past for a course with grades already frozen
+        """
+        upgr_mock.return_value = True
+        froz_mock.return_value = True
+
+        self.mmtrack.configure_mock(**{
+            'is_enrolled.return_value': True,
+            'is_enrolled_mmtrack.return_value': False,
+            'has_paid.return_value': False
+        })
+        # create a run that is past
+        crun = self.create_run(
+            start=self.now-timedelta(weeks=52),
+            end=self.now-timedelta(weeks=45),
+            enr_start=self.now-timedelta(weeks=62),
+            enr_end=self.now-timedelta(weeks=53),
+            edx_key="course-v1:MITx+8.MechCX+2014_T1"
+        )
+
+        # case when the user has not an entry in the frozen grades
+        final_grades_mock.side_effect = FinalGrade.DoesNotExist
+        run_status = api.get_status_for_courserun(crun, self.mmtrack)
+        assert run_status.status == api.CourseRunStatus.CURRENTLY_ENROLLED
+        # just resetting the mock does not remove the side effect
+        final_grades_mock.side_effect = None
+
+        # case in a final grade with status passed=True is returned
+        grade = MagicMock(passed=True)
+        final_grades_mock.return_value = grade
+        run_status = api.get_status_for_courserun(crun, self.mmtrack)
+        assert run_status.status == api.CourseRunStatus.CAN_UPGRADE
+        final_grades_mock.reset_mock()
+
+        # case in a final grade with status passed=False is returned
+        grade = MagicMock(passed=False)
+        final_grades_mock.return_value = grade
         run_status = api.get_status_for_courserun(crun, self.mmtrack)
         assert run_status.status == api.CourseRunStatus.NOT_PASSED
-        assert run_status.course_run == crun
 
     def test_status_for_run_not_enrolled_but_paid(self):
         """test for get_status_for_courserun for course without enrollment and it is paid"""
@@ -848,17 +934,41 @@ class UserProgramInfoIntegrationTest(ESTestCase):
 
         failed_course_run = course.courserun_set.first()
         failed_course_run.end_date = now - timedelta(days=1)
+        failed_course_run.upgrade_deadline = now - timedelta(days=1)
         failed_course_run.save()
         CachedEnrollmentFactory.create(user=self.user, course_run=failed_course_run)
         CachedCurrentGradeFactory.create(user=self.user, course_run=failed_course_run)
+        FinalGrade.objects.create(
+            user=self.user,
+            course_run=failed_course_run,
+            grade=0.1,
+            passed=False,
+            status=FinalGradeStatus.COMPLETE
+        )
+        CourseRunGradingStatus.objects.create(
+            course_run=failed_course_run,
+            status=FinalGradeStatus.COMPLETE
+        )
 
         # Create a course run previous to that one, and set it to be failed as well
         previous_failed_course_run = CourseRunFactory.create(
             course=course,
-            end_date=failed_course_run.end_date - timedelta(days=30)
+            end_date=failed_course_run.end_date - timedelta(days=30),
+            upgrade_deadline=failed_course_run.upgrade_deadline - timedelta(days=30)
         )
         CachedEnrollmentFactory.create(user=self.user, course_run=previous_failed_course_run)
         CachedCurrentGradeFactory.create(user=self.user, course_run=previous_failed_course_run)
+        FinalGrade.objects.create(
+            user=self.user,
+            course_run=previous_failed_course_run,
+            grade=0.1,
+            passed=False,
+            status=FinalGradeStatus.COMPLETE
+        )
+        CourseRunGradingStatus.objects.create(
+            course_run=previous_failed_course_run,
+            status=FinalGradeStatus.COMPLETE
+        )
 
         # set the last access for the cache
         UserCacheRefreshTimeFactory.create(
@@ -869,6 +979,13 @@ class UserProgramInfoIntegrationTest(ESTestCase):
         )
 
         result = api.get_user_program_info(self.user, self.edx_client)
+        # extract the right program from the result
+        program_result = None
+        for res in result:
+            if res['id'] == program.pk:
+                program_result = res
+                break
+        assert program_result is not None
         assert len(result) > 0
         assert len(result[0]['courses']) > 0
         assert len(result[0]['courses'][0]['runs']) == 2
