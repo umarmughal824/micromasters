@@ -9,7 +9,6 @@ import {
   SelectedFilters,
   RefinementListFilter,
   HitsStats,
-  Pagination,
   ResetFilters,
   RangeFilter,
   SortingSelector,
