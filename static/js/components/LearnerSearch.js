@@ -36,6 +36,8 @@ import type { Email } from '../flow/emailTypes';
 import type { AvailableProgram } from '../flow/enrollmentTypes';
 import { EDUCATION_LEVELS } from '../constants';
 
+import PatchedPagination from './search/PatchedPagination';
+
 const makeCountryNameTranslations: () => Object = () => {
   let translations = {};
   for (let code of Object.keys(iso3166.data)) {
@@ -162,7 +164,7 @@ export default class LearnerSearch extends SearchkitComponent {
         <Cell col={2} />
         <Cell col={4} className="pagination-sort">
           <SortingSelector options={sortOptions} listComponent={CustomSortingSelect} />
-          <Pagination showText={false} listComponent={CustomPaginationDisplay} />
+          <PatchedPagination showText={false} listComponent={CustomPaginationDisplay} />
         </Cell>
         <Cell col={12} className="mm-filters">
           <SelectedFilters />
