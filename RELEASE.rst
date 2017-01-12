@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.39.2
+--------------
+
+- Fixed unused variable linting error (#2338)
+
 Version 0.39.1
 --------------
 
