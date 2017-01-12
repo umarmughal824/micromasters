@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.39.1
+--------------
+
+- Fixed missing pagination in learner's search (#2337)
+
 Version 0.39.0
 --------------
 
