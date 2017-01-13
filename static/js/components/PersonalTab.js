@@ -68,7 +68,15 @@ export default class PersonalTab extends React.Component {
     dispatch(setProfileStep(PERSONAL_STEP));
   }
 
-  onChange = (selection: Option): void => {
+  componentDidUpdate() {
+    const { currentProgramEnrollment, setProgram } = this.props;
+    const selectedProgram = this.getSelectedProgramId();
+    if ( currentProgramEnrollment && !selectedProgram ) {
+      setProgram(currentProgramEnrollment);
+    }
+  }
+
+  onProgramSelect = (selection: Option): void => {
     const {
       programs,
       setProgram,
@@ -91,7 +99,7 @@ export default class PersonalTab extends React.Component {
     return (
       <Select
         value={this.getSelectedProgramId()}
-        onChange={this.onChange}
+        onChange={this.onProgramSelect}
         clearable={false}
         className={`program-selectfield ${validationErrorSelector(errors, ['program'])}`}
         errorText={_.get(errors, "program")}

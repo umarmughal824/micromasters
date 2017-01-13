@@ -37,7 +37,6 @@ import {
   setNavDrawerOpen,
   clearUI,
   setPhotoDialogVisibility,
-  setProgram,
 } from '../actions/ui';
 import { validateProfileComplete } from '../lib/validation/profile';
 import { currentOrFirstIncompleteStep } from '../util/util';
@@ -108,17 +107,9 @@ class App extends React.Component {
     const {
       programs,
       dispatch,
-      location: { pathname },
-      currentProgramEnrollment,
-      ui: { selectedProgram },
     } = this.props;
     if (programs.getStatus === undefined && SETTINGS.user) {
-      dispatch(fetchProgramEnrollments()).then(({payload}) => {
-        if ( PROFILE_REGEX.test(pathname) && currentProgramEnrollment && !selectedProgram ) {
-          let selected = payload.find(program => program.id === currentProgramEnrollment.id);
-          dispatch(setProgram(selected));
-        }
-      });
+      dispatch(fetchProgramEnrollments());
     }
   }
 

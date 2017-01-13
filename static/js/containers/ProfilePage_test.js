@@ -26,6 +26,7 @@ import {
   setProgram,
   SET_PROFILE_STEP,
   SET_TOAST_MESSAGE,
+  SET_PROGRAM,
 } from '../actions/ui';
 import { USER_PROFILE_RESPONSE, PROGRAMS } from '../test_constants';
 import {
@@ -58,6 +59,8 @@ describe("ProfilePage", function() {
     SET_PROFILE_STEP,
   ];
 
+  const SUCCESS_SET_PROGRAM_ACTIONS = SUCCESS_ACTIONS.concat(SET_PROGRAM);
+
   const REDIRECT_ACTIONS = SUCCESS_ACTIONS.concat([
     SET_PROFILE_STEP,
   ]);
@@ -77,36 +80,23 @@ describe("ProfilePage", function() {
     gmaps.cleanup();
   });
 
-  let confirmSaveButtonBehavior = (updatedProfile, pageElements, validationFailure=false) => {
+  let confirmSaveButtonBehavior = (updatedProfile, pageElements, additionalActions = []) => {
     let { div, button } = pageElements;
     button = button || div.querySelector(nextButtonSelector);
     patchUserProfileStub.throws("Invalid arguments");
     patchUserProfileStub.withArgs(SETTINGS.user.username, updatedProfile).returns(Promise.resolve(updatedProfile));
 
-    let actions;
-    if (!validationFailure) {
-      actions = [
-        UPDATE_PROFILE_VALIDATION,
-        UPDATE_VALIDATION_VISIBILITY,
-        REQUEST_PATCH_USER_PROFILE,
-        RECEIVE_PATCH_USER_PROFILE_SUCCESS,
-        CLEAR_PROFILE_EDIT,
-        SET_PROFILE_STEP,
-      ];
-    } else {
-      actions = [
-        UPDATE_PROFILE_VALIDATION,
-        UPDATE_VALIDATION_VISIBILITY,
-      ];
-    }
+    let actions = [
+      UPDATE_PROFILE_VALIDATION,
+      UPDATE_VALIDATION_VISIBILITY,
+      REQUEST_PATCH_USER_PROFILE,
+      RECEIVE_PATCH_USER_PROFILE_SUCCESS,
+      CLEAR_PROFILE_EDIT,
+      SET_PROFILE_STEP,
+    ].concat(additionalActions);
 
     return listenForActions(actions, () => {
       TestUtils.Simulate.click(button);
-    }).then(state => {
-      if (!validationFailure) {
-        assert.deepEqual(state.profiles[SETTINGS.user.username].edit, undefined);
-      }
-      return state;
     });
   };
 
@@ -151,7 +141,7 @@ describe("ProfilePage", function() {
       };
       helper.profileGetStub.withArgs(SETTINGS.user.username).returns(Promise.resolve(response));
 
-      return renderComponent("/profile/education", REDIRECT_ACTIONS).then(() => {
+      return renderComponent("/profile/education", REDIRECT_ACTIONS.concat(SET_PROGRAM)).then(() => {
         assert.equal(helper.currentLocation.pathname, "/profile/personal");
         assert.equal(getStep(), PERSONAL_STEP);
       });
@@ -188,19 +178,20 @@ describe("ProfilePage", function() {
           work_history: [],
         };
         helper.profileGetStub.withArgs(SETTINGS.user.username).returns(Promise.resolve(updatedProfile));
-        return renderComponent(`/profile/${step}`, SUCCESS_ACTIONS).then(([, div]) => {
-          // close all switches
-          if (step === 'personal') {
-            return confirmSaveButtonBehavior(updatedProfile, {div: div}, true);
-          }
-          return confirmSaveButtonBehavior(updatedProfile, {div: div});
+        let actions = step === PERSONAL_STEP ? SUCCESS_SET_PROGRAM_ACTIONS : SUCCESS_ACTIONS;
+        return renderComponent(`/profile/${step}`, actions).then(([, div]) => {
+          return confirmSaveButtonBehavior(
+            updatedProfile,
+            {div: div},
+            step === PERSONAL_STEP ? [REQUEST_ADD_PROGRAM_ENROLLMENT] : []
+          );
         });
       });
     }
   }
 
   it('shows a spinner when profile get is processing', () => {
-    return renderComponent('/profile/personal', SUCCESS_ACTIONS).then(([wrapper]) => {
+    return renderComponent('/profile/personal', SUCCESS_SET_PROGRAM_ACTIONS).then(([wrapper]) => {
       assert.equal(wrapper.find(".loader").length, 0);
       helper.store.dispatch(requestGetUserProfile(SETTINGS.user.username));
 
@@ -210,7 +201,7 @@ describe("ProfilePage", function() {
 
   for (let activity of [true, false]) {
     it(`has proper button state when the profile patch is processing when activity=${String(activity)}`, () => {
-      return renderComponent('/profile/personal', SUCCESS_ACTIONS).then(([wrapper]) => {
+      return renderComponent('/profile/personal', SUCCESS_SET_PROGRAM_ACTIONS).then(([wrapper]) => {
         if (activity) {
           helper.store.dispatch(requestPatchUserProfile(SETTINGS.user.username));
         }
@@ -255,7 +246,8 @@ describe("ProfilePage", function() {
     [EMPLOYMENT_STEP, 'EmploymentTab'],
   ]) {
     it(`sends the right props to tab components for step ${step}`, () => {
-      return renderComponent(`/profile/${step}`, SUCCESS_ACTIONS).then(([wrapper]) => {
+      let actions = step === PERSONAL_STEP ? SUCCESS_SET_PROGRAM_ACTIONS : SUCCESS_ACTIONS;
+      return renderComponent(`/profile/${step}`, actions).then(([wrapper]) => {
         let props = wrapper.find(component).props();
         assert.deepEqual(props['ui'], helper.store.getState().ui);
         assert.deepEqual(props['programs'], helper.store.getState().programs.availablePrograms);
