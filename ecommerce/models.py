@@ -36,6 +36,7 @@ from courses.models import (
     Program,
 )
 from ecommerce.exceptions import EcommerceModelException
+from financialaid.models import TimestampedModel
 from micromasters.models import (
     AuditableModel,
     AuditModel,
@@ -170,7 +171,7 @@ class CoursePrice(Model):
         return "CoursePrice for {}, price={}, is_valid={}".format(self.course_run, self.price, self.is_valid)
 
 
-class Coupon(Model):
+class Coupon(TimestampedModel):
     """
     Model for a coupon. This stores the discount for the coupon and other information about how it should be redeemed.
 
@@ -345,7 +346,7 @@ class Coupon(Model):
         )
 
 
-class UserCoupon(Model):
+class UserCoupon(TimestampedModel):
     """
     Model for a coupon attached to a user.
     """
@@ -363,7 +364,7 @@ class UserCoupon(Model):
         )
 
 
-class RedeemedCoupon(Model):
+class RedeemedCoupon(TimestampedModel):
     """
     Model for coupon which has been used in a purchase by a user.
     """
