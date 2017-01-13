@@ -10,19 +10,13 @@ import re
 import pycountry
 
 from exams.pearson.constants import (
-    PEARSON_CSV_DIALECT,
     PEARSON_DATE_FORMAT,
     PEARSON_DATETIME_FORMAT,
+    PEARSON_DIALECT_OPTIONS,
 )
 from exams.pearson.exceptions import (
     InvalidProfileDataException,
     InvalidTsvRowException,
-)
-
-# custom csv dialect for Pearson
-csv.register_dialect(
-    PEARSON_CSV_DIALECT,
-    delimiter='\t',
 )
 
 log = logging.getLogger(__name__)
@@ -110,8 +104,8 @@ class BaseTSVWriter(object):
         file_writer = csv.DictWriter(
             tsv_file,
             self.columns,
-            dialect=PEARSON_CSV_DIALECT,
             restval='',  # ensure we don't print 'None' into the file for optional fields
+            **PEARSON_DIALECT_OPTIONS
         )
 
         file_writer.writeheader()

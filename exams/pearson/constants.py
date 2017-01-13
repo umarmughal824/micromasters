@@ -1,10 +1,6 @@
-"""
-Pearson-related constants
-"""
+"""Pearson-related constants"""
 
 # Pearson TSV constants
-PEARSON_CSV_DIALECT = 'pearsontsv'
-
 PEARSON_DATE_FORMAT = "%Y/%m/%d"
 PEARSON_DATETIME_FORMAT = "%Y/%m/%d %H:%M:%S"
 
@@ -16,3 +12,8 @@ PEARSON_UPLOAD_REQUIRED_SETTINGS = [
     "EXAMS_SFTP_PASSWORD",
     "EXAMS_SFTP_UPLOAD_DIR",
 ]
+
+# Common options for Pearson TSV readers/writers
+PEARSON_DIALECT_OPTIONS = {
+    'delimiter': '\t',
+}

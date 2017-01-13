@@ -3,6 +3,7 @@ Tests for TSV writers
 """
 import io
 from datetime import date, datetime
+from unittest import TestCase as UnitTestCase
 from unittest.mock import (
     Mock,
     NonCallableMock,
@@ -28,12 +29,13 @@ from exams.pearson.writers import (
     BaseTSVWriter,
 )
 from profiles.factories import ProfileFactory
+from profiles.models import Profile
 
 FIXED_DATETIME = datetime(2016, 5, 15, 15, 2, 55, tzinfo=pytz.UTC)
 FIXED_DATE = date(2016, 5, 15)
 
 
-class TSVWriterTestCase(TestCase):
+class TSVWriterTestCase(UnitTestCase):
     """
     Base class for tests around TSVWriter implementations
     """
@@ -70,13 +72,12 @@ class BaseTSVWriterTest(TSVWriterTestCase):
         """
         Tests that _get_field_mapper handles input correctly
         """
-        with mute_signals(post_save):
-            profile = ProfileFactory.create()
+        profile = Profile(address='1 Main St')
 
-        assert BaseTSVWriter.get_field_mapper('address1')(profile) == profile.address1
+        assert BaseTSVWriter.get_field_mapper('address')(profile) == profile.address
 
         def get_addr1(profile):  # pylint: disable=missing-docstring
-            return profile.address1
+            return profile.address
 
         addr1_field_mapper = BaseTSVWriter.get_field_mapper(get_addr1)
 
@@ -186,7 +187,7 @@ class BaseTSVWriterTest(TSVWriterTestCase):
 
 
 @ddt.ddt
-class CDDWriterTest(TSVWriterTestCase):
+class CDDWriterTest(TSVWriterTestCase, TestCase):
     """
     Tests for CDDWriter
     """
@@ -276,7 +277,7 @@ class CDDWriterTest(TSVWriterTestCase):
         )
 
 
-class EADWriterTest(TSVWriterTestCase):
+class EADWriterTest(TSVWriterTestCase, TestCase):
     """
     Tests for EADWriter
     """
