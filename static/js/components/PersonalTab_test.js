@@ -7,9 +7,8 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
 import PersonalTab from './PersonalTab';
-import { PROGRAMS } from '../constants';
+import { PROGRAMS, USER_PROFILE_RESPONSE } from '../test_constants';
 import IntegrationTestHelper from '../util/integration_test_helper';
-import { USER_PROFILE_RESPONSE } from '../constants';
 import { GoogleMapsStub } from '../util/test_utils';
 
 describe("PersonalTab", () => {

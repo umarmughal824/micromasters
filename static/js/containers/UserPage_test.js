@@ -41,7 +41,8 @@ import {
   SET_SHOW_WORK_DELETE_DIALOG,
   SET_SHOW_EDUCATION_DELETE_DIALOG,
 } from '../actions/ui';
-import { USER_PROFILE_RESPONSE, HIGH_SCHOOL, DOCTORATE } from '../constants';
+import { USER_PROFILE_RESPONSE } from '../test_constants';
+import { HIGH_SCHOOL, DOCTORATE } from '../constants';
 import {
   generateNewEducation,
   generateNewWorkHistory,

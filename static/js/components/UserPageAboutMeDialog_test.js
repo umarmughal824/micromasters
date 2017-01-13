@@ -9,7 +9,7 @@ import TestUtils from 'react-addons-test-utils';
 import * as inputUtil from '../components/inputs/util';
 import { FETCH_PROCESSING } from '../actions';
 import UserPageAboutMeDialog from './UserPageAboutMeDialog';
-import { USER_PROFILE_RESPONSE } from '../constants';
+import { USER_PROFILE_RESPONSE } from '../test_constants';
 
 describe('UserPageAboutMeDialog', () => {
   let sandbox;

@@ -59,8 +59,8 @@ import {
   DASHBOARD_RESPONSE,
   USER_PROFILE_RESPONSE,
   CYBERSOURCE_CHECKOUT_RESPONSE,
-  ALL_ERRORS_VISIBLE,
-} from '../constants';
+} from '../test_constants';
+import { ALL_ERRORS_VISIBLE } from '../constants';
 import rootReducer, { INITIAL_PROFILES_STATE } from '../reducers';
 
 describe('reducers', () => {

@@ -15,10 +15,8 @@ import {
   shouldRenderRomanizedFields
 } from './profile_edit';
 import * as dateValidation from '../lib/validation/date';
-import {
-  YEAR_VALIDATION_CUTOFF,
-  USER_PROFILE_RESPONSE
-} from '../constants';
+import { YEAR_VALIDATION_CUTOFF } from '../constants';
+import { USER_PROFILE_RESPONSE } from '../test_constants';
 import { GoogleMapsStub } from './test_utils';
 
 describe('Profile Editing utility functions', () => {

@@ -23,7 +23,7 @@ import {
   DASHBOARD_RESPONSE,
   ERROR_RESPONSE,
   USER_PROFILE_RESPONSE,
-} from '../constants';
+} from '../test_constants';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import { GoogleMapsStub } from '../util/test_utils';
 import { makeStrippedHtml } from '../util/util';

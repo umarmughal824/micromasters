@@ -22,7 +22,7 @@ import {
   USER_PROFILE_RESPONSE,
   USER_PROGRAM_RESPONSE,
   ELASTICSEARCH_RESPONSE,
-} from '../../constants';
+} from '../../test_constants';
 
 describe('LearnerResult', () => {
   let helper;

@@ -9,7 +9,7 @@ import {
   USER_PROFILE_RESPONSE,
   DASHBOARD_RESPONSE,
   PROGRAMS,
-} from '../constants';
+} from '../test_constants';
 
 describe('Navbar', () => {
   const props = {

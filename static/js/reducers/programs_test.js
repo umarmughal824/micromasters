@@ -6,14 +6,12 @@ import {
   FETCH_SUCCESS,
   FETCH_FAILURE,
 } from '../actions';
+import { SET_TOAST_MESSAGE } from '../actions/ui';
 import {
-  SET_TOAST_MESSAGE,
-} from '../actions/ui';
-import {
-  PROGRAMS,
   TOAST_SUCCESS,
   TOAST_FAILURE,
 } from '../constants';
+import { PROGRAMS } from '../test_constants';
 import {
   addProgramEnrollment,
   fetchProgramEnrollments,

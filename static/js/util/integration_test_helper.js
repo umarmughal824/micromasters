@@ -12,7 +12,7 @@ import {
   COURSE_PRICES_RESPONSE,
   PROGRAMS,
   USER_PROFILE_RESPONSE,
-} from '../constants';
+} from '../test_constants';
 import {
   REQUEST_GET_USER_PROFILE,
   RECEIVE_GET_USER_PROFILE_SUCCESS,

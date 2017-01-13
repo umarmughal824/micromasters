@@ -2,7 +2,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { assert } from 'chai';
 
-import { USER_PROFILE_RESPONSE } from '../constants';
+import { USER_PROFILE_RESPONSE } from '../test_constants';
 import R from 'ramda';
 import UserChip from './UserChip';
 import { getPreferredName } from '../util/util';

@@ -14,7 +14,7 @@ import * as uiActions from '../actions/ui';
 import {
   DASHBOARD_RESPONSE,
   PROGRAMS,
-} from '../constants';
+} from '../test_constants';
 import NewEnrollmentDialog from './NewEnrollmentDialog';
 import IntegrationTestHelper from '../util/integration_test_helper';
 

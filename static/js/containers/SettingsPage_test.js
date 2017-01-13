@@ -25,7 +25,7 @@ import {
 } from '../actions/profile';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../lib/api';
-import { USER_PROFILE_RESPONSE } from '../constants';
+import { USER_PROFILE_RESPONSE } from '../test_constants';
 
 describe("SettingsPage", function() {
   this.timeout(5000);

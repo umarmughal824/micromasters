@@ -9,9 +9,11 @@ import sinon from 'sinon';
 import { FETCH_PROCESSING } from '../../actions';
 import CourseAction from './CourseAction';
 import {
-  DASHBOARD_FORMAT,
   COURSE_PRICES_RESPONSE,
   FINANCIAL_AID_PARTIAL_RESPONSE,
+} from '../../test_constants';
+import {
+  DASHBOARD_FORMAT,
   STATUS_PASSED,
   STATUS_NOT_PASSED,
   STATUS_OFFERED,

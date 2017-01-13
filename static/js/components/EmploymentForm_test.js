@@ -4,7 +4,7 @@ import { shallow } from 'enzyme';
 import { assert } from 'chai';
 
 import EmploymentForm from './EmploymentForm';
-import { USER_PROFILE_RESPONSE } from '../constants';
+import { USER_PROFILE_RESPONSE } from '../test_constants';
 import { labelSort } from '../util/util';
 
 describe("EmploymentForm", () => {

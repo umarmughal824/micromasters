@@ -15,12 +15,12 @@ import {
   profileImageValidation,
 } from './profile';
 import {
-  USER_PROFILE_RESPONSE,
   HIGH_SCHOOL,
   PERSONAL_STEP,
   EMPLOYMENT_STEP,
   ISO_8601_FORMAT,
 } from '../../constants';
+import { USER_PROFILE_RESPONSE } from '../../test_constants';
 
 describe('Profile validation functions', () => {
   let sandbox;

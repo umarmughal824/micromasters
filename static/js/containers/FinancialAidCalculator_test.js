@@ -12,7 +12,7 @@ import FinancialAidCalculator from '../containers/FinancialAidCalculator';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../lib/api';
 import { modifyTextField, modifySelectField, clearSelectField } from '../util/test_utils';
-import { DASHBOARD_RESPONSE, FINANCIAL_AID_PARTIAL_RESPONSE } from '../constants';
+import { DASHBOARD_RESPONSE, FINANCIAL_AID_PARTIAL_RESPONSE } from '../test_constants';
 import {
   requestAddFinancialAid,
   requestSkipFinancialAid,

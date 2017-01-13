@@ -8,7 +8,7 @@ import sinon from 'sinon';
 
 import CourseListCard from './CourseListCard';
 import CourseRow from './CourseRow';
-import { DASHBOARD_RESPONSE, COURSE_PRICES_RESPONSE } from '../../constants';
+import { DASHBOARD_RESPONSE, COURSE_PRICES_RESPONSE } from '../../test_constants';
 
 describe('CourseListCard', () => {
   let program, checkout, sandbox;

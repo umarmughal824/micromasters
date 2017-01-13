@@ -28,7 +28,7 @@ import {
   COURSE_PRICES_RESPONSE,
   USER_PROFILE_RESPONSE,
   PROGRAMS,
-} from '../constants';
+} from '../test_constants';
 
 describe('api', function() {
   this.timeout(5000);  // eslint-disable-line no-invalid-this

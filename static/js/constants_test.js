@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { assert } from 'chai';
 
-import { DASHBOARD_RESPONSE } from './constants';
+import { DASHBOARD_RESPONSE } from './test_constants';
 
 describe('constants', () => {
   it("doesn't duplicate any id numbers within the same type of information", () => {

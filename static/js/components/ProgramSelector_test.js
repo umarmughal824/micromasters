@@ -6,9 +6,7 @@ import Select from 'react-select';
 import sinon from 'sinon';
 
 import ProgramSelector from './ProgramSelector';
-import {
-  PROGRAMS,
-} from '../constants';
+import { PROGRAMS } from '../test_constants';
 
 describe('ProgramSelector', () => {
   let sandbox;

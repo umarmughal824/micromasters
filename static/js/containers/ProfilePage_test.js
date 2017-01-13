@@ -27,12 +27,11 @@ import {
   SET_PROFILE_STEP,
   SET_TOAST_MESSAGE,
 } from '../actions/ui';
+import { USER_PROFILE_RESPONSE, PROGRAMS } from '../test_constants';
 import {
-  USER_PROFILE_RESPONSE,
   PERSONAL_STEP,
   EDUCATION_STEP,
   EMPLOYMENT_STEP,
-  PROGRAMS,
 } from '../constants';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import * as api from '../lib/api';

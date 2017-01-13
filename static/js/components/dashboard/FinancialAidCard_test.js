@@ -13,8 +13,9 @@ import FinancialAidCard from './FinancialAidCard';
 import {
   DASHBOARD_RESPONSE,
   COURSE_PRICES_RESPONSE,
+} from '../../test_constants';
+import {
   ISO_8601_FORMAT,
-
   FA_STATUS_AUTO_APPROVED,
   FA_STATUS_PENDING_DOCS,
   FA_STATUS_DOCS_SENT,

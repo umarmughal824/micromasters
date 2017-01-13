@@ -8,9 +8,11 @@ import _ from 'lodash';
 import CourseSubRow from './CourseSubRow';
 import {
   DASHBOARD_RESPONSE,
-  DASHBOARD_MONTH_FORMAT,
   COURSE_PRICES_RESPONSE,
   FINANCIAL_AID_PARTIAL_RESPONSE,
+} from '../../test_constants';
+import {
+  DASHBOARD_MONTH_FORMAT,
   STATUS_NOT_PASSED,
   STATUS_PASSED,
   STATUS_OFFERED,

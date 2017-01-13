@@ -6,7 +6,7 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 
 import UserInfoCard from './UserInfoCard';
-import { USER_PROFILE_RESPONSE } from '../constants';
+import { USER_PROFILE_RESPONSE } from '../test_constants';
 import { mstr } from '../lib/sanctuary';
 import {
   getEmployer,

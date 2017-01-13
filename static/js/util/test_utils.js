@@ -8,7 +8,7 @@ import sinon from 'sinon';
 import _ from 'lodash';
 
 import { findCourseRun } from '../util/util';
-import { DASHBOARD_RESPONSE } from '../constants';
+import { DASHBOARD_RESPONSE } from '../test_constants';
 import type {
   Course,
   CourseRun,

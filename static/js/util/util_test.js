@@ -32,18 +32,20 @@ import {
 } from '../util/util';
 import {
   EDUCATION_LEVELS,
-  USER_PROFILE_RESPONSE,
   HIGH_SCHOOL,
   ASSOCIATE,
   BACHELORS,
   DOCTORATE,
   MASTERS,
   PROFILE_STEP_LABELS,
-  CYBERSOURCE_CHECKOUT_RESPONSE,
-  DASHBOARD_RESPONSE,
   PERSONAL_STEP,
   EDUCATION_STEP,
 } from '../constants';
+import {
+  USER_PROFILE_RESPONSE,
+  DASHBOARD_RESPONSE,
+  CYBERSOURCE_CHECKOUT_RESPONSE,
+} from '../test_constants';
 import { assertMaybeEquality, assertIsNothing } from '../lib/sanctuary_test';
 import { program } from '../components/ProgressWidget_test';
 

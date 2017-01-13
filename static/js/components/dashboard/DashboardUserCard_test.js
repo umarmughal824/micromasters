@@ -6,7 +6,7 @@ import { CardTitle } from 'react-mdl/lib/Card';
 import Link from 'react-router/lib/Link';
 
 import ProfileImage from '../../containers/ProfileImage';
-import { DASHBOARD_RESPONSE, USER_PROFILE_RESPONSE } from '../../constants';
+import { DASHBOARD_RESPONSE, USER_PROFILE_RESPONSE } from '../../test_constants';
 import DashboardUserCard from './DashboardUserCard';
 
 describe('DashboardUserCard', () => {

@@ -34,8 +34,8 @@ import {
   SET_PHOTO_DIALOG_VISIBILITY,
 } from '../actions/ui';
 import * as uiActions from '../actions/ui';
+import { USER_PROFILE_RESPONSE } from '../test_constants';
 import {
-  USER_PROFILE_RESPONSE,
   PERSONAL_STEP,
   EDUCATION_STEP,
   EMPLOYMENT_STEP,

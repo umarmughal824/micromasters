@@ -7,7 +7,7 @@ import IntegrationTestHelper from '../util/integration_test_helper';
 import {
   PROGRAMS,
   ELASTICSEARCH_RESPONSE,
-} from '../constants';
+} from '../test_constants';
 import { setEmailDialogVisibility } from '../actions/ui';
 import {
   INITIATE_SEND_EMAIL,

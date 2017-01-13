@@ -17,7 +17,7 @@ import {
   updatePhotoEdit,
   requestPatchUserPhoto,
 } from '../actions/image_upload';
-import { USER_PROFILE_RESPONSE } from '../constants';
+import { USER_PROFILE_RESPONSE } from '../test_constants';
 
 describe('ProfileImage', () => {
   let helper, sandbox, updateProfileImageStub, div;
