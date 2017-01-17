@@ -1,6 +1,21 @@
 Release Notes
 =============
 
+Version 0.40.0
+--------------
+
+- Filtered out coupons redeemed by another user (#2327)
+- Fixed infinite loop in profile validation (#2344)
+- Fixed unused variable linting error
+- Fixed missing pagination in learner&#39;s search
+- Added Adwords Remarketing Tag Insertion (#2263)
+- User can pay after course run has finished.
+- Fixed tests
+- Deleted .babelrc
+- Added functions for checking redeemable coupons (#2289)
+- Added UserCoupon, removed num_... fields, added helper properties (#2282)
+- sudo: false for Travis CI (#2311)
+
 Version 0.39.2
 --------------
 
