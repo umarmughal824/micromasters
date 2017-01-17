@@ -13,7 +13,7 @@ fi
 
 export FILES=${1:-'static/**/*/*_test.js'}
 
-$CMD --compilers js:babel-register static/js/global_init.js "$FILES" 2> >(tee "$TMP_FILE")
+$CMD --require static/js/babelhook.js static/js/global_init.js "$FILES" 2> >(tee "$TMP_FILE")
 export TEST_RESULT=$?
 export TRAVIS_BUILD_DIR=$PWD
 if [[ ! -z "$CODECOV" ]]

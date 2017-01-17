@@ -22,7 +22,7 @@ from celery.schedules import crontab
 from django.core.exceptions import ImproperlyConfigured
 
 
-VERSION = "0.39.2"
+VERSION = "0.40.0"
 
 CONFIG_PATHS = [
     os.environ.get('MICROMASTERS_CONFIG', ''),
@@ -437,6 +437,7 @@ if get_var('MICROMASTERS_BYPASS_SYSLOG', False):
 STATUS_TOKEN = get_var("STATUS_TOKEN", "")
 HEALTH_CHECK = ['CELERY', 'REDIS', 'POSTGRES', 'ELASTIC_SEARCH']
 
+ADWORDS_CONVERSION_ID = get_var("ADWORDS_CONVERSION_ID", "")
 GA_TRACKING_ID = get_var("GA_TRACKING_ID", "")
 GOOGLE_API_KEY = get_var("GOOGLE_API_KEY", "")
 SL_TRACKING_ID = get_var("SL_TRACKING_ID", "")

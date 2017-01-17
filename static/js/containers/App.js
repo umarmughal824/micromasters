@@ -74,7 +74,6 @@ class App extends React.Component {
       this.fetchUserProfile(SETTINGS.user.username);
     }
     this.fetchEnrollments();
-    this.requireCompleteProfile();
   }
 
   componentDidMount() {
@@ -97,6 +96,7 @@ class App extends React.Component {
     const { userProfile, dispatch, location: { pathname } } = this.props;
     if (userProfile.getStatus === undefined) {
       dispatch(fetchUserProfile(username)).then(() => {
+        this.requireCompleteProfile();
         if ( PROFILE_REGEX.test(pathname) ) {
           dispatch(startProfileEdit(SETTINGS.user.username));
         }

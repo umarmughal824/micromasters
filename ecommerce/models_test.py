@@ -1,12 +1,23 @@
 """
 Tests for ecommerce models
 """
+from datetime import (
+    datetime,
+    timedelta,
+)
+from unittest.mock import patch
 
-from django.core.exceptions import ValidationError
+import ddt
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import (
+    ImproperlyConfigured,
+    ValidationError,
+)
 from django.test import (
     TestCase,
     override_settings,
 )
+import pytz
 
 from courses.factories import CourseRunFactory
 from ecommerce.exceptions import EcommerceModelException
@@ -17,9 +28,14 @@ from ecommerce.factories import (
     OrderFactory,
     ReceiptFactory,
 )
-from ecommerce.models import Coupon
+from ecommerce.models import (
+    Coupon,
+    Order,
+    RedeemedCoupon,
+)
 from micromasters.utils import serialize_model_object
 from profiles.factories import UserFactory
+from profiles.models import Profile
 
 
 # pylint: disable=no-self-use
@@ -133,6 +149,7 @@ class CoursePriceTests(TestCase):
         )
 
 
+@ddt.ddt
 class CouponTests(TestCase):
     """Tests for Coupon"""
 
@@ -171,3 +188,130 @@ class CouponTests(TestCase):
         assert ex.exception.args[0]['__all__'][0].args[0] == (
             'amount_type must be one of percent-discount, fixed-discount'
         )
+
+    def test_validate_coupon_type(self):
+        """Coupon.coupon_type must be one of Coupon.COUPON_TYPES"""
+        with self.assertRaises(ValidationError) as ex:
+            CouponFactory.create(coupon_type='xyz')
+        assert ex.exception.args[0]['__all__'][0].args[0] == (
+            'coupon_type must be one of {}'.format(", ".join(Coupon.COUPON_TYPES))
+        )
+
+    def test_validate_discount_prev_run_coupon_type(self):
+        """Coupon must be for a course if Coupon.coupon_type is DISCOUNTED_PREVIOUS_RUN"""
+        run = CourseRunFactory.create()
+        for obj in [run, run.course.program]:
+            with self.assertRaises(ValidationError) as ex:
+                CouponFactory.create(coupon_type=Coupon.DISCOUNTED_PREVIOUS_COURSE, content_object=obj)
+            assert ex.exception.args[0]['__all__'][0].args[0] == (
+                'coupon must be for a course if coupon_type is discounted-previous-course'
+            )
+
+    def test_course_keys(self):
+        """
+        Coupon.course_keys should return a list of all course run keys in a program, course, or course run
+        """
+        run1 = CourseRunFactory.create()
+        run2 = CourseRunFactory.create(course=run1.course)
+        run3 = CourseRunFactory.create(course__program=run1.course.program)
+        run4 = CourseRunFactory.create(course=run3.course)
+
+        coupon_program = CouponFactory.create(
+            content_object=run1.course.program,
+        )
+        assert sorted(coupon_program.course_keys) == sorted([run.edx_course_key for run in [run1, run2, run3, run4]])
+
+        coupon_course = CouponFactory.create(content_object=run1.course)
+        assert sorted(coupon_course.course_keys) == sorted([run.edx_course_key for run in [run1, run2]])
+
+        coupon_run = CouponFactory.create(content_object=run1)
+        assert coupon_run.course_keys == [run1.edx_course_key]
+
+    def test_course_keys_invalid_content_object(self):
+        """
+        course_keys should error if we set content_object to an invalid value
+        """
+        coupon = CouponFactory.create()
+        profile_content_type = ContentType.objects.get_for_model(Profile)
+        # bypass clean()
+        Coupon.objects.filter(id=coupon.id).update(content_type=profile_content_type)
+        coupon.refresh_from_db()
+        with self.assertRaises(ImproperlyConfigured) as ex:
+            _ = coupon.course_keys
+        assert ex.exception.args[0] == "content_object expected to be one of Program, Course, CourseRun"
+
+    def test_is_valid(self):
+        """
+        Coupon.is_valid should return True if the coupon is enabled and within the valid date range
+        """
+        now = datetime.now(tz=pytz.UTC)
+        assert CouponFactory.create(enabled=True).is_valid is True
+        assert CouponFactory.create(enabled=False).is_valid is False
+        assert CouponFactory.create(activation_date=now - timedelta(days=1)).is_valid is True
+        assert CouponFactory.create(activation_date=now + timedelta(days=1)).is_valid is False
+        assert CouponFactory.create(expiration_date=now - timedelta(days=1)).is_valid is False
+        assert CouponFactory.create(expiration_date=now + timedelta(days=1)).is_valid is True
+
+    def test_is_automatic(self):
+        """
+        Coupon.is_automatic should be true if the coupon type is DISCOUNTED_PREVIOUS_COURSE
+        """
+        assert CouponFactory.create(coupon_type=Coupon.STANDARD).is_automatic is False
+        run = CourseRunFactory.create()
+        assert CouponFactory.create(
+            coupon_type=Coupon.DISCOUNTED_PREVIOUS_COURSE,
+            content_object=run.course,
+        ).is_automatic is True
+
+    @ddt.data(
+        [Order.CREATED, True, True, False],
+        [Order.CREATED, False, True, False],
+        [Order.FULFILLED, True, True, False],
+        [Order.FULFILLED, False, True, False],
+        [Order.CREATED, True, False, True],
+        [Order.CREATED, False, False, True],
+        [Order.FULFILLED, True, False, True],
+        [Order.FULFILLED, False, False, False],
+    )
+    @ddt.unpack
+    def test_user_has_redemptions_left(self, order_status, has_unpurchased_run, another_already_redeemed, expected):
+        """
+        Coupon.user_has_redemptions_left should be true if user has not yet purchased all course runs
+        """
+        run1 = CourseRunFactory.create()
+        if has_unpurchased_run:
+            CourseRunFactory.create(course__program=run1.course.program)
+
+        line = LineFactory.create(course_key=run1.edx_course_key, order__status=order_status)
+        coupon = CouponFactory.create(content_object=run1.course.program)
+        with patch(
+            'ecommerce.models.Coupon.another_user_already_redeemed',
+            autospec=True,
+        ) as _already_redeemed:
+            _already_redeemed.return_value = another_already_redeemed
+            assert coupon.user_has_redemptions_left(line.order.user) is expected
+        _already_redeemed.assert_called_with(coupon, line.order.user)
+
+    @ddt.data(
+        [Order.CREATED, True, False],
+        [Order.CREATED, False, False],
+        [Order.FULFILLED, True, True],
+        [Order.FULFILLED, False, False],
+    )
+    @ddt.unpack
+    def test_another_user_already_redeemed(self, order_status, other_user_redeemed, expected):
+        """
+        Tests for Coupon.another_user_already_redeemed
+        """
+        run1 = CourseRunFactory.create()
+        run2 = CourseRunFactory.create(course__program=run1.course.program)
+        coupon = CouponFactory.create(content_object=run1.course.program)
+
+        line1 = LineFactory.create(course_key=run1.edx_course_key, order__status=Order.FULFILLED)
+        RedeemedCoupon.objects.create(order=line1.order, coupon=coupon)
+
+        if other_user_redeemed:
+            line2 = LineFactory.create(course_key=run2.edx_course_key, order__status=order_status)
+            RedeemedCoupon.objects.create(order=line2.order, coupon=coupon)
+
+        assert coupon.another_user_already_redeemed(line1.order.user) is expected
