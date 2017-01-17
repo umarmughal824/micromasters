@@ -247,6 +247,22 @@ class Coupon(TimestampedModel):
             raise ImproperlyConfigured("content_object expected to be one of Program, Course, CourseRun")
 
     @property
+    def program(self):
+        """
+        Get the program for the coupon's content_object.
+        """
+        obj = self.content_object
+        if isinstance(obj, Program):
+            return obj
+        elif isinstance(obj, Course):
+            return obj.program
+        elif isinstance(obj, CourseRun):
+            return obj.course.program
+        else:
+            # Should probably not get here, clean() should take care of validating this
+            raise ImproperlyConfigured("content_object expected to be one of Program, Course, CourseRun")
+
+    @property
     def is_valid(self):
         """Returns true if the coupon is enabled and also within the valid date range"""
         now = datetime.now(tz=pytz.UTC)
@@ -258,12 +274,25 @@ class Coupon(TimestampedModel):
             return False
         return True
 
-    @property
-    def is_automatic(self):
+    @classmethod
+    def is_automatic_qset(cls):
         """
-        Returns true if the coupon would be redeemed automatically without input from the user.
+        Returns queryset for the coupons would be redeemed automatically without input from the user.
+
+        Returns:
+            django.db.models.query.QuerySet: A queryset
         """
-        return self.coupon_type == self.DISCOUNTED_PREVIOUS_COURSE
+        return Coupon.objects.filter(coupon_type=cls.DISCOUNTED_PREVIOUS_COURSE)
+
+    @classmethod
+    def user_coupon_qset(cls, user):
+        """
+        Returns queryset for the coupons which are attached to a user
+
+        Returns:
+            django.db.models.query.QuerySet: A queryset
+        """
+        return Coupon.objects.filter(usercoupon__user=user)
 
     def user_has_redemptions_left(self, user):
         """
@@ -298,10 +327,13 @@ class Coupon(TimestampedModel):
             bool:
                 True if the coupon is not automatic and it has already been redeemed by someone else
         """
-        return not self.is_automatic and RedeemedCoupon.objects.filter(
-            coupon=self,
-            order__status=Order.FULFILLED,
-        ).exclude(order__user=user).exists()
+        return (
+            not Coupon.is_automatic_qset().filter(id=user.id).exists() and
+            RedeemedCoupon.objects.filter(
+                coupon=self,
+                order__status=Order.FULFILLED,
+            ).exclude(order__user=user).exists()
+        )
 
     def clean(self):
         """Validate amount and content_object"""

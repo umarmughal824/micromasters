@@ -4,12 +4,17 @@ import traceback
 from urllib.parse import urljoin
 
 from django.conf import settings
+from django.db import transaction
+from django.http.response import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.exceptions import ValidationError
+from rest_framework.mixins import ListModelMixin
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.status import HTTP_200_OK
+from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet
 
 from courses.models import CourseRun
 from ecommerce.api import (
@@ -17,12 +22,20 @@ from ecommerce.api import (
     enroll_user_on_success,
     generate_cybersource_sa_payload,
     get_new_order_by_reference_number,
+    is_coupon_redeemable,
+    pick_coupons,
 )
 from ecommerce.models import (
+    Coupon,
     Order,
     Receipt,
+    UserCoupon,
 )
-from ecommerce.permissions import IsSignedByCyberSource
+from ecommerce.permissions import (
+    IsLoggedInUser,
+    IsSignedByCyberSource,
+)
+from ecommerce.serializers import CouponSerializer
 from mail.api import MailgunClient
 
 log = logging.getLogger(__name__)
@@ -152,3 +165,52 @@ class OrderFulfillmentView(APIView):
                     )
         # The response does not matter to CyberSource
         return Response()
+
+
+class CouponsView(ListModelMixin, GenericViewSet):
+    """
+    View for coupons API. This is a read-only API showing the user
+    - what coupons they have available if those coupons would be automatically applied on checkout
+    - what coupons they have for a given coupon code, even if those coupons wouldn't be automatically applied
+    """
+    authentication_classes = (
+        SessionAuthentication,
+        TokenAuthentication,
+    )
+    permission_classes = (IsAuthenticated,)
+    serializer_class = CouponSerializer
+
+    def get_queryset(self):
+        """List coupons which a user is allowed to see"""
+        return pick_coupons(self.request.user)
+
+
+class UserCouponsView(APIView):
+    """
+    View for coupon/user attachments. Used to create attachments for a user for a coupon.
+    """
+    permission_classes = (IsLoggedInUser, IsAuthenticated,)
+    authentication_classes = (
+        SessionAuthentication,
+        TokenAuthentication,
+    )
+
+    def post(self, request, code, *args, **kwargs):
+        """Attach a coupon to a user"""
+        with transaction.atomic():
+            coupon = get_object_or_404(Coupon, coupon_code=code)
+            if not is_coupon_redeemable(coupon, self.request.user):
+                # Coupon is not redeemable. Return a 404 to prevent the user from
+                raise Http404
+
+            UserCoupon.objects.get_or_create(
+                coupon=coupon,
+                user=self.request.user,
+            )
+
+            return Response(
+                status=HTTP_200_OK,
+                data={
+                    'message': 'Attached user to coupon successfully.'
+                }
+            )
