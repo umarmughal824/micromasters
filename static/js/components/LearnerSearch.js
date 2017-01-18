@@ -23,6 +23,7 @@ import ProgramFilter from './ProgramFilter';
 import LearnerResult from './search/LearnerResult';
 import CountryRefinementOption from './search/CountryRefinementOption';
 import PatchedMenuFilter from './search/PatchedMenuFilter';
+import WorkHistoryFilter from './search/WorkHistoryFilter';
 import CustomPaginationDisplay from './search/CustomPaginationDisplay';
 import CustomResetFiltersDisplay from './search/CustomResetFiltersDisplay';
 import CustomSortingSelect from './search/CustomSortingSelect';
@@ -269,6 +270,13 @@ export default class LearnerSearch extends SearchkitComponent {
             showHistogram={false}
             title="# of Courses Passed" />
         </FilterVisibilityToggle>
+        <FilterVisibilityToggle
+          {...this.props}
+          filterName="company-name"
+        >
+          <WorkHistoryFilter id="company_name" />
+        </FilterVisibilityToggle>
+
       </Card>
     );
   };

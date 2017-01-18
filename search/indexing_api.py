@@ -181,13 +181,26 @@ def serialize_program_enrolled_user(program_enrollment):
         'email': user.email
     }
     try:
-        serialized['profile'] = ProfileSerializer(user.profile).data
+        serialized['profile'] = filter_current_work(ProfileSerializer(user.profile).data)
     except Profile.DoesNotExist:
         # Just in case
         pass
 
     serialized['program'] = UserProgramSearchSerializer.serialize(program_enrollment)
     return serialized
+
+
+def filter_current_work(profile):
+    """
+    Remove work_history objects that are not current
+    Args:
+        profile (dict): serialized user Profile
+    Returns:
+        dict: Profile with filtered current work_history list
+    """
+    mod_profile = dict(profile)
+    mod_profile['work_history'] = [work for work in mod_profile['work_history'] if not work['end_date']]
+    return mod_profile
 
 
 def refresh_index():
