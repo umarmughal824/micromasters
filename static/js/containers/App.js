@@ -133,6 +133,11 @@ class App extends React.Component {
       dispatch(startProfileEdit(SETTINGS.user.username));
       dispatch(updateValidationVisibility(username, ALL_ERRORS_VISIBLE));
       dispatch(updateProfileValidation(username, errors));
+      dispatch(setToastMessage({
+        title: "Profile",
+        message: "We need to know a little bit more about you. Please complete your profile.",
+        icon: TOAST_FAILURE
+      }));
       this.context.router.push(`/profile/${idealStep}`);
     }
   }

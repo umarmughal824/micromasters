@@ -32,6 +32,7 @@ import {
   setNavDrawerOpen,
   SET_NAV_DRAWER_OPEN,
   SET_PHOTO_DIALOG_VISIBILITY,
+  SET_TOAST_MESSAGE,
 } from '../actions/ui';
 import * as uiActions from '../actions/ui';
 import { USER_PROFILE_RESPONSE } from '../test_constants';
@@ -49,6 +50,7 @@ const REDIRECT_ACTIONS = SUCCESS_ACTIONS.concat([
   UPDATE_PROFILE_VALIDATION,
   UPDATE_VALIDATION_VISIBILITY,
   SET_PROFILE_STEP,
+  SET_TOAST_MESSAGE,
 ]);
 
 describe('App', function() {
