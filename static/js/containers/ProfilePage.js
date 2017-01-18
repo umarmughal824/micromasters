@@ -16,6 +16,10 @@ import {
 } from '../util/util';
 
 class ProfilePage extends ProfileFormContainer {
+  componentDidMount() {
+    this.scrollToError();
+  }
+
   componentDidUpdate() {
     const username = SETTINGS.user.username;
     const {

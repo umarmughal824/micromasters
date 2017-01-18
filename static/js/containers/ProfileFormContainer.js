@@ -129,17 +129,21 @@ class ProfileFormContainer extends React.Component {
         dispatch(clearProfileEdit(username));
       });
     } else {
-      // `setState` is being called here because we want to guarantee that
-      // the callback executes after the `dispatch` call above. A callback
-      // passed to `setState` executes when the component next re-renders.
-      this.setState({}, () => {
-        let invalidField = document.querySelector('.invalid-input');
-        if ( invalidField !== null ) {
-          invalidField.scrollIntoView();
-        }
-      });
+      this.scrollToError();
       return Promise.reject(errors);
     }
+  }
+
+  scrollToError () {
+    // `setState` is being called here because we want to guarantee that
+    // the callback executes on the next re-render. A callback
+    // passed to `setState` executes when the component next re-renders.
+    this.setState({}, () => {
+      let invalidField = document.querySelector('.invalid-input');
+      if ( invalidField !== null ) {
+        invalidField.scrollIntoView();
+      }
+    });
   }
 
   addProgramEnrollment = (programId: number): void => {
