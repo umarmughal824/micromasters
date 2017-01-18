@@ -12,10 +12,10 @@ from courses.serializers import ProgramSerializer
 from dashboard.factories import ProgramEnrollmentFactory
 from dashboard.models import ProgramEnrollment
 from micromasters.factories import UserFactory
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
-class ProgramTests(ESTestCase):
+class ProgramTests(MockedESTestCase):
     """Tests for the Program API"""
     @classmethod
     def setUpTestData(cls):
@@ -46,7 +46,7 @@ class ProgramTests(ESTestCase):
         assert len(resp.json()) == 0
 
 
-class ProgramEnrollmentTests(ESTestCase, APITestCase):
+class ProgramEnrollmentTests(MockedESTestCase, APITestCase):
     """Tests for the ProgramEnrollment API"""
 
     @classmethod

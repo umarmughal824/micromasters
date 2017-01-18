@@ -6,7 +6,6 @@ from unittest import mock
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.test import TestCase
 
 from backends.edxorg import EdxOrgOAuth2
 from backends.utils import InvalidCredentialStored
@@ -16,11 +15,12 @@ from dashboard.tasks import (
     batch_update_user_data_subtasks
 )
 from micromasters.factories import UserFactory
+from search.base import MockedESTestCase
 
 # pylint: disable=no-self-use
 
 
-class TasksTest(TestCase):
+class TasksTest(MockedESTestCase):
     """
     Tests for periodic task which is for updating user data from edx.
     """

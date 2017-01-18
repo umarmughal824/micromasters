@@ -11,7 +11,6 @@ from django.template import RequestContext
 from django.test import (
     override_settings,
     RequestFactory,
-    TestCase,
 )
 import pytz
 from rest_framework import status
@@ -35,10 +34,11 @@ from micromasters.utils import (
     is_subset_dict,
     serialize_model_object,
 )
+from search.base import MockedESTestCase
 
 
 @ddt.ddt
-class ExceptionHandlerTest(TestCase):
+class ExceptionHandlerTest(MockedESTestCase):
     """
     Tests for the custom_exception_handler function.\
     This is a Django Rest framework custom exception handler
@@ -95,7 +95,7 @@ def format_as_iso8601(time):
 
 
 # pylint: disable=no-self-use
-class SerializerTests(TestCase):
+class SerializerTests(MockedESTestCase):
     """
     Tests for serialize_model
     """

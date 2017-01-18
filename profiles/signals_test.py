@@ -5,11 +5,11 @@ Tests for signals
 from django.contrib.auth.models import User
 
 from profiles.models import Profile
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
 # pylint: disable=no-self-use
-class SignalProfilesTest(ESTestCase):
+class SignalProfilesTest(MockedESTestCase):
     """
     Test class for signals that creates a profile whenever a user is created
     """

@@ -4,23 +4,23 @@ Base test classes for search
 from unittest.mock import patch
 
 from django.test import (
-    override_settings,
     TestCase,
 )
 
-from search.indexing_api import recreate_index
+from search import indexing_api
+from search.indexing_api import recreate_index, delete_index
 
 
 class ESTestCase(TestCase):
     """
-    Set up ES index on setup
+    Test class for test cases that need a live ES index
     """
 
     @classmethod
-    def setUpTestData(cls):
+    def setUpClass(cls):
         # Make sure index exists when signals are run.
         recreate_index()
-        super().setUpTestData()
+        super().setUpClass()
 
     def setUp(self):
         # Make sure index exists when signals are run.
@@ -31,31 +31,34 @@ class ESTestCase(TestCase):
         recreate_index()
         super().setUp()
 
+    @classmethod
+    def tearDownClass(cls):
+        delete_index()
+        super().tearDownClass()
 
-@override_settings(ELASTICSEARCH_URL="fake")
+
 class MockedESTestCase(TestCase):
     """
-    Mock ES signals
+    Test class that mocks the MicroMasters indexing API to avoid unnecessary ES index operations
     """
-
-    def setUp(self):
-        self.patchers = [
-            patch('search.api.get_conn', autospec=True),
-            patch('search.api.bulk', autospec=True, return_value=(0, [])),
-            patch('search.api.Mapping', autospec=True),
-        ]
-        for patcher in self.patchers:
+    @classmethod
+    def setUpClass(cls):
+        cls.patchers = []
+        for name, val in indexing_api.__dict__.items():
+            if callable(val):
+                cls.patchers.append(patch('search.indexing_api.{0}'.format(name), autospec=True))
+        for patcher in cls.patchers:
             patcher.start()
         try:
-            super(MockedESTestCase, self).setUp()
+            super().setUpClass()
         except:
-            for patcher in self.patchers:
+            for patcher in cls.patchers:
                 patcher.stop()
             raise
 
-    def tearDown(self):
-        try:
-            super(MockedESTestCase, self).tearDown()
-        finally:
-            for patcher in self.patchers:
-                patcher.stop()
+    @classmethod
+    def tearDownClass(cls):
+        for patcher in cls.patchers:
+            patcher.stop()
+
+        super().tearDownClass()

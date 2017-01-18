@@ -2,7 +2,6 @@
 Tests for library functions used by seed_db and alter_data commands
 """
 
-from django.test import TestCase
 from micromasters.factories import UserFactory
 from courses.factories import ProgramFactory, CourseFactory, CourseRunFactory
 from seed_data.lib import (
@@ -10,9 +9,10 @@ from seed_data.lib import (
     CourseRunFinder,
     UserFinder,
 )
+from search.base import MockedESTestCase
 
 
-class UserFinderTests(TestCase):
+class UserFinderTests(MockedESTestCase):
     """Test cases for UserFinder"""
     @classmethod
     def setUpTestData(cls):
@@ -42,7 +42,7 @@ class UserFinderTests(TestCase):
                 UserFinder.find(**param_set)
 
 
-class CourseFinderTests(TestCase):
+class CourseFinderTests(MockedESTestCase):
     """Test cases for CourseFinder"""
     def test_course_finder_success(self):  # pylint: disable=no-self-use
         """Tests that CourseFinder will return a desired course"""
@@ -60,7 +60,7 @@ class CourseFinderTests(TestCase):
         assert all([course == found_course for found_course in found_courses])
 
 
-class CourseRunFinderTests(TestCase):
+class CourseRunFinderTests(MockedESTestCase):
     """Test cases for CourseRunFinder"""
     def test_course_run_finder_success(self):  # pylint: disable=no-self-use
         """Tests that CourseRunFinder will return a desired course run"""

@@ -51,7 +51,7 @@ from roles.roles import (
     Instructor,
     Staff,
 )
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
 def format_image_expectation(profile):
@@ -63,7 +63,7 @@ def format_image_expectation(profile):
     return profile
 
 
-class ProfileBaseTests(ESTestCase):
+class ProfileBaseTests(MockedESTestCase):
     """
     Tests for profile views
     """

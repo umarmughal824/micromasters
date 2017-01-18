@@ -9,11 +9,11 @@ from factory.django import mute_signals
 from micromasters.serializers import UserSerializer, serialize_maybe_user
 from micromasters.factories import UserFactory
 from profiles.factories import ProfileFactory
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 # pylint: disable=no-self-use, missing-docstring
 
 
-class UserTests(ESTestCase):
+class UserTests(MockedESTestCase):
     """
     Tests for serializing users.
     """

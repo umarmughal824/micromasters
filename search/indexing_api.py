@@ -317,6 +317,16 @@ def clear_index():
     create_mappings()
 
 
+def delete_index():
+    """
+    Drop the index without re-creating it
+    """
+    conn = get_conn(verify=False)
+    index_name = settings.ELASTICSEARCH_INDEX
+    if conn.indices.exists(index_name):
+        conn.indices.delete(index_name)
+
+
 def recreate_index():
     """
     Wipe and recreate index and mapping, and index all items.

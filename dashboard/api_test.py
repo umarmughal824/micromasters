@@ -24,11 +24,11 @@ from grades.constants import FinalGradeStatus
 from grades.models import FinalGrade, CourseRunGradingStatus
 from micromasters.factories import UserFactory
 from micromasters.utils import is_subset_dict
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
 # pylint: disable=too-many-lines
-class StatusTest(ESTestCase):
+class StatusTest(MockedESTestCase):
     """
     Tests for the different status classes
     """
@@ -98,7 +98,7 @@ class StatusTest(ESTestCase):
         assert len(api.CourseFormatConditionalFields.get_assoc_field(api.CourseStatus.OFFERED)) == 2
 
 
-class CourseTests(ESTestCase):
+class CourseTests(MockedESTestCase):
     """Base class for APIs tests"""
 
     @classmethod
@@ -887,7 +887,7 @@ class InfoCourseTest(CourseTests):
         mock_format.assert_called_once_with(run1, api.CourseStatus.OFFERED, None, position=1)
 
 
-class UserProgramInfoIntegrationTest(ESTestCase):
+class UserProgramInfoIntegrationTest(MockedESTestCase):
     """Integration tests for get_user_program_info"""
     @classmethod
     def setUpTestData(cls):
@@ -992,7 +992,7 @@ class UserProgramInfoIntegrationTest(ESTestCase):
         assert all([run['status'] == api.CourseStatus.NOT_PASSED for run in result[0]['courses'][0]['runs']])
 
 
-class InfoProgramTest(ESTestCase):
+class InfoProgramTest(MockedESTestCase):
     """Tests for get_info_for_program"""
     @classmethod
     def setUpTestData(cls):

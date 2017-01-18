@@ -7,7 +7,6 @@ from elasticsearch_dsl import Search, Q
 from factory.django import mute_signals
 from django.test import (
     override_settings,
-    TestCase
 )
 from django.db.models.signals import post_save
 from django.conf import settings
@@ -23,6 +22,7 @@ from search.api import (
     prepare_and_execute_search,
     get_all_query_matching_emails,
 )
+from search.base import ESTestCase
 from search.indexing_api import (
     DOC_TYPES,
 )
@@ -52,7 +52,7 @@ def create_fake_search_result(hits_cls):
     return Mock(hits=hits_cls())
 
 
-class SearchAPITests(TestCase):  # pylint: disable=missing-docstring
+class SearchAPITests(ESTestCase):  # pylint: disable=missing-docstring
     @classmethod
     def setUpTestData(cls):
         with mute_signals(post_save):

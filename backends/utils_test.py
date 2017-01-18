@@ -13,11 +13,11 @@ from requests.exceptions import HTTPError
 from backends import utils
 from backends.edxorg import EdxOrgOAuth2
 from profiles.factories import UserFactory
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 # pylint: disable=protected-access
 
 
-class RefreshTest(ESTestCase):
+class RefreshTest(MockedESTestCase):
     """Class to test refresh token"""
 
     @classmethod

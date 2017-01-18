@@ -59,7 +59,7 @@ from ecommerce.models import (
 from financialaid.factories import FinancialAidFactory
 from financialaid.models import FinancialAidStatus
 from micromasters.factories import UserFactory
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
 # pylint: disable=no-self-use
@@ -84,7 +84,7 @@ def create_purchasable_course_run():
     return course_run, user
 
 
-class PurchasableTests(ESTestCase):
+class PurchasableTests(MockedESTestCase):
     """
     Tests for get_purchasable_courses and create_unfulfilled_order
     """
@@ -300,7 +300,7 @@ CYBERSOURCE_REFERENCE_PREFIX = 'prefix'
     CYBERSOURCE_PROFILE_ID=CYBERSOURCE_PROFILE_ID,
     CYBERSOURCE_SECURITY_KEY=CYBERSOURCE_SECURITY_KEY,
 )
-class CybersourceTests(ESTestCase):
+class CybersourceTests(MockedESTestCase):
     """
     Tests for generate_cybersource_sa_payload and generate_cybersource_sa_signature
     """
@@ -378,7 +378,7 @@ class CybersourceTests(ESTestCase):
 
 
 @override_settings(CYBERSOURCE_REFERENCE_PREFIX=CYBERSOURCE_REFERENCE_PREFIX)
-class ReferenceNumberTests(ESTestCase):
+class ReferenceNumberTests(MockedESTestCase):
     """
     Tests for get_order_by_reference_number and make_reference_id
     """
@@ -436,7 +436,7 @@ class ReferenceNumberTests(ESTestCase):
             assert ex.exception.args[0] == "Order {} is expected to have status 'created'".format(order.id)
 
 
-class EnrollUserTests(ESTestCase):
+class EnrollUserTests(MockedESTestCase):
     """
     Tests for enroll_user
     """
@@ -519,7 +519,7 @@ class EnrollUserTests(ESTestCase):
         assert enrollment.data == create_audit(self.line2.course_key).json
 
 
-class CouponTests(ESTestCase):
+class CouponTests(MockedESTestCase):
     """
     Tests for coupon-related API functions
     """
@@ -640,7 +640,7 @@ class CouponTests(ESTestCase):
         assert is_coupon_redeemable(coupon, self.user) is False
 
 
-class PickCouponTests(ESTestCase):
+class PickCouponTests(MockedESTestCase):
     """Tests for pick_coupon"""
 
     @classmethod

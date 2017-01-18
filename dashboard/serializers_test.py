@@ -6,7 +6,6 @@ from datetime import datetime
 import ddt
 import faker
 import pytz
-from django.test import TestCase
 from django.db.models.signals import post_save
 from factory.django import mute_signals
 
@@ -41,10 +40,11 @@ from profiles.factories import (
 from profiles.models import Profile
 from roles.models import Role
 from roles.roles import Staff
+from search.base import MockedESTestCase
 
 
 @ddt.ddt
-class UserProgramSearchSerializerTests(TestCase):
+class UserProgramSearchSerializerTests(MockedESTestCase):
     """
     Test cases for the UserProgramSearchSerializer
     """
@@ -242,7 +242,7 @@ class UserProgramSearchSerializerTests(TestCase):
             }
 
 
-class UserProgramSearchSerializerEdxTests(TestCase):
+class UserProgramSearchSerializerEdxTests(MockedESTestCase):
     """
     Test cases for the serialization of a user's course enrollments for search results
     """
@@ -398,7 +398,7 @@ class UserProgramSearchSerializerEdxTests(TestCase):
         assert len(serialized_program_user['enrollments']) == serialized_count_before_addition
 
 
-class UserProgramSemesterSerializerEdxTests(TestCase):
+class UserProgramSemesterSerializerEdxTests(MockedESTestCase):
     """
     Test cases for the serialization of a user's semester enrollments for search results
     """

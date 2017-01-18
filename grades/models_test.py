@@ -11,10 +11,10 @@ from grades.models import (
 )
 from grades.constants import FinalGradeStatus
 from micromasters.factories import UserFactory
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
-class FinalGradeModelTests(ESTestCase):
+class FinalGradeModelTests(MockedESTestCase):
     """
     Tests for final grade model
     """
@@ -52,7 +52,7 @@ class FinalGradeModelTests(ESTestCase):
                 )
 
 
-class CourseRunGradingStatusTests(ESTestCase):
+class CourseRunGradingStatusTests(MockedESTestCase):
     """
     Tests for CourseRunGradingStatus methods
     """

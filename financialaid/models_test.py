@@ -16,10 +16,10 @@ from financialaid.models import (
 )
 from micromasters.utils import serialize_model_object
 from profiles.factories import ProfileFactory
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
-class FinancialAidModelsTests(ESTestCase):
+class FinancialAidModelsTests(MockedESTestCase):
     """
     Tests for financialaid models
     """

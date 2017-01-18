@@ -2,7 +2,6 @@
 Tests for signals
 """
 from django.db.models.signals import post_save
-from django.test import TestCase
 from factory.django import mute_signals
 from rolepermissions.verifications import (
     has_role,
@@ -13,11 +12,12 @@ from rolepermissions.verifications import (
 from courses.factories import ProgramFactory
 from roles.models import Role
 from micromasters.factories import UserFactory
-
+from search.base import MockedESTestCase
 
 # pylint: disable=no-self-use
 
-class SignalsTest(TestCase):
+
+class SignalsTest(MockedESTestCase):
     """
     Tests for signals triggered by the role assignment
     """

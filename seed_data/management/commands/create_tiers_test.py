@@ -5,10 +5,10 @@ from courses.factories import ProgramFactory
 from financialaid.factories import TierProgramFactory
 from financialaid.models import Tier, TierProgram
 from seed_data.management.commands import create_tiers
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
-class CreateTiersTest(ESTestCase):
+class CreateTiersTest(MockedESTestCase):
     """
     Tests for create_tier management command
     """

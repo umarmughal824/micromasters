@@ -36,11 +36,11 @@ from profiles.serializers import (
     ProfileSerializer,
     ProfileFilledOutSerializer,
 )
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
 # pylint: disable=no-self-use
-class ProfileTests(ESTestCase):
+class ProfileTests(MockedESTestCase):
     """
     Tests for profile serializers
     """
@@ -314,7 +314,7 @@ class ProfileTests(ESTestCase):
         assert employment3.profile.work_history.count() == 1
 
 
-class ProfileFilledOutTests(ESTestCase):
+class ProfileFilledOutTests(MockedESTestCase):
     """Tests for validating filled out profiles"""
 
     @classmethod
@@ -338,6 +338,7 @@ class ProfileFilledOutTests(ESTestCase):
         """
         Create a profile and social auth
         """
+        super().setUp()
         serializer = ProfileFilledOutSerializer(self.profile)
         self.data = serializer.data
         self.profile.refresh_from_db()

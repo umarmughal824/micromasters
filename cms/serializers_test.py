@@ -1,7 +1,7 @@
 """
 Tests for CMS serializers
 """
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 from cms.serializers import (
     FacultySerializer,
     RenditionSerializer,
@@ -12,7 +12,7 @@ from courses.factories import ProgramFactory, CourseFactory
 
 
 # pylint: disable=no-self-use
-class WagtailSerializerTests(ESTestCase):
+class WagtailSerializerTests(MockedESTestCase):
     """
     Tests for WagtailSerializer
     """

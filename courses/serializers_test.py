@@ -17,11 +17,11 @@ from courses.serializers import (
 )
 from dashboard.models import ProgramEnrollment
 from profiles.factories import UserFactory
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
 # pylint: disable=no-self-use
-class CourseSerializerTests(ESTestCase):
+class CourseSerializerTests(MockedESTestCase):
     """
     Tests for CourseSerializer
     """
@@ -52,7 +52,7 @@ class CourseSerializerTests(ESTestCase):
         assert data['enrollment_text'] == course.enrollment_text
 
 
-class ProgramSerializerTests(ESTestCase):
+class ProgramSerializerTests(MockedESTestCase):
     """
     Tests for ProgramSerializer
     """

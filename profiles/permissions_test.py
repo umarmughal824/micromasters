@@ -21,11 +21,11 @@ from roles.roles import (
     Instructor,
     Staff,
 )
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
 # pylint: disable=no-self-use
-class CanEditIfOwnerTests(ESTestCase):
+class CanEditIfOwnerTests(MockedESTestCase):
     """
     Tests for CanEditIfOwner permissions
     """
@@ -67,7 +67,7 @@ class CanEditIfOwnerTests(ESTestCase):
 
 
 # pylint: disable=no-self-use
-class CanSeeIfNotPrivateTests(ESTestCase):
+class CanSeeIfNotPrivateTests(MockedESTestCase):
     """
     Tests for CanSeeIfNotPrivate permissions
     """
