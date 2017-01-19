@@ -22,7 +22,7 @@ class DashboardFactoryTests(TestCase):
         assert Line.objects.count() == 0
         with mute_signals(post_save):
             user = UserFactory.create()
-        fa_program = ProgramFactory.create(financial_aid_availability=True)
+        fa_program = ProgramFactory.create(financial_aid_availability=True, full=True)
         CachedEnrollmentVerifiedFactory.create(user=user, course_run__course__program=fa_program)
         lines = Line.objects.all()
         assert len(lines) == 1

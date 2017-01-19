@@ -68,3 +68,11 @@ def localized_datetime(dt, tz='US/Eastern'):
         return dt.astimezone(timezone(tz))
     else:
         return timezone(tz).localize(dt)
+
+
+def add_year(date, years=1):
+    """Adds a year to given datetime"""
+    try:
+        return date.replace(year=date.year + years)
+    except ValueError:
+        return date + (datetime(date.year + years, 1, 1, 0, 0, 0) - datetime(date.year, 1, 1, 0, 0, 0))
