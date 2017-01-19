@@ -37,6 +37,11 @@ from seed_data.management.commands.create_tiers import create_tiers
 
 
 MODEL_DEFAULTS = {
+    User: {
+        'is_active': True,
+        'is_staff': False,
+        'is_superuser': False
+    },
     Profile: {
         'account_privacy': 'private',
         'edx_requires_parental_consent': False,
@@ -49,33 +54,28 @@ MODEL_DEFAULTS = {
 }
 
 
-def deserialize_model_data_on_object(model_obj, data, save=True):
+def compile_model_data(model_cls, data, **additional_data):
     """
-    Sets field values on an existing model object using some supplied data
+    Compiles a dictionary of data that will be set on a model object
     """
-    non_relation_field_names = get_field_names(model_obj.__class__)
-    for k, v in filter_dict_by_key_set(data, non_relation_field_names).items():
-        setattr(model_obj, k, v)
-    if save:
-        model_obj.save()
-    return model_obj
-
-
-def deserialize_model_data(model_cls, data, relational_data=None):
-    """
-    Creates a new instance of a model class and fills in field values using some supplied data
-    """
-    non_relation_field_names = get_field_names(model_cls)
     model_data = {}
+    field_names = get_field_names(model_cls)
     # If default values have been specified, set them on the model data dict
     if model_cls in MODEL_DEFAULTS:
         model_data.update(MODEL_DEFAULTS[model_cls])
     # For all keys that match valid model fields, update the model data dict
-    model_data.update(filter_dict_by_key_set(data, non_relation_field_names))
+    model_data.update(filter_dict_by_key_set(data, field_names))
     # For any other data that has been specifically passed in, update the model data dict
-    if relational_data:
-        model_data.update(relational_data)
-    # Create a new model object based on the computed data
+    if additional_data:
+        model_data.update(additional_data)
+    return model_data
+
+
+def deserialize_model_data(model_cls, data, **additional_data):
+    """
+    Creates a new instance of a model class and fills in field values using some supplied data
+    """
+    model_data = compile_model_data(model_cls, data, **additional_data)
     return model_cls.objects.create(**model_data)
 
 
@@ -94,21 +94,18 @@ def deserialize_user_data(user_data, programs):
     """
     Deserializes a dict of mixed User/Profile data and returns the newly-inserted User
     """
-    user_model_data = user_data.copy()
-    user_model_data.update(
-        dict(
-            username=FAKE_USER_USERNAME_PREFIX + user_data['email'].split('@')[0],
-            is_active=True,
-            is_staff=False,
-            is_superuser=False
-        )
-    )
-    user = deserialize_model_data(User, user_model_data)
+    username = FAKE_USER_USERNAME_PREFIX + user_data['email'].split('@')[0]
+    user = deserialize_model_data(User, user_data, username=username)
     # Create social username
     user.social_auth.create(
         provider=EdxOrgOAuth2.name,
         uid=user.username,
     )
+    # The user data is generated in this script with mute_signals(post_save)
+    # so we need to create the profile explicitly.
+    profile = deserialize_model_data(Profile, user_data, user=user)
+    deserialize_profile_detail_data(profile, Employment, user_data['work_history'])
+    deserialize_profile_detail_data(profile, Education, user_data['education'])
     deserialize_edx_data(user, user_data, programs)
     ensure_cached_data_freshness(user)
     return user
@@ -175,7 +172,7 @@ def deserialize_profile_detail_data(profile, model_cls, profile_detail_data):
     Deserializes a list of data for a model with a many-to-one relationship with Profile (eg: Education)
     """
     for profile_detail in profile_detail_data:
-        deserialize_model_data(model_cls, profile_detail, dict(profile=profile))
+        deserialize_model_data(model_cls, profile_detail, profile=profile)
 
 
 def deserialize_user_data_list(user_data_list, programs):
@@ -184,13 +181,8 @@ def deserialize_user_data_list(user_data_list, programs):
     """
     new_user_count = 0
     for user_data in user_data_list:
-        new_user = deserialize_user_data(user_data, programs)
+        deserialize_user_data(user_data, programs)
         new_user_count += 1
-        # This function is run with mute_signals(post_save) so we need to create the profile explicitly.
-        profile = Profile.objects.create(user=new_user)
-        deserialize_model_data_on_object(profile, user_data)
-        deserialize_profile_detail_data(profile, Employment, user_data['work_history'])
-        deserialize_profile_detail_data(profile, Education, user_data['education'])
     return new_user_count
 
 
@@ -211,14 +203,14 @@ def deserialize_course_price_data(program, program_data):
 def deserialize_course_run_data(course, course_run_data):
     """Deserializes a CourseRun object"""
     course_run = deserialize_model_data(
-        CourseRun, course_run_data, dict(course=course)
+        CourseRun, course_run_data, course=course
     )
     return course_run
 
 
 def deserialize_course_data(program, course_data):
     """Deserializes a Course object"""
-    course = deserialize_model_data(Course, course_data, dict(program=program))
+    course = deserialize_model_data(Course, course_data, program=program)
     for course_run_data in course_data['course_runs']:
         deserialize_course_run_data(course, course_run_data)
     return course
