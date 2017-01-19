@@ -20,6 +20,10 @@
   ],
   "description": "Web Portal for MicroMasters",
   "env": {
+    "ADWORDS_CONVERSION_ID": {
+      "description": "Id for adwords conversion.",
+      "required": false
+    },
     "ALLOWED_HOSTS": {
       "default": "['*']",
       "description": "Array of allowed hostnames"
@@ -71,6 +75,26 @@
     },
     "ELASTICSEARCH_URL": {
       "description": "URL for connecting to Elasticsearch cluster"
+    },
+    "EXAMS_SFTP_HOST": {
+      "description": "Hostname for Pearson SFTP server",
+      "required": false
+    },
+    "EXAMS_SFTP_PORT": {
+      "description": "Port for Pearson SFTP server",
+      "required": false
+    },
+    "EXAMS_SFTP_USERNAME": {
+      "description": "Username for Pearson SFTP server authentication",
+      "required": false
+    },
+    "EXAMS_SFTP_PASSWORD": {
+      "description": "Password for Pearson SFTP server authentication",
+      "required": false
+    },
+    "EXAMS_SFTP_UPLOAD_DIR": {
+      "description": "Upload directory for files we send to Pearson",
+      "required": false
     },
     "GOOGLE_API_KEY": {
       "description": "API key for accessing Google services",
@@ -158,10 +182,6 @@
     "STATUS_TOKEN": {
       "description": "Token to access the status API.",
       "required": true
-    },
-    "ADWORDS_CONVERSION_ID": {
-      "description": "Id for adwords conversion.",
-      "required": false
     }
   },
   "keywords": [
