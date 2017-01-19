@@ -2,7 +2,7 @@
   display: none;
   align-items: center;
   flex-direction: row;
-  position: absolute;
+  position: fixed;
   background-color: $black-transparent;
   color: #c5c5c5;
   margin: 0 auto;
@@ -10,7 +10,8 @@
   padding: 20px;
   left: 0;
   right: 0;
-  z-index: 2;
+  top: 0;
+  z-index: 100;
   font-size: 16px;
 
   &.open {
