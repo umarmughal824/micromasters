@@ -4,6 +4,9 @@
 PEARSON_DATE_FORMAT = "%Y/%m/%d"
 PEARSON_DATETIME_FORMAT = "%Y/%m/%d %H:%M:%S"
 
+PEARSON_FILE_TYPE_EAC = 'eac'
+PEARSON_FILE_TYPE_VCDC = 'vcdc'
+
 # SFTP Upload constants
 PEARSON_UPLOAD_REQUIRED_SETTINGS = [
     "EXAMS_SFTP_HOST",
@@ -18,7 +21,16 @@ PEARSON_DIALECT_OPTIONS = {
     'delimiter': '\t',
 }
 
+# Only for these countries does Pearson require/support state/zip
 PEARSON_STATE_SUPPORTED_COUNTRIES = (
     "US",
     "CA",
 )
+
+# Vue Candidate Data Confirmation (VCDC) file statuses
+VCDC_SUCCESS_STATUS = "Accepted"
+VCDC_FAILURE_STATUS = "Error"
+
+# Exam Authorization Confirmation (EAC) file statuses
+EAC_SUCCESS_STATUS = "Accepted"
+EAC_FAILURE_STATUS = "Error"

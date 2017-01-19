@@ -51,7 +51,7 @@ class ExamAuthorizationFactory(DjangoModelFactory):
         lambda: FAKE.date_time_this_year(before_now=False, after_now=True, tzinfo=pytz.utc).date()
     )
     date_last_eligible = factory.LazyAttribute(
-        lambda exam_auth: exam_auth.date_first_eligible + timedelta(days=10)
+        lambda exam_auth: exam_auth.date_first_eligible + timedelta(days=365)
     )
 
     class Meta:

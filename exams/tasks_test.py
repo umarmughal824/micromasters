@@ -20,7 +20,7 @@ from exams.models import (
     ExamProfile,
 )
 from exams.tasks import (
-    _backoff,
+    batch_process_pearson_zip_files,
     export_exam_authorizations,
     export_exam_profiles,
 )
@@ -32,19 +32,6 @@ class ExamTasksTest(TestCase):
     """
     Tests for exam tasks
     """
-    @data(
-        (5, 1, 5),
-        (5, 2, 25),
-        (5, 3, 125),
-    )
-    @unpack
-    def test_backoff(self, base, retries, expected):
-        """
-        Test that _backoff is a power of settings.EXAMS_SFTP_BACKOFF_BASE
-        """
-        with self.settings(EXAMS_SFTP_BACKOFF_BASE=base):
-            assert _backoff(retries) == expected
-
     @data(
         (export_exam_authorizations, 'exams.tasks.export_exam_authorizations.retry'),
         (export_exam_profiles, 'exams.tasks.export_exam_profiles.retry'),
@@ -211,3 +198,38 @@ class ExamAuthorizationTasksTest(TestCase):
 
         for exam_auth in self.exam_auths:
             assert exam_auth in in_progress_auths
+
+
+@override_settings(FEATURES={"PEARSON_EXAMS_SYNC": True})
+class BatchProcessingTasksTest(TestCase):
+    """
+    Tests for batch response processing tasks
+    """
+
+    @patch('exams.pearson.download.ArchivedResponseProcessor')
+    @patch('exams.pearson.sftp.get_connection')
+    def test_batch_process(self, get_connection_mock, processor_mock):  # pylint: disable=no-self-use
+        """
+        Verify that batch_process_pearson_zip_files works in the happy path
+        """
+
+        batch_process_pearson_zip_files()
+
+        get_connection_mock.assert_called_once_with()
+        sftp_mock = get_connection_mock.return_value.__enter__.return_value
+
+        processor_mock.assert_called_once_with(sftp_mock)
+        processor_mock.return_value.process.assert_called_once_with()
+
+    @patch('exams.pearson.download.ArchivedResponseProcessor')
+    @patch('exams.pearson.sftp.get_connection')
+    def test_batch_process_retryable(self, get_connection_mock, processor_mock):  # pylint: disable=no-self-use
+        """
+        Verify that batch_process_pearson_zip_files doesn't error when a RetryableSFTPException raises
+        """
+        get_connection_mock.side_effect = RetryableSFTPException("")
+
+        batch_process_pearson_zip_files()
+
+        get_connection_mock.assert_called_once_with()
+        processor_mock.assert_not_called()

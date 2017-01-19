@@ -11,6 +11,10 @@ import pytz
 
 from exams.pearson.readers import (
     BaseTSVReader,
+    EACReader,
+    EACResult,
+    VCDCReader,
+    VCDCResult,
 )
 from exams.pearson.exceptions import InvalidTsvRowException
 
@@ -85,7 +89,6 @@ class BaseTSVReaderTest(UnitTestCase):
         """
         Tests the read method outputs correctly
         """
-
         PropTuple = namedtuple('PropTuple', ['prop1', 'prop2'])
         tsv_file = io.StringIO(
             "Prop1\tProp2\r\n"
@@ -104,3 +107,69 @@ class BaseTSVReaderTest(UnitTestCase):
         rows = reader.read(tsv_file)
 
         assert rows == [row]
+
+
+class VCDCReaderTest(UnitTestCase):
+    """Tests for VCDCReader"""
+    def test_vcdc_read(self):  # pylint: disable=no-self-use
+        """Test that read() correctly parses a VCDC file"""
+        sample_data = io.StringIO(
+            "ClientCandidateID\tStatus\tDate\tMessage\r\n"
+            "1\tAccepted\t2016/05/15 15:02:55\t\r\n"
+            "145\tAccepted\t2016/05/15 15:02:55\tWARNING: There be dragons\r\n"
+            "345\tError\t2016/05/15 15:02:55\tEmpty Address\r\n"
+        )
+
+        reader = VCDCReader()
+        results = reader.read(sample_data)
+
+        assert results == [
+            VCDCResult(
+                client_candidate_id=1, status='Accepted', date=FIXED_DATETIME, message=''
+            ),
+            VCDCResult(
+                client_candidate_id=145, status='Accepted', date=FIXED_DATETIME, message='WARNING: There be dragons'
+            ),
+            VCDCResult(
+                client_candidate_id=345, status='Error', date=FIXED_DATETIME, message='Empty Address'
+            ),
+        ]
+
+
+class EACReaderTest(UnitTestCase):
+    """Tests for EACReader"""
+    def test_eac_read(self):  # pylint: disable=no-self-use
+        """Test that read() correctly parses a EAC file"""
+        sample_data = io.StringIO(
+            "ClientAuthorizationID\tClientCandidateID\tStatus\tDate\tMessage\r\n"
+            "4\t1\tAccepted\t2016/05/15 15:02:55\t\r\n"
+            "5\t2\tAccepted\t2016/05/15 15:02:55\tWARNING: There be dragons\r\n"
+            "6\t3\tError\t2016/05/15 15:02:55\tInvalid profile\r\n"
+        )
+
+        reader = EACReader()
+        results = reader.read(sample_data)
+
+        assert results == [
+            EACResult(
+                exam_authorization_id=4,
+                candidate_id=1,
+                date=FIXED_DATETIME,
+                status='Accepted',
+                message=''
+            ),
+            EACResult(
+                exam_authorization_id=5,
+                candidate_id=2,
+                date=FIXED_DATETIME,
+                status='Accepted',
+                message='WARNING: There be dragons'
+            ),
+            EACResult(
+                exam_authorization_id=6,
+                candidate_id=3,
+                date=FIXED_DATETIME,
+                status='Error',
+                message='Invalid profile'
+            )
+        ]

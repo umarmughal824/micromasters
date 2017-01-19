@@ -54,7 +54,6 @@ services:
       EXAMS_SFTP_HOST: sftp
       EXAMS_SFTP_USERNAME: odl
       EXAMS_SFTP_PASSWORD: 123
-      EXAMS_SFTP_UPLOAD_DIR: share
 
     env_file: .env
     ports:
@@ -102,7 +101,6 @@ services:
       EXAMS_SFTP_HOST: sftp
       EXAMS_SFTP_USERNAME: odl
       EXAMS_SFTP_PASSWORD: 123
-      EXAMS_SFTP_UPLOAD_DIR: share
     env_file: .env
     links:
       - db
@@ -113,10 +111,10 @@ services:
   sftp:
     image: atmoz/sftp
     volumes:
-        - sftp_share:/home/odl/share
+        - sftp_share:/home/odl/results
     ports:
         - "2022:22"
-    command: odl:123:1001:1001:share
+    command: odl:123:1001:1001:results,results/topvue
 
 volumes:
   django_media: {}

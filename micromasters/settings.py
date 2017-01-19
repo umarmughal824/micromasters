@@ -501,6 +501,10 @@ CELERYBEAT_SCHEDULE = {
         'task': 'exams.tasks.export_exam_authorizations',
         'schedule': crontab(minute=0, hour='*')
     },
+    'pearson-zip-files-processing-every-1-hrs': {
+        'task': 'exams.tasks.batch_process_pearson_zip_files',
+        'schedule': crontab(minute=0, hour='*')
+    },
 }
 CELERY_TIMEZONE = 'UTC'
 
@@ -526,12 +530,14 @@ OPEN_EXCHANGE_RATES_URL = get_var("OPEN_EXCHANGE_RATES_URL", None)
 OPEN_EXCHANGE_RATES_APP_ID = get_var("OPEN_EXCHANGE_RATES_APP_ID", "")
 
 # Exams SFTP
+EXAMS_SFTP_TEMP_DIR = get_var('EXAMS_SFTP_TEMP_DIR', '/tmp')
 EXAMS_SFTP_HOST = get_var('EXAMS_SFTP_HOST', 'localhost')
 EXAMS_SFTP_PORT = get_var('EXAMS_SFTP_PORT', '22')
 EXAMS_SFTP_USERNAME = get_var('EXAMS_SFTP_USERNAME', None)
 EXAMS_SFTP_PASSWORD = get_var('EXAMS_SFTP_PASSWORD', None)
-EXAMS_SFTP_UPLOAD_DIR = get_var('EXAMS_SFTP_UPLOAD_DIR', 'results/topvue')
-EXAMS_SFTP_BACKOFF_BASE = get_var('EXAMS_SFTP_BACKOFF_BASE', 5)
+EXAMS_SFTP_UPLOAD_DIR = get_var('EXAMS_SFTP_UPLOAD_DIR', '/results/topvue')
+EXAMS_SFTP_RESULTS_DIR = get_var('EXAMS_SFTP_RESULTS_DIR', '/results')
+EXAMS_SFTP_BACKOFF_BASE = get_var('EXAMS_SFTP_BACKOFF_BASE', '5')
 
 # Pearson SSO
 EXAMS_SSO_PASSPHRASE = get_var('EXAMS_SSO_PASSPHRASE', None)
