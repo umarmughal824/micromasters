@@ -148,7 +148,7 @@ export default class CourseSubRow extends React.Component {
   );
 
   isCompletedCourseRun = (courseRun: CourseRun) => (
-    [STATUS_NOT_PASSED, STATUS_PASSED].includes(courseRun.status) 
+    [STATUS_NOT_PASSED, STATUS_PASSED].includes(courseRun.status)
   );
 
   courseRunGrade = (courseRun: CourseRun) => (
