@@ -24,13 +24,13 @@ from financialaid.factories import (
 from grades import api
 from grades.models import FinalGrade, FinalGradeStatus
 from micromasters.factories import UserFactory
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
 # pylint: disable=no-self-use, protected-access
 
 
-class GradeAPITests(ESTestCase):
+class GradeAPITests(MockedESTestCase):
     """
     Tests for final grades api
     """

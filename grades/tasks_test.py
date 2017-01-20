@@ -16,13 +16,13 @@ from grades.models import (
     FinalGradeStatus,
 )
 from micromasters.factories import UserFactory
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
 # pylint: disable=no-self-use, protected-access
 
 
-class GradeTasksTests(ESTestCase):
+class GradeTasksTests(MockedESTestCase):
     """
     Tests for final grades tasks
     """

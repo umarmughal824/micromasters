@@ -11,10 +11,10 @@ from testfixtures import LogCapture
 from backends.edxorg import EdxOrgOAuth2
 from profiles.api import get_social_username
 from profiles.factories import ProfileFactory
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
-class SocialTests(ESTestCase):
+class SocialTests(MockedESTestCase):
     """
     Tests for profile functions
     """

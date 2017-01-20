@@ -30,13 +30,13 @@ from dashboard.models import (
 )
 from micromasters.factories import UserFactory
 from micromasters.utils import load_json_from_file
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
 # pylint: disable=no-self-use
 
 
-class CachedEdxUserDataTests(ESTestCase):
+class CachedEdxUserDataTests(MockedESTestCase):
     """
     Tests for the CachedEdxUserData class
     """
@@ -101,7 +101,7 @@ class CachedEdxUserDataTests(ESTestCase):
         assert run_data.current_grade.course_id == self.p1_course_run_keys[0]
 
 
-class CachedEdxDataApiTests(ESTestCase):
+class CachedEdxDataApiTests(MockedESTestCase):
     """
     Tests for the CachedEdxDataApi class
     """

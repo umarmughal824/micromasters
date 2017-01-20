@@ -1,7 +1,6 @@
 """
 Tests for library functions used by seed_db and alter_data commands
 """
-from django.test import TestCase
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 from factory.django import mute_signals
@@ -16,9 +15,10 @@ from seed_data.management.commands.seed_db import (
     deserialize_user_data,
     deserialize_course_data,
 )
+from search.base import MockedESTestCase
 
 
-class SeedDBUtilityTests(TestCase):
+class SeedDBUtilityTests(MockedESTestCase):
     """Tests for utility functions used by the seed_db command"""
     def test_compile_model_data(self):  # pylint: disable=no-self-use
         """Tests that compile_model_data creates a dict of model data"""
@@ -40,7 +40,7 @@ class SeedDBUtilityTests(TestCase):
         assert model_obj.id is not None
 
 
-class SeedDBDeserializationTests(TestCase):
+class SeedDBDeserializationTests(MockedESTestCase):
     """Tests for object deserializers used by the seed_db command"""
     USER_DATA = {
         "first_name": "Mario",

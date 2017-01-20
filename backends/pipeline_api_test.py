@@ -15,11 +15,11 @@ from roles.models import (
     Role,
     Staff,
 )
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
 # pylint: disable=no-self-use
-class EdxPipelineApiTest(ESTestCase):
+class EdxPipelineApiTest(MockedESTestCase):
     """
     Test class for APIs run during the Python Social Auth
     authentication pipeline.

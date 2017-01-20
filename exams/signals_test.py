@@ -2,7 +2,6 @@
 Tests for exam signals
 """
 from django.contrib.auth.models import User
-from django.test import TestCase
 from django.db.models.signals import post_save
 from factory.django import mute_signals
 
@@ -26,9 +25,10 @@ from grades.models import (
     FinalGradeStatus,
 )
 from profiles.factories import ProfileFactory
+from search.base import MockedESTestCase
 
 
-class ExamSignalsTest(TestCase):
+class ExamSignalsTest(MockedESTestCase):
     """
     Tests for exam signals
     """

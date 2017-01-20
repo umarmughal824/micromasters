@@ -18,13 +18,13 @@ from courses.factories import (
 from courses.models import CourseRun
 from grades.models import CourseRunGradingStatus
 from grades.constants import FinalGradeStatus
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
 BASE_URL = "http://base.url/"
 
 
-class ProgramTests(ESTestCase):
+class ProgramTests(MockedESTestCase):
     """Tests for Program model"""
 
     def test_to_string(self):
@@ -42,7 +42,7 @@ def from_weeks(weeks, now=None):
     return now + timedelta(weeks=weeks)
 
 
-class CourseModelTests(ESTestCase):
+class CourseModelTests(MockedESTestCase):
     """Mixin for Course models"""
 
     @classmethod

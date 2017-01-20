@@ -8,7 +8,7 @@ from unittest.mock import Mock, patch
 from ddt import ddt, data
 from django.conf import settings
 from django.db.models.signals import post_save
-from django.test import TestCase, override_settings
+from django.test import override_settings
 from factory.django import mute_signals
 from requests import Response
 from rest_framework.status import HTTP_200_OK
@@ -20,14 +20,14 @@ from mail.api import MailgunClient
 from mail.models import FinancialAidEmailAudit
 from mail.views_test import mocked_json
 from profiles.factories import ProfileFactory
-
+from search.base import MockedESTestCase
 
 # pylint: disable=no-self-use
 
 
 @ddt
 @patch('requests.post')
-class MailAPITests(TestCase):
+class MailAPITests(MockedESTestCase):
     """
     Tests for the Mailgun client class
     """
@@ -165,7 +165,7 @@ class MailAPITests(TestCase):
 
 
 @patch('requests.post')
-class FinancialAidMailAPITests(TestCase):
+class FinancialAidMailAPITests(MockedESTestCase):
     """
     Tests for the Mailgun client class for financial aid
     """

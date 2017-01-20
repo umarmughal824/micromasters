@@ -19,10 +19,10 @@ from financialaid.factories import TierProgramFactory, FinancialAidFactory
 from financialaid.constants import FinancialAidStatus
 from micromasters.factories import UserFactory
 from micromasters.utils import load_json_from_file
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
-class MMTrackTest(ESTestCase):
+class MMTrackTest(MockedESTestCase):
     """
     Tests for the MMTrack class
     """

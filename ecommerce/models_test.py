@@ -14,7 +14,6 @@ from django.core.exceptions import (
     ValidationError,
 )
 from django.test import (
-    TestCase,
     override_settings,
 )
 import pytz
@@ -36,11 +35,12 @@ from ecommerce.models import (
 from micromasters.utils import serialize_model_object
 from profiles.factories import UserFactory
 from profiles.models import Profile
+from search.base import MockedESTestCase
 
 
 # pylint: disable=no-self-use
 @override_settings(CYBERSOURCE_SECURITY_KEY='fake')
-class OrderTests(TestCase):
+class OrderTests(MockedESTestCase):
     """
     Tests for Order, Line, and Receipt
     """
@@ -81,7 +81,7 @@ class OrderTests(TestCase):
         assert lines_data == [serialize_model_object(line) for line in lines]
 
 
-class CoursePriceTests(TestCase):
+class CoursePriceTests(MockedESTestCase):
     """
     Tests for CoursePrice
     """
@@ -150,7 +150,7 @@ class CoursePriceTests(TestCase):
 
 
 @ddt.ddt
-class CouponTests(TestCase):
+class CouponTests(MockedESTestCase):
     """Tests for Coupon"""
 
     def test_validate_content_object(self):

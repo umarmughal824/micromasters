@@ -15,10 +15,10 @@ import semantic_version
 import yaml
 
 from micromasters.settings import load_fallback, get_var
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
-class TestSettings(ESTestCase):
+class TestSettings(MockedESTestCase):
     """Validate that settings work as expected."""
 
     def reload_settings(self):

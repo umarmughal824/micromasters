@@ -7,14 +7,14 @@ from factory.django import mute_signals
 
 from backends.edxorg import EdxOrgOAuth2
 from profiles.factories import ProfileFactory
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 from ui.url_utils import (
     DASHBOARD_URL,
     PROFILE_URL,
 )
 
 
-class DecoratorTests(ESTestCase):
+class DecoratorTests(MockedESTestCase):
     """
     Decorator tests for UI views
     """

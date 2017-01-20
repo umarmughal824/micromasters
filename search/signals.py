@@ -16,7 +16,6 @@ from search.tasks import index_users, remove_user
 
 log = logging.getLogger(__name__)
 
-
 # all the following signal handlers do basically the same.
 # The reason why there is one function per sender is
 # because each signal handler needs to be hooked to a single sender

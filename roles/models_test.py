@@ -7,12 +7,12 @@ from courses.factories import ProgramFactory
 from micromasters.factories import UserFactory
 from roles import roles
 from roles.models import Role
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 # pylint: disable=no-self-use
 
 
-class MicroMastersRoleTest(ESTestCase):
+class MicroMastersRoleTest(MockedESTestCase):
     """
     Tests for the MicroMastersRole model
     """

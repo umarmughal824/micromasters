@@ -4,7 +4,6 @@ Tests for mail utils
 
 from unittest.mock import Mock
 from django.core.exceptions import ValidationError, ImproperlyConfigured
-from django.test import TestCase
 from requests import Response
 from rest_framework import status
 
@@ -22,9 +21,10 @@ from financialaid.constants import (
 from financialaid.factories import FinancialAidFactory
 from mail.utils import generate_financial_aid_email, generate_mailgun_response_json
 from mail.views_test import mocked_json
+from search.base import MockedESTestCase
 
 
-class MailUtilsTests(TestCase):
+class MailUtilsTests(MockedESTestCase):
     """
     Tests for mail utils
     """

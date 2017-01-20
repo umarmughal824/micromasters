@@ -7,10 +7,10 @@ from micromasters.factories import UserFactory
 from roles.api import get_advance_searchable_programs
 from roles.models import Role
 from roles.roles import Staff
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
-class APITests(ESTestCase):
+class APITests(MockedESTestCase):
     """Tests for the roles apis"""
 
     @classmethod

@@ -3,7 +3,7 @@ Tests for ecommerce admin interface
 """
 from unittest.mock import Mock
 
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 from ecommerce.admin import OrderAdmin
 from ecommerce.factories import OrderFactory
@@ -12,7 +12,7 @@ from profiles.factories import UserFactory
 
 
 # pylint: disable=no-self-use
-class AdminTest(ESTestCase):
+class AdminTest(MockedESTestCase):
     """
     Tests specifically whether new FinancialAidAudit object is created when the financial aid
     admin model is changed.

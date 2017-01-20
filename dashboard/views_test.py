@@ -21,10 +21,10 @@ from dashboard.factories import UserCacheRefreshTimeFactory
 from dashboard.models import ProgramEnrollment, CachedEnrollment
 from micromasters.exceptions import PossiblyImproperlyConfigured
 from micromasters.factories import UserFactory
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
-class DashboardTest(APITestCase):
+class DashboardTest(MockedESTestCase, APITestCase):
     """
     Tests for dashboard Rest API
     """
@@ -81,7 +81,7 @@ class DashboardTest(APITestCase):
         assert [self.program_1.id, self.program_2.id] == [res_item['id'] for res_item in result.data]
 
 
-class DashboardTokensTest(APITestCase):
+class DashboardTokensTest(MockedESTestCase, APITestCase):
     """
     Tests for access tokens in dashboard Rest API
     """
@@ -171,7 +171,7 @@ class DashboardTokensTest(APITestCase):
         assert res.status_code == status.HTTP_400_BAD_REQUEST
 
 
-class UserCourseEnrollmentTest(ESTestCase, APITestCase):
+class UserCourseEnrollmentTest(MockedESTestCase, APITestCase):
     """
     Tests for the UserCourseEnrollment REST API
     """

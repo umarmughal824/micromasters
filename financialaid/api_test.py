@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 import ddt
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models.signals import post_save
-from django.test import TestCase
 from factory.django import mute_signals
 import pytz
 
@@ -34,6 +33,7 @@ from financialaid.models import (
 from profiles.factories import ProfileFactory
 from roles.models import Role
 from roles.roles import Staff, Instructor
+from search.base import MockedESTestCase
 
 
 def create_program(create_tiers=True, past=False):
@@ -108,7 +108,7 @@ def create_enrolled_profile(program, role=None, **profile_kwargs):
     return profile
 
 
-class FinancialAidBaseTestCase(TestCase):
+class FinancialAidBaseTestCase(MockedESTestCase):
     """
     Base test case for financial aid test setup
     """
@@ -352,7 +352,7 @@ class CoursePriceAPITests(FinancialAidBaseTestCase):
         )
 
 
-class ExchangeRateAPITests(TestCase):
+class ExchangeRateAPITests(MockedESTestCase):
     """
     Tests for financial aid exchange rate api backend
     """

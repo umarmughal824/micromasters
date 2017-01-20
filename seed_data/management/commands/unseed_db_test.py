@@ -1,7 +1,6 @@
 """
 Tests for the unseed_db command
 """
-from django.test import TestCase
 from django.contrib.auth.models import User
 from micromasters.factories import UserFactory
 from courses.factories import ProgramFactory
@@ -11,9 +10,10 @@ from seed_data.management.commands import (
     FAKE_USER_USERNAME_PREFIX,
     FAKE_PROGRAM_DESC_PREFIX,
 )
+from search.base import MockedESTestCase
 
 
-class UnseedDBTests(TestCase):
+class UnseedDBTests(MockedESTestCase):
     """Tests for the unseed_db_commond"""
     def test_unseed_db(self):  # pylint: disable=no-self-use
         """Test that unseed_db deletes seed data"""

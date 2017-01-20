@@ -16,10 +16,10 @@ from profiles.util import (
     profile_image_upload_uri_small,
     profile_image_upload_uri_medium,
 )
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
-class StudentIdTests(ESTestCase):
+class StudentIdTests(MockedESTestCase):
     """tests that student_id is updated properly"""
 
     def test_on_save(self):
@@ -62,7 +62,7 @@ class StudentIdTests(ESTestCase):
         assert profile.pretty_printed_student_id is ''
 
 
-class ImageTests(ESTestCase):
+class ImageTests(MockedESTestCase):
     """
     Tests for image fields
     """
@@ -85,7 +85,7 @@ class ImageTests(ESTestCase):
             )
 
 
-class ProfileAddressTests(ESTestCase):
+class ProfileAddressTests(MockedESTestCase):
     """
     Tests for splitting a user's address field
     """

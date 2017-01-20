@@ -33,7 +33,7 @@ from ecommerce.serializers import CouponSerializer
 from micromasters.factories import UserFactory
 from profiles.api import get_social_username
 from profiles.factories import ProfileFactory
-from search.base import ESTestCase
+from search.base import MockedESTestCase
 
 
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = 'http://fake'
@@ -41,7 +41,7 @@ CYBERSOURCE_REFERENCE_PREFIX = 'fake'
 FAKE = faker.Factory.create()
 
 
-class CheckoutViewTests(ESTestCase):
+class CheckoutViewTests(MockedESTestCase):
     """
     Tests for /api/v0/checkout/
     """
@@ -196,7 +196,7 @@ class CheckoutViewTests(ESTestCase):
     CYBERSOURCE_REFERENCE_PREFIX=CYBERSOURCE_REFERENCE_PREFIX,
     ECOMMERCE_EMAIL='ecommerce@example.com'
 )
-class OrderFulfillmentViewTests(ESTestCase):
+class OrderFulfillmentViewTests(MockedESTestCase):
     """
     Tests for order fulfillment
     """
@@ -337,7 +337,7 @@ class OrderFulfillmentViewTests(ESTestCase):
 
 
 @ddt.ddt
-class CouponTests(ESTestCase):
+class CouponTests(MockedESTestCase):
     """
     Tests for list coupon view
     """
