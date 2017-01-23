@@ -7,7 +7,6 @@ from unittest.mock import patch
 from django.db.models.signals import post_save
 from django.test import (
     override_settings,
-    TestCase,
 )
 from factory.django import mute_signals
 
@@ -15,12 +14,13 @@ from courses.factories import ProgramFactory, CourseFactory
 
 from dashboard.models import ProgramEnrollment
 from profiles.factories import ProfileFactory
+from search.base import MockedESTestCase
 
 
 # pylint: disable=no-self-use
 # Make sure that any unmocked ES activity results in an error
 @override_settings(ELASTICSEARCH_URL="fake")
-class IndexingTests(TestCase):
+class IndexingTests(MockedESTestCase):
     """
     Test class for signals that index certain objects in Elasticsearch
     """
