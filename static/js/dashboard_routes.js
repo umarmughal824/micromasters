@@ -87,6 +87,9 @@ export const routes = {
           .then(loadRoute(cb))
           .catch(errorLoading);
       },
+      indexRoute: {
+        onEnter: (nextState, cb) => cb(`/learner/${username}`)
+      },
       childRoutes: [
         {
           path: ':username',
