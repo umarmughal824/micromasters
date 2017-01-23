@@ -1,6 +1,29 @@
 Release Notes
 =============
 
+Version 0.41.0
+--------------
+
+- Updated realistic user and program data to add more fake users
+- Fixed seed_db commands to work with indexing/grade changes
+- Refactored Pearson code to separate functionality
+- Fixed copyright date (#2374)
+- Added a toast message when we redirect for missing profile data
+- Fixed bug with scroll to error when profile page mounts
+- Added Facet by Company (#2261)
+- Implemented $0 checkout (#2367)
+- Fix intermittent test failures (#2370)
+- Added coupon APIs (#2250)
+- Added test for auto migrations (#2365)
+- Fix toast message loop (#2366)
+- Added boilerplate for coupon APIs (#2358)
+- Capture user&#39;s full address (#2308)
+- Replace hardcoded Adwords Conversion ID with variable reference (#2362)
+- Added telephone input to profile
+- Fixed a bug on the profile with setting the program
+- Moved test constants out of `constants.js`
+- Added timestamps for Coupon-related models (#2330)
+
 Version 0.40.0
 --------------
 
