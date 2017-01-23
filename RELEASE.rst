@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.41.1
+--------------
+
+- Past enrolled courses need to be under feature flag (#2413)
+
 Version 0.41.0
 --------------
 
