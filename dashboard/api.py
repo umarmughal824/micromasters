@@ -4,7 +4,6 @@ Apis for the dashboard
 import datetime
 import logging
 
-from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
 import pytz
@@ -301,11 +300,7 @@ def get_status_for_courserun(course_run, mmtrack):
             status = CourseRunStatus.CHECK_IF_PASSED
         # this last check needs to be done as last one
         elif course_run.is_past:
-            version = settings.FEATURES.get("FINAL_GRADE_ALGO", "v0")
-            if version == "v1":
-                status = CourseRunStatus.CURRENTLY_ENROLLED
-            else:
-                status = CourseRunStatus.CHECK_IF_PASSED
+            status = CourseRunStatus.CURRENTLY_ENROLLED
         else:
             raise ImproperlyConfigured(
                 'The course {0} results are not either current, past, or future at the same time'.format(

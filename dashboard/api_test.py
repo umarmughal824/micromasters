@@ -7,7 +7,6 @@ from unittest.mock import patch, MagicMock, PropertyMock
 import ddt
 import pytz
 from django.core.exceptions import ImproperlyConfigured
-from django.test import override_settings
 
 from courses.factories import (
     CourseFactory,
@@ -279,13 +278,11 @@ class CourseRunTest(CourseTests):
         assert run_status.course_run == crun
 
     @ddt.data(
-        (True, api.CourseRunStatus.CHECK_IF_PASSED, 'v1'),
-        (False, api.CourseRunStatus.CURRENTLY_ENROLLED, 'v1'),
-        (True, api.CourseRunStatus.CHECK_IF_PASSED, 'v0'),
-        (False, api.CourseRunStatus.CHECK_IF_PASSED, 'v0')
+        (True, api.CourseRunStatus.CHECK_IF_PASSED),
+        (False, api.CourseRunStatus.CURRENTLY_ENROLLED)
     )
     @ddt.unpack
-    def test_check_if_passed(self, has_frozen_grades, expected_status, grade_algo):
+    def test_check_if_passed(self, has_frozen_grades, expected_status):
         """test for get_status_for_courserun for a finished course if enrolled"""
         self.mmtrack.configure_mock(**{
             'is_enrolled.return_value': True,
@@ -300,10 +297,7 @@ class CourseRunTest(CourseTests):
             enr_end=self.now-timedelta(weeks=53),
             edx_key="course-v1:edX+DemoX+Demo_Course"
         )
-        with patch(
-            'courses.models.CourseRun.has_frozen_grades',
-            new_callable=PropertyMock
-        ) as frozen_mock, override_settings(FEATURES={"FINAL_GRADE_ALGO": grade_algo}):
+        with patch('courses.models.CourseRun.has_frozen_grades', new_callable=PropertyMock) as frozen_mock:
             frozen_mock.return_value = has_frozen_grades
             run_status = api.get_status_for_courserun(crun, self.mmtrack)
         assert run_status.status == expected_status
