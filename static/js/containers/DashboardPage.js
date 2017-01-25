@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import Loader from '../components/Loader';
 import _ from 'lodash';
 import moment from 'moment';
+import R from 'ramda';
 
 import { calculatePrices } from '../lib/coupon';
 import {
@@ -19,6 +20,8 @@ import {
 } from '../actions';
 import {
   COUPON_CONTENT_TYPE_COURSE,
+  COUPON_CONTENT_TYPE_PROGRAM,
+  COUPON_AMOUNT_TYPE_PERCENT_DISCOUNT,
   TOAST_SUCCESS,
   TOAST_FAILURE,
   STATUS_OFFERED,
@@ -105,6 +108,11 @@ class DashboardPage extends React.Component {
 
   componentDidUpdate() {
     this.updateRequirements();
+
+    let program = this.getCurrentlyEnrolledProgram();
+    if ( this.shouldSkipFinancialAid() && program !== undefined ) {
+      this.skipFinancialAid(program.id);
+    }
   }
 
   componentWillUnmount() {
@@ -303,17 +311,40 @@ class DashboardPage extends React.Component {
     dispatch(setDocumentSentDate(newDate));
   };
 
+  getCurrentlyEnrolledProgram = () => {
+    const { currentProgramEnrollment, dashboard } = this.props;
+    if (
+      currentProgramEnrollment !== null &&
+      dashboard !== null
+    ) {
+      return dashboard.programs.find(program => (
+        program.id === currentProgramEnrollment.id
+      ));
+    } else {
+      return undefined;
+    }
+  }
+
   skipFinancialAid = programId => {
-    const { dispatch } = this.props;
-    dispatch(skipFinancialAid(programId)).then(() => {
-      this.setConfirmSkipDialogVisibility(false);
-    }).catch(() => {
-      this.setConfirmSkipDialogVisibility(false);
-      dispatch(setToastMessage({
-        message: "Failed to skip financial aid.",
-        icon: TOAST_FAILURE,
-      }));
-    });
+    const { dispatch, financialAid } = this.props;
+
+    let program = this.getCurrentlyEnrolledProgram();
+    if (
+      program &&
+      program.financial_aid_user_info &&
+      program.financial_aid_user_info.has_user_applied === false &&
+      financialAid.fetchSkipStatus === undefined
+    ) {
+      dispatch(skipFinancialAid(programId)).then(() => {
+        this.setConfirmSkipDialogVisibility(false);
+      }).catch(() => {
+        this.setConfirmSkipDialogVisibility(false);
+        dispatch(setToastMessage({
+          message: "Failed to skip financial aid.",
+          icon: TOAST_FAILURE,
+        }));
+      });
+    }
   };
 
   setConfirmSkipDialogVisibility = bool => {
@@ -382,6 +413,21 @@ class DashboardPage extends React.Component {
     this.context.router.push("/learner");
   };
 
+  shouldSkipFinancialAid = (): boolean => {
+    let program = this.getCurrentlyEnrolledProgram();
+
+    return R.compose(
+      R.any(coupon => (
+        program !== undefined &&
+        coupon.content_type === COUPON_CONTENT_TYPE_PROGRAM &&
+        coupon.amount_type === COUPON_AMOUNT_TYPE_PERCENT_DISCOUNT &&
+        coupon.program_id === program.id &&
+        coupon.amount.eq(1)
+      )),
+      R.pathOr([], ['coupons', 'coupons'])
+    )(this.props);
+  }
+
   render() {
     const {
       dashboard,
@@ -400,9 +446,10 @@ class DashboardPage extends React.Component {
     // if there are no errors coming from the backend, simply show the dashboard
     let program, coursePrice;
     if (!_.isNil(currentProgramEnrollment)) {
-      program = dashboard.programs.find(program => program.id === currentProgramEnrollment.id);
+      program = this.getCurrentlyEnrolledProgram();
       coursePrice = prices.coursePrices.find(coursePrice => coursePrice.program_id === currentProgramEnrollment.id);
     }
+
     if (dashboard.errorInfo !== undefined) {
       errorMessage = <ErrorMessage errorInfo={dashboard.errorInfo}/>;
     } else if (prices.errorInfo !== undefined) {
@@ -414,20 +461,23 @@ class DashboardPage extends React.Component {
       errorMessage = <ErrorMessage errorInfo={{user_message: "No program enrollment is available."}} />;
     } else {
       let financialAidCard;
-      if (program.financial_aid_availability) {
-        financialAidCard = <FinancialAidCard
-          program={program}
-          coursePrice={coursePrice}
-          openFinancialAidCalculator={this.openFinancialAidCalculator}
-          documents={documents}
-          setDocumentSentDate={this.setDocumentSentDate}
-          skipFinancialAid={this.skipFinancialAid}
-          updateDocumentSentDate={this.updateDocumentSentDate}
-          setConfirmSkipDialogVisibility={this.setConfirmSkipDialogVisibility}
-          setDocsInstructionsVisibility={this.setDocsInstructionsVisibility}
-          ui={ui}
-          financialAid={financialAid}
-        />;
+
+      if ( program.financial_aid_availability ) {
+        if ( !this.shouldSkipFinancialAid() ) {
+          financialAidCard = <FinancialAidCard
+            program={program}
+            coursePrice={coursePrice}
+            openFinancialAidCalculator={this.openFinancialAidCalculator}
+            documents={documents}
+            setDocumentSentDate={this.setDocumentSentDate}
+            skipFinancialAid={this.skipFinancialAid}
+            updateDocumentSentDate={this.updateDocumentSentDate}
+            setConfirmSkipDialogVisibility={this.setConfirmSkipDialogVisibility}
+            setDocsInstructionsVisibility={this.setDocsInstructionsVisibility}
+            ui={ui}
+            financialAid={financialAid}
+          />;
+        }
       }
 
       const calculatedPrices = calculatePrices(dashboard.programs, prices.coursePrices, coupons.coupons);

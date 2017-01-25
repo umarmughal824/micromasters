@@ -10,7 +10,6 @@ import sinon from 'sinon';
 import * as inputUtil from '../components/inputs/util';
 import FinancialAidCalculator from '../containers/FinancialAidCalculator';
 import IntegrationTestHelper from '../util/integration_test_helper';
-import * as api from '../lib/api';
 import { modifyTextField, modifySelectField, clearSelectField } from '../util/test_utils';
 import { DASHBOARD_RESPONSE, FINANCIAL_AID_PARTIAL_RESPONSE } from '../test_constants';
 import {
@@ -45,7 +44,7 @@ import {
 import { DASHBOARD_SUCCESS_ACTIONS } from './test_util';
 
 describe('FinancialAidCalculator', () => {
-  let listenForActions, renderComponent, helper, addFinancialAidStub, skipFinancialAidStub;
+  let listenForActions, renderComponent, helper;
   let financialAidDashboard = _.cloneDeep(DASHBOARD_RESPONSE);
   let program = financialAidDashboard.find(program => (
     program.title === "Not passed program"
@@ -54,14 +53,13 @@ describe('FinancialAidCalculator', () => {
   program.financial_aid_user_info = {
     max_possible_cost: 100,
     min_possible_cost: 50,
+    has_user_applied: false,
   };
 
   beforeEach(() => {
     helper = new IntegrationTestHelper();
     listenForActions = helper.listenForActions.bind(helper);
     renderComponent = helper.renderComponent.bind(helper);
-    addFinancialAidStub = helper.sandbox.stub(api, 'addFinancialAid');
-    skipFinancialAidStub = helper.sandbox.stub(api, 'skipFinancialAid');
     helper.dashboardStub.returns(Promise.resolve(financialAidDashboard));
   });
 
@@ -81,7 +79,7 @@ describe('FinancialAidCalculator', () => {
   });
 
   it('should let you skip and pay full price', () => {
-    skipFinancialAidStub.returns(Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE));
+    helper.skipFinancialAidStub.returns(Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE));
     return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
       return listenForActions([
         START_CALCULATOR_EDIT,
@@ -106,7 +104,7 @@ describe('FinancialAidCalculator', () => {
         TestUtils.Simulate.click(confirmDialog.querySelector('.skip-button'));
       }).then(() => {
         assert(
-          skipFinancialAidStub.calledWith(program.id),
+          helper.skipFinancialAidStub.calledWith(program.id),
           'should skip with the right program id'
         );
       });
@@ -116,7 +114,7 @@ describe('FinancialAidCalculator', () => {
   for (let activity of [true, false]) {
     it(`has proper spinner state for the skip dialog save button for activity=${activity.toString()}`, () => {
       let dialogActionsSpy = helper.sandbox.spy(inputUtil, 'dialogActions');
-      skipFinancialAidStub.returns(Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE));
+      helper.skipFinancialAidStub.returns(Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE));
       helper.store.dispatch(setConfirmSkipDialogVisibility(true));
 
       if (activity) {
@@ -130,7 +128,7 @@ describe('FinancialAidCalculator', () => {
   }
 
   it(`disables the button if fetchAddStatus is in progress`, () => {
-    skipFinancialAidStub.returns(Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE));
+    helper.skipFinancialAidStub.returns(Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE));
     helper.store.dispatch(setConfirmSkipDialogVisibility(true));
     helper.store.dispatch(requestAddFinancialAid());
 
@@ -142,7 +140,7 @@ describe('FinancialAidCalculator', () => {
       assert.isTrue(skipButton.disabled);
       assert.equal(skipButton.innerHTML, 'Pay Full Price');
       TestUtils.Simulate.click(skipButton);
-      assert.isFalse(skipFinancialAidStub.calledWith(program.id));
+      assert.isFalse(helper.skipFinancialAidStub.calledWith(program.id));
     });
   });
 
@@ -238,7 +236,7 @@ describe('FinancialAidCalculator', () => {
   });
 
   it('should let you submit a financial aid request', () => {
-    addFinancialAidStub.returns(Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE));
+    helper.addFinancialAidStub.returns(Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE));
     return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
       return listenForActions([
         START_CALCULATOR_EDIT,
@@ -263,7 +261,7 @@ describe('FinancialAidCalculator', () => {
         TestUtils.Simulate.click(calculator.querySelector('.save-button'));
       }).then(() => {
         assert(
-          addFinancialAidStub.calledWith('1000', 'USD', program.id),
+          helper.addFinancialAidStub.calledWith('1000', 'USD', program.id),
           'should be called with the right arguments'
         );
       });
@@ -277,7 +275,7 @@ describe('FinancialAidCalculator', () => {
       if (activity) {
         helper.store.dispatch(requestAddFinancialAid());
       }
-      addFinancialAidStub.returns(Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE));
+      helper.addFinancialAidStub.returns(Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE));
       return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(() => {
         assert.isTrue(dialogActionsSpy.calledWith(sinon.match.any, sinon.match.any, activity, "Calculate"));
       });
@@ -285,7 +283,7 @@ describe('FinancialAidCalculator', () => {
   }
 
   it(`should be disabled if the skip button is in progress`, () => {
-    addFinancialAidStub.returns(Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE));
+    helper.addFinancialAidStub.returns(Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE));
     helper.store.dispatch(requestSkipFinancialAid());
 
     return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
@@ -301,12 +299,12 @@ describe('FinancialAidCalculator', () => {
 
       TestUtils.Simulate.click(saveButton);
     }).then(() => {
-      assert.isFalse(addFinancialAidStub.calledWith('1000', 'USD', program.id));
+      assert.isFalse(helper.addFinancialAidStub.calledWith('1000', 'USD', program.id));
     });
   });
 
   it('should show an error if the financial aid request fails', () => {
-    addFinancialAidStub.returns(Promise.reject({
+    helper.addFinancialAidStub.returns(Promise.reject({
       '0': 'an error message',
       errorStatusCode: 500
     }));
@@ -329,7 +327,7 @@ describe('FinancialAidCalculator', () => {
         TestUtils.Simulate.click(calculator.querySelector('.save-button'));
       }).then(() => {
         assert(
-          addFinancialAidStub.calledWith('1000', 'USD', program.id),
+          helper.addFinancialAidStub.calledWith('1000', 'USD', program.id),
           'should be called with the right arguments'
         );
         assert.equal(

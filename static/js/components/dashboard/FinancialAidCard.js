@@ -246,7 +246,7 @@ export default class FinancialAidCard extends React.Component {
       contents = this.renderAidApplicationStatus();
     }
 
-    return <Card shadow={0}>
+    return <Card shadow={0} className="financial-aid-card">
       <SkipFinancialAidDialog
         open={skipDialogVisibility}
         cancel={() => setConfirmSkipDialogVisibility(false)}

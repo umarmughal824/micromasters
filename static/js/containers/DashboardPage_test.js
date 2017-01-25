@@ -4,6 +4,7 @@ import '../global_init';
 import { assert } from 'chai';
 import moment from 'moment';
 import ReactDOM from 'react-dom';
+import Decimal from 'decimal.js-light';
 
 import { makeCoupon } from '../factories/dashboard';
 import IntegrationTestHelper from '../util/integration_test_helper';
@@ -12,6 +13,7 @@ import {
   UPDATE_COURSE_STATUS,
   CLEAR_COURSE_PRICES,
   CLEAR_DASHBOARD,
+  FETCH_SUCCESS,
 } from '../actions';
 import * as actions from '../actions';
 import { CLEAR_COUPONS } from '../actions/coupons';
@@ -31,6 +33,10 @@ import {
 import {
   CLEAR_ENROLLMENTS,
 } from '../actions/programs';
+import {
+  REQUEST_SKIP_FINANCIAL_AID,
+  RECEIVE_SKIP_FINANCIAL_AID_SUCCESS,
+} from '../actions/financial_aid';
 import {
   makeAvailablePrograms,
   makeCoursePrices,
@@ -203,27 +209,76 @@ describe('DashboardPage', () => {
       );
     });
 
-    it('renders a price', () => {
-      let calculatePricesStub = helper.sandbox.stub(libCoupon, 'calculatePrices');
-      let dashboard = makeDashboard();
-      let availablePrograms = makeAvailablePrograms(dashboard);
-      let coursePrices = makeCoursePrices(dashboard);
+    describe('course pricing', () => {
+      let dashboard, availablePrograms, coursePrices, calculatePricesStub;
+      let run, program;
 
-      // set enrollment information so run comes up as offered in dashboard
-      let program = dashboard[0];
-      let run = program.courses[0].runs[0];
-      run.enrollment_start_date = '2016-01-01';
+      beforeEach(() => {
+        calculatePricesStub = helper.sandbox.stub(libCoupon, 'calculatePrices');
+        dashboard = makeDashboard();
+        program = dashboard[0];
+        run = program.courses[0].runs[0];
+        run.enrollment_start_date = '2016-01-01';
+        availablePrograms = makeAvailablePrograms(dashboard);
+        coursePrices = makeCoursePrices(dashboard);
+        helper.dashboardStub.returns(Promise.resolve(dashboard));
+        helper.programsGetStub.returns(Promise.resolve(availablePrograms));
+        helper.coursePricesStub.returns(Promise.resolve(coursePrices));
+      });
 
-      helper.dashboardStub.returns(Promise.resolve(dashboard));
-      helper.programsGetStub.returns(Promise.resolve(availablePrograms));
-      helper.coursePricesStub.returns(Promise.resolve(coursePrices));
-      let calculatedPrices = new Map([[run.id, 123]]);
-      calculatePricesStub.returns(calculatedPrices);
+      it('renders a price', () => {
+        let calculatedPrices = new Map([[run.id, 123]]);
+        calculatePricesStub.returns(calculatedPrices);
 
-      return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
-        assert.include(wrapper.text(), `Pay Now $123`);
+        return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
+          assert.include(wrapper.text(), `Pay Now $123`);
+          assert.isTrue(calculatePricesStub.calledWith(dashboard, coursePrices, []));
+        });
+      });
 
-        assert.isTrue(calculatePricesStub.calledWith(dashboard, coursePrices, []));
+      describe('100% program coupon', () => {
+        let coupon;
+        let expectedActions = DASHBOARD_SUCCESS_ACTIONS.concat([
+          REQUEST_SKIP_FINANCIAL_AID,
+          RECEIVE_SKIP_FINANCIAL_AID_SUCCESS,
+        ]);
+
+        beforeEach(() => {
+          coupon = makeCoupon(program);
+          coupon.amount_type = 'percent-discount';
+          coupon.amount = Decimal('1');
+          helper.couponsStub.returns(Promise.resolve([coupon]));
+          program.financial_aid_user_info = {
+            has_user_applied: false
+          };
+        });
+
+        it('should issue a request to skip if there is a 100% coupon for the program', () => {
+          return renderComponent('/dashboard', expectedActions).then(() => {
+            let aid = helper.store.getState().financialAid;
+            assert.equal(aid.fetchSkipStatus, FETCH_SUCCESS);
+            assert(helper.skipFinancialAidStub.calledWith(program.id));
+          });
+        });
+
+        it('should hide the financial aid card if there is a 100% coupon for the program', () => {
+          return renderComponent('/dashboard', expectedActions).then(([wrapper]) => {
+            assert.equal(wrapper.find(".financial-aid-card").length, 0);
+          });
+        });
+
+        it('should not care about coupons for other programs', () => {
+          coupon.program_id = dashboard[1].id;
+          coupon.object_id = dashboard[1].id;
+          dashboard[1].financial_aid_user_info = {
+            has_user_applied: false
+          };
+
+          return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
+            assert(helper.skipFinancialAidStub.notCalled);
+            assert.equal(wrapper.find(".financial-aid-card").length, 1);
+          });
+        });
       });
     });
 
