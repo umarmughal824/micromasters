@@ -1,6 +1,28 @@
 Release Notes
 =============
 
+Version 0.42.0
+--------------
+
+- Add handling for next parameter (#2406)
+- Removed 13px Adwords iframe height and added Adwords tags to only home page and program page (#2410)
+- Used FinalGrade model to fetch final grade info on mmtrack
+- Add setting to disable webpack loader functionality for tests (#2417)
+- Changed the `crossOriginLoading` option for webpack
+- Added base reader class for Pearson TSV responses
+- Release 0.41.1
+- Past enrolled courses need to be under feature flag (new)
+- Fixed /learner -&gt; /learner/username redirect
+- Past enrolled courses need to be under feature flag (new)
+- Revert &quot;Merge pull request #2413 from mitodl/fix_enrolled_regression_2412&quot;
+- Past enrolled courses need to be under feature flag
+- Added test that REST API updates modification datetime (#2398)
+- Added logic to calculate prices including coupons on frontend (#2378)
+- Mocked ES in most tests
+- Added SFTP env vars to app.json
+- Ensured that the Toast component is always visible
+- Triggered exam authorizations when users enrolled or passed course (#2331)
+
 Version 0.41.1
 --------------
 
