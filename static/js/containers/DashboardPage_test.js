@@ -14,6 +14,7 @@ import {
   CLEAR_DASHBOARD,
 } from '../actions';
 import * as actions from '../actions';
+import { CLEAR_COUPONS } from '../actions/coupons';
 import {
   SET_TOAST_MESSAGE,
   CLEAR_UI,
@@ -29,6 +30,12 @@ import {
 import {
   CLEAR_ENROLLMENTS,
 } from '../actions/programs';
+import {
+  makeAvailablePrograms,
+  makeCoursePrices,
+  makeDashboard,
+} from '../factories/dashboard';
+import * as libCoupon  from '../lib/coupon';
 import { findCourseRun } from '../util/util';
 import * as util from '../util/util';
 import {
@@ -226,6 +233,37 @@ describe('DashboardPage', () => {
       });
     });
 
+    it("doesn't error if the course run couldn't be found", () => {
+      return renderComponent(
+        `/dashboard?status=receipt&course_key=missing`,
+        DASHBOARD_SUCCESS_ACTIONS
+      );
+    });
+
+    it('renders a price', () => {
+      let calculatePricesStub = helper.sandbox.stub(libCoupon, 'calculatePrices');
+      let dashboard = makeDashboard();
+      let availablePrograms = makeAvailablePrograms(dashboard);
+      let coursePrices = makeCoursePrices(dashboard);
+
+      // set enrollment information so run comes up as offered in dashboard
+      let program = dashboard[0];
+      let run = program.courses[0].runs[0];
+      run.enrollment_start_date = '2016-01-01';
+
+      helper.dashboardStub.returns(Promise.resolve(dashboard));
+      helper.programsGetStub.returns(Promise.resolve(availablePrograms));
+      helper.coursePricesStub.returns(Promise.resolve(coursePrices));
+      let calculatedPrices = new Map([[run.id, 123]]);
+      calculatePricesStub.returns(calculatedPrices);
+
+      return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
+        assert.include(wrapper.text(), `Pay Now $123`);
+
+        assert.isTrue(calculatePricesStub.calledWith(dashboard, coursePrices, []));
+      });
+    });
+
     describe('fake timer tests', function() {
       let clock;
       beforeEach(() => {
@@ -282,6 +320,7 @@ describe('DashboardPage', () => {
         CLEAR_ENROLLMENTS,
         CLEAR_DASHBOARD,
         CLEAR_COURSE_PRICES,
+        CLEAR_COUPONS,
       ], () => {
         ReactDOM.unmountComponentAtNode(div);
       });
