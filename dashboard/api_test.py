@@ -2,7 +2,12 @@
 Tests for the dashboard api functions
 """
 from datetime import datetime, timedelta
-from unittest.mock import patch, MagicMock, PropertyMock
+from unittest.mock import (
+    MagicMock,
+    Mock,
+    PropertyMock,
+    patch,
+)
 
 import ddt
 import pytz
@@ -303,7 +308,7 @@ class CourseRunTest(CourseTests):
         with patch(
             'courses.models.CourseRun.has_frozen_grades',
             new_callable=PropertyMock
-        ) as frozen_mock, override_settings(FEATURES={"FINAL_GRADE_ALGO": grade_algo}):
+        ) as frozen_mock, override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": grade_algo}):
             frozen_mock.return_value = has_frozen_grades
             run_status = api.get_status_for_courserun(crun, self.mmtrack)
         assert run_status.status == expected_status
@@ -438,10 +443,9 @@ class CourseRunTest(CourseTests):
         assert run_status.status == expected_status
         assert run_status.course_run == crun
 
-    @patch('grades.models.FinalGrade.objects.get', autospect=True)
     @patch('courses.models.CourseRun.is_upgradable', new_callable=PropertyMock)
     @patch('courses.models.CourseRun.has_frozen_grades', new_callable=PropertyMock)
-    def test_not_paid_in_past_grade_frozen(self, froz_mock, upgr_mock, final_grades_mock):
+    def test_not_paid_in_past_grade_frozen(self, froz_mock, upgr_mock):
         """
         test for get_status_for_courserun for course
         not paid but that is past for a course with grades already frozen
@@ -464,22 +468,21 @@ class CourseRunTest(CourseTests):
         )
 
         # case when the user has not an entry in the frozen grades
-        final_grades_mock.side_effect = FinalGrade.DoesNotExist
+        self.mmtrack.extract_final_grade.side_effect = FinalGrade.DoesNotExist
         run_status = api.get_status_for_courserun(crun, self.mmtrack)
         assert run_status.status == api.CourseRunStatus.CURRENTLY_ENROLLED
         # just resetting the mock does not remove the side effect
-        final_grades_mock.side_effect = None
+        self.mmtrack.extract_final_grade.side_effect = None
 
         # case in a final grade with status passed=True is returned
-        grade = MagicMock(passed=True)
-        final_grades_mock.return_value = grade
+        grade = Mock(passed=True)
+        self.mmtrack.extract_final_grade.return_value = grade
         run_status = api.get_status_for_courserun(crun, self.mmtrack)
         assert run_status.status == api.CourseRunStatus.CAN_UPGRADE
-        final_grades_mock.reset_mock()
 
         # case in a final grade with status passed=False is returned
-        grade = MagicMock(passed=False)
-        final_grades_mock.return_value = grade
+        grade = Mock(passed=False)
+        self.mmtrack.extract_final_grade.return_value = grade
         run_status = api.get_status_for_courserun(crun, self.mmtrack)
         assert run_status.status == api.CourseRunStatus.NOT_PASSED
 
