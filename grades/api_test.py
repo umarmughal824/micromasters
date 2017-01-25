@@ -4,6 +4,7 @@ Tests for grades API
 from datetime import datetime, timedelta
 from unittest.mock import patch, MagicMock
 
+import ddt
 import pytz
 from django.core.exceptions import ImproperlyConfigured
 
@@ -22,6 +23,7 @@ from financialaid.factories import (
     TierProgramFactory
 )
 from grades import api
+from grades.exceptions import FreezeGradeFailedException
 from grades.models import FinalGrade, FinalGradeStatus
 from micromasters.factories import UserFactory
 from search.base import MockedESTestCase
@@ -30,6 +32,7 @@ from search.base import MockedESTestCase
 # pylint: disable=no-self-use, protected-access
 
 
+@ddt.ddt
 class GradeAPITests(MockedESTestCase):
     """
     Tests for final grades api
@@ -200,43 +203,70 @@ class GradeAPITests(MockedESTestCase):
 
     @patch('grades.api.get_final_grade', autospec=True)
     @patch('dashboard.api_edx_cache.CachedEdxDataApi.update_all_cached_grade_data', new_callable=MagicMock)
-    def test_freeze_user_final_grade_error1(self, mock_refr, mock_get_fg):
+    @ddt.data(True, False)
+    def test_freeze_user_final_grade_error1(self, raise_on_exception, mock_refr, mock_get_fg):
         """
         Test for freeze_user_final_grade function in case of problems with can_freeze_grades
         """
         # case not ready to be frozen because the freeze date is in the future
-        api.freeze_user_final_grade(self.user, self.run_no_fa)
+        if not raise_on_exception:
+            final_grade = api.freeze_user_final_grade(
+                self.user, self.run_no_fa, raise_on_exception=raise_on_exception)
+            assert final_grade is None
+        else:
+            with self.assertRaises(FreezeGradeFailedException):
+                api.freeze_user_final_grade(
+                    self.user, self.run_no_fa, raise_on_exception=raise_on_exception)
         assert mock_refr.called is False
         assert mock_get_fg.called is False
         assert FinalGrade.objects.filter(user=self.user, course_run=self.run_no_fa).exists() is False
 
+    @patch('grades.api.get_final_grade', autospec=True)
+    @patch('dashboard.api_edx_cache.CachedEdxDataApi.update_all_cached_grade_data', new_callable=MagicMock)
+    @ddt.data(True, False)
+    def test_freeze_user_final_grade_error1_improperly_configured(self, raise_on_exception, mock_refr, mock_get_fg):
+        """
+        Test for freeze_user_final_grade function in case of problems with can_freeze_grades
+        """
         # case without freeze date
         with self.assertRaises(ImproperlyConfigured):
-            api.freeze_user_final_grade(self.user, self.run_fa_with_cert)
+            api.freeze_user_final_grade(self.user, self.run_fa_with_cert, raise_on_exception=raise_on_exception)
         assert mock_refr.called is False
         assert mock_get_fg.called is False
         assert FinalGrade.objects.filter(user=self.user, course_run=self.run_fa_with_cert).exists() is False
 
     @patch('grades.api.get_final_grade', autospec=True)
     @patch('dashboard.api_edx_cache.CachedEdxDataApi.update_all_cached_grade_data', new_callable=MagicMock)
-    def test_freeze_user_final_grade_error2(self, mock_refr, mock_get_fg):
+    @ddt.data(True, False)
+    def test_freeze_user_final_grade_error2(self, raise_on_exception, mock_refr, mock_get_fg):
         """
         Test for freeze_user_final_grade function in case of problems with refresh of cache
         """
         mock_refr.side_effect = AttributeError
-        api.freeze_user_final_grade(self.user, self.run_fa)
+        if not raise_on_exception:
+            final_grade = api.freeze_user_final_grade(self.user, self.run_fa, raise_on_exception=raise_on_exception)
+            assert final_grade is None
+        else:
+            with self.assertRaises(FreezeGradeFailedException):
+                api.freeze_user_final_grade(self.user, self.run_fa, raise_on_exception=raise_on_exception)
         assert mock_get_fg.called is False
         mock_refr.assert_called_once_with(self.user)
         assert FinalGrade.objects.filter(user=self.user, course_run=self.run_fa).exists() is False
 
     @patch('grades.api.get_final_grade', autospec=True)
     @patch('dashboard.api_edx_cache.CachedEdxDataApi.update_all_cached_grade_data', new_callable=MagicMock)
-    def test_freeze_user_final_grade_error3(self, mock_refr, mock_get_fg):
+    @ddt.data(True, False)
+    def test_freeze_user_final_grade_error3(self, raise_on_exception, mock_refr, mock_get_fg):
         """
         Test for freeze_user_final_grade function in case of problems with getting the final grade
         """
         mock_get_fg.side_effect = AttributeError
-        api.freeze_user_final_grade(self.user, self.run_fa)
+        if not raise_on_exception:
+            final_grade = api.freeze_user_final_grade(self.user, self.run_fa, raise_on_exception=raise_on_exception)
+            assert final_grade is None
+        else:
+            with self.assertRaises(FreezeGradeFailedException):
+                api.freeze_user_final_grade(self.user, self.run_fa, raise_on_exception=raise_on_exception)
         mock_refr.assert_called_once_with(self.user)
         mock_get_fg.assert_called_once_with(self.user, self.run_fa)
         assert FinalGrade.objects.filter(user=self.user, course_run=self.run_fa).exists() is False
@@ -246,12 +276,12 @@ class GradeAPITests(MockedESTestCase):
         """
         Test for happy path for freeze_user_final_grade function
         """
-        api.freeze_user_final_grade(self.user, self.run_fa)
+        final_grade = api.freeze_user_final_grade(self.user, self.run_fa)
+        assert final_grade is not None
         mock_refr.assert_called_once_with(self.user)
         fg_qset = FinalGrade.objects.filter(user=self.user, course_run=self.run_fa)
         assert fg_qset.exists() is True
         fg_status = fg_qset.first()
-        final_grade = api._compute_grade_for_fa(self.user_edx_data.get_run_data(self.run_fa.edx_course_key))
         assert fg_status.status == FinalGradeStatus.COMPLETE
         assert fg_status.user == self.user
         assert fg_status.course_run == self.run_fa
