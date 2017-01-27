@@ -15,6 +15,8 @@ class OrderSummary extends React.Component {
     course:           Course,
     courseRun:        CourseRun,
     coursePrice:      CoursePrice,
+    finalPrice:       ?number,
+    discount:         ?number,
     checkout:         Function,
     checkoutStatus?:  string,
   };
@@ -22,10 +24,19 @@ class OrderSummary extends React.Component {
     const { coursePrice } = this.props;
     return formatPrice(coursePrice.price);
   }
+  getFinalPrice(): string {
+    const { finalPrice } = this.props;
+    return formatPrice(finalPrice);
+  }
+  getDiscountAmount(): string {
+    const { discount } = this.props;
+    return `-${formatPrice(discount)}`;
+  }
   getExplanationText(): React$Element<*> {
-    const { coursePrice } = this.props;
+    const { finalPrice, coursePrice } = this.props;
     let text;
-    if (coursePrice.price > 0){
+    let price = (finalPrice !== undefined && finalPrice !== null) ? finalPrice : coursePrice.price;
+    if (price > 0 ){
       text = "Clicking below with link outside of the MIT MicroMasters app" +
         " to an external website, where you will be able to complete the transaction by" +
         " paying with a credit card.";
@@ -36,20 +47,40 @@ class OrderSummary extends React.Component {
     return <p className="payment-explanation">{text}</p>;
   }
 
+  showAmount(description: string, amount: string): Array<React$Element<*>> {
+    return [
+      <Cell col={8} tablet={4} phone={2} className="description" key={description}>
+        {description}
+      </Cell>,
+      <Cell
+        col={2}
+        key={`${description}-amount`}
+        className="align-right">
+        <b className="amount">{amount}</b>
+      </Cell>
+    ];
+  }
+
   render() {
-    let { course, courseRun, checkout, checkoutStatus } = this.props;
+    let { course, courseRun, checkout, checkoutStatus, discount } = this.props;
+    let discountInfo;
+    if (discount !== null && discount !== undefined){
+      discountInfo = [
+        this.showAmount('Discount from coupon', this.getDiscountAmount()),
+        <Cell col={10} tablet={6} phone={4} className="division-line" key="division"/>,
+        this.showAmount('Total', this.getFinalPrice())
+      ];
+    }
     return (
       <div>
-        <Card shadow={1} className="profile-form">
+        <Card shadow={1}>
           <p className="intro-text">You are about to enroll in <b>{ course.title }</b></p>
-          <Grid className="summary-box">
-            <Cell col={3}>
-              Cost of course
-            </Cell>
-            <Cell col={9}>
-              <b>{this.getCoursePrice()}</b>
-              </Cell>
-          </Grid>
+          <div className="wrapper-box">
+            <Grid className="summary-box">
+              {this.showAmount('Cost of course', this.getCoursePrice())}
+              {discountInfo}
+            </Grid>
+          </div>
           {this.getExplanationText()}
         </Card>
         <p className="terms-of-service-text">

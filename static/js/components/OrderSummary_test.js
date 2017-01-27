@@ -19,7 +19,7 @@ import {
 } from '../util/test_utils';
 
 
-describe('CourseAction', () => {
+describe('OrderSummary', () => {
   let sandbox, checkoutStub;
 
   beforeEach(() => {
@@ -57,11 +57,50 @@ describe('CourseAction', () => {
       <OrderSummary
         checkout={checkoutStub}
         coursePrice={COURSE_PRICES_RESPONSE[1]}
+        finalPrice={COURSE_PRICES_RESPONSE[1].price}
         courseRun={null}
         {...props}
       />
     );
   };
+
+  it('shows discount calculation if user has a coupon', () => {
+    let course = findCourse(course => (
+      course.runs.length > 0 &&
+      course.runs[0].status === STATUS_OFFERED
+    ));
+    let firstRun = course.runs[0];
+    const wrapper = renderOrderSummary({
+      courseRun: firstRun,
+      course: course,
+      discount: COURSE_PRICES_RESPONSE[1].price,
+      finalPrice: 0
+    });
+
+    let descriptions = wrapper.find(".description");
+    assert.equal(descriptions.length, 3);
+    assert.equal(descriptions.children().nodes[1], 'Discount from coupon');
+    let amounts = wrapper.find(".amount");
+    assert.equal(amounts.length, 3);
+    assert.equal(amounts.children().nodes[1], `-$${COURSE_PRICES_RESPONSE[1].price}`);
+  });
+
+  it('does not show discount calculation if no discount applies', () => {
+    let course = findCourse(course => (
+      course.runs.length > 0 &&
+      course.runs[0].status === STATUS_OFFERED
+    ));
+    let firstRun = course.runs[0];
+    const wrapper = renderOrderSummary({
+      courseRun: firstRun,
+      course: course,
+      discount: null,
+    });
+
+    let descriptions = wrapper.find(".description");
+    assert.equal(descriptions.length, 1);
+  });
+
   it('shows a message if a user is redirected for checkout when price is above 0', () => {
     let course = findCourse(course => (
       course.runs.length > 0 &&
@@ -70,7 +109,7 @@ describe('CourseAction', () => {
     let firstRun = course.runs[0];
     const wrapper = renderOrderSummary({
       courseRun: firstRun,
-      course: course
+      course: course,
     });
     let elements = getElements(wrapper);
 
@@ -89,7 +128,8 @@ describe('CourseAction', () => {
     const wrapper = renderOrderSummary({
       courseRun: firstRun,
       course: course,
-      coursePrice: 0
+      coursePrice: 0,
+      finalPrice: 0
     });
     let elements = getElements(wrapper);
 

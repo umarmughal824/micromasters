@@ -43,6 +43,11 @@ function* genPrices(programs: Dashboard, prices: CoursePrices, coupons: Coupons)
   }
 }
 
+export const calculatePrice = (runId: number, courseId: number, price: CoursePrice, coupons: Coupons): ?number => {
+  const couponLookup: Map<number, Coupon> = makeProgramIdLookup(coupons);
+  return calculateRunPrice(runId, courseId, price.program_id, price, couponLookup.get(price.program_id));
+};
+
 export const calculatePrices = (programs: Dashboard, prices: CoursePrices, coupons: Coupons): CalculatedPrices => {
   return new Map(genPrices(programs, prices, coupons));
 };

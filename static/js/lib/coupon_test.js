@@ -10,6 +10,7 @@ import {
 } from '../constants';
 import {
   calculateDiscount,
+  calculatePrice,
   calculatePrices,
   calculateRunPrice,
 } from './coupon';
@@ -31,6 +32,26 @@ describe('coupon utility functions', () => {
 
   afterEach(() => {
     sandbox.restore();
+  });
+
+  describe('calculatePrice', () => {
+    it('uses calculateRunPrice to figure out price', () => {
+      let program = makeProgram();
+      let coupons = makeCoupons([program]);
+      let price = makeCoursePrice(program);
+      let course = program.courses[0];
+      let run = course.runs[0];
+
+      let stubPrice = 5;
+      let calculateRunPriceStub = sandbox.stub(couponFuncs, 'calculateRunPrice');
+      calculateRunPriceStub.returns(stubPrice);
+      let actual = calculatePrice(run.id, course.id, price, coupons);
+      assert.equal(actual, stubPrice);
+      let coupon = coupons.find(coupon => coupon.program_id === program.id);
+      assert.isTrue(calculateRunPriceStub.calledWith(
+        run.id, course.id, program.id, price, coupon
+      ));
+    });
   });
 
   describe('calculatePrices', () => {

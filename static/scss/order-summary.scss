@@ -7,8 +7,11 @@
 
   .summary-box {
     background-color: $bg-light-gray;
-    padding: 20px;
-    margin: 0;
+    padding: 15px;
+  }
+
+  .wrapper-box {
+    max-width: 550px;
   }
 
   .payment-explanation {
@@ -31,5 +34,13 @@
   .intro-text {
     font-size: 15px;
     margin: 15px 0 20px;
+  }
+
+  .division-line {
+    border-bottom: 1px solid #cecece;
+  }
+
+  .align-right {
+    text-align: right;
   }
 }
