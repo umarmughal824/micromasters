@@ -12,12 +12,11 @@ import CourseRow from './CourseRow';
 import { DASHBOARD_RESPONSE, COURSE_PRICES_RESPONSE } from '../../test_constants';
 
 describe('CourseListCard', () => {
-  let program, checkout, sandbox;
+  let program, sandbox;
   beforeEach(() => {
     program = _.cloneDeep(DASHBOARD_RESPONSE[1]);
     assert(program.courses.length > 0);
     sandbox = sinon.sandbox.create();
-    checkout = sandbox.stub();
   });
 
   afterEach(() => {
@@ -33,7 +32,6 @@ describe('CourseListCard', () => {
     return shallow(
       <CourseListCard
         program={program}
-        checkout={checkout}
         addCourseEnrollment={() => undefined}
         prices={prices}
         {...props}
@@ -55,7 +53,6 @@ describe('CourseListCard', () => {
       assert.equal(props.now, now);
       assert.equal(props.prices, prices);
       assert.deepEqual(props.course, courses[i]);
-      assert.equal(props.checkout, checkout);
     });
   });
 

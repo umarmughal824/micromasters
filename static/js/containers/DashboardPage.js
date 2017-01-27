@@ -11,7 +11,6 @@ import { calculatePrices } from '../lib/coupon';
 import {
   FETCH_SUCCESS,
   FETCH_PROCESSING,
-  checkout,
   updateCourseStatus,
   fetchDashboard,
   clearDashboard,
@@ -37,7 +36,7 @@ import {
   setDocsInstructionsVisibility,
   setCouponNotificationVisibility,
 } from '../actions/ui';
-import { createForm, findCourseRun } from '../util/util';
+import { findCourseRun } from '../util/util';
 import CourseListCard from '../components/dashboard/CourseListCard';
 import DashboardUserCard from '../components/dashboard/DashboardUserCard';
 import FinancialAidCard from '../components/dashboard/FinancialAidCard';
@@ -71,7 +70,6 @@ import type { FinancialAidState } from '../reducers/financial_aid';
 import type { CouponsState } from '../reducers/coupons';
 import type { ProfileGetResult } from '../flow/profileTypes';
 import type { Course, CourseRun } from '../flow/programTypes';
-import type { CheckoutState } from '../reducers';
 import { skipFinancialAid } from '../actions/financial_aid';
 import { currencyForCountry } from '../lib/currency';
 import DocsInstructionsDialog from '../components/DocsInstructionsDialog';
@@ -96,7 +94,6 @@ class DashboardPage extends React.Component {
     fetchDashboard:           () => void,
     orderReceipt:             OrderReceiptState,
     courseEnrollments:        CourseEnrollmentsState,
-    checkout:                 CheckoutState,
     financialAid:             FinancialAidState,
     location:                 Object,
   };
@@ -286,23 +283,6 @@ class DashboardPage extends React.Component {
     });
   };
 
-  dispatchCheckout = (courseId: string) => {
-    const { dispatch } = this.props;
-
-    return dispatch(checkout(courseId)).then(result => {
-      const { payload, url, method } = result;
-
-      if (method === 'POST') {
-        const form = createForm(url, payload);
-        const body = document.querySelector("body");
-        body.appendChild(form);
-        form.submit();
-      } else {
-        window.location = url;
-      }
-    });
-  };
-
   openFinancialAidCalculator = () => {
     const {
       dispatch,
@@ -400,7 +380,6 @@ class DashboardPage extends React.Component {
       currentProgramEnrollment,
       ui,
       courseEnrollments,
-      checkout,
       financialAid,
       coupons,
     } = this.props;
@@ -457,8 +436,6 @@ class DashboardPage extends React.Component {
               courseEnrollAddStatus={courseEnrollments.courseEnrollAddStatus}
               prices={calculatedPrices}
               key={program.id}
-              checkout={this.dispatchCheckout}
-              checkoutStatus={checkout.fetchStatus}
               openFinancialAidCalculator={this.openFinancialAidCalculator}
               addCourseEnrollment={this.addCourseEnrollment}
             />
@@ -498,7 +475,6 @@ const mapStateToProps = (state) => {
     documents: state.documents,
     orderReceipt: state.orderReceipt,
     courseEnrollments: state.courseEnrollments,
-    checkout: state.checkout,
     financialAid: state.financialAid,
     coupons: state.coupons,
   };
