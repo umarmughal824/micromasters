@@ -10,7 +10,7 @@ from rest_framework.test import APITestCase
 from rest_framework.response import Response
 from factory.django import mute_signals
 
-from courses.factories import ProgramFactory
+from courses.factories import ProgramFactory, CourseFactory, CourseRunFactory
 from financialaid.api_test import (
     FinancialAidBaseTestCase,
     create_program,
@@ -18,9 +18,11 @@ from financialaid.api_test import (
 )
 from financialaid.factories import FinancialAidFactory, TierProgramFactory
 from profiles.factories import ProfileFactory
+from dashboard.factories import ProgramEnrollmentFactory, CachedEnrollmentFactory
 from roles.models import Role
 from roles.roles import Staff
 from search.api import get_all_query_matching_emails
+from search.base import MockedESTestCase
 
 
 def mocked_json(return_data=None):
@@ -130,9 +132,76 @@ class MailViewsTests(APITestCase):
         assert resp_post.status_code == status.HTTP_403_FORBIDDEN
 
 
-class FinancialAidMailViewsTests(FinancialAidBaseTestCase, APITestCase):
+class CourseTeamMailViewTests(APITestCase, MockedESTestCase):
     """
-    Tests for FinancialAidMailViews
+    Tests for CourseTeamMailView
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        with mute_signals(post_save):
+            staff_profile = ProfileFactory.create()
+        cls.staff_user = staff_profile.user
+        cls.course = CourseFactory.create(
+            contact_email='a@example.com',
+            program__financial_aid_availability=False
+        )
+        course_run = CourseRunFactory.create(course=cls.course)
+        ProgramEnrollmentFactory.create(user=cls.staff_user, program=cls.course.program)
+        CachedEnrollmentFactory.create(user=cls.staff_user, course_run=course_run)
+        cls.url_name = 'course_team_mail_api'
+        cls.request_data = {
+            'email_subject': 'email subject',
+            'email_body': 'email body'
+        }
+
+    @patch('mail.views.MailgunClient')
+    def test_send_course_team_email_view(self, mock_mailgun_client):
+        """
+        Test that course team emails are correctly sent through the view
+        """
+        self.client.force_login(self.staff_user)
+        mock_mailgun_client.send_course_team_email.return_value = Mock(
+            spec=Response,
+            status_code=status.HTTP_200_OK,
+            json=mocked_json()
+        )
+        url = reverse(self.url_name, kwargs={'course_id': self.course.id})
+        resp_post = self.client.post(url, data=self.request_data, format='json')
+        assert resp_post.status_code == status.HTTP_200_OK
+        assert mock_mailgun_client.send_course_team_email.called
+        _, called_kwargs = mock_mailgun_client.send_course_team_email.call_args
+        assert called_kwargs['user'] == self.staff_user
+        assert called_kwargs['course'] == self.course
+        assert called_kwargs['subject'] == self.request_data['email_subject']
+        assert called_kwargs['body'] == self.request_data['email_body']
+
+    def test_course_team_email_with_no_enrollment(self):
+        """
+        Test that an attempt to send an email to a course in an un-enrolled program will fail
+        """
+        self.client.force_login(self.staff_user)
+        new_course = CourseFactory.create(contact_email='b@example.com')
+        url = reverse(self.url_name, kwargs={'course_id': new_course.id})
+        resp = self.client.post(url, data=self.request_data, format='json')
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_course_team_email_unpaid(self):
+        """
+        Test that an attempt to send an email to the course team of an unpaid course will fail
+        """
+        self.client.force_login(self.staff_user)
+        new_course = CourseFactory.create(contact_email='c@example.com')
+        ProgramEnrollmentFactory.create(user=self.staff_user, program=new_course.program)
+        url = reverse(self.url_name, kwargs={'course_id': new_course.id})
+        resp = self.client.post(url, data=self.request_data, format='json')
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
+
+
+class FinancialAidMailViewTests(FinancialAidBaseTestCase, APITestCase):
+    """
+    Tests for FinancialAidMailView
     """
 
     @classmethod

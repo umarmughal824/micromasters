@@ -12,11 +12,12 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from courses.models import Course
 from financialaid.models import FinancialAid
 from financialaid.permissions import UserCanEditFinancialAid
 from mail.api import MailgunClient
-from mail.permissions import UserCanMessageLearnersPermission
-from mail.serializers import FinancialAidMailSerializer
+from mail.permissions import UserCanMessageLearnersPermission, UserCanMessageCourseTeamPermission
+from mail.serializers import GenericMailSerializer
 from mail.utils import generate_mailgun_response_json
 from search.api import (
     prepare_and_execute_search,
@@ -29,7 +30,7 @@ log = logging.getLogger(__name__)
 
 class SearchResultMailView(APIView):
     """
-    View class that authenticates and handles HTTP requests to mail API URLs
+    View class that handles HTTP requests to search results mail API
     """
     authentication_classes = (
         authentication.SessionAuthentication,
@@ -39,7 +40,7 @@ class SearchResultMailView(APIView):
 
     def post(self, request, *args, **kargs):  # pylint: disable=unused-argument, no-self-use
         """
-        View  to send emails to users
+        POST method handler
         """
         emails = prepare_and_execute_search(
             request.user,
@@ -64,11 +65,45 @@ class SearchResultMailView(APIView):
         )
 
 
+class CourseTeamMailView(GenericAPIView):
+    """
+    View class that handles HTTP requests to course team mail API
+    """
+    serializer_class = GenericMailSerializer
+    authentication_classes = (
+        authentication.SessionAuthentication,
+        authentication.TokenAuthentication,
+    )
+    permission_classes = (permissions.IsAuthenticated, UserCanMessageCourseTeamPermission)
+    lookup_field = "id"
+    lookup_url_kwarg = "course_id"
+    queryset = Course.objects.all()
+
+    def post(self, request, *args, **kargs):  # pylint: disable=unused-argument, no-self-use
+        """
+        POST method handler
+        """
+        user = request.user
+        course = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        mailgun_response = MailgunClient.send_course_team_email(
+            user=user,
+            course=course,
+            subject=serializer.data['email_subject'],
+            body=serializer.data['email_body'],
+        )
+        return Response(
+            status=mailgun_response.status_code,
+            data=generate_mailgun_response_json(mailgun_response)
+        )
+
+
 class FinancialAidMailView(GenericAPIView):
     """
     View for sending financial aid emails to individual learners
     """
-    serializer_class = FinancialAidMailSerializer
+    serializer_class = GenericMailSerializer
     authentication_classes = (
         authentication.SessionAuthentication,
         authentication.TokenAuthentication,

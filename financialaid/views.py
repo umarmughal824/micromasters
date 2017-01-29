@@ -48,7 +48,7 @@ from financialaid.serializers import (
     FinancialAidRequestSerializer,
     FinancialAidSerializer,
 )
-from mail.serializers import FinancialAidMailSerializer
+from mail.serializers import GenericMailSerializer
 from roles.models import (
     Instructor,
     Staff,
@@ -185,7 +185,7 @@ class ReviewFinancialAidView(UserPassesTestMixin, ListView):
         context["selected_status"] = self.selected_status
         context["statuses"] = FinancialAidStatus
         context["justifications"] = FinancialAidJustification.ALL_JUSTIFICATIONS
-        context["email_serializer"] = FinancialAidMailSerializer()
+        context["email_serializer"] = GenericMailSerializer()
         context["current_sort_field"] = "{sort_direction}{sort_field}".format(
             sort_direction=self.sort_direction,
             sort_field=self.sort_field
