@@ -220,6 +220,18 @@ class Profile(models.Model):
         """Third line of address"""
         return self._split_address()[2]
 
+    @property
+    def display_name(self):
+        """User's full name in a standard displayable format"""
+        name_components = [
+            self.first_name or self.user.username
+        ]
+        if self.last_name:
+            name_components.append(self.last_name)
+        if self.preferred_name and self.preferred_name != self.first_name:
+            name_components.append('({})'.format(self.preferred_name))
+        return ' '.join(name_components)
+
 
 class Education(models.Model):
     """

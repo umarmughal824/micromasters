@@ -4,6 +4,7 @@ Model tests
 # pylint: disable=no-self-use
 from datetime import datetime
 from unittest.mock import patch
+from ddt import ddt, data
 
 from django.db.models.signals import post_save
 from factory.django import mute_signals
@@ -126,3 +127,34 @@ class ProfileAddressTests(MockedESTestCase):
         assert profile.address1 == "Who lives in a pineapple under the sea?"
         assert profile.address2 == "SPONGEBOB SQUAREPANTS! Absorbent and"
         assert profile.address3 == "yellow and porous is he"
+
+
+@ddt
+class ProfileDisplayNameTests(MockedESTestCase):
+    """
+    Tests for profile display name
+    """
+    def test_full_display_name(self):
+        """Test the profile display name with all name components set"""
+        with mute_signals(post_save):
+            profile = ProfileFactory(first_name='First', last_name='Last', preferred_name='Pref')
+        assert profile.display_name == 'First Last (Pref)'
+
+    @data(None, 'First')
+    def test_display_name_without_preferred(self, pref_name):
+        """Test the profile display name with a preferred name that is blank or equal to first name"""
+        with mute_signals(post_save):
+            profile = ProfileFactory(first_name='First', last_name='Last', preferred_name=pref_name)
+        assert profile.display_name == 'First Last'
+
+    def test_display_name_no_last_name(self):
+        """Test the profile display name with a blank last name"""
+        with mute_signals(post_save):
+            profile = ProfileFactory(first_name='First', last_name=None, preferred_name=None)
+        assert profile.display_name == 'First'
+
+    def test_display_name_no_first_name(self):
+        """Test the profile display name with a blank first name"""
+        with mute_signals(post_save):
+            profile = ProfileFactory(user__username='uname', first_name=None, last_name=None, preferred_name=None)
+        assert profile.display_name == 'uname'

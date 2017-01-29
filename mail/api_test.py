@@ -7,6 +7,7 @@ from unittest.mock import Mock, patch
 
 from ddt import ddt, data
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.db.models.signals import post_save
 from django.test import override_settings
 from factory.django import mute_signals
@@ -14,6 +15,7 @@ from requests import Response
 from rest_framework.status import HTTP_200_OK
 
 from dashboard.models import ProgramEnrollment
+from courses.factories import CourseFactory
 from ecommerce.factories import CoursePriceFactory
 from financialaid.factories import FinancialAidFactory
 from mail.api import MailgunClient
@@ -31,14 +33,15 @@ class MailAPITests(MockedESTestCase):
     """
     Tests for the Mailgun client class
     """
+    batch_recipient_arg = ['a@example.com', 'b@example.com']
+    individual_recipient_arg = 'a@example.com'
+
     @override_settings(EMAIL_SUPPORT='mailgun_from_email@example.com')
     @data(None, 'Tester')
     def test_from_address(self, sender_name, mock_post):
         """
         Test that the 'from' address for our emails is set correctly
         """
-        # NOTE: Using patch.multiple to override settings values because Django's
-        # override_settings decorator fails to work for mysterious reasons
         MailgunClient.send_bcc(
             'email subject',
             'email body',
@@ -150,11 +153,17 @@ class MailAPITests(MockedESTestCase):
             )
 
     @override_settings(MAILGUN_RECIPIENT_OVERRIDE=None)
-    def test_send_individual_email(self, mock_post):
+    @data(None, 'Tester')
+    def test_send_individual_email(self, sender_name, mock_post):
         """
         Test that MailgunClient.send_individual_email() sends an individual message
         """
-        MailgunClient.send_individual_email('email subject', 'email body', 'a@example.com')
+        MailgunClient.send_individual_email(
+            subject='email subject',
+            body='email body',
+            recipient='a@example.com',
+            sender_name=sender_name
+        )
         assert mock_post.called
         called_args, called_kwargs = mock_post.call_args
         assert list(called_args)[0] == '{}/{}'.format(settings.MAILGUN_URL, 'messages')
@@ -162,6 +171,30 @@ class MailAPITests(MockedESTestCase):
         assert called_kwargs['data']['text'].startswith('email body')
         assert called_kwargs['data']['subject'] == 'email subject'
         assert called_kwargs['data']['to'] == ['a@example.com']
+        if sender_name is not None:
+            self.assertEqual(
+                called_kwargs['data']['from'],
+                "{sender_name} <{email}>".format(sender_name=sender_name, email=settings.EMAIL_SUPPORT)
+            )
+        else:
+            self.assertEqual(called_kwargs['data']['from'], settings.EMAIL_SUPPORT)
+
+    @override_settings(MAILGUN_RECIPIENT_OVERRIDE=None)
+    def test_send_with_sender_address(self, mock_post):
+        """
+        Test that specifying a sender address in our mail API functions will result in an email
+        with the sender address in the 'from' field
+        """
+        sender_address = 'sender@example.com'
+        MailgunClient.send_batch(
+            'email subject', 'email body', self.batch_recipient_arg, sender_address=sender_address
+        )
+        MailgunClient.send_individual_email(
+            'email subject', 'email body', self.individual_recipient_arg, sender_address=sender_address
+        )
+        for args in mock_post.call_args_list:
+            _, called_kwargs = args
+            assert called_kwargs['data']['from'] == sender_address
 
 
 @patch('requests.post')
@@ -266,3 +299,53 @@ class FinancialAidMailAPITests(MockedESTestCase):
         assert audit.from_email == settings.EMAIL_SUPPORT
         assert audit.email_subject == ''
         assert audit.email_body == ''
+
+
+@patch('requests.post')
+class CourseTeamMailAPITests(MockedESTestCase):
+    """
+    Tests for course team contact functionality in the Mailgun client class
+    """
+    @classmethod
+    def setUpTestData(cls):
+        with mute_signals(post_save):
+            cls.user_profile = ProfileFactory.create()
+        cls.user = cls.user_profile.user
+
+    @override_settings(MAILGUN_RECIPIENT_OVERRIDE=None)
+    def test_send_course_team_email(self, mock_post):
+        """
+        Tests that a course team contact email is sent correctly
+        """
+        course_with_email = CourseFactory.create(title='course with email', contact_email='course@example.com')
+        MailgunClient.send_course_team_email(
+            self.user,
+            course_with_email,
+            'email subject',
+            'email body'
+        )
+        assert mock_post.called
+        _, called_kwargs = mock_post.call_args
+        assert called_kwargs['data']['text'] == 'email body'
+        assert called_kwargs['data']['subject'] == 'email subject'
+        assert called_kwargs['data']['to'] == [course_with_email.contact_email]
+        self.assertEqual(
+            called_kwargs['data']['from'],
+            '{} <{}>'.format(self.user_profile.display_name, self.user.email)
+        )
+
+    @override_settings(MAILGUN_RECIPIENT_OVERRIDE=None)
+    def test_send_to_course_team_without_email(self, mock_post):
+        """
+        Tests that an attempt to send an email to a course with no contact email will fail
+        """
+        course_no_email = CourseFactory.create(title='course no email', contact_email=None)
+        with self.assertRaises(ImproperlyConfigured) as ex:
+            MailgunClient.send_course_team_email(
+                self.user,
+                course_no_email,
+                'email subject',
+                'email body'
+            )
+        assert ex.exception.args[0].startswith('Course team contact email attempted')
+        assert not mock_post.called

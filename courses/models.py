@@ -69,6 +69,7 @@ class Course(models.Model):
     thumbnail = models.ImageField(null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     prerequisites = models.TextField(blank=True, null=True)
+    contact_email = models.EmailField(blank=True, null=True)
 
     # ExamModule for Pearson exams, used for authorizations
     # tuple of (Program.exam_series_code, Course.exam_module) is used to identify an exam
