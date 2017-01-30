@@ -11,7 +11,7 @@ import type {
   WorkHistoryEntry,
 } from '../../flow/profileTypes';
 import type { UIState } from '../../reducers/ui';
-import type { Email } from '../../flow/emailTypes';
+import type { EmailInputs } from '../../flow/emailTypes';
 import type {
   FinancialAidState,
   FinancialAidValidation,
@@ -239,8 +239,8 @@ let emailMessages: ErrorMessages = {
   'body': 'Please fill in a body',
 };
 
-export const emailValidation = (email: Email): ValidationErrors => (
-  findErrors(email, R.keys(emailMessages), emailMessages)
+export const emailValidation = (emailInputs: EmailInputs): ValidationErrors => (
+  findErrors(emailInputs, R.keys(emailMessages), emailMessages)
 );
 
 /*

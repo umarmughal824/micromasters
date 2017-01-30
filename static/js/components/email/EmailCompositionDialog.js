@@ -3,12 +3,12 @@ import React from 'react';
 import Dialog from 'material-ui/Dialog';
 import R from 'ramda';
 
-import { FETCH_PROCESSING } from '../actions';
-import { dialogActions } from './inputs/util';
+import { FETCH_PROCESSING } from '../../actions';
+import { dialogActions } from '../inputs/util';
 import type {
-  Email,
+  EmailState,
   EmailValidationErrors
-} from '../flow/emailTypes';
+} from '../../flow/emailTypes';
 
 const showValidationError = R.curry((getter, object: EmailValidationErrors) => {
   let val = getter(object);
@@ -27,7 +27,7 @@ type EmailDialogProps = {
   closeEmailDialog: () => void,
   updateEmailEdit:  Function,
   open:             boolean,
-  email:            Email,
+  email:            EmailState,
   searchkit:        Object,
   sendEmail:        () => void,
 };
@@ -37,7 +37,7 @@ const EmailCompositionDialog = (props: EmailDialogProps) => {
     closeEmailDialog,
     updateEmailEdit,
     open,
-    email: { email, validationErrors, fetchStatus },
+    email: { inputs, validationErrors, fetchStatus },
     searchkit,
     sendEmail,
   } = props;
@@ -59,7 +59,7 @@ const EmailCompositionDialog = (props: EmailDialogProps) => {
         rows="1"
         className="email-subject"
         placeholder="Subject"
-        value={email.subject || ""}
+        value={inputs.subject || ""}
         onChange={updateEmailEdit('subject')}
       />
       { showSubjectError(validationErrors) }
@@ -67,7 +67,7 @@ const EmailCompositionDialog = (props: EmailDialogProps) => {
         rows="7"
         className="email-body"
         placeholder="Type a message"
-        value={email.body || ""}
+        value={inputs.body || ""}
         onChange={updateEmailEdit('body')}
       />
       { showBodyError(validationErrors) }

@@ -6,10 +6,12 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import TestUtils from 'react-addons-test-utils';
 
-import * as inputUtil from '../components/inputs/util';
-import { FETCH_PROCESSING } from '../actions';
-import { INITIAL_EMAIL_STATE, NEW_EMAIL_EDIT } from '../reducers/email';
-import { modifyTextField } from '../util/test_utils';
+import * as inputUtil from '../inputs/util';
+import { FETCH_PROCESSING } from '../../actions';
+import {
+  INITIAL_EMAIL_STATE
+} from '../../reducers/email';
+import { modifyTextField } from '../../util/test_utils';
 import EmailCompositionDialog from './EmailCompositionDialog';
 
 describe('EmailCompositionDialog', () => {
@@ -37,10 +39,7 @@ describe('EmailCompositionDialog', () => {
           closeEmailDialog={closeEmailDialog}
           updateEmailEdit={updateEmailEdit}
           open={true}
-          email={{
-            ...INITIAL_EMAIL_STATE,
-            email: NEW_EMAIL_EDIT
-          }}
+          email={{ ...INITIAL_EMAIL_STATE }}
           searchkit={{
             getHitsCount: getHitsCount
           }}
@@ -77,7 +76,6 @@ describe('EmailCompositionDialog', () => {
     renderDialog({
       email: {
         ...INITIAL_EMAIL_STATE,
-        email: NEW_EMAIL_EDIT,
         fetchStatus: FETCH_PROCESSING,
       }
     });
@@ -100,13 +98,12 @@ describe('EmailCompositionDialog', () => {
         renderDialog({
           email: {
             ...INITIAL_EMAIL_STATE,
-            email: {
-              ...NEW_EMAIL_EDIT,
-              [field]: "a field value!"
+            inputs: {
+              [field]: `${field} value!`
             }
           }
         });
-        assert.equal(getField().value, "a field value!");
+        assert.equal(getField().value, `${field} value!`);
       });
 
       it('should fire the updateEmailEdit callback on change', () => {
