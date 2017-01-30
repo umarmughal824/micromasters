@@ -16,8 +16,9 @@ import {
   SEND_EMAIL_SUCCESS,
   SEND_EMAIL_FAILURE,
 } from '../actions/email';
-import { NEW_EMAIL_EDIT, INITIAL_EMAIL_STATE } from './email';
-import { EmailSendResponse } from '../flow/emailTypes';
+import { INITIAL_ALL_EMAILS_STATE, INITIAL_EMAIL_STATE, NEW_EMAIL_EDIT } from './email';
+import { SEARCH_EMAIL_TYPE } from '../components/email/constants';
+import type { EmailSendResponse } from '../flow/emailTypes';
 import * as api from '../lib/api';
 import rootReducer from '../reducers';
 import { assert } from 'chai';
@@ -25,7 +26,10 @@ import sinon from 'sinon';
 import R from 'ramda';
 
 describe('email reducers', () => {
-  let sandbox, store, dispatchThen;
+  let sandbox,
+    store,
+    dispatchThen,
+    emailType = SEARCH_EMAIL_TYPE;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -37,37 +41,41 @@ describe('email reducers', () => {
     sandbox.restore();
   });
 
-  let query = { query: "Hi, I'm a query!" };
-
-  let initialExpectation = { ...INITIAL_EMAIL_STATE, email: { ...NEW_EMAIL_EDIT, query: query } };
+  let initialExpectedEmailState = { ...INITIAL_EMAIL_STATE, inputs: NEW_EMAIL_EDIT };
 
   it('should let you start editing an email', () => {
-    return dispatchThen(startEmailEdit(query), [START_EMAIL_EDIT]).then(state => {
-      assert.deepEqual(initialExpectation, state);
+    return dispatchThen(startEmailEdit(emailType), [START_EMAIL_EDIT]).then(state => {
+      assert.deepEqual(state[emailType], initialExpectedEmailState);
     });
   });
 
   it('should let you update an email edit in progress', () => {
-    store.dispatch(startEmailEdit(query));
-    let update = R.clone(initialExpectation.email);
-    update.body = 'The body of my email';
-    return dispatchThen(updateEmailEdit(update), [UPDATE_EMAIL_EDIT]).then(state => {
-      assert.deepEqual(state, { ...initialExpectation, email: update });
+    store.dispatch(startEmailEdit(emailType));
+    let updatedInputs = R.clone(initialExpectedEmailState.inputs);
+    updatedInputs.body = 'The body of my email';
+    return dispatchThen(
+      updateEmailEdit({type: emailType, inputs: updatedInputs}),
+      [UPDATE_EMAIL_EDIT]
+    ).then(state => {
+      assert.deepEqual(state[emailType], { ...initialExpectedEmailState, inputs: updatedInputs });
     });
   });
 
   it('should let you clear an existing email edit', () => {
     return assert.eventually.deepEqual(
-      dispatchThen(clearEmailEdit(), [CLEAR_EMAIL_EDIT]),
-      INITIAL_EMAIL_STATE,
+      dispatchThen(clearEmailEdit(emailType), [CLEAR_EMAIL_EDIT]),
+      INITIAL_ALL_EMAILS_STATE,
     );
   });
 
   it('should let you update email validation', () => {
-    store.dispatch(startEmailEdit(query));
+    store.dispatch(startEmailEdit(emailType));
     let errors = { subject: "NO SUBJECT" };
-    return dispatchThen(updateEmailValidation(errors), [UPDATE_EMAIL_VALIDATION]).then(state => {
-      assert.deepEqual(state.validationErrors, errors);
+    return dispatchThen(
+      updateEmailValidation({type: emailType, errors: errors}),
+      [UPDATE_EMAIL_VALIDATION]
+    ).then(state => {
+      assert.deepEqual(state[emailType].validationErrors, errors);
     });
   });
 
@@ -87,7 +95,7 @@ describe('email reducers', () => {
         sendSearchResultMail('subject', 'body', searchRequest),
         [INITIATE_SEND_EMAIL, SEND_EMAIL_SUCCESS]
       ).then(emailState => {
-        assert.equal(emailState.fetchStatus, FETCH_SUCCESS);
+        assert.equal(emailState[emailType].fetchStatus, FETCH_SUCCESS);
         assert.equal(sendSearchResultMailStub.callCount, 1);
         assert.deepEqual(sendSearchResultMailStub.args[0], ['subject', 'body', searchRequest]);
       });
@@ -100,7 +108,7 @@ describe('email reducers', () => {
         sendSearchResultMail('subject', 'body', searchRequest),
         [INITIATE_SEND_EMAIL, SEND_EMAIL_FAILURE]
       ).then(emailState => {
-        assert.equal(emailState.fetchStatus, FETCH_FAILURE);
+        assert.equal(emailState[emailType].fetchStatus, FETCH_FAILURE);
       });
     });
   });

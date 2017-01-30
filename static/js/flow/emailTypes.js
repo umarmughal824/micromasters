@@ -1,24 +1,23 @@
-export type Email = {
-  subject?:   ?string,
-  body?:      ?string,
-  query?:     ?Object,
-};
-
+// @flow
 export type EmailSendResponse = {
-  errorStatusCode?:  number,
+  errorStatusCode?: number,
 };
-
 export type EmailSendError = EmailSendResponse;
 
-export type EmailValidationErrors = {
+export type EmailInputs = {
   subject?:   ?string,
   body?:      ?string,
-  query?:     ?string,
 };
+export type EmailValidationErrors = EmailInputs;
 
 export type EmailState = {
-  email:  Email,
+  inputs:           EmailInputs,
   validationErrors: EmailValidationErrors,
-  sendError: EmailSendError,
-  fetchStatus?: ?string,
-}
+  sendError:        EmailSendError,
+  fetchStatus?:     ?string,
+};
+
+export type AllEmailsState = {
+  searchResultEmail:  EmailState,
+  courseTeamEmail:    EmailState,
+};

@@ -20,6 +20,7 @@ import {
 import {
   SET_EMAIL_DIALOG_VISIBILITY,
 } from '../actions/ui';
+import { SEARCH_EMAIL_TYPE } from '../components/email/constants';
 import * as api from '../lib/api';
 import { modifyTextField } from '../util/test_utils';
 
@@ -69,16 +70,13 @@ describe('LearnerSearchPage', function () {
   it('waits for a successful email send to close the dialog', () => {
     helper.programsGetStub.returns(Promise.resolve(PROGRAMS));
     helper.store.dispatch(setEmailDialogVisibility(true));
-    const query = {
-      fake: 'query'
-    };
-    helper.store.dispatch(startEmailEdit(query));
-    let sendMail = helper.sandbox.stub(api, 'sendSearchResultMail');
-    sendMail.returns(Promise.resolve());
+    helper.store.dispatch(startEmailEdit(SEARCH_EMAIL_TYPE));
+    let sendSearchResultMail = helper.sandbox.stub(api, 'sendSearchResultMail');
+    sendSearchResultMail.returns(Promise.resolve());
 
     return renderComponent('/learners').then(() => {
       let dialog = document.querySelector('.email-composition-dialog');
-      let button = dialog.querySelector(".save-button");
+      let saveButton = dialog.querySelector(".save-button");
 
       return listenForActions([
         UPDATE_EMAIL_EDIT,
@@ -92,11 +90,17 @@ describe('LearnerSearchPage', function () {
         modifyTextField(dialog.querySelector('.email-subject'), 'subject');
         modifyTextField(dialog.querySelector('.email-body'), 'body');
 
-        TestUtils.Simulate.click(button);
+        TestUtils.Simulate.click(saveButton);
         assert.isTrue(helper.store.getState().ui.emailDialogVisibility);
       }).then(() => {
-        assert.isTrue(sendMail.calledWith("subject", "body", query));
         assert.isFalse(helper.store.getState().ui.emailDialogVisibility);
+        assert.isTrue(sendSearchResultMail.calledWith("subject", "body"));
+        // Assert that 'sendSearchResultMail' is called with an object representing an ES query, which should have
+        // specific properties. func.args[0][2] == the third arg of the first call to 'func'
+        let queryArg = sendSearchResultMail.args[0][2];
+        assert.property(queryArg, 'filter');
+        assert.property(queryArg, 'aggs');
+        assert.property(queryArg, 'size');
       });
     });
   });

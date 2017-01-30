@@ -3,7 +3,12 @@ import type { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 
 import type { Dispatcher } from '../flow/reduxTypes';
-import type { EmailSendResponse } from '../flow/emailTypes';
+import type {
+  EmailSendResponse,
+} from '../flow/emailTypes';
+import {
+  SEARCH_EMAIL_TYPE,
+} from '../components/email/constants';
 import * as api from '../lib/api';
 
 export const START_EMAIL_EDIT = 'START_EMAIL_EDIT';
@@ -33,13 +38,13 @@ export function sendSearchResultMail(
   searchRequest: Object
 ): Dispatcher<EmailSendResponse> {
   return (dispatch: Dispatch) => {
-    dispatch(initiateSendEmail());
+    dispatch(initiateSendEmail(SEARCH_EMAIL_TYPE));
     return api.sendSearchResultMail(subject, body, searchRequest).
       then(response => {
-        dispatch(sendEmailSuccess());
+        dispatch(sendEmailSuccess(SEARCH_EMAIL_TYPE));
         return Promise.resolve(response);
       }).catch(error => {
-        dispatch(sendEmailFailure(error));
+        dispatch(sendEmailFailure({type: SEARCH_EMAIL_TYPE, error: error}));
       });
   };
 }

@@ -1,4 +1,5 @@
 // @flow
+import _ from 'lodash';
 import {
   START_EMAIL_EDIT,
   UPDATE_EMAIL_EDIT,
@@ -15,38 +16,57 @@ import {
 } from '../actions';
 import type { Action } from '../flow/reduxTypes';
 import type {
-  Email,
-  EmailState
+  AllEmailsState,
+  EmailState,
+  EmailInputs,
 } from '../flow/emailTypes';
 
 export const INITIAL_EMAIL_STATE: EmailState = {
-  email:  {},
+  inputs: {},
   validationErrors: {},
   sendError: {},
 };
-
-export const NEW_EMAIL_EDIT: Email = {
-  subject:    null,
-  body:       null,
-  query:      null,
+export const INITIAL_ALL_EMAILS_STATE: AllEmailsState = {
+  searchResultEmail: INITIAL_EMAIL_STATE,
+  courseTeamEmail: INITIAL_EMAIL_STATE
 };
 
-export const email = (state: EmailState = INITIAL_EMAIL_STATE, action: Action) => {
+export const NEW_EMAIL_EDIT: EmailInputs = {
+  subject:    null,
+  body:       null,
+};
+
+const getEmailType = (payload: string|Object) => (
+  // If the action payload is just a string, that indicates the email type
+  // Otherwise, the action payload should be an Object with a 'type' property indicating email type
+  typeof payload === "string" ? payload : _.get(payload, 'type')
+);
+
+function updatedState(state: AllEmailsState, emailType: string, updateObject: Object) {
+  let clonedState = _.cloneDeep(state);
+  _.merge(clonedState[emailType], updateObject);
+  return clonedState;
+}
+
+export const email = (state: AllEmailsState = INITIAL_ALL_EMAILS_STATE, action: Action) => {
+  let emailType = getEmailType(action.payload);
+
   switch (action.type) {
   case START_EMAIL_EDIT:
-    return { ...state, email: { ...NEW_EMAIL_EDIT, query: action.payload } };
+    return updatedState(state, emailType, { inputs: NEW_EMAIL_EDIT });
   case UPDATE_EMAIL_EDIT:
-    return { ...state, email: action.payload };
+    return updatedState(state, emailType, { inputs: action.payload.inputs });
   case CLEAR_EMAIL_EDIT:
-    return { ...INITIAL_EMAIL_STATE };
+    return updatedState(state, emailType, INITIAL_EMAIL_STATE);
   case UPDATE_EMAIL_VALIDATION:
-    return { ...state, validationErrors: action.payload };
+    return updatedState(state, emailType, { validationErrors: action.payload.errors });
+
   case INITIATE_SEND_EMAIL:
-    return { ...state, fetchStatus: FETCH_PROCESSING };
+    return updatedState(state, emailType, { fetchStatus: FETCH_PROCESSING });
   case SEND_EMAIL_SUCCESS:
-    return { ...INITIAL_EMAIL_STATE, fetchStatus: FETCH_SUCCESS };
+    return updatedState(state, emailType, { ...INITIAL_ALL_EMAILS_STATE, fetchStatus: FETCH_SUCCESS });
   case SEND_EMAIL_FAILURE:
-    return { ...state, fetchStatus: FETCH_FAILURE, sendError: action.payload };
+    return updatedState(state, emailType, { fetchStatus: FETCH_FAILURE, sendError: action.payload.error });
   default:
     return state;
   }

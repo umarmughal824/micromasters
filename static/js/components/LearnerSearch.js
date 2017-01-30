@@ -30,9 +30,9 @@ import CustomSortingSelect from './search/CustomSortingSelect';
 import FilterVisibilityToggle from './search/FilterVisibilityToggle';
 import HitsCount from './search/HitsCount';
 import CustomNoHits from './search/CustomNoHits';
-import EmailCompositionDialog from './EmailCompositionDialog';
+import EmailCompositionDialog from './email/EmailCompositionDialog';
 import type { Option } from '../flow/generalTypes';
-import type { Email } from '../flow/emailTypes';
+import type { EmailState } from '../flow/emailTypes';
 import type { AvailableProgram } from '../flow/enrollmentTypes';
 import { EDUCATION_LEVELS } from '../constants';
 
@@ -115,11 +115,11 @@ export default class LearnerSearch extends SearchkitComponent {
     checkFilterVisibility:    (s: string) => boolean,
     setFilterVisibility:      (s: string, v: boolean) => void,
     openEmailComposer:        () => void,
-    emailDialogVisibility:    boolean,
     closeEmailDialog:         () => void,
     updateEmailEdit:          (o: Object) => void,
     sendEmail:                () => void,
-    email:                    Email,
+    emailDialogVisibility:    boolean,
+    email:                    EmailState,
     children:                 React$Element<*>[],
     currentProgramEnrollment: AvailableProgram,
   };
@@ -142,9 +142,11 @@ export default class LearnerSearch extends SearchkitComponent {
        results.hits && results.hits.hits && results.hits.hits.length > 0 ? results.hits.hits[0] : null
     );
     return hit !== null ? hit._source.program.total_courses : 0;
-  }
+  };
 
-  renderSearchHeader: Function = (openEmailComposer: Function): React$Element<*>|null => {
+  renderSearchHeader: Function = (): React$Element<*>|null => {
+    const { openEmailComposer } = this.props;
+
     if (_.isNull(this.getResults())) {
       return null;
     }
@@ -155,7 +157,7 @@ export default class LearnerSearch extends SearchkitComponent {
           <button
             id="email-selected"
             className="mdl-button minor-action"
-            onClick={() => openEmailComposer(this.searchkit)}
+            onClick={openEmailComposer}
           >
             Email These Learners
           </button>
@@ -288,7 +290,6 @@ export default class LearnerSearch extends SearchkitComponent {
       updateEmailEdit,
       sendEmail,
       email,
-      openEmailComposer,
       currentProgramEnrollment,
     } = this.props;
 
@@ -311,7 +312,7 @@ export default class LearnerSearch extends SearchkitComponent {
           </Cell>
           <Cell col={9}>
             <Card className="fullwidth results-padding" shadow={1}>
-              { this.renderSearchHeader(openEmailComposer) }
+              { this.renderSearchHeader() }
               <Hits
                 className="learner-results"
                 hitsPerPage={SETTINGS.es_page_size}
