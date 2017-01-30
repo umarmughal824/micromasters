@@ -132,7 +132,7 @@ export default class LearnerSearch extends SearchkitComponent {
   countryNameTranslations: Object = makeCountryNameTranslations();
   degreeTranslations: Object = makeDegreeTranslations();
 
-  getNumberOfCoursesInProgram: Function = (): number => {
+  getNumberOfCoursesInProgram = (): number => {
     let results = this.getResults();
     if (!results) {
       return 0;
@@ -144,7 +144,7 @@ export default class LearnerSearch extends SearchkitComponent {
     return hit !== null ? hit._source.program.total_courses : 0;
   };
 
-  renderSearchHeader: Function = (): React$Element<*>|null => {
+  renderSearchHeader = (): React$Element<*>|null => {
     const { openEmailComposer } = this.props;
 
     if (_.isNull(this.getResults())) {
