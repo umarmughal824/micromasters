@@ -8,6 +8,7 @@ import type {
 } from '../flow/emailTypes';
 import {
   SEARCH_EMAIL_TYPE,
+  COURSE_EMAIL_TYPE
 } from '../components/email/constants';
 import * as api from '../lib/api';
 
@@ -45,6 +46,23 @@ export function sendSearchResultMail(
         return Promise.resolve(response);
       }).catch(error => {
         dispatch(sendEmailFailure({type: SEARCH_EMAIL_TYPE, error: error}));
+      });
+  };
+}
+
+export function sendCourseTeamMail(
+  subject: string,
+  body: string,
+  courseId: number
+): Dispatcher<EmailSendResponse> {
+  return (dispatch: Dispatch) => {
+    dispatch(initiateSendEmail(COURSE_EMAIL_TYPE));
+    return api.sendCourseTeamMail(subject, body, courseId).
+      then(response => {
+        dispatch(sendEmailSuccess(COURSE_EMAIL_TYPE));
+        return Promise.resolve(response);
+      }).catch(error => {
+        dispatch(sendEmailFailure({type: COURSE_EMAIL_TYPE, error: error}));
       });
   };
 }

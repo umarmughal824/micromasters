@@ -21,15 +21,14 @@ const showSubjectError = showValidationError(R.prop('subject'));
 
 const showBodyError = showValidationError(R.prop('body'));
 
-const hitsCount = searchkit => R.isNil(searchkit) ? 0 : searchkit.getHitsCount();
-
 type EmailDialogProps = {
   closeEmailDialog: () => void,
   updateEmailEdit:  Function,
   open:             boolean,
   email:            EmailState,
-  searchkit:        Object,
   sendEmail:        () => void,
+  title?:           string,
+  children?:        any,
 };
 
 const EmailCompositionDialog = (props: EmailDialogProps) => {
@@ -38,12 +37,18 @@ const EmailCompositionDialog = (props: EmailDialogProps) => {
     updateEmailEdit,
     open,
     email: { inputs, validationErrors, fetchStatus },
-    searchkit,
     sendEmail,
+    title,
+    children
   } = props;
 
+  let subHeading;
+  if (children) {
+    subHeading = <h5 className="sub-heading">{ children }</h5>;
+  }
+
   return <Dialog
-    title="New Email"
+    title={title || "New Email"}
     titleClassName="dialog-title"
     contentClassName="dialog email-composition-dialog"
     className="email-composition-dialog-wrapper"
@@ -52,9 +57,7 @@ const EmailCompositionDialog = (props: EmailDialogProps) => {
     onRequestClose={closeEmailDialog}
   >
     <div className="email-composition-contents">
-      <span className="user-count">
-        {hitsCount(searchkit)} recipients selected
-      </span>
+      { subHeading }
       <textarea
         rows="1"
         className="email-subject"

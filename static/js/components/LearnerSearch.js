@@ -304,8 +304,9 @@ export default class LearnerSearch extends SearchkitComponent {
           updateEmailEdit={updateEmailEdit}
           email={email}
           sendEmail={sendEmail}
-          searchkit={this.searchkit}
-        />
+        >
+          {this.getHitsCount() || 0} recipients selected
+        </EmailCompositionDialog>
         <Grid className="search-grid">
           <Cell col={3} className="search-sidebar">
             { this.renderFacets(currentProgramEnrollment) }
