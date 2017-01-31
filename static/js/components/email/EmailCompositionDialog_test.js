@@ -15,12 +15,11 @@ import { modifyTextField } from '../../util/test_utils';
 import EmailCompositionDialog from './EmailCompositionDialog';
 
 describe('EmailCompositionDialog', () => {
-  let sandbox, updateStub, getHitsCount, closeEmailDialog, updateEmailEdit, sendEmail;
+  let sandbox, updateStub, closeEmailDialog, updateEmailEdit, sendEmail;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     updateStub = sandbox.stub();
-    getHitsCount = sandbox.stub().returns(20);
     closeEmailDialog = sandbox.stub().returns(updateStub);
     updateEmailEdit = sandbox.stub().returns(updateStub);
     sendEmail = sandbox.stub();
@@ -32,7 +31,7 @@ describe('EmailCompositionDialog', () => {
 
   const getDialog = () => document.querySelector('.email-composition-dialog');
 
-  const renderDialog = (props = {}) => (
+  const renderDialog = (props = {}, subHeading = null) => (
     mount (
       <MuiThemeProvider muiTheme={getMuiTheme()}>
         <EmailCompositionDialog
@@ -40,12 +39,11 @@ describe('EmailCompositionDialog', () => {
           updateEmailEdit={updateEmailEdit}
           open={true}
           email={{ ...INITIAL_EMAIL_STATE }}
-          searchkit={{
-            getHitsCount: getHitsCount
-          }}
           sendEmail={sendEmail}
           {...props}
-        />
+        >
+          { subHeading }
+        </EmailCompositionDialog>
       </MuiThemeProvider>
     )
   );
@@ -55,20 +53,10 @@ describe('EmailCompositionDialog', () => {
     assert.equal(document.querySelector('h3').textContent, 'New Email');
   });
 
-  it('should have a results count', () => {
-    renderDialog();
-    let count = document.querySelector('.user-count').textContent;
-    assert.equal(count, '20 recipients selected');
-    assert(
-      getHitsCount.called,
-      "called searchkit getHitsCount method"
-    );
-  });
-
-  it('should fire sendSearchResultMail when the "send" button is clicked', () => {
+  it('should fire the send handler when the "send" button is clicked', () => {
     renderDialog();
     TestUtils.Simulate.click(getDialog().querySelector('.save-button'));
-    assert.isTrue(sendEmail.called, "called sendSearchResultMail method");
+    assert.isTrue(sendEmail.called, "called send handler");
   });
 
   it('should show a disabled spinner button if email send is in progress', () => {
@@ -83,6 +71,26 @@ describe('EmailCompositionDialog', () => {
     // assert that inFlight is true
     assert.isTrue(dialogActionsSpy.calledWith(sinon.match.any, sinon.match.any, true));
     assert.equal(dialogActionsSpy.callCount, 1);
+  });
+
+  it('should show a subheader when text is passed in', () => {
+    renderDialog({}, 'Some subheader text');
+    assert.equal(document.querySelector('h5').textContent, 'Some subheader text');
+  });
+
+  it('should not show a subheader when text is not passed in', () => {
+    renderDialog({}, null);
+    assert.isNull(document.querySelector('h5'));
+  });
+
+  it('should show a specific title when one is passed in', () => {
+    renderDialog({title: 'Some Title'});
+    assert.equal(document.querySelector('h3').textContent, 'Some Title');
+  });
+
+  it('should show a default title when one is not passed in', () => {
+    renderDialog();
+    assert.equal(document.querySelector('h3').textContent, 'New Email');
   });
 
   ['subject', 'body'].forEach(field => {

@@ -16,6 +16,7 @@ import {
   csrfSafeMethod,
   checkout,
   sendSearchResultMail,
+  sendCourseTeamMail,
   getPrograms,
   addProgramEnrollment,
   updateProfileImage,
@@ -182,8 +183,9 @@ describe('api', function() {
     describe('for email', () => {
       let MAIL_RESPONSE = {errorStatusCode: 200};
       let searchRequest = {size: 50};
+      let courseId = 123;
 
-      it('returns expected values when a POST to send email succeeds', () => {
+      it('returns expected values when a POST to send a search result email succeeds', () => {
         fetchJSONStub.returns(Promise.resolve(MAIL_RESPONSE));
         return sendSearchResultMail('subject', 'body', searchRequest).then(mailResp => {
           assert.ok(fetchJSONStub.calledWith('/api/v0/mail/', {
@@ -198,7 +200,21 @@ describe('api', function() {
         });
       });
 
-      it('returns a rejected Promise when a POST to send email fails', () => {
+      it('returns expected values when a POST to send a course team email succeeds', () => {
+        fetchJSONStub.returns(Promise.resolve(MAIL_RESPONSE));
+        return sendCourseTeamMail('subject', 'body', courseId).then(mailResp => {
+          assert.ok(fetchJSONStub.calledWith(`/api/v0/mail/course/${courseId}/`, {
+            method: 'POST',
+            body: JSON.stringify({
+              email_subject: 'subject',
+              email_body: 'body',
+            })
+          }));
+          assert.deepEqual(mailResp, MAIL_RESPONSE);
+        });
+      });
+
+      it('returns a rejected Promise when a POST to any email sending function fails', () => {
         fetchJSONStub.returns(Promise.reject());
         return assert.isRejected(sendSearchResultMail('subject', 'body', searchRequest));
       });

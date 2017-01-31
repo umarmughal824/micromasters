@@ -8,6 +8,7 @@ import {
   clearEmailEdit,
   updateEmailValidation,
   sendSearchResultMail,
+  sendCourseTeamMail,
   START_EMAIL_EDIT,
   UPDATE_EMAIL_EDIT,
   CLEAR_EMAIL_EDIT,
@@ -79,7 +80,7 @@ describe('email reducers', () => {
     });
   });
 
-  describe('for send actions', () => {
+  describe('for the sendSearchResultMail action', () => {
     let sendSearchResultMailStub;
     let MAIL_SUCCESS_RESPONSE: EmailSendResponse = { errorStatusCode: 200 },
       searchRequest = { size: 50 };
@@ -88,7 +89,7 @@ describe('email reducers', () => {
       sendSearchResultMailStub = sandbox.stub(api, 'sendSearchResultMail');
     });
 
-    it('should go through expected state changes when sendSearchResultMail succeeds', () => {
+    it('should go through expected state changes when the send function succeeds', () => {
       sendSearchResultMailStub.returns(Promise.resolve(MAIL_SUCCESS_RESPONSE));
 
       return dispatchThen(
@@ -101,11 +102,45 @@ describe('email reducers', () => {
       });
     });
 
-    it('should go through expected state changes when sendSearchResultMail fails', () => {
+    it('should go through expected state changes when the send function fails', () => {
       sendSearchResultMailStub.returns(Promise.reject());
 
       return dispatchThen(
         sendSearchResultMail('subject', 'body', searchRequest),
+        [INITIATE_SEND_EMAIL, SEND_EMAIL_FAILURE]
+      ).then(emailState => {
+        assert.equal(emailState[emailType].fetchStatus, FETCH_FAILURE);
+      });
+    });
+  });
+
+  describe('for the sendCourseTeamMail action', () => {
+    let sendCourseTeamMailStub;
+    let MAIL_SUCCESS_RESPONSE: EmailSendResponse = { errorStatusCode: 200 },
+      courseId = 123;
+
+    beforeEach(() => {
+      sendCourseTeamMailStub = sandbox.stub(api, 'sendCourseTeamMail');
+    });
+
+    it('should go through expected state changes when the send function succeeds', () => {
+      sendCourseTeamMailStub.returns(Promise.resolve(MAIL_SUCCESS_RESPONSE));
+
+      return dispatchThen(
+        sendCourseTeamMail('subject', 'body', courseId),
+        [INITIATE_SEND_EMAIL, SEND_EMAIL_SUCCESS]
+      ).then(emailState => {
+        assert.equal(emailState[emailType].fetchStatus, FETCH_SUCCESS);
+        assert.equal(sendCourseTeamMailStub.callCount, 1);
+        assert.deepEqual(sendCourseTeamMailStub.args[0], ['subject', 'body', courseId]);
+      });
+    });
+
+    it('should go through expected state changes when the send function fails', () => {
+      sendCourseTeamMailStub.returns(Promise.reject());
+
+      return dispatchThen(
+        sendCourseTeamMail('subject', 'body', courseId),
         [INITIATE_SEND_EMAIL, SEND_EMAIL_FAILURE]
       ).then(emailState => {
         assert.equal(emailState[emailType].fetchStatus, FETCH_FAILURE);
