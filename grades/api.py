@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 
 from dashboard.api_edx_cache import CachedEdxUserData, CachedEdxDataApi
 from dashboard.models import CachedEnrollment
+from grades.exceptions import FreezeGradeFailedException
 from grades.models import (
     FinalGrade,
     FinalGradeStatus,
@@ -114,7 +115,7 @@ def get_users_without_frozen_final_grade(course_run):
     return User.objects.filter(pk__in=users_in_cache.difference(users_already_processed))
 
 
-def freeze_user_final_grade(user, course_run):
+def freeze_user_final_grade(user, course_run, raise_on_exception=False):
     """
     Public function to freeze final grades for the a user in a course run.
 
@@ -128,25 +129,45 @@ def freeze_user_final_grade(user, course_run):
     # pylint: disable=bare-except
     # no need to do anything if the course run is not ready
     if not course_run.can_freeze_grades:
-        log.info(
-            'the grade for user "%s" course "%s" cannot be frozen yet',
-            user.username, course_run.edx_course_key
-        )
-        return
+        if not raise_on_exception:
+            log.info(
+                'The grade for user "%s" course "%s" cannot be frozen yet',
+                user.username, course_run.edx_course_key
+            )
+            return
+        else:
+            raise FreezeGradeFailedException(
+                'The grade for user "{0}" course "{1}" cannot be frozen yet'.format(
+                    user.username,
+                    course_run.edx_course_key,
+                )
+            )
     # update one last time the user's certificates and current grades
     try:
         CachedEdxDataApi.update_all_cached_grade_data(user)
     except:
-        log.exception('Impossible to refresh the edX cache for user "%s"', user.username)
-        return
+        if not raise_on_exception:
+            log.exception('Impossible to refresh the edX cache for user "%s"', user.username)
+            return
+        else:
+            raise FreezeGradeFailedException(
+                'Impossible to refresh the edX cache for user "{0}"'.format(user.username))
     # get the final grade for the user in the program
     try:
         final_grade = get_final_grade(user, course_run)
     except:
-        log.exception(
-            'Impossible to get final grade for user "%s" in course %s', user.username, course_run.edx_course_key)
-        return
-    FinalGrade.objects.create(
+        if not raise_on_exception:
+            log.exception(
+                'Impossible to get final grade for user "%s" in course %s', user.username, course_run.edx_course_key)
+            return
+        else:
+            raise FreezeGradeFailedException(
+                'Impossible to get final grade for user "{0}" in course {1}'.format(
+                    user.username,
+                    course_run.edx_course_key
+                )
+            )
+    return FinalGrade.objects.create(
         user=user,
         course_run=course_run,
         grade=final_grade.grade,

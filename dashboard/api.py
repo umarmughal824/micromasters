@@ -12,6 +12,7 @@ import pytz
 from courses.models import Program
 from dashboard.api_edx_cache import CachedEdxDataApi, CachedEdxUserData
 from dashboard.utils import MMTrack
+from grades import api
 from grades.models import FinalGrade
 
 log = logging.getLogger(__name__)
@@ -294,16 +295,31 @@ def get_status_for_courserun(course_run, mmtrack):
         return CourseRunUserStatus(CourseRunStatus.NOT_ENROLLED, course_run)
     status = None
     if mmtrack.is_enrolled_mmtrack(course_run.edx_course_key):
+        get_grade_algorithm_version = settings.FEATURES.get("FINAL_GRADE_ALGORITHM", "v0")
         if course_run.is_current:
             status = CourseRunStatus.CURRENTLY_ENROLLED
         elif course_run.is_future:
             status = CourseRunStatus.WILL_ATTEND
-        elif course_run.has_frozen_grades:
+        # the following statement needs to happen only with the new version of the algorithm
+        elif course_run.has_frozen_grades and get_grade_algorithm_version == "v1":
+            # be sure that the user has a final grade or freeze now
+            try:
+                mmtrack.extract_final_grade(course_run.edx_course_key)
+            except FinalGrade.DoesNotExist:
+                # this is a very special case that happens if the user has logged in
+                # for the first time after we have already frozen the final grades
+                log.warning(
+                    'The user "%s" doesn\'t have a final grade for the course run "%s" '
+                    'but the course run has already been frozen. Trying to freeze the user now.',
+                    mmtrack.user.username,
+                    course_run.edx_course_key,
+                )
+                api.freeze_user_final_grade(mmtrack.user, course_run, raise_on_exception=True)
             status = CourseRunStatus.CHECK_IF_PASSED
         # this last check needs to be done as last one
         elif course_run.is_past:
-            get_grade_algorithm_version = settings.FEATURES.get("FINAL_GRADE_ALGORITHM", "v0")
             if get_grade_algorithm_version == "v1":
+                # in this case with v1 the course has not frozen final grades yet
                 status = CourseRunStatus.CURRENTLY_ENROLLED
             else:
                 status = CourseRunStatus.CHECK_IF_PASSED
@@ -326,25 +342,22 @@ def get_status_for_courserun(course_run, mmtrack):
                 if not course_run.has_frozen_grades:
                     status = CourseRunStatus.CAN_UPGRADE
                 else:
-                    final_grade = None
                     try:
                         final_grade = mmtrack.extract_final_grade(course_run.edx_course_key)
                     except FinalGrade.DoesNotExist:
                         # this is a very special case that happens if the user has logged in
                         # for the first time after we have already frozen the final grades
-                        # this should be eventually changed to freeze the final grade sync
-                        status = CourseRunStatus.CURRENTLY_ENROLLED
-                        log.exception(
+                        log.warning(
                             'The user "%s" doesn\'t have a final grade for the course run "%s" '
-                            'but the course run has already been frozen',
+                            'but the course run has already been frozen. Trying to freeze the user now.',
                             mmtrack.user.username,
                             course_run.edx_course_key,
                         )
-                    if final_grade is not None:
-                        if final_grade.passed:
-                            status = CourseRunStatus.CAN_UPGRADE
-                        else:
-                            status = CourseRunStatus.NOT_PASSED
+                        final_grade = api.freeze_user_final_grade(mmtrack.user, course_run, raise_on_exception=True)
+                    if final_grade.passed:
+                        status = CourseRunStatus.CAN_UPGRADE
+                    else:
+                        status = CourseRunStatus.NOT_PASSED
 
     return CourseRunUserStatus(
         status=status,

@@ -29,13 +29,14 @@ from dashboard.api_edx_cache import CachedEdxDataApi
 from dashboard.factories import CachedEnrollmentFactory, CachedCurrentGradeFactory, UserCacheRefreshTimeFactory
 from dashboard.utils import MMTrack
 from grades.constants import FinalGradeStatus
+from grades.exceptions import FreezeGradeFailedException
 from grades.models import FinalGrade, CourseRunGradingStatus
 from micromasters.factories import UserFactory
 from micromasters.utils import is_subset_dict
 from search.base import MockedESTestCase
 
 
-# pylint: disable=too-many-lines
+# pylint: disable=too-many-lines, too-many-arguments
 class StatusTest(MockedESTestCase):
     """
     Tests for the different status classes
@@ -292,12 +293,16 @@ class CourseRunTest(CourseTests):
         (False, api.CourseRunStatus.CHECK_IF_PASSED, 'v0')
     )
     @ddt.unpack
-    def test_check_if_passed(self, has_frozen_grades, expected_status, grade_algo):
-        """test for get_status_for_courserun for a finished course if enrolled"""
+    def test_check_if_passed_if_has_frozen_grade(self, has_frozen_grades, expected_status, grade_algo):
+        """
+        test for get_status_for_courserun for a finished course if enrolled
+        and in case the user has a final grade (if the grade_algorithm is v1)
+        """
         self.mmtrack.configure_mock(**{
             'is_enrolled.return_value': True,
             'is_enrolled_mmtrack.return_value': True,
-            'has_paid.return_value': True
+            'has_paid.return_value': True,
+            'extract_final_grade.return_value': Mock()
         })
         # create a run that is past
         crun = self.create_run(
@@ -315,6 +320,38 @@ class CourseRunTest(CourseTests):
             run_status = api.get_status_for_courserun(crun, self.mmtrack)
         assert run_status.status == expected_status
         assert run_status.course_run == crun
+
+    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": 'v1'})
+    @patch('grades.api.freeze_user_final_grade', autospec=True)
+    @patch('courses.models.CourseRun.has_frozen_grades', new_callable=PropertyMock)
+    def test_check_if_passed_if_no_frozen_grade(self, has_frozen_mock, freeze_grades_mock):
+        """
+        test for get_status_for_courserun for a finished course if enrolled
+        and in case the user has not a final grade (if the grade_algorithm is v1)
+        """
+        self.mmtrack.configure_mock(**{
+            'is_enrolled.return_value': True,
+            'is_enrolled_mmtrack.return_value': True,
+            'has_paid.return_value': True,
+            'extract_final_grade.side_effect': FinalGrade.DoesNotExist
+        })
+        has_frozen_mock.return_value = True
+        # create a run that is past
+        crun = self.create_run(
+            start=self.now-timedelta(weeks=52),
+            end=self.now-timedelta(weeks=45),
+            enr_start=self.now-timedelta(weeks=62),
+            enr_end=self.now-timedelta(weeks=53),
+            edx_key="course-v1:edX+DemoX+Demo_Course"
+        )
+        # in case the sync freeze works
+        run_status = api.get_status_for_courserun(crun, self.mmtrack)
+        assert run_status.status == api.CourseRunStatus.CHECK_IF_PASSED
+        assert run_status.course_run == crun
+        # if the sync freeze function raises, the tested function raises
+        freeze_grades_mock.side_effect = FreezeGradeFailedException
+        with self.assertRaises(FreezeGradeFailedException):
+            api.get_status_for_courserun(crun, self.mmtrack)
 
     def test_read_will_attend(self):
         """test for get_status_for_courserun for an enrolled and paid future course"""
@@ -445,12 +482,88 @@ class CourseRunTest(CourseTests):
         assert run_status.status == expected_status
         assert run_status.course_run == crun
 
+    @patch('grades.api.freeze_user_final_grade', autospec=True)
     @patch('courses.models.CourseRun.is_upgradable', new_callable=PropertyMock)
     @patch('courses.models.CourseRun.has_frozen_grades', new_callable=PropertyMock)
-    def test_not_paid_in_past_grade_frozen(self, froz_mock, upgr_mock):
+    @ddt.data(
+        (True, api.CourseRunStatus.CAN_UPGRADE),
+        (False, api.CourseRunStatus.NOT_PASSED)
+    )
+    @ddt.unpack
+    def test_not_paid_in_past_grade_frozen_not_exists(
+            self, passed, status, froz_mock, upgr_mock, freeze_mock):
         """
         test for get_status_for_courserun for course
         not paid but that is past for a course with grades already frozen
+        and the user does not have a final grade
+        """
+        upgr_mock.return_value = True
+        froz_mock.return_value = True
+
+        self.mmtrack.configure_mock(**{
+            'is_enrolled.return_value': True,
+            'is_enrolled_mmtrack.return_value': False,
+            'has_paid.return_value': False
+        })
+        # create a run that is past
+        crun = self.create_run(
+            start=self.now-timedelta(weeks=52),
+            end=self.now-timedelta(weeks=45),
+            enr_start=self.now-timedelta(weeks=62),
+            enr_end=self.now-timedelta(weeks=53),
+            edx_key="course-v1:MITx+8.MechCX+2014_T1"
+        )
+        # case when the user has not an entry in the frozen grades the code tries to create it
+        self.mmtrack.extract_final_grade.side_effect = FinalGrade.DoesNotExist
+        # depending on the passed, there is a different ststus
+        freeze_mock.return_value = Mock(passed=passed)
+        run_status = api.get_status_for_courserun(crun, self.mmtrack)
+        assert run_status.status == status
+
+    @patch('grades.api.freeze_user_final_grade', autospec=True)
+    @patch('courses.models.CourseRun.is_upgradable', new_callable=PropertyMock)
+    @patch('courses.models.CourseRun.has_frozen_grades', new_callable=PropertyMock)
+    def test_not_paid_in_past_grade_frozen_not_exists_raises(self, froz_mock, upgr_mock, freeze_mock):
+        """
+        test for get_status_for_courserun for course
+        not paid but that is past for a course with grades already frozen
+        and the user does not have a final grade
+        """
+        upgr_mock.return_value = True
+        froz_mock.return_value = True
+
+        self.mmtrack.configure_mock(**{
+            'is_enrolled.return_value': True,
+            'is_enrolled_mmtrack.return_value': False,
+            'has_paid.return_value': False
+        })
+        # create a run that is past
+        crun = self.create_run(
+            start=self.now-timedelta(weeks=52),
+            end=self.now-timedelta(weeks=45),
+            enr_start=self.now-timedelta(weeks=62),
+            enr_end=self.now-timedelta(weeks=53),
+            edx_key="course-v1:MITx+8.MechCX+2014_T1"
+        )
+        # case when the user has not an entry in the frozen grades the code tries to create it
+        self.mmtrack.extract_final_grade.side_effect = FinalGrade.DoesNotExist
+        # in case the sync freeze raises, the tested function raises
+        freeze_mock.side_effect = FreezeGradeFailedException
+        with self.assertRaises(FreezeGradeFailedException):
+            api.get_status_for_courserun(crun, self.mmtrack)
+
+    @patch('courses.models.CourseRun.is_upgradable', new_callable=PropertyMock)
+    @patch('courses.models.CourseRun.has_frozen_grades', new_callable=PropertyMock)
+    @ddt.data(
+        (True, api.CourseRunStatus.CAN_UPGRADE),
+        (False, api.CourseRunStatus.NOT_PASSED)
+    )
+    @ddt.unpack
+    def test_not_paid_in_past_grade_frozen_exists(self, passed, status, froz_mock, upgr_mock):
+        """
+        test for get_status_for_courserun for course
+        not paid but that is past for a course with grades already frozen
+        and the user has a frozen grade.
         """
         upgr_mock.return_value = True
         froz_mock.return_value = True
@@ -469,24 +582,9 @@ class CourseRunTest(CourseTests):
             edx_key="course-v1:MITx+8.MechCX+2014_T1"
         )
 
-        # case when the user has not an entry in the frozen grades
-        self.mmtrack.extract_final_grade.side_effect = FinalGrade.DoesNotExist
+        self.mmtrack.extract_final_grade.return_value = Mock(passed=passed)
         run_status = api.get_status_for_courserun(crun, self.mmtrack)
-        assert run_status.status == api.CourseRunStatus.CURRENTLY_ENROLLED
-        # just resetting the mock does not remove the side effect
-        self.mmtrack.extract_final_grade.side_effect = None
-
-        # case in a final grade with status passed=True is returned
-        grade = Mock(passed=True)
-        self.mmtrack.extract_final_grade.return_value = grade
-        run_status = api.get_status_for_courserun(crun, self.mmtrack)
-        assert run_status.status == api.CourseRunStatus.CAN_UPGRADE
-
-        # case in a final grade with status passed=False is returned
-        grade = Mock(passed=False)
-        self.mmtrack.extract_final_grade.return_value = grade
-        run_status = api.get_status_for_courserun(crun, self.mmtrack)
-        assert run_status.status == api.CourseRunStatus.NOT_PASSED
+        assert run_status.status == status
 
     def test_status_for_run_not_enrolled_but_paid(self):
         """test for get_status_for_courserun for course without enrollment and it is paid"""
