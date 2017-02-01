@@ -13,10 +13,18 @@ import {
   FETCH_PROCESSING,
   fetchDashboard,
   fetchCoursePrices,
+  clearDashboard,
+  clearCoursePrices,
   checkout,
 } from '../actions';
+import {
+  clearCoupons,
+  fetchCoupons,
+} from '../actions/coupons';
+import type { CouponsState } from '../reducers/coupons';
 import type { CheckoutState } from '../reducers';
 import { createForm, findCourseRun } from '../util/util';
+import { calculatePrice } from '../lib/coupon';
 
 class OrderSummaryPage extends React.Component {
   static contextTypes = {
@@ -30,6 +38,7 @@ class OrderSummaryPage extends React.Component {
     dashboard:                DashboardState,
     dispatch:                 Dispatch,
     prices:                   CoursePricesState,
+    coupons:                  CouponsState,
     location:                 Object,
   };
 
@@ -40,6 +49,14 @@ class OrderSummaryPage extends React.Component {
   componentDidUpdate() {
     this.updateRequirements();
   }
+
+  componentWillUnmount() {
+    const { dispatch } = this.props;
+    dispatch(clearDashboard());
+    dispatch(clearCoursePrices());
+    dispatch(clearCoupons());
+  }
+
   fetchDashboard() {
     const { dashboard, dispatch } = this.props;
     if (dashboard.fetchStatus === undefined) {
@@ -53,9 +70,17 @@ class OrderSummaryPage extends React.Component {
     }
   }
 
+  fetchCoupons() {
+    const { coupons, dispatch } = this.props;
+    if (coupons.fetchGetStatus === undefined) {
+      dispatch(fetchCoupons());
+    }
+  }
+
   updateRequirements = () => {
     this.fetchDashboard();
     this.fetchCoursePrices();
+    this.fetchCoupons();
   };
   dispatchCheckout = (courseId: string) => {
     const { dispatch } = this.props;
@@ -80,17 +105,26 @@ class OrderSummaryPage extends React.Component {
       currentProgramEnrollment,
       prices,
       dashboard,
+      coupons,
       location: { query }
     }  = this.props;
     let courseRun, course, orderSummaryContent, coursePrice;
     let courseKey = query.course_key;
     [courseRun, course] = findCourseRun(dashboard.programs, run => run !== null && run.course_id === courseKey);
     coursePrice = prices.coursePrices.find(coursePrice => coursePrice.program_id === currentProgramEnrollment.id);
+
     if( course && courseRun && coursePrice ){
+      const calculatedPrice = calculatePrice(courseRun.id, course.id, coursePrice, coupons.coupons);
+      let discount = null;
+      if(calculatedPrice !== null && calculatedPrice !== undefined){
+        discount = coursePrice.price - calculatedPrice;
+      }
       orderSummaryContent = <OrderSummary
         course={course}
         courseRun={courseRun}
         coursePrice={coursePrice}
+        finalPrice={calculatedPrice}
+        discount={discount}
         checkout={this.dispatchCheckout}
         checkoutStatus={checkout.fetchStatus}
       />;
@@ -121,6 +155,7 @@ const mapStateToProps = (state) => {
     prices: state.prices,
     orderReceipt: state.orderReceipt,
     checkout: state.checkout,
+    coupons: state.coupons,
   };
 };
 
