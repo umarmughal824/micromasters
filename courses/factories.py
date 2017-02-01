@@ -19,7 +19,7 @@ class ProgramFactory(DjangoModelFactory):
     description = fuzzy.FuzzyText()
     exam_series_code = factory.Faker('lexify', text="????_MicroMasters")
 
-    class Meta:  # pylint: disable=missing-docstring
+    class Meta:
         model = Program
 
     @classmethod
@@ -59,15 +59,8 @@ class CourseFactory(DjangoModelFactory):
     prerequisites = fuzzy.FuzzyText(prefix="Course requires ")
     exam_module = factory.Faker('numerify', text="##.##x")
 
-    class Meta:  # pylint: disable=missing-docstring
+    class Meta:
         model = Course
-
-    @classmethod
-    def _setup_next_sequence(cls):
-        last = Course.objects.last()
-        if last is not None:
-            return last.position_in_program + 1
-        return 0
 
 
 class CourseRunFactory(DjangoModelFactory):
@@ -104,5 +97,5 @@ class CourseRunFactory(DjangoModelFactory):
     enrollment_url = factory.Faker('url')
     prerequisites = factory.Faker('paragraph')
 
-    class Meta:  # pylint: disable=missing-docstring
+    class Meta:
         model = CourseRun

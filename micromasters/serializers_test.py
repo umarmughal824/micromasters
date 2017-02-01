@@ -10,7 +10,6 @@ from micromasters.serializers import UserSerializer, serialize_maybe_user
 from micromasters.factories import UserFactory
 from profiles.factories import ProfileFactory
 from search.base import MockedESTestCase
-# pylint: disable=no-self-use, missing-docstring
 
 
 class UserTests(MockedESTestCase):
@@ -18,6 +17,9 @@ class UserTests(MockedESTestCase):
     Tests for serializing users.
     """
     def test_basic_user(self):
+        """
+        Test serializing a basic user, no profile
+        """
         with mute_signals(post_save):
             user = UserFactory.create(email="fake@example.com")
 
@@ -31,6 +33,9 @@ class UserTests(MockedESTestCase):
         }
 
     def test_logged_in_user_through_maybe_wrapper(self):
+        """
+        Test serialize_maybe_user
+        """
         with mute_signals(post_save):
             user = UserFactory.create(email="fake@example.com")
 
@@ -44,6 +49,9 @@ class UserTests(MockedESTestCase):
         }
 
     def test_user_with_profile(self):
+        """
+        Test a user with a profile
+        """
         with mute_signals(post_save):
             user = UserFactory.create(email="fake@example.com")
             ProfileFactory.create(
@@ -64,6 +72,9 @@ class UserTests(MockedESTestCase):
 
     @mock.patch('micromasters.serializers.get_social_username')
     def test_social_username(self, mock_get_username):
+        """
+        Make sure serializer gets social username
+        """
         mock_get_username.return_value = "remote"
         with mute_signals(post_save):
             user = UserFactory.create(
@@ -86,6 +97,9 @@ class AnonymousUserTests(TestCase):
     Tests for serializing anonymous users.
     """
     def test_serialize_anonymous_user(self):
+        """
+        Test serializing an anonymous user
+        """
         anon_user = AnonymousUser()
         data = serialize_maybe_user(anon_user)
         assert data is None

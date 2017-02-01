@@ -29,7 +29,7 @@ from micromasters.factories import UserFactory
 from search.base import MockedESTestCase
 
 
-# pylint: disable=no-self-use, protected-access
+# pylint: disable=protected-access
 
 
 @ddt.ddt
