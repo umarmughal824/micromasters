@@ -1,6 +1,33 @@
 Release Notes
 =============
 
+Version 0.43.0
+--------------
+
+- Pearson SSO callback views (#2472)
+- Show coupon discount on OrderSummary page
+- Configure pylintrc to be more accepting (#2466)
+- Use dict comprehension and set comprehension (#2461)
+- Added new dashboard behavior if user has 100% program coupon
+- Correctly export user profiles with blank romanized name fields (#2465)
+- Freeze grade sync in case the course run has already frozen grades.
+- Implemented front-end course contact email API
+- Added dashboard card for final exams
+- Display toast notification for API failure (#2430)
+- Removed foo: Function annotations
+- Don&#39;t needlessly set a `next` query param (#2458)
+- Changed front-end handling of emails
+- Added course team contact email API endpoint
+- Added Summary Page before checkout (#2425)
+- Bumped yarn, node-sass, sass-loader versions
+- Add unique constraint on coupon code (#2442)
+- Added audit models for Coupon, UserCoupon, and RedeemableCoupon (#2401)
+- Attach user to coupon (#2392)
+- Redeem coupon during checkout (#2388)
+- Don&#39;t render closed Toast (#2437)
+- Remove readonly_fields for Coupon admin (#2402)
+- Display coupon-discounted prices in UI (#2431)
+
 Version 0.42.0
 --------------
 
