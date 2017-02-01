@@ -41,6 +41,7 @@ from profiles.models import Profile
 from roles.models import Role
 from roles.roles import Staff
 from search.base import MockedESTestCase
+from grades.factories import FinalGradeFactory
 
 
 @ddt.ddt
@@ -108,6 +109,12 @@ class UserProgramSearchSerializerTests(MockedESTestCase):
                     }
                 )
             )
+            FinalGradeFactory.create(
+                user=cls.user,
+                course_run=enrollment.course_run,
+                grade=certificate_grades_vals[i],
+                passed=True,
+            )
         non_fa_cached_edx_data = CachedEdxUserData(cls.user, program=program)
         non_fa_mmtrack = MMTrack(cls.user, program, non_fa_cached_edx_data)
         cls.serialized_enrollments = UserProgramSearchSerializer.serialize_enrollments(non_fa_mmtrack, cls.enrollments)
@@ -131,6 +138,12 @@ class UserProgramSearchSerializerTests(MockedESTestCase):
                         "course_key": enrollment.course_run.edx_course_key,
                     }
                 )
+            )
+            FinalGradeFactory.create(
+                user=cls.user,
+                course_run=enrollment.course_run,
+                grade=cls.current_grades_vals[i],
+                passed=True,
             )
         fa_cached_edx_data = CachedEdxUserData(cls.user, program=cls.fa_program)
         fa_mmtrack = MMTrack(cls.user, cls.fa_program, fa_cached_edx_data)
