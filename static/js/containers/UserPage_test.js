@@ -163,7 +163,7 @@ describe("UserPage", function() {
 
             let input;
             // run the 'getInput' function if 'removeErrorValue' is also a function (radio buttons)
-            if ( _.isFunction(removeErrorValue) ) {
+            if (_.isFunction(removeErrorValue)) {
               getInput(getDialog());
             } else {
               input = getInput(getDialog());
@@ -176,7 +176,7 @@ describe("UserPage", function() {
             assert.deepEqual(state.profiles.jane.edit.errors, validationExpectation);
 
             // run the 'remove error' function if it's a function
-            if ( _.isFunction(removeErrorValue) ) {
+            if (_.isFunction(removeErrorValue)) {
               removeErrorValue(getDialog());
             } else {
               modifyTextField(input, removeErrorValue);
@@ -189,7 +189,7 @@ describe("UserPage", function() {
         });
       };
 
-      const scrollIntoView = (actions, getInput, selectField=false) => {
+      const scrollIntoView = (actions, getInput, selectField = false) => {
         const username = SETTINGS.user.username;
         return renderComponent(`/learner/${username}`, userActions).then(([, div]) => {
           return listenForActions(actions, () => {
@@ -197,7 +197,7 @@ describe("UserPage", function() {
 
             let input = getInput(getDialog());
 
-            if ( !selectField ) {
+            if (!selectField) {
               modifyTextField(input, "");
             }
             TestUtils.Simulate.click(getSave());

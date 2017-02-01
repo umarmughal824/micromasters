@@ -104,7 +104,7 @@ export function boundRadioGroupField(keySet: string[], label: string, options: O
 export function boundTextField(
   keySet: string[],
   label: string,
-  { multiLine=false, maxLength=0 }: { multiLine: boolean, maxLength: number } = {}
+  { multiLine = false, maxLength = 0 }: { multiLine: boolean, maxLength: number } = {}
 ): React$Element<*> {
   const {
     profile,
@@ -130,7 +130,7 @@ export function boundTextField(
 
   let getValue = () => {
     let value = _.get(profile, keySet, "");
-    return ( _.isNull(value) || _.isUndefined(value) ) ? "" : value;
+    return (_.isNull(value) || _.isUndefined(value)) ? "" : value;
   };
 
   // fullWidth means set width to 100% instead of 256px. This lets us use the
@@ -328,7 +328,7 @@ const onTelChange = R.curry((
   newPhoneNumber,
 ) => {
   let currentPhoneNumber = _.get(profile, keySet);
-  if ( currentPhoneNumber !== newPhoneNumber ) {
+  if (currentPhoneNumber !== newPhoneNumber) {
     let clone = _.cloneDeep(profile);
     _.set(clone, keySet, newPhoneNumber);
     updateProfile(clone, validator);
