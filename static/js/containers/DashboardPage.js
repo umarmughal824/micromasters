@@ -89,6 +89,14 @@ import { skipFinancialAid } from '../actions/financial_aid';
 import { currencyForCountry } from '../lib/currency';
 import DocsInstructionsDialog from '../components/DocsInstructionsDialog';
 import CouponNotificationDialog from '../components/CouponNotificationDialog';
+import {
+  getPearsonSSODigest,
+  pearsonSSOInProgress,
+  pearsonSSOFailure,
+  setPearsonError
+} from '../actions/pearson';
+import { generateSSOForm } from '../lib/pearson';
+import type { PearsonAPIState } from '../reducers/pearson';
 
 const isProcessing = R.equals(FETCH_PROCESSING);
 
@@ -114,6 +122,7 @@ class DashboardPage extends React.Component {
     courseEnrollments:        CourseEnrollmentsState,
     financialAid:             FinancialAidState,
     location:                 Object,
+    pearson:                  PearsonAPIState,
   };
 
   componentDidMount() {
@@ -136,6 +145,37 @@ class DashboardPage extends React.Component {
     dispatch(clearCoupons());
   }
 
+  submitPearsonSSO = () => {
+    const {
+      dispatch,
+      profile: { profile },
+    } = this.props;
+
+    dispatch(getPearsonSSODigest()).then(res => {
+      dispatch(pearsonSSOInProgress());
+      const {
+        session_timeout,
+        sso_digest,
+        timestamp,
+        sso_redirect_url,
+      } = res;
+
+      let form = generateSSOForm(
+        profile.student_id,
+        timestamp,
+        session_timeout,
+        sso_digest,
+        sso_redirect_url,
+      );
+      form.submit();
+    }).catch(()  => {
+      dispatch(pearsonSSOFailure());
+      dispatch(setPearsonError(
+        "It looks like we're experiencing an issue with scheduling, try again later."
+      ));
+    });
+  };
+  
   openEmailComposer = (course: Course) => {
     const { dispatch } = this.props;
     dispatch(
@@ -521,6 +561,7 @@ class DashboardPage extends React.Component {
       courseEnrollments,
       financialAid,
       coupons,
+      pearson,
     } = this.props;
     const program = this.getCurrentlyEnrolledProgram();
     if (!program) {
@@ -568,7 +609,9 @@ class DashboardPage extends React.Component {
           <FinalExamCard
             profile={profile}
             program={program}
+            pearson={pearson}
             navigateToProfile={this.navigateToProfile}
+            submitPearsonSSO={this.submitPearsonSSO}
           />
           {financialAidCard}
           {couponCard}
@@ -640,6 +683,7 @@ const mapStateToProps = (state) => {
     courseEnrollments: state.courseEnrollments,
     financialAid: state.financialAid,
     coupons: state.coupons,
+    pearson: state.pearson,
   };
 };
 

@@ -95,6 +95,7 @@ export type Profile = {
   about_me:                    ?string,
   romanized_first_name:        ?string,
   romanized_last_name:         ?string,
+  student_id:                  number,
 };
 
 export type Profiles = {

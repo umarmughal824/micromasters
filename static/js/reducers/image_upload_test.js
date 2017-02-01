@@ -1,3 +1,7 @@
+import { assert } from 'chai';
+import sinon from 'sinon';
+import configureTestStore from 'redux-asserts';
+
 import {
   startPhotoEdit,
   START_PHOTO_EDIT,
@@ -19,10 +23,7 @@ import {
   FETCH_PROCESSING,
   FETCH_SUCCESS,
 } from '../actions';
-import configureTestStore from 'redux-asserts';
 import rootReducer from '../reducers';
-import { assert } from 'chai';
-import sinon from 'sinon';
 import * as api from '../lib/api';
 
 describe('image upload reducer', () => {

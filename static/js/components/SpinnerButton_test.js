@@ -72,6 +72,22 @@ describe("SpinnerButton", () => {
     assert.equal(button.children().text(), "<Spinner />");
   });
 
+
+  it('shows the spinner is spinning is true, recentlyClicked is false, but ignoreRecentlyClicked is true', () => {
+    let wrapper = shallow(<SpinnerButton
+      component={Button}
+      spinning={true}
+      ignoreRecentlyClicked={true}
+    >
+      text
+    </SpinnerButton>);
+    wrapper.setState({
+      recentlyClicked: false
+    });
+    let button = wrapper.find("Button");
+    assert.equal(button.children().text(), "<Spinner />");
+  });
+
   it("does not show the spinner when it's disabled", () => {
     let wrapper = shallow(<SpinnerButton
       disabled={true}
@@ -122,6 +138,7 @@ describe("SpinnerButton", () => {
     assert.equal(buttonProps.onClick, undefined);
     assert.equal("text", wrapper.find("button").text());
   });
+
 
   it('sets recentlyClicked back to false if the spinning prop changes back to false', () => {
     let wrapper = shallow(

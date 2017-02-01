@@ -219,6 +219,7 @@ class ProfileSerializer(ProfileBaseSerializer):
             'preferred_language',
             'gender',
             'pretty_printed_student_id',
+            'student_id',
             'work_history',
             'edx_level_of_education',
             'education',
@@ -235,6 +236,7 @@ class ProfileSerializer(ProfileBaseSerializer):
             'agreed_to_terms_of_service',
             'image_small',
             'image_medium',
+            'student_id',
         )
 
 

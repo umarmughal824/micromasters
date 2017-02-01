@@ -26,6 +26,7 @@ import {
   addCourseEnrollment,
   getCoupons,
   attachCoupon,
+  getPearsonSSO,
 } from './api';
 import * as api from './api';
 import {
@@ -40,6 +41,7 @@ import {
   USER_PROFILE_RESPONSE,
   PROGRAMS,
 } from '../test_constants';
+import { makeSSOParameters } from '../factories/pearson';
 
 describe('api', function() {
   this.timeout(5000);  // eslint-disable-line no-invalid-this
@@ -477,6 +479,27 @@ describe('api', function() {
               username: SETTINGS.user.username,
             })
           }));
+        });
+      });
+    });
+
+    describe('Pearson API functions', () => {
+      describe('getPearsonSSO', () => {
+        it('fetches the pearson sso parameters', () => {
+          let params = makeSSOParameters();
+          fetchJSONStub.returns(Promise.resolve(params));
+
+          return getPearsonSSO().then(() => {
+            assert(fetchJSONStub.calledWith('/api/v0/pearson/sso/'));
+          });
+        });
+
+        it('fails to fetch the pearson sso parameters', () => {
+          fetchJSONStub.returns(Promise.reject());
+
+          return assert.isRejected(getPearsonSSO()).then(() => {
+            assert(fetchJSONStub.calledWith('/api/v0/pearson/sso/'));
+          });
         });
       });
     });

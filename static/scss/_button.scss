@@ -20,7 +20,7 @@
     padding: 0 23px;
   }
 
-  &.next {
+  &.next, &.exam-button {
     background: $button-color;
     color: #fff;
   }
@@ -213,7 +213,7 @@ a.btn {
   }
 }
 
-.dialog, .course-action, .document-sent-button-container {
+.dialog, .course-action, .document-sent-button-container, .final-exam-card  {
   .disabled-with-spinner {
     display: inline-block !important;
     box-shadow: none;

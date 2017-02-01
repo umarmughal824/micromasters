@@ -1,18 +1,8 @@
 // @flow
-
 export type Option = {
   value:     any,
   label:     string,
   disabled?: boolean,
-};
-export type Settings = {
-  gaTrackingID: string,
-  reactGaDebug: boolean,
-  authenticated: boolean,
-  name: string,
-  username: string,
-  host: string,
-  edx_base_url: string,
 };
 
 export type APIErrorInfo = {

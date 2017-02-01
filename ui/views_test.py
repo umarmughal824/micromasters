@@ -291,7 +291,9 @@ class DashboardTests(ViewsTests):
             EMAIL_SUPPORT=email_support,
             VERSION='0.0.1',
             RAVEN_CONFIG={'dsn': ''},
-            ELASTICSEARCH_DEFAULT_PAGE_SIZE=10
+            ELASTICSEARCH_DEFAULT_PAGE_SIZE=10,
+            EXAMS_SSO_CLIENT_CODE='itsacode',
+            EXAMS_SSO_URL='url',
         ), patch('ui.templatetags.render_bundle._get_bundle') as get_bundle:
             resp = self.client.get(DASHBOARD_URL)
 
@@ -325,6 +327,8 @@ class DashboardTests(ViewsTests):
                 'sentry_dsn': None,
                 'es_page_size': 10,
                 'public_path': '/static/bundles/',
+                'EXAMS_SSO_CLIENT_CODE': 'itsacode',
+                'EXAMS_SSO_URL': 'url',
             }
             assert resp.context['is_public'] is False
             assert resp.context['has_zendesk_widget'] is True
@@ -683,7 +687,9 @@ class TestUsersPage(ViewsTests):
             EMAIL_SUPPORT=email_support,
             VERSION='0.0.1',
             RAVEN_CONFIG={'dsn': ''},
-            ELASTICSEARCH_DEFAULT_PAGE_SIZE=10
+            ELASTICSEARCH_DEFAULT_PAGE_SIZE=10,
+            EXAMS_SSO_CLIENT_CODE='itsacode',
+            EXAMS_SSO_URL='url',
         ):
             # Mock has_permission so we don't worry about testing permissions here
             has_permission = Mock(return_value=True)
@@ -717,6 +723,8 @@ class TestUsersPage(ViewsTests):
                     'sentry_dsn': None,
                     'es_page_size': 10,
                     'public_path': '/static/bundles/',
+                    'EXAMS_SSO_CLIENT_CODE': 'itsacode',
+                    'EXAMS_SSO_URL': 'url',
                 }
                 assert has_permission.called
 
@@ -751,7 +759,9 @@ class TestUsersPage(ViewsTests):
             EMAIL_SUPPORT=email_support,
             VERSION='0.0.1',
             RAVEN_CONFIG={'dsn': ''},
-            ELASTICSEARCH_DEFAULT_PAGE_SIZE=10
+            ELASTICSEARCH_DEFAULT_PAGE_SIZE=10,
+            EXAMS_SSO_CLIENT_CODE='itsacode',
+            EXAMS_SSO_URL='url',
         ):
             # Mock has_permission so we don't worry about testing permissions here
             has_permission = Mock(return_value=True)
@@ -778,7 +788,9 @@ class TestUsersPage(ViewsTests):
                     'release_version': '0.0.1',
                     'sentry_dsn': None,
                     'es_page_size': 10,
-                    'public_path': '/static/bundles/'
+                    'public_path': '/static/bundles/',
+                    'EXAMS_SSO_CLIENT_CODE': 'itsacode',
+                    'EXAMS_SSO_URL': 'url',
                 }
                 assert has_permission.called
 

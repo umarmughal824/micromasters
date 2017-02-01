@@ -2,12 +2,13 @@ import React from 'react';
 import Spinner from 'react-mdl/lib/Spinner';
 
 type SpinnerButtonProps = {
-  spinning: bool,
-  component: React.Component<*, *, *>,
-  className?: string,
-  onClick?: Function,
-  children?: any,
-  disabled?: ?bool,
+  spinning:               bool,
+  component:              React.Component<*, *, *>,
+  className?:             string,
+  onClick?:               Function,
+  children?:              any,
+  disabled?:              ?bool,
+  ignoreRecentlyClicked:  ?bool,
 };
 
 export default class SpinnerButton extends React.Component {
@@ -50,11 +51,12 @@ export default class SpinnerButton extends React.Component {
       className,
       children,
       disabled,
+      ignoreRecentlyClicked,
       ...otherProps
     } = this.props;
     const { recentlyClicked } = this.state;
 
-    if (spinning && !disabled && recentlyClicked) {
+    if (spinning && !disabled && (ignoreRecentlyClicked || recentlyClicked)) {
       if (!className) {
         className = '';
       }

@@ -19,22 +19,26 @@ import {
   PEARSON_PROFILE_INVALID,
   PEARSON_PROFILE_SCHEDULABLE
 } from '../../constants';
+import { INITIAL_PEARSON_STATE } from '../../reducers/pearson';
 
 describe('FinalExamCard', () => {
   let sandbox;
-  let navigateToProfileStub;
+  let navigateToProfileStub, submitPearsonSSOStub;
   let props;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     navigateToProfileStub = sandbox.stub();
+    submitPearsonSSOStub = sandbox.stub();
     let program = _.cloneDeep(DASHBOARD_RESPONSE.find(program => (
       program.pearson_exam_status !== undefined
     )));
     props = {
       profile: USER_PROFILE_RESPONSE,
       program: program,
-      navigateToProfile: navigateToProfileStub
+      navigateToProfile: navigateToProfileStub,
+      submitPearsonSSO: submitPearsonSSOStub,
+      pearson: { ...INITIAL_PEARSON_STATE },
     };
   });
 
@@ -100,6 +104,27 @@ pay for the course and pass the online work.`;
     assert.include(
       stringStrip(card.text()),
       "You need to update your profile in order to take a test at a Pearson Test center"
+    );
+  });
+
+  it('should show a schedule button when an exam is schedulable', () => {
+    props.program.pearson_exam_status = PEARSON_PROFILE_SCHEDULABLE;
+    let card = renderCard(props);
+    assert.include(
+      stringStrip(card.text()),
+      `You are ready to schedule an exam for ${props.program.title}`
+    );
+    card.find(".exam-button").simulate('click');
+    assert(submitPearsonSSOStub.called);
+  });
+
+  it('should show a scheduling error, when there is one', () => {
+    props.pearson.error = 'ERROR ERROR';
+    props.program.pearson_exam_status = PEARSON_PROFILE_SCHEDULABLE;
+    let card = renderCard(props);
+    assert.include(
+      stringStrip(card.text()),
+      'ERROR ERROR'
     );
   });
 });

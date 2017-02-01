@@ -1,7 +1,23 @@
 // @flow
 /* eslint-disable no-unused-vars */
-import type { Settings } from './generalTypes';
-declare var SETTINGS: Settings;
+declare var SETTINGS: {
+  gaTrackingID: string,
+  reactGaDebug: boolean,
+  authenticated: boolean,
+  name: string,
+  username: string,
+  user: {
+    username: string,
+  },
+  host: string,
+  edx_base_url: string,
+  EXAMS_SSO_CLIENT_CODE: string,
+  EXAMS_SSO_URL: string,
+  support_email: string,
+  es_page_size: number,
+  search_url: string,
+  roles: Array<{ role: string }>,
+};
 
 // mocha
 declare var it: Function;
@@ -11,3 +27,8 @@ declare var describe: Function;
 
 // webpack
 declare var __webpack_public_path__: string; // eslint-disable-line camelcase
+
+declare class FormData {
+  get(s: string): any,
+  append(x: any, y: any): void,
+}

@@ -533,6 +533,11 @@ EXAMS_SFTP_PASSWORD = get_var('EXAMS_SFTP_PASSWORD', None)
 EXAMS_SFTP_UPLOAD_DIR = get_var('EXAMS_SFTP_UPLOAD_DIR', 'results/topvue')
 EXAMS_SFTP_BACKOFF_BASE = get_var('EXAMS_SFTP_BACKOFF_BASE', 5)
 
+# Pearson SSO
+EXAMS_SSO_PASSPHRASE = get_var('EXAMS_SSO_PASSPHRASE', None)
+EXAMS_SSO_CLIENT_CODE = get_var('EXAMS_SSO_CLIENT_CODE', None)
+EXAMS_SSO_URL = get_var('EXAMS_SSO_URL', None)
+
 
 # features flags
 def get_all_config_keys():

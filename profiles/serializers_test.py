@@ -96,6 +96,7 @@ class ProfileTests(MockedESTestCase):
             'romanized_first_name': profile.romanized_first_name,
             'romanized_last_name': profile.romanized_last_name,
             'phone_number': profile.phone_number,
+            'student_id': profile.student_id,
         }
 
     def test_limited(self):

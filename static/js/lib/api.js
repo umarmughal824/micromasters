@@ -11,6 +11,7 @@ import type { Coupons, AttachCouponResponse } from '../flow/couponTypes';
 import type { Dashboard } from '../flow/dashboardTypes';
 import type { AvailableProgram, AvailablePrograms } from '../flow/enrollmentTypes';
 import type { EmailSendResponse } from '../flow/emailTypes';
+import type { PearsonSSOParameters } from '../flow/pearsonTypes';
 
 export function getCookie(name: string): string|null {
   let cookieValue = null;
@@ -213,6 +214,11 @@ export function updateProfileImage(username: string, image: Blob, name: string):
     method: 'PATCH',
     body: formData
   });
+}
+
+// this hits our endpoint to get the sso_digest, session_timout, etc
+export function getPearsonSSO(): Promise<PearsonSSOParameters> {
+  return fetchJSONWithCSRF('/api/v0/pearson/sso/');
 }
 
 export function addFinancialAid(income: number, currency: string, programId: number): Promise<*> {

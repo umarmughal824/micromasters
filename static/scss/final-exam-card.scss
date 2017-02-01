@@ -1,6 +1,11 @@
 .final-exam-card {
   font-size: 14px;
 
+  .error {
+    font-size: 12px;
+    color: $validation-red;
+  }
+
   .card-header {
     display: flex;
     flex-direction: row;
@@ -8,6 +13,24 @@
     .exam-icon {
       width: 40px;
       margin-right: 10px;
+    }
+  }
+
+  .exam-scheduling {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+
+    > * {
+      margin: auto;
+    }
+
+    .program-info {
+      margin-top: 8px;
+    }
+
+    li {
+      font-weight: 600;
     }
   }
 
