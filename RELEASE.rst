@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.44.0
+--------------
+
+- Show Coupon code on OrderSummary page
+- Updated ⬆ webpack to version 2.2.1 👌
+- Added course contact email link to the student dashboard
+- Implemented coupon messaging (#2453)
+- Gs/more eslint rules (#2476)
+
 Version 0.43.0
 --------------
 
