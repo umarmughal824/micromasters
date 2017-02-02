@@ -303,6 +303,29 @@ class CourseRunTest(CourseTests):
         assert run_status.status == api.CourseRunStatus.CURRENTLY_ENROLLED
         assert run_status.course_run == crun
 
+    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": 'v1'})
+    def test_has_frozen_grade_taken_before_anything_else(self):
+        """
+        Tests that if an user has a final grade for the course,
+        that is taken in account before checking anything else
+        """
+        self.mmtrack.configure_mock(**{
+            'is_enrolled.return_value': True,
+            'extract_final_grade.return_value': Mock()
+        })
+        # create a run that is past
+        crun = self.create_run(
+            start=self.now-timedelta(weeks=52),
+            end=self.now-timedelta(weeks=45),
+            enr_start=self.now-timedelta(weeks=62),
+            enr_end=self.now-timedelta(weeks=53),
+            edx_key="course-v1:edX+DemoX+Demo_Course"
+        )
+        run_status = api.get_status_for_courserun(crun, self.mmtrack)
+        assert run_status.status == api.CourseRunStatus.CHECK_IF_PASSED
+        assert run_status.course_run == crun
+        assert self.mmtrack.is_enrolled.call_count == 0
+
     @ddt.data(
         (True, api.CourseRunStatus.CHECK_IF_PASSED, 'v1'),
         (False, api.CourseRunStatus.CURRENTLY_ENROLLED, 'v1'),
@@ -321,6 +344,8 @@ class CourseRunTest(CourseTests):
             'has_paid.return_value': True,
             'extract_final_grade.return_value': Mock()
         })
+        if not has_frozen_grades:
+            self.mmtrack.extract_final_grade.side_effect = FinalGrade.DoesNotExist
         # create a run that is past
         crun = self.create_run(
             start=self.now-timedelta(weeks=52),

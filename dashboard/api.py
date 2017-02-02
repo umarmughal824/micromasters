@@ -290,13 +290,20 @@ def get_status_for_courserun(course_run, mmtrack):
     Returns:
         CourseRunUserStatus: an object representing the run status for the user
     """
+    get_grade_algorithm_version = settings.FEATURES.get("FINAL_GRADE_ALGORITHM", "v0")
+    if get_grade_algorithm_version == "v1":
+        try:
+            mmtrack.extract_final_grade(course_run.edx_course_key)
+        except FinalGrade.DoesNotExist:
+            pass
+        else:
+            return CourseRunUserStatus(CourseRunStatus.CHECK_IF_PASSED, course_run)
     if not mmtrack.is_enrolled(course_run.edx_course_key):
         if mmtrack.has_paid(course_run.edx_course_key):
             return CourseRunUserStatus(CourseRunStatus.PAID_BUT_NOT_ENROLLED, course_run)
         return CourseRunUserStatus(CourseRunStatus.NOT_ENROLLED, course_run)
     status = None
     if mmtrack.is_enrolled_mmtrack(course_run.edx_course_key):
-        get_grade_algorithm_version = settings.FEATURES.get("FINAL_GRADE_ALGORITHM", "v0")
         if course_run.is_current:
             status = CourseRunStatus.CURRENTLY_ENROLLED
         elif course_run.is_future:
