@@ -45,9 +45,10 @@ describe('coupon utility functions', () => {
       let stubPrice = 5;
       let calculateRunPriceStub = sandbox.stub(couponFuncs, 'calculateRunPrice');
       calculateRunPriceStub.returns(stubPrice);
-      let actual = calculatePrice(run.id, course.id, price, coupons);
-      assert.equal(actual, stubPrice);
+      let [ actualCoupon, actualPrice ] = calculatePrice(run.id, course.id, price, coupons);
+      assert.equal(actualPrice, stubPrice);
       let coupon = coupons.find(coupon => coupon.program_id === program.id);
+      assert.deepEqual(actualCoupon, coupon);
       assert.isTrue(calculateRunPriceStub.calledWith(
         run.id, course.id, program.id, price, coupon
       ));

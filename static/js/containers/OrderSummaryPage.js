@@ -114,7 +114,7 @@ class OrderSummaryPage extends React.Component {
     coursePrice = prices.coursePrices.find(coursePrice => coursePrice.program_id === currentProgramEnrollment.id);
 
     if (course && courseRun && coursePrice) {
-      const calculatedPrice = calculatePrice(courseRun.id, course.id, coursePrice, coupons.coupons);
+      const [coupon, calculatedPrice] = calculatePrice(courseRun.id, course.id, coursePrice, coupons.coupons);
       let discount = null;
       if (calculatedPrice !== null && calculatedPrice !== undefined) {
         discount = coursePrice.price - calculatedPrice;
@@ -124,6 +124,7 @@ class OrderSummaryPage extends React.Component {
         courseRun={courseRun}
         coursePrice={coursePrice}
         finalPrice={calculatedPrice}
+        couponCode={coupon ? coupon.coupon_code : null}
         discount={discount}
         checkout={this.dispatchCheckout}
         checkoutStatus={checkout.fetchStatus}

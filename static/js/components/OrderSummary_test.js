@@ -74,12 +74,13 @@ describe('OrderSummary', () => {
       courseRun: firstRun,
       course: course,
       discount: COURSE_PRICES_RESPONSE[1].price,
-      finalPrice: 0
+      finalPrice: 0,
+      couponCode: '561KH'
     });
 
     let descriptions = wrapper.find(".description");
     assert.equal(descriptions.length, 3);
-    assert.equal(descriptions.children().nodes[1], 'Discount from coupon');
+    assert.equal(descriptions.children().nodes[1], 'Discount from coupon 561KH');
     let amounts = wrapper.find(".amount");
     assert.equal(amounts.length, 3);
     assert.equal(amounts.children().nodes[1], `-$${COURSE_PRICES_RESPONSE[1].price}`);
