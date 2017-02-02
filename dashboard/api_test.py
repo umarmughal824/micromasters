@@ -154,6 +154,7 @@ class FormatRunTest(CourseTests):
         self.mmtrack.configure_mock(**{
             'get_final_grade.return_value': 99.99,
             'get_current_grade.return_value': 33.33,
+            'has_paid.return_value': False
         })
         crun = self.create_run(
             start=self.now+timedelta(weeks=52),
@@ -173,6 +174,7 @@ class FormatRunTest(CourseTests):
             'fuzzy_start_date': crun.fuzzy_start_date,
             'final_grade': 99.99,
             'enrollment_url': crun.enrollment_url,
+            'has_paid': False,
         }
 
         self.assertEqual(
@@ -209,8 +211,23 @@ class FormatRunTest(CourseTests):
             expected_ret_data
         )
 
+        # with a paid course run
+        self.mmtrack.configure_mock(**{
+            'has_paid.return_value': True
+        })
+        expected_ret_data.update({
+            'has_paid': True
+        })
+        self.assertEqual(
+            api.format_courserun_for_dashboard(crun, api.CourseStatus.CURRENTLY_ENROLLED, self.mmtrack),
+            expected_ret_data
+        )
+
     def test_format_run_conditional(self):
         """Test for format_courserun_for_dashboard with conditional fields"""
+        self.mmtrack.configure_mock(**{
+            'has_paid.return_value': False
+        })
         crun = self.create_run(
             start=self.now+timedelta(weeks=52),
             end=self.now+timedelta(weeks=62),
@@ -231,6 +248,7 @@ class FormatRunTest(CourseTests):
                 'course_end_date': crun.end_date,
                 'fuzzy_start_date': crun.fuzzy_start_date,
                 'enrollment_url': crun.enrollment_url,
+                'has_paid': False,
             }
         )
 
@@ -667,6 +685,7 @@ class InfoCourseTest(CourseTests):
             "position_in_program": course.position_in_program,
             "description": course.description,
             "prerequisites": course.prerequisites,
+            "has_contact_email": bool(course.contact_email),
         }
         # remove the runs part: assumed checked with the mock assertion
         del course_data_from_call['runs']
@@ -695,6 +714,22 @@ class InfoCourseTest(CourseTests):
             self.course_noruns,
             api.get_info_for_course(self.course_noruns, None)
         )
+        assert mock_format.called is False
+
+    @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
+    def test_info_with_contact_email(self, mock_format):  # pylint: disable=no-self-use
+        """test that get_info_for_course indicates that a course has a contact_email """
+        course = CourseFactory.create(contact_email="abc@example.com")
+        course_info = api.get_info_for_course(course, None)
+        assert course_info['has_contact_email'] is True
+        assert mock_format.called is False
+
+    @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
+    def test_info_without_contact_email(self, mock_format):  # pylint: disable=no-self-use
+        """test that get_info_for_course indicates that a course has no contact_email """
+        course = CourseFactory.create(contact_email=None)
+        course_info = api.get_info_for_course(course, None)
+        assert course_info['has_contact_email'] is False
         assert mock_format.called is False
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)

@@ -12,6 +12,8 @@ export type EmailValidationErrors = EmailInputs;
 
 export type EmailState = {
   inputs:           EmailInputs,
+  subheading?:      ?string,
+  params:           Object,
   validationErrors: EmailValidationErrors,
   sendError:        EmailSendError,
   fetchStatus?:     ?string,

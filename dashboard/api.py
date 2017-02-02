@@ -199,6 +199,7 @@ def get_info_for_course(course, mmtrack):
         "position_in_program": course.position_in_program,
         "description": course.description,
         "prerequisites": course.prerequisites,
+        "has_contact_email": bool(course.contact_email),
         "runs": [],
     }
 
@@ -385,6 +386,7 @@ def format_courserun_for_dashboard(course_run, status_for_user, mmtrack, positio
         'course_id': course_run.edx_course_key,
         'title': course_run.title,
         'status': status_for_user,
+        'has_paid': mmtrack.has_paid(course_run.edx_course_key),
         'position': position,
         'course_start_date': course_run.start_date,
         'course_end_date': course_run.end_date,

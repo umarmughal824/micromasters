@@ -10,6 +10,7 @@ import { calculatePrices } from '../../lib/coupon';
 import CourseListCard from './CourseListCard';
 import CourseRow from './CourseRow';
 import { DASHBOARD_RESPONSE, COURSE_PRICES_RESPONSE } from '../../test_constants';
+import { INITIAL_EMAIL_STATE } from '../../reducers/email';
 
 describe('CourseListCard', () => {
   let program, sandbox;
@@ -35,6 +36,12 @@ describe('CourseListCard', () => {
         coupon={null}
         addCourseEnrollment={() => undefined}
         prices={prices}
+        openEmailComposer={() => undefined}
+        closeEmailDialog={() => undefined}
+        updateEmailEdit={() => undefined}
+        sendEmail={() => undefined}
+        emailDialogVisibility={false}
+        email={INITIAL_EMAIL_STATE}
         {...props}
       />
     );

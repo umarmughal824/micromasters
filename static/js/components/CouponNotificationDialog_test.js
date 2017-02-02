@@ -53,6 +53,7 @@ const COUPON_COURSE: Coupon = {
 const COURSE: Course = {
   id: 2,
   title: "Horse",
+  has_contact_email: false,
   position_in_program: 1,
   runs: []
 };

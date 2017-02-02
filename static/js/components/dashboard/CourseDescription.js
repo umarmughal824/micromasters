@@ -1,6 +1,7 @@
 /* global SETTINGS: false */
 // @flow
 import React from 'react';
+import R from 'ramda';
 import _ from 'lodash';
 import moment from 'moment';
 
@@ -17,12 +18,15 @@ import {
   DASHBOARD_FORMAT,
   EDX_LINK_BASE,
 } from '../../constants';
+import { renderSeparatedComponents } from '../../util/util';
 import { ifValidDate } from '../../util/date';
 
 export default class CourseDescription extends React.Component {
   props: {
     courseRun: CourseRun,
-    courseTitle: ?string
+    courseTitle: ?string,
+    canContactCourseTeam: boolean,
+    openEmailComposer: () => void,
   };
 
   renderCourseDateMessage(label: string, dateString: string): React$Element<*> {
@@ -81,7 +85,7 @@ export default class CourseDescription extends React.Component {
     }
   };
 
-  renderViewCourseLink = (courseRun: CourseRun): React$Element<*>|null => {
+  renderViewCourseEdxLink = (courseRun: CourseRun): React$Element<*>|null => {
     if (!courseRun || !courseRun.course_id) {
       return null;
     }
@@ -93,32 +97,52 @@ export default class CourseDescription extends React.Component {
       url = courseRun.enrollment_url;
     }
 
-    return url ? <a href={url} target="_blank">View on edX</a> : null;
-  }
+    return url ?
+      <a key={'view-edx-link'} className={'view-edx-link'} href={url} target="_blank">View on edX</a>
+      : null;
+  };
+
+  renderContactLink = (): React$Element<*>|null => {
+    const { canContactCourseTeam, openEmailComposer } = this.props;
+
+    return canContactCourseTeam ?
+      <a key={'contact-link'} className={'contact-link'} onClick={openEmailComposer}>Contact Course Team</a>
+      : null;
+  };
+
+  renderCourseLinks = (): React$Element<*>|null => {
+    const { courseRun } = this.props;
+
+    let courseLinks = R.reject(R.isNil, [
+      this.renderViewCourseEdxLink(courseRun),
+      this.renderContactLink()
+    ]);
+
+    return courseLinks.length > 0 ?
+      <div className="course-links">
+        { renderSeparatedComponents(courseLinks, ' | ') }
+      </div>
+      : null;
+  };
 
   render() {
     const { courseRun, courseTitle } = this.props;
 
-    let detailContents, title, edxLink;
+    let detailContents;
     if (courseRun && !_.isEmpty(courseRun)) {
       detailContents = this.renderDetailContents(courseRun);
     } else {
       detailContents = <span className="no-runs">No future courses are currently scheduled.</span>;
     }
-    edxLink = this.renderViewCourseLink(courseRun);
-    if(edxLink) {
-      title = <span>{courseTitle} - {edxLink}</span>;
-    } else {
-      title = <span>{courseTitle}</span>;
-    }
 
     return <div className="course-description">
       <div className="course-title">
-        {title}
+        <span>{courseTitle}</span>
       </div>
       <div className="details">
         {detailContents}
       </div>
+      { this.renderCourseLinks() }
     </div>;
   }
 }

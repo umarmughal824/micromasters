@@ -31,6 +31,7 @@ import FilterVisibilityToggle from './search/FilterVisibilityToggle';
 import HitsCount from './search/HitsCount';
 import CustomNoHits from './search/CustomNoHits';
 import EmailCompositionDialog from './email/EmailCompositionDialog';
+import { SEARCH_EMAIL_TYPE } from './email/constants';
 import type { Option } from '../flow/generalTypes';
 import type { EmailState } from '../flow/emailTypes';
 import type { AvailableProgram } from '../flow/enrollmentTypes';
@@ -114,7 +115,7 @@ export default class LearnerSearch extends SearchkitComponent {
   props: {
     checkFilterVisibility:    (s: string) => boolean,
     setFilterVisibility:      (s: string, v: boolean) => void,
-    openEmailComposer:        () => void,
+    openEmailComposer:        (searchkit: Object) => void,
     closeEmailDialog:         () => void,
     updateEmailEdit:          (o: Object) => void,
     sendEmail:                () => void,
@@ -157,7 +158,7 @@ export default class LearnerSearch extends SearchkitComponent {
           <button
             id="email-selected"
             className="mdl-button minor-action"
-            onClick={openEmailComposer}
+            onClick={R.partial(openEmailComposer, [this.searchkit])}
           >
             Email These Learners
           </button>
@@ -304,9 +305,8 @@ export default class LearnerSearch extends SearchkitComponent {
           updateEmailEdit={updateEmailEdit}
           email={email}
           sendEmail={sendEmail}
-        >
-          {this.getHitsCount() || 0} recipients selected
-        </EmailCompositionDialog>
+          subheadingType={SEARCH_EMAIL_TYPE}
+        />
         <Grid className="search-grid">
           <Cell col={3} className="search-sidebar">
             { this.renderFacets(currentProgramEnrollment) }

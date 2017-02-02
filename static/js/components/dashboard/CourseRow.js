@@ -31,6 +31,7 @@ export default class CourseRow extends React.Component {
     hasFinancialAid: boolean,
     openFinancialAidCalculator: () => void,
     addCourseEnrollment: (courseId: string) => void,
+    openEmailComposer: () => void,
   };
 
   shouldDisplayGradeColumn = (run: CourseRun): boolean => (
@@ -49,6 +50,14 @@ export default class CourseRow extends React.Component {
     (course.runs.length > 1) ?
       R.drop(1, course.runs).filter(run => run.status !== STATUS_OFFERED) :
       []
+  );
+
+  hasPaidForAnyCourseRun = (course: Course): boolean => (
+    R.any(R.propEq('has_paid', true), course.runs)
+  );
+
+  canContactCourseTeam = (course: Course): boolean => (
+    this.hasPaidForAnyCourseRun(course) && course.has_contact_email
   );
 
   // $FlowFixMe: CourseRun is sometimes an empty object
@@ -71,12 +80,18 @@ export default class CourseRow extends React.Component {
       hasFinancialAid,
       openFinancialAidCalculator,
       addCourseEnrollment,
+      openEmailComposer
     } = this.props;
 
     let lastColumnSize, lastColumnClass;
     let columns = [
       <Cell col={6} key="1">
-        <CourseDescription courseRun={run} courseTitle={course.title} />
+        <CourseDescription
+          courseRun={run}
+          courseTitle={course.title}
+          canContactCourseTeam={this.canContactCourseTeam(course)}
+          openEmailComposer={openEmailComposer}
+        />
       </Cell>
     ];
 

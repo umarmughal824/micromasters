@@ -5,6 +5,7 @@ import { assert } from 'chai';
 import moment from 'moment';
 import ReactDOM from 'react-dom';
 import Decimal from 'decimal.js-light';
+import TestUtils from 'react-addons-test-utils';
 
 import {
   makeAvailablePrograms,
@@ -27,8 +28,18 @@ import {
   SET_TOAST_MESSAGE,
   CLEAR_UI,
   SET_COUPON_NOTIFICATION_VISIBILITY,
+  SET_EMAIL_DIALOG_VISIBILITY,
   setToastMessage,
+  setEmailDialogVisibility,
 } from '../actions/ui';
+import {
+  INITIATE_SEND_EMAIL,
+  SEND_EMAIL_SUCCESS,
+  UPDATE_EMAIL_VALIDATION,
+  UPDATE_EMAIL_EDIT,
+  CLEAR_EMAIL_EDIT,
+  startEmailEdit,
+} from '../actions/email';
 import {
   SET_TIMEOUT_ACTIVE,
   setInitialTime,
@@ -40,10 +51,12 @@ import {
   CLEAR_ENROLLMENTS,
   setCurrentProgramEnrollment,
 } from '../actions/programs';
+import { COURSE_EMAIL_TYPE } from '../components/email/constants';
 import {
   REQUEST_SKIP_FINANCIAL_AID,
   RECEIVE_SKIP_FINANCIAL_AID_SUCCESS,
 } from '../actions/financial_aid';
+import * as api from '../lib/api';
 import * as libCoupon  from '../lib/coupon';
 import {
   REQUEST_ATTACH_COUPON,
@@ -68,15 +81,16 @@ import {
   STATUS_OFFERED,
   STATUS_PAID_BUT_NOT_ENROLLED,
 } from '../constants';
-import { findCourse } from '../util/test_utils';
+import { findCourse, modifyTextField } from '../util/test_utils';
 import { DASHBOARD_SUCCESS_ACTIONS } from './test_util';
 
 describe('DashboardPage', () => {
-  let renderComponent, helper;
+  let renderComponent, helper, listenForActions;
 
   beforeEach(() => {
     helper = new IntegrationTestHelper();
     renderComponent = helper.renderComponent.bind(helper);
+    listenForActions = helper.listenForActions.bind(helper);
   });
 
   afterEach(() => {
@@ -467,6 +481,46 @@ describe('DashboardPage', () => {
         assert.deepEqual(row.find("CouponMessage").props(), {
           coupon: coupon
         });
+      });
+    });
+  });
+
+  it('waits for a successful email send to close the dialog', () => {
+    helper.store.dispatch(
+      startEmailEdit({
+        type: COURSE_EMAIL_TYPE,
+        params: {
+          courseId: 123
+        }
+      })
+    );
+    helper.store.dispatch(setEmailDialogVisibility(true));
+    let sendCourseTeamMail = helper.sandbox.stub(api, 'sendCourseTeamMail');
+    sendCourseTeamMail.returns(Promise.resolve());
+
+    const EMAIL_SUCCESS_ACTIONS = [
+      UPDATE_EMAIL_EDIT,
+      UPDATE_EMAIL_EDIT,
+      UPDATE_EMAIL_VALIDATION,
+      INITIATE_SEND_EMAIL,
+      SEND_EMAIL_SUCCESS,
+      CLEAR_EMAIL_EDIT,
+      SET_EMAIL_DIALOG_VISIBILITY,
+    ];
+
+    return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(() => {
+      let dialog = document.querySelector('.email-composition-dialog');
+      let saveButton = dialog.querySelector('.save-button');
+
+      return listenForActions(EMAIL_SUCCESS_ACTIONS, () => {
+        modifyTextField(dialog.querySelector('.email-subject'), 'subject');
+        modifyTextField(dialog.querySelector('.email-body'), 'body');
+
+        TestUtils.Simulate.click(saveButton);
+        assert.isTrue(helper.store.getState().ui.emailDialogVisibility);
+      }).then(() => {
+        assert.isFalse(helper.store.getState().ui.emailDialogVisibility);
+        assert.isTrue(sendCourseTeamMail.calledWith("subject", "body", 123));
       });
     });
   });
