@@ -231,6 +231,21 @@ class CDDWriterTest(TSVWriterTestCase, TestCase):
             )
         assert CDDWriter.last_name(profile) == expected
 
+    @ddt.data(
+        ("US", "US-MA", "MA"),
+        ("CA", "CA-NB", "NB"),
+        ("UK", "GB-ABD", ""),
+    )
+    @ddt.unpack
+    def test_profile_state(self, country, state, expected):
+        """Test that profile_state returns expected values"""
+        with mute_signals(post_save):
+            profile = ProfileFactory(
+                country=country,
+                state_or_territory=state
+            )
+        assert CDDWriter.profile_state(profile) == expected
+
     def test_profile_country_to_alpha3_invalid_country(self):
         """
         A profile with an invalid country code should raise an InvalidProfileDataException
@@ -290,7 +305,7 @@ class CDDWriterTest(TSVWriterTestCase, TestCase):
             'profile__user__email': 'jane@example.com',
             'profile__address': '1 Main St, Room B345',
             'profile__city': 'Boston',
-            'profile__state_or_territory': 'Massachusetts',
+            'profile__state_or_territory': 'US-MA',
             'profile__country': 'US',
             'profile__postal_code': '02115',
             'profile__phone_number': '+1 999-999-9999',
@@ -305,7 +320,7 @@ class CDDWriterTest(TSVWriterTestCase, TestCase):
         assert self.tsv_rows[0] == (
             "14879\tJane\tSmith\tjane@example.com\t"
             "1 Main St, Room B345\t\t\t"  # triple tab is for blank address2 and address3
-            "Boston\tMassachusetts\t02115\tUSA\t"
+            "Boston\tMA\t02115\tUSA\t"
             "999-999-9999\t1\t2016/05/15 15:02:55"
         )
 

@@ -13,6 +13,7 @@ from exams.pearson.constants import (
     PEARSON_DATE_FORMAT,
     PEARSON_DATETIME_FORMAT,
     PEARSON_DIALECT_OPTIONS,
+    PEARSON_STATE_SUPPORTED_COUNTRIES,
 )
 from exams.pearson.exceptions import (
     InvalidProfileDataException,
@@ -149,7 +150,7 @@ class CDDWriter(BaseTSVWriter):
             ('Address2', 'address2'),
             ('Address3', 'address3'),
             ('City', 'city'),
-            ('State', 'state_or_territory'),
+            ('State', self.profile_state),
             ('PostalCode', 'postal_code'),
             ('Country', self.profile_country_to_alpha3),
             ('Phone', self.profile_phone_number_to_raw_number),
@@ -160,21 +161,54 @@ class CDDWriter(BaseTSVWriter):
     @classmethod
     def first_name(cls, profile):
         """
-        romanized_first_name if we have it, first_name otherwise
+        Determines which first_name to use
+
+        Args:
+            profile (profiles.models.Profile): the profile to get state data from
+
+        Returns:
+            str: romanized_first_name if we have it, first_name otherwise
         """
         return profile.romanized_first_name or profile.first_name
 
     @classmethod
     def last_name(cls, profile):
         """
-        romanized_last_name if we have it, last_name otherwise
+        Determines which last_name to use
+
+        Args:
+            profile (profiles.models.Profile): the profile to get state data from
+
+        Returns:
+            str: romanized_last_name if we have it, last_name otherwise
         """
         return profile.romanized_last_name or profile.last_name
 
     @classmethod
+    def profile_state(cls, profile):
+        """
+        Transforms the state into the format accepted by PEARSON
+
+        Args:
+            profile (profiles.models.Profile): the profile to get state data from
+
+        Returns:
+            str: 2-character state representation if country is US/CA otherwise None
+        """
+        country, state = profile.country_subdivision
+
+        return state if country in PEARSON_STATE_SUPPORTED_COUNTRIES else ''
+
+    @classmethod
     def profile_phone_number_to_country_code(cls, profile):
         """
-        get the country code for a profile's phone number
+        Get the country code for a profile's phone number
+
+        Args:
+            profile (profiles.models.Profile): the profile to get state data from
+
+        Returns:
+            str: the 1 character country code
         """
         try:
             code, _ = split_phone_number(profile.phone_number)
@@ -185,7 +219,13 @@ class CDDWriter(BaseTSVWriter):
     @classmethod
     def profile_phone_number_to_raw_number(cls, profile):
         """
-        get just the number for a profile's phone number
+        Get just the number for a profile's phone number
+
+        Args:
+            profile (profiles.models.Profile): the profile to get state data from
+
+        Returns:
+            str: full phone number minus the country code
         """
         try:
             _, number = split_phone_number(profile.phone_number)

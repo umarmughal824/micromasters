@@ -3,7 +3,7 @@ Model tests
 """
 from datetime import datetime
 from unittest.mock import patch
-from ddt import ddt, data
+from ddt import ddt, data, unpack
 
 from django.db.models.signals import post_save
 from factory.django import mute_signals
@@ -126,6 +126,27 @@ class ProfileAddressTests(MockedESTestCase):
         assert profile.address1 == "Who lives in a pineapple under the sea?"
         assert profile.address2 == "SPONGEBOB SQUAREPANTS! Absorbent and"
         assert profile.address3 == "yellow and porous is he"
+
+
+@ddt
+class ProfileCountrySubdivisionTests(MockedESTestCase):
+    """
+    Tests for country_subdivision property
+    """
+
+    @data(
+        (None, (None, None)),
+        ('MA', (None, None)),
+        ('US-MA', ('US', 'MA')),
+        ('US-MA-BS', (None, None)),  # non a valid code
+    )
+    @unpack
+    def test_country_subdivision(self, state, expected_result):
+        """Test country_subdivision against a range of values"""
+        with mute_signals(post_save):
+            profile = ProfileFactory(state_or_territory=state)
+
+        assert profile.country_subdivision == expected_result
 
 
 @ddt

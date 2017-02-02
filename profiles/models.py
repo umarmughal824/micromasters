@@ -1,6 +1,8 @@
 """
 Models for user profile
 """
+import re
+
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.db import models, transaction
@@ -22,6 +24,8 @@ JUNIOR_HIGH_SCHOOL = 'jhs'
 ELEMENTARY = 'el'
 NO_FORMAL_EDUCATION = 'none'
 OTHER_EDUCATION = 'other'
+
+ISO_3166_SUBDIVISION_RE = re.compile(r'^([A-Z]+)\-([A-Z]+)$')
 
 
 class Employment(models.Model):
@@ -219,6 +223,15 @@ class Profile(models.Model):
     def address3(self):
         """Third line of address"""
         return self._split_address()[2]
+
+    @property
+    def country_subdivision(self):
+        """The ISO 3166-2 (country, subdivision) tuple"""
+        if self.state_or_territory:
+            match = ISO_3166_SUBDIVISION_RE.match(self.state_or_territory)
+            if match:
+                return match.group(1, 2)
+        return (None, None)
 
     @property
     def display_name(self):
