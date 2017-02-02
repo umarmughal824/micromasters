@@ -57,7 +57,11 @@ module.exports = {
     exclude: /node_modules/,
     loader: 'babel-loader',
     query: {
-      "presets": ["latest", "react"],
+      "presets": [
+        ["env", { "modules": false }],
+        "latest",
+        "react",
+      ],
       "ignore": [
         "node_modules/**"
       ],

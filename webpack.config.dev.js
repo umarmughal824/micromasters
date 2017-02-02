@@ -30,7 +30,7 @@ const devConfig = Object.assign({}, config, {
     }),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NamedModulesPlugin(),
-    new webpack.NoErrorsPlugin(),
+    new webpack.NoEmitOnErrorsPlugin(),
     new BundleTracker({filename: './webpack-stats.json'})
   ],
   devtool: 'source-map'
