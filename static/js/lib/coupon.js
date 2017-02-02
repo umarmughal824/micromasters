@@ -44,9 +44,12 @@ function* genPrices(programs: Dashboard, prices: CoursePrices, coupons: Coupons)
   }
 }
 
-export const calculatePrice = (runId: number, courseId: number, price: CoursePrice, coupons: Coupons): ?number => {
+export const calculatePrice = (
+  runId: number, courseId: number, price: CoursePrice, coupons: Coupons
+): [?Coupon, ?number] => {
   const couponLookup: Map<number, Coupon> = makeProgramIdLookup(coupons);
-  return calculateRunPrice(runId, courseId, price.program_id, price, couponLookup.get(price.program_id));
+  let coupon = couponLookup.get(price.program_id);
+  return [coupon, calculateRunPrice(runId, courseId, price.program_id, price, coupon)];
 };
 
 export const calculatePrices = (programs: Dashboard, prices: CoursePrices, coupons: Coupons): CalculatedPrices => {

@@ -17,6 +17,7 @@ class OrderSummary extends React.Component {
     coursePrice:      CoursePrice,
     finalPrice:       ?number,
     discount:         ?number,
+    couponCode:       ?string,
     checkout:         Function,
     checkoutStatus?:  string,
   };
@@ -62,11 +63,11 @@ class OrderSummary extends React.Component {
   }
 
   render() {
-    let { course, courseRun, checkout, checkoutStatus, discount } = this.props;
+    let { course, courseRun, checkout, checkoutStatus, couponCode} = this.props;
     let discountInfo;
-    if (discount !== null && discount !== undefined) {
+    if (couponCode) {
       discountInfo = [
-        this.showAmount('Discount from coupon', this.getDiscountAmount()),
+        this.showAmount(`Discount from coupon ${couponCode}`, this.getDiscountAmount()),
         <Cell col={10} tablet={6} phone={4} className="division-line" key="division"/>,
         this.showAmount('Total', this.getFinalPrice())
       ];
