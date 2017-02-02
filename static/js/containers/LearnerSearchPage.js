@@ -55,9 +55,17 @@ class LearnerSearchPage extends React.Component {
     dispatch(setSearchFilterVisibility(clone));
   };
 
-  openEmailComposer = () => {
+  openEmailComposer = (searchkit) => {
     const { dispatch } = this.props;
-    dispatch(startEmailEdit(SEARCH_EMAIL_TYPE));
+    dispatch(
+      startEmailEdit(
+        {
+          type: SEARCH_EMAIL_TYPE,
+          params: {query: searchkit.query.query},
+          subheading: `${searchkit.getHitsCount() || 0} recipients selected`
+        }
+      )
+    );
     dispatch(setEmailDialogVisibility(true));
   };
 
@@ -68,7 +76,7 @@ class LearnerSearchPage extends React.Component {
   };
 
   closeEmailComposerAndSend = (): void => {
-    const { dispatch, searchResultEmail: { inputs } } = this.props;
+    const { dispatch, searchResultEmail: { inputs, params } } = this.props;
     let errors = emailValidation(inputs);
     dispatch(updateEmailValidation({type: SEARCH_EMAIL_TYPE, errors: errors}));
     if (R.isEmpty(errors)) {
@@ -76,7 +84,7 @@ class LearnerSearchPage extends React.Component {
         sendSearchResultMail(
           inputs.subject || '',
           inputs.body || '',
-          searchKit.query.query
+          params.query
         )
       ).then(() => {
         this.closeAndClearEmailComposer();

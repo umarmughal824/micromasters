@@ -40,6 +40,7 @@ export type Program = {
 export type Course = {
   runs: Array<CourseRun>,
   title: string,
+  has_contact_email: boolean,
   id: number,
   position_in_program: number,
 };

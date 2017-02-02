@@ -47,7 +47,8 @@ import FinancialAidCard from '../components/dashboard/FinancialAidCard';
 import FinalExamCard from '../components/dashboard/FinalExamCard';
 import ErrorMessage from '../components/ErrorMessage';
 import ProgressWidget from '../components/ProgressWidget';
-import { setCalculatorDialogVisibility } from '../actions/ui';
+import { COURSE_EMAIL_TYPE } from '../components/email/constants';
+import { setCalculatorDialogVisibility, setEmailDialogVisibility } from '../actions/ui';
 import {
   clearCoupons,
   fetchCoupons,
@@ -62,6 +63,14 @@ import {
 } from '../actions/financial_aid';
 import { setTimeoutActive } from '../actions/order_receipt';
 import { attachCoupon, setRecentlyAttachedCoupon } from '../actions/coupons';
+import {
+  startEmailEdit,
+  updateEmailEdit,
+  clearEmailEdit,
+  updateEmailValidation,
+  sendCourseTeamMail
+} from '../actions/email';
+import { emailValidation } from '../lib/validation/profile';
 import type { UIState } from '../reducers/ui';
 import type { OrderReceiptState } from '../reducers/order_receipt';
 import type {
@@ -73,6 +82,7 @@ import type {
 } from '../flow/enrollmentTypes';
 import type { FinancialAidState } from '../reducers/financial_aid';
 import type { CouponsState } from '../reducers/coupons';
+import type { EmailState } from '../flow/emailTypes';
 import type { ProfileGetResult } from '../flow/profileTypes';
 import type { Course, CourseRun } from '../flow/programTypes';
 import { skipFinancialAid } from '../actions/financial_aid';
@@ -95,6 +105,7 @@ class DashboardPage extends React.Component {
     dispatch:                 Dispatch,
     setCalculatorVisibility:  (b: boolean) => void,
     ui:                       UIState,
+    courseTeamEmail:          EmailState,
     documents:                DocumentsState,
     fetchDashboard:           () => void,
     orderReceipt:             OrderReceiptState,
@@ -122,6 +133,55 @@ class DashboardPage extends React.Component {
     dispatch(clearCoursePrices());
     dispatch(clearCoupons());
   }
+  
+  openEmailComposer = (course: Course) => {
+    const { dispatch } = this.props;
+    dispatch(
+      startEmailEdit({
+        type: COURSE_EMAIL_TYPE,
+        params: {courseId: course.id},
+        subheading: `${course.title} Course Team`
+      })
+    );
+    dispatch(setEmailDialogVisibility(true));
+  };
+
+  closeAndClearEmailComposer = () => {
+    const { dispatch } = this.props;
+    dispatch(clearEmailEdit(COURSE_EMAIL_TYPE));
+    dispatch(setEmailDialogVisibility(false));
+  };
+
+  updateEmailEdit = R.curry((fieldName, e) => {
+    const {
+      dispatch,
+      courseTeamEmail: { inputs, validationErrors }
+    } = this.props;
+    let inputsClone = R.clone(inputs);
+    inputsClone[fieldName] = e.target.value;
+    dispatch(updateEmailEdit({type: COURSE_EMAIL_TYPE, inputs: inputsClone}));
+    if (!R.isEmpty(validationErrors)) {
+      let cloneErrors = emailValidation(inputsClone);
+      dispatch(updateEmailValidation({type: COURSE_EMAIL_TYPE, errors: cloneErrors}));
+    }
+  });
+
+  closeEmailComposerAndSend = (): void => {
+    const { dispatch, courseTeamEmail: { inputs, params } } = this.props;
+    let errors = emailValidation(inputs);
+    dispatch(updateEmailValidation({type: COURSE_EMAIL_TYPE, errors: errors}));
+    if (R.isEmpty(errors)) {
+      dispatch(
+        sendCourseTeamMail(
+          inputs.subject || '',
+          inputs.body || '',
+          params.courseId
+        )
+      ).then(() => {
+        this.closeAndClearEmailComposer();
+      });
+    }
+  };
 
   handleOrderSuccess = (course: Course): void => {
     const { dispatch, ui: { toastMessage } } = this.props;
@@ -437,6 +497,7 @@ class DashboardPage extends React.Component {
       documents,
       currentProgramEnrollment,
       ui,
+      courseTeamEmail,
       courseEnrollments,
       financialAid,
       coupons,
@@ -514,6 +575,12 @@ class DashboardPage extends React.Component {
               key={program.id}
               openFinancialAidCalculator={this.openFinancialAidCalculator}
               addCourseEnrollment={this.addCourseEnrollment}
+              openEmailComposer={this.openEmailComposer}
+              closeEmailDialog={this.closeAndClearEmailComposer}
+              updateEmailEdit={this.updateEmailEdit}
+              sendEmail={this.closeEmailComposerAndSend}
+              emailDialogVisibility={ui.emailDialogVisibility}
+              email={courseTeamEmail}
             />
           </div>
           <div className="second-column">
@@ -548,6 +615,7 @@ const mapStateToProps = (state) => {
     programs: state.programs,
     currentProgramEnrollment: state.currentProgramEnrollment,
     ui: state.ui,
+    courseTeamEmail: state.email.courseTeamEmail,
     documents: state.documents,
     orderReceipt: state.orderReceipt,
     courseEnrollments: state.courseEnrollments,

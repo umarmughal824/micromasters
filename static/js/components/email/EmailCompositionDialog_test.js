@@ -13,6 +13,7 @@ import {
 } from '../../reducers/email';
 import { modifyTextField } from '../../util/test_utils';
 import EmailCompositionDialog from './EmailCompositionDialog';
+import { SEARCH_EMAIL_TYPE, COURSE_EMAIL_TYPE } from './constants';
 
 describe('EmailCompositionDialog', () => {
   let sandbox, updateStub, closeEmailDialog, updateEmailEdit, sendEmail;
@@ -31,7 +32,7 @@ describe('EmailCompositionDialog', () => {
 
   const getDialog = () => document.querySelector('.email-composition-dialog');
 
-  const renderDialog = (props = {}, subHeading = null) => (
+  const renderDialog = (props = {}) => (
     mount (
       <MuiThemeProvider muiTheme={getMuiTheme()}>
         <EmailCompositionDialog
@@ -41,9 +42,7 @@ describe('EmailCompositionDialog', () => {
           email={{ ...INITIAL_EMAIL_STATE }}
           sendEmail={sendEmail}
           {...props}
-        >
-          { subHeading }
-        </EmailCompositionDialog>
+        />
       </MuiThemeProvider>
     )
   );
@@ -73,14 +72,43 @@ describe('EmailCompositionDialog', () => {
     assert.equal(dialogActionsSpy.callCount, 1);
   });
 
-  it('should show a subheader when text is passed in', () => {
-    renderDialog({}, 'Some subheader text');
+  it('should show a subheader when subheader text exists in the state', () => {
+    renderDialog({
+      email: {
+        ...INITIAL_EMAIL_STATE,
+        subheading: 'Some subheader text'
+      }
+    });
     assert.equal(document.querySelector('h5').textContent, 'Some subheader text');
   });
 
-  it('should not show a subheader when text is not passed in', () => {
-    renderDialog({}, null);
+  it('should not show a subheader when subheader text does not exist in the state', () => {
+    renderDialog({email: INITIAL_EMAIL_STATE});
     assert.isNull(document.querySelector('h5'));
+  });
+
+  it('should not show a simple subheader for search result emails', () => {
+    renderDialog({
+      email: {
+        ...INITIAL_EMAIL_STATE,
+        subheading: 'Some subheader text'
+      },
+      subheadingType: SEARCH_EMAIL_TYPE
+    });
+    assert.equal(document.querySelector('h5').className, 'subheading');
+  });
+
+  it('should not show a rounded subheader for course contact emails', () => {
+    renderDialog({
+      email: {
+        ...INITIAL_EMAIL_STATE,
+        subheading: 'Some subheader text'
+      },
+      subheadingType: COURSE_EMAIL_TYPE
+    });
+    let className = document.querySelector('h5').className;
+    assert.include(className, 'subheading');
+    assert.include(className, 'rounded');
   });
 
   it('should show a specific title when one is passed in', () => {

@@ -29,6 +29,8 @@ import {
   classify,
   currentOrFirstIncompleteStep,
   getUserDisplayName,
+  renderSeparatedComponents,
+  getPropertyOrDefault
 } from '../util/util';
 import {
   EDUCATION_LEVELS,
@@ -650,6 +652,49 @@ describe('utility functions', () => {
     it('does not show preferred name when first name has same value', () => {
       profile.first_name = 'test';
       assert.equal('test doe', getUserDisplayName(profile));
+    });
+  });
+
+  describe('renderSeparatedComponents', () => {
+    it('renders a list of components with a separator that has specified text content', () => {
+      let components = [
+        <div key={"1"}>div1</div>,
+        <div key={"2"}>div2</div>,
+        <div key={"3"}>div3</div>
+      ];
+      let separatedComponents = renderSeparatedComponents(components, ' | ');
+      assert.equal(separatedComponents[0].props.children, 'div1');
+      assert.equal(separatedComponents[1].type, 'span');
+      assert.equal(separatedComponents[1].props.children, ' | ');
+      assert.equal(separatedComponents[2].props.children, 'div2');
+      assert.equal(separatedComponents[3].type, 'span');
+      assert.equal(separatedComponents[3].props.children, ' | ');
+      assert.equal(separatedComponents[4].props.children, 'div3');
+    });
+
+    it('renders a single component without a separator', () => {
+      let components = [<div key={"1"}>div1</div>];
+      let separatedComponents = renderSeparatedComponents(components, ' | ');
+      assert.equal(separatedComponents[0].props.children, 'div1');
+      assert.lengthOf(separatedComponents, 1);
+    });
+  });
+
+  describe('getPropertyOrDefault', () => {
+    let obj = {a: 'value for a'};
+
+    it('gets an object property by name', () => {
+      assert.equal(getPropertyOrDefault(obj, 'a', 'default value'), 'value for a');
+    });
+
+    it('returns a default value when given a null/undefined property name', () => {
+      [null, undefined].forEach(propName => {
+        assert.equal(getPropertyOrDefault(obj, propName, 'default value'), 'default value');
+      });
+    });
+
+    it('returns a default value when given a property name that an object does not have', () => {
+      assert.equal(getPropertyOrDefault(obj, 'z', 'default value'), 'default value');
     });
   });
 });

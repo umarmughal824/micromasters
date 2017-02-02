@@ -2,9 +2,12 @@
 import React from 'react';
 import Dialog from 'material-ui/Dialog';
 import R from 'ramda';
+import Grid, { Cell } from 'react-mdl/lib/Grid';
 
 import { FETCH_PROCESSING } from '../../actions';
 import { dialogActions } from '../inputs/util';
+import { getPropertyOrDefault } from '../../util/util';
+import { COURSE_EMAIL_TYPE, SEARCH_EMAIL_TYPE } from './constants';
 import type {
   EmailState,
   EmailValidationErrors
@@ -28,7 +31,36 @@ type EmailDialogProps = {
   email:            EmailState,
   sendEmail:        () => void,
   title?:           string,
-  children?:        any,
+  subheadingType?:  string
+};
+
+const renderSimpleSubheading = (subheading: string) => (
+  <div className="subheading-section">
+    <h5 className="subheading">{ subheading }</h5>
+  </div>
+);
+
+const renderRoundedSubheading = (subheading: string) => (
+  <div className="subheading-section">
+    <Grid noSpacing={true}>
+      <Cell col={1} align={"middle"} className="subheading-to">TO:</Cell>
+      <Cell col={11}><h5 className="subheading rounded">{ subheading }</h5></Cell>
+    </Grid>
+  </div>
+);
+
+const emailTypeRendererMap = {
+  [SEARCH_EMAIL_TYPE]: renderSimpleSubheading,
+  [COURSE_EMAIL_TYPE]: renderRoundedSubheading
+};
+
+const renderSubheading = (renderType: ?string, subheading: ?string) => {
+  if (R.isNil(subheading) || R.isEmpty(subheading)) {
+    return null;
+  } else {
+    let renderFunc = getPropertyOrDefault(emailTypeRendererMap, renderType, renderSimpleSubheading);
+    return renderFunc(subheading);
+  }
 };
 
 const EmailCompositionDialog = (props: EmailDialogProps) => {
@@ -36,16 +68,11 @@ const EmailCompositionDialog = (props: EmailDialogProps) => {
     closeEmailDialog,
     updateEmailEdit,
     open,
-    email: { inputs, validationErrors, fetchStatus },
+    email: { inputs, subheading, validationErrors, fetchStatus },
     sendEmail,
     title,
-    children
+    subheadingType
   } = props;
-
-  let subHeading;
-  if (children) {
-    subHeading = <h5 className="sub-heading">{ children }</h5>;
-  }
 
   return <Dialog
     title={title || "New Email"}
@@ -57,7 +84,7 @@ const EmailCompositionDialog = (props: EmailDialogProps) => {
     onRequestClose={closeEmailDialog}
   >
     <div className="email-composition-contents">
-      { subHeading }
+      { renderSubheading(subheadingType, subheading) }
       <textarea
         rows="1"
         className="email-subject"

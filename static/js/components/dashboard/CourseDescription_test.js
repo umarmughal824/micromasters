@@ -23,18 +23,24 @@ import {
 } from '../../constants';
 
 describe('CourseDescription', () => {
-  let getElements = (renderedComponent) => {
-    let title = renderedComponent.find(".course-title");
-    let titleLink = title.find("a");
-    let details = renderedComponent.find(".details");
-    return {
-      titleText: title.text(),
-      titleLink: titleLink,
-      detailsText: details.text()
-    };
-  };
+  let getElements = (renderedComponent) => ({
+    titleText: renderedComponent.find(".course-title").text(),
+    edxLink: renderedComponent.find("a.view-edx-link"),
+    contactLink: renderedComponent.find("a.contact-link"),
+    detailsText: renderedComponent.find(".details").text()
+  });
 
-  it('shows the course title and a link to view the course on edX', () => {
+  let renderCourseDescription = (courseRun, courseTitle, canContactCourseTeam = false) => (
+    shallow(
+      <CourseDescription
+        courseRun={courseRun}
+        courseTitle={courseTitle}
+        canContactCourseTeam={canContactCourseTeam}
+      />
+    )
+  );
+
+  it('shows the course title', () => {
     for (let status of ALL_COURSE_STATUSES) {
       let course = findAndCloneCourse(course => (
         course.runs.length > 0 &&
@@ -42,13 +48,10 @@ describe('CourseDescription', () => {
       ));
       let firstRun = course.runs[0];
       firstRun.enrollment_url = 'http://example.com';
-      const wrapper = shallow(<CourseDescription courseRun={firstRun} courseTitle={course.title} />);
+      const wrapper = renderCourseDescription(firstRun, course.title);
       let elements = getElements(wrapper);
 
       assert.include(elements.titleText, course.title);
-      assert.isAbove(elements.titleLink.length, 0);
-      assert.equal(elements.titleLink.text(), 'View on edX');
-      assert.isAbove(elements.titleLink.props().href.length, 0);
     }
   });
 
@@ -66,12 +69,12 @@ describe('CourseDescription', () => {
       firstRun.course_start_date = moment().subtract(2, 'days').format();
       firstRun.course_id = "example+run";
       firstRun.enrollment_url = null;
-      const wrapper = shallow(<CourseDescription courseRun={firstRun} courseTitle={course.title} />);
+      const wrapper = renderCourseDescription(firstRun, course.title);
       let elements = getElements(wrapper);
 
-      assert.equal(elements.titleLink.text(), 'View on edX');
-      assert.isAbove(elements.titleLink.props().href.length, 0);
-      assert.include(elements.titleLink.props().href, firstRun.course_id);
+      assert.equal(elements.edxLink.text(), 'View on edX');
+      assert.isAbove(elements.edxLink.props().href.length, 0);
+      assert.include(elements.edxLink.props().href, firstRun.course_id);
     }
   });
 
@@ -90,11 +93,11 @@ describe('CourseDescription', () => {
       for (let courseStartDate of START_DATES_TO_TEST) {
         firstRun.course_start_date = courseStartDate;
         firstRun.enrollment_url = 'http://example.com';
-        const wrapper = shallow(<CourseDescription courseRun={firstRun} courseTitle={course.title} />);
+        const wrapper = renderCourseDescription(firstRun, course.title);
         let elements = getElements(wrapper);
-        assert.equal(elements.titleLink.text(), 'View on edX');
-        assert.isAbove(elements.titleLink.props().href.length, 0);
-        assert.include(elements.titleLink.props().href, firstRun.enrollment_url);
+        assert.equal(elements.edxLink.text(), 'View on edX');
+        assert.isAbove(elements.edxLink.props().href.length, 0);
+        assert.include(elements.edxLink.props().href, firstRun.enrollment_url);
       }
     }
   });
@@ -112,11 +115,11 @@ describe('CourseDescription', () => {
       let firstRun = course.runs[0];
       firstRun.course_start_date = moment().add(2, 'days').format();
       firstRun.course_id = "example+run";
-      const wrapper = shallow(<CourseDescription courseRun={firstRun} courseTitle={course.title} />);
+      const wrapper = renderCourseDescription(firstRun, course.title);
       let elements = getElements(wrapper);
-      assert.equal(elements.titleLink.text(), 'View on edX');
-      assert.isAbove(elements.titleLink.props().href.length, 0);
-      assert.include(elements.titleLink.props().href, firstRun.course_id);
+      assert.equal(elements.edxLink.text(), 'View on edX');
+      assert.isAbove(elements.edxLink.props().href.length, 0);
+      assert.include(elements.edxLink.props().href, firstRun.course_id);
     }
   });
 
@@ -127,10 +130,35 @@ describe('CourseDescription', () => {
     ));
     let firstRun = course.runs[0];
     firstRun.course_id = null;
-    const wrapper = shallow(<CourseDescription courseRun={firstRun} courseTitle={course.title} />);
+    const wrapper = renderCourseDescription(firstRun, course.title);
     let elements = getElements(wrapper);
 
-    assert.lengthOf(elements.titleLink, 0);
+    assert.lengthOf(elements.edxLink, 0);
+  });
+
+  it('shows a link to contact the course team if the user has permission', () => {
+    let course = findAndCloneCourse(course => (
+      course.runs.length > 0 &&
+      course.runs[0].status === STATUS_CURRENTLY_ENROLLED
+    ));
+    let firstRun = course.runs[0];
+    const wrapper = renderCourseDescription(firstRun, course.title, true);
+    let elements = getElements(wrapper);
+
+    assert.isAbove(elements.contactLink.length, 0);
+    assert.equal(elements.contactLink.text(), 'Contact Course Team');
+  });
+
+  it('does not show a link to contact the course team if the user does not have permission', () => {
+    let course = findAndCloneCourse(course => (
+      course.runs.length > 0 &&
+      course.runs[0].status === STATUS_PASSED
+    ));
+    let firstRun = course.runs[0];
+    const wrapper = renderCourseDescription(firstRun, course.title, false);
+    let elements = getElements(wrapper);
+
+    assert.lengthOf(elements.contactLink, 0);
   });
 
   it('shows an enrollment link for an unenrolled course run with an enrollment url', () => {
@@ -145,12 +173,29 @@ describe('CourseDescription', () => {
       ));
       let firstRun = course.runs[0];
       firstRun.enrollment_url = 'http://example.com';
-      const wrapper = shallow(<CourseDescription courseRun={firstRun} courseTitle={course.title} />);
+      const wrapper = renderCourseDescription(firstRun, course.title);
       let elements = getElements(wrapper);
-      assert.equal(elements.titleLink.text(), 'View on edX');
-      assert.isAbove(elements.titleLink.props().href.length, 0);
-      assert.include(elements.titleLink.props().href, firstRun.enrollment_url);
+      assert.equal(elements.edxLink.text(), 'View on edX');
+      assert.isAbove(elements.edxLink.props().href.length, 0);
+      assert.include(elements.edxLink.props().href, firstRun.enrollment_url);
     }
+  });
+
+  it('shows both an edX link and a course contact link when both are enabled', () => {
+    let course = findAndCloneCourse(course => (
+      course.runs.length > 0 &&
+      course.runs[0].status === STATUS_CURRENTLY_ENROLLED
+    ));
+    let firstRun = course.runs[0];
+    firstRun.course_id = 'example+run';
+    const wrapper = renderCourseDescription(firstRun, course.title, true);
+    let elements = getElements(wrapper);
+
+    assert.isAbove(elements.edxLink.length, 0);
+    assert.equal(elements.edxLink.text(), 'View on edX');
+    assert.isAbove(elements.contactLink.length, 0);
+    assert.equal(elements.contactLink.text(), 'Contact Course Team');
+    assert.equal(wrapper.find('.course-links span').text(), ' | ');
   });
 
   it('does not show an edX link for an unenrolled course run with no enrollment url', () => {
@@ -165,9 +210,9 @@ describe('CourseDescription', () => {
       ));
       let firstRun = course.runs[0];
       firstRun.enrollment_url = null;
-      const wrapper = shallow(<CourseDescription courseRun={firstRun} courseTitle={course.title} />);
+      const wrapper = renderCourseDescription(firstRun, course.title);
       let elements = getElements(wrapper);
-      assert.lengthOf(elements.titleLink, 0);
+      assert.lengthOf(elements.edxLink, 0);
     }
   });
 
@@ -177,7 +222,7 @@ describe('CourseDescription', () => {
       course.runs[0].status === STATUS_PASSED
     ));
     let firstRun = course.runs[0];
-    const wrapper = shallow(<CourseDescription courseRun={firstRun} courseTitle={course.title} />);
+    const wrapper = renderCourseDescription(firstRun, course.title);
     let elements = getElements(wrapper);
     let courseEndDate = moment(firstRun.course_end_date);
     let formattedDate = courseEndDate.format(DASHBOARD_FORMAT);
@@ -191,7 +236,7 @@ describe('CourseDescription', () => {
       course.runs[0].status === STATUS_PASSED
     ));
     let firstRun = alterFirstRun(course, {course_end_date: '1999-13-92'});
-    const wrapper = shallow(<CourseDescription courseRun={firstRun} courseTitle={course.title} />);
+    const wrapper = renderCourseDescription(firstRun, course.title);
     let elements = getElements(wrapper);
     assert.equal(elements.detailsText, '');
   });
@@ -202,7 +247,7 @@ describe('CourseDescription', () => {
       course.runs[0].status === STATUS_NOT_PASSED
     ));
     let firstRun = course.runs[0];
-    const wrapper = shallow(<CourseDescription courseRun={firstRun} courseTitle={course.title} />);
+    const wrapper = renderCourseDescription(firstRun, course.title);
     let elements = getElements(wrapper);
     let courseEndDate = moment(firstRun.course_end_date);
     let formattedDate = courseEndDate.format(DASHBOARD_FORMAT);
@@ -215,7 +260,7 @@ describe('CourseDescription', () => {
       course.runs[0].status === STATUS_NOT_PASSED
     ));
     let firstRun = alterFirstRun(course, {course_end_date: '1999-13-92'});
-    const wrapper = shallow(<CourseDescription courseRun={firstRun} courseTitle={course.title} />);
+    const wrapper = renderCourseDescription(firstRun, course.title);
     let elements = getElements(wrapper);
     assert.equal(elements.detailsText, '');
   });
@@ -233,7 +278,7 @@ describe('CourseDescription', () => {
       course.runs[0].status === STATUS_CURRENTLY_ENROLLED
     ));
     let firstRun = course.runs[0];
-    const wrapper = shallow(<CourseDescription courseRun={firstRun} courseTitle={course.title} />);
+    const wrapper = renderCourseDescription(firstRun, course.title);
     let elements = getElements(wrapper);
     let courseStartDate = moment(firstRun.course_start_date);
     let formattedDate = courseStartDate.format(DASHBOARD_FORMAT);
@@ -247,7 +292,7 @@ describe('CourseDescription', () => {
       course.runs[0].status === STATUS_CURRENTLY_ENROLLED
     ));
     let firstRun = alterFirstRun(course, { course_start_date: '1999-13-92' });
-    const wrapper = shallow(<CourseDescription courseRun={firstRun} courseTitle={course.title} />);
+    const wrapper = renderCourseDescription(firstRun, course.title);
     let elements = getElements(wrapper);
     assert.equal(elements.detailsText, '');
   });
@@ -258,7 +303,7 @@ describe('CourseDescription', () => {
       course.runs[0].status === STATUS_CAN_UPGRADE
     ));
     let firstRun = course.runs[0];
-    const wrapper = shallow(<CourseDescription courseRun={firstRun} courseTitle={course.title} />);
+    const wrapper = renderCourseDescription(firstRun, course.title);
     let elements = getElements(wrapper);
     let courseStartDate = moment(firstRun.course_start_date);
     let formattedDate = courseStartDate.format(DASHBOARD_FORMAT);
@@ -272,7 +317,7 @@ describe('CourseDescription', () => {
       course.runs[0].status === STATUS_CAN_UPGRADE
     ));
     let firstRun = alterFirstRun(course, {course_start_date: '1999-13-92'});
-    const wrapper = shallow(<CourseDescription courseRun={firstRun} courseTitle={course.title} />);
+    const wrapper = renderCourseDescription(firstRun, course.title);
     let elements = getElements(wrapper);
     assert.notInclude(elements.detailsText, 'Start date: ');
   });
@@ -283,7 +328,7 @@ describe('CourseDescription', () => {
       course.runs[0].status === STATUS_OFFERED
     ));
     let firstRun = course.runs[0];
-    const wrapper = shallow(<CourseDescription courseRun={firstRun} courseTitle={course.title} />);
+    const wrapper = renderCourseDescription(firstRun, course.title);
     let elements = getElements(wrapper);
     let courseStartDate = moment(firstRun.course_start_date);
     let formattedDate = courseStartDate.format(DASHBOARD_FORMAT);
@@ -300,7 +345,7 @@ describe('CourseDescription', () => {
     let firstRun = course.runs[0];
     firstRun.fuzzy_start_date = fuzzyStartDate;
     firstRun.course_start_date = null;
-    const wrapper = shallow(<CourseDescription courseRun={firstRun} courseTitle={course.title} />);
+    const wrapper = renderCourseDescription(firstRun, course.title);
     let elements = getElements(wrapper);
 
     assert.equal(elements.detailsText, `Coming ${fuzzyStartDate}`);
@@ -314,7 +359,7 @@ describe('CourseDescription', () => {
     let firstRun = course.runs[0];
     firstRun.fuzzy_start_date = null;
     firstRun.course_start_date = null;
-    const wrapper = shallow(<CourseDescription courseRun={firstRun} courseTitle={course.title} />);
+    const wrapper = renderCourseDescription(firstRun, course.title);
     let elements = getElements(wrapper);
 
     assert.equal(elements.detailsText, '');
@@ -326,7 +371,7 @@ describe('CourseDescription', () => {
       course.runs[0].status === STATUS_OFFERED
     ));
     let firstRun = alterFirstRun(course, {course_start_date: '1999-13-92'});
-    const wrapper = shallow(<CourseDescription courseRun={firstRun} courseTitle={course.title} />);
+    const wrapper = renderCourseDescription(firstRun, course.title);
     let elements = getElements(wrapper);
     assert.equal(elements.detailsText, '');
   });
@@ -338,7 +383,7 @@ describe('CourseDescription', () => {
         course.runs[0].status === auditStatus
       ));
       let firstRun = course.runs[0];
-      const wrapper = shallow(<CourseDescription courseRun={firstRun} courseTitle={course.title} />);
+      const wrapper = renderCourseDescription(firstRun, course.title);
       let elements = getElements(wrapper);
 
       assert.include(elements.detailsText, 'You are Auditing this Course');

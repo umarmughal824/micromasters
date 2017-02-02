@@ -44,6 +44,7 @@ describe('CourseRow', () => {
         now={moment()}
         addCourseEnrollment={sandbox.stub()}
         course={null}
+        openEmailComposer={sandbox.stub()}
         {...props}
       />,
       {
@@ -75,10 +76,10 @@ describe('CourseRow', () => {
     for (const key of keys) {
       assert.deepEqual(actionProps[key], courseRowProps[key]);
     }
-    assert.deepEqual(wrapper.find(CourseDescription).props(), {
-      courseRun,
-      courseTitle,
-    });
+    let descriptionProps = wrapper.find(CourseDescription).props();
+    assert.deepEqual(descriptionProps.courseRun, courseRun);
+    assert.deepEqual(descriptionProps.courseTitle, courseTitle);
+    assert.property(descriptionProps, 'canContactCourseTeam');
     assert.deepEqual(wrapper.find(CourseGrade).props(), {
       courseRun,
     });

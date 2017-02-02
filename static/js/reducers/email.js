@@ -23,6 +23,7 @@ import type {
 
 export const INITIAL_EMAIL_STATE: EmailState = {
   inputs: {},
+  params: {},
   validationErrors: {},
   sendError: {},
 };
@@ -53,7 +54,11 @@ export const email = (state: AllEmailsState = INITIAL_ALL_EMAILS_STATE, action: 
 
   switch (action.type) {
   case START_EMAIL_EDIT:
-    return updatedState(state, emailType, { inputs: NEW_EMAIL_EDIT });
+    return updatedState(state, emailType, {
+      inputs: NEW_EMAIL_EDIT,
+      params: action.payload.params,
+      subheading: action.payload.subheading
+    });
   case UPDATE_EMAIL_EDIT:
     return updatedState(state, emailType, { inputs: action.payload.inputs });
   case CLEAR_EMAIL_EDIT:
