@@ -20,6 +20,7 @@ from ecommerce.factories import (
     OrderFactory,
     LineFactory,
 )
+from grades.factories import FinalGradeFactory
 from profiles.factories import ProfileFactory
 
 
@@ -45,6 +46,11 @@ class ExamUtilTests(TestCase):
             }
         )
         CachedCertificateFactory.create(user=cls.user, course_run=course_run)
+        FinalGradeFactory.create(
+            user=cls.user,
+            course_run=course_run,
+            passed=True
+        )
 
     def create_order(self, user, course_run):
         """"

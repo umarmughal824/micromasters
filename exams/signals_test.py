@@ -3,6 +3,7 @@ Tests for exam signals
 """
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
+from django.test.utils import override_settings
 from factory.django import mute_signals
 
 from dashboard.factories import (
@@ -19,14 +20,12 @@ from ecommerce.factories import (
     LineFactory,
 )
 from financialaid.api_test import create_program
-from grades.api import get_final_grade
-from grades.models import (
-    FinalGrade,
-    FinalGradeStatus,
-)
+from grades.factories import FinalGradeFactory
 from profiles.factories import ProfileFactory
 from search.base import MockedESTestCase
 
+
+# pylint: disable=no-self-use
 
 class ExamSignalsTest(MockedESTestCase):
     """
@@ -36,30 +35,28 @@ class ExamSignalsTest(MockedESTestCase):
     @classmethod
     def setUpTestData(cls):
         with mute_signals(post_save):
-            cls.profile = profile = ProfileFactory.create()
+            cls.profile = ProfileFactory.create()
 
         program, _ = create_program(past=True)
         cls.course_run = course_run = program.course_set.first().courserun_set.first()
         CachedCurrentGradeFactory.create(
-            user=profile.user,
+            user=cls.profile.user,
             course_run=course_run,
             data={
                 "passed": True,
                 "percent": 0.9,
                 "course_key": course_run.edx_course_key,
-                "username": profile.user.username
+                "username": cls.profile.user.username
             }
         )
-        CachedCertificateFactory.create(user=profile.user, course_run=course_run)
-        order = OrderFactory.create(user=profile.user, status='fulfilled')
+        CachedCertificateFactory.create(user=cls.profile.user, course_run=course_run)
+        order = OrderFactory.create(user=cls.profile.user, status='fulfilled')
         LineFactory.create(order=order, course_key=course_run.edx_course_key)
-        CachedEnrollmentFactory.create(user=profile.user, course_run=course_run)
 
     def test_update_exam_profile_called(self):
         """
         Verify that update_exam_profile is called when a profile saves
         """
-
         user = User.objects.create(username='test')
         profile = user.profile
         profile_exam = ExamProfile.objects.create(
@@ -73,17 +70,15 @@ class ExamSignalsTest(MockedESTestCase):
 
         assert profile_exam.status == ExamProfile.PROFILE_PENDING
 
+    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v1"})
     def test_update_exam_authorization_final_grade(self):
         """
         Verify that update_exam_authorization_final_grade is called when a FinalGrade saves
         """
-        final_grade = get_final_grade(self.profile.user, self.course_run)
-        FinalGrade.objects.create(
+        FinalGradeFactory.create(
             user=self.profile.user,
             course_run=self.course_run,
-            grade=final_grade.grade,
-            passed=final_grade.passed,
-            status=FinalGradeStatus.COMPLETE
+            passed=True,
         )
 
         # assert Exam Authorization and profile created.
@@ -93,10 +88,12 @@ class ExamSignalsTest(MockedESTestCase):
             course=self.course_run.course
         ).exists())
 
+    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v0"})
     def test_update_exam_authorization_cached_enrollment(self):
         """
         Verify that update_exam_authorization_final_grade is called when a CachedEnrollment saves
         """
+        CachedEnrollmentFactory.create(user=self.profile.user, course_run=self.course_run)
         # assert Exam Authorization and profile created. CachedEnrollmentFactory triggered the signal.
         self.assertTrue(ExamProfile.objects.filter(profile=self.profile).exists())
         self.assertTrue(ExamAuthorization.objects.filter(

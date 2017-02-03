@@ -41,8 +41,17 @@ def authorize_for_exam(mmtrack, course_run):
 
         # if user passed the course and currently not authorization for that run then give
         # her authorizations.
+        try:
+            passed = mmtrack.has_passed_course(course_run.edx_course_key)
+        except:  # pylint: disable=bare-except
+            log.exception(
+                'Unable to check if user %s passed course %s',
+                mmtrack.user.username,
+                course_run.edx_course_key
+            )
+            return
         ok_for_authorization = (
-            mmtrack.has_passed_course(course_run.edx_course_key) and
+            passed and
             not ExamAuthorization.objects.filter(
                 user=mmtrack.user,
                 course=course_run.course,
