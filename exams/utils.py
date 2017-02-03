@@ -1,6 +1,7 @@
 """Exam related helpers"""
 import logging
 import datetime
+import re
 import pytz
 
 from django.conf import settings
@@ -116,3 +117,37 @@ def authorize_for_exam(mmtrack, course_run):
                 mmtrack.user.username,
                 course_run.edx_course_key
             )
+
+
+def _match_field(profile, field):
+    """
+    If a field is filled out match it to the CP-1252 character set.
+    """
+    pattern = r'^[\u0020-\u00FF]*$'
+    reg = re.compile(pattern)
+    value = getattr(profile, field)
+    return (True if reg.match(value) else False) if value else False
+
+
+def validate_profile(profile):
+    """
+    Make sure all the required fields fall within the CP-1252 character set
+
+    Args:
+        profile (Profile): user profile
+
+    Returns:
+        bool: whether profile is valid or not
+    """
+    fields = ['address', 'city', 'state_or_territory', 'country', 'phone_number']
+    optional = {'first_name': 'romanized_first_name', 'last_name': 'romanized_last_name'}
+
+    if not _match_field(profile.user, 'email'):
+        return False
+    for key, value in optional.items():
+        if not _match_field(profile, key):
+            fields.append(value)
+    if profile.country in ('US', 'CA'):
+        fields.append('postal_code')
+
+    return all([_match_field(profile, field) for field in fields])
