@@ -31,6 +31,9 @@ from micromasters.utils import load_json_from_file
 from search.base import MockedESTestCase
 
 
+# pylint: disable=too-many-arguments
+
+
 @ddt.ddt
 class MMTrackTest(MockedESTestCase):
     """
@@ -463,6 +466,60 @@ class MMTrackTest(MockedESTestCase):
         with self.assertRaises(FinalGrade.DoesNotExist):
             mmtrack.has_passed_course(course_id)
         extr_grade_mock.assert_called_once_with(mmtrack, course_id)
+
+    @patch('grades.models.FinalGrade.objects.get', autospec=True)
+    @ddt.data(
+        (True, False),
+        (False, True),
+    )
+    @ddt.unpack
+    def test_has_frozen_grade(self, get_frozen_raises, expected_result, get_grades_mock):
+        """
+        Test for has_frozen_grade method.
+        """
+        course_id = "course-v1:odl+FOO101+CR-FALL15"
+        if not get_frozen_raises:
+            grade_mock = Mock(grade=0.97, passed=True)
+            get_grades_mock.return_value = grade_mock
+        else:
+            get_grades_mock.side_effect = FinalGrade.DoesNotExist
+
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program,
+            edx_user_data=self.cached_edx_user_data
+        )
+        assert mmtrack.has_frozen_grade(course_id) is expected_result
+
+    @patch('dashboard.utils.MMTrack.has_paid', autospec=True)
+    @patch('grades.models.FinalGrade.objects.get', autospec=True)
+    @ddt.data(
+        (True, True, False),
+        (True, False, False),
+        (False, True, True),
+        (False, False, False),
+    )
+    @ddt.unpack
+    def test_has_paid_frozen_grade(
+            self, get_frozen_raises, has_paid, expected_result,
+            get_grades_mock, has_paid_mock):
+        """
+        Test for extract_final_grade method.
+        """
+        course_id = "course-v1:odl+FOO101+CR-FALL15"
+        if not get_frozen_raises:
+            grade_mock = Mock(grade=0.97, passed=True)
+            get_grades_mock.return_value = grade_mock
+        else:
+            get_grades_mock.side_effect = FinalGrade.DoesNotExist
+        has_paid_mock.return_value = has_paid
+
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program,
+            edx_user_data=self.cached_edx_user_data
+        )
+        assert mmtrack.has_paid_frozen_grade(course_id) is expected_result
 
     @patch('grades.models.FinalGrade.objects.get', autospec=True)
     def test_extract_final_grade(self, get_grades_mock):
