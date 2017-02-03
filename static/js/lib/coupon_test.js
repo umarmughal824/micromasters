@@ -175,7 +175,12 @@ describe('coupon utility functions', () => {
 
     it('calculates a fixed price', () => {
       assert.equal(calculateDiscount(123, COUPON_AMOUNT_TYPE_FIXED_PRICE, 50), 50);
-      assert.equal(calculateDiscount(123, COUPON_AMOUNT_TYPE_FIXED_PRICE, 150), 150);
+      assert.equal(calculateDiscount(123, COUPON_AMOUNT_TYPE_FIXED_PRICE, 150), 123);
+    });
+
+    it('caps the minimum price between 0 and the current price', () => {
+      assert.equal(calculateDiscount(123, COUPON_AMOUNT_TYPE_FIXED_DISCOUNT, 150), 0);
+      assert.equal(calculateDiscount(50, COUPON_AMOUNT_TYPE_FIXED_DISCOUNT, -50), 50);
     });
   });
 
