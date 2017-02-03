@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.45.0
+--------------
+
+- Cap coupon-adjusted price to between 0 and the full price (#2498)
+- Added fixed price coupon support (#2436)
+- Enroll user after a $0 purchase (#2494)
+- Alert anonymous user if they try to use a coupon (#2459)
+- Fixing code to run with v1 grades agorithm
+- Fixed CoursePrice and TierProgram handling in seed_db (#2484)
+
 Version 0.44.0
 --------------
 
