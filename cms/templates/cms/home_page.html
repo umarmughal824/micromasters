@@ -49,6 +49,23 @@
   <div class="main-content-wrapper">
     <main>
       <div class="banner-wrapper">
+        {% if user.is_anonymous and coupon_code %}
+          <div role="alertdialog" class="toast">
+            <div class="toast-message">
+              <i class="material-icons">account_circle</i>
+              <div class="toast-body">
+                <p>You need to Sign up or Login before you can apply this coupon.</p>
+              </div>
+              <button class="toast-close close">
+                <i class="material-icons close-icon">close</i>
+              </button>
+            </div>
+            <ul class="toast-actions">
+              <li><button class="mm-minor-action open-signup-dialog">Log In</button></li>
+              <li><button class="mm-minor-action open-signup-dialog">Sign Up</button></li>
+            </ul>
+          </div>
+        {% endif %}
         <div class="banner-wrapper-content">
           <h1>
             MITx MicroMasters: Bringing MIT to you

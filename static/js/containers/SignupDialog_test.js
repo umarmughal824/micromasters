@@ -2,6 +2,7 @@
 import { mount } from 'enzyme';
 import { assert } from 'chai';
 import React from 'react';
+import URI from 'urijs';
 import { Provider } from 'react-redux';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
@@ -37,8 +38,28 @@ describe("SignupDialog", () => {
     helper.store.dispatch(setDialogVisibility(true));
     renderDialog();
 
-    let link = document.body.querySelector(".signup-dialog a");
+    const link = document.body.querySelector(".signup-dialog a");
     assert.equal(link.getAttribute('href'), `/login/edxorg${queryParams}`);
+  });
+
+  it('also checks the coupon query param', () => {
+    window.location = "http://fake/?coupon=aBc-123.";
+    helper.store.dispatch(setDialogVisibility(true));
+    renderDialog();
+
+    const link = document.body.querySelector(".signup-dialog a");
+    const expectedNext = URI("/dashboard/").setQuery("coupon", "aBc-123.");
+    const expectedUrl = URI("/login/edxorg").setQuery("next", expectedNext);
+    assert.equal(link.getAttribute('href'), expectedUrl.toString());
+  });
+
+  it('chooses next over coupon', () => {
+    window.location = "http://fake/?next=a&coupon=b";
+    helper.store.dispatch(setDialogVisibility(true));
+    renderDialog();
+
+    const link = document.body.querySelector(".signup-dialog a");
+    assert.equal(link.getAttribute('href'), "/login/edxorg?next=a");
   });
 
   it("doesn't needlessly set a next query param", () => {
@@ -46,7 +67,7 @@ describe("SignupDialog", () => {
     helper.store.dispatch(setDialogVisibility(true));
     renderDialog();
 
-    let link = document.body.querySelector(".signup-dialog a");
+    const link = document.body.querySelector(".signup-dialog a");
     assert.equal(link.getAttribute('href'), "/login/edxorg");
   });
 });
