@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.46.0
+--------------
+
+- Fixed ES search result email bug
+- Scope enrollment under program (#2515)
+
 Version 0.45.0
 --------------
 
