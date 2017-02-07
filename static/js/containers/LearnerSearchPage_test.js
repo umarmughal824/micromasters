@@ -68,12 +68,15 @@ describe('LearnerSearchPage', function () {
   });
 
   it('waits for a successful email send to close the dialog', () => {
+    let searchKitStub = {
+      buildQuery: () => ({query: {abc: 123}})
+    };
     helper.programsGetStub.returns(Promise.resolve(PROGRAMS));
     helper.store.dispatch(
       startEmailEdit({
         type: SEARCH_EMAIL_TYPE,
         params: {
-          query: {filter: {}}
+          searchkit: searchKitStub
         }
       })
     );
@@ -97,11 +100,11 @@ describe('LearnerSearchPage', function () {
         modifyTextField(dialog.querySelector('.email-subject'), 'subject');
         modifyTextField(dialog.querySelector('.email-body'), 'body');
 
-        TestUtils.Simulate.click(saveButton);
         assert.isTrue(helper.store.getState().ui.emailDialogVisibility);
+        TestUtils.Simulate.click(saveButton);
       }).then(() => {
         assert.isFalse(helper.store.getState().ui.emailDialogVisibility);
-        assert.isTrue(sendSearchResultMail.calledWith("subject", "body", {filter: {}}));
+        assert.isTrue(sendSearchResultMail.calledWith("subject", "body", {abc: 123}));
       });
     });
   });

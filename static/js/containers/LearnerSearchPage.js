@@ -61,7 +61,7 @@ class LearnerSearchPage extends React.Component {
       startEmailEdit(
         {
           type: SEARCH_EMAIL_TYPE,
-          params: {query: searchkit.query.query},
+          params: {searchkit: searchkit},
           subheading: `${searchkit.getHitsCount() || 0} recipients selected`
         }
       )
@@ -84,7 +84,7 @@ class LearnerSearchPage extends React.Component {
         sendSearchResultMail(
           inputs.subject || '',
           inputs.body || '',
-          params.query
+          params.searchkit.buildQuery().query
         )
       ).then(() => {
         this.closeAndClearEmailComposer();
