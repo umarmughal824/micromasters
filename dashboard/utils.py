@@ -199,6 +199,32 @@ class MMTrack:
             raise
         return final_grade
 
+    def has_frozen_grade(self, course_id):
+        """
+        Checks if there is a frozen grade for the course run
+
+        Args:
+            course_id (str): an edX course run id
+        Returns:
+            bool: whether a frozen final grade exists
+        """
+        try:
+            self.extract_final_grade(course_id)
+            return True
+        except FinalGrade.DoesNotExist:
+            return False
+
+    def has_paid_frozen_grade(self, course_id):
+        """
+        Checks if there is a a frozen final grade and the user paid for it.
+
+        Args:
+            course_id (str): an edX course run id
+        Returns:
+            bool: whether a frozen final grade exists
+        """
+        return self.has_frozen_grade(course_id) and self.has_paid(course_id)
+
     def has_passed_course(self, course_id):
         """
         Returns whether the user has passed a course run.
