@@ -97,7 +97,7 @@ class CachedEnrollmentUnverifiedFactory(CachedEnrollmentFactory):
     """Factory for unverified enrollments"""
     data = LazyAttribute(lambda x: {
         "is_active": True,
-        "mode": "not verified",
+        "mode": "audit",
         "user": x.user.username,
         "course_details": {
             "course_id": x.course_run.edx_course_key,

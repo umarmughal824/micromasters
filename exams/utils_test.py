@@ -89,26 +89,25 @@ class ExamAuthorizationUtilsTests(TestCase):
         cls.program, _ = create_program(past=True)
         cls.user = profile.user
         cls.course_run = course_run = cls.program.course_set.first().courserun_set.first()
-
         with mute_signals(post_save):
             CachedEnrollmentFactory.create(user=cls.user, course_run=course_run)
-
         CachedCurrentGradeFactory.create(
             user=cls.user,
-            course_run=course_run,
+            course_run=cls.course_run,
             data={
                 "passed": True,
                 "percent": 0.9,
-                "course_key": course_run.edx_course_key,
+                "course_key": cls.course_run.edx_course_key,
                 "username": cls.user.username
             }
         )
-        CachedCertificateFactory.create(user=cls.user, course_run=course_run)
+        CachedCertificateFactory.create(user=cls.user, course_run=cls.course_run)
         with mute_signals(post_save):
-            FinalGradeFactory.create(
+            cls.final_grade = FinalGradeFactory.create(
                 user=cls.user,
-                course_run=course_run,
-                passed=True
+                course_run=cls.course_run,
+                passed=True,
+                course_run_payed_on_edx=True,
             )
 
     def test_exam_authorization(self):
@@ -141,6 +140,9 @@ class ExamAuthorizationUtilsTests(TestCase):
         """
         test exam_authorization when user has passed course but not paid.
         """
+        with mute_signals(post_save):
+            self.final_grade.course_run_payed_on_edx = False
+            self.final_grade.save()
         mmtrack = get_mmtrack(self.user, self.program)
         assert mmtrack.has_paid(self.course_run.edx_course_key) is False
 
@@ -471,7 +473,8 @@ class BulkExamUtilV1Tests(TestCase):
                 user=user,
                 course_run=course_run,
                 passed=True,
-                grade=0.9
+                grade=0.9,
+                course_run_payed_on_edx=True
             )
         CachedCertificateFactory.create(user=user, course_run=course_run)
         create_order(user, course_run)
