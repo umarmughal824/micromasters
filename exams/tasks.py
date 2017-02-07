@@ -6,6 +6,7 @@ import logging
 import tempfile
 
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
 import pytz
 
@@ -42,6 +43,9 @@ def export_exam_profiles(self):
     """
     Sync any outstanding profiles
     """
+    if not settings.FEATURES.get("PEARSON_EXAMS_SYNC", False):
+        return None
+
     exam_profiles = ExamProfile.objects.filter(
         status=ExamProfile.PROFILE_PENDING).select_related('profile')
     file_prefix = datetime.now(pytz.utc).strftime(PEARSON_CDD_FILE_PREFIX)
@@ -63,6 +67,8 @@ def export_exam_profiles(self):
         try:
             # upload to SFTP server
             upload.upload_tsv(tsv.name)
+        except ImproperlyConfigured:
+            log.exception('export_exam_profiles is improperly configured, please review require settings.')
         except RetryableSFTPException as exc:
             log.exception('Retryable error during upload of CDD file to Pearson SFTP')
             # retry up to 3 times w/ exponential backoff if this was a connection error
@@ -97,6 +103,9 @@ def export_exam_authorizations(self):
     """
     Sync any outstanding profiles
     """
+    if not settings.FEATURES.get("PEARSON_EXAMS_SYNC", False):
+        return None
+
     exam_authorizations = ExamAuthorization.objects.filter(
         status=ExamAuthorization.STATUS_PENDING).prefetch_related('user__profile', 'course__program')
     file_prefix = datetime.now(pytz.utc).strftime(PEARSON_EAD_FILE_PREFIX)
@@ -118,6 +127,8 @@ def export_exam_authorizations(self):
         try:
             # upload to SFTP server
             upload.upload_tsv(tsv.name)
+        except ImproperlyConfigured:
+            log.exception('export_exam_authorizations is improperly configured, please review require settings.')
         except RetryableSFTPException as exc:
             log.exception('Retryable error during upload of EAD file to Pearson SFTP')
             # retry up to 3 times w/ exponential backoff if this was a connection error
