@@ -28,3 +28,13 @@ export const dialogActions = (
     {text}
   </SpinnerButton>
 ]);
+
+export const singleBtnDialogActions = (onCancel: Function, text: string='OK') => ([
+  <Button
+    type='cancel'
+    key='cancel'
+    className="secondary-button cancel-button"
+    onClick={onCancel}>
+    { text }
+  </Button>
+]);

@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import _ from 'lodash';
 import moment from 'moment';
 import R from 'ramda';
+import Dialog from 'material-ui/Dialog';
 
 import Loader from '../components/Loader';
 import CouponCard from '../components/dashboard/CouponCard';
@@ -39,6 +40,9 @@ import {
   setConfirmSkipDialogVisibility,
   setDocsInstructionsVisibility,
   setCouponNotificationVisibility,
+  setCalculatorDialogVisibility,
+  setEmailDialogVisibility,
+  setPaymentTeaserDialogVisibility
 } from '../actions/ui';
 import { findCourseRun } from '../util/util';
 import CourseListCard from '../components/dashboard/CourseListCard';
@@ -48,7 +52,6 @@ import FinalExamCard from '../components/dashboard/FinalExamCard';
 import ErrorMessage from '../components/ErrorMessage';
 import ProgressWidget from '../components/ProgressWidget';
 import { COURSE_EMAIL_TYPE } from '../components/email/constants';
-import { setCalculatorDialogVisibility, setEmailDialogVisibility } from '../actions/ui';
 import {
   clearCoupons,
   fetchCoupons,
@@ -71,11 +74,11 @@ import {
   sendCourseTeamMail
 } from '../actions/email';
 import { emailValidation } from '../lib/validation/profile';
+import EmailCompositionDialog from '../components/email/EmailCompositionDialog';
+import { singleBtnDialogActions } from '../components/inputs/util';
 import type { UIState } from '../reducers/ui';
 import type { OrderReceiptState } from '../reducers/order_receipt';
-import type {
-  DocumentsState,
-} from '../reducers/documents';
+import type { DocumentsState } from '../reducers/documents';
 import type { CoursePricesState, DashboardState } from '../flow/dashboardTypes';
 import type {
   AvailableProgram, AvailableProgramsState, CourseEnrollmentsState
@@ -176,16 +179,20 @@ class DashboardPage extends React.Component {
     });
   };
   
-  openEmailComposer = (course: Course) => {
+  openCourseContactDialog = (course: Course, canContactCourseTeam: boolean) => {
     const { dispatch } = this.props;
-    dispatch(
-      startEmailEdit({
-        type: COURSE_EMAIL_TYPE,
-        params: {courseId: course.id},
-        subheading: `${course.title} Course Team`
-      })
-    );
-    dispatch(setEmailDialogVisibility(true));
+    if (canContactCourseTeam) {
+      dispatch(
+        startEmailEdit({
+          type: COURSE_EMAIL_TYPE,
+          params: {courseId: course.id},
+          subheading: `${course.title} Course Team`
+        })
+      );
+      dispatch(setEmailDialogVisibility(true));
+    } else {
+      dispatch(setPaymentTeaserDialogVisibility(true));
+    }
   };
 
   closeAndClearEmailComposer = () => {
@@ -223,6 +230,11 @@ class DashboardPage extends React.Component {
         this.closeAndClearEmailComposer();
       });
     }
+  };
+
+  closePaymentTeaserDialog = () => {
+    const { dispatch } = this.props;
+    dispatch(setPaymentTeaserDialogVisibility(false));
   };
 
   handleOrderSuccess = (course: Course): void => {
@@ -422,7 +434,7 @@ class DashboardPage extends React.Component {
     return dashboard.programs.find(program => (
       program.id === currentProgramEnrollment.id
     ));
-  }
+  };
 
   skipFinancialAid = programId => {
     const { dispatch, financialAid } = this.props;
@@ -476,6 +488,25 @@ class DashboardPage extends React.Component {
     dispatch(setRecentlyAttachedCoupon(coupon));
   };
 
+  navigateToProfile = () => {
+    this.context.router.push("/learner");
+  };
+
+  shouldSkipFinancialAid = (): boolean => {
+    let program = this.getCurrentlyEnrolledProgram();
+
+    return R.compose(
+      R.any(coupon => (
+        program !== undefined &&
+        coupon.content_type === COUPON_CONTENT_TYPE_PROGRAM &&
+        coupon.amount_type === COUPON_AMOUNT_TYPE_PERCENT_DISCOUNT &&
+        coupon.program_id === program.id &&
+        coupon.amount.eq(1)
+      )),
+      R.pathOr([], ['coupons', 'coupons'])
+    )(this.props);
+  };
+
   renderCouponDialog() {
     const {
       programs,
@@ -508,23 +539,36 @@ class DashboardPage extends React.Component {
     />;
   }
 
-  navigateToProfile = () => {
-    this.context.router.push("/learner");
-  };
-
-  shouldSkipFinancialAid = (): boolean => {
-    let program = this.getCurrentlyEnrolledProgram();
-
-    return R.compose(
-      R.any(coupon => (
-        program !== undefined &&
-        coupon.content_type === COUPON_CONTENT_TYPE_PROGRAM &&
-        coupon.amount_type === COUPON_AMOUNT_TYPE_PERCENT_DISCOUNT &&
-        coupon.program_id === program.id &&
-        coupon.amount.eq(1)
-      )),
-      R.pathOr([], ['coupons', 'coupons'])
-    )(this.props);
+  renderCourseContactDialogs() {
+    const { ui, courseTeamEmail } = this.props;
+    return [
+      <EmailCompositionDialog
+        key={"dashboard-course-contact-dialog"}
+        closeEmailDialog={this.closeAndClearEmailComposer}
+        updateEmailEdit={this.updateEmailEdit}
+        sendEmail={this.closeEmailComposerAndSend}
+        open={ui.emailDialogVisibility}
+        email={courseTeamEmail}
+        subheadingType={COURSE_EMAIL_TYPE}
+        title="Contact the Course Team"
+      />,
+      <Dialog
+        key={"dashboard-course-contact-payment-dialog"}
+        title="Contact the Course Team"
+        titleClassName="dialog-title"
+        contentClassName="dialog"
+        className="course-payment-dialog-wrapper"
+        bodyStyle={{padding: '0 24px'}}
+        open={ui.paymentTeaserDialogVisibility}
+        actions={singleBtnDialogActions(this.closePaymentTeaserDialog)}
+        onRequestClose={this.closePaymentTeaserDialog}
+      >
+        <div className="inner-content">
+          <img src="/static/images/contact_course_team_icon.png" alt="Instructor icon" />
+          <p>This is a premium feature for learners who have paid for the course.</p>
+        </div>
+      </Dialog>
+    ];
   }
 
   renderErrorMessage = (): React$Element<*>|null => {
@@ -557,7 +601,6 @@ class DashboardPage extends React.Component {
       profile: { profile },
       documents,
       ui,
-      courseTeamEmail,
       courseEnrollments,
       financialAid,
       coupons,
@@ -623,13 +666,9 @@ class DashboardPage extends React.Component {
             key={program.id}
             openFinancialAidCalculator={this.openFinancialAidCalculator}
             addCourseEnrollment={this.addCourseEnrollment}
-            openEmailComposer={this.openEmailComposer}
-            closeEmailDialog={this.closeAndClearEmailComposer}
-            updateEmailEdit={this.updateEmailEdit}
-            sendEmail={this.closeEmailComposerAndSend}
-            emailDialogVisibility={ui.emailDialogVisibility}
-            email={courseTeamEmail}
+            openCourseContactDialog={this.openCourseContactDialog}
           />
+
         </div>
         <div className="second-column">
           <ProgressWidget program={program} />
@@ -656,6 +695,7 @@ class DashboardPage extends React.Component {
         <Loader loaded={loaded}>
           {errorMessage}
           {pageContent}
+          {this.renderCourseContactDialogs()}
         </Loader>
       </div>
     );

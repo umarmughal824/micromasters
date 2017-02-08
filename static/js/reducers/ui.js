@@ -28,6 +28,7 @@ import {
   SET_SEARCH_FILTER_VISIBILITY,
 
   SET_EMAIL_DIALOG_VISIBILITY,
+  SET_PAYMENT_TEASER_DIALOG_VISIBILITY,
 
   SET_ENROLL_PROGRAM_DIALOG_ERROR,
   SET_ENROLL_PROGRAM_DIALOG_VISIBILITY,
@@ -73,6 +74,7 @@ export type UIState = {
   searchFilterVisibility:              {[s: string]: boolean},
   tosDialogVisibility:                 boolean,
   emailDialogVisibility:               boolean,
+  paymentTeaserDialogVisibility:       boolean,
   enrollProgramDialogError:            ?string,
   enrollProgramDialogVisibility:       boolean,
   toastMessage:                        ?ToastMessage,
@@ -108,6 +110,7 @@ export const INITIAL_UI_STATE: UIState = {
   searchFilterVisibility:              {},
   tosDialogVisibility:                 false,
   emailDialogVisibility:               false,
+  paymentTeaserDialogVisibility:       false,
   enrollProgramDialogError:            null,
   enrollProgramDialogVisibility:       false,
   toastMessage:                        null,
@@ -248,6 +251,12 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
     return {
       ...state,
       emailDialogVisibility: action.payload,
+    };
+  }
+  case SET_PAYMENT_TEASER_DIALOG_VISIBILITY: {
+    return {
+      ...state,
+      paymentTeaserDialogVisibility: action.payload,
     };
   }
   case SET_ENROLL_PROGRAM_DIALOG_ERROR: {
