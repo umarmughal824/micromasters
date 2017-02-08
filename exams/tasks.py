@@ -19,7 +19,7 @@ from exams.pearson import (
     upload,
     writers,
 )
-from exams.utils import exponential_backoff
+from exams.utils import exponential_backoff, validate_profile
 from micromasters.celery import async
 
 PEARSON_CDD_FILE_PREFIX = "cdd-%Y%m%d%H_"
@@ -44,6 +44,16 @@ def export_exam_profiles(self):
         status=ExamProfile.PROFILE_PENDING).select_related('profile')
     file_prefix = datetime.now(pytz.utc).strftime(PEARSON_CDD_FILE_PREFIX)
 
+    valid_exam_profiles = []
+    for exam_profile in exam_profiles:
+        validated = validate_profile(exam_profile.profile)
+
+        if validated:
+            valid_exam_profiles.append(exam_profile)
+        else:
+            exam_profile.status = ExamProfile.PROFILE_INVALID
+            exam_profile.save()
+
     # write the file out locally
     # this will be written out to a file like: /tmp/cdd-20160405_kjfiamdf.dat
     with tempfile.NamedTemporaryFile(
@@ -53,7 +63,7 @@ def export_exam_profiles(self):
         mode='w',
     ) as tsv:
         cdd_writer = writers.CDDWriter()
-        valid_profiles, invalid_profiles = cdd_writer.write(tsv, exam_profiles)
+        valid_profiles, invalid_profiles = cdd_writer.write(tsv, valid_exam_profiles)
 
         # flush data to disk before upload
         tsv.flush()

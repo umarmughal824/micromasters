@@ -108,7 +108,7 @@ class ExamProfileTasksTest(TestCase):
             mutate by the time export_exam_profiles returns
             """
             assert hasattr(tsv, 'write')
-            assert isinstance(qs, QuerySet)
+            assert isinstance(qs, list)
 
             profiles = list(qs)
             assert len(profiles) == 10
@@ -142,6 +142,36 @@ class ExamProfileTasksTest(TestCase):
         # valid profiles should be in progress
         for exam_profile in self.expected_in_progress_profiles:
             assert exam_profile in in_progress_profiles
+
+    @patch('exams.tasks.validate_profile', return_value=False, autospec=True)
+    @patch('exams.pearson.upload.upload_tsv', autospec=True)
+    def test_writing_only_valid_profiles(self, upload_tsv_mock, validate_profile_mock):
+        """
+        Verify invalid profiles are not writen to file and set to 'invalid'
+        """
+        def side_effect(tsv, qs):
+            """
+            Use side_effect to assert at call-time because query return values
+            mutate by the time export_exam_profiles returns
+            """
+            assert hasattr(tsv, 'write')
+            assert isinstance(qs, list)
+            assert len(qs) == 0
+            return [], []
+
+        with patch('exams.pearson.writers.CDDWriter') as cdd_writer_mock_cls:
+            cdd_writer_instance = cdd_writer_mock_cls.return_value
+            cdd_writer_instance.write.side_effect = side_effect
+            export_exam_profiles.delay()
+
+        assert upload_tsv_mock.call_count == 1
+        assert validate_profile_mock.call_count == 10
+
+        invalid_profiles = ExamProfile.objects.filter(status=ExamProfile.PROFILE_INVALID)
+        in_progress_profiles = ExamProfile.objects.filter(status=ExamProfile.PROFILE_IN_PROGRESS)
+
+        assert invalid_profiles.count() == 10
+        assert in_progress_profiles.count() == 0
 
 
 @override_settings(FEATURES={"PEARSON_EXAMS_SYNC": True})
