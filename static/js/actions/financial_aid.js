@@ -1,4 +1,5 @@
 // @flow
+/* global SETTINGS: false */
 import type { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 
@@ -37,7 +38,7 @@ export const addFinancialAid = (income: number, currency: string, programId: num
       () => {
         dispatch(receiveAddFinancialAidSuccess());
         dispatch(fetchCoursePrices());
-        dispatch(fetchDashboard());
+        dispatch(fetchDashboard(SETTINGS.user.username));
         return Promise.resolve();
       },
       err => {
@@ -66,7 +67,7 @@ export const skipFinancialAid = (programId: number): Dispatcher<*> => {
       () => {
         dispatch(receiveSkipFinancialAidSuccess());
         dispatch(fetchCoursePrices());
-        dispatch(fetchDashboard());
+        dispatch(fetchDashboard(SETTINGS.user.username));
         return Promise.resolve();
       },
       () => {

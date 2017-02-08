@@ -109,11 +109,9 @@ class DashboardPage extends React.Component {
     dashboard:                DashboardState,
     prices:                   CoursePricesState,
     dispatch:                 Dispatch,
-    setCalculatorVisibility:  (b: boolean) => void,
     ui:                       UIState,
     email:                    AllEmailsState,
     documents:                DocumentsState,
-    fetchDashboard:           () => void,
     orderReceipt:             OrderReceiptState,
     courseEnrollments:        CourseEnrollmentsState,
     financialAid:             FinancialAidState,
@@ -231,7 +229,7 @@ class DashboardPage extends React.Component {
         let deadline = moment(orderReceipt.initialTime).add(2, 'minutes');
         let now = moment();
         if (now.isBefore(deadline)) {
-          dispatch(fetchDashboard(true));
+          dispatch(fetchDashboard(SETTINGS.user.username, true));
         } else {
           dispatch(setToastMessage({
             message: 'Order was not processed',
@@ -254,7 +252,7 @@ class DashboardPage extends React.Component {
   fetchDashboard() {
     const { dashboard, dispatch } = this.props;
     if (dashboard.fetchStatus === undefined) {
-      dispatch(fetchDashboard());
+      dispatch(fetchDashboard(SETTINGS.user.username));
     }
   }
 

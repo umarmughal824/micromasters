@@ -138,8 +138,8 @@ describe('api', function() {
 
     it('gets the dashboard', () => {
       fetchJSONStub.returns(Promise.resolve(DASHBOARD_RESPONSE));
-      return getDashboard().then(dashboard => {
-        assert.ok(fetchJSONStub.calledWith('/api/v0/dashboard/', {}, true));
+      return getDashboard('beep').then(dashboard => {
+        assert.ok(fetchJSONStub.calledWith('/api/v0/dashboard/beep/', {}, true));
         assert.deepEqual(dashboard, DASHBOARD_RESPONSE);
       });
     });
@@ -147,8 +147,8 @@ describe('api', function() {
     it('fails to get the dashboard', () => {
       fetchJSONStub.returns(Promise.reject());
 
-      return assert.isRejected(getDashboard()).then(() => {
-        assert.ok(fetchJSONStub.calledWith('/api/v0/dashboard/', {}, true));
+      return assert.isRejected(getDashboard('user')).then(() => {
+        assert.ok(fetchJSONStub.calledWith('/api/v0/dashboard/user/', {}, true));
       });
     });
 

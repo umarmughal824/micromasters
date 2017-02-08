@@ -3,6 +3,7 @@ Views for dashboard REST APIs
 """
 import logging
 
+from django.contrib.auth.models import User
 from django.conf import settings
 from edx_api.client import EdxApi
 from requests.exceptions import HTTPError
@@ -14,9 +15,11 @@ from rest_framework import (
 from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.generics import get_object_or_404
 
 from backends import utils
 from backends.edxorg import EdxOrgOAuth2
+from dashboard.permissions import CanReadIfStaffOrSelf
 from dashboard.api import get_user_program_info
 from dashboard.api_edx_cache import CachedEdxDataApi
 from micromasters.exceptions import PossiblyImproperlyConfigured
@@ -34,27 +37,37 @@ class UserDashboard(APIView):
         authentication.SessionAuthentication,
         authentication.TokenAuthentication,
     )
-    permission_classes = (permissions.IsAuthenticated, )
+    permission_classes = (permissions.IsAuthenticated, CanReadIfStaffOrSelf)
 
-    def get(self, request, *args, **kargs):  # pylint: disable=unused-argument
+    def get(self, request, username, *args, **kargs):  # pylint: disable=unused-argument
         """
         Returns information needed to display the user
         dashboard for all the programs the user is enrolled in.
         """
 
-        # get the credentials for the current user for edX
-        user_social = request.user.social_auth.get(provider=EdxOrgOAuth2.name)
-        try:
-            utils.refresh_user_token(user_social)
-        except utils.InvalidCredentialStored as exc:
-            return Response(
-                status=exc.http_status_code,
-                data={'error': str(exc)}
-            )
+        user = get_object_or_404(
+            User,
+            social_auth__uid=username,
+            social_auth__provider=EdxOrgOAuth2.name
+        )
 
-        # create an instance of the client to query edX
-        edx_client = EdxApi(user_social.extra_data, settings.EDXORG_BASE_URL)
-        return Response(get_user_program_info(request.user, edx_client))
+        # get the credentials for the current user for edX
+        if user == request.user:
+            user_social = request.user.social_auth.get(provider=EdxOrgOAuth2.name)
+            try:
+                utils.refresh_user_token(user_social)
+            except utils.InvalidCredentialStored as exc:
+                return Response(
+                    status=exc.http_status_code,
+                    data={'error': str(exc)}
+                )
+            # create an instance of the client to query edX
+            edx_client = EdxApi(user_social.extra_data, settings.EDXORG_BASE_URL)
+
+        else:
+            edx_client = None
+
+        return Response(get_user_program_info(user, edx_client))
 
 
 class UserCourseEnrollment(APIView):

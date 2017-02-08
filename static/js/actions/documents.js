@@ -1,4 +1,5 @@
 // @flow
+/* global SETTINGS: false */
 import { createAction } from 'redux-actions';
 import type { Dispatch } from 'redux';
 
@@ -27,7 +28,7 @@ export const updateDocumentSentDate = (financialAidId: number, dateSent: string)
     return api.updateDocumentSentDate(financialAidId, dateSent).then(
       () => {
         dispatch(receiveUpdateDocumentSentDateSuccess());
-        dispatch(fetchDashboard());
+        dispatch(fetchDashboard(SETTINGS.user.username));
         dispatch(fetchCoursePrices());
         return Promise.resolve();
       },

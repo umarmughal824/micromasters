@@ -1,4 +1,5 @@
 // @flow
+/* global SETTINGS: false */
 import type { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 
@@ -62,7 +63,7 @@ export const addProgramEnrollment = (programId: number): Dispatcher<AvailablePro
           icon: TOAST_SUCCESS
         }));
         dispatch(setEnrollProgramDialogVisibility(false));
-        dispatch(fetchDashboard());
+        dispatch(fetchDashboard(SETTINGS.user.username));
         dispatch(fetchCoursePrices());
       }).
       catch(error => {

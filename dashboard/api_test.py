@@ -1173,6 +1173,12 @@ class UserProgramInfoIntegrationTest(MockedESTestCase):
             }
             assert is_subset_dict(expected, result[i])
 
+    @patch('dashboard.api_edx_cache.CachedEdxDataApi.update_cache_if_expired', new_callable=MagicMock)
+    def test_when_edx_client_is_none(self, mock_cache_refresh):
+        """Test that the edx data is not refreshed"""
+        api.get_user_program_info(self.user, None)
+        assert mock_cache_refresh.call_count == 0
+
     def test_past_course_runs(self):
         """Test that past course runs are returned in the API results"""
         # Set a course run to be failed

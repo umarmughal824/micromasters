@@ -15,7 +15,7 @@ class URLTests(TestCase):
         assert reverse('terms_of_service') == '/terms_of_service/'
         assert reverse('program-list') == '/api/v0/programs/'
         assert reverse('profile-detail', kwargs={'user': 'xyz'}) == '/api/v0/profiles/xyz/'
-        assert reverse('dashboard_api') == '/api/v0/dashboard/'
+        assert reverse('dashboard_api', args=['username']) == '/api/v0/dashboard/username/'
         assert reverse('search_api', kwargs={'elastic_url': 'elastic'}) == '/api/v0/search/elastic'
         assert reverse('checkout') == '/api/v0/checkout/'
         assert reverse('user_program_enrollments') == '/api/v0/enrolledprograms/'

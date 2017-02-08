@@ -1,4 +1,4 @@
-/* global document: false, window: false */
+/* global document: false, window: false, SETTINGS: false */
 import '../global_init';
 
 import { assert } from 'chai';
@@ -328,7 +328,7 @@ describe('DashboardPage', () => {
             type: 'fake'
           }));
           clock.tick(3501);
-          assert(fetchDashboardStub.calledWith(true), 'expected fetchDashboard called');
+          assert(fetchDashboardStub.calledWith(SETTINGS.user.username, true), 'expected fetchDashboard called');
         });
       });
 

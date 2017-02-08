@@ -1,4 +1,5 @@
 // @flow
+/* global SETTINGS: false */
 import type { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 
@@ -24,7 +25,7 @@ export const addCourseEnrollment = (courseId: string): Dispatcher<*> => {
     return api.addCourseEnrollment(courseId).
       then(() => {
         dispatch(receiveAddCourseEnrollmentSuccess());
-        dispatch(fetchDashboard());
+        dispatch(fetchDashboard(SETTINGS.user.username));
         dispatch(fetchCoursePrices());
       }).
       catch(() => {

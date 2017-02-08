@@ -157,8 +157,8 @@ export function patchUserProfile(username: string, profile: Profile): Promise<Pr
   });
 }
 
-export function getDashboard(): Promise<Dashboard> {
-  return fetchJSONWithCSRF('/api/v0/dashboard/', {}, true);
+export function getDashboard(username: string): Promise<Dashboard> {
+  return fetchJSONWithCSRF(`/api/v0/dashboard/${username}/`, {}, true);
 }
 
 export function checkout(courseId: string): Promise<CheckoutResponse> {

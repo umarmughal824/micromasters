@@ -7,6 +7,7 @@ from unittest.mock import (
     patch,
 )
 
+import ddt
 import pytz
 from django.core.urlresolvers import reverse
 from requests.exceptions import HTTPError
@@ -22,8 +23,14 @@ from dashboard.models import ProgramEnrollment, CachedEnrollment
 from micromasters.exceptions import PossiblyImproperlyConfigured
 from micromasters.factories import UserFactory
 from search.base import MockedESTestCase
+from roles.models import Role
+from roles.roles import (
+    Instructor,
+    Staff,
+)
 
 
+@ddt.ddt
 class DashboardTest(MockedESTestCase, APITestCase):
     """
     Tests for dashboard Rest API
@@ -35,9 +42,10 @@ class DashboardTest(MockedESTestCase, APITestCase):
         # create an user
         cls.user = UserFactory.create()
         # create a social auth for the user
+        cls.username = "{}_edx".format(cls.user.username)
         cls.user.social_auth.create(
             provider=EdxOrgOAuth2.name,
-            uid="{}_edx".format(cls.user.username),
+            uid=cls.username,
             extra_data={"access_token": "fooooootoken"}
         )
         UserCacheRefreshTimeFactory(
@@ -61,7 +69,7 @@ class DashboardTest(MockedESTestCase, APITestCase):
             )
 
         # url for the dashboard
-        cls.url = reverse('dashboard_api')
+        cls.url = reverse('dashboard_api', args=[cls.username])
 
     def setUp(self):
         super(DashboardTest, self).setUp()
@@ -80,6 +88,23 @@ class DashboardTest(MockedESTestCase, APITestCase):
         assert len(result.data) == 2
         assert [self.program_1.id, self.program_2.id] == [res_item['id'] for res_item in result.data]
 
+    @ddt.data(Instructor, Staff)
+    @patch('dashboard.api.CachedEdxDataApi.update_cache_if_expired')
+    def test_edx_is_not_refreshed_if_not_own_dashboard(self, role, update_mock):
+        """
+        If the dashboard being queried is not the user's own dashboard
+        the cached edx data should not be refreshed
+        """
+        staff = UserFactory.create()
+        self.client.force_login(staff)
+        Role.objects.create(
+            user=staff,
+            program=self.program_1,
+            role=role.ROLE_ID,
+        )
+        self.client.get(self.url)
+        assert update_mock.call_count == 0
+
 
 class DashboardTokensTest(MockedESTestCase, APITestCase):
     """
@@ -92,9 +117,10 @@ class DashboardTokensTest(MockedESTestCase, APITestCase):
         # create an user
         cls.user = UserFactory.create()
         # create a social auth for the user
+        cls.username = "{}_edx".format(cls.user.username)
         cls.user.social_auth.create(
             provider=EdxOrgOAuth2.name,
-            uid="{}_edx".format(cls.user.username),
+            uid=cls.username,
             extra_data={
                 "access_token": "fooooootoken",
                 "refresh_token": "baaaarrefresh",
@@ -104,7 +130,7 @@ class DashboardTokensTest(MockedESTestCase, APITestCase):
         cls.enrollments = Enrollments([])
 
         # url for the dashboard
-        cls.url = reverse('dashboard_api')
+        cls.url = reverse('dashboard_api', args=[cls.username])
 
     def setUp(self):
         super(DashboardTokensTest, self).setUp()

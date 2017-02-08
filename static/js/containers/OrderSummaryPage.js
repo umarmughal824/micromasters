@@ -60,7 +60,7 @@ class OrderSummaryPage extends React.Component {
   fetchDashboard() {
     const { dashboard, dispatch } = this.props;
     if (dashboard.fetchStatus === undefined) {
-      dispatch(fetchDashboard());
+      dispatch(fetchDashboard(SETTINGS.user.username));
     }
   }
   fetchCoursePrices() {

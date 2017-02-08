@@ -1,4 +1,5 @@
 // @flow
+/* global SETTINGS: false */
 import type { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 
@@ -35,10 +36,10 @@ export const receiveDashboardFailure = (errorInfo: APIErrorInfo): Action => ({
 export const CLEAR_DASHBOARD = 'CLEAR_DASHBOARD';
 export const clearDashboard = () => ({ type: CLEAR_DASHBOARD });
 
-export function fetchDashboard(noSpinner: boolean = false): Dispatcher<Dashboard> {
+export function fetchDashboard(username: string, noSpinner: boolean = false): Dispatcher<Dashboard> {
   return (dispatch: Dispatch) => {
     dispatch(requestDashboard(noSpinner));
-    return api.getDashboard().
+    return api.getDashboard(username).
       then(dashboard => dispatch(receiveDashboardSuccess(dashboard))).
       catch(error => {
         dispatch(receiveDashboardFailure(error));

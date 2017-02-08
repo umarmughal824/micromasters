@@ -126,8 +126,9 @@ def get_user_program_info(user, edx_client):
     """
     # update cache
     # NOTE: this part can be moved to an asynchronous task
-    for cache_type in CachedEdxDataApi.SUPPORTED_CACHES:
-        CachedEdxDataApi.update_cache_if_expired(user, edx_client, cache_type)
+    if edx_client is not None:
+        for cache_type in CachedEdxDataApi.SUPPORTED_CACHES:
+            CachedEdxDataApi.update_cache_if_expired(user, edx_client, cache_type)
 
     edx_user_data = CachedEdxUserData(user)
 
