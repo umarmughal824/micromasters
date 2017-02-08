@@ -5,6 +5,7 @@ import { assert } from 'chai';
 import moment from 'moment';
 import ReactDOM from 'react-dom';
 import Decimal from 'decimal.js-light';
+import R from 'ramda';
 import TestUtils from 'react-addons-test-utils';
 
 import {
@@ -13,6 +14,7 @@ import {
   makeCoupons,
   makeCoursePrices,
   makeDashboard,
+  makeCourse
 } from '../factories/dashboard';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import {
@@ -21,6 +23,7 @@ import {
   CLEAR_COURSE_PRICES,
   CLEAR_DASHBOARD,
   FETCH_SUCCESS,
+
 } from '../actions';
 import * as actions from '../actions';
 import { CLEAR_COUPONS } from '../actions/coupons';
@@ -29,10 +32,12 @@ import {
   CLEAR_UI,
   SET_COUPON_NOTIFICATION_VISIBILITY,
   SET_EMAIL_DIALOG_VISIBILITY,
+  SET_PAYMENT_TEASER_DIALOG_VISIBILITY,
   setToastMessage,
   setEmailDialogVisibility,
 } from '../actions/ui';
 import {
+  START_EMAIL_EDIT,
   INITIATE_SEND_EMAIL,
   SEND_EMAIL_SUCCESS,
   UPDATE_EMAIL_VALIDATION,
@@ -485,7 +490,63 @@ describe('DashboardPage', () => {
     });
   });
 
-  it('waits for a successful email send to close the dialog', () => {
+  describe('course contact UI behavior', () => {
+    let dashboardResponse;
+    const CONTACT_LINK_SELECTOR = '.contact-link';
+    const EMAIL_DIALOG_ACTIONS = [
+      START_EMAIL_EDIT,
+      SET_EMAIL_DIALOG_VISIBILITY
+    ];
+    const PAYMENT_DIALOG_ACTIONS = [
+      SET_PAYMENT_TEASER_DIALOG_VISIBILITY
+    ];
+
+    beforeEach(() => {
+      // Limit the dashboard response to 1 program
+      dashboardResponse = [R.clone(DASHBOARD_RESPONSE[0])];
+    });
+
+    it('shows the email composition dialog when a user has permission to contact a course team', () => {
+      let course = makeCourse();
+      course.has_contact_email = true;
+      course.runs[0].has_paid = true;
+      dashboardResponse[0].courses = [course];
+      helper.dashboardStub.returns(Promise.resolve(dashboardResponse));
+
+      return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
+        let contactLink = wrapper.find(CONTACT_LINK_SELECTOR).at(0);
+
+        return listenForActions(EMAIL_DIALOG_ACTIONS, () => {
+          contactLink.simulate('click');
+        }).then((state) => {
+          assert.isFalse(state.ui.paymentTeaserDialogVisibility);
+          assert.isTrue(state.ui.emailDialogVisibility);
+        });
+      });
+    });
+
+    it('shows the payment teaser dialog when a user lacks permission to contact a course team', () => {
+      let course = makeCourse();
+      course.has_contact_email = true;
+      // Set all course runs to unpaid
+      course.runs = R.chain(R.set(R.lensProp('has_paid'), false), course.runs);
+      dashboardResponse[0].courses = [course];
+      helper.dashboardStub.returns(Promise.resolve(dashboardResponse));
+
+      return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
+        let contactLink = wrapper.find(CONTACT_LINK_SELECTOR).at(0);
+
+        return listenForActions(PAYMENT_DIALOG_ACTIONS, () => {
+          contactLink.simulate('click');
+        }).then((state) => {
+          assert.isTrue(state.ui.paymentTeaserDialogVisibility);
+          assert.isFalse(state.ui.emailDialogVisibility);
+        });
+      });
+    });
+  });
+
+  it('waits for a successful email send to close the course contact dialog', () => {
     helper.store.dispatch(
       startEmailEdit({
         type: COURSE_EMAIL_TYPE,

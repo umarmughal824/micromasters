@@ -5,7 +5,7 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 import _ from 'lodash';
 
-import { makeDashboard } from '../../factories/dashboard';
+import { makeDashboard, makeCourse } from '../../factories/dashboard';
 import CourseRow from './CourseRow';
 import CourseAction from './CourseAction';
 import CourseDescription from './CourseDescription';
@@ -23,6 +23,16 @@ import { generateCourseFromExisting } from '../../util/test_utils';
 
 describe('CourseRow', () => {
   let sandbox;
+  const defaultCourseRowProps = () => ({
+    hasFinancialAid: true,
+    financialAid: FINANCIAL_AID_PARTIAL_RESPONSE,
+    prices: new Map([[345, 456]]),
+    openFinancialAidCalculator: sandbox.stub(),
+    now: moment(),
+    addCourseEnrollment: sandbox.stub(),
+    course: null,
+    openCourseContactDialog: sandbox.stub(),
+  });
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -34,17 +44,9 @@ describe('CourseRow', () => {
 
   const renderRow = (props = {}, isShallow = false) => {
     let render = isShallow ? shallow : mount;
-    let prices = new Map([[345, 456]]);
     return render(
       <CourseRow
-        hasFinancialAid={true}
-        financialAid={FINANCIAL_AID_PARTIAL_RESPONSE}
-        prices={prices}
-        openFinancialAidCalculator={sandbox.stub()}
-        now={moment()}
-        addCourseEnrollment={sandbox.stub()}
-        course={null}
-        openEmailComposer={sandbox.stub()}
+        {...defaultCourseRowProps()}
         {...props}
       />,
       {
@@ -79,7 +81,6 @@ describe('CourseRow', () => {
     let descriptionProps = wrapper.find(CourseDescription).props();
     assert.deepEqual(descriptionProps.courseRun, courseRun);
     assert.deepEqual(descriptionProps.courseTitle, courseTitle);
-    assert.property(descriptionProps, 'canContactCourseTeam');
     assert.deepEqual(wrapper.find(CourseGrade).props(), {
       courseRun,
     });
@@ -144,5 +145,20 @@ describe('CourseRow', () => {
       });
       assert.lengthOf(wrapper.find('.course-container .course-sub-row'), 1);
     });
+  });
+
+  it('passes the correct prop value based on the course having a contact email', () => {
+    for (let hasContactEmail of [true, false]) {
+      let course = makeCourse();
+      course.has_contact_email = hasContactEmail;
+
+      const wrapper = shallow(
+        <CourseRow
+          {...defaultCourseRowProps()}
+          course={course}
+        />
+      );
+      assert.equal(wrapper.find('CourseDescription').props().hasContactEmail, hasContactEmail);
+    }
   });
 });

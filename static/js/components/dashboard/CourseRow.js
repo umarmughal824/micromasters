@@ -31,7 +31,7 @@ export default class CourseRow extends React.Component {
     hasFinancialAid: boolean,
     openFinancialAidCalculator: () => void,
     addCourseEnrollment: (courseId: string) => void,
-    openEmailComposer: () => void,
+    openCourseContactDialog: (course: Course, canContactCourseTeam: boolean) => void,
   };
 
   shouldDisplayGradeColumn = (run: CourseRun): boolean => (
@@ -56,10 +56,6 @@ export default class CourseRow extends React.Component {
     R.any(R.propEq('has_paid', true), course.runs)
   );
 
-  canContactCourseTeam = (course: Course): boolean => (
-    this.hasPaidForAnyCourseRun(course) && course.has_contact_email
-  );
-
   // $FlowFixMe: CourseRun is sometimes an empty object
   getFirstRun(): CourseRun {
     const { course } = this.props;
@@ -80,7 +76,7 @@ export default class CourseRow extends React.Component {
       hasFinancialAid,
       openFinancialAidCalculator,
       addCourseEnrollment,
-      openEmailComposer
+      openCourseContactDialog
     } = this.props;
 
     let lastColumnSize, lastColumnClass;
@@ -89,8 +85,10 @@ export default class CourseRow extends React.Component {
         <CourseDescription
           courseRun={run}
           courseTitle={course.title}
-          canContactCourseTeam={this.canContactCourseTeam(course)}
-          openEmailComposer={openEmailComposer}
+          hasContactEmail={course.has_contact_email}
+          openCourseContactDialog={
+            R.partial(openCourseContactDialog, [course, this.hasPaidForAnyCourseRun(course)])
+          }
         />
       </Cell>
     ];

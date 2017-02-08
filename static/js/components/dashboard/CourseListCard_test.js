@@ -36,7 +36,7 @@ describe('CourseListCard', () => {
         coupon={null}
         addCourseEnrollment={() => undefined}
         prices={prices}
-        openEmailComposer={() => undefined}
+        openCourseContactDialog={() => undefined}
         closeEmailDialog={() => undefined}
         updateEmailEdit={() => undefined}
         sendEmail={() => undefined}

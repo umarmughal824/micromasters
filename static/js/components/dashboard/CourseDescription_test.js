@@ -30,12 +30,16 @@ describe('CourseDescription', () => {
     detailsText: renderedComponent.find(".details").text()
   });
 
-  let renderCourseDescription = (courseRun, courseTitle, canContactCourseTeam = false) => (
+  let renderCourseDescription = (
+    courseRun,
+    courseTitle,
+    hasContactEmail = true
+  ) => (
     shallow(
       <CourseDescription
         courseRun={courseRun}
         courseTitle={courseTitle}
-        canContactCourseTeam={canContactCourseTeam}
+        hasContactEmail={hasContactEmail}
       />
     )
   );
@@ -136,7 +140,7 @@ describe('CourseDescription', () => {
     assert.lengthOf(elements.edxLink, 0);
   });
 
-  it('shows a link to contact the course team if the user has permission', () => {
+  it('shows a link to contact the course team', () => {
     let course = findAndCloneCourse(course => (
       course.runs.length > 0 &&
       course.runs[0].status === STATUS_CURRENTLY_ENROLLED
@@ -149,10 +153,10 @@ describe('CourseDescription', () => {
     assert.equal(elements.contactLink.text(), 'Contact Course Team');
   });
 
-  it('does not show a link to contact the course team if the user does not have permission', () => {
+  it('does not show a link to contact the course team if there is no contact email', () => {
     let course = findAndCloneCourse(course => (
       course.runs.length > 0 &&
-      course.runs[0].status === STATUS_PASSED
+      course.runs[0].status === STATUS_CURRENTLY_ENROLLED
     ));
     let firstRun = course.runs[0];
     const wrapper = renderCourseDescription(firstRun, course.title, false);

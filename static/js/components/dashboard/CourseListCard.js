@@ -1,5 +1,4 @@
 // @flow
-import R from 'ramda';
 import React from 'react';
 import moment from 'moment';
 import _ from 'lodash';
@@ -10,11 +9,8 @@ import type {
   CalculatedPrices,
   Coupon,
 } from '../../flow/couponTypes';
-import type { EmailState } from '../../flow/emailTypes';
 import CourseRow from './CourseRow';
 import FinancialAidCalculator from '../../containers/FinancialAidCalculator';
-import EmailCompositionDialog from '../email/EmailCompositionDialog';
-import { COURSE_EMAIL_TYPE } from '../email/constants';
 
 export default class CourseListCard extends React.Component {
   props: {
@@ -25,12 +21,7 @@ export default class CourseListCard extends React.Component {
     openFinancialAidCalculator?:  () => void,
     now?:                         Object,
     addCourseEnrollment:          (courseId: string) => void,
-    openEmailComposer:            (course: Course) => void,
-    closeEmailDialog:             () => void,
-    updateEmailEdit:              (o: Object) => void,
-    sendEmail:                    () => void,
-    emailDialogVisibility:        boolean,
-    email:                        EmailState,
+    openCourseContactDialog:      (course: Course, canContactCourseTeam: boolean) => void
   };
 
   render() {
@@ -42,12 +33,7 @@ export default class CourseListCard extends React.Component {
       openFinancialAidCalculator,
       addCourseEnrollment,
       courseEnrollAddStatus,
-      openEmailComposer,
-      closeEmailDialog,
-      updateEmailEdit,
-      sendEmail,
-      emailDialogVisibility,
-      email
+      openCourseContactDialog,
     } = this.props;
     if (now === undefined) {
       now = moment();
@@ -66,7 +52,7 @@ export default class CourseListCard extends React.Component {
         prices={prices}
         now={now}
         addCourseEnrollment={addCourseEnrollment}
-        openEmailComposer={R.partial(openEmailComposer, [course])}
+        openCourseContactDialog={openCourseContactDialog}
       />
     );
 
@@ -74,15 +60,6 @@ export default class CourseListCard extends React.Component {
       <FinancialAidCalculator />
       <CardTitle>Required Courses</CardTitle>
       { courseRows }
-      <EmailCompositionDialog
-        open={emailDialogVisibility}
-        closeEmailDialog={closeEmailDialog}
-        updateEmailEdit={updateEmailEdit}
-        email={email}
-        sendEmail={sendEmail}
-        subheadingType={COURSE_EMAIL_TYPE}
-        title="Contact the Course Team"
-      />
     </Card>;
   }
 }
