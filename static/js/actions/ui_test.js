@@ -10,7 +10,7 @@ import {
   SET_EDUCATION_DEGREE_LEVEL,
   SET_EDUCATION_LEVEL_ANSWERS,
   SET_WORK_HISTORY_ANSWER,
-  SET_USER_PAGE_DIALOG_VISIBILITY,
+  SET_LEARNER_PAGE_DIALOG_VISIBILITY,
   SET_SHOW_EDUCATION_DELETE_DIALOG,
   SET_SHOW_WORK_DELETE_DIALOG,
   SET_DELETION_INDEX,
@@ -29,7 +29,7 @@ import {
   SET_DOCS_INSTRUCTIONS_VISIBILITY,
   SET_COUPON_NOTIFICATION_VISIBILITY,
   SET_NAV_DRAWER_OPEN,
-  SET_USER_CHIP_VISIBILITY,
+  SET_LEARNER_CHIP_VISIBILITY,
 
   clearUI,
   updateDialogText,
@@ -42,7 +42,7 @@ import {
   setEducationDegreeLevel,
   setEducationLevelAnswers,
   setWorkHistoryAnswer,
-  setUserPageDialogVisibility,
+  setLearnerPageDialogVisibility,
   setShowEducationDeleteDialog,
   setShowWorkDeleteDialog,
   setDeletionIndex,
@@ -61,7 +61,7 @@ import {
   setDocsInstructionsVisibility,
   setCouponNotificationVisibility,
   setNavDrawerOpen,
-  setUserChipVisibility,
+  setLearnerChipVisibility,
 } from '../actions/ui';
 import { assertCreatedActionHelper } from './util';
 
@@ -78,7 +78,7 @@ describe('generated UI action helpers', () => {
       [setEducationDialogVisibility, SET_EDUCATION_DIALOG_VISIBILITY],
       [setEducationDialogIndex, SET_EDUCATION_DIALOG_INDEX],
       [setEducationDegreeLevel, SET_EDUCATION_DEGREE_LEVEL],
-      [setUserPageDialogVisibility, SET_USER_PAGE_DIALOG_VISIBILITY],
+      [setLearnerPageDialogVisibility, SET_LEARNER_PAGE_DIALOG_VISIBILITY],
       [setShowEducationDeleteDialog, SET_SHOW_EDUCATION_DELETE_DIALOG],
       [setShowWorkDeleteDialog, SET_SHOW_WORK_DELETE_DIALOG],
       [setDeletionIndex, SET_DELETION_INDEX],
@@ -98,7 +98,7 @@ describe('generated UI action helpers', () => {
       [setCouponNotificationVisibility, SET_COUPON_NOTIFICATION_VISIBILITY],
       [setWorkHistoryAnswer, SET_WORK_HISTORY_ANSWER],
       [setNavDrawerOpen, SET_NAV_DRAWER_OPEN],
-      [setUserChipVisibility, SET_USER_CHIP_VISIBILITY],
+      [setLearnerChipVisibility, SET_LEARNER_CHIP_VISIBILITY],
     ].forEach(assertCreatedActionHelper);
   });
 });

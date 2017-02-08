@@ -16,8 +16,8 @@ import {
   SET_EDUCATION_DEGREE_LEVEL,
   SET_EDUCATION_LEVEL_ANSWERS,
 
-  SET_USER_PAGE_DIALOG_VISIBILITY,
-  SET_USER_PAGE_ABOUT_ME_DIALOG_VISIBILITY,
+  SET_LEARNER_PAGE_DIALOG_VISIBILITY,
+  SET_LEARNER_PAGE_ABOUT_ME_DIALOG_VISIBILITY,
 
   SET_SHOW_EDUCATION_DELETE_DIALOG,
   SET_SHOW_WORK_DELETE_DIALOG,
@@ -41,7 +41,7 @@ import {
   SET_COUPON_NOTIFICATION_VISIBILITY,
   SET_NAV_DRAWER_OPEN,
   SET_PROGRAM,
-  SET_USER_CHIP_VISIBILITY,
+  SET_LEARNER_CHIP_VISIBILITY,
 } from '../actions/ui';
 import type { ToastMessage } from '../flow/generalTypes';
 import type { Action } from '../flow/reduxTypes';
@@ -54,73 +54,73 @@ export type UIDialog = {
 };
 
 export type UIState = {
-  educationDialogVisibility:        boolean,
-  educationDialogIndex:             number,
-  educationDegreeLevel:             string,
-  educationLevelAnswers:            {},
-  workHistoryEdit:                  boolean,
-  workDialogVisibility:             boolean,
-  workHistoryAnswer:                ?boolean,
-  userPageDialogVisibility:         boolean,
-  showWorkDeleteDialog:             boolean,
-  userPageAboutMeDialogVisibility:  boolean,
-  showEducationDeleteDialog:        boolean,
-  deletionIndex:                    ?number,
-  dialog:                           UIDialog,
-  profileStep:                      ?string,
-  workDialogIndex:                  ?number,
-  userMenuOpen:                     boolean,
-  searchFilterVisibility:           {[s: string]: boolean},
-  tosDialogVisibility:              boolean,
-  emailDialogVisibility:            boolean,
-  enrollProgramDialogError:         ?string,
-  enrollProgramDialogVisibility:    boolean,
-  toastMessage:                     ?ToastMessage,
-  enrollSelectedProgram:            ?number,
-  photoDialogVisibility:            boolean,
-  calculatorDialogVisibility:       boolean,
-  documentSentDate:                 Object,
-  selectedProgram:                  ?AvailableProgram,
-  skipDialogVisibility:             boolean,
-  docsInstructionsVisibility:       boolean,
-  couponNotificationVisibility:     boolean,
-  navDrawerOpen:                    boolean,
-  userChipVisibility:               ?string,
+  educationDialogVisibility:           boolean,
+  educationDialogIndex:                number,
+  educationDegreeLevel:                string,
+  educationLevelAnswers:               {},
+  workHistoryEdit:                     boolean,
+  workDialogVisibility:                boolean,
+  workHistoryAnswer:                   ?boolean,
+  learnerPageDialogVisibility:         boolean,
+  showWorkDeleteDialog:                boolean,
+  learnerPageAboutMeDialogVisibility:  boolean,
+  showEducationDeleteDialog:           boolean,
+  deletionIndex:                       ?number,
+  dialog:                              UIDialog,
+  profileStep:                         ?string,
+  workDialogIndex:                     ?number,
+  userMenuOpen:                        boolean,
+  searchFilterVisibility:              {[s: string]: boolean},
+  tosDialogVisibility:                 boolean,
+  emailDialogVisibility:               boolean,
+  enrollProgramDialogError:            ?string,
+  enrollProgramDialogVisibility:       boolean,
+  toastMessage:                        ?ToastMessage,
+  enrollSelectedProgram:               ?number,
+  photoDialogVisibility:               boolean,
+  calculatorDialogVisibility:          boolean,
+  documentSentDate:                    Object,
+  selectedProgram:                     ?AvailableProgram,
+  skipDialogVisibility:                boolean,
+  docsInstructionsVisibility:          boolean,
+  couponNotificationVisibility:        boolean,
+  navDrawerOpen:                       boolean,
+  learnerChipVisibility:               ?string,
 };
 
 export const INITIAL_UI_STATE: UIState = {
-  educationDialogVisibility:  false,
-  educationDialogIndex:       -1,
-  educationDegreeLevel:       '',
-  educationLevelAnswers:      {},
-  workHistoryEdit:            true,
-  workDialogVisibility:       false,
-  workHistoryAnswer:          null,
-  userPageDialogVisibility: false,
-  userPageAboutMeDialogVisibility: false,
-  showWorkDeleteDialog: false,
-  showEducationDeleteDialog: false,
-  deletionIndex: null,
-  dialog: {},
-  profileStep: null,
-  workDialogIndex:  null,
-  userMenuOpen: false,
-  searchFilterVisibility: {},
-  tosDialogVisibility: false,
-  emailDialogVisibility: false,
-  enrollProgramDialogError: null,
-  enrollProgramDialogVisibility: false,
-  toastMessage: null,
-  enrollSelectedProgram: null,
-  photoDialogVisibility: false,
-  calculatorDialogVisibility: false,
-  documentSentDate: {},
-  selectedProgram: null,
-  skipDialogVisibility: false,
-  docsInstructionsVisibility: false,
-  couponNotificationVisibility: false,
-  navDrawerOpen: false,
-  userChipVisibility: null,
+  educationDialogVisibility:           false,
+  educationDialogIndex:                -1,
+  educationDegreeLevel:                '',
+  educationLevelAnswers:               {},
+  workHistoryEdit:                     true,
+  workDialogVisibility:                false,
+  workHistoryAnswer:                   null,
+  learnerPageDialogVisibility:         false,
+  learnerPageAboutMeDialogVisibility:  false,
+  showWorkDeleteDialog:                false,
+  showEducationDeleteDialog:           false,
+  deletionIndex:                       null,
+  dialog:                              {},
+  profileStep:                         null,
+  workDialogIndex:                     null,
+  userMenuOpen:                        false,
+  searchFilterVisibility:              {},
+  tosDialogVisibility:                 false,
+  emailDialogVisibility:               false,
+  enrollProgramDialogError:            null,
+  enrollProgramDialogVisibility:       false,
+  toastMessage:                        null,
+  enrollSelectedProgram:               null,
+  photoDialogVisibility:               false,
+  calculatorDialogVisibility:          false,
+  documentSentDate:                    {},
+  selectedProgram:                     null,
+  skipDialogVisibility:                false,
+  docsInstructionsVisibility:          false,
+  couponNotificationVisibility:        false,
+  navDrawerOpen:                       false,
+  learnerChipVisibility:               null,
 };
 
 export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
@@ -196,16 +196,16 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
     };
   case CLEAR_UI:
     return INITIAL_UI_STATE;
-  case SET_USER_PAGE_DIALOG_VISIBILITY: {
+  case SET_LEARNER_PAGE_DIALOG_VISIBILITY: {
     return {
       ...state,
-      userPageDialogVisibility: action.payload,
+      learnerPageDialogVisibility: action.payload,
     };
   }
-  case SET_USER_PAGE_ABOUT_ME_DIALOG_VISIBILITY: {
+  case SET_LEARNER_PAGE_ABOUT_ME_DIALOG_VISIBILITY: {
     return {
       ...state,
-      userPageAboutMeDialogVisibility: action.payload,
+      learnerPageAboutMeDialogVisibility: action.payload,
     };
   }
   case SET_SHOW_EDUCATION_DELETE_DIALOG: {
@@ -286,8 +286,8 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
     return { ...state, couponNotificationVisibility: action.payload };
   case SET_NAV_DRAWER_OPEN:
     return { ...state, navDrawerOpen: action.payload };
-  case SET_USER_CHIP_VISIBILITY:
-    return { ...state, userChipVisibility: action.payload };
+  case SET_LEARNER_CHIP_VISIBILITY:
+    return { ...state, learnerChipVisibility: action.payload };
   default:
     return state;
   }

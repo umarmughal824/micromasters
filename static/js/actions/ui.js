@@ -50,11 +50,11 @@ export const setEducationDegreeLevel = createAction(SET_EDUCATION_DEGREE_LEVEL);
 export const SET_EDUCATION_LEVEL_ANSWERS = 'SET_EDUCATION_LEVEL_ANSWERS';
 export const setEducationLevelAnswers = createAction(SET_EDUCATION_LEVEL_ANSWERS);
 
-export const SET_USER_PAGE_DIALOG_VISIBILITY = 'SET_USER_PAGE_DIALOG_VISIBILITY';
-export const setUserPageDialogVisibility = createAction(SET_USER_PAGE_DIALOG_VISIBILITY);
+export const SET_LEARNER_PAGE_DIALOG_VISIBILITY = 'SET_LEARNER_PAGE_DIALOG_VISIBILITY';
+export const setLearnerPageDialogVisibility = createAction(SET_LEARNER_PAGE_DIALOG_VISIBILITY);
 
-export const SET_USER_PAGE_ABOUT_ME_DIALOG_VISIBILITY = 'SET_USER_PAGE_ABOUT_ME_DIALOG_VISIBILITY';
-export const setUserPageAboutMeDialogVisibility = createAction(SET_USER_PAGE_ABOUT_ME_DIALOG_VISIBILITY);
+export const SET_LEARNER_PAGE_ABOUT_ME_DIALOG_VISIBILITY = 'SET_LEARNER_PAGE_ABOUT_ME_DIALOG_VISIBILITY';
+export const setLearnerPageAboutMeDialogVisibility = createAction(SET_LEARNER_PAGE_ABOUT_ME_DIALOG_VISIBILITY);
 
 
 export const SET_SHOW_EDUCATION_DELETE_DIALOG = 'SET_SHOW_EDUCATION_DELETE_DIALOG';
@@ -111,5 +111,5 @@ export const setCouponNotificationVisibility = createAction(SET_COUPON_NOTIFICAT
 export const SET_NAV_DRAWER_OPEN = 'SET_NAV_DRAWER_OPEN';
 export const setNavDrawerOpen = createAction(SET_NAV_DRAWER_OPEN);
 
-export const SET_USER_CHIP_VISIBILITY = 'SET_USER_CHIP_VISIBILITY';
-export const setUserChipVisibility = createAction(SET_USER_CHIP_VISIBILITY);
+export const SET_LEARNER_CHIP_VISIBILITY = 'SET_LEARNER_CHIP_VISIBILITY';
+export const setLearnerChipVisibility = createAction(SET_LEARNER_CHIP_VISIBILITY);

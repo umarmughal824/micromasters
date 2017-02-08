@@ -9,23 +9,23 @@ import PersonalForm from './PersonalForm';
 import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
 
-export default class UserPagePersonalDialog extends React.Component {
+export default class LearnerPagePersonalDialog extends React.Component {
   props: {
-    setUserPageDialogVisibility:  () => void,
-    ui:                           UIState,
-    profile:                      Profile,
-    profilePatchStatus:           ?string,
-    saveProfile:                  SaveProfileFunc,
-    clearProfileEdit:             () => void,
+    setLearnerPageDialogVisibility:  () => void,
+    ui:                              UIState,
+    profile:                         Profile,
+    profilePatchStatus:              ?string,
+    saveProfile:                     SaveProfileFunc,
+    clearProfileEdit:                () => void,
   };
 
   closePersonalDialog = (): void => {
     const {
-      setUserPageDialogVisibility,
+      setLearnerPageDialogVisibility,
       clearProfileEdit,
       profile: { username }
     } = this.props;
-    setUserPageDialogVisibility(false);
+    setLearnerPageDialogVisibility(false);
     clearProfileEdit(username);
   };
 
@@ -37,7 +37,7 @@ export default class UserPagePersonalDialog extends React.Component {
   };
 
   render () {
-    const { ui: { userPageDialogVisibility }, profilePatchStatus } = this.props;
+    const { ui: { learnerPageDialogVisibility }, profilePatchStatus } = this.props;
     const inFlight = profilePatchStatus === FETCH_PROCESSING;
 
     return (
@@ -46,7 +46,7 @@ export default class UserPagePersonalDialog extends React.Component {
         titleClassName="dialog-title"
         contentClassName="dialog personal-dialog"
         className="personal-dialog-wrapper"
-        open={userPageDialogVisibility}
+        open={learnerPageDialogVisibility}
         onRequestClose={this.closePersonalDialog}
         actions={dialogActions(this.closePersonalDialog, this.savePersonalInfo, inFlight)}
         autoScrollBodyContent={true}>
