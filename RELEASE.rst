@@ -1,6 +1,23 @@
 Release Notes
 =============
 
+Version 0.46.1
+--------------
+
+- Validate exam profile
+- Created dialog for course team contact payment teaser
+- Marked required PR sections
+- CoursePrice.price is a decimal (#2522)
+- Renamed UserPage -&gt; LearnerPage
+- Added VCDC/EAD file processing (#1797, #2080)
+- Impelemented SSO for Pearson
+- Refactor DashboardPage (#2509)
+- Fixed signals for exam authorization trigger (#2457)
+- Added TSV tasks to celery crontab (#2496)
+- Added tranformation for exam profile state (#2486)
+- Fixed bug with extracting final grade for not_passed courses
+- The Frozen grade should be taken in account before enything else in case they exist
+
 Version 0.46.0
 --------------
 
