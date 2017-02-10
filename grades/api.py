@@ -126,7 +126,6 @@ def freeze_user_final_grade(user, course_run, raise_on_exception=False):
     Returns:
         None
     """
-    # pylint: disable=bare-except
     # no need to do anything if the course run is not ready
     if not course_run.can_freeze_grades:
         if not raise_on_exception:
@@ -145,17 +144,17 @@ def freeze_user_final_grade(user, course_run, raise_on_exception=False):
     # update one last time the user's certificates and current grades
     try:
         CachedEdxDataApi.update_all_cached_grade_data(user)
-    except:
+    except Exception as ex:  # pylint: disable=broad-except
         if not raise_on_exception:
             log.exception('Impossible to refresh the edX cache for user "%s"', user.username)
             return
         else:
             raise FreezeGradeFailedException(
-                'Impossible to refresh the edX cache for user "{0}"'.format(user.username))
+                'Impossible to refresh the edX cache for user "{0}"'.format(user.username)) from ex
     # get the final grade for the user in the program
     try:
         final_grade = get_final_grade(user, course_run)
-    except:
+    except Exception as ex:  # pylint: disable=broad-except
         if not raise_on_exception:
             log.exception(
                 'Impossible to get final grade for user "%s" in course %s', user.username, course_run.edx_course_key)
@@ -166,7 +165,7 @@ def freeze_user_final_grade(user, course_run, raise_on_exception=False):
                     user.username,
                     course_run.edx_course_key
                 )
-            )
+            ) from ex
     return FinalGrade.objects.create(
         user=user,
         course_run=course_run,
