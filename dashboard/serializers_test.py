@@ -95,6 +95,7 @@ class UserProgramSearchSerializerTests(MockedESTestCase):
                         "grade": certificate_grades_vals[i],
                         "certificate_type": "verified",
                         "course_id": enrollment.course_run.edx_course_key,
+                        "status": "downloadable",
                     }
                 )
             )

@@ -42,6 +42,7 @@ class CachedCertificateFactory(DjangoModelFactory):
         "grade": randint(60, 100)/100.0,
         "course_id": x.course_run.edx_course_key,
         "username": x.user.username,
+        "status": "downloadable",
     })
 
     class Meta:

@@ -779,9 +779,43 @@ class MMTrackTest(MockedESTestCase):
         key = "course-v1:edX+DemoX+Demo_Course"
         assert mmtrack.has_paid(key) is True
 
-    def test_has_verified_cert_fa(self):
+    @ddt.data(
+        ("verified", "downloadable", True),
+        ("audit", "downloadable", False),
+        ("verified", "generating", False),
+        ("verified", "notpassing", False),
+        ("verified", "unverified", False),
+    )
+    @ddt.unpack
+    def test_has_passing_certificate(self, certificate_type, status, expected_result):
         """
-        Assert that has_cert_fa is true if user has a cert even if has_paid is false for FA programs
+        Test for has_passing_certificate method with different type of certificates
+        """
+        course_key = self.crun_fa.edx_course_key
+        cert_json = {
+            "username": "staff",
+            "course_id": course_key,
+            "certificate_type": certificate_type,
+            "status": status,
+            "download_url": "http://www.example.com/demo.pdf",
+            "grade": "0.98"
+        }
+        cached_edx_user_data = MagicMock(
+            spec=CachedEdxUserData,
+            enrollments=CachedEnrollment.deserialize_edx_data(self.enrollments_json),
+            certificates=CachedCertificate.deserialize_edx_data(self.certificates_json + [cert_json]),
+            current_grades=CachedCurrentGrade.deserialize_edx_data(self.current_grades_json),
+        )
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program_financial_aid,
+            edx_user_data=cached_edx_user_data
+        )
+        assert mmtrack.has_passing_certificate(course_key) is expected_result
+
+    def test_has_passing_certificate_fa(self):
+        """
+        Assert that has_passing_certificate is true if user has a cert even if has_paid is false for FA programs
         """
         mmtrack = MMTrack(
             user=self.user,
@@ -789,7 +823,7 @@ class MMTrackTest(MockedESTestCase):
             edx_user_data=self.cached_edx_user_data
         )
         key = self.crun_fa.edx_course_key
-        assert mmtrack.has_verified_cert(key) is False
+        assert mmtrack.has_passing_certificate(key) is False
         assert mmtrack.has_paid(key) is False
 
         cert_json = {
@@ -811,7 +845,7 @@ class MMTrackTest(MockedESTestCase):
             program=self.program_financial_aid,
             edx_user_data=cached_edx_user_data
         )
-        assert mmtrack.has_verified_cert(key) is True
+        assert mmtrack.has_passing_certificate(key) is True
         assert mmtrack.has_paid(key) is False
 
     def test_get_mmtrack(self):
