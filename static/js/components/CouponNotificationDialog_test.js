@@ -66,7 +66,8 @@ const COURSE: Course = {
   title: "Horse",
   has_contact_email: false,
   position_in_program: 1,
-  runs: []
+  runs: [],
+  can_schedule_exam: false,
 };
 
 const PROGRAM: AvailableProgram = {

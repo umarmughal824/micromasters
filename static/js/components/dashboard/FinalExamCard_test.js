@@ -110,12 +110,21 @@ pay for the course and pass the online work.`;
   it('should show a schedule button when an exam is schedulable', () => {
     props.program.pearson_exam_status = PEARSON_PROFILE_SCHEDULABLE;
     let card = renderCard(props);
+    let button = card.find(".exam-button");
+    assert.equal(button.text(), 'Schedule an exam');
+    button.simulate('click');
+    assert(submitPearsonSSOStub.called);
+  });
+
+  it('should show the titles of schedulable exams', () => {
+    props.program.pearson_exam_status = PEARSON_PROFILE_SCHEDULABLE;
+    let course  = props.program.courses[0];
+    course.can_schedule_exam = true;
+    let card = renderCard(props);
     assert.include(
       stringStrip(card.text()),
-      `You are ready to schedule an exam for ${props.program.title}`
+      `You are ready to schedule an exam for ${stringStrip(course.title)}`
     );
-    card.find(".exam-button").simulate('click');
-    assert(submitPearsonSSOStub.called);
   });
 
   it('should show a scheduling error, when there is one', () => {

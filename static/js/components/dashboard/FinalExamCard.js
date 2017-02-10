@@ -126,6 +126,16 @@ const errorDisplay = pearson => (
   R.isNil(pearson.error) ? null : <div className="error" key="error">{ pearson.error }</div>
 );
 
+const listItem = (text, index) => (<li key={index}>{ text }</li>);
+
+const schedulableCourseList = R.compose(
+  R.addIndex(R.map)(listItem),
+  R.map(R.prop('title')),
+  R.filter(R.propEq('can_schedule_exam', true)),
+  R.propOr([], 'courses'),
+  R.defaultTo({}),
+);
+
 const schedulableCard = (profile, program, navigateToProfile, submitPearsonSSO, pearson) => cardWrapper(
   accountCreated(profile, navigateToProfile),
   <div key="schedulable" className="exam-scheduling">
@@ -141,7 +151,7 @@ const schedulableCard = (profile, program, navigateToProfile, submitPearsonSSO, 
     <div className="program-info">
       You are ready to schedule an exam for:
       <ul>
-        <li>{ program.title }</li>
+        { schedulableCourseList(program) }
       </ul>
     </div>
   </div>,

@@ -680,6 +680,7 @@ class CourseRunTest(CourseTests):
         assert run_status.course_run == crun
 
 
+@ddt.ddt
 class InfoCourseTest(CourseTests):
     """Tests for get_info_for_course"""
 
@@ -734,7 +735,7 @@ class InfoCourseTest(CourseTests):
             title="Demo 2"
         )
 
-    def assert_course_equal(self, course, course_data_from_call):
+    def assert_course_equal(self, course, course_data_from_call, can_schedule_exam=False):
         """Helper to format the course info"""
         expected_data = {
             "id": course.pk,
@@ -743,6 +744,7 @@ class InfoCourseTest(CourseTests):
             "description": course.description,
             "prerequisites": course.prerequisites,
             "has_contact_email": bool(course.contact_email),
+            "can_schedule_exam": can_schedule_exam,
         }
         # remove the runs part: assumed checked with the mock assertion
         del course_data_from_call['runs']
@@ -765,32 +767,48 @@ class InfoCourseTest(CourseTests):
         return mock_return_status
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
-    def test_info_no_runs(self, mock_format):
+    @patch('dashboard.api.is_exam_schedulable', return_value=False)
+    def test_info_no_runs(self, mock_schedulable, mock_format):
         """test for get_info_for_course for course with no runs"""
         self.assert_course_equal(
             self.course_noruns,
-            api.get_info_for_course(self.course_noruns, None)
+            api.get_info_for_course(self.course_noruns, self.mmtrack)
         )
         assert mock_format.called is False
+        assert mock_schedulable.call_count == 1
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
-    def test_info_with_contact_email(self, mock_format):  # pylint: disable=no-self-use
+    @patch('dashboard.api.is_exam_schedulable', return_value=False)
+    def test_info_with_contact_email(self, mock_schedulable, mock_format):  # pylint: disable=no-self-use
         """test that get_info_for_course indicates that a course has a contact_email """
         course = CourseFactory.create(contact_email="abc@example.com")
-        course_info = api.get_info_for_course(course, None)
+        course_info = api.get_info_for_course(course, self.mmtrack)
         assert course_info['has_contact_email'] is True
         assert mock_format.called is False
+        assert mock_schedulable.call_count == 1
+
+    @patch('dashboard.api.is_exam_schedulable')
+    @ddt.data((True), (False))
+    def test_info_returns_exam_schedulable(self, boolean, mock_schedulable):
+        """test that get_info_for_course returns whether the exam is schedulable"""
+        course = CourseFactory.create(contact_email=None)
+        mock_schedulable.return_value = boolean
+        course_info = api.get_info_for_course(course, self.mmtrack)
+        assert course_info['can_schedule_exam'] == boolean
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
-    def test_info_without_contact_email(self, mock_format):  # pylint: disable=no-self-use
+    @patch('dashboard.api.is_exam_schedulable', return_value=False)
+    def test_info_without_contact_email(self, mock_schedulable, mock_format):  # pylint: disable=no-self-use
         """test that get_info_for_course indicates that a course has no contact_email """
         course = CourseFactory.create(contact_email=None)
-        course_info = api.get_info_for_course(course, None)
+        course_info = api.get_info_for_course(course, self.mmtrack)
         assert course_info['has_contact_email'] is False
         assert mock_format.called is False
+        assert mock_schedulable.call_count == 1
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
-    def test_info_not_enrolled_offered(self, mock_format):
+    @patch('dashboard.api.is_exam_schedulable', return_value=False)
+    def test_info_not_enrolled_offered(self, mock_schedulable, mock_format):
         """test for get_info_for_course for course with with an offered run"""
         with patch(
             'dashboard.api.get_status_for_courserun',
@@ -802,12 +820,14 @@ class InfoCourseTest(CourseTests):
         ):
             self.assert_course_equal(
                 self.course,
-                api.get_info_for_course(self.course, None)
+                api.get_info_for_course(self.course, self.mmtrack)
             )
-        mock_format.assert_called_once_with(self.course_run, api.CourseStatus.OFFERED, None, position=1)
+        mock_format.assert_called_once_with(self.course_run, api.CourseStatus.OFFERED, self.mmtrack, position=1)
+        assert mock_schedulable.call_count == 1
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
-    def test_info_not_enrolled_but_paid(self, mock_format):
+    @patch('dashboard.api.is_exam_schedulable', return_value=False)
+    def test_info_not_enrolled_but_paid(self, mock_schedulable, mock_format):
         """test for get_info_for_course for course with with a paid but not enrolled run"""
         with patch(
             'dashboard.api.get_status_for_courserun',
@@ -819,17 +839,19 @@ class InfoCourseTest(CourseTests):
         ):
             self.assert_course_equal(
                 self.course,
-                api.get_info_for_course(self.course, None)
+                api.get_info_for_course(self.course, self.mmtrack)
             )
         mock_format.assert_called_once_with(
             self.course_run,
             api.CourseStatus.PAID_BUT_NOT_ENROLLED,
-            None,
+            self.mmtrack,
             position=1
         )
+        assert mock_schedulable.call_count == 1
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
-    def test_info_not_passed_offered(self, mock_format):
+    @patch('dashboard.api.is_exam_schedulable', return_value=False)
+    def test_info_not_passed_offered(self, mock_schedulable, mock_format):
         """test for get_info_for_course for course with a run not passed and another offered"""
         with patch(
             'dashboard.api.get_status_for_courserun',
@@ -839,16 +861,18 @@ class InfoCourseTest(CourseTests):
         ):
             self.assert_course_equal(
                 self.course,
-                api.get_info_for_course(self.course, None)
+                api.get_info_for_course(self.course, self.mmtrack)
             )
         # the mock object has been called 2 times
         # one for the one that is past
-        mock_format.assert_any_call(self.course_run_ver, api.CourseStatus.NOT_PASSED, None, position=1)
+        mock_format.assert_any_call(self.course_run_ver, api.CourseStatus.NOT_PASSED, self.mmtrack, position=1)
         # one for the course that is current run
-        mock_format.assert_any_call(self.course_run, api.CourseStatus.OFFERED, None, position=2)
+        mock_format.assert_any_call(self.course_run, api.CourseStatus.OFFERED, self.mmtrack, position=2)
+        assert mock_schedulable.call_count == 1
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
-    def test_info_not_enrolled_not_passed_not_offered(self, mock_format):
+    @patch('dashboard.api.is_exam_schedulable', return_value=False)
+    def test_info_not_enrolled_not_passed_not_offered(self, mock_schedulable, mock_format):
         """test for get_info_for_course for course with run not passed and nothing offered"""
         self.mmtrack.configure_mock(**{'has_passed_course.return_value': False})
         with patch(
@@ -863,9 +887,11 @@ class InfoCourseTest(CourseTests):
             )
         mock_format.assert_any_call(self.course_run, api.CourseStatus.NOT_PASSED, self.mmtrack, position=1)
         mock_format.assert_any_call(self.course_run_ver, api.CourseStatus.NOT_PASSED, self.mmtrack, position=2)
+        assert mock_schedulable.call_count == 1
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
-    def test_info_grade(self, mock_format):
+    @patch('dashboard.api.is_exam_schedulable', return_value=False)
+    def test_info_grade(self, mock_schedulable, mock_format):
         """test for get_info_for_course for course with a course current and another not passed"""
         self.mmtrack.configure_mock(**{'has_passed_course.return_value': False})
         with patch(
@@ -880,9 +906,11 @@ class InfoCourseTest(CourseTests):
             )
         mock_format.assert_any_call(self.course_run, api.CourseStatus.CURRENTLY_ENROLLED, self.mmtrack, position=1)
         mock_format.assert_any_call(self.course_run_ver, api.CourseStatus.NOT_PASSED, self.mmtrack, position=2)
+        assert mock_schedulable.call_count == 1
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
-    def test_info_check_but_not_passed(self, mock_format):
+    @patch('dashboard.api.is_exam_schedulable', return_value=False)
+    def test_info_check_but_not_passed(self, mock_schedulable, mock_format):
         """
         test for get_info_for_course in case a check if the course has been passed is required
         """
@@ -899,9 +927,11 @@ class InfoCourseTest(CourseTests):
             )
         mock_format.assert_any_call(self.course_run_ver, api.CourseStatus.NOT_PASSED, self.mmtrack, position=1)
         mock_format.assert_any_call(self.course_run, api.CourseStatus.OFFERED, self.mmtrack, position=2)
+        assert mock_schedulable.call_count == 1
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
-    def test_info_missed_deadline(self, mock_format):
+    @patch('dashboard.api.is_exam_schedulable', return_value=False)
+    def test_info_missed_deadline(self, mock_schedulable, mock_format):
         """
         test for get_info_for_course with a missed upgrade deadline
         """
@@ -917,9 +947,11 @@ class InfoCourseTest(CourseTests):
             )
         mock_format.assert_any_call(self.course_run_ver, api.CourseStatus.MISSED_DEADLINE, self.mmtrack, position=1)
         mock_format.assert_any_call(self.course_run, api.CourseStatus.OFFERED, self.mmtrack, position=2)
+        assert mock_schedulable.call_count == 1
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
-    def test_info_check_but_not_passed_no_next(self, mock_format):
+    @patch('dashboard.api.is_exam_schedulable', return_value=False)
+    def test_info_check_but_not_passed_no_next(self, mock_schedulable, mock_format):
         """
         test for get_info_for_course in case a check if the course has been passed
         is required for the course, the course has not been passed and there is no next run
@@ -937,9 +969,11 @@ class InfoCourseTest(CourseTests):
             )
         mock_format.assert_called_once_with(
             self.course_run_past, api.CourseStatus.NOT_PASSED, self.mmtrack, position=1)
+        assert mock_schedulable.call_count == 1
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
-    def test_info_check_passed(self, mock_format):
+    @patch('dashboard.api.is_exam_schedulable', return_value=False)
+    def test_info_check_passed(self, mock_schedulable, mock_format):
         """
         test for get_info_for_course in case a check if the course has been passed
         is required for the course and the course has been passed
@@ -961,9 +995,11 @@ class InfoCourseTest(CourseTests):
             self.mmtrack,
             position=1
         )
+        assert mock_schedulable.call_count == 1
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
-    def test_info_will_attend(self, mock_format):
+    @patch('dashboard.api.is_exam_schedulable', return_value=False)
+    def test_info_will_attend(self, mock_schedulable, mock_format):
         """test for get_info_for_course for course with enrolled run that will happen in the future"""
         with patch(
             'dashboard.api.get_status_for_courserun',
@@ -973,12 +1009,14 @@ class InfoCourseTest(CourseTests):
         ):
             self.assert_course_equal(
                 self.course,
-                api.get_info_for_course(self.course, None)
+                api.get_info_for_course(self.course, self.mmtrack)
             )
-        mock_format.assert_called_once_with(self.course_run, api.CourseStatus.WILL_ATTEND, None, position=1)
+        mock_format.assert_called_once_with(self.course_run, api.CourseStatus.WILL_ATTEND, self.mmtrack, position=1)
+        assert mock_schedulable.call_count == 1
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
-    def test_info_upgrade(self, mock_format):
+    @patch('dashboard.api.is_exam_schedulable', return_value=False)
+    def test_info_upgrade(self, mock_schedulable, mock_format):
         """test for get_info_for_course for course with a run that needs to be upgraded"""
         with patch(
             'dashboard.api.get_status_for_courserun',
@@ -988,12 +1026,14 @@ class InfoCourseTest(CourseTests):
         ):
             self.assert_course_equal(
                 self.course,
-                api.get_info_for_course(self.course, None)
+                api.get_info_for_course(self.course, self.mmtrack)
             )
-        mock_format.assert_called_once_with(self.course_run, api.CourseStatus.CAN_UPGRADE, None, position=1)
+        mock_format.assert_called_once_with(self.course_run, api.CourseStatus.CAN_UPGRADE, self.mmtrack, position=1)
+        assert mock_schedulable.call_count == 1
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
-    def test_info_default_should_not_happen(self, mock_format):
+    @patch('dashboard.api.is_exam_schedulable', return_value=False)
+    def test_info_default_should_not_happen(self, mock_schedulable, mock_format):
         """
         test for get_info_for_course for course with a run with an
         unexpected state but that can be offered
@@ -1006,12 +1046,14 @@ class InfoCourseTest(CourseTests):
         ):
             self.assert_course_equal(
                 self.course,
-                api.get_info_for_course(self.course, None)
+                api.get_info_for_course(self.course, self.mmtrack)
             )
         assert mock_format.call_count == 0
+        assert mock_schedulable.call_count == 1
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
-    def test_info_default_should_not_happen_no_next(self, mock_format):
+    @patch('dashboard.api.is_exam_schedulable', return_value=False)
+    def test_info_default_should_not_happen_no_next(self, mock_schedulable, mock_format):
         """test for get_info_for_course with no next and weird status"""
         with patch(
             'dashboard.api.get_status_for_courserun',
@@ -1021,12 +1063,14 @@ class InfoCourseTest(CourseTests):
         ):
             self.assert_course_equal(
                 self.course_no_next_run,
-                api.get_info_for_course(self.course_no_next_run, None)
+                api.get_info_for_course(self.course_no_next_run, self.mmtrack)
             )
         assert mock_format.call_count == 0
+        assert mock_schedulable.call_count == 1
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
-    def test_info_read_cert_for_all_no_next(self, mock_format):
+    @patch('dashboard.api.is_exam_schedulable', return_value=False)
+    def test_info_read_cert_for_all_no_next(self, mock_schedulable, mock_format):
         """
         test for get_info_for_course in case the less recent course is flagged to be checked if passed
         """
@@ -1048,9 +1092,11 @@ class InfoCourseTest(CourseTests):
             self.mmtrack,
             position=2
         )
+        assert mock_schedulable.call_count == 1
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
-    def test_course_run_end_date_mixed(self, mock_format):
+    @patch('dashboard.api.is_exam_schedulable', return_value=False)
+    def test_course_run_end_date_mixed(self, mock_schedulable, mock_format):
         """
         Test with a mix of end_date being None and also a valid date
         """
@@ -1060,6 +1106,8 @@ class InfoCourseTest(CourseTests):
                 status=api.CourseRunStatus.NOT_ENROLLED,
                 course_run=run
             )
+
+        self.mmtrack.configure_mock(**{'user': self.user})
 
         run1 = CourseRunFactory.create(
             start_date=datetime.now(pytz.utc),
@@ -1081,9 +1129,10 @@ class InfoCourseTest(CourseTests):
         ):
             self.assert_course_equal(
                 run1.course,
-                api.get_info_for_course(run1.course, None)
+                api.get_info_for_course(run1.course, self.mmtrack),
             )
-        mock_format.assert_called_once_with(run1, api.CourseStatus.OFFERED, None, position=1)
+        mock_format.assert_called_once_with(run1, api.CourseStatus.OFFERED, self.mmtrack, position=1)
+        assert mock_schedulable.call_count == 1
 
 
 class UserProgramInfoIntegrationTest(MockedESTestCase):

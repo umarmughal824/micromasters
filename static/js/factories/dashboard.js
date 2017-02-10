@@ -78,7 +78,8 @@ export const makeCourse = (positionInProgram: number): Course => {
     runs: R.reverse(R.range(1, 3)).map(makeRun),
     has_contact_email: false,
     position_in_program: positionInProgram,
-    title: `Title for course ${courseId}`
+    title: `Title for course ${courseId}`,
+    can_schedule_exam: false,
   };
 };
 

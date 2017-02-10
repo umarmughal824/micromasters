@@ -43,6 +43,7 @@ export type Course = {
   has_contact_email: boolean,
   id: number,
   position_in_program: number,
+  can_schedule_exam: boolean,
 };
 
 export type ProgramPageCourse = {

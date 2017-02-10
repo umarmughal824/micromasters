@@ -14,6 +14,7 @@ from dashboard.api_edx_cache import CachedEdxDataApi, CachedEdxUserData
 from dashboard.utils import MMTrack
 from grades import api
 from grades.models import FinalGrade
+from exams.models import ExamAuthorization
 
 log = logging.getLogger(__name__)
 
@@ -200,6 +201,7 @@ def get_info_for_course(course, mmtrack):
         "description": course.description,
         "prerequisites": course.prerequisites,
         "has_contact_email": bool(course.contact_email),
+        "can_schedule_exam": is_exam_schedulable(mmtrack.user, course),
         "runs": [],
     }
 
@@ -406,3 +408,10 @@ def format_courserun_for_dashboard(course_run, status_for_user, mmtrack, positio
         formatted_run['current_grade'] = mmtrack.get_current_grade(course_run.edx_course_key)
 
     return formatted_run
+
+
+def is_exam_schedulable(user, course):
+    """
+    Check if a course is ready to schedule an exam or not
+    """
+    return ExamAuthorization.objects.filter(course=course, user=user).exists()
