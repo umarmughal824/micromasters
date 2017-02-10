@@ -9,6 +9,7 @@ from django.db.models.signals import post_save
 from django.test import (
     SimpleTestCase,
     TestCase,
+    override_settings,
 )
 from factory.django import mute_signals
 
@@ -171,10 +172,11 @@ class ExamAuthorizationUtilsTests(TestCase):
             ).exists() is False
 
 
-class BulkExamUtilTests(TestCase):
+@override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v0"})
+class BulkExamUtilV0Tests(TestCase):
     """Tests for authorization_user_exam command operations"""
     @classmethod
-    def set_data(cls, user, course_run):
+    def setup_course_run_data(cls, user, course_run):
         """
         creates user records like CachedGrades, CachedEnrollments and CachedCertificate
         """
@@ -195,31 +197,204 @@ class BulkExamUtilTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         with mute_signals(post_save):
-            profile1 = ProfileFactory.create()
-            profile2 = ProfileFactory.create()
+            cls.users = [profile.user for profile in ProfileFactory.create_batch(2)]
 
         cls.program, _ = create_program(past=True)
         cls.course_run = cls.program.course_set.first().courserun_set.first()
-        cls.users = [profile1.user, profile2.user]
 
         for user in cls.users:
             with mute_signals(post_save):
                 ProgramEnrollment.objects.create(user=user, program=cls.program)
-            cls.set_data(user, cls.course_run)
+            cls.setup_course_run_data(user, cls.course_run)
 
         # second passed run on same courses
-        course_run2 = CourseRunFactory.create(
+        cls.course_run2 = CourseRunFactory.create(
             end_date=datetime.now(tz=pytz.UTC) - timedelta(days=366),
             enrollment_end=datetime.now(tz=pytz.UTC) - timedelta(days=500),
             course=cls.course_run.course
         )
         CoursePriceFactory.create(
-            course_run=course_run2,
+            course_run=cls.course_run2,
             is_valid=True
         )
 
         for user in cls.users:
-            cls.set_data(user, course_run2)
+            cls.setup_course_run_data(user, cls.course_run2)
+
+    def test_exam_authorization_v1(self):
+        """For all users in any program"""
+        bulk_authorize_for_exam()
+        for user in self.users:
+            assert ExamProfile.objects.filter(profile=user.profile).exists() is True
+            assert ExamAuthorization.objects.filter(
+                user=user,
+                course=self.course_run.course
+            ).exists() is True
+
+    def test_exam_authorization_specific_user_v1(self):
+        """Authorize a user for exams of passed and paid courses"""
+        user = self.users[0]
+        bulk_authorize_for_exam(username=user.username)
+        assert ExamProfile.objects.filter(profile=user.profile).exists() is True
+        assert ExamAuthorization.objects.filter(
+            user=user,
+            course=self.course_run.course
+        ).exists() is True
+
+    def test_exam_authorization_specific_user_specific_course_v1(self):
+        """Authorize a user for exams of passed and paid courses"""
+        user1 = self.users[0]
+        user2 = self.users[1]
+        bulk_authorize_for_exam(
+            username=user1.username
+        )
+
+        # user 1 is authorized for exam
+        assert ExamProfile.objects.filter(profile=user1.profile).exists() is True
+        assert ExamAuthorization.objects.filter(
+            user=user1,
+            course=self.course_run.course
+        ).exists() is True
+
+        # user 2 is not authorized
+        assert ExamProfile.objects.filter(profile=user2.profile).exists() is False
+        assert ExamAuthorization.objects.filter(
+            user=user2,
+            course=self.course_run.course
+        ).exists() is False
+
+    def test_exam_authorization_wrong_program_id_v1(self):
+        """Assert user not authorize when program id is wrong"""
+        user = self.users[0]
+
+        with self.assertRaises(ExamAuthorizationException) as e:
+            bulk_authorize_for_exam(
+                program_id=-1,
+                username=user.username
+            )
+
+        assert e.exception.args[0] == "[Exam authorization] exam_series_code is missing on program='%s'", -1
+        assert ExamProfile.objects.filter(profile=user.profile).exists() is False
+        assert ExamAuthorization.objects.filter(
+            user=user,
+            course=self.course_run.course
+        ).exists() is False
+
+    def test_exam_authorization_invalid_user_v1(self):
+        """Assert user not authorize when username wrong"""
+        user = self.users[0]
+
+        with self.assertRaises(ExamAuthorizationException) as e:
+            bulk_authorize_for_exam(
+                username="invalid_user"
+            )
+
+        assert e.exception.args[0] == '[Exam authorization] Invalid username: %s', "invalid_user"
+        for user in self.users:
+            assert ExamProfile.objects.filter(profile=user.profile).exists() is False
+            assert ExamAuthorization.objects.filter(
+                user=user,
+                course=self.course_run.course
+            ).exists() is False
+
+    def test_exam_authorization_no_exam_module_set_v1(self):
+        """Test authorization when `exam_module` is not set on course."""
+        user = self.users[0]
+        self.course_run.course.exam_module = None
+        self.course_run.course.save()
+
+        with patch("exams.utils.log") as log:
+            bulk_authorize_for_exam(
+                username=user.username,
+                program_id=self.program.id
+            )
+
+        log.error.assert_called_with(
+            'Either exam_module is not set for course id="%s" or user="%s" has no enrollment(s)',
+            self.course_run.course.id,
+            user.username
+        )
+
+        assert ExamProfile.objects.filter(profile=user.profile).exists() is False
+        assert ExamAuthorization.objects.filter(
+            user=user,
+            course=self.course_run.course
+        ).exists() is False
+
+    def test_exam_authorization_no_exam_series_code_set_v1(self):
+        """Test authorization when `exam_series_code` is not set on program."""
+        user = self.users[0]
+        self.program.exam_series_code = None
+        self.program.save()
+        program_id = self.program.id
+
+        with self.assertRaises(ExamAuthorizationException) as e:
+            bulk_authorize_for_exam(username=user.username, program_id=program_id)
+
+        assert e.exception.args[0] == "[Exam authorization] exam_series_code is missing on program='%s'", program_id
+
+        assert ExamProfile.objects.filter(profile=user.profile).exists() is False
+        assert ExamAuthorization.objects.filter(
+            user=user,
+            course=self.course_run.course
+        ).exists() is False
+
+
+@override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v1"})
+class BulkExamUtilV1Tests(TestCase):
+    """Tests for authorization_user_exam command operations"""
+    @classmethod
+    def setup_course_run_data(cls, user, course_run):
+        """
+        creates user records like CachedGrades, CachedEnrollments and CachedCertificate
+        """
+        CachedEnrollmentFactory.create(user=user, course_run=course_run)
+        CachedCurrentGradeFactory.create(
+            user=user,
+            course_run=course_run,
+            data={
+                "passed": True,
+                "percent": 0.9,
+                "course_key": course_run.edx_course_key,
+                "username": user.username
+            }
+        )
+        FinalGradeFactory.create(
+            user=user,
+            course_run=course_run,
+            passed=True,
+            grade=0.9
+        )
+        CachedCertificateFactory.create(user=user, course_run=course_run)
+        create_order(user, course_run)
+
+    @classmethod
+    def setUpTestData(cls):
+        with mute_signals(post_save):
+            cls.users = [profile.user for profile in ProfileFactory.create_batch(2)]
+
+        cls.program, _ = create_program(past=True)
+        cls.course_run = cls.program.course_set.first().courserun_set.first()
+
+        for user in cls.users:
+            with mute_signals(post_save):
+                ProgramEnrollment.objects.create(user=user, program=cls.program)
+            cls.setup_course_run_data(user, cls.course_run)
+
+        # second passed run on same courses
+        cls.course_run2 = CourseRunFactory.create(
+            end_date=datetime.now(tz=pytz.UTC) - timedelta(days=366),
+            enrollment_end=datetime.now(tz=pytz.UTC) - timedelta(days=500),
+            course=cls.course_run.course
+        )
+        CoursePriceFactory.create(
+            course_run=cls.course_run2,
+            is_valid=True
+        )
+        cls.course_runs = [cls.course_run, cls.course_run2]
+
+        for user in cls.users:
+            cls.setup_course_run_data(user, cls.course_run2)
 
     def test_exam_authorization(self):
         """For all users in any program"""
