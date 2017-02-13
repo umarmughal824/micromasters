@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.46.2
+--------------
+
+- Added exception chaining for FreezeGradeFailedException (#2503)
+- Add coupon invoice table (#2543)
+- Skip if the status is not terminal (#2533)
+- Fixed exam authorization command and refactoring (#2448)
+
 Version 0.46.1
 --------------
 
