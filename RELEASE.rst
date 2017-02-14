@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.47.0
+--------------
+
+- Added certificate status to check if user passed course
+- Added robots.txt file (#2540)
+- Fixed exam util tests for v0 and v1 (#2544)
+- Added selenium testing (#2511)
+
 Version 0.46.2
 --------------
 
