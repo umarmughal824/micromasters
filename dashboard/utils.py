@@ -166,16 +166,19 @@ class MMTrack:
         enrollment = self.enrollments.get_enrollment_for_course(course_id)
         return enrollment and enrollment.is_verified
 
-    def has_verified_cert(self, course_id):
+    def has_passing_certificate(self, course_id):
         """
-        Returns whether the user has a verified cert.
+        Returns whether the user has a passing certificate.
 
         Args:
             course_id (str): An edX course key
         Returns:
-            bool: whether the user has a verified cert meaning that they passed the course on edX
+            bool: whether the user has a passing certificate meaning that the user passed the course on edX
         """
-        return self.certificates.has_verified_cert(course_id)
+        if not self.certificates.has_verified_cert(course_id):
+            return False
+        certificate = self.certificates.get_verified_cert(course_id)
+        return certificate.status == 'downloadable'
 
     def extract_final_grade(self, course_id):
         """
@@ -247,7 +250,7 @@ class MMTrack:
 
         # for normal programs need to check the certificate
         if not self.financial_aid_available:
-            return self.has_verified_cert(course_id)
+            return self.has_passing_certificate(course_id)
         # financial aid programs need to have an audit enrollment,
         # a current grade with a passed attribute and the course should be ended
         else:

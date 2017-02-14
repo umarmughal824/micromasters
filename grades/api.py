@@ -34,7 +34,7 @@ def _compute_grade_for_fa(user_edx_run_data):
     run_passed = None
     grade = None
     if user_edx_run_data.certificate is not None:
-        run_passed = True
+        run_passed = user_edx_run_data.certificate.status == 'downloadable'
         grade = user_edx_run_data.certificate.grade
     else:
         run_passed = user_edx_run_data.current_grade.passed
@@ -55,8 +55,11 @@ def _compute_grade_for_non_fa(user_edx_run_data):
         UserFinalGrade: a namedtuple of (float, bool,) representing the final grade
             of the user in the course run and whether she passed it
     """
-    run_passed = user_edx_run_data.certificate is not None
-    grade = user_edx_run_data.certificate.grade if run_passed else user_edx_run_data.current_grade.percent
+    run_passed = user_edx_run_data.certificate is not None and user_edx_run_data.certificate.status == 'downloadable'
+    if user_edx_run_data.certificate is not None:
+        grade = user_edx_run_data.certificate.grade
+    else:
+        grade = user_edx_run_data.current_grade.percent
     return UserFinalGrade(grade=grade, passed=run_passed)
 
 

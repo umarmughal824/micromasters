@@ -117,6 +117,28 @@ class GradeAPITests(MockedESTestCase):
         assert grade2_from_cert.grade == self.certificates.get(
             self.run_fa_with_cert.edx_course_key).data.get('grade')
 
+    @ddt.data(
+        ("verified", "downloadable", True),
+        ("audit", "downloadable", True),
+        ("verified", "generating", False),
+        ("verified", "notpassing", False),
+        ("verified", "unverified", False),
+    )
+    @ddt.unpack
+    def test_compute_grade_for_fa_certs_status(self, certificate_type, status, expected_result):
+        """
+        Tests for _compute_grade_for_fa function with certificates of different status
+        """
+        course_key = self.run_fa_with_cert.edx_course_key
+        certificate = self.certificates[course_key]
+        certificate.data.update(certificate_type=certificate_type, status=status)
+        certificate.save()
+
+        run_data = CachedEdxUserData(self.user).get_run_data(course_key)
+        grade = api._compute_grade_for_fa(run_data)
+        assert grade.passed is expected_result
+        assert grade.grade == self.certificates.get(course_key).data.get('grade')
+
     def test_compute_grade_for_non_fa(self):
         """
         Tests for _compute_grade_for_non_fa function.
@@ -137,6 +159,28 @@ class GradeAPITests(MockedESTestCase):
         assert grade4.passed is True
         assert grade4.grade == self.certificates.get(
             self.run_no_fa_with_cert.edx_course_key).data.get('grade')
+
+    @ddt.data(
+        ("verified", "downloadable", True),
+        ("audit", "downloadable", True),
+        ("verified", "generating", False),
+        ("verified", "notpassing", False),
+        ("verified", "unverified", False),
+    )
+    @ddt.unpack
+    def test_compute_grade_for_non_fa_certs_status(self, certificate_type, status, expected_result):
+        """
+        Tests for _compute_grade_for_non_fa function with certificates of different status
+        """
+        course_key = self.run_no_fa_with_cert.edx_course_key
+        certificate = self.certificates[course_key]
+        certificate.data.update(certificate_type=certificate_type, status=status)
+        certificate.save()
+
+        run_data = CachedEdxUserData(self.user).get_run_data(course_key)
+        grade = api._compute_grade_for_non_fa(run_data)
+        assert grade.passed is expected_result
+        assert grade.grade == self.certificates.get(course_key).data.get('grade')
 
     def test_get_compute_func(self):
         """
