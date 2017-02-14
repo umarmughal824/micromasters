@@ -557,6 +557,17 @@ FEATURES = {
     in get_all_config_keys() if key.startswith(MM_FEATURES_PREFIX)
 }
 
+MIDDLEWARE_FEATURE_FLAG_QS_PREFIX = get_var("MIDDLEWARE_FEATURE_FLAG_QS_PREFIX", None)
+MIDDLEWARE_FEATURE_FLAG_COOKIE_NAME = get_var('MIDDLEWARE_FEATURE_FLAG_COOKIE_NAME', 'MM_FEATURE_FLAGS')
+MIDDLEWARE_FEATURE_FLAG_COOKIE_MAX_AGE_SECONDS = get_var('MIDDLEWARE_FEATURE_FLAG_COOKIE_MAX_AGE_SECONDS', 60 * 60)
+
+
+if MIDDLEWARE_FEATURE_FLAG_QS_PREFIX:
+    MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + (
+        'ui.middleware.QueryStringFeatureFlagMiddleware',
+        'ui.middleware.CookieFeatureFlagMiddleware',
+    )
+
 
 # django debug toolbar only in debug mode
 if DEBUG:

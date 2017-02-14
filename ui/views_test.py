@@ -329,6 +329,9 @@ class DashboardTests(ViewsTests):
                 'public_path': '/static/bundles/',
                 'EXAMS_SSO_CLIENT_CODE': 'itsacode',
                 'EXAMS_SSO_URL': 'url',
+                'FEATURES': {
+                    'EXAMS': False,
+                },
             }
             assert resp.context['is_public'] is False
             assert resp.context['has_zendesk_widget'] is True
@@ -725,6 +728,9 @@ class TestUsersPage(ViewsTests):
                     'public_path': '/static/bundles/',
                     'EXAMS_SSO_CLIENT_CODE': 'itsacode',
                     'EXAMS_SSO_URL': 'url',
+                    'FEATURES': {
+                        'EXAMS': False,
+                    },
                 }
                 assert has_permission.called
 
@@ -791,6 +797,9 @@ class TestUsersPage(ViewsTests):
                     'public_path': '/static/bundles/',
                     'EXAMS_SSO_CLIENT_CODE': 'itsacode',
                     'EXAMS_SSO_URL': 'url',
+                    'FEATURES': {
+                        'EXAMS': False,
+                    },
                 }
                 assert has_permission.called
 

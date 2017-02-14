@@ -13,6 +13,9 @@ declare var SETTINGS: {
   edx_base_url: string,
   EXAMS_SSO_CLIENT_CODE: string,
   EXAMS_SSO_URL: string,
+  FEATURES: {
+    [key: string]: boolean,
+  },
   support_email: string,
   es_page_size: number,
   search_url: string,
