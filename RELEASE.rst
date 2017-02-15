@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.47.1
+--------------
+
+- Lower logging of unexceptional exception to debug
+- create pyup.io config file (#2482)
+- Update html5lib from 0.999999 to 0.999999999 (#2483)
+- Added Confirm Income dialog (#2536)
+
 Version 0.47.0
 --------------
 
