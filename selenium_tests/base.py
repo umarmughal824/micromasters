@@ -259,6 +259,10 @@ FROM pg_stat_activity WHERE pid <> pg_backend_pid()""")
             if "'webkitURL' is deprecated. Please use 'URL' instead" in message:
                 continue
 
+            # warnings (e.g. deprecations) should not fail the tests
+            if entry['level'] in ["WARNING"]:
+                continue
+
             messages.append(entry)
 
         assert len(messages) == 0, str(messages)

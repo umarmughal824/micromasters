@@ -37,7 +37,7 @@ def update_exam_authorization_final_grade(sender, instance, **kwargs):  # pylint
     try:
         authorize_for_exam(mmtrack, instance.course_run)
     except ExamAuthorizationException:
-        log.exception(
+        log.debug(
             'Unable to authorize user: %s for exam on course_id: %s',
             instance.user.username,
             instance.course_run.course.id

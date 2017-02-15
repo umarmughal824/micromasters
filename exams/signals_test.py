@@ -122,7 +122,7 @@ class ExamSignalsTest(MockedESTestCase):
                 passed=True,
             )
 
-        log.exception.assert_called_with(
+        log.debug.assert_called_with(
             'Unable to authorize user: %s for exam on course_id: %s',
             self.profile.user.username,
             self.course_run.course.id
