@@ -30,7 +30,7 @@ import {
   currentOrFirstIncompleteStep,
   getUserDisplayName,
   renderSeparatedComponents,
-  getPropertyOrDefault
+  isNilOrBlank
 } from '../util/util';
 import {
   EDUCATION_LEVELS,
@@ -685,21 +685,15 @@ describe('utility functions', () => {
     });
   });
 
-  describe('getPropertyOrDefault', () => {
-    let obj = {a: 'value for a'};
-
-    it('gets an object property by name', () => {
-      assert.equal(getPropertyOrDefault(obj, 'a', 'default value'), 'value for a');
-    });
-
-    it('returns a default value when given a null/undefined property name', () => {
-      [null, undefined].forEach(propName => {
-        assert.equal(getPropertyOrDefault(obj, propName, 'default value'), 'default value');
+  describe('isNilOrBlank', () => {
+    it('returns true for undefined, null, and a blank string', () => {
+      [undefined, null, ''].forEach(value => {
+        assert.isTrue(isNilOrBlank(value));
       });
     });
 
-    it('returns a default value when given a property name that an object does not have', () => {
-      assert.equal(getPropertyOrDefault(obj, 'z', 'default value'), 'default value');
+    it('returns false for a non-blank string', () => {
+      assert.isFalse(isNilOrBlank('not blank'));
     });
   });
 });

@@ -12,18 +12,12 @@ import R from 'ramda';
 
 import ErrorMessage from '../components/ErrorMessage';
 import LearnerSearch from '../components/LearnerSearch';
-import { SEARCH_EMAIL_TYPE } from '../components/email/constants';
-import { setSearchFilterVisibility, setEmailDialogVisibility } from '../actions/ui';
-import {
-  startEmailEdit,
-  updateEmailEdit,
-  clearEmailEdit,
-  updateEmailValidation,
-  sendSearchResultMail
-} from '../actions/email';
-import { emailValidation } from '../lib/validation/profile';
+import { setSearchFilterVisibility } from '../actions/ui';
 import type { UIState } from '../reducers/ui';
-import type { EmailState } from '../flow/emailTypes';
+import { SEARCH_EMAIL_TYPE } from '../components/email/constants';
+import { SEARCH_RESULT_EMAIL_CONFIG } from '../components/email/lib';
+import { withEmailDialog } from '../components/email/hoc';
+import type { AllEmailsState } from '../flow/emailTypes';
 import type { AvailableProgram } from '../flow/enrollmentTypes';
 import { getCookie } from '../lib/api';
 import { SEARCH_FILTER_DEFAULT_VISIBILITY } from '../constants';
@@ -38,8 +32,9 @@ class LearnerSearchPage extends React.Component {
   props: {
     currentProgramEnrollment: AvailableProgram,
     dispatch:                 Dispatch,
-    searchResultEmail:        EmailState,
+    email:                    AllEmailsState,
     ui:                       UIState,
+    openEmailComposer:        () => void
   };
 
   checkFilterVisibility = (filterName: string): boolean => {
@@ -55,63 +50,8 @@ class LearnerSearchPage extends React.Component {
     dispatch(setSearchFilterVisibility(clone));
   };
 
-  openEmailComposer = (searchkit) => {
-    const { dispatch } = this.props;
-    dispatch(
-      startEmailEdit(
-        {
-          type: SEARCH_EMAIL_TYPE,
-          params: {searchkit: searchkit},
-          subheading: `${searchkit.getHitsCount() || 0} recipients selected`
-        }
-      )
-    );
-    dispatch(setEmailDialogVisibility(true));
-  };
-
-  closeAndClearEmailComposer = () => {
-    const { dispatch } = this.props;
-    dispatch(clearEmailEdit(SEARCH_EMAIL_TYPE));
-    dispatch(setEmailDialogVisibility(false));
-  };
-
-  closeEmailComposerAndSend = (): void => {
-    const { dispatch, searchResultEmail: { inputs, params } } = this.props;
-    let errors = emailValidation(inputs);
-    dispatch(updateEmailValidation({type: SEARCH_EMAIL_TYPE, errors: errors}));
-    if (R.isEmpty(errors)) {
-      dispatch(
-        sendSearchResultMail(
-          inputs.subject || '',
-          inputs.body || '',
-          params.searchkit.buildQuery().query
-        )
-      ).then(() => {
-        this.closeAndClearEmailComposer();
-      });
-    }
-  };
-
-  updateEmailEdit = R.curry((fieldName, e) => {
-    const {
-      dispatch,
-      searchResultEmail: { inputs, validationErrors }
-    } = this.props;
-    let inputsClone = R.clone(inputs);
-    inputsClone[fieldName] = e.target.value;
-    dispatch(updateEmailEdit({type: SEARCH_EMAIL_TYPE, inputs: inputsClone}));
-    if (! R.isEmpty(validationErrors)) {
-      let cloneErrors = emailValidation(inputsClone);
-      dispatch(updateEmailValidation({type: SEARCH_EMAIL_TYPE, errors: cloneErrors}));
-    }
-  });
-
   render () {
-    const {
-      ui: { emailDialogVisibility },
-      currentProgramEnrollment,
-      searchResultEmail
-    } = this.props;
+    const { currentProgramEnrollment, openEmailComposer } = this.props;
 
     if (_.isNil(currentProgramEnrollment)) {
       return <ErrorMessage errorInfo={{user_message: "No program enrollment is available."}} />;
@@ -123,12 +63,7 @@ class LearnerSearchPage extends React.Component {
           <LearnerSearch
             checkFilterVisibility={this.checkFilterVisibility}
             setFilterVisibility={this.setFilterVisibility}
-            openEmailComposer={this.openEmailComposer}
-            closeEmailDialog={this.closeAndClearEmailComposer}
-            updateEmailEdit={this.updateEmailEdit}
-            sendEmail={this.closeEmailComposerAndSend}
-            emailDialogVisibility={emailDialogVisibility}
-            email={searchResultEmail}
+            openSearchResultEmailComposer={openEmailComposer(SEARCH_EMAIL_TYPE)}
             currentProgramEnrollment={currentProgramEnrollment}
           />
         </SearchkitProvider>
@@ -140,9 +75,14 @@ class LearnerSearchPage extends React.Component {
 const mapStateToProps = state => {
   return {
     ui:                       state.ui,
-    searchResultEmail:        state.email.searchResultEmail,
+    email:                    state.email,
     currentProgramEnrollment: state.currentProgramEnrollment
   };
 };
 
-export default connect(mapStateToProps)(LearnerSearchPage);
+export default R.compose(
+  connect(mapStateToProps),
+  withEmailDialog({
+    [SEARCH_EMAIL_TYPE]: SEARCH_RESULT_EMAIL_CONFIG
+  })
+)(LearnerSearchPage);

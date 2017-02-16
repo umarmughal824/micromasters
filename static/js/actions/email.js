@@ -3,9 +3,7 @@ import type { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 
 import type { Dispatcher } from '../flow/reduxTypes';
-import type {
-  EmailSendResponse,
-} from '../flow/emailTypes';
+import type { EmailSendResponse } from '../flow/emailTypes';
 import {
   SEARCH_EMAIL_TYPE,
   COURSE_EMAIL_TYPE

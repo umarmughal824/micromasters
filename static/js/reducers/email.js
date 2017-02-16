@@ -21,20 +21,21 @@ import type {
   EmailInputs,
 } from '../flow/emailTypes';
 
-export const INITIAL_EMAIL_STATE: EmailState = {
-  inputs: {},
-  params: {},
-  validationErrors: {},
-  sendError: {},
-};
-export const INITIAL_ALL_EMAILS_STATE: AllEmailsState = {
-  searchResultEmail: INITIAL_EMAIL_STATE,
-  courseTeamEmail: INITIAL_EMAIL_STATE
-};
-
 export const NEW_EMAIL_EDIT: EmailInputs = {
   subject:    null,
   body:       null,
+};
+
+export const INITIAL_EMAIL_STATE: EmailState = {
+  inputs: { ...NEW_EMAIL_EDIT },
+  params: {},
+  validationErrors: {},
+  sendError: {},
+  subheading: undefined
+};
+
+export const INITIAL_ALL_EMAILS_STATE: AllEmailsState = {
+  currentlyActive: null
 };
 
 const getEmailType = (payload: string|Object) => (
@@ -49,27 +50,36 @@ function updatedState(state: AllEmailsState, emailType: string, updateObject: Ob
   return clonedState;
 }
 
+function resetState(state: AllEmailsState, emailType: string) {
+  let clonedState = _.cloneDeep(state);
+  clonedState[emailType] = INITIAL_EMAIL_STATE;
+  return clonedState;
+}
+
 export const email = (state: AllEmailsState = INITIAL_ALL_EMAILS_STATE, action: Action) => {
   let emailType = getEmailType(action.payload);
 
   switch (action.type) {
-  case START_EMAIL_EDIT:
-    return updatedState(state, emailType, {
-      inputs: NEW_EMAIL_EDIT,
-      params: action.payload.params,
+  case START_EMAIL_EDIT:  // eslint-disable-line no-case-declarations
+    let newState = { ...state };
+    newState[emailType] = {
+      ...INITIAL_EMAIL_STATE,
+      params: action.payload.params || {},
       subheading: action.payload.subheading
-    });
+    };
+    newState.currentlyActive = emailType;
+    return newState;
   case UPDATE_EMAIL_EDIT:
     return updatedState(state, emailType, { inputs: action.payload.inputs });
   case CLEAR_EMAIL_EDIT:
-    return updatedState(state, emailType, INITIAL_EMAIL_STATE);
+    return resetState(state, emailType);
   case UPDATE_EMAIL_VALIDATION:
     return updatedState(state, emailType, { validationErrors: action.payload.errors });
 
   case INITIATE_SEND_EMAIL:
     return updatedState(state, emailType, { fetchStatus: FETCH_PROCESSING });
   case SEND_EMAIL_SUCCESS:
-    return updatedState(state, emailType, { ...INITIAL_ALL_EMAILS_STATE, fetchStatus: FETCH_SUCCESS });
+    return updatedState(state, emailType, { fetchStatus: FETCH_SUCCESS });
   case SEND_EMAIL_FAILURE:
     return updatedState(state, emailType, { fetchStatus: FETCH_FAILURE, sendError: action.payload.error });
   default:

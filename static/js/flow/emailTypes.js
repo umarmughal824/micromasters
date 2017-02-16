@@ -1,4 +1,6 @@
 // @flow
+import type { Dispatcher } from './reduxTypes';
+
 export type EmailSendResponse = {
   errorStatusCode?: number,
 };
@@ -12,7 +14,7 @@ export type EmailValidationErrors = EmailInputs;
 
 export type EmailState = {
   inputs:           EmailInputs,
-  subheading?:      ?string,
+  subheading:       ?string,
   params:           Object,
   validationErrors: EmailValidationErrors,
   sendError:        EmailSendError,
@@ -20,6 +22,14 @@ export type EmailState = {
 };
 
 export type AllEmailsState = {
-  searchResultEmail:  EmailState,
-  courseTeamEmail:    EmailState,
+  currentlyActive:     ?string,
+  searchResultEmail?:  EmailState,
+  courseTeamEmail?:    EmailState,
+};
+
+export type EmailConfig = {
+  title: string,
+  renderSubheading: (subheading: string) => React$Element<*>,
+  emailOpenParams: (args: any) => Object,
+  emailSendAction: (emailState: EmailState) => Dispatcher<EmailSendResponse>
 };

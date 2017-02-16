@@ -1,4 +1,5 @@
 import React from 'react';
+import _ from 'lodash';
 import { mount } from 'enzyme';
 import { assert } from 'chai';
 import sinon from 'sinon';
@@ -8,116 +9,102 @@ import TestUtils from 'react-addons-test-utils';
 
 import * as inputUtil from '../inputs/util';
 import { FETCH_PROCESSING } from '../../actions';
-import {
-  INITIAL_EMAIL_STATE
-} from '../../reducers/email';
 import { modifyTextField } from '../../util/test_utils';
 import EmailCompositionDialog from './EmailCompositionDialog';
-import { SEARCH_EMAIL_TYPE, COURSE_EMAIL_TYPE } from './constants';
+import {
+  TEST_EMAIL_TYPE,
+  TEST_EMAIL_CONFIG,
+  INITIAL_TEST_EMAIL_STATE
+} from './test_constants';
 
 describe('EmailCompositionDialog', () => {
-  let sandbox, updateStub, closeEmailDialog, updateEmailEdit, sendEmail;
+  let sandbox, sendStub, closeStub, updateStub;
+
+  const updateObject = (objectToUpdate = {}, updatedProps = {}) => {
+    let cloned = _.cloneDeep(objectToUpdate);
+    _.forEach(updatedProps, function(value, key) {
+      cloned[key] = value;
+    });
+    return cloned;
+  };
+
+  const getDialog = () => document.querySelector('.email-composition-dialog');
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    sendStub = sandbox.stub();
+    closeStub = sandbox.stub();
     updateStub = sandbox.stub();
-    closeEmailDialog = sandbox.stub().returns(updateStub);
-    updateEmailEdit = sandbox.stub().returns(updateStub);
-    sendEmail = sandbox.stub();
   });
 
   afterEach(() => {
     sandbox.restore();
   });
 
-  const getDialog = () => document.querySelector('.email-composition-dialog');
-
-  const renderDialog = (props = {}) => (
-    mount (
+  const renderDialog = (updatedEmailState = {}, props = {}) => {
+    let emailState = updateObject(INITIAL_TEST_EMAIL_STATE[TEST_EMAIL_TYPE], updatedEmailState);
+    return mount(
       <MuiThemeProvider muiTheme={getMuiTheme()}>
         <EmailCompositionDialog
-          closeEmailDialog={closeEmailDialog}
-          updateEmailEdit={updateEmailEdit}
-          open={true}
-          email={{ ...INITIAL_EMAIL_STATE }}
-          sendEmail={sendEmail}
-          {...props}
+          updateEmailFieldEdit={() => (updateStub)}
+          closeAndClearEmailComposer={closeStub}
+          closeEmailComposerAndSend={sendStub}
+          dialogVisibility={true}
+          activeEmail={emailState}
+          title={TEST_EMAIL_CONFIG.title}
+          subheadingRenderer={TEST_EMAIL_CONFIG.renderSubheading}
+          { ...props }
         />
       </MuiThemeProvider>
-    )
-  );
+    );
+  };
 
   it('should have a title', () => {
     renderDialog();
-    assert.equal(document.querySelector('h3').textContent, 'New Email');
+    assert.equal(document.querySelector('h3').textContent, 'Test Email Dialog');
   });
 
   it('should fire the send handler when the "send" button is clicked', () => {
-    renderDialog();
+    renderDialog(
+      {inputs: {subject: 'abc', body: 'abc'}}
+    );
     TestUtils.Simulate.click(getDialog().querySelector('.save-button'));
-    assert.isTrue(sendEmail.called, "called send handler");
+    assert.isTrue(sendStub.called, "called send handler");
+  });
+
+  it('should fire the close handler when the "cancel" button is clicked', () => {
+    renderDialog();
+    TestUtils.Simulate.click(getDialog().querySelector('.cancel-button'));
+    assert.isTrue(closeStub.called, "called send handler");
   });
 
   it('should show a disabled spinner button if email send is in progress', () => {
     let dialogActionsSpy = sandbox.spy(inputUtil, 'dialogActions');
-    renderDialog({
-      email: {
-        ...INITIAL_EMAIL_STATE,
-        fetchStatus: FETCH_PROCESSING,
-      }
-    });
+    renderDialog(
+      {fetchStatus: FETCH_PROCESSING}
+    );
 
     // assert that inFlight is true
     assert.isTrue(dialogActionsSpy.calledWith(sinon.match.any, sinon.match.any, true));
     assert.equal(dialogActionsSpy.callCount, 1);
   });
 
-  it('should show a subheader when subheader text exists in the state', () => {
-    renderDialog({
-      email: {
-        ...INITIAL_EMAIL_STATE,
-        subheading: 'Some subheader text'
-      }
-    });
-    assert.equal(document.querySelector('h5').textContent, 'Some subheader text');
-  });
-
   it('should not show a subheader when subheader text does not exist in the state', () => {
-    renderDialog({email: INITIAL_EMAIL_STATE});
-    assert.isNull(document.querySelector('h5'));
+    renderDialog();
+    assert.isNull(document.querySelector('.test-subheading'));
   });
 
-  it('should not show a simple subheader for search result emails', () => {
-    renderDialog({
-      email: {
-        ...INITIAL_EMAIL_STATE,
-        subheading: 'Some subheader text'
-      },
-      subheadingType: SEARCH_EMAIL_TYPE
-    });
-    assert.equal(document.querySelector('h5').className, 'subheading');
-  });
-
-  it('should not show a rounded subheader for course contact emails', () => {
-    renderDialog({
-      email: {
-        ...INITIAL_EMAIL_STATE,
-        subheading: 'Some subheader text'
-      },
-      subheadingType: COURSE_EMAIL_TYPE
-    });
-    let className = document.querySelector('h5').className;
-    assert.include(className, 'subheading');
-    assert.include(className, 'rounded');
-  });
-
-  it('should show a specific title when one is passed in', () => {
-    renderDialog({title: 'Some Title'});
-    assert.equal(document.querySelector('h3').textContent, 'Some Title');
+  it('should show a subheading when subheading text exists in the state', () => {
+    renderDialog(
+      {'subheading': 'this is a subheading'}
+    );
+    let subheading = document.querySelector('.test-subheading');
+    assert.equal(subheading.tagName, 'DIV');
+    assert.equal(subheading.textContent, 'this is a subheading');
   });
 
   it('should show a default title when one is not passed in', () => {
-    renderDialog();
+    renderDialog({}, {title: undefined});
     assert.equal(document.querySelector('h3').textContent, 'New Email');
   });
 
@@ -131,34 +118,24 @@ describe('EmailCompositionDialog', () => {
       });
 
       it('should display the value from the store', () => {
-        renderDialog({
-          email: {
-            ...INITIAL_EMAIL_STATE,
-            inputs: {
-              [field]: `${field} value!`
-            }
-          }
-        });
+        renderDialog(
+          {inputs: {[field]: `${field} value!`}}
+        );
         assert.equal(getField().value, `${field} value!`);
       });
 
       it('should fire the updateEmailEdit callback on change', () => {
         renderDialog();
-        let field = getField();
-        modifyTextField(field, "HI");
-        assert(updateStub.calledWith(), "onChange callback was called");
+        let fieldInput = getField();
+        modifyTextField(fieldInput, "HI");
+        assert.isTrue(updateStub.called, "called update handler");
       });
 
       it('should show an error if an error for the field is passed in', () => {
-        let errorMessage = `An error message for ${field}`;
-        renderDialog({
-          email: {
-            ...INITIAL_EMAIL_STATE,
-            validationErrors: {
-              [field]: errorMessage
-            }
-          }
-        });
+        let errorMessage = `${field} error!`;
+        renderDialog(
+          {validationErrors: {[field]: errorMessage}}
+        );
         let message = getDialog().querySelector('.validation-error').textContent;
         assert.equal(message, errorMessage);
       });
