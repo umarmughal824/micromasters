@@ -1,28 +1,15 @@
 /* global SETTINGS: false */
 import { assert } from 'chai';
 import _ from 'lodash';
-import TestUtils from 'react-addons-test-utils';
 
 import IntegrationTestHelper from '../util/integration_test_helper';
 import {
   PROGRAMS,
   ELASTICSEARCH_RESPONSE,
 } from '../test_constants';
-import { setEmailDialogVisibility } from '../actions/ui';
-import {
-  INITIATE_SEND_EMAIL,
-  SEND_EMAIL_SUCCESS,
-  UPDATE_EMAIL_VALIDATION,
-  UPDATE_EMAIL_EDIT,
-  CLEAR_EMAIL_EDIT,
-  startEmailEdit,
-} from '../actions/email';
-import {
-  SET_EMAIL_DIALOG_VISIBILITY,
-} from '../actions/ui';
-import { SEARCH_EMAIL_TYPE } from '../components/email/constants';
-import * as api from '../lib/api';
-import { modifyTextField } from '../util/test_utils';
+import { START_EMAIL_EDIT } from '../actions/email';
+import { SHOW_DIALOG } from '../actions/ui';
+import { EMAIL_COMPOSITION_DIALOG } from '../components/email/constants';
 
 describe('LearnerSearchPage', function () {
   let renderComponent, listenForActions, helper, server;
@@ -67,44 +54,20 @@ describe('LearnerSearchPage', function () {
     });
   });
 
-  it('waits for a successful email send to close the dialog', () => {
-    let searchKitStub = {
-      buildQuery: () => ({query: {abc: 123}})
-    };
-    helper.programsGetStub.returns(Promise.resolve(PROGRAMS));
-    helper.store.dispatch(
-      startEmailEdit({
-        type: SEARCH_EMAIL_TYPE,
-        params: {
-          searchkit: searchKitStub
-        }
-      })
-    );
-    helper.store.dispatch(setEmailDialogVisibility(true));
-    let sendSearchResultMail = helper.sandbox.stub(api, 'sendSearchResultMail');
-    sendSearchResultMail.returns(Promise.resolve());
+  it('email learners link shows the email composition dialog', () => {
+    const EMAIL_LINK_SELECTOR = '#email-selected';
+    const EMAIL_DIALOG_ACTIONS = [
+      START_EMAIL_EDIT,
+      SHOW_DIALOG
+    ];
 
-    return renderComponent('/learners').then(() => {
-      let dialog = document.querySelector('.email-composition-dialog');
-      let saveButton = dialog.querySelector('.save-button');
+    return renderComponent('/learners').then(([wrapper]) => {
+      let emailLink = wrapper.find(EMAIL_LINK_SELECTOR).at(0);
 
-      return listenForActions([
-        UPDATE_EMAIL_EDIT,
-        UPDATE_EMAIL_EDIT,
-        UPDATE_EMAIL_VALIDATION,
-        INITIATE_SEND_EMAIL,
-        SEND_EMAIL_SUCCESS,
-        CLEAR_EMAIL_EDIT,
-        SET_EMAIL_DIALOG_VISIBILITY,
-      ], () => {
-        modifyTextField(dialog.querySelector('.email-subject'), 'subject');
-        modifyTextField(dialog.querySelector('.email-body'), 'body');
-
-        assert.isTrue(helper.store.getState().ui.emailDialogVisibility);
-        TestUtils.Simulate.click(saveButton);
-      }).then(() => {
-        assert.isFalse(helper.store.getState().ui.emailDialogVisibility);
-        assert.isTrue(sendSearchResultMail.calledWith("subject", "body", {abc: 123}));
+      return listenForActions(EMAIL_DIALOG_ACTIONS, () => {
+        emailLink.simulate('click');
+      }).then((state) => {
+        assert.isTrue(state.ui.dialogVisibility[EMAIL_COMPOSITION_DIALOG]);
       });
     });
   });

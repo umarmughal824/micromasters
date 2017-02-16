@@ -487,10 +487,8 @@ export function renderSeparatedComponents(
   );
 }
 
-/**
- * Returns the value of an object's property by name, or a default if (a) the property name
- * is null/undefined or (b) the property doesn't exist in the object.
- */
-export function getPropertyOrDefault(obj: Object, property: ?string, defaultValue: any): any {
-  return _.get(obj, property, defaultValue);
+export function getDisplayName(WrappedComponent: ReactClass<*>) {
+  return WrappedComponent.displayName || WrappedComponent.name || 'Component';
 }
+
+export const isNilOrBlank = R.either(R.isNil, R.isEmpty);

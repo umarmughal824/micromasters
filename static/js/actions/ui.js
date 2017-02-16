@@ -6,6 +6,12 @@ import { createAction } from 'redux-actions';
 export const CLEAR_UI = 'CLEAR_UI';
 export const clearUI = createAction(CLEAR_UI);
 
+export const SHOW_DIALOG = 'SHOW_DIALOG';
+export const showDialog = createAction(SHOW_DIALOG);
+
+export const HIDE_DIALOG = 'HIDE_DIALOG';
+export const hideDialog = createAction(HIDE_DIALOG);
+
 export const UPDATE_DIALOG_TEXT = 'UPDATE_DIALOG_TEXT';
 export const updateDialogText = createAction(UPDATE_DIALOG_TEXT);
 

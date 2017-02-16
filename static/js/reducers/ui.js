@@ -2,6 +2,9 @@
 /* global SETTINGS: false */
 import {
   CLEAR_UI,
+  SHOW_DIALOG,
+  HIDE_DIALOG,
+
   UPDATE_DIALOG_TEXT,
   UPDATE_DIALOG_TITLE,
   SET_DIALOG_VISIBILITY,
@@ -45,6 +48,7 @@ import {
   SET_PROGRAM,
   SET_LEARNER_CHIP_VISIBILITY,
 } from '../actions/ui';
+import { EMAIL_COMPOSITION_DIALOG } from '../components/email/constants';
 import type { ToastMessage } from '../flow/generalTypes';
 import type { Action } from '../flow/reduxTypes';
 import type { AvailableProgram } from '../flow/enrollmentTypes';
@@ -53,6 +57,12 @@ export type UIDialog = {
   title?: string,
   text?: string,
   visible?: boolean,
+};
+
+export type DialogVisibilityState = {[dialogName: string]: boolean};
+
+export const INITIAL_DIALOG_VISIBILITY_STATE = {
+  [EMAIL_COMPOSITION_DIALOG]: false
 };
 
 export type UIState = {
@@ -90,6 +100,7 @@ export type UIState = {
   couponNotificationVisibility:        boolean,
   navDrawerOpen:                       boolean,
   learnerChipVisibility:               ?string,
+  dialogVisibility:                    DialogVisibilityState
 };
 
 export const INITIAL_UI_STATE: UIState = {
@@ -127,10 +138,27 @@ export const INITIAL_UI_STATE: UIState = {
   couponNotificationVisibility:        false,
   navDrawerOpen:                       false,
   learnerChipVisibility:               null,
+  dialogVisibility:                    INITIAL_DIALOG_VISIBILITY_STATE
 };
 
 export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
   switch (action.type) {
+  case SHOW_DIALOG:
+    return {
+      ...state,
+      dialogVisibility: {
+        ...state.dialogVisibility,
+        [action.payload]: true
+      },
+    };
+  case HIDE_DIALOG:
+    return {
+      ...state,
+      dialogVisibility: {
+        ...state.dialogVisibility,
+        [action.payload]: false
+      },
+    };
   case UPDATE_DIALOG_TEXT:
     return {
       ...state,

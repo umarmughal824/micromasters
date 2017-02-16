@@ -17,8 +17,8 @@ import {
   SEND_EMAIL_SUCCESS,
   SEND_EMAIL_FAILURE,
 } from '../actions/email';
-import { INITIAL_ALL_EMAILS_STATE, INITIAL_EMAIL_STATE, NEW_EMAIL_EDIT } from './email';
-import { SEARCH_EMAIL_TYPE } from '../components/email/constants';
+import { INITIAL_ALL_EMAILS_STATE, INITIAL_EMAIL_STATE } from './email';
+import { SEARCH_EMAIL_TYPE, COURSE_EMAIL_TYPE } from '../components/email/constants';
 import type { EmailSendResponse } from '../flow/emailTypes';
 import * as api from '../lib/api';
 import rootReducer from '../reducers';
@@ -42,7 +42,7 @@ describe('email reducers', () => {
     sandbox.restore();
   });
 
-  let initialExpectedEmailState = { ...INITIAL_EMAIL_STATE, inputs: NEW_EMAIL_EDIT };
+  let initialExpectedEmailState = INITIAL_EMAIL_STATE;
 
   it('should let you start editing an email', () => {
     return dispatchThen(startEmailEdit(emailType), [START_EMAIL_EDIT]).then(state => {
@@ -65,7 +65,10 @@ describe('email reducers', () => {
   it('should let you clear an existing email edit', () => {
     return assert.eventually.deepEqual(
       dispatchThen(clearEmailEdit(emailType), [CLEAR_EMAIL_EDIT]),
-      INITIAL_ALL_EMAILS_STATE,
+      {
+        ...INITIAL_ALL_EMAILS_STATE,
+        [emailType]: INITIAL_EMAIL_STATE
+      },
     );
   });
 
@@ -86,7 +89,9 @@ describe('email reducers', () => {
       searchRequest = { size: 50 };
 
     beforeEach(() => {
+      emailType = SEARCH_EMAIL_TYPE;
       sendSearchResultMailStub = sandbox.stub(api, 'sendSearchResultMail');
+      store.dispatch(startEmailEdit(emailType));
     });
 
     it('should go through expected state changes when the send function succeeds', () => {
@@ -120,7 +125,9 @@ describe('email reducers', () => {
       courseId = 123;
 
     beforeEach(() => {
+      emailType = COURSE_EMAIL_TYPE;
       sendCourseTeamMailStub = sandbox.stub(api, 'sendCourseTeamMail');
+      store.dispatch(startEmailEdit(emailType));
     });
 
     it('should go through expected state changes when the send function succeeds', () => {
