@@ -10,15 +10,11 @@ services:
     ports:
       - "6379"
 
-  web:
+  python:
     build:
       context: .
       dockerfile: ./travis/Dockerfile-travis-web
-    command: >
-      /bin/bash -c '
-      sleep 3 &&
-      python3 manage.py migrate &&
-      ./with_host.sh python3 manage.py runserver 0.0.0.0:8079'
+    command: /bin/true
     environment:
       DEBUG: 'False'
       COVERAGE_DIR: htmlcov
@@ -31,31 +27,30 @@ services:
       BROKER_URL: redis://redis:6379/4
       CELERY_RESULT_BACKEND: redis://redis:6379/4
     env_file: .env
+
+  web:
+    image: micromasters_python
+    extends:
+      service: python
+    command: >
+      /bin/bash -c '
+      sleep 3 &&
+      python3 manage.py migrate &&
+      ./with_host.sh python3 manage.py runserver 0.0.0.0:8079'
     ports:
       - "8079:8079"
     links:
       - db
       - elastic
-      - grid
 
   celery:
-    image: micromasters_web
-    mem_limit: 384m
+    image: micromasters_python
+    extends:
+      service: python
     command: >
       /bin/bash -c '
       sleep 3;
       celery -A micromasters worker -B -l debug'
-    volumes_from:
-      - web
-    environment:
-      DEBUG: 'False'
-      MICROMASTERS_DB_DISABLE_SSL: 'True'
-      DATABASE_URL: postgres://postgres@db:5432/postgres
-      BROKER_URL: redis://redis:6379/4
-      CELERY_RESULT_BACKEND: redis://redis:6379/4
-      ELASTICSEARCH_URL: elastic:9200
-      CELERY_ALWAYS_EAGER: 'True'
-    env_file: .env
     links:
       - db
       - elastic
@@ -66,6 +61,15 @@ services:
     command: elasticsearch -Des.network.host=0.0.0.0
     ports:
       - "9200"
+
+  selenium:
+    image: micromasters_python
+    extends:
+      service: python
+    links:
+      - db
+      - elastic
+      - redis
 
   grid:
     image: elgalu/selenium
