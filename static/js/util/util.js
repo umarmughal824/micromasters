@@ -378,7 +378,14 @@ export function formatPrice(price: ?string|number|Decimal): string {
   if (price === null || price === undefined) {
     return '';
   } else {
-    return `$${price}`;
+    let formattedPrice: Decimal = Decimal(price);
+
+    if (formattedPrice.isInteger()) {
+      formattedPrice =  formattedPrice.toFixed(0);
+    } else {
+      formattedPrice =  formattedPrice.toFixed(2, Decimal.ROUND_HALF_UP);
+    }
+    return `$${formattedPrice}`;
   }
 }
 
