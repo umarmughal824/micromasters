@@ -23,7 +23,6 @@ import {
 import { createSimpleActionHelpers } from '../lib/redux';
 import { currencyOptions } from '../lib/currency';
 import { validateFinancialAid } from '../lib/validation/profile';
-import { sanitizeNumberString } from '../lib/validation/date';
 import type { AvailableProgram } from '../flow/enrollmentTypes';
 import type {
   FinancialAidState,
@@ -57,7 +56,7 @@ const currencySelect = (update, current) => (
 
 const salaryUpdate = R.curry((update, current, e) => {
   let newEdit = R.clone(current);
-  newEdit.income = sanitizeNumberString(20, e.target.value);
+  newEdit.income = e.target.value;
   update(newEdit);
 });
 

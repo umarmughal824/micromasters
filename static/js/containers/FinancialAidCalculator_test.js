@@ -206,6 +206,26 @@ describe('FinancialAidCalculator', () => {
     });
   });
 
+  for (let income of ["2000.00", "2000.50", "2Adb", "two thousand"]) {
+    it(`should show validation errors if invalid income=${income}`, () => {
+      return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
+        return listenForActions([
+          START_CALCULATOR_EDIT,
+          UPDATE_CALCULATOR_EDIT,
+          SET_CALCULATOR_DIALOG_VISIBILITY,
+          UPDATE_CALCULATOR_VALIDATION,
+          UPDATE_CALCULATOR_EDIT
+        ], () => {
+          wrapper.find('.pricing-actions').find('.calculate-cost-button').simulate('click');
+          modifyTextField(document.querySelector('#user-salary-input'), income);
+        }).then(() => {
+          let state = helper.store.getState().financialAid;
+          assert.equal(state.validation["income"], "Please only use whole numbers.");
+        });
+      });
+    });
+  }
+
   it('should let you enter your preferred currency', () => {
     return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
       return listenForActions([

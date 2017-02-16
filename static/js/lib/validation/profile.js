@@ -299,5 +299,10 @@ export const validateFinancialAid = (edit: FinancialAidState): FinancialAidValid
   if (!edit.checkBox) {
     errors['checkBox'] = 'You must agree to these terms';
   }
+
+  if (edit.income && /\D+/.test(edit.income)) {
+    errors['income'] = 'Please only use whole numbers.';
+  }
+
   return errors;
 };
