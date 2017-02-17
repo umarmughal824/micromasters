@@ -26,6 +26,11 @@ from ecommerce.api import (
     make_dashboard_receipt_url,
     pick_coupons,
 )
+from ecommerce.constants import (
+    CYBERSOURCE_DECISION_ACCEPT,
+    CYBERSOURCE_DECISION_CANCEL,
+)
+from ecommerce.exceptions import EcommerceException
 from ecommerce.models import (
     Coupon,
     Order,
@@ -148,29 +153,36 @@ class OrderFulfillmentView(APIView):
         receipt.order = order
         receipt.save()
 
-        if request.data['decision'] != 'ACCEPT':
-            # This may happen if the user clicks 'Cancel Order'
+        decision = request.data['decision']
+        if order.status == Order.FAILED and decision == CYBERSOURCE_DECISION_CANCEL:
+            # This is a duplicate message, ignore since it's already handled
+            return Response(status=HTTP_200_OK)
+        elif order.status != Order.CREATED:
+            raise EcommerceException("Order {} is expected to have status 'created'".format(order.id))
+
+        if decision != CYBERSOURCE_DECISION_ACCEPT:
             order.status = Order.FAILED
             log.warning(
                 "Order fulfillment failed: received a decision that wasn't ACCEPT for order %s",
                 order,
             )
-            try:
-                MailgunClient().send_individual_email(
-                    "Order fulfillment failed, decision={decision}".format(
-                        decision=request.data['decision']
-                    ),
-                    "Order fulfillment failed for order {order}".format(
-                        order=order,
-                    ),
-                    settings.ECOMMERCE_EMAIL
-                )
-            except:  # pylint: disable=bare-except
-                log.exception(
-                    "Error occurred when sending the email to notify "
-                    "about order fulfillment failure for order %s",
-                    order,
-                )
+            if decision != CYBERSOURCE_DECISION_CANCEL:
+                try:
+                    MailgunClient().send_individual_email(
+                        "Order fulfillment failed, decision={decision}".format(
+                            decision=decision
+                        ),
+                        "Order fulfillment failed for order {order}".format(
+                            order=order,
+                        ),
+                        settings.ECOMMERCE_EMAIL
+                    )
+                except:  # pylint: disable=bare-except
+                    log.exception(
+                        "Error occurred when sending the email to notify "
+                        "about order fulfillment failure for order %s",
+                        order,
+                    )
         else:
             order.status = Order.FULFILLED
         order.save_and_log(None)
@@ -201,7 +213,7 @@ class OrderFulfillmentView(APIView):
                         order,
                     )
         # The response does not matter to CyberSource
-        return Response()
+        return Response(status=HTTP_200_OK)
 
 
 class CouponsView(ListModelMixin, GenericViewSet):
