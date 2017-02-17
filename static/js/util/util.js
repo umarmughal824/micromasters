@@ -9,6 +9,7 @@ import { S } from '../lib/sanctuary';
 const { Maybe, Just, Nothing } = S;
 import R from 'ramda';
 import Decimal from 'decimal.js-light';
+import { remove as removeDiacritics } from 'diacritics';
 
 import {
   STATUS_PASSED,
@@ -451,6 +452,31 @@ export const classify: (s: string) => string = (
 );
 
 export const labelSort = R.sortBy(R.compose(R.toLower, R.prop('label')));
+
+export function highlight(text: string, highlightPhrase: ?string) {
+  if (!highlightPhrase || !text) {
+    return text;
+  }
+
+  let filteredPhrase = removeDiacritics(highlightPhrase.toLowerCase());
+  let filteredText = removeDiacritics(text.toLowerCase());
+
+  let startPosition = 0, endPosition;
+  let pieces = [];
+  while ((endPosition = filteredText.indexOf(filteredPhrase, startPosition)) !== -1) {
+    pieces.push(text.substring(startPosition, endPosition));
+    pieces.push(
+      <span className="highlight" key={startPosition}>
+        {text.substring(endPosition, endPosition + highlightPhrase.length)}
+      </span>
+    );
+
+    startPosition = endPosition + highlightPhrase.length;
+  }
+  pieces.push(text.substring(startPosition));
+
+  return <span>{pieces}</span>;
+}
 
 /**
  * Return first, last, preferred_name names if available else username

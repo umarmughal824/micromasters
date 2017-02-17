@@ -3,6 +3,7 @@ import { assert } from 'chai';
 import React from 'react';
 import R from 'ramda';
 import _ from 'lodash';
+import { shallow } from 'enzyme';
 import { S } from '../lib/sanctuary';
 const { Just } = S;
 
@@ -30,7 +31,8 @@ import {
   currentOrFirstIncompleteStep,
   getUserDisplayName,
   renderSeparatedComponents,
-  isNilOrBlank
+  isNilOrBlank,
+  highlight,
 } from '../util/util';
 import {
   EDUCATION_LEVELS,
@@ -657,6 +659,49 @@ describe('utility functions', () => {
     it('does not show preferred name when first name has same value', () => {
       profile.first_name = 'test';
       assert.equal('test doe', getUserDisplayName(profile));
+    });
+  });
+
+  describe('highlight', () => {
+    it("doesn't highlight if there's no highlight phrase", () => {
+      assert.equal(highlight('abc', ''), 'abc');
+    });
+
+    it("doesn't highlight if there's no text", () => {
+      assert.equal(highlight(null, 'xyz'), null);
+    });
+
+    it("filters out diacritics and makes text and phrase lowercase", () => {
+      let name = 'Côté';
+      let phrase = 'CÖ';
+      let result = highlight(name, phrase);
+      assert.equal(shallow(result).text(), name);
+      assert.equal(shallow(result).find('.highlight').text(), "Cô");
+    });
+
+    it("doesn't highlight if phrase doesn't match", () => {
+      let result = highlight('abc', 'xyz');
+      let wrapper = shallow(result);
+      assert.equal(wrapper.text(), 'abc');
+      assert.equal(wrapper.find(".highlight").length, 0);
+    });
+
+    it("handles unicode properly", () => {
+      let dog = "🐶";
+      let catdogfish = "🐱🐶🐟";
+      let result = highlight(catdogfish, dog);
+      assert.equal(catdogfish, shallow(result).text());
+      assert.equal(dog, shallow(result).find(".highlight").text());
+    });
+
+    it("handles multiple matches", () => {
+      let phrase = "match";
+      let text = "match1 match2";
+      let result = highlight(text, phrase);
+      assert.equal(
+        shallow(result).html(),
+        '<span><span class="highlight">match</span>1 <span class="highlight">match</span>2</span>',
+      );
     });
   });
 

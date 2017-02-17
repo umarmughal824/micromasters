@@ -6,7 +6,7 @@ import sinon from 'sinon';
 import R from 'ramda';
 import { SearchkitManager, SearchkitProvider } from 'searchkit';
 
-import FilterVisibilityToggle from './FilterVisibilityToggle';
+import FilterVisibilityToggle, { FILTER_ID_ADJUST } from './FilterVisibilityToggle';
 import { makeStrippedHtml } from '../../util/util';
 
 describe('FilterVisibilityToggle', () => {
@@ -48,19 +48,19 @@ describe('FilterVisibilityToggle', () => {
 
   it('renders children', () => {
     sandbox.stub(FilterVisibilityToggle.prototype, 'getResults').returns(null);
-    let toggle = renderStrippedHtmlToggle(props, <div>Test Text</div>);
+    let toggle = renderStrippedHtmlToggle(props, <div id="test">Test Text</div>);
     assert.include(toggle, "Test Text");
   });
 
   it('checks for filter visibility when rendering', () => {
     sandbox.stub(FilterVisibilityToggle.prototype, 'getResults').returns(null);
-    renderStrippedHtmlToggle(props, <div>Test Text</div>);
+    renderStrippedHtmlToggle(props, <div id="test">Test Text</div>);
     assert(checkFilterVisibility.called);
   });
 
   it('hides toggle icon when no results', () => {
     sandbox.stub(FilterVisibilityToggle.prototype, 'getResults').returns(null);
-    const wrapper = renderWrappedToggle(props, <div>Test Text</div>);
+    const wrapper = renderWrappedToggle(props, <div id="test">Test Text</div>);
     const icon = wrapper.find("i.material-icons");
     assert.lengthOf(icon, 0);
   });
@@ -107,5 +107,49 @@ describe('FilterVisibilityToggle', () => {
     assert.lengthOf(icon, 1);
     icon.simulate('click');
     assert(setFilterVisibility.called);
+  });
+
+  it("shows the toggle icon when a filter name matches our filter id map and is a prefix of an ES result key", () => {
+    for (const [key, value] of Object.entries(FILTER_ID_ADJUST)) {
+      sandbox.stub(FilterVisibilityToggle.prototype, 'getResults').returns({
+        aggregations: {
+          [`${value}123`]: {
+            doc_count: 2
+          }
+        }
+      });
+      props.filterName = key;
+      const wrapper = renderWrappedToggle(props, <div id={key}>Test Text</div>);
+      assert.equal(wrapper.find("Icon").props().className, "");
+      sandbox.restore();
+    }
+  });
+
+  it('shows the toggle icon the filter name is a prefix of a key in the ES results', () => {
+    sandbox.stub(FilterVisibilityToggle.prototype, 'getResults').returns({
+      aggregations: {
+        [`a.b.c.d.e.f456`]: {
+          doc_count: 2
+        }
+      }
+    });
+    let key = 'a.b.c.d.e.f';
+    props.filterName = key;
+    const wrapper = renderWrappedToggle(props, <div id={key}>Test Text</div>);
+    assert.equal(wrapper.find("Icon").length, 1);
+  });
+
+  it("hides toggle icon when the filter name doesn't match anything in ES results", () => {
+    sandbox.stub(FilterVisibilityToggle.prototype, 'getResults').returns({
+      aggregations: {
+        other_key: {
+          doc_count: 2
+        }
+      }
+    });
+    let key = 'a.b.c.d.e.f';
+    props.filterName = key;
+    const wrapper = renderWrappedToggle(props, <div id={key}>Test Text</div>);
+    assert.equal(wrapper.find("Icon").length, 0);
   });
 });

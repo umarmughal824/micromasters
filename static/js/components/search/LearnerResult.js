@@ -8,8 +8,13 @@ import type { Dispatch } from 'redux';
 import { setLearnerChipVisibility } from '../../actions/ui';
 import ProfileImage from '../../containers/ProfileImage';
 import LearnerChip from '../LearnerChip';
-import { getUserDisplayName, getLocation } from '../../util/util';
+import {
+  getUserDisplayName,
+  getLocation,
+  highlight,
+} from '../../util/util';
 import type { SearchResult } from '../../flow/searchTypes';
+import { SearchkitComponent } from 'searchkit';
 
 type LearnerResultProps = {
   result: { _source: SearchResult },
@@ -17,7 +22,7 @@ type LearnerResultProps = {
   learnerChipVisibility: ?string,
 };
 
-class LearnerResult extends React.Component {
+class LearnerResult extends SearchkitComponent {
   props: LearnerResultProps;
 
   static hasGrade = program => (
@@ -42,7 +47,7 @@ class LearnerResult extends React.Component {
           onMouseEnter={() => setLearnerChipVisibility(profile.username)}
         >
           <span className="display-name">
-            { getUserDisplayName(profile) }
+            { highlight(getUserDisplayName(profile), this.searchkit.state.q) }
           </span>
           {profile.username === learnerChipVisibility ? <LearnerChip profile={profile} /> : null}
         </Cell>

@@ -7,6 +7,10 @@ import { assert } from 'chai';
 import { mount } from 'enzyme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
+import {
+  SearchkitManager,
+  SearchkitProvider,
+} from 'searchkit';
 
 import ProfileImage from '../../containers/ProfileImage';
 import LearnerResult from './LearnerResult';
@@ -33,16 +37,24 @@ describe('LearnerResult', () => {
     helper.cleanup();
   });
 
-  let renderElasticSearchResult = (result, props = {}) => mount(
-    <MuiThemeProvider muiTheme={getMuiTheme()}>
-      <Provider store={helper.store}>
-        <LearnerResult
-          result={result}
-          {...props}
-        />
-      </Provider>
-    </MuiThemeProvider>
-  );
+  let renderElasticSearchResult = (result, props = {}) => {
+    const manager = new SearchkitManager();
+    manager.state = {
+      q: 'query'
+    };
+    return mount(
+      <MuiThemeProvider muiTheme={getMuiTheme()}>
+        <Provider store={helper.store}>
+          <SearchkitProvider searchkit={manager}>
+            <LearnerResult
+              result={result}
+              {...props}
+            />
+          </SearchkitProvider>
+        </Provider>
+      </MuiThemeProvider>
+    );
+  };
 
   let renderLearnerResult = (props = {}) => renderElasticSearchResult(
     { _source: {
@@ -134,4 +146,24 @@ describe('LearnerResult', () => {
       });
     });
   }
+
+  it('should highlight the text in the result', () => {
+    let profile = Object.assign({}, USER_PROFILE_RESPONSE);
+    profile.first_name = 'queryname';
+    profile.last_name = 'qÜeryson';
+    profile.preferred_name = 'Querypreferred';
+    let result = renderElasticSearchResult(
+      {
+        _source: {
+          profile: profile,
+          program: USER_PROGRAM_RESPONSE,
+        }
+      }
+    );
+    assert.deepEqual(result.find(".display-name .highlight").map(node => node.text()), [
+      'query',
+      'qÜery',
+      'Query',
+    ]);
+  });
 });
