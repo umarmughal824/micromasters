@@ -16,10 +16,11 @@
   .nav-drawer {
     position: fixed;
     z-index: 1000;
-    width: 250px;
+    width: 280px;
     height: 100%;
-    left: -250px;
-    background-color: white;
+    left: -280px;
+    background-color: #1e1e1e;
+    color: white;
     transition: transform 0.5s;
 
     &.open {
@@ -28,18 +29,17 @@
     }
 
     .profile-info {
-      background-color: $mm-brand-bg;
       display: flex;
       flex-direction: column;
-      color: white;
 
       > * {
         padding-left: 20px;
       }
 
       .program-selector {
-        padding-right: 15px;
-        margin-top: 5px;
+        padding: 0;
+        margin: 0 0 0 20px;
+        width: 240px;
 
         .Select-menu-outer,.Select-control,.Select-value-label,.Select-placeholder,.Select-option {
           color: rgba(255,255,255,.7) !important;
@@ -47,12 +47,14 @@
 
         .Select-placeholder {
           padding-left: 0;
+          color: #a2a2a2 !important;
         }
 
         .Select-control {
           border: none !important;
           box-shadow: none !important;
           cursor: pointer;
+          background: none;
         }
 
         .Select-menu-outer {
@@ -63,6 +65,7 @@
 
       .name {
         font-weight: 400;
+        font-size: 15px;
       }
 
       .program-selector:last-child, .name:last-child {
@@ -70,7 +73,7 @@
       }
 
       .avatar {
-        padding: 10px 20px;
+        padding: 15px 0 25px;
 
         img {
           width: 70px;
@@ -83,7 +86,7 @@
     .links {
       display: flex;
       flex-direction: column;
-      border-bottom: thin solid $border-color;
+      border-bottom: thin solid rgba(255,255,255,.1);
     }
 
     .links, .logout-link {
@@ -93,9 +96,9 @@
         padding: 10px 0;
 
         a, button {
-          color: $font-black;
+          color: #a2a2a2;
           width: 100%;
-          font-weight: 500;
+          font-weight: 300;
           border: 0;
           padding: 0;
           background: inherit;
@@ -104,11 +107,12 @@
           &:hover, &:focus {
             text-decoration: none;
             cursor: pointer;
+            color: #fff;
           }
         }
 
         i {
-          color: $mm-brand-bg;
+          color: rgba(255,255,255,.3);
           padding: 0 23px 0 15px;
         }
       }
@@ -172,12 +176,12 @@
           height: 27px;
           margin-right: 15px;
         }
-
-        i.material-icons {
-          font-size: 30px;
-          padding-right: 15px;
-        }
       }
+    }
+
+    i.menu-icon {
+      font-size: 30px;
+      padding-right: 15px;
     }
 
     .micromasters-header {
@@ -243,13 +247,13 @@
   }
 
   .Select-control {
-    border: 1px solid $program_selector_border !important;
+    border: none !important;
     box-shadow: none !important;
     cursor: pointer;
   }
 
   .Select-menu-outer,.Select-control,.Select-value-label,.Select-menu-outer,.Select-option {
-    background-color: $mm-brand-bg !important;
+    background-color: rgba(0,0,0,.1);
   }
 
   .Select-menu-outer,.Select-control,.Select-value-label,.Select-placeholder,.Select-option {
@@ -266,11 +270,10 @@
 
   .Select-menu-outer {
     box-shadow: none;
-    border-top: none;
-    border-left: 1px solid $program_selector_border;
-    border-right: 1px solid $program_selector_border;
-    border-bottom: 1px solid $program_selector_border;
+    border: 1px solid $program_selector_border;
     z-index: 2;
+    background: rgba(0,0,0,.8);
+    border-radius: 3px;
   }
 
   .Select-placeholder {

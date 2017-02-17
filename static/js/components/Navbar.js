@@ -171,7 +171,7 @@ export default class Navbar extends React.Component {
           <HeaderRow className="micromasters-header">
             <div className="micromasters-title">
               <div className="mobile-visible">
-                <Icon name="menu" onClick={() => setNavDrawerOpen(true)} />
+                <Icon name="menu" className="menu-icon" onClick={() => setNavDrawerOpen(true)} />
               </div>
               { PROFILE_REGEX.test(pathname) ? this.renderProfileHeader() : this.renderNormalHeader(link) }
               <div className="desktop-visible">
