@@ -1,6 +1,19 @@
 Release Notes
 =============
 
+Version 0.47.2
+--------------
+
+- Added runtime feature flags via cookie (#2558)
+- Exams: HTML edited to exam card on dashboard (#2637)
+- Refactored email front-end code to use HOC pattern
+- Make separate selenium container for tests (#2634)
+- Fixed &#39;ready to schedule&#39; display for FinalExamCard
+- Round to the nearest cent, formatPrice util (#2541)
+- Added program title to dashboard (#2572)
+- Personal Pricing: Added validation on income so that it can only be an integer (#2559)
+- Respect DNT request header (#2280)
+
 Version 0.47.1
 --------------
 
