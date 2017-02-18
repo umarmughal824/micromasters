@@ -145,6 +145,7 @@ class ExamSignalsTest(MockedESTestCase):
         CachedEnrollmentFactory.create(user=self.profile.user, course_run=self.course_run)
         assert ExamProfile.objects.filter(profile=self.profile).exists() is True
 
+    @override_settings(FEATURES={"SUPPRESS_PAYMENT_FOR_EXAM": False})
     def test_update_exam_authorization_cached_enrollment_user_not_paid(self):
         """
         Test no exam profile created when user enrolled in the course but not paid for it.
