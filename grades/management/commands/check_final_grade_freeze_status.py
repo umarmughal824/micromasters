@@ -1,13 +1,16 @@
 """
 Checks the freeze status for a final grade
 """
-from django.core.cache import cache
+from django.core.cache import caches
 from django.core.management import BaseCommand, CommandError
 
 from courses.models import CourseRun
 from dashboard.models import CachedEnrollment
 from grades.models import CourseRunGradingStatus, FinalGrade
 from grades.tasks import CACHE_ID_BASE_STR
+
+
+cache_redis = caches['redis']
 
 
 class Command(BaseCommand):
@@ -33,7 +36,7 @@ class Command(BaseCommand):
                 )
             )
         elif CourseRunGradingStatus.is_pending(run):
-            if cache.get(CACHE_ID_BASE_STR.format(course_id)):
+            if cache_redis.get(CACHE_ID_BASE_STR.format(course_id)):
                 self.stdout.write(
                     self.style.WARNING(
                         'Final grades for course "{0}" are being processed'.format(course_id)

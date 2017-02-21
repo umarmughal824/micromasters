@@ -509,6 +509,23 @@ CELERYBEAT_SCHEDULE = {
 }
 CELERY_TIMEZONE = 'UTC'
 
+
+# django cache back-ends
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'local-in-memory-cache',
+    },
+    'redis': {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": BROKER_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient"
+        },
+    },
+}
+
+
 # Elasticsearch
 ELASTICSEARCH_DEFAULT_PAGE_SIZE = get_var('ELASTICSEARCH_DEFAULT_PAGE_SIZE', 50)
 ELASTICSEARCH_URL = get_var("ELASTICSEARCH_URL", None)
