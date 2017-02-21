@@ -49,6 +49,10 @@ http {
         server_name _;
         root /app;
 
+        location = /favicon.ico {
+            try_files /static/images/favicon.ico /favicon.ico;
+        }
+
         location ~* /static/(.*$) {
             expires max;
             add_header Access-Control-Allow-Origin *;
