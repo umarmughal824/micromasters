@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.47.3
+--------------
+
+- Reduced MAX_AGE for PG connections to 0 (#2219)
+- Don&#39;t send email on order cancellations, ignore duplicate cancellations (#2547)
+- Added person search (#2562)
+- Add link to grid for selenium container (#2645)
+
 Version 0.47.2
 --------------
 
