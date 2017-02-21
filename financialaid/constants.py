@@ -52,14 +52,6 @@ class FinancialAidStatus:
         SKIPPED: "Skipped",
     }
 
-if settings.OPEN_EXCHANGE_RATES_URL and settings.OPEN_EXCHANGE_RATES_APP_ID:
-    CURRENCY_EXCHANGE_RATE_API_REQUEST_URL = "{url}latest.json?app_id={app_id}".format(
-        url=settings.OPEN_EXCHANGE_RATES_URL,
-        app_id=quote_plus(settings.OPEN_EXCHANGE_RATES_APP_ID)
-    )
-else:
-    CURRENCY_EXCHANGE_RATE_API_REQUEST_URL = None  # pragma: no cover
-
 FINANCIAL_AID_DOCUMENTS_RECEIVED_SUBJECT = "Documents received for {program_name} MicroMasters"
 FINANCIAL_AID_APPROVAL_SUBJECT = "Your personalized course price for {program_name} MicroMasters"
 
@@ -83,3 +75,16 @@ FINANCIAL_AID_APPROVAL_MESSAGE = (
 )
 
 DEFAULT_INCOME_THRESHOLD = 75000
+
+
+def get_currency_exchange_rate_api_request_url():
+    """
+    Helper function to build the CURRENCY_EXCHANGE_RATE_API_REQUEST_URL
+    """
+    if settings.OPEN_EXCHANGE_RATES_URL and settings.OPEN_EXCHANGE_RATES_APP_ID:
+        return "{url}latest.json?app_id={app_id}".format(
+            url=settings.OPEN_EXCHANGE_RATES_URL,
+            app_id=quote_plus(settings.OPEN_EXCHANGE_RATES_APP_ID)
+        )
+    else:
+        return None  # pragma: no cover

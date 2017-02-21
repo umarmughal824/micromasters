@@ -4,8 +4,9 @@ Test for management command generating exchange rates
 from unittest.mock import patch
 
 from django.test import TestCase
+from django.test.utils import override_settings
 
-from financialaid.constants import CURRENCY_EXCHANGE_RATE_API_REQUEST_URL
+from financialaid.constants import get_currency_exchange_rate_api_request_url
 from financialaid.management.commands import update_exchange_rates
 from financialaid.models import CurrencyExchangeRate
 
@@ -30,6 +31,7 @@ class GenerateExchangeRatesTest(TestCase):
             }
         }
 
+    @override_settings(OPEN_EXCHANGE_RATES_APP_ID='foo_id', OPEN_EXCHANGE_RATES_URL='http://foo.bar.com')
     def test_currency_exchange_rate_command(self, mocked_request):
         """
         Assert currency exchange rates are created using management command
@@ -39,7 +41,7 @@ class GenerateExchangeRatesTest(TestCase):
         assert CurrencyExchangeRate.objects.count() == 0
         self.command.handle("generate_exchange_rates")
         called_args, _ = mocked_request.call_args
-        assert called_args[0] == CURRENCY_EXCHANGE_RATE_API_REQUEST_URL
+        assert called_args[0] == get_currency_exchange_rate_api_request_url()
         assert CurrencyExchangeRate.objects.count() == 3
         currency_cba = CurrencyExchangeRate.objects.get(currency_code="CBA")
         assert currency_cba.exchange_rate == 3.5
