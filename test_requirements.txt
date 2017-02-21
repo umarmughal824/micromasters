@@ -12,7 +12,7 @@ pytest
 pytest-cov
 pytest-django
 pytest-pep8
-pytest-pylint
+pytest-pylint==0.6.0
 semantic-version
 selenium
 testfixtures
