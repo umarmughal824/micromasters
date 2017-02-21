@@ -218,6 +218,31 @@ export default class LearnerSearch extends SearchkitComponent {
         </FilterVisibilityToggle>
         <FilterVisibilityToggle
           {...this.props}
+          filterName="num-courses-passed"
+        >
+          <RangeFilter
+            field="program.num_courses_passed"
+            id="num-courses-passed"
+            min={0}
+            max={this.getNumberOfCoursesInProgram()}
+            showHistogram={false}
+            title="# of Courses Passed" />
+        </FilterVisibilityToggle>
+        <FilterVisibilityToggle
+          {...this.props}
+          filterName="grade-average"
+        >
+          <RangeFilter
+            field="program.grade_average"
+            id="grade-average"
+            min={0}
+            max={100}
+            showHistogram={true}
+            title="Average Grade in Program"
+          />
+        </FilterVisibilityToggle>
+        <FilterVisibilityToggle
+          {...this.props}
           filterName="birth-location"
         >
           <RefinementListFilter
@@ -251,31 +276,6 @@ export default class LearnerSearch extends SearchkitComponent {
             fieldOptions={{type: 'nested', options: { path: 'profile.education' } }}
             translations={this.degreeTranslations}
           />
-        </FilterVisibilityToggle>
-        <FilterVisibilityToggle
-          {...this.props}
-          filterName="grade-average"
-        >
-          <RangeFilter
-            field="program.grade_average"
-            id="grade-average"
-            min={0}
-            max={100}
-            showHistogram={true}
-            title="Average Grade in Program"
-          />
-        </FilterVisibilityToggle>
-        <FilterVisibilityToggle
-          {...this.props}
-          filterName="num-courses-passed"
-        >
-          <RangeFilter
-            field="program.num_courses_passed"
-            id="num-courses-passed"
-            min={0}
-            max={this.getNumberOfCoursesInProgram()}
-            showHistogram={false}
-            title="# of Courses Passed" />
         </FilterVisibilityToggle>
         <FilterVisibilityToggle
           {...this.props}
