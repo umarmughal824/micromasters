@@ -41,10 +41,12 @@ from ecommerce.models import (
     Order,
     RedeemedCoupon,
 )
+from ecommerce.models import CoursePrice
 from financialaid.api import get_formatted_course_price
 from financialaid.models import (
     FinancialAid,
     FinancialAidStatus,
+    TierProgram
 )
 from profiles.api import get_social_username
 
@@ -479,3 +481,36 @@ def calculate_run_price(course_run, user):
     coupon = coupons[0]
     price = calculate_coupon_price(coupon, price, course_run.edx_course_key)
     return price, coupon
+
+
+def validate_prices():
+    """
+    Validate prices and financial aid discounts
+    Returns:
+        list: List of validation errors
+    """
+    errors = []
+    programs = Program.objects.filter(live=True)
+    for program in programs:
+        runs = CourseRun.objects.filter(course__program=program)
+        course_prices = [CoursePrice.objects.filter(course_run=run, is_valid=True).first() for run in runs]
+        prices = [course_price.price if course_price else None for course_price in course_prices]
+
+        if not (len(prices) and all(prices[0] == price for price in prices) and prices[0] is not None):
+            errors.append('Invalid course prices for program {0}'.format(program.title))
+
+        elif program.financial_aid_availability:
+            tier = TierProgram.objects.filter(program=program, current=True).order_by("-discount_amount").first()
+            if tier:
+                if tier.discount_amount > prices[0]:
+                    errors.append('Discount is higher than course price for program {0}'.format(program.title))
+                if not TierProgram.objects.filter(discount_amount=0, program=program, current=True).exists():
+                    errors.append('Could not find 0 discount TierProgram for program {0}'.format(program.title))
+                if not TierProgram.objects.filter(income_threshold=0, program=program, current=True).exists():
+                    errors.append(
+                        'Could not find 0 income_threshold TierProgram for program {0}'.format(program.title)
+                    )
+            else:
+                errors.append('Could not find current TierProgram for program {0}'.format(program.title))
+
+    return errors

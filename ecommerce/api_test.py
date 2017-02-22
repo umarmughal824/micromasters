@@ -22,7 +22,7 @@ from rest_framework.exceptions import ValidationError
 from edx_api.enrollments import Enrollment
 
 from backends.pipeline_api import EdxOrgOAuth2
-from courses.factories import CourseRunFactory
+from courses.factories import CourseRunFactory, ProgramFactory
 from dashboard.models import (
     CachedCertificate,
     CachedEnrollment,
@@ -42,6 +42,7 @@ from ecommerce.api import (
     ISO_8601_FORMAT,
     make_reference_id,
     pick_coupons,
+    validate_prices,
 )
 from ecommerce.exceptions import (
     EcommerceEdxApiException,
@@ -61,10 +62,11 @@ from ecommerce.models import (
     RedeemedCoupon,
     RedeemedCouponAudit,
     UserCoupon,
+    CoursePrice,
 )
 from financialaid.api import get_formatted_course_price
-from financialaid.factories import FinancialAidFactory
-from financialaid.models import FinancialAidStatus
+from financialaid.factories import FinancialAidFactory, TierProgramFactory
+from financialaid.models import FinancialAidStatus, TierProgram
 from micromasters.factories import UserFactory
 from micromasters.utils import serialize_model_object
 from search.base import MockedESTestCase
@@ -863,3 +865,86 @@ class PriceTests(MockedESTestCase):
             content_object=course_run, amount_type=Coupon.FIXED_DISCOUNT, amount=-(price + 50),
         )
         assert calculate_coupon_price(coupon, price, course_run.edx_course_key) == price
+
+
+class ValidatePricesTests(MockedESTestCase):
+    """Test for validate_prices"""
+    @classmethod
+    def setUpTestData(cls):
+        """Set up some coupons"""
+        super().setUpTestData()
+        cls.program = ProgramFactory.create(live=True, financial_aid_availability=True, full=True)
+        course_price = CoursePrice.objects.filter(
+            is_valid=True,
+            course_run__course__program=cls.program
+        ).first()
+        cls.price = float(course_price.price)
+
+    def setUp(self):
+        super().setUp()
+        self.program.refresh_from_db()
+        for tier_program in self.program.tier_programs.all():
+            tier_program.refresh_from_db()
+
+    def test_courses_with_diff_prices(self):
+        """courses have different prices"""
+
+        course_run = CourseRunFactory.create(
+            course__program=self.program
+        )
+        CoursePriceFactory.create(course_run=course_run, is_valid=True, price=self.price+20)
+        assert validate_prices()[0] == 'Invalid course prices for program {0}'.format(self.program.title)
+
+    def test_courses_with_no_price(self):
+        """course does not have price"""
+        CourseRunFactory.create(
+            course__program=self.program,
+        )
+        assert validate_prices()[0] == 'Invalid course prices for program {0}'.format(self.program.title)
+
+    def test_program_with_no_prices(self):
+        """program with no prices"""
+        CourseRunFactory.create(
+            course__program=self.program,
+        )
+        CoursePrice.objects.filter(
+            is_valid=True,
+            course_run__course__program=self.program
+        ).delete()
+        assert validate_prices()[0] == 'Invalid course prices for program {0}'.format(self.program.title)
+
+    def test_fa_discount_too_large(self):
+        """discount greater then courses price"""
+
+        TierProgramFactory.create(
+            program=self.program,
+            current=True,
+            discount_amount=int(self.price + 30),
+            income_threshold=1000
+        )
+        assert (
+            validate_prices()[0] == 'Discount is higher than course price for program {0}'.format(self.program.title)
+        )
+
+    def test_no_current_tier_program(self):
+        """No current tier program"""
+        TierProgram.objects.filter(program=self.program, current=True).update(current=False)
+        assert (
+            validate_prices()[0] == 'Could not find current TierProgram for program {0}'.format(self.program.title)
+        )
+
+    def test_no_0_income_threshold_tier_program(self):
+        """program with no 0 income_threshold tier program"""
+        TierProgram.objects.filter(program=self.program, current=True, income_threshold=0).update(current=False)
+        assert (
+            validate_prices()[0] ==
+            'Could not find 0 income_threshold TierProgram for program {0}'.format(self.program.title)
+        )
+
+    def test_no_0_discount_tier_program(self):
+        """program with no 0 discount_amount tier program"""
+        TierProgram.objects.filter(program=self.program, current=True, discount_amount=0).update(current=False)
+        assert (
+            validate_prices()[0] ==
+            'Could not find 0 discount TierProgram for program {0}'.format(self.program.title)
+        )
