@@ -1,6 +1,23 @@
 Release Notes
 =============
 
+Version 0.48.0
+--------------
+
+- Refactored dashboard API to support getting dashboard for other users
+- Added redis django cache backend
+- Modified financial aid tasks
+- Validate prices and FA discounts management command
+- Pinned pytest-pylint because of weird behavior of 0.7.0
+- Redirect favicon.ico
+- Check for open exchange API URL before requesting it (#2557)
+- Moved iPython to requirements.txt
+- Rearranged facets (#2655)
+- Use testindex when running selenium tests (#2658)
+- Use travis docker image (#2648)
+- return a 204 on requests for dnt-policy.txt (#2635)
+- Exams: Added environment variable to suppress payment requirement (#2640)
+
 Version 0.47.3
 --------------
 
