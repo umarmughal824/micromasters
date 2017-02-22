@@ -58,7 +58,7 @@ CURRENCY_EXCHANGE_RATE_API_REQUEST_URL = "{url}latest.json?app_id={app_id}".form
     app_id=quote_plus(settings.OPEN_EXCHANGE_RATES_APP_ID)
 )
 
-FINANCIAL_AID_RESET_SUBJECT = "Your personalized course price for {program_name} MicroMasters"
+FINANCIAL_AID_RESET_SUBJECT = "Update to your personalized course price for {program_name} MicroMasters"
 FINANCIAL_AID_DOCUMENTS_RECEIVED_SUBJECT = "Documents received for {program_name} MicroMasters"
 FINANCIAL_AID_APPROVAL_SUBJECT = "Your personalized course price for {program_name} MicroMasters"
 
