@@ -7,10 +7,8 @@ import {
   TOAST_SUCCESS,
   TOAST_FAILURE,
 } from '../constants';
-import {
-  fetchCoursePrices,
-  fetchDashboard,
-} from './';
+import { fetchDashboard } from './dashboard';
+import { fetchCoursePrices } from './';
 import { setToastMessage, setEnrollProgramDialogVisibility } from '../actions/ui';
 import type { Dispatcher } from '../flow/reduxTypes';
 import type {

@@ -14,12 +14,14 @@ import { calculatePrices } from '../lib/coupon';
 import {
   FETCH_SUCCESS,
   FETCH_PROCESSING,
-  updateCourseStatus,
-  fetchDashboard,
-  clearDashboard,
   fetchCoursePrices,
   clearCoursePrices,
 } from '../actions';
+import {
+  updateCourseStatus,
+  fetchDashboard,
+  clearDashboard,
+} from '../actions/dashboard';
 import {
   COUPON_CONTENT_TYPE_COURSE,
   COUPON_CONTENT_TYPE_PROGRAM,

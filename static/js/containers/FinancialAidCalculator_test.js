@@ -39,6 +39,8 @@ import {
 import {
   REQUEST_DASHBOARD,
   RECEIVE_DASHBOARD_SUCCESS,
+} from '../actions/dashboard';
+import {
   REQUEST_COURSE_PRICES,
   RECEIVE_COURSE_PRICES_SUCCESS,
 } from '../actions/index';

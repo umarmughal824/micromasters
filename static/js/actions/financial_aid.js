@@ -5,10 +5,8 @@ import { createAction } from 'redux-actions';
 
 import type { Dispatcher } from '../flow/reduxTypes';
 import * as api from '../lib/api';
-import {
-  fetchCoursePrices,
-  fetchDashboard,
-} from '.';
+import { fetchDashboard } from './dashboard';
+import { fetchCoursePrices } from './';
 
 export const START_CALCULATOR_EDIT = 'START_CALCULATOR_EDIT';
 export const startCalculatorEdit = createAction(START_CALCULATOR_EDIT);

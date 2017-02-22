@@ -3,12 +3,8 @@ import '../global_init';
 import { assert } from 'chai';
 
 import IntegrationTestHelper from '../util/integration_test_helper';
-import {
-  REQUEST_DASHBOARD,
-} from '../actions';
-import {
-  STATUS_OFFERED,
-} from '../constants';
+import { REQUEST_DASHBOARD } from '../actions/dashboard';
+import { STATUS_OFFERED } from '../constants';
 import * as actions from '../actions';
 
 import * as util from '../util/util';
@@ -18,9 +14,7 @@ import {
 } from '../test_constants';
 
 import { DASHBOARD_SUCCESS_ACTIONS } from './test_util';
-import {
-  findCourse,
-} from '../util/test_utils';
+import { findCourse } from '../util/test_utils';
 
 describe('OrderSummaryPage', () => {
   let renderComponent, helper,run, url;

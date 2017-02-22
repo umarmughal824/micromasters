@@ -19,11 +19,13 @@ import IntegrationTestHelper from '../util/integration_test_helper';
 import {
   REQUEST_DASHBOARD,
   UPDATE_COURSE_STATUS,
-  CLEAR_COURSE_PRICES,
   CLEAR_DASHBOARD,
+} from '../actions/dashboard';
+import {
+  CLEAR_COURSE_PRICES,
   FETCH_SUCCESS,
 } from '../actions';
-import * as actions from '../actions';
+import * as dashboardActions from '../actions/dashboard';
 import { CLEAR_COUPONS } from '../actions/coupons';
 import {
   SHOW_DIALOG,
@@ -324,7 +326,7 @@ describe('DashboardPage', () => {
           `/dashboard?status=receipt&course_key=${encodedKey}`,
           SUCCESS_WITH_TIMEOUT_ACTIONS
         ).then(() => {
-          let fetchDashboardStub = helper.sandbox.stub(actions, 'fetchDashboard').returns(() => ({
+          let fetchDashboardStub = helper.sandbox.stub(dashboardActions, 'fetchDashboard').returns(() => ({
             type: 'fake'
           }));
           clock.tick(3501);

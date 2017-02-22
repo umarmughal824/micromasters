@@ -3,10 +3,8 @@
 import type { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 
-import {
-  fetchCoursePrices,
-  fetchDashboard,
-} from './';
+import { fetchDashboard } from './dashboard';
+import { fetchCoursePrices } from './';
 import type { Dispatcher } from '../flow/reduxTypes';
 import * as api from '../lib/api';
 

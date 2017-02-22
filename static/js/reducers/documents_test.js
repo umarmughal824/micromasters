@@ -18,6 +18,7 @@ import {
   updateDocumentSentDate,
 } from '../actions/documents';
 import * as actions from '../actions';
+import * as dashboardActions from '../actions/dashboard';
 import type { DocumentsState } from '../reducers/documents';
 import rootReducer from '../reducers';
 import * as api from '../lib/api';
@@ -52,7 +53,7 @@ describe('documents reducers', () => {
       updateDocumentSentDateStub = sandbox.stub(api, 'updateDocumentSentDate');
       fetchCoursePricesStub = sandbox.stub(actions, 'fetchCoursePrices');
       fetchCoursePricesStub.returns({type: "fake"});
-      fetchDashboardStub = sandbox.stub(actions, 'fetchDashboard');
+      fetchDashboardStub = sandbox.stub(dashboardActions, 'fetchDashboard');
       fetchDashboardStub.returns({type: "fake"});
     });
 

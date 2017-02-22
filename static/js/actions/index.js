@@ -7,51 +7,13 @@ import * as api from '../lib/api';
 import type { CheckoutResponse } from '../flow/checkoutTypes';
 import type { APIErrorInfo } from '../flow/generalTypes';
 import type { Action, Dispatcher } from '../flow/reduxTypes';
-import type { Dashboard, CoursePrices } from '../flow/dashboardTypes';
+import type { CoursePrices } from '../flow/dashboardTypes';
 
 // constants for fetch status (these are not action types)
 export const FETCH_FAILURE = 'FETCH_FAILURE';
 export const FETCH_SUCCESS = 'FETCH_SUCCESS';
 export const FETCH_PROCESSING = 'FETCH_PROCESSING';
 
-// dashboard list actions
-export const REQUEST_DASHBOARD = 'REQUEST_DASHBOARD';
-export const requestDashboard = (noSpinner: boolean) => ({
-  type: REQUEST_DASHBOARD,
-  payload: { noSpinner }
-});
-
-export const RECEIVE_DASHBOARD_SUCCESS = 'RECEIVE_DASHBOARD_SUCCESS';
-export const receiveDashboardSuccess = (programs: Object[]): Action => ({
-  type: RECEIVE_DASHBOARD_SUCCESS,
-  payload: { programs }
-});
-
-export const RECEIVE_DASHBOARD_FAILURE = 'RECEIVE_DASHBOARD_FAILURE';
-export const receiveDashboardFailure = (errorInfo: APIErrorInfo): Action => ({
-  type: RECEIVE_DASHBOARD_FAILURE,
-  payload: { errorInfo }
-});
-
-export const CLEAR_DASHBOARD = 'CLEAR_DASHBOARD';
-export const clearDashboard = () => ({ type: CLEAR_DASHBOARD });
-
-export function fetchDashboard(username: string, noSpinner: boolean = false): Dispatcher<Dashboard> {
-  return (dispatch: Dispatch) => {
-    dispatch(requestDashboard(noSpinner));
-    return api.getDashboard(username).
-      then(dashboard => dispatch(receiveDashboardSuccess(dashboard))).
-      catch(error => {
-        dispatch(receiveDashboardFailure(error));
-        // the exception is assumed handled and will not be propagated
-      });
-  };
-}
-
-export const UPDATE_COURSE_STATUS = 'UPDATE_COURSE_STATUS';
-export const updateCourseStatus = createAction(UPDATE_COURSE_STATUS, (courseId, status) => ({
-  courseId, status
-}));
 
 export const REQUEST_CHECKOUT = 'REQUEST_CHECKOUT';
 export const requestCheckout = (courseId: string) => ({

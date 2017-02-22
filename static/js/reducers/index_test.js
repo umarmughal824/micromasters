@@ -34,7 +34,10 @@ import {
   RECEIVE_DASHBOARD_FAILURE,
   CLEAR_DASHBOARD,
   receiveDashboardSuccess,
-
+  updateCourseStatus,
+  UPDATE_COURSE_STATUS,
+} from '../actions/dashboard';
+import {
   checkout,
   REQUEST_CHECKOUT,
   RECEIVE_CHECKOUT_SUCCESS,
@@ -47,8 +50,6 @@ import {
   RECEIVE_COURSE_PRICES_FAILURE,
   CLEAR_COURSE_PRICES,
 
-  updateCourseStatus,
-  UPDATE_COURSE_STATUS,
 
   FETCH_FAILURE,
   FETCH_SUCCESS

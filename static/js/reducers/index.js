@@ -19,11 +19,6 @@ import {
   UPDATE_VALIDATION_VISIBILITY,
 } from '../actions/profile';
 import {
-  REQUEST_DASHBOARD,
-  RECEIVE_DASHBOARD_SUCCESS,
-  RECEIVE_DASHBOARD_FAILURE,
-  CLEAR_DASHBOARD,
-
   REQUEST_CHECKOUT,
   RECEIVE_CHECKOUT_SUCCESS,
   RECEIVE_CHECKOUT_FAILURE,
@@ -32,7 +27,6 @@ import {
   RECEIVE_COURSE_PRICES_SUCCESS,
   RECEIVE_COURSE_PRICES_FAILURE,
   CLEAR_COURSE_PRICES,
-  UPDATE_COURSE_STATUS,
 
   FETCH_FAILURE,
   FETCH_PROCESSING,
@@ -45,7 +39,7 @@ import {
   programs,
 } from './programs';
 import { courseEnrollments } from './course_enrollments';
-import type { DashboardState, CoursePricesState } from '../flow/dashboardTypes';
+import type { CoursePricesState } from '../flow/dashboardTypes';
 import type { Action } from '../flow/reduxTypes';
 import type {
   ProfileGetResult,
@@ -58,6 +52,7 @@ import { documents } from './documents';
 import { orderReceipt } from './order_receipt';
 import { coupons } from './coupons';
 import { pearson } from './pearson';
+import { dashboard } from './dashboard';
 import { ALL_ERRORS_VISIBLE } from '../constants';
 
 export const INITIAL_PROFILES_STATE = {};
@@ -179,57 +174,6 @@ export const profiles = (state: Profiles = INITIAL_PROFILES_STATE, action: Actio
         }
       });
     }
-  default:
-    return state;
-  }
-};
-
-const INITIAL_DASHBOARD_STATE: DashboardState = {
-  programs: []
-};
-
-export const dashboard = (state: DashboardState = INITIAL_DASHBOARD_STATE, action: Action) => {
-  switch (action.type) {
-  case REQUEST_DASHBOARD:
-    if (action.payload.noSpinner) {
-      return state;
-    } else {
-      return {
-        ...state,
-        fetchStatus: FETCH_PROCESSING
-      };
-    }
-  case RECEIVE_DASHBOARD_SUCCESS:
-    return {
-      ...state,
-      fetchStatus: FETCH_SUCCESS,
-      programs: action.payload.programs
-    };
-  case RECEIVE_DASHBOARD_FAILURE:
-    return {
-      ...state,
-      fetchStatus: FETCH_FAILURE,
-      errorInfo: action.payload.errorInfo,
-    };
-  case UPDATE_COURSE_STATUS: {
-    const { courseId, status } = action.payload;
-    let programs = _.cloneDeep(state.programs);
-    for (let program of programs) {
-      for (let course of program.courses) {
-        for (let courseRun of course.runs) {
-          if (courseRun.course_id === courseId) {
-            courseRun.status = status;
-          }
-        }
-      }
-    }
-    return {
-      ...state,
-      programs,
-    };
-  }
-  case CLEAR_DASHBOARD:
-    return INITIAL_DASHBOARD_STATE;
   default:
     return state;
   }

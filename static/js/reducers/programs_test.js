@@ -30,6 +30,7 @@ import {
 } from '../actions/programs';
 import * as api from '../lib/api';
 import * as actions from '../actions';
+import * as dashboardActions from '../actions/dashboard';
 import rootReducer from '../reducers';
 
 describe('enrollments', () => {
@@ -58,7 +59,7 @@ describe('enrollments', () => {
 
       fetchCoursePricesStub = sandbox.stub(actions, 'fetchCoursePrices');
       fetchCoursePricesStub.returns({type: "fake"});
-      fetchDashboardStub = sandbox.stub(actions, 'fetchDashboard');
+      fetchDashboardStub = sandbox.stub(dashboardActions, 'fetchDashboard');
       fetchDashboardStub.returns({type: "fake"});
     });
 

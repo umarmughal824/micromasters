@@ -2,6 +2,8 @@ import {
   REQUEST_DASHBOARD,
   RECEIVE_DASHBOARD_SUCCESS,
   RECEIVE_DASHBOARD_FAILURE,
+} from '../actions/dashboard';
+import {
   REQUEST_COURSE_PRICES,
   RECEIVE_COURSE_PRICES_SUCCESS,
 } from '../actions';

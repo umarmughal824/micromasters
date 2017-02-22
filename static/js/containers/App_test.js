@@ -1,3 +1,4 @@
+// @flow
 /* global document: false, window: false, SETTINGS: false */
 import '../global_init';
 
@@ -9,6 +10,8 @@ import Navbar from '../components/Navbar';
 import {
   REQUEST_DASHBOARD,
   RECEIVE_DASHBOARD_SUCCESS,
+} from '../actions/dashboard';
+import {
   REQUEST_COURSE_PRICES,
   RECEIVE_COURSE_PRICES_SUCCESS,
 } from '../actions';

@@ -29,6 +29,7 @@ import {
   FETCH_SUCCESS,
 } from '../actions';
 import * as actions from '../actions';
+import * as dashboardActions from '../actions/dashboard';
 import { setCurrentProgramEnrollment } from '../actions/programs';
 import { FINANCIAL_AID_EDIT } from './financial_aid';
 import rootReducer from '../reducers';
@@ -46,7 +47,7 @@ describe('financial aid reducers', () => {
     store.dispatch(setCurrentProgramEnrollment(1));
     addFinancialAidStub = sandbox.stub(api, 'addFinancialAid');
     skipFinancialAidStub = sandbox.stub(api, 'skipFinancialAid');
-    fetchDashboardStub = sandbox.stub(actions, 'fetchDashboard');
+    fetchDashboardStub = sandbox.stub(dashboardActions, 'fetchDashboard');
     fetchDashboardStub.returns({type: "fake"});
     fetchCoursePricesStub = sandbox.stub(actions, 'fetchCoursePrices');
     fetchCoursePricesStub.returns({type: "fake"});

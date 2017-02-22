@@ -10,9 +10,7 @@ import {
   FETCH_PROCESSING
 } from '../actions';
 import type { Action } from '../flow/reduxTypes';
-import type {
-  CourseEnrollmentsState,
-} from '../flow/enrollmentTypes';
+import type { CourseEnrollmentsState } from '../flow/enrollmentTypes';
 
 export const INITIAL_ENROLLMENTS_STATE: CourseEnrollmentsState = {};
 

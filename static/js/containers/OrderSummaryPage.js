@@ -11,12 +11,14 @@ import type { AvailableProgram } from '../flow/enrollmentTypes';
 import OrderSummary from '../components/OrderSummary';
 import {
   FETCH_PROCESSING,
-  fetchDashboard,
   fetchCoursePrices,
-  clearDashboard,
-  clearCoursePrices,
   checkout,
+  clearCoursePrices,
 } from '../actions';
+import {
+  clearDashboard,
+  fetchDashboard,
+} from '../actions/dashboard';
 import {
   clearCoupons,
   fetchCoupons,
