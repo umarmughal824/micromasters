@@ -297,6 +297,11 @@ def get_status_for_courserun(course_run, mmtrack):
     if get_grade_algorithm_version == "v1":
         if mmtrack.has_paid_frozen_grade(course_run.edx_course_key):
             return CourseRunUserStatus(CourseRunStatus.CHECK_IF_PASSED, course_run)
+        elif mmtrack.has_frozen_grade(course_run.edx_course_key):
+            if course_run.is_upgradable:
+                return CourseRunUserStatus(CourseRunStatus.CAN_UPGRADE, course_run)
+            else:
+                return CourseRunUserStatus(CourseRunStatus.MISSED_DEADLINE, course_run)
     if not mmtrack.is_enrolled(course_run.edx_course_key):
         if mmtrack.has_paid(course_run.edx_course_key):
             return CourseRunUserStatus(CourseRunStatus.PAID_BUT_NOT_ENROLLED, course_run)
