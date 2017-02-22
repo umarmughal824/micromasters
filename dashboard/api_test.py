@@ -1198,7 +1198,7 @@ class UserProgramInfoIntegrationTest(MockedESTestCase):
             grade=0.1,
             passed=False,
             status=FinalGradeStatus.COMPLETE,
-            course_run_payed_on_edx=True
+            course_run_paid_on_edx=True
         )
         CourseRunGradingStatus.objects.create(
             course_run=failed_course_run,
@@ -1219,7 +1219,7 @@ class UserProgramInfoIntegrationTest(MockedESTestCase):
             grade=0.1,
             passed=False,
             status=FinalGradeStatus.COMPLETE,
-            course_run_payed_on_edx=True
+            course_run_paid_on_edx=True
         )
         CourseRunGradingStatus.objects.create(
             course_run=previous_failed_course_run,

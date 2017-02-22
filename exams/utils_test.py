@@ -107,7 +107,7 @@ class ExamAuthorizationUtilsTests(TestCase):
                 user=cls.user,
                 course_run=cls.course_run,
                 passed=True,
-                course_run_payed_on_edx=True,
+                course_run_paid_on_edx=True,
             )
 
     def test_exam_authorization(self):
@@ -141,7 +141,7 @@ class ExamAuthorizationUtilsTests(TestCase):
         test exam_authorization when user has passed course but not paid.
         """
         with mute_signals(post_save):
-            self.final_grade.course_run_payed_on_edx = False
+            self.final_grade.course_run_paid_on_edx = False
             self.final_grade.save()
         mmtrack = get_mmtrack(self.user, self.program)
         assert mmtrack.has_paid(self.course_run.edx_course_key) is False
@@ -474,7 +474,7 @@ class BulkExamUtilV1Tests(TestCase):
                 course_run=course_run,
                 passed=True,
                 grade=0.9,
-                course_run_payed_on_edx=True
+                course_run_paid_on_edx=True
             )
         CachedCertificateFactory.create(user=user, course_run=course_run)
         create_order(user, course_run)

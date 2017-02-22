@@ -183,5 +183,5 @@ def freeze_user_final_grade(user, course_run, raise_on_exception=False):
         grade=final_grade.grade,
         passed=final_grade.passed,
         status=FinalGradeStatus.COMPLETE,
-        course_run_payed_on_edx=final_grade.payed_on_edx
+        course_run_paid_on_edx=final_grade.payed_on_edx
     )

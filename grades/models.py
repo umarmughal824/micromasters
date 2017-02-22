@@ -39,7 +39,7 @@ class FinalGrade(TimestampedModel, AuditableModel):
         default=FinalGradeStatus.PENDING,
         max_length=30,
     )
-    course_run_payed_on_edx = models.BooleanField(default=False)
+    course_run_paid_on_edx = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('user', 'course_run')

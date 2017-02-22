@@ -164,9 +164,9 @@ class MMTrack:
             if self.financial_aid_available:
                 # this is a special case to take in account the case when the users
                 # took a course on edx and we want to consider it as paid overriding the flag
-                return course_id in self.paid_course_ids or final_grade.course_run_payed_on_edx
+                return course_id in self.paid_course_ids or final_grade.course_run_paid_on_edx
             else:
-                return final_grade.course_run_payed_on_edx
+                return final_grade.course_run_paid_on_edx
         # financial aid programs need to have an audit enrollment and a paid entry for the course
         if self.financial_aid_available:
             return course_id in self.paid_course_ids

@@ -779,9 +779,9 @@ class MMTrackTest(MockedESTestCase):
         )
         key = self.crun_fa.edx_course_key
         assert mmtrack.has_paid(key) is False
-        final_grade = FinalGradeFactory.create(user=self.user, course_run=self.crun_fa, course_run_payed_on_edx=True)
+        final_grade = FinalGradeFactory.create(user=self.user, course_run=self.crun_fa, course_run_paid_on_edx=True)
         assert mmtrack.has_paid(key) is True
-        final_grade.course_run_payed_on_edx = False
+        final_grade.course_run_paid_on_edx = False
         final_grade.save()
         assert mmtrack.has_paid(key) is False
 
@@ -810,9 +810,9 @@ class MMTrackTest(MockedESTestCase):
         key = "course-v1:odl+FOO102+CR-FALL16"
         assert mmtrack.has_paid(key) is False
         course_run = self.cruns[-1]
-        final_grade = FinalGradeFactory.create(user=self.user, course_run=course_run, course_run_payed_on_edx=True)
+        final_grade = FinalGradeFactory.create(user=self.user, course_run=course_run, course_run_paid_on_edx=True)
         assert mmtrack.has_paid(key) is True
-        final_grade.course_run_payed_on_edx = False
+        final_grade.course_run_paid_on_edx = False
         final_grade.save()
         assert mmtrack.has_paid(key) is False
 

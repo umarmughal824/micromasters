@@ -213,7 +213,7 @@ class GradeAPITests(MockedESTestCase):
         grade = api._compute_grade_for_non_fa(run_data)
         assert grade.passed is grade_result
         assert grade.grade == self.certificates.get(course_key).data.get('grade')
-        assert grade.payed_on_edx == payed_edx_result
+        assert grade.payed_on_edx is payed_edx_result
 
     def test_get_compute_func(self):
         """
