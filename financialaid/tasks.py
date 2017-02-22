@@ -4,7 +4,7 @@ Periodic task that updates currency exchange rates.
 import requests
 
 from financialaid.api import update_currency_exchange_rate
-from financialaid.constants import CURRENCY_EXCHANGE_RATE_API_REQUEST_URL
+from financialaid.constants import get_currency_exchange_rate_api_request_url
 from financialaid.exceptions import ExceededAPICallsException, UnexpectedAPIErrorException
 from micromasters.celery import async
 
@@ -15,6 +15,7 @@ def sync_currency_exchange_rates():
     Updates all CurrencyExchangeRate objects to reflect latest exchange rates from
     Open Exchange Rates API (https://openexchangerates.org/).
     """
+    CURRENCY_EXCHANGE_RATE_API_REQUEST_URL = get_currency_exchange_rate_api_request_url()
     if not CURRENCY_EXCHANGE_RATE_API_REQUEST_URL:
         msg = (
             "Currency exchange API URL cannot be determined. "
