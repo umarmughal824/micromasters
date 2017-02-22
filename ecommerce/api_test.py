@@ -23,8 +23,8 @@ from edx_api.enrollments import Enrollment
 
 from backends.pipeline_api import EdxOrgOAuth2
 from courses.factories import CourseRunFactory, ProgramFactory
+from dashboard.factories import CachedEnrollmentFactory
 from dashboard.models import (
-    CachedCertificate,
     CachedEnrollment,
     ProgramEnrollment,
 )
@@ -638,19 +638,7 @@ class CouponTests(MockedESTestCase):
             coupon_type=Coupon.DISCOUNTED_PREVIOUS_COURSE,
             content_object=self.run1.course,
         )
-        cert_json = {
-            "username": "staff",
-            "course_id": self.run1.edx_course_key,
-            "certificate_type": "verified",
-            "status": "downloadable",
-            "download_url": "http://www.example.com/demo.pdf",
-            "grade": "0.98"
-        }
-        CachedCertificate.objects.create(
-            user=self.user,
-            course_run=self.run1,
-            data=cert_json,
-        )
+        CachedEnrollmentFactory.create(user=self.user, course_run=self.run1)
         assert is_coupon_redeemable(coupon, self.user) is True
 
     def test_prev_course_user_not_verified(self):

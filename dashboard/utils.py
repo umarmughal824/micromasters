@@ -172,6 +172,18 @@ class MMTrack:
             return course_id in self.paid_course_ids
 
         # normal programs need to have a verified enrollment
+        return self.has_verified_enrollment(course_id)
+
+    def has_verified_enrollment(self, course_id):
+        """
+        Returns true if user has a verified enrollment
+
+        Args:
+            course_id (str): an edX course run id
+
+        Returns:
+            bool: whether the user has a verified enrollment
+        """
         enrollment = self.enrollments.get_enrollment_for_course(course_id)
         return bool(enrollment and enrollment.is_verified)
 

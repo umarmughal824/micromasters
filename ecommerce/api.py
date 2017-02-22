@@ -393,7 +393,7 @@ def is_coupon_redeemable(coupon, user):
         )
 
         # For this coupon type the user must have already purchased a course run on edX
-        return any((mmtrack.has_passing_certificate(run.edx_course_key) for run in course.courserun_set.all()))
+        return any((mmtrack.has_verified_enrollment(run.edx_course_key) for run in course.courserun_set.all()))
 
     return True
 
