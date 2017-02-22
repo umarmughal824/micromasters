@@ -9,7 +9,7 @@ import pytz
 from celery import group
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.cache import cache
+from django.core.cache import caches
 from django.db.models import Q
 from edx_api.client import EdxApi
 from social.apps.django_app.default.models import UserSocialAuth
@@ -23,6 +23,7 @@ from micromasters.utils import chunks
 
 
 log = logging.getLogger(__name__)
+cache_redis = caches['redis']
 
 
 MAX_HRS_MAIN_TASK = 6
@@ -42,13 +43,13 @@ def batch_update_user_data():
         create lock by adding a key to storage.
         """
         # lock will expire if 2 hrs are pass and task is not complete.
-        return cache.add(lock_id, 'true', LOCK_EXPIRE)
+        return cache_redis.add(lock_id, 'true', LOCK_EXPIRE)
 
     def release_lock():
         """
         remove lock by deleteing key from storage.
         """
-        return cache.delete(lock_id)
+        return cache_redis.delete(lock_id)
 
     if acquire_lock():
         refresh_time_limit = datetime.now(tz=pytz.UTC) - timedelta(hours=MAX_HRS_MAIN_TASK)

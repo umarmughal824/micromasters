@@ -5,7 +5,7 @@ import logging
 
 from celery import group
 from celery.result import GroupResult
-from django.core.cache import cache
+from django.core.cache import caches
 
 from courses.models import CourseRun
 from grades import api
@@ -17,6 +17,7 @@ from micromasters.utils import chunks
 CACHE_ID_BASE_STR = "freeze_grade_{0}"
 
 log = logging.getLogger(__name__)
+cache_redis = caches['redis']
 
 
 @async.task
@@ -61,13 +62,13 @@ def freeze_course_run_final_grades(course_run):
     cache_id = CACHE_ID_BASE_STR.format(course_run.edx_course_key)
 
     # try to get the result id from a previous iteration of this task for this course run
-    group_results_id = cache.get(cache_id)
+    group_results_id = cache_redis.get(cache_id)
 
     # if the id is not none, it means that this task already run before for this course run
     # so we need to check if its subtasks have finished
     if group_results_id is not None:
         # delete the entry from the cache (if needed it will be added again later)
-        cache.delete(cache_id)
+        cache_redis.delete(cache_id)
         # extract the results from the id
         results = GroupResult.restore(group_results_id)
         # if the subtasks are not done, revoke them
@@ -98,7 +99,7 @@ def freeze_course_run_final_grades(course_run):
     # save the result ID in the celery backend
     results.save()
     # put the results id in the cache to be retrieved and finalized later
-    cache.set(cache_id, results.id, None)
+    cache_redis.set(cache_id, results.id, None)
 
 
 @async.task

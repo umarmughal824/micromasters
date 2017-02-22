@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from unittest.mock import patch
 
 import pytz
-from django.core.cache import cache
+from django.core.cache import caches
 
 from courses.factories import CourseRunFactory
 from dashboard.factories import CachedEnrollmentFactory
@@ -18,6 +18,8 @@ from grades.models import (
 from micromasters.factories import UserFactory
 from search.base import MockedESTestCase
 
+
+cache_redis = caches['redis']
 
 # pylint: disable=protected-access
 
@@ -91,7 +93,7 @@ class GradeTasksTests(MockedESTestCase):
         """
         tasks.freeze_course_run_final_grades.delay(self.course_run_frozen)
         # in this case no task has started
-        assert cache.get(tasks.CACHE_ID_BASE_STR.format(self.course_run_frozen.edx_course_key)) is None
+        assert cache_redis.get(tasks.CACHE_ID_BASE_STR.format(self.course_run_frozen.edx_course_key)) is None
 
     def test_freeze_course_run_final_grades_3(self):
         """
@@ -124,7 +126,7 @@ class GradeTasksTests(MockedESTestCase):
         assert info_run.course_run == self.course_run1
         assert info_run.status == FinalGradeStatus.PENDING
         cache_id = tasks.CACHE_ID_BASE_STR.format(self.course_run1.edx_course_key)
-        cached_celery_task_id_1 = cache.get(cache_id)
+        cached_celery_task_id_1 = cache_redis.get(cache_id)
         assert cached_celery_task_id_1 is not None
         assert freeze_single_user.call_count == len(self.users)
         for user in self.users:
@@ -146,7 +148,7 @@ class GradeTasksTests(MockedESTestCase):
         tasks.freeze_course_run_final_grades.delay(self.course_run1)
         info_run.refresh_from_db()
         assert info_run.status == FinalGradeStatus.PENDING
-        cached_celery_task_id_2 = cache.get(cache_id)
+        cached_celery_task_id_2 = cache_redis.get(cache_id)
         assert cached_celery_task_id_2 is not None
         assert cached_celery_task_id_2 != cached_celery_task_id_1
         remaining_users = self.users[:5]
@@ -169,5 +171,5 @@ class GradeTasksTests(MockedESTestCase):
         tasks.freeze_course_run_final_grades.delay(self.course_run1)
         info_run.refresh_from_db()
         assert info_run.status == FinalGradeStatus.COMPLETE
-        assert cache.get(cache_id) is None
+        assert cache_redis.get(cache_id) is None
         assert freeze_single_user.call_count == 0
