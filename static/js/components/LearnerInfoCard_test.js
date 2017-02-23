@@ -105,6 +105,6 @@ describe('LearnerInfoCard', () => {
 
   it('should not show email if user is viewing their own profile', () => {
     let chip = renderInfoCard();
-    assert(chip.find(".profile-email").isEmpty(), 'email is shown');
+    assert(!chip.find(".profile-email").exists(), 'email is shown');
   });
 });
