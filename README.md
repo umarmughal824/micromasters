@@ -308,6 +308,10 @@ host machine isn't running Linux. If you are using a Mac, you'll need to run
     yarn install --pure-lockfile
     npm run-script flow
 
+To validate prices and financial aid discounts for all programs run:
+
+    docker-compose run web ./manage.py validate_db
+
 ## Connecting to external services
 
 #### Elasticsearch
