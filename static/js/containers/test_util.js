@@ -1,3 +1,4 @@
+// @flow
 import {
   REQUEST_DASHBOARD,
   RECEIVE_DASHBOARD_SUCCESS,
@@ -19,8 +20,9 @@ import {
   REQUEST_GET_USER_PROFILE,
   RECEIVE_GET_USER_PROFILE_SUCCESS,
 } from '../actions/profile';
+import type { ActionType } from '../flow/reduxTypes';
 
-export const SUCCESS_ACTIONS = [
+export const SUCCESS_ACTIONS: Array<ActionType> = [
   REQUEST_GET_PROGRAM_ENROLLMENTS,
   RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
   REQUEST_GET_USER_PROFILE,
@@ -44,4 +46,3 @@ export const DASHBOARD_ERROR_ACTIONS = SUCCESS_ACTIONS.concat([
   REQUEST_FETCH_COUPONS,
   RECEIVE_FETCH_COUPONS_SUCCESS,
 ]);
-

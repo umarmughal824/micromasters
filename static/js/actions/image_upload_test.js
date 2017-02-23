@@ -21,7 +21,7 @@ import {
   receivePatchUserPhotoSuccess,
   RECEIVE_PATCH_USER_PHOTO_SUCCESS,
 } from './image_upload';
-import { assertCreatedActionHelper } from './util';
+import { assertCreatedActionHelper } from './test_util';
 
 describe('generated image upload action helpers', () => {
   it('should create all action creators', () => {

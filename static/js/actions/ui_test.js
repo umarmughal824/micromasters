@@ -65,7 +65,7 @@ import {
   setNavDrawerOpen,
   setLearnerChipVisibility,
 } from '../actions/ui';
-import { assertCreatedActionHelper } from './util';
+import { assertCreatedActionHelper } from './test_util';
 
 describe('generated UI action helpers', () => {
   it('should create all action creators', () => {

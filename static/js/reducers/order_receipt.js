@@ -17,7 +17,7 @@ export const INITIAL_ORDER_RECEIPT_STATE = {
   initialTime: moment().toISOString()
 };
 
-export const orderReceipt = (state: OrderReceiptState = INITIAL_ORDER_RECEIPT_STATE, action: Action) => {
+export const orderReceipt = (state: OrderReceiptState = INITIAL_ORDER_RECEIPT_STATE, action: Action<any, null>) => {
   switch (action.type) {
   case SET_TIMEOUT_ACTIVE:
     return { ...state, timeoutActive: action.payload };

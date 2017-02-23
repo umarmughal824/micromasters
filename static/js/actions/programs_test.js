@@ -18,7 +18,7 @@ import {
   CLEAR_ENROLLMENTS,
   SET_CURRENT_PROGRAM_ENROLLMENT,
 } from './programs';
-import { assertCreatedActionHelper } from './util';
+import { assertCreatedActionHelper } from './test_util';
 
 describe('program enrollment actions', () => {
   it('should create all action creators', () => {

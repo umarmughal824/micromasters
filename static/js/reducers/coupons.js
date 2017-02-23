@@ -29,7 +29,7 @@ export const INITIAL_COUPONS_STATE: CouponsState = {
   recentlyAttachedCoupon: null,
 };
 
-export const coupons = (state: CouponsState = INITIAL_COUPONS_STATE, action: Action) => {
+export const coupons = (state: CouponsState = INITIAL_COUPONS_STATE, action: Action<any, null>) => {
   switch (action.type) {
   case REQUEST_ATTACH_COUPON:
     return { ...state, fetchPostStatus: FETCH_PROCESSING };

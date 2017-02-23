@@ -27,17 +27,6 @@ import {
   RECEIVE_PATCH_USER_PROFILE_FAILURE,
 } from '../actions/profile';
 import {
-  fetchDashboard,
-  clearDashboard,
-  REQUEST_DASHBOARD,
-  RECEIVE_DASHBOARD_SUCCESS,
-  RECEIVE_DASHBOARD_FAILURE,
-  CLEAR_DASHBOARD,
-  receiveDashboardSuccess,
-  updateCourseStatus,
-  UPDATE_COURSE_STATUS,
-} from '../actions/dashboard';
-import {
   checkout,
   REQUEST_CHECKOUT,
   RECEIVE_CHECKOUT_SUCCESS,
@@ -57,7 +46,6 @@ import {
 import * as api from '../lib/api';
 import {
   COURSE_PRICES_RESPONSE,
-  DASHBOARD_RESPONSE,
   USER_PROFILE_RESPONSE,
   CYBERSOURCE_CHECKOUT_RESPONSE,
 } from '../test_constants';
@@ -95,16 +83,16 @@ describe('reducers', () => {
       getUserProfileStub.withArgs(SETTINGS.user.username).returns(Promise.resolve(USER_PROFILE_RESPONSE));
 
       return dispatchThen(fetchUserProfile('jane'), [REQUEST_GET_USER_PROFILE, RECEIVE_GET_USER_PROFILE_SUCCESS]).
-      then(profileState => {
-        assert.deepEqual(profileState['jane'].profile, USER_PROFILE_RESPONSE);
-        assert.equal(profileState['jane'].getStatus, FETCH_SUCCESS);
+        then(profileState => {
+          assert.deepEqual(profileState['jane'].profile, USER_PROFILE_RESPONSE);
+          assert.equal(profileState['jane'].getStatus, FETCH_SUCCESS);
 
-        assert.ok(getUserProfileStub.calledWith('jane'));
+          assert.ok(getUserProfileStub.calledWith('jane'));
 
-        return dispatchThen(clearProfile('jane'), [CLEAR_PROFILE]).then(state => {
-          assert.deepEqual(state, INITIAL_PROFILES_STATE);
+          return dispatchThen(clearProfile('jane'), [CLEAR_PROFILE]).then(state => {
+            assert.deepEqual(state, INITIAL_PROFILES_STATE);
+          });
         });
-      });
     });
 
     it('should fail to fetch user profile', () => {
@@ -115,11 +103,11 @@ describe('reducers', () => {
       getUserProfileStub.withArgs(SETTINGS.user.username).returns(Promise.reject(errorInfo));
 
       return dispatchThen(fetchUserProfile('jane'), [REQUEST_GET_USER_PROFILE, RECEIVE_GET_USER_PROFILE_FAILURE]).
-      then(profileState => {
-        assert.equal(profileState['jane'].getStatus, FETCH_FAILURE);
-        assert.deepEqual(profileState['jane'].errorInfo, errorInfo);
-        assert.ok(getUserProfileStub.calledWith('jane'));
-      });
+        then(profileState => {
+          assert.equal(profileState['jane'].getStatus, FETCH_FAILURE);
+          assert.deepEqual(profileState['jane'].errorInfo, errorInfo);
+          assert.ok(getUserProfileStub.calledWith('jane'));
+        });
     });
 
     it("should patch the profile successfully", () => {
@@ -269,58 +257,6 @@ describe('reducers', () => {
         [UPDATE_PROFILE_VALIDATION]
       ).then(profileState => {
         assert.deepEqual(profileState['jane'], undefined);
-      });
-    });
-  });
-
-  describe('dashboard reducers', () => {
-    let dashboardStub;
-
-    beforeEach(() => {
-      dispatchThen = store.createDispatchThen(state => state.dashboard);
-      dashboardStub = sandbox.stub(api, 'getDashboard');
-    });
-
-    it('should have an empty default state', () => {
-      return dispatchThen({type: 'unknown'}, ['unknown']).then(state => {
-        assert.deepEqual(state, {
-          programs: []
-        });
-      });
-    });
-
-    it('should fetch the dashboard successfully then clear it', () => {
-      dashboardStub.returns(Promise.resolve(DASHBOARD_RESPONSE));
-
-      return dispatchThen(fetchDashboard(), [REQUEST_DASHBOARD, RECEIVE_DASHBOARD_SUCCESS]).then(dashboardState => {
-        assert.deepEqual(dashboardState.programs, DASHBOARD_RESPONSE);
-        assert.equal(dashboardState.fetchStatus, FETCH_SUCCESS);
-
-        return dispatchThen(clearDashboard(), [CLEAR_DASHBOARD]).then(dashboardState => {
-          assert.deepEqual(dashboardState, {
-            programs: []
-          });
-        });
-      });
-    });
-
-    it('should fail to fetch the dashboard', () => {
-      dashboardStub.returns(Promise.reject());
-
-      return dispatchThen(fetchDashboard(), [REQUEST_DASHBOARD, RECEIVE_DASHBOARD_FAILURE]).then(dashboardState => {
-        assert.equal(dashboardState.fetchStatus, FETCH_FAILURE);
-      });
-    });
-
-    it("should update a course run's status", () => {
-      store.dispatch(receiveDashboardSuccess(DASHBOARD_RESPONSE));
-
-      let getRun = programs => programs[1].courses[0].runs[0];
-
-      let run = getRun(DASHBOARD_RESPONSE);
-      assert.notEqual(run.status, 'new_status');
-      return dispatchThen(updateCourseStatus(run.course_id, 'new_status'), [UPDATE_COURSE_STATUS]).then(state => {
-        assert.equal(getRun(state.programs).status, 'new_status');
       });
     });
   });

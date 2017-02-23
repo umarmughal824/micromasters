@@ -29,7 +29,7 @@ export type ImageUploadState = {
   patchStatus: ?string
 }
 
-export const imageUpload = (state: ImageUploadState = INITIAL_IMAGE_UPLOAD_STATE, action: Action) => {
+export const imageUpload = (state: ImageUploadState = INITIAL_IMAGE_UPLOAD_STATE, action: Action<any, null>) => {
   switch (action.type) {
   case START_PHOTO_EDIT: {
     if (state.patchStatus === FETCH_PROCESSING) {

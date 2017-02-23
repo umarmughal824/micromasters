@@ -54,7 +54,7 @@ export type FinancialAidState = {
   fetchError?:      FetchError,
 };
 
-export const financialAid = (state: FinancialAidState = INITIAL_FINANCIAL_AID_STATE, action: Action) => {
+export const financialAid = (state: FinancialAidState = INITIAL_FINANCIAL_AID_STATE, action: Action<any, null>) => {
   switch (action.type) {
   case START_CALCULATOR_EDIT:
     return {

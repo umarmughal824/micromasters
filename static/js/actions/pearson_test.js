@@ -1,5 +1,5 @@
 // @flow
-import { assertCreatedActionHelper } from './util';
+import { assertCreatedActionHelper } from './test_util';
 import {
   REQUEST_GET_PEARSON_SSO_DIGEST,
   requestGetPearsonSSODigest,

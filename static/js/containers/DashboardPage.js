@@ -95,6 +95,7 @@ import {
 } from '../actions/pearson';
 import { generateSSOForm } from '../lib/pearson';
 import type { PearsonAPIState } from '../reducers/pearson';
+import { getOwnDashboard } from '../reducers/util';
 
 const isProcessing = R.equals(FETCH_PROCESSING);
 
@@ -137,7 +138,7 @@ class DashboardPage extends React.Component {
 
   componentWillUnmount() {
     const { dispatch } = this.props;
-    dispatch(clearDashboard());
+    dispatch(clearDashboard(SETTINGS.user.username));
     dispatch(clearCoursePrices());
     dispatch(clearCoupons());
   }
@@ -222,7 +223,7 @@ class DashboardPage extends React.Component {
 
   handleOrderPending = (run: CourseRun): void => {
     const { dispatch } = this.props;
-    dispatch(updateCourseStatus(run.course_id, STATUS_PENDING_ENROLLMENT));
+    dispatch(updateCourseStatus(SETTINGS.user.username, run.course_id, STATUS_PENDING_ENROLLMENT));
 
     if (!this.props.orderReceipt.timeoutActive) {
       setTimeout(() => {
@@ -653,7 +654,7 @@ const mapStateToProps = (state) => {
 
   return {
     profile: profile,
-    dashboard: state.dashboard,
+    dashboard: getOwnDashboard(state),
     prices: state.prices,
     programs: state.programs,
     currentProgramEnrollment: state.currentProgramEnrollment,

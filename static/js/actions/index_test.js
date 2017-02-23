@@ -18,7 +18,7 @@ import {
   RECEIVE_COURSE_PRICES_FAILURE,
   CLEAR_COURSE_PRICES,
 } from './';
-import { assertCreatedActionHelper } from './util';
+import { assertCreatedActionHelper } from './test_util';
 import { ERROR_RESPONSE } from '../constants';
 
 describe('generated index action helpers', () => {

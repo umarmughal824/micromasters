@@ -32,6 +32,7 @@ import type {
 import type { Program } from '../flow/programTypes';
 import { formatPrice } from '../util/util';
 import { dialogActions } from '../components/inputs/util';
+import { getOwnDashboard } from '../reducers/util';
 
 const updateCurrency = R.curry((update, financialAid, selection) => {
   let _financialAid = R.clone(financialAid);
@@ -304,8 +305,8 @@ const mapStateToProps = state => {
     ui: { calculatorDialogVisibility, confirmIncomeDialogVisibility },
     financialAid,
     currentProgramEnrollment,
-    dashboard: { programs },
   } = state;
+  const { programs } = getOwnDashboard(state);
 
   return {
     calculatorDialogVisibility,

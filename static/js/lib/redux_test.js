@@ -12,7 +12,7 @@ describe('redux helpers', () => {
   const MY_ACTION = 'MY_ACTION';
   let dispatch = sinon.spy();
   let actionCreator = (arg) => ({
-    type: MY_ACTION, payload: arg
+    type: MY_ACTION, payload: arg, meta: null
   });
 
   describe('createActionHelper', () => {
@@ -33,7 +33,7 @@ describe('redux helpers', () => {
     it('should return a function that passes arguments to dispatch', () => {
       helper(3);
       assert(dispatch.calledWith({
-        type: MY_ACTION, payload: 3
+        type: MY_ACTION, payload: 3, meta: null,
       }));
     });
   });
@@ -58,7 +58,7 @@ describe('redux helpers', () => {
       let actionCreator = actions.actionCreator;
       actionCreator(3);
       assert(dispatch.calledWith({
-        type: MY_ACTION, payload: 3
+        type: MY_ACTION, payload: 3, meta: null
       }));
     });
   });

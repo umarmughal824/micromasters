@@ -6,7 +6,7 @@ import { createAction } from 'redux-actions';
 import * as api from '../lib/api';
 import type { CheckoutResponse } from '../flow/checkoutTypes';
 import type { APIErrorInfo } from '../flow/generalTypes';
-import type { Action, Dispatcher } from '../flow/reduxTypes';
+import type { Dispatcher } from '../flow/reduxTypes';
 import type { CoursePrices } from '../flow/dashboardTypes';
 
 // constants for fetch status (these are not action types)
@@ -36,15 +36,15 @@ export function checkout(courseId: string): Dispatcher<CheckoutResponse> {
 }
 
 export const RECEIVE_CHECKOUT_SUCCESS = 'RECEIVE_CHECKOUT_SUCCESS';
-export const receiveCheckoutSuccess = (url: string, payload: Object): Action => ({
-  type: RECEIVE_CHECKOUT_SUCCESS,
-  payload: { url, payload }
-});
+
+export const receiveCheckoutSuccess = createAction(RECEIVE_CHECKOUT_SUCCESS, (url, payload) => ({
+  url, payload
+}));
+
 export const RECEIVE_CHECKOUT_FAILURE = 'RECEIVE_CHECKOUT_FAILURE';
-export const receiveCheckoutFailure = (errorInfo: APIErrorInfo): Action => ({
-  type: RECEIVE_CHECKOUT_FAILURE,
-  payload: { errorInfo }
-});
+export const receiveCheckoutFailure = createAction(RECEIVE_CHECKOUT_FAILURE,
+  (errorInfo: APIErrorInfo) => ({errorInfo })
+);
 
 // course price actions
 export const REQUEST_COURSE_PRICES = 'REQUEST_COURSE_PRICES';

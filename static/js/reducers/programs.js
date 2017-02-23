@@ -25,7 +25,7 @@ export const INITIAL_PROGRAMS_STATE: AvailableProgramsState = {
   availablePrograms: []
 };
 
-export const programs = (state: AvailableProgramsState = INITIAL_PROGRAMS_STATE, action: Action) => {
+export const programs = (state: AvailableProgramsState = INITIAL_PROGRAMS_STATE, action: Action<any, null>) => {
   switch (action.type) {
   case REQUEST_GET_PROGRAM_ENROLLMENTS:
     return { ...state, getStatus: FETCH_PROCESSING };
@@ -54,7 +54,7 @@ export const programs = (state: AvailableProgramsState = INITIAL_PROGRAMS_STATE,
 };
 
 // state is of type ProgramEnrollment but I can't convince flow that we do all necessary null checks
-export const currentProgramEnrollment = (state: any = null, action: Action) => {
+export const currentProgramEnrollment = (state: any = null, action: Action<any, null>) => {
   switch (action.type) {
   case SET_CURRENT_PROGRAM_ENROLLMENT:
     return action.payload;

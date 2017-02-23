@@ -1,5 +1,6 @@
 // @flow
 import _ from 'lodash';
+import R from 'ramda';
 
 import {
   REQUEST_DASHBOARD,
@@ -13,39 +14,49 @@ import {
   FETCH_PROCESSING,
   FETCH_SUCCESS,
 } from '../actions';
-import type { DashboardState } from '../flow/dashboardTypes';
+import type {
+  DashboardsState,
+  DashboardState,
+} from '../flow/dashboardTypes';
 import type { Action } from '../flow/reduxTypes';
 
-const INITIAL_DASHBOARD_STATE: DashboardState = {
+export const INITIAL_DASHBOARD_STATE: DashboardState = {
   programs: []
 };
 
-export const dashboard = (state: DashboardState = INITIAL_DASHBOARD_STATE, action: Action) => {
+const INITIAL_DASHBOARDS_STATE: DashboardsState = {};
+
+const updateDashboardState = (state, username, update) => (
+  _.merge({}, state, {[username]: update })
+);
+
+export const dashboard = (state: DashboardsState = INITIAL_DASHBOARDS_STATE, action: Action<any, string>) => {
+  const { meta: username } = action;
   switch (action.type) {
-  case REQUEST_DASHBOARD:
-    if (action.payload.noSpinner) {
-      return state;
+  case REQUEST_DASHBOARD: // eslint-disable-line no-case-declarations
+    let newBaseState = R.dissoc(username, state);
+    if (action.payload === true) {
+      return updateDashboardState(newBaseState, username, INITIAL_DASHBOARD_STATE);
     } else {
-      return {
-        ...state,
-        fetchStatus: FETCH_PROCESSING
-      };
+      return updateDashboardState(
+        newBaseState,
+        username,
+        _.merge({}, INITIAL_DASHBOARD_STATE, { fetchStatus: FETCH_PROCESSING })
+      );
     }
   case RECEIVE_DASHBOARD_SUCCESS:
-    return {
-      ...state,
+    return updateDashboardState(state, username, {
       fetchStatus: FETCH_SUCCESS,
-      programs: action.payload.programs
-    };
+      programs: action.payload
+    });
   case RECEIVE_DASHBOARD_FAILURE:
-    return {
-      ...state,
+    return updateDashboardState(state, username, {
       fetchStatus: FETCH_FAILURE,
-      errorInfo: action.payload.errorInfo,
-    };
+      errorInfo: action.payload,
+    });
   case UPDATE_COURSE_STATUS: {
     const { courseId, status } = action.payload;
-    let programs = _.cloneDeep(state.programs);
+    let programs = _.cloneDeep(state[username].programs);
     for (let program of programs) {
       for (let course of program.courses) {
         for (let courseRun of course.runs) {
@@ -55,16 +66,13 @@ export const dashboard = (state: DashboardState = INITIAL_DASHBOARD_STATE, actio
         }
       }
     }
-    return {
-      ...state,
-      programs,
-    };
+    return updateDashboardState(state, username, { programs });
   }
   case CLEAR_DASHBOARD:
-    return INITIAL_DASHBOARD_STATE;
+    return updateDashboardState(
+      R.dissoc(username, state), username, INITIAL_DASHBOARD_STATE
+    );
   default:
     return state;
   }
 };
-
-

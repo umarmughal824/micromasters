@@ -6,7 +6,7 @@ import {
   SET_TIMEOUT_ACTIVE,
   SET_INITIAL_TIME,
 } from './order_receipt';
-import { assertCreatedActionHelper } from './util';
+import { assertCreatedActionHelper } from './test_util';
 
 describe('generated order receipt action helpers', () => {
   it('should create all action creators', () => {

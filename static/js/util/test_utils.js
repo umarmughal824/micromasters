@@ -244,7 +244,7 @@ export class GoogleMapsStub {
 
 export function createAssertReducerResultState<State>(store: Store, getReducerState: (x: any) => State) {
   return (
-    action: () => Action, stateLookup: (state: State) => any, defaultValue: any
+    action: () => Action<*,*>, stateLookup: (state: State) => any, defaultValue: any
   ): void => {
     const getState = () => stateLookup(getReducerState(store.getState()));
 

@@ -14,7 +14,10 @@ import type { CourseEnrollmentsState } from '../flow/enrollmentTypes';
 
 export const INITIAL_ENROLLMENTS_STATE: CourseEnrollmentsState = {};
 
-export const courseEnrollments = (state: CourseEnrollmentsState = INITIAL_ENROLLMENTS_STATE, action: Action) => {
+export const courseEnrollments = (
+  state: CourseEnrollmentsState = INITIAL_ENROLLMENTS_STATE,
+  action: Action<null, null>
+) => {
   switch (action.type) {
   case REQUEST_ADD_COURSE_ENROLLMENT:
     return { ...state, courseEnrollAddStatus: FETCH_PROCESSING };

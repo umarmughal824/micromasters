@@ -56,7 +56,7 @@ import { dashboard } from './dashboard';
 import { ALL_ERRORS_VISIBLE } from '../constants';
 
 export const INITIAL_PROFILES_STATE = {};
-export const profiles = (state: Profiles = INITIAL_PROFILES_STATE, action: Action) => {
+export const profiles = (state: Profiles = INITIAL_PROFILES_STATE, action: Action<any, null>) => {
   let patchProfile = newProfile => {
     let username = action.payload.username;
     return {
@@ -183,7 +183,7 @@ export type CheckoutState = {
   fetchStatus?: string,
 };
 const INITIAL_CHECKOUT_STATE = {};
-export const checkout = (state: CheckoutState = INITIAL_CHECKOUT_STATE, action: Action) => {
+export const checkout = (state: CheckoutState = INITIAL_CHECKOUT_STATE, action: Action<null, null>) => {
   switch (action.type) {
   case REQUEST_CHECKOUT:
     return {
@@ -208,7 +208,7 @@ export const checkout = (state: CheckoutState = INITIAL_CHECKOUT_STATE, action: 
 const INITIAL_COURSE_PRICES_STATE: CoursePricesState = {
   coursePrices: []
 };
-export const prices = (state: CoursePricesState = INITIAL_COURSE_PRICES_STATE, action: Action) => {
+export const prices = (state: CoursePricesState = INITIAL_COURSE_PRICES_STATE, action: Action<any, null>) => {
   switch (action.type) {
   case REQUEST_COURSE_PRICES:
     return {

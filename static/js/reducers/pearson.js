@@ -24,7 +24,7 @@ export type PearsonAPIState = {
   error: ?string,
 };
 
-export const pearson = (state: PearsonAPIState = INITIAL_PEARSON_STATE, action: Action) => {
+export const pearson = (state: PearsonAPIState = INITIAL_PEARSON_STATE, action: Action<any, null>) => {
   switch (action.type) {
   case REQUEST_GET_PEARSON_SSO_DIGEST:
     return { ...state, getStatus: FETCH_PROCESSING };

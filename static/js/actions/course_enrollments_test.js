@@ -8,7 +8,7 @@ import {
   RECEIVE_ADD_COURSE_ENROLLMENT_SUCCESS,
   RECEIVE_ADD_COURSE_ENROLLMENT_FAILURE,
 } from './course_enrollments';
-import { assertCreatedActionHelper } from './util';
+import { assertCreatedActionHelper } from './test_util';
 
 describe('course enrollment actions', () => {
   it('should create all action creators', () => {

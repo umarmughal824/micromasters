@@ -1,3 +1,4 @@
+/* global SETTINGS: false */
 import '../global_init';
 
 import { assert } from 'chai';
@@ -6,13 +7,11 @@ import IntegrationTestHelper from '../util/integration_test_helper';
 import { REQUEST_DASHBOARD } from '../actions/dashboard';
 import { STATUS_OFFERED } from '../constants';
 import * as actions from '../actions';
-
 import * as util from '../util/util';
 import {
   CYBERSOURCE_CHECKOUT_RESPONSE,
   EDX_CHECKOUT_RESPONSE,
 } from '../test_constants';
-
 import { DASHBOARD_SUCCESS_ACTIONS } from './test_util';
 import { findCourse } from '../util/test_utils';
 
@@ -39,7 +38,7 @@ describe('OrderSummaryPage', () => {
     return renderComponent(url, DASHBOARD_SUCCESS_ACTIONS).then(([, div]) => {
 
       assert.notOk(div.querySelector(".loader"), "Found spinner but no fetch in progress");
-      helper.store.dispatch({type: REQUEST_DASHBOARD, payload: {noSpinner: false}});
+      helper.store.dispatch({type: REQUEST_DASHBOARD, payload: false, meta: SETTINGS.user.username});
 
       assert(div.querySelector(".loader"), "Unable to find spinner");
     });

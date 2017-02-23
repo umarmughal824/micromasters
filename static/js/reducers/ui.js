@@ -141,7 +141,7 @@ export const INITIAL_UI_STATE: UIState = {
   dialogVisibility:                    INITIAL_DIALOG_VISIBILITY_STATE
 };
 
-export const ui = (state: UIState = INITIAL_UI_STATE, action: Action) => {
+export const ui = (state: UIState = INITIAL_UI_STATE, action: Action<any, null>) => {
   switch (action.type) {
   case SHOW_DIALOG:
     return {

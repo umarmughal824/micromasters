@@ -56,7 +56,7 @@ function resetState(state: AllEmailsState, emailType: string) {
   return clonedState;
 }
 
-export const email = (state: AllEmailsState = INITIAL_ALL_EMAILS_STATE, action: Action) => {
+export const email = (state: AllEmailsState = INITIAL_ALL_EMAILS_STATE, action: Action<any, null>) => {
   let emailType = getEmailType(action.payload);
 
   switch (action.type) {

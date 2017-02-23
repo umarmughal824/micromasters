@@ -10,7 +10,7 @@ import {
   CLEAR_EMAIL_EDIT,
   UPDATE_EMAIL_VALIDATION,
 } from './email';
-import { assertCreatedActionHelper } from './util';
+import { assertCreatedActionHelper } from './test_util';
 
 describe('generated email action helpers', () => {
   it('should create all action creators', () => {

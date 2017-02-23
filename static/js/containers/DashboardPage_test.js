@@ -99,7 +99,11 @@ describe('DashboardPage', () => {
   it('shows a spinner when dashboard get is processing', () => {
     return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([, div]) => {
       assert.notOk(div.querySelector(".loader"), "Found spinner but no fetch in progress");
-      helper.store.dispatch({ type: REQUEST_DASHBOARD, payload: { noSpinner: false } });
+      helper.store.dispatch({
+        type: REQUEST_DASHBOARD,
+        payload: { noSpinner: false },
+        meta: SETTINGS.user.username
+      });
 
       assert(div.querySelector(".loader"), "Unable to find spinner");
     });
@@ -210,7 +214,7 @@ describe('DashboardPage', () => {
         SUCCESS_WITH_TIMEOUT_ACTIONS
       ).then(() => {
         let [ courseRun ] = findCourseRun(
-          helper.store.getState().dashboard.programs,
+          helper.store.getState().dashboard[SETTINGS.user.username].programs,
           _run => _run.course_id === run.course_id
         );
         assert.equal(run.course_id, courseRun.course_id);

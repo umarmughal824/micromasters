@@ -27,6 +27,7 @@ import type { CouponsState } from '../reducers/coupons';
 import type { CheckoutState } from '../reducers';
 import { createForm, findCourseRun } from '../util/util';
 import { calculatePrice } from '../lib/coupon';
+import { getOwnDashboard } from '../reducers/util';
 
 class OrderSummaryPage extends React.Component {
   static contextTypes = {
@@ -153,7 +154,7 @@ const mapStateToProps = (state) => {
   }
   return {
     profile: profile,
-    dashboard: state.dashboard,
+    dashboard: getOwnDashboard(state),
     currentProgramEnrollment: state.currentProgramEnrollment,
     prices: state.prices,
     orderReceipt: state.orderReceipt,

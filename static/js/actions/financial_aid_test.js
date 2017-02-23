@@ -21,7 +21,7 @@ import {
   RECEIVE_SKIP_FINANCIAL_AID_SUCCESS,
   receiveSkipFinancialAidSuccess,
 } from './financial_aid';
-import { assertCreatedActionHelper } from './util';
+import { assertCreatedActionHelper } from './test_util';
 
 describe('financial aid actions', () => {
   it('should create all action creators', () => {

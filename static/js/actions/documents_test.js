@@ -9,7 +9,7 @@ import {
   receiveUpdateDocumentSentDateSuccess,
   receiveUpdateDocumentSentDateFailure,
 } from '../actions/documents';
-import { assertCreatedActionHelper } from './util';
+import { assertCreatedActionHelper } from './test_util';
 
 describe('generated document action helpers', () => {
   it('should create all action creators', () => {

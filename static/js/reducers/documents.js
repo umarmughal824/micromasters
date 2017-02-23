@@ -27,7 +27,7 @@ export const INITIAL_DOCUMENTS_STATE: DocumentsState = {
   documentSentDate: moment().format(ISO_8601_FORMAT)
 };
 
-export const documents = (state: DocumentsState = INITIAL_DOCUMENTS_STATE, action: Action) => {
+export const documents = (state: DocumentsState = INITIAL_DOCUMENTS_STATE, action: Action<?string, null>) => {
   switch (action.type) {
   case SET_DOCUMENT_SENT_DATE:
     return { ...state, documentSentDate: action.payload };
