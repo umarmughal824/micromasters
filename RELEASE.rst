@@ -1,6 +1,30 @@
 Release Notes
 =============
 
+Version 0.48.1
+--------------
+
+- Fixed coupons to check enrollments instead of certs (#2561)
+- Added search test (#2663)
+- Implement str(CouponInvoice) (#2664)
+- Moved sorting UI to column headers (#2667)
+- Use babel-plugin-istanbul to fix coverage (#2681)
+- Upgraded a few JS dependencies ⬆🆙
+- Fix import (#2677)
+- fixed small problem with an empty block in css
+- Fixed tests
+- more variables and added program selector border
+- Moved dashboard reducer and actions to separate files
+- Financial Aid: Allowed course team to reset students financial aid review form (#2656)
+- Added logic to allow upgrade after frozen grades
+- Comments on PR
+- Added field to FinalGrade to save if user paid on edx
+- Add validate_db to README
+- added color variables and lightened font colors
+- some small changes
+- added cursor style
+- style changes to sidebar
+
 Version 0.48.0
 --------------
 
