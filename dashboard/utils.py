@@ -158,13 +158,22 @@ class MMTrack:
         Returns:
             bool: whether the user is paid
         """
+        get_grade_algorithm_version = settings.FEATURES.get("FINAL_GRADE_ALGORITHM", "v0")
+        if get_grade_algorithm_version == "v1" and self.has_frozen_grade(course_id):
+            final_grade = self.extract_final_grade(course_id)
+            if self.financial_aid_available:
+                # this is a special case to take in account the case when the users
+                # took a course on edx and we want to consider it as paid overriding the flag
+                return course_id in self.paid_course_ids or final_grade.course_run_paid_on_edx
+            else:
+                return final_grade.course_run_paid_on_edx
         # financial aid programs need to have an audit enrollment and a paid entry for the course
         if self.financial_aid_available:
             return course_id in self.paid_course_ids
 
         # normal programs need to have a verified enrollment
         enrollment = self.enrollments.get_enrollment_for_course(course_id)
-        return enrollment and enrollment.is_verified
+        return bool(enrollment and enrollment.is_verified)
 
     def has_passing_certificate(self, course_id):
         """

@@ -282,6 +282,7 @@ class CourseRunTest(CourseTests):
             'is_enrolled.return_value': False,
             'has_paid.return_value': False,
             'has_paid_frozen_grade.return_value': False,
+            'has_frozen_grade.return_value': False,
         })
         crun = self.create_run(
             start=self.now+timedelta(weeks=52),
@@ -317,15 +318,25 @@ class CourseRunTest(CourseTests):
         assert run_status.course_run == crun
 
     @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": 'v1'})
-    def test_has_frozen_grade_taken_before_anything_else(self):
+    @patch('courses.models.CourseRun.is_upgradable', new_callable=PropertyMock)
+    @ddt.data(
+        (True, False, None, api.CourseRunStatus.CHECK_IF_PASSED),
+        (False, True, True, api.CourseRunStatus.CAN_UPGRADE),
+        (False, True, False, api.CourseRunStatus.MISSED_DEADLINE),
+    )
+    @ddt.unpack
+    def test_has_frozen_grade_taken_before_anything_else(
+            self, has_paid_froz, has_frozen, is_upgradable, status, mock_is_upgradable):
         """
         Tests that if an user has a final grade for the course,
         that is taken in account before checking anything else
         """
         self.mmtrack.configure_mock(**{
             'is_enrolled.return_value': True,
-            'has_paid_frozen_grade.return_value': True,
+            'has_paid_frozen_grade.return_value': has_paid_froz,
+            'has_frozen_grade.return_value': has_frozen,
         })
+        mock_is_upgradable.return_value = is_upgradable
         # create a run that is past
         crun = self.create_run(
             start=self.now-timedelta(weeks=52),
@@ -335,7 +346,7 @@ class CourseRunTest(CourseTests):
             edx_key="course-v1:edX+DemoX+Demo_Course"
         )
         run_status = api.get_status_for_courserun(crun, self.mmtrack)
-        assert run_status.status == api.CourseRunStatus.CHECK_IF_PASSED
+        assert run_status.status == status
         assert run_status.course_run == crun
         assert self.mmtrack.is_enrolled.call_count == 0
 
@@ -355,8 +366,8 @@ class CourseRunTest(CourseTests):
             'is_enrolled.return_value': True,
             'is_enrolled_mmtrack.return_value': True,
             'has_paid.return_value': True,
-            'has_paid_frozen_grade.return_value': False,
-            'has_frozen_grade.return_value': True,
+            'has_paid_frozen_grade.return_value': has_frozen_grades,
+            'has_frozen_grade.return_value': has_frozen_grades,
         })
         if not has_frozen_grades:
             self.mmtrack.extract_final_grade.side_effect = FinalGrade.DoesNotExist
@@ -410,6 +421,7 @@ class CourseRunTest(CourseTests):
         with self.assertRaises(FreezeGradeFailedException):
             api.get_status_for_courserun(crun, self.mmtrack)
 
+    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": 'v1'})
     def test_read_will_attend(self):
         """test for get_status_for_courserun for an enrolled and paid future course"""
         self.mmtrack.configure_mock(**{
@@ -417,6 +429,7 @@ class CourseRunTest(CourseTests):
             'is_enrolled_mmtrack.return_value': True,
             'has_paid.return_value': True,
             'has_paid_frozen_grade.return_value': False,
+            'has_frozen_grade.return_value': False,
         })
         # create a run that is future
         crun = self.create_run(
@@ -629,6 +642,7 @@ class CourseRunTest(CourseTests):
         (False, api.CourseRunStatus.NOT_PASSED)
     )
     @ddt.unpack
+    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": 'v1'})
     def test_not_paid_in_past_grade_frozen_exists(self, passed, status, froz_mock, upgr_mock):
         """
         test for get_status_for_courserun for course
@@ -643,7 +657,7 @@ class CourseRunTest(CourseTests):
             'is_enrolled_mmtrack.return_value': False,
             'has_paid.return_value': False,
             'has_paid_frozen_grade.return_value': False,
-            'has_frozen_grade.return_value': True,
+            'has_frozen_grade.return_value': False,
         })
         # create a run that is past
         crun = self.create_run(
@@ -665,7 +679,7 @@ class CourseRunTest(CourseTests):
             'is_enrolled_mmtrack.return_value': False,
             'has_paid.return_value': True,
             'has_paid_frozen_grade.return_value': False,
-            'has_frozen_grade.return_value': True,
+            'has_frozen_grade.return_value': False,
         })
         crun = self.create_run(
             start=self.now+timedelta(weeks=52),
@@ -1197,7 +1211,8 @@ class UserProgramInfoIntegrationTest(MockedESTestCase):
             course_run=failed_course_run,
             grade=0.1,
             passed=False,
-            status=FinalGradeStatus.COMPLETE
+            status=FinalGradeStatus.COMPLETE,
+            course_run_paid_on_edx=True
         )
         CourseRunGradingStatus.objects.create(
             course_run=failed_course_run,
@@ -1217,7 +1232,8 @@ class UserProgramInfoIntegrationTest(MockedESTestCase):
             course_run=previous_failed_course_run,
             grade=0.1,
             passed=False,
-            status=FinalGradeStatus.COMPLETE
+            status=FinalGradeStatus.COMPLETE,
+            course_run_paid_on_edx=True
         )
         CourseRunGradingStatus.objects.create(
             course_run=previous_failed_course_run,

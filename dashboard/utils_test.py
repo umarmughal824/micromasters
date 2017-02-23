@@ -747,9 +747,9 @@ class MMTrackTest(MockedESTestCase):
         )
         assert mmtrack.count_courses_passed() == 1
 
-    def test_has_paid_fa(self):
+    def test_has_paid_fa_no_final_grade(self):
         """
-        Assert that has_paid works for FA programs
+        Assert that has_paid works for FA programs in case there is no final grade or or with v0 algorithm
         """
         mmtrack = MMTrack(
             user=self.user,
@@ -767,9 +767,27 @@ class MMTrackTest(MockedESTestCase):
         )
         assert mmtrack.has_paid(key) is True
 
-    def test_has_paid_not_fa(self):
+    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v1"})
+    def test_has_paid_fa_with_final_grade(self):
         """
-        Assert that has_paid works for non-FA programs
+        Test for has_paid for FA programs in case there is a final grade
+        """
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program_financial_aid,
+            edx_user_data=self.cached_edx_user_data
+        )
+        key = self.crun_fa.edx_course_key
+        assert mmtrack.has_paid(key) is False
+        final_grade = FinalGradeFactory.create(user=self.user, course_run=self.crun_fa, course_run_paid_on_edx=True)
+        assert mmtrack.has_paid(key) is True
+        final_grade.course_run_paid_on_edx = False
+        final_grade.save()
+        assert mmtrack.has_paid(key) is False
+
+    def test_has_paid_not_fa_no_final_grade(self):
+        """
+        Assert that has_paid works for non-FA programs in case there is no final grade or with v0 algorithm
         """
         mmtrack = MMTrack(
             user=self.user,
@@ -778,6 +796,25 @@ class MMTrackTest(MockedESTestCase):
         )
         key = "course-v1:edX+DemoX+Demo_Course"
         assert mmtrack.has_paid(key) is True
+
+    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v1"})
+    def test_has_paid_not_fa_with_final_grade(self):
+        """
+        Assert that has_paid works for non-FA programs in case there is a final grade
+        """
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program,
+            edx_user_data=self.cached_edx_user_data
+        )
+        key = "course-v1:odl+FOO102+CR-FALL16"
+        assert mmtrack.has_paid(key) is False
+        course_run = self.cruns[-1]
+        final_grade = FinalGradeFactory.create(user=self.user, course_run=course_run, course_run_paid_on_edx=True)
+        assert mmtrack.has_paid(key) is True
+        final_grade.course_run_paid_on_edx = False
+        final_grade.save()
+        assert mmtrack.has_paid(key) is False
 
     @ddt.data(
         ("verified", "downloadable", True),

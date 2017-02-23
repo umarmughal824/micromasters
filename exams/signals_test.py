@@ -120,6 +120,7 @@ class ExamSignalsTest(MockedESTestCase):
                 user=self.profile.user,
                 course_run=self.course_run,
                 passed=True,
+                course_run_paid_on_edx=False,
             )
 
         log.debug.assert_called_with(

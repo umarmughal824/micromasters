@@ -17,7 +17,7 @@ from grades.models import (
 
 log = logging.getLogger(__name__)
 
-UserFinalGrade = namedtuple('UserFinalGrade', ['grade', 'passed'])
+UserFinalGrade = namedtuple('UserFinalGrade', ['grade', 'passed', 'payed_on_edx'])
 
 
 def _compute_grade_for_fa(user_edx_run_data):
@@ -36,10 +36,14 @@ def _compute_grade_for_fa(user_edx_run_data):
     if user_edx_run_data.certificate is not None:
         run_passed = user_edx_run_data.certificate.status == 'downloadable'
         grade = user_edx_run_data.certificate.grade
+        # the following line should be updated when
+        # we add support for honor enrollments and certificates in the edx-api-client
+        payed_on_edx = user_edx_run_data.certificate.certificate_type in ['honor', 'verified']
     else:
         run_passed = user_edx_run_data.current_grade.passed
         grade = user_edx_run_data.current_grade.percent
-    return UserFinalGrade(grade=grade, passed=run_passed)
+        payed_on_edx = False
+    return UserFinalGrade(grade=grade, passed=run_passed, payed_on_edx=payed_on_edx)
 
 
 def _compute_grade_for_non_fa(user_edx_run_data):
@@ -55,12 +59,16 @@ def _compute_grade_for_non_fa(user_edx_run_data):
         UserFinalGrade: a namedtuple of (float, bool,) representing the final grade
             of the user in the course run and whether she passed it
     """
-    run_passed = user_edx_run_data.certificate is not None and user_edx_run_data.certificate.status == 'downloadable'
     if user_edx_run_data.certificate is not None:
+        run_passed = user_edx_run_data.certificate.status == 'downloadable'
         grade = user_edx_run_data.certificate.grade
+        payed_on_edx = user_edx_run_data.certificate.certificate_type in ['honor', 'verified']
     else:
+        run_passed = False
         grade = user_edx_run_data.current_grade.percent
-    return UserFinalGrade(grade=grade, passed=run_passed)
+        payed_on_edx = user_edx_run_data.enrollment.mode in ['honor', 'verified']
+
+    return UserFinalGrade(grade=grade, passed=run_passed, payed_on_edx=payed_on_edx)
 
 
 def _get_compute_func(course_run):
@@ -174,5 +182,6 @@ def freeze_user_final_grade(user, course_run, raise_on_exception=False):
         course_run=course_run,
         grade=final_grade.grade,
         passed=final_grade.passed,
-        status=FinalGradeStatus.COMPLETE
+        status=FinalGradeStatus.COMPLETE,
+        course_run_paid_on_edx=final_grade.payed_on_edx
     )

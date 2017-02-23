@@ -16,6 +16,7 @@ class FinalGradeFactory(DjangoModelFactory):
     grade = FuzzyFloat(low=0, high=1)
     passed = Faker('boolean')
     status = FinalGradeStatus.COMPLETE
+    course_run_paid_on_edx = Faker('boolean')
 
     class Meta:  # pylint: disable=missing-docstring,no-init,too-few-public-methods,old-style-class
         model = FinalGrade
