@@ -203,24 +203,18 @@ class MMTrack:
 
     def extract_final_grade(self, course_id):
         """
-        Function that extract a final grade tuple from a global class dictionary
-        or extracts the value from the database and updates such dictionary.
+        Helper function that extract a final grade from the database.
 
         Args:
             course_id (str): an edX course run id
         Returns:
             FinalGrade: a Final Grade object
         """
-        try:
-            final_grade = FinalGrade.objects.get(
-                course_run__edx_course_key=course_id,
-                user=self.user,
-                status=FinalGradeStatus.COMPLETE,
-            )
-        except FinalGrade.DoesNotExist:
-            log.exception('No final grade found for user %s in course %s', self.user.username, course_id)
-            raise
-        return final_grade
+        return FinalGrade.objects.get(
+            course_run__edx_course_key=course_id,
+            user=self.user,
+            status=FinalGradeStatus.COMPLETE,
+        )
 
     def has_frozen_grade(self, course_id):
         """
