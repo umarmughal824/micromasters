@@ -7,18 +7,28 @@ import R from 'ramda';
 import { FETCH_PROCESSING } from '../actions';
 import Loader from '../components/Loader';
 import ErrorMessage from '../components/ErrorMessage';
-import ProfileFormContainer from './ProfileFormContainer';
+import {
+  profileFormContainer,
+  mapStateToProfileProps,
+  childrenWithProps,
+} from './ProfileFormContainer';
 import { validateProfileComplete } from '../lib/validation/profile';
 import type { Profile, ProfileGetResult } from '../flow/profileTypes';
 import {
   makeProfileProgressDisplay,
   currentOrFirstIncompleteStep,
 } from '../util/util';
+import type { ProfileContainerProps } from './ProfileFormContainer';
 
-class ProfilePage extends ProfileFormContainer {
+class ProfilePage extends React.Component<*, ProfileContainerProps, *> {
   componentDidMount() {
-    this.scrollToError();
+    const { scrollToError } = this.props;
+    scrollToError.call(this);
   }
+
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
+  };
 
   componentDidUpdate() {
     const username = SETTINGS.user.username;
@@ -27,12 +37,13 @@ class ProfilePage extends ProfileFormContainer {
         [username]: profileInfo,
       },
       ui: { profileStep },
+      profileProps,
     } = this.props;
 
     if (profileStep !== null &&
         profileInfo !== undefined &&
         profileInfo.getStatus !== FETCH_PROCESSING) {
-      const { profile } = this.profileProps(profileInfo);
+      const { profile } = profileProps(profileInfo);
 
       const [ , step, ] = validateProfileComplete(profile);
       let idealStep = currentOrFirstIncompleteStep(profileStep, step);
@@ -43,6 +54,8 @@ class ProfilePage extends ProfileFormContainer {
   }
 
   renderContent(username: string, profileInfo: ProfileGetResult, profile: Profile, currentStep: ?string) {
+    const { children, profileProps } = this.props;
+
     if (R.isNil(profileInfo)) {
       return '';
     }
@@ -57,7 +70,7 @@ class ProfilePage extends ProfileFormContainer {
           {makeProfileProgressDisplay(currentStep)}
         </div>
         <section className="profile-form">
-          {this.childrenWithProps(profileInfo)}
+          { childrenWithProps(children, profileProps(profileInfo)) }
         </section>
       </div>
     );
@@ -70,11 +83,12 @@ class ProfilePage extends ProfileFormContainer {
       profiles: {
         [username]: profileInfo,
       },
-      ui: { profileStep }
+      ui: { profileStep },
+      profileProps,
     } = this.props;
     const loaded = profileInfo !== undefined &&
         profileInfo.getStatus !== FETCH_PROCESSING;
-    const { profile } = this.profileProps(profileInfo);
+    const { profile } = profileProps(profileInfo);
 
     return (
       <div className="single-column">
@@ -86,4 +100,7 @@ class ProfilePage extends ProfileFormContainer {
   }
 }
 
-export default connect(ProfileFormContainer.mapStateToProps)(ProfilePage);
+export default R.compose(
+  connect(mapStateToProfileProps),
+  profileFormContainer
+)(ProfilePage);

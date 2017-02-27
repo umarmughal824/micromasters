@@ -3,21 +3,27 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import Loader from '../components/Loader';
+import R from 'ramda';
 
 import { FETCH_PROCESSING } from '../actions';
 import { clearProfile } from '../actions/profile';
-import ProfileFormContainer from './ProfileFormContainer';
+import {
+  profileFormContainer,
+  mapStateToProfileProps,
+  childrenWithProps,
+} from './ProfileFormContainer';
 import ErrorMessage from '../components/ErrorMessage';
+import type { ProfileContainerProps } from './ProfileFormContainer';
 
-class LearnerPage extends ProfileFormContainer {
+class LearnerPage extends React.Component<*, ProfileContainerProps, *> {
   componentDidMount() {
-    const { params: { username } } = this.props;
-    this.fetchProfile(username);
+    const { params: { username }, fetchProfile } = this.props;
+    fetchProfile(username);
   }
 
   componentDidUpdate() {
-    const { params: { username } } = this.props;
-    this.fetchProfile(username);
+    const { params: { username }, fetchProfile } = this.props;
+    fetchProfile(username);
   }
 
   componentWillUnmount() {
@@ -29,21 +35,29 @@ class LearnerPage extends ProfileFormContainer {
   }
 
   render() {
-    const { params: { username }, profiles } = this.props;
+    const {
+      params: { username },
+      profiles,
+      children,
+      profileProps,
+    } = this.props;
 
     let profile = {};
-    let children = null;
+    let toRender = null;
     let loaded = false;
     if (profiles[username] !== undefined) {
       profile = profiles[username];
       loaded = profiles[username].getStatus !== FETCH_PROCESSING;
-      children = this.childrenWithProps(profile);
+      toRender = childrenWithProps(children, profileProps(profile));
     }
     const { errorInfo } = profile;
     return <Loader loaded={loaded}>
-      {errorInfo && loaded ? <ErrorMessage errorInfo={errorInfo} /> : children }
+      {errorInfo && loaded ? <ErrorMessage errorInfo={errorInfo} /> : toRender }
     </Loader>;
   }
 }
 
-export default connect(ProfileFormContainer.mapStateToProps)(LearnerPage);
+export default R.compose(
+  connect(mapStateToProfileProps),
+  profileFormContainer
+)(LearnerPage);

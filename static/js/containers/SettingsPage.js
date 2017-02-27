@@ -3,15 +3,17 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import Loader from '../components/Loader';
+import R from 'ramda';
 
 import { startProfileEdit } from '../actions/profile';
 import { FETCH_PROCESSING } from '../actions/index';
-import ProfileFormContainer from './ProfileFormContainer';
+import { profileFormContainer, mapStateToProfileProps } from './ProfileFormContainer';
 import PrivacyForm from '../components/PrivacyForm';
 import ProfileProgressControls from '../components/ProfileProgressControls';
 import { privacyValidation } from '../lib/validation/profile';
+import type { ProfileContainerProps } from './ProfileFormContainer';
 
-class SettingsPage extends ProfileFormContainer {
+class SettingsPage extends React.Component<*, ProfileContainerProps, *> {
   componentWillMount() {
     this.startSettingsEdit();
   }
@@ -22,8 +24,8 @@ class SettingsPage extends ProfileFormContainer {
   }
 
   render() {
-    const { profiles } = this.props;
-    let props = this.profileProps(profiles[SETTINGS.user.username]);
+    const { profiles, profileProps } = this.props;
+    let props = profileProps(profiles[SETTINGS.user.username]);
     let loaded = false;
     const username = SETTINGS.user.username;
 
@@ -49,5 +51,7 @@ class SettingsPage extends ProfileFormContainer {
     );
   }
 }
-
-export default connect(ProfileFormContainer.mapStateToProps)(SettingsPage);
+export default R.compose(
+  connect(mapStateToProfileProps),
+  profileFormContainer
+)(SettingsPage);
