@@ -153,7 +153,8 @@ class FinancialAidActionSerializer(serializers.Serializer):
         elif self.instance.status == FinancialAidStatus.RESET:
             self.instance.justification = "Reset via the financial aid review form"
 
-        self.instance.save()
+        # also saves history of this change in FinancialAidAudit.
+        self.instance.save_and_log(self.context["request"].user)
 
         # Send email notification
         MailgunClient.send_financial_aid_email(
