@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.49.0
+--------------
+
+- Refactored dashboard reducer to support multiple users
+- Fixed search filtering involving query parameters (#2691)
+- [financial_aid/review]Created financialaidaudit objects when financial aid status is changed through ui (#2695)
+- Upgrade Django to 1.10.5 (#2698)
+- Removed excessive logging from MMTrack
+
 Version 0.48.1
 --------------
 
