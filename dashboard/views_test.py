@@ -105,6 +105,18 @@ class DashboardTest(MockedESTestCase, APITestCase):
         self.client.get(self.url)
         assert update_mock.call_count == 0
 
+    @patch('dashboard.api_edx_cache.CachedEdxDataApi.update_cache_if_expired', new_callable=MagicMock)
+    @patch('backends.utils.refresh_user_token', autospec=True)
+    @ddt.data(400, 401,)
+    def test_http_error_propagated_from_back_functions(
+            self, status_code, refr_token, refr_cache):  # pylint: disable=unused-argument
+        """
+        Tests that if an InvalidCredentialStored is raised from the backend,
+        """
+        refr_cache.side_effect = InvalidCredentialStored('foo message', status_code)
+        result = self.client.get(self.url)
+        assert result.status_code == status_code
+
 
 class DashboardTokensTest(MockedESTestCase, APITestCase):
     """

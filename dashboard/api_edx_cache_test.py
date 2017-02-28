@@ -5,12 +5,15 @@ Tests for the dashboard APIs functions that deal with the edx cached data
 from datetime import datetime, timedelta
 from unittest.mock import patch, MagicMock, ANY
 
+import ddt
 import pytz
 from edx_api.certificates.models import Certificate, Certificates
 from edx_api.enrollments.models import Enrollment, Enrollments
 from edx_api.grades.models import CurrentGrade, CurrentGrades
+from requests.exceptions import HTTPError
 
 from backends.edxorg import EdxOrgOAuth2
+from backends.exceptions import InvalidCredentialStored
 from courses.factories import ProgramFactory, CourseFactory, CourseRunFactory
 from dashboard import models
 from dashboard.api_edx_cache import (
@@ -98,6 +101,7 @@ class CachedEdxUserDataTests(MockedESTestCase):
         assert run_data.current_grade.course_id == self.p1_course_run_keys[0]
 
 
+@ddt.ddt
 class CachedEdxDataApiTests(MockedESTestCase):
     """
     Tests for the CachedEdxDataApi class
@@ -376,6 +380,26 @@ class CachedEdxDataApiTests(MockedESTestCase):
             CachedEdxDataApi.update_cache_if_expired(self.user, self.edx_client, cache_type)
         for mock_func in all_mocks:
             assert mock_func.called is True
+
+    @patch('dashboard.api_edx_cache.CachedEdxDataApi.update_cached_enrollments')
+    @ddt.data(400, 401, 405,)
+    def test_update_cache_if_expired_http_errors(self, status_code, mock_enr):
+        """
+        Test for update_cache_if_expired in case a backend function raises an HTTPError
+        """
+        def raise_http_error(*args, **kwargs):  # pylint: disable=unused-argument
+            """Mock function to raise an exception"""
+            error = HTTPError()
+            error.response = MagicMock()
+            error.response.status_code = status_code
+            raise error
+        mock_enr.side_effect = raise_http_error
+        if status_code in (400, 401):
+            with self.assertRaises(InvalidCredentialStored):
+                CachedEdxDataApi.update_cache_if_expired(self.user, self.edx_client, CachedEdxDataApi.ENROLLMENT)
+        else:
+            with self.assertRaises(HTTPError):
+                CachedEdxDataApi.update_cache_if_expired(self.user, self.edx_client, CachedEdxDataApi.ENROLLMENT)
 
     @patch('dashboard.api_edx_cache.CachedEdxDataApi.update_cached_current_grades')
     @patch('dashboard.api_edx_cache.CachedEdxDataApi.update_cached_certificates')
