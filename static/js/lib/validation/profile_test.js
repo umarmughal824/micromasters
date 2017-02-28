@@ -4,6 +4,7 @@ import sinon from 'sinon';
 import moment from 'moment';
 
 import {
+  isNilOrEmptyString,
   personalValidation,
   educationValidation,
   employmentValidation,
@@ -31,6 +32,25 @@ describe('Profile validation functions', () => {
 
   afterEach(() => {
     sandbox.restore();
+  });
+
+  describe('isNilOrEmptyString', () => {
+    it('should match nil values and empty strings, nothing else', () => {
+      [
+        [null, true],
+        [undefined, true],
+        ["", true],
+        [" ", true],
+        ["   ", true],
+        [" \n  ", true],
+        ["\t ", true],
+        ["TEST", false],
+        [" TEST", false],
+        [" TEST ", false],
+      ].forEach(([val, expectation]) => {
+        assert.equal(isNilOrEmptyString(val), expectation);
+      });
+    });
   });
 
   describe('Personal validation', () => {

@@ -27,8 +27,8 @@ import { shouldRenderRomanizedFields } from '../../util/profile_edit';
 
 type ErrorMessages = {[key: string]: string};
 
-let isNilOrEmptyString = (val: any): boolean => (
-  val === null || val === undefined || val === ""
+export const isNilOrEmptyString = R.anyPass(
+  [R.isNil, R.test(/^\s*$/)]
 );
 
 const filledOutFields = R.compose(R.keys, R.reject(isNilOrEmptyString));
