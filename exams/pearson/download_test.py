@@ -278,7 +278,9 @@ class VCDCDownloadTest(MockedESTestCase):
         cls.now = datetime.now(pytz.utc)
         cls.processor = download.ArchivedResponseProcessor(sftp)
         with mute_signals(post_save):
-            cls.success_profiles = ExamProfileFactory.create_batch(2)
+            cls.success_profiles = ExamProfileFactory.create_batch(2) + [
+                ExamProfileFactory.create(profile__id=999, profile__student_id=1000),  # disjoint id and student_id
+            ]
             cls.failure_profiles = ExamProfileFactory.create_batch(2)
 
         cls.success_results = [VCDCResult(

@@ -168,7 +168,7 @@ class ArchivedResponseProcessor:
         messages = []
         for result in results:
             try:
-                exam_profile = ExamProfile.objects.get(profile_id=result.client_candidate_id)
+                exam_profile = ExamProfile.objects.get(profile__student_id=result.client_candidate_id)
             except ExamProfile.DoesNotExist:
                 error_message = "Unable to find an ExamProfile record for profile_id `{profile_id}`".format(
                     profile_id=result.client_candidate_id
