@@ -32,10 +32,10 @@ class BasicTests(SeleniumTestsBase):
 
         # Click the dashboard link on the upper right of the homepage
         self.selenium.find_element_by_class_name("header-dashboard-link").click()
-        self.wait().until(lambda driver: driver.find_element_by_class_name("enroll-button"))
+        self.wait().until(lambda driver: driver.find_element_by_class_name("pay-button"))
         self.assert_console_logs()
-        # Click the Enroll Now button on dashboard
-        self.selenium.find_element_by_class_name("enroll-button").click()
+        # Click the Pay $0 button on dashboard
+        self.selenium.find_element_by_class_name("pay-button").click()
         self.wait().until(lambda driver: driver.find_element_by_class_name("continue-payment"))
         # Click 'Continue' on the order summary page
         self.selenium.find_element_by_class_name("continue-payment").click()

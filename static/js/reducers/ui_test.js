@@ -25,10 +25,8 @@ import {
   setEmailDialogVisibility,
   setEnrollProgramDialogError,
   setEnrollProgramDialogVisibility,
-  setEnrollCourseDialogVisibility,
   setToastMessage,
   setEnrollSelectedProgram,
-  setEnrollSelectedCourseRun,
   setPhotoDialogVisibility,
   setCalculatorDialogVisibility,
   setConfirmSkipDialogVisibility,
@@ -188,16 +186,6 @@ describe('ui reducers', () => {
 
     it('sets the enrollment dialog currently selected program', () => {
       assertReducerResultState(setEnrollSelectedProgram, ui => ui.enrollSelectedProgram, null);
-    });
-  });
-
-  describe('Course enrollment', () => {
-    it('sets the enrollment dialog visibility', () => {
-      assertReducerResultState(setEnrollCourseDialogVisibility, ui => ui.enrollCourseDialogVisibility, false);
-    });
-
-    it('sets the enrollment dialog currently selected course run', () => {
-      assertReducerResultState(setEnrollSelectedCourseRun, ui => ui.enrollSelectedCourseRun, null);
     });
   });
 
