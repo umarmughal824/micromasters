@@ -37,10 +37,14 @@ from search.indexing_api import (
     remove_program_enrolled_user,
     serialize_program_enrolled_user,
     USER_DOC_TYPE,
-    filter_current_work
+    filter_current_work,
+    index_percolate_queries,
+    delete_percolate_query,
+    PERCOLATE_DOC_TYPE,
 )
 from search.base import ESTestCase
 from search.exceptions import ReindexException
+from search.models import PercolateQuery
 from search.util import traverse_mapping
 from micromasters.utils import dict_without_key
 
@@ -61,6 +65,10 @@ class ESTestActions:
         """Gets full index data from the _search endpoint"""
         refresh_index()
         return get(self.search_url).json()['hits']
+
+    def get_percolate_query(self, _id):
+        """Get percolate query"""
+        return get("{}/.percolator/{}".format(self.url, _id)).json()
 
     def get_mappings(self):
         """Gets mapping data"""
@@ -216,11 +224,17 @@ class IndexTests(ESTestCase):
         """
         with mute_signals(post_save):
             program_enrollments = [ProgramEnrollmentFactory.build() for _ in range(10)]
-        with patch('search.indexing_api._index_program_enrolled_users_chunk', autospec=True, return_value=0) \
-                as index_chunk:
+        with patch(
+            'search.indexing_api._index_chunk', autospec=True, return_value=0
+        ) as index_chunk, patch(
+            'search.indexing_api.serialize_program_enrolled_user', autospec=True, side_effect=lambda x: x
+        ) as serialize_mock:
             index_program_enrolled_users(program_enrollments, chunk_size=4)
             assert index_chunk.call_count == 3
-            index_chunk.assert_any_call(program_enrollments[0:4])
+            index_chunk.assert_any_call(program_enrollments[0:4], USER_DOC_TYPE)
+            assert serialize_mock.call_count == len(program_enrollments)
+            for enrollment in program_enrollments:
+                serialize_mock.assert_any_call(enrollment)
 
     def test_add_edx_record(self):
         """
@@ -401,3 +415,60 @@ class RecreateIndexTests(ESTestCase):
         # recreate_index should index the program-enrolled user
         recreate_index()
         assert_search(es.search(), [program_enrollment])
+
+
+class PercolateQueryTests(ESTestCase):
+    """
+    Tests for indexing of percolate queries
+    """
+
+    def test_index_percolate_query(self):
+        """Test that we index the percolate query"""
+        query = {"query": {"match": {"profile.first_name": "here"}}}
+        percolate_query = PercolateQuery(query=query)
+        percolate_query_id = 123
+        percolate_query.id = percolate_query_id
+        # Don't save since that will trigger a signal which will update the index
+        assert es.get_percolate_query(percolate_query_id) == {
+            '_id': str(percolate_query_id),
+            '_index': settings.ELASTICSEARCH_INDEX,
+            '_type': PERCOLATE_DOC_TYPE,
+            'found': False,
+        }
+        index_percolate_queries([percolate_query])
+        assert es.get_percolate_query(percolate_query_id) == {
+            '_id': str(percolate_query_id),
+            '_index': settings.ELASTICSEARCH_INDEX,
+            '_source': query,
+            '_type': PERCOLATE_DOC_TYPE,
+            '_version': 1,
+            'found': True,
+        }
+
+    def test_delete_percolate_queries(self):
+        """Test that we delete the percolate query from the index"""
+        query = {"query": {"match": {"profile.first_name": "here"}}}
+        percolate_query = PercolateQuery.objects.create(query=query)
+        assert es.get_percolate_query(percolate_query.id) == {
+            '_id': str(percolate_query.id),
+            '_index': settings.ELASTICSEARCH_INDEX,
+            '_source': query,
+            '_type': PERCOLATE_DOC_TYPE,
+            '_version': 1,
+            'found': True,
+        }
+        delete_percolate_query(percolate_query.id)
+        assert es.get_percolate_query(percolate_query.id) == {
+            '_id': str(percolate_query.id),
+            '_index': settings.ELASTICSEARCH_INDEX,
+            '_type': PERCOLATE_DOC_TYPE,
+            'found': False,
+        }
+        # If we delete it again there should be no exception
+        delete_percolate_query(percolate_query.id)
+        assert es.get_percolate_query(percolate_query.id) == {
+            '_id': str(percolate_query.id),
+            '_index': settings.ELASTICSEARCH_INDEX,
+            '_type': PERCOLATE_DOC_TYPE,
+            'found': False,
+        }

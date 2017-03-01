@@ -7,8 +7,11 @@ from search.indexing_api import (
     index_program_enrolled_users as _index_program_enrolled_users,
     remove_program_enrolled_user as _remove_program_enrolled_user,
     index_users as _index_users,
-    remove_user as _remove_user
+    remove_user as _remove_user,
+    index_percolate_queries as _index_percolate_queries,
+    delete_percolate_query as _delete_percolate_query,
 )
+from search.models import PercolateQuery
 
 
 @async.task
@@ -39,7 +42,7 @@ def index_users(users):
     Index users
 
     Args:
-        users (iterable of Users): Users to remove from index
+        users (iterable of Users): Users to update in the Elasticsearch index
     """
     _index_users(users)
 
@@ -53,3 +56,26 @@ def remove_user(user):
         user (User): A user to remove from index
     """
     _remove_user(user)
+
+
+@async.task
+def index_percolate_queries(percolate_query_ids):
+    """
+    Index percolate queries
+
+    Args:
+        percolate_query_ids (iterable of int):
+            Database ids for PercolateQuery instances to index
+    """
+    _index_percolate_queries(PercolateQuery.objects.filter(id__in=percolate_query_ids))
+
+
+@async.task
+def delete_percolate_query(percolate_query_id):
+    """
+    Delete a percolate query in Elasticsearch
+
+    Args:
+        percolate_query_id (int): A PercolateQuery id
+    """
+    _delete_percolate_query(percolate_query_id)
