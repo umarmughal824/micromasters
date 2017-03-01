@@ -1,6 +1,19 @@
 Release Notes
 =============
 
+Version 0.49.1
+--------------
+
+- Added PercolateQuery model (#2701)
+- Frozen grades enabled by default in tests
+- Fixed ExamProfile lookup query (#2716)
+- Search: Added states/regions to search results for US learners (#2713)
+- Fix deepequal test (#2726)
+- Style changes to the Learner Search page (#2688)
+- New course enrollment UX (#2519)
+- Fix flaky test (#2715)
+- Added setting for Django Storage to use Cloudfront for S3 files (#2711)
+
 Version 0.49.0
 --------------
 
