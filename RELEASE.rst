@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.49.2
+--------------
+
+- Revert &quot;New course enrollment UX (#2519)&quot;
+- Fixed the name display on the final exam card
+- Use searchkit from props instead of storing it in redux (#2724)
+- Updated mail API to support automatic emails (#2728)
+- Fixed profile validation
+- Refactored profile form container into an HOC
+- Removed program.email_optin from ES index (#2730)
+
 Version 0.49.1
 --------------
 
