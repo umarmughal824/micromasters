@@ -275,6 +275,7 @@ def program_enrolled_user_mapping():
             'school_state_or_territory': NOT_ANALYZED_STRING_TYPE,
         }},
         'email_optin': BOOL_TYPE,
+        'email': FOLDED_SEARCHABLE_STRING_TYPE,
         'filled_out': BOOL_TYPE,
         'first_name': FOLDED_SEARCHABLE_STRING_TYPE,
         'gender': NOT_ANALYZED_STRING_TYPE,

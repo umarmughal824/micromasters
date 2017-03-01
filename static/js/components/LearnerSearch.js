@@ -166,6 +166,8 @@ export default class LearnerSearch extends SearchkitComponent {
               'profile.first_name.folded',
               'profile.last_name.folded',
               'profile.preferred_name.folded',
+              'profile.username',
+              'profile.email.folded'
             ]}
             prefixQueryOptions={{
               analyzer: "folding"

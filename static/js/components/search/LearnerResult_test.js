@@ -71,6 +71,11 @@ describe('LearnerResult', () => {
     assert.equal(result.text(), getUserDisplayName(USER_PROFILE_RESPONSE));
   });
 
+  it("should include the username", () => {
+    let result = renderLearnerResult().find(".learner-name").find(".user-name");
+    assert.equal(result.text(), USER_PROFILE_RESPONSE.username);
+  });
+
   it("should include the user's location for US residence", () => {
     let result = renderLearnerResult().find(".learner-location").find("span");
     assert.include(result.text(), USER_PROFILE_RESPONSE.city);
