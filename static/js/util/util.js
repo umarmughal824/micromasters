@@ -269,6 +269,10 @@ export function getPreferredName(profile: Profile, last: boolean = true): string
   return last && profile.last_name && !profile.preferred_name ? `${first} ${profile.last_name}` : first;
 }
 
+export const getFullName = (profile: Profile): string => (
+  `${profile.first_name} ${profile.last_name}`
+);
+
 /**
  * returns the users location
  */

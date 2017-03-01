@@ -26,6 +26,8 @@ describe('FinalExamCard', () => {
   let navigateToProfileStub, submitPearsonSSOStub;
   let props;
 
+  let profile = { ...USER_PROFILE_RESPONSE, preferred_name: 'Preferred Name' };
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     navigateToProfileStub = sandbox.stub();
@@ -34,7 +36,7 @@ describe('FinalExamCard', () => {
       program.pearson_exam_status !== undefined
     )));
     props = {
-      profile: USER_PROFILE_RESPONSE,
+      profile: profile,
       program: program,
       navigateToProfile: navigateToProfileStub,
       submitPearsonSSO: submitPearsonSSOStub,
@@ -75,10 +77,12 @@ pay for the course and pass the online work.`;
     it(`should include profile info if the profile is ${status}`, () => {
       props.program.pearson_exam_status = status;
       let cardText = stringStrip(renderCard(props).text());
-      assert.include(cardText, USER_PROFILE_RESPONSE.address);
-      assert.include(cardText, USER_PROFILE_RESPONSE.first_name);
-      assert.include(cardText, stringStrip(USER_PROFILE_RESPONSE.phone_number));
-      assert.include(cardText, USER_PROFILE_RESPONSE.state_or_territory);
+      assert.include(cardText, profile.address);
+      assert.include(cardText, profile.first_name);
+      assert.include(cardText, profile.last_name);
+      assert.notInclude(cardText, profile.preferred_name);
+      assert.include(cardText, stringStrip(profile.phone_number));
+      assert.include(cardText, profile.state_or_territory);
     });
 
     it(`should show a button to edit if the profile is ${status}`, () => {

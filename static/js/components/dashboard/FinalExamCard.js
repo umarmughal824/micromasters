@@ -18,7 +18,7 @@ import {
   PEARSON_PROFILE_SCHEDULABLE
 } from '../../constants';
 import { FETCH_PROCESSING } from '../../actions';
-import { getPreferredName, getLocation } from '../../util/util';
+import { getFullName, getLocation } from '../../util/util';
 import type { PearsonAPIState } from '../../reducers/pearson';
 
 const cardWrapper = (...children) => (
@@ -61,7 +61,7 @@ const accountCreated = (profile, navigateToProfile) => (
       <div className="address-info">
         <div className="address">
           <span className="name">
-            { getPreferredName(profile) }
+            { getFullName(profile) }
           </span>
           <span>
             { _.get(profile, ['address']) }

@@ -13,6 +13,7 @@ import {
   generateNewEducation,
   generateNewWorkHistory,
   getPreferredName,
+  getFullName,
   makeProfileProgressDisplay,
   userPrivilegeCheck,
   calculateDegreeInclusions,
@@ -162,6 +163,21 @@ describe('utility functions', () => {
       it(`shows just the first name if 'last === ${bool}' and 'profile.last_name === undefined'`, () => {
         assert.equal('First', getPreferredName({preferred_name: 'First'}, bool));
       });
+    });
+  });
+
+
+  describe('getFullName', () => {
+    let profile;
+    beforeEach(() => {
+      profile = {
+        first_name: 'jane',
+        last_name: 'doe',
+      };
+    });
+
+    it('returns First Last', () => {
+      assert.equal('jane doe', getFullName(profile));
     });
   });
 
