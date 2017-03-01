@@ -7,7 +7,8 @@ import R from 'ramda';
 import _ from 'lodash';
 
 import SpinnerButton from '../SpinnerButton';
-import type { Coupon, CalculatedPrices } from '../../flow/couponTypes';
+import { FETCH_PROCESSING } from '../../actions';
+import type { CalculatedPrices } from '../../flow/couponTypes';
 import type { CourseRun, FinancialAidUserInfo } from '../../flow/programTypes';
 import {
   STATUS_NOT_PASSED,
@@ -26,7 +27,6 @@ import {
 import { isCurrentlyEnrollable } from './util';
 import { formatPrice } from '../../util/util';
 import { ifValidDate } from '../../util/date';
-import { isFreeCoupon } from '../../lib/coupon';
 
 export default class CourseAction extends React.Component {
   static contextTypes = {
@@ -35,15 +35,13 @@ export default class CourseAction extends React.Component {
 
   props: {
     courseRun: CourseRun,
+    courseEnrollAddStatus?: string,
     now: moment$Moment,
     prices: CalculatedPrices,
     financialAid: FinancialAidUserInfo,
     hasFinancialAid: boolean,
-    openFinancialAidCalculator: () => void,
-    addCourseEnrollment: (courseId: string) => void,
-    setEnrollSelectedCourseRun: (r: CourseRun) => void,
-    setEnrollCourseDialogVisibility: (b: boolean) => void,
-    coupon?: Coupon,
+    openFinancialAidCalculator?: () => void,
+    addCourseEnrollment: (courseId: string) => void
   };
 
   statusDescriptionClasses = {
@@ -69,63 +67,40 @@ export default class CourseAction extends React.Component {
     return hasFinancialAid && FA_PENDING_STATUSES.includes(financialAid.application_status);
   }
 
-  redirectToOrderSummary(run: CourseRun): void {
-    const url = `/order_summary/?course_key=${encodeURIComponent(run.course_id)}`;
-    this.context.router.push(url);
-  }
-
-  handleEnrollButtonClick(run: CourseRun): void {
-    const {
-      coupon,
-      setEnrollSelectedCourseRun,
-      setEnrollCourseDialogVisibility,
-    } = this.props;
-
-    setEnrollSelectedCourseRun(run);
-
-    if (coupon && isFreeCoupon(coupon)) {
-      this.redirectToOrderSummary(run);
-    } else {
-      setEnrollCourseDialogVisibility(true);
-    }
-  }
-
   renderEnrollButton(run: CourseRun): React$Element<*> {
+    const { openFinancialAidCalculator } = this.props;
+    let text = '';
+    let needsPriceCalculation = this.needsPriceCalculation();
     let buttonProps = {};
+
+    if (needsPriceCalculation) {
+      text = 'Calculate Cost';
+    } else {
+      text = `Pay Now ${this.getCoursePrice()}`;
+    }
 
     if (this.hasPendingFinancialAid()) {
       buttonProps.disabled = true;
+    } else {
+      if (needsPriceCalculation) {
+        buttonProps.onClick = openFinancialAidCalculator;
+      } else {
+        buttonProps.onClick = () => {
+          this.context.router.push(`/order_summary/?course_key=${encodeURIComponent(run.course_id)}`);
+        };
+      }
     }
 
     return (
       <SpinnerButton
-        className="dashboard-button enroll-button"
+        className="dashboard-button pay-button"
         key="1"
         component={Button}
         spinning={run.status === STATUS_PENDING_ENROLLMENT}
-        onClick={() => this.handleEnrollButtonClick(run)}
         {...buttonProps}
       >
-        Enroll Now
+        {text}
       </SpinnerButton>
-    );
-  }
-
-  renderPayButton(run: CourseRun): React$Element<*> {
-    let props;
-    if (this.needsPriceCalculation()) {
-      props = {disabled: true};
-    } else {
-      props = {onClick: () => this.redirectToOrderSummary(run)};
-    }
-    return (
-      <Button
-        className="dashboard-button pay-button"
-        key="1"
-        {...props}
-      >
-        Pay Now
-      </Button>
     );
   }
 
@@ -150,9 +125,24 @@ export default class CourseAction extends React.Component {
     addCourseEnrollment(run.course_id);
   };
 
-  renderContents(run: CourseRun) {
-    const { now } = this.props;
+  renderPayLaterLink(run: CourseRun, inFlight: bool): React$Element<*> {
+    return (
+      <SpinnerButton
+        component="button"
+        spinning={inFlight}
+        className="mm-minor-action enroll-pay-later"
+        onClick={() => this.handleAddCourseEnrollment(run)}
+        key="2"
+      >
+        Enroll and pay later
+      </SpinnerButton>
+    );
+  }
 
+  renderContents(run: CourseRun) {
+    const { now, courseEnrollAddStatus } = this.props;
+
+    const inFlight = courseEnrollAddStatus === FETCH_PROCESSING;
     let action, description;
 
     switch (run.status) {
@@ -174,9 +164,9 @@ export default class CourseAction extends React.Component {
       break;
     }
     case STATUS_CAN_UPGRADE: {
-      action = this.renderPayButton(run);
-      const date = moment(run.course_upgrade_deadline);
-      const text = ifValidDate('', date => `Payment due: ${date.format(DASHBOARD_FORMAT)}`, date);
+      let date = moment(run.course_upgrade_deadline);
+      action = this.renderEnrollButton(run);
+      let text = ifValidDate('', date => `Payment due: ${date.format(DASHBOARD_FORMAT)}`, date);
       description = this.renderTextDescription(text);
       break;
     }
@@ -184,6 +174,7 @@ export default class CourseAction extends React.Component {
       let enrollmentStartDate = run.enrollment_start_date ? moment(run.enrollment_start_date) : null;
       if (isCurrentlyEnrollable(enrollmentStartDate, now)) {
         action = this.renderEnrollButton(run);
+        description = this.renderPayLaterLink(run, inFlight);
       } else {
         let text;
         if (enrollmentStartDate) {

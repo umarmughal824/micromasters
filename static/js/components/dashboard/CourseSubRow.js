@@ -18,14 +18,13 @@ import {
 export default class CourseSubRow extends React.Component {
   props: {
     courseRun:                   CourseRun,
+    courseEnrollAddStatus?:      string,
     now:                         moment$Moment,
     prices:                      CalculatedPrices,
     financialAid:                FinancialAidUserInfo,
     hasFinancialAid:             boolean,
     openFinancialAidCalculator:  () => void,
     addCourseEnrollment:         (courseId: string) => void,
-    setEnrollSelectedCourseRun:  (r: CourseRun) => void,
-    setEnrollCourseDialogVisibility: (b: boolean) => void,
   };
 
   getFormattedDateOrFuzzy(dateKey: string, fuzzyDateKey: string): string|null {
@@ -115,8 +114,6 @@ export default class CourseSubRow extends React.Component {
       openFinancialAidCalculator,
       addCourseEnrollment,
       prices,
-      setEnrollSelectedCourseRun,
-      setEnrollCourseDialogVisibility,
     } = this.props;
 
     let enrollStartDate = courseRun.enrollment_start_date ? moment(courseRun.enrollment_start_date) : null;
@@ -129,8 +126,6 @@ export default class CourseSubRow extends React.Component {
         financialAid={financialAid}
         openFinancialAidCalculator={openFinancialAidCalculator}
         addCourseEnrollment={addCourseEnrollment}
-        setEnrollSelectedCourseRun={setEnrollSelectedCourseRun}
-        setEnrollCourseDialogVisibility={setEnrollCourseDialogVisibility}
       />;
     }
   };
