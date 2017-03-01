@@ -1,6 +1,5 @@
 // @flow
 import _ from 'lodash';
-import R from 'ramda';
 import React from 'react';
 import { mount } from 'enzyme';
 import { assert } from 'chai';
@@ -20,6 +19,7 @@ import {
   PEARSON_PROFILE_SCHEDULABLE
 } from '../../constants';
 import { INITIAL_PEARSON_STATE } from '../../reducers/pearson';
+import { stringStrip } from '../../util/test_utils';
 
 describe('FinalExamCard', () => {
   let sandbox;
@@ -43,8 +43,6 @@ describe('FinalExamCard', () => {
       pearson: { ...INITIAL_PEARSON_STATE },
     };
   });
-
-  let stringStrip = R.compose(R.join(" "), _.words);
 
   let commonText = `You must take a proctored exam for each course. Exams may
 be taken at any authorized Pearson test center. Before you can take an exam, you have to

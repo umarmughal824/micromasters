@@ -23,3 +23,18 @@ export const mstr = S.maybe("", String);
  * (the third argument to R.ifElse)
  */
 export const ifNil = R.ifElse(R.isNil, () => S.Nothing());
+
+/*
+ * wraps a function in a guard, which will return Nothing
+ * if any of the arguments are null || undefined,
+ * and otherwise will return Just(fn(...args))
+ * 
+ * Similar to S.toMaybe
+ */
+export const guard = (func: Function) => (...args: any) => {
+  if (R.any(R.isNil, args)) {
+    return S.Nothing();
+  } else {
+    return S.Just(func(...args));
+  }
+};

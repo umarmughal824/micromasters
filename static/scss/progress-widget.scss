@@ -2,6 +2,9 @@
 .circular-progress-widget {
   margin-bottom: 8px;
   fill: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
   .circular-progress-widget-bg {
     stroke: $progress-widget-bg-stroke !important;

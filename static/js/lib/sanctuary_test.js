@@ -1,14 +1,22 @@
 // @flow
 import { assert } from 'chai';
+import R from 'ramda';
 
-import { S, allJust, mstr, ifNil } from './sanctuary';
+import { S, allJust, mstr, ifNil, guard } from './sanctuary';
 const { Maybe, Just, Nothing } = S;
 
 export const assertMaybeEquality = (m1: Maybe, m2: Maybe) => {
   assert(m1.equals(m2), `expected ${m1.value} to equal ${m2.value}`);
 };
 
-export const assertIsNothing = (m: Maybe) => assert(m.isNothing, "should be nothing");
+export const assertIsNothing = (m: Maybe) => {
+  assert(m.isNothing, `should be nothing, is ${m}`);
+};
+
+export const assertIsJust = (m: Maybe, val: any) => {
+  assert(m.isJust, `should be Just(${val}), is ${m}`);
+  assert.deepEqual(m.value, val);
+};
 
 describe('sanctuary util functions', () => {
   describe('allJust', () => {
@@ -51,6 +59,38 @@ describe('sanctuary util functions', () => {
     it('return func(input) if the input is not nil', () => {
       let result = ifNil(x => x)('test input');
       assert.equal('test input', result);
+    });
+  });
+
+  describe('guard', () => {
+    let wrappedFunc = guard(x => x + 2);
+    let wrappedRestFunc = guard((x, y, z) => [x, y, z]);
+
+    it('takes a function and returns a function', () => {
+      assert.isFunction(wrappedFunc);
+      assert.isFunction(wrappedRestFunc);
+    });
+
+    it('returns a function that returns Nothing if any arguments are nil', () => {
+      assertIsNothing(wrappedFunc(null));
+      assertIsNothing(wrappedFunc(undefined));
+    });
+
+    it('returns a function that returns the Just(fn(args)) if no args are undefined', () => {
+      assertIsJust(wrappedFunc(2), 4);
+    });
+
+    it('accepts rest parameters', () => {
+      assertIsJust(wrappedRestFunc(1,2,3), [1,2,3]);
+    });
+
+    it('returns Nothing if any rest parameter arg is undefined', () => {
+      let args = [1,2,3];
+      [null, undefined].forEach(nilVal => {
+        for (let i = 0; i < 3; i++) {
+          assertIsNothing(wrappedRestFunc(...R.update(i, nilVal, args)));
+        }
+      });
     });
   });
 });

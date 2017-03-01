@@ -8,25 +8,21 @@ import type {
 } from '../flow/programTypes';
 import { programCourseInfo } from '../util/util';
 
-export default class ProgressWidget extends React.Component {
-  props: {
-    program: Program
-  };
+export const circularProgressWidget = (
+  radius: number,
+  strokeWidth: number,
+  totalPassedCourses: number,
+  totalCourses: number
+): React$Element<*> => {
+  const radiusForMeasures = radius - strokeWidth / 2;
+  const width = radius * 2;
+  const height = radius * 2;
+  const viewBox = `0 0 ${width} ${height}`;
+  const dashArray = radiusForMeasures * Math.PI * 2;
+  const dashOffset = dashArray - dashArray * totalPassedCourses / (totalCourses || 1);
 
-  circularProgressWidget = (
-    radius: number,
-    strokeWidth: number,
-    totalPassedCourses: number,
-    totalCourses: number
-  ): React$Element<*> => {
-    const radiusForMeasures = radius - strokeWidth / 2;
-    const width = radius * 2;
-    const height = radius * 2;
-    const viewBox = `0 0 ${width} ${height}`;
-    const dashArray = radiusForMeasures * Math.PI * 2;
-    const dashOffset = dashArray - dashArray * totalPassedCourses / (totalCourses || 1);
-
-    return (
+  return (
+    <div className="circular-progress-widget">
       <svg className="circular-progress-widget"
         width={radius * 2}
         height={radius * 2}
@@ -56,7 +52,14 @@ export default class ProgressWidget extends React.Component {
           {`${totalPassedCourses}/${totalCourses}`}
         </text>
       </svg>
-    );
+      <p className="text-course-complete">Courses complete</p>
+    </div>
+  );
+};
+
+export default class ProgressWidget extends React.Component {
+  props: {
+    program: Program
   };
 
   render() {
@@ -66,10 +69,7 @@ export default class ProgressWidget extends React.Component {
     return (
       <Card className="progress-widget" shadow={0}>
         <CardTitle className="progress-title">Progress</CardTitle>
-        <div className="circular-progress-widget">
-          {this.circularProgressWidget(63, 7, totalPassedCourses, totalCourses)}
-        </div>
-        <p className="text-course-complete">Courses complete</p>
+        {circularProgressWidget(63, 7, totalPassedCourses, totalCourses)}
         <p className="heading-paragraph">
           On completion, you can apply for
           the master’s degree program</p>

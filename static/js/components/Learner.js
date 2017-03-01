@@ -1,5 +1,7 @@
 // @flow
+/* global SETTINGS: false */
 import React from 'react';
+import R from 'ramda';
 
 import EmploymentForm from './EmploymentForm';
 import EducationForm from './EducationForm';
@@ -13,6 +15,8 @@ import {
 } from '../lib/validation/profile';
 import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
+import StaffLearnerInfoCard from './StaffLearnerInfoCard';
+import type { DashboardState } from '../flow/dashboardTypes';
 
 export default class Learner extends React.Component {
   props: {
@@ -24,6 +28,7 @@ export default class Learner extends React.Component {
     saveProfile:                            SaveProfileFunc,
     startProfileEdit:                       () => void,
     setLearnerPageAboutMeDialogVisibility:  () => void,
+    dashboard:                              DashboardState,
   };
 
   toggleShowPersonalDialog = (): void => {
@@ -46,6 +51,19 @@ export default class Learner extends React.Component {
     startProfileEdit();
   };
 
+  showStaffInfo = () => {
+    const { dashboard } = this.props;
+    if (! R.isEmpty(dashboard)) {
+      return dashboard.programs.map(program => (
+        <StaffLearnerInfoCard
+          program={program}
+          key={program.title}
+        />
+      ));
+    }
+    return null;
+  };
+
   render() {
     const { profile } = this.props;
 
@@ -56,6 +74,7 @@ export default class Learner extends React.Component {
         profile={profile}
         toggleShowAboutMeDialog={this.toggleShowAboutMeDialog}
         toggleShowPersonalDialog={this.toggleShowPersonalDialog} />
+      { this.showStaffInfo() }
       <EducationForm {...this.props} showSwitch={false} validator={educationValidation} />
       <EmploymentForm {...this.props} showSwitch={false} validator={employmentValidation} />
     </div>;

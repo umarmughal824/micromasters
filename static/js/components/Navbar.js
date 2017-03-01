@@ -17,6 +17,7 @@ import UserMenu from '../containers/UserMenu';
 import ProfileImage from '../containers/ProfileImage';
 import { getPreferredName } from '../util/util';
 import type { Profile } from '../flow/profileTypes';
+import { hasAnyStaffRole } from '../lib/roles';
 
 const PROFILE_SETTINGS_REGEX = /^\/profile\/?|settings\/?|learner\/[a-z]?/;
 const PROFILE_REGEX = /^\/profile\/?/;
@@ -157,7 +158,7 @@ export default class Navbar extends React.Component {
     } = this.props;
 
     let link = '/dashboard';
-    if (SETTINGS.roles.find(role => role.role === 'staff' || role.role === 'instructor')) {
+    if (hasAnyStaffRole(SETTINGS.roles)) {
       link = '/learners';
     }
 

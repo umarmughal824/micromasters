@@ -41,7 +41,7 @@ import {
   SET_SHOW_WORK_DELETE_DIALOG,
   SET_SHOW_EDUCATION_DELETE_DIALOG,
 } from '../actions/ui';
-import { USER_PROFILE_RESPONSE } from '../test_constants';
+import { USER_PROFILE_RESPONSE, DASHBOARD_RESPONSE } from '../test_constants';
 import { HIGH_SCHOOL, DOCTORATE } from '../constants';
 import {
   generateNewEducation,
@@ -59,6 +59,11 @@ import {
   clearSelectField,
   GoogleMapsStub,
 } from '../util/test_utils';
+import StaffLearnerInfoCard from '../components/StaffLearnerInfoCard';
+import {
+  REQUEST_DASHBOARD,
+  RECEIVE_DASHBOARD_SUCCESS,
+} from '../actions/dashboard';
 
 describe("LearnerPage", function() {
   this.timeout(10000);
@@ -980,6 +985,25 @@ describe("LearnerPage", function() {
       return renderComponent(`/learner/other`, userActions).then(([, div]) => {
         let count = div.getElementsByClassName('mdl-button--icon').length;
         assert.equal(count, 0);
+      });
+    });
+
+    it('should hide the staff learner info card, if the user doesnt have a staff role', () => {
+      const username = SETTINGS.user.username;
+      return renderComponent(`/learner/${username}`, userActions).then(([wrapper, ]) => {
+        assert.equal(wrapper.find(StaffLearnerInfoCard).length, 0);
+      });
+    });
+
+
+    it('should show the staff learner info card, if the user has a staff role', () => {
+      const smallDashboard = DASHBOARD_RESPONSE.slice(0,1);
+      helper.dashboardStub.returns(Promise.resolve(smallDashboard));
+      const username = SETTINGS.user.username;
+      SETTINGS.roles.push({ role: 'staff' });
+      const actions = userActions.concat([REQUEST_DASHBOARD, RECEIVE_DASHBOARD_SUCCESS]);
+      return renderComponent(`/learner/${username}`, actions).then(([wrapper, ]) => {
+        assert.equal(wrapper.find(StaffLearnerInfoCard).length, 1);
       });
     });
   });

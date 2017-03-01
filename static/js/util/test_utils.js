@@ -6,6 +6,7 @@ import TestUtils from 'react-addons-test-utils';
 import { assert } from 'chai';
 import sinon from 'sinon';
 import _ from 'lodash';
+import R from 'ramda';
 
 import { findCourseRun } from '../util/util';
 import { DASHBOARD_RESPONSE } from '../test_constants';
@@ -276,3 +277,6 @@ export const testRoutes = (
     <Route path="/learners" component={LearnerSearchPage} />
   </Route>
 );
+
+
+export const stringStrip = R.compose(R.join(" "), _.words);
