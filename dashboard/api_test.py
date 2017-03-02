@@ -143,94 +143,150 @@ class CourseTests(MockedESTestCase):
 class FormatRunTest(CourseTests):
     """Tests for the format_courserun_for_dashboard function"""
 
+    def setUp(self):
+        super().setUp()
+        self.mmtrack.configure_mock(**{
+            'get_final_grade.return_value': 99.99,
+            'get_current_grade.return_value': 33.33,
+            'has_paid.return_value': False,
+        })
+        self.crun = self.create_run(
+            start=self.now+timedelta(weeks=52),
+            end=self.now+timedelta(weeks=62),
+            enr_start=self.now+timedelta(weeks=40),
+            enr_end=self.now+timedelta(weeks=50),
+            upgrade_deadline=self.now+timedelta(weeks=70),
+        )
+        self.expected_ret_data = {
+            'title': self.crun.title,
+            'status': api.CourseStatus.PASSED,
+            'id': self.crun.pk,
+            'course_id': self.crun.edx_course_key,
+            'position': 1,
+            'course_start_date': self.crun.start_date,
+            'course_end_date': self.crun.end_date,
+            'fuzzy_start_date': self.crun.fuzzy_start_date,
+            'final_grade': 99.99,
+            'enrollment_url': self.crun.enrollment_url,
+            'has_paid': False,
+        }
+
     def test_format_run_no_run(self):
         """Test for format_courserun_for_dashboard if there is no run"""
         self.assertIsNone(
             api.format_courserun_for_dashboard(None, api.CourseStatus.PASSED, self.mmtrack)
         )
 
-    def test_format_run(self):
-        """Test for format_courserun_for_dashboard"""
-        self.mmtrack.configure_mock(**{
-            'get_final_grade.return_value': 99.99,
-            'get_current_grade.return_value': 33.33,
-            'has_paid.return_value': False
-        })
-        crun = self.create_run(
-            start=self.now+timedelta(weeks=52),
-            end=self.now+timedelta(weeks=62),
-            enr_start=self.now+timedelta(weeks=40),
-            enr_end=self.now+timedelta(weeks=50),
-        )
-
-        expected_ret_data = {
-            'title': crun.title,
-            'status': api.CourseStatus.PASSED,
-            'id': crun.pk,
-            'course_id': crun.edx_course_key,
-            'position': 1,
-            'course_start_date': crun.start_date,
-            'course_end_date': crun.end_date,
-            'fuzzy_start_date': crun.fuzzy_start_date,
-            'final_grade': 99.99,
-            'enrollment_url': crun.enrollment_url,
-            'has_paid': False,
-        }
-
+    def test_format_run_normal(self):
+        """
+        Test for format_courserun_for_dashboard
+        """
         self.assertEqual(
-            api.format_courserun_for_dashboard(crun, api.CourseStatus.PASSED, self.mmtrack),
-            expected_ret_data
+            api.format_courserun_for_dashboard(self.crun, api.CourseStatus.PASSED, self.mmtrack),
+            self.expected_ret_data
         )
 
-        # with different position
-        expected_ret_data['position'] = 56
+    def test_format_run_different_position(self):
+        """
+        Test for format_courserun_for_dashboard with different position
+        """
+        self.expected_ret_data['position'] = 56
         self.assertEqual(
-            api.format_courserun_for_dashboard(crun, api.CourseStatus.PASSED, self.mmtrack, position=56),
-            expected_ret_data
+            api.format_courserun_for_dashboard(self.crun, api.CourseStatus.PASSED, self.mmtrack, position=56),
+            self.expected_ret_data
         )
 
-        # with not passed in v0
-        expected_ret_data.update({
+    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": 'v0'})
+    def test_format_run_with_not_passed_v0(self):
+        """
+        Test for format_courserun_for_dashboard with not passed in v0
+        """
+        self.expected_ret_data.update({
             'status': api.CourseStatus.NOT_PASSED,
-            'position': 1,
             'final_grade': 33.33,
         })
-        with override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": 'v0'}):
-            self.assertEqual(
-                api.format_courserun_for_dashboard(crun, api.CourseStatus.NOT_PASSED, self.mmtrack),
-                expected_ret_data
-            )
-        # with not passed in v1
-        expected_ret_data.update({
-            'final_grade': 99.99,
-        })
-        with override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": 'v1'}):
-            self.assertEqual(
-                api.format_courserun_for_dashboard(crun, api.CourseStatus.NOT_PASSED, self.mmtrack),
-                expected_ret_data
-            )
+        self.assertEqual(
+            api.format_courserun_for_dashboard(self.crun, api.CourseStatus.NOT_PASSED, self.mmtrack),
+            self.expected_ret_data
+        )
 
-        # with currently enrolled
-        expected_ret_data.update({
+    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": 'v1'})
+    def test_format_run_with_not_passed(self):
+        """
+        Test for format_courserun_for_dashboard with not passed in v1
+        """
+        self.expected_ret_data.update({
+            'status': api.CourseStatus.NOT_PASSED,
+        })
+        self.assertEqual(
+            api.format_courserun_for_dashboard(self.crun, api.CourseStatus.NOT_PASSED, self.mmtrack),
+            self.expected_ret_data
+        )
+
+    def test_format_run_with_currently_enrolled(self):
+        """
+        Test for format_courserun_for_dashboard with currently enrolled
+        """
+        self.expected_ret_data.update({
             'status': api.CourseStatus.CURRENTLY_ENROLLED,
             'current_grade': 33.33
         })
-        del expected_ret_data['final_grade']
+        del self.expected_ret_data['final_grade']
         self.assertEqual(
-            api.format_courserun_for_dashboard(crun, api.CourseStatus.CURRENTLY_ENROLLED, self.mmtrack),
-            expected_ret_data
+            api.format_courserun_for_dashboard(self.crun, api.CourseStatus.CURRENTLY_ENROLLED, self.mmtrack),
+            self.expected_ret_data
         )
 
-        # with a paid course run
+    def test_format_run_with_paid_course_run(self):
+        """
+        Test for format_courserun_for_dashboard with a paid course run
+        """
         self.mmtrack.configure_mock(**{
             'has_paid.return_value': True
         })
-        expected_ret_data.update({
-            'has_paid': True
+        del self.expected_ret_data['final_grade']
+        self.expected_ret_data.update({
+            'status': api.CourseStatus.CURRENTLY_ENROLLED,
+            'current_grade': 33.33,
+            'has_paid': True,
         })
         self.assertEqual(
-            api.format_courserun_for_dashboard(crun, api.CourseStatus.CURRENTLY_ENROLLED, self.mmtrack),
-            expected_ret_data
+            api.format_courserun_for_dashboard(self.crun, api.CourseStatus.CURRENTLY_ENROLLED, self.mmtrack),
+            self.expected_ret_data
+        )
+
+    def test_format_run_with_can_upgrade_no_frozen_grade(self):
+        """
+        Test for format_courserun_for_dashboard with can-upgrade status and no frozen grade
+        """
+        self.mmtrack.configure_mock(**{
+            'has_frozen_grade.return_value': False,
+        })
+        del self.expected_ret_data['final_grade']
+        self.expected_ret_data.update({
+            'status': api.CourseStatus.CAN_UPGRADE,
+            'current_grade': 33.33,
+            'course_upgrade_deadline': self.crun.upgrade_deadline,
+        })
+        self.assertEqual(
+            api.format_courserun_for_dashboard(self.crun, api.CourseStatus.CAN_UPGRADE, self.mmtrack),
+            self.expected_ret_data
+        )
+
+    def test_format_run_with_can_upgrade_and_frozen_grade(self):
+        """
+        Test for format_courserun_for_dashboard with can-upgrade status and frozen grade
+        """
+        self.mmtrack.configure_mock(**{
+            'has_frozen_grade.return_value': True,
+        })
+        self.expected_ret_data.update({
+            'status': api.CourseStatus.CAN_UPGRADE,
+            'course_upgrade_deadline': self.crun.upgrade_deadline,
+        })
+        self.assertEqual(
+            api.format_courserun_for_dashboard(self.crun, api.CourseStatus.CAN_UPGRADE, self.mmtrack),
+            self.expected_ret_data
         )
 
     def test_format_run_conditional(self):
@@ -1043,6 +1099,27 @@ class InfoCourseTest(CourseTests):
                 api.get_info_for_course(self.course, self.mmtrack)
             )
         mock_format.assert_called_once_with(self.course_run, api.CourseStatus.CAN_UPGRADE, self.mmtrack, position=1)
+        assert mock_schedulable.call_count == 1
+
+    @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
+    @patch('dashboard.api.is_exam_schedulable', return_value=False)
+    def test_info_upgrade_in_past(self, mock_schedulable, mock_format):
+        """
+        test for get_info_for_course for course with a run
+        that needs to be upgraded but before a current enrolled one
+        """
+        with patch(
+            'dashboard.api.get_status_for_courserun',
+            autospec=True,
+            side_effect=self.get_mock_run_status_func(
+                api.CourseRunStatus.CURRENTLY_ENROLLED, self.course_run, api.CourseRunStatus.CAN_UPGRADE),
+        ):
+            self.assert_course_equal(
+                self.course,
+                api.get_info_for_course(self.course, self.mmtrack)
+            )
+        mock_format.assert_any_call(self.course_run, api.CourseStatus.CURRENTLY_ENROLLED, self.mmtrack, position=1)
+        mock_format.assert_any_call(self.course_run_ver, api.CourseStatus.CAN_UPGRADE, self.mmtrack, position=2)
         assert mock_schedulable.call_count == 1
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
