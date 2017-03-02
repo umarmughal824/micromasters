@@ -1,6 +1,7 @@
 """
 Checks the freeze status for a final grade
 """
+from celery.result import GroupResult
 from django.core.cache import caches
 from django.core.management import BaseCommand, CommandError
 
@@ -20,39 +21,49 @@ class Command(BaseCommand):
     help = "Submits a celery task to freeze the final grades for all the users enrolled in a course run"
 
     def add_arguments(self, parser):
-        parser.add_argument("course_id", help="the edx_course_key for the course run")
+        parser.add_argument("edx_course_key", help="the edx_course_key for the course run")
 
     def handle(self, *args, **kwargs):  # pylint: disable=unused-argument
-        course_id = kwargs.get('course_id')
+        edx_course_key = kwargs.get('edx_course_key')
         try:
-            run = CourseRun.objects.get(edx_course_key=course_id)
+            run = CourseRun.objects.get(edx_course_key=edx_course_key)
         except CourseRun.DoesNotExist:
-            raise CommandError('Course Run for course_id "{0}" does not exist'.format(course_id))
+            raise CommandError('Course Run for course_id "{0}" does not exist'.format(edx_course_key))
 
         if CourseRunGradingStatus.is_complete(run):
             self.stdout.write(
                 self.style.SUCCESS(
-                    'Final grades for course "{0}" are complete'.format(course_id)
+                    'Final grades for course "{0}" are complete'.format(edx_course_key)
                 )
             )
         elif CourseRunGradingStatus.is_pending(run):
-            if cache_redis.get(CACHE_ID_BASE_STR.format(course_id)):
-                self.stdout.write(
-                    self.style.WARNING(
-                        'Final grades for course "{0}" are being processed'.format(course_id)
+            group_results_id = CACHE_ID_BASE_STR.format(edx_course_key)
+            if cache_redis.get(group_results_id):
+                results = GroupResult.restore(group_results_id)
+                if not results.ready():
+                    self.stdout.write(
+                        self.style.WARNING(
+                            'Final grades for course "{0}" are being processed'.format(edx_course_key)
+                        )
                     )
-                )
+                else:
+                    self.stdout.write(
+                        self.style.WARNING(
+                            'Async task to freeze grade for course "{0}" '
+                            'are done, but course is not marked as complete.'.format(edx_course_key)
+                        )
+                    )
             else:
                 self.stdout.write(
                     self.style.ERROR(
                         'Final grades for course "{0}" are marked as they are being processed'
-                        ', but no task found.'.format(course_id)
+                        ', but no task found.'.format(edx_course_key)
                     )
                 )
         else:
             self.stdout.write(
                 self.style.WARNING(
-                    'Final grades for course "{0}" are not being processed yet'.format(course_id)
+                    'Final grades for course "{0}" are not being processed yet'.format(edx_course_key)
                 )
             )
         self.stdout.write(

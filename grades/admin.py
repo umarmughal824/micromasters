@@ -38,5 +38,13 @@ class FinalGradeAuditAdmin(admin.ModelAdmin):
         return False
 
 
+class CourseRunGradingStatusAdmin(admin.ModelAdmin):
+    """Admin for FinalGradeA"""
+    model = models.CourseRunGradingStatus
+    list_display = ('id', 'course_run', 'status')
+    ordering = ('course_run',)
+
+
 admin.site.register(models.FinalGrade, FinalGradeAdmin)
 admin.site.register(models.FinalGradeAudit, FinalGradeAuditAdmin)
+admin.site.register(models.CourseRunGradingStatus, CourseRunGradingStatusAdmin)
