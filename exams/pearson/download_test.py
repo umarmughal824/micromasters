@@ -172,6 +172,7 @@ class PearsonDownloadTest(SimpleTestCase):
 
 
 @override_settings(**EXAMS_SFTP_SETTINGS)
+@ddt.ddt
 @patch('os.remove')
 @patch('os.path.exists', return_value=True)
 @patch(
@@ -222,10 +223,14 @@ class ArchivedResponseProcessorProcessTest(SimpleTestCase):
         os_path_exists_mock.assert_called_once_with('/tmp/a.zip')
         os_remove_mock.assert_called_once_with('/tmp/a.zip')
 
+    @ddt.data(
+        SSHException('exception'),
+        EOFError(),
+    )
     def test_process_ssh_exception_remove(
-            self, process_zip_mock, filtered_files_mock, os_path_exists_mock, os_remove_mock):
+            self, exc, process_zip_mock, filtered_files_mock, os_path_exists_mock, os_remove_mock):
         """Test that SSH exceptions bubble up"""
-        self.sftp.remove.side_effect = SSHException('exception')
+        self.sftp.remove.side_effect = exc
 
         processor = download.ArchivedResponseProcessor(self.sftp)
         with self.assertRaises(RetryableSFTPException):

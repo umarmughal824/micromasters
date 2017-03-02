@@ -93,14 +93,14 @@ class ArchivedResponseProcessor:
                         if self.process_zip(local_path):
                             self.sftp.remove(remote_path)
                         log.debug("Processed remote file: %s", remote_path)
-                    except SSHException:
+                    except (EOFError, SSHException):
                         raise
                     except:  # pylint: disable=bare-except
                         log.exception("Error processing file: %s", remote_path)
                     finally:
                         if os.path.exists(local_path):
                             os.remove(local_path)
-        except SSHException as exc:
+        except (EOFError, SSHException) as exc:
             raise RetryableSFTPException("Exception processing response files") from exc
 
     def process_zip(self, local_path):

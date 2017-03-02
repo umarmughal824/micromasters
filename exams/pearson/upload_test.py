@@ -37,6 +37,7 @@ class PeasonUploadTest(SimpleTestCase):
 
     @data(
         SSHException(),
+        EOFError(),
         ConnectionException('localhost', 22),
     )
     def test_retryable_exceptions(self, expected_exc, connection_mock):
