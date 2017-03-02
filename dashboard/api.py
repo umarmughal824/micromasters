@@ -278,6 +278,8 @@ def get_info_for_course(course, mmtrack):
             else:
                 # any other status means that the student never passed the course run
                 _add_run(run_status.course_run, mmtrack, CourseStatus.NOT_PASSED)
+        elif run_status.status == CourseRunStatus.CAN_UPGRADE:
+            _add_run(run_status.course_run, mmtrack, CourseStatus.CAN_UPGRADE)
 
     return course_data
 
@@ -409,6 +411,13 @@ def format_courserun_for_dashboard(course_run, status_for_user, mmtrack, positio
             formatted_run['final_grade'] = mmtrack.get_final_grade(course_run.edx_course_key)
         else:
             formatted_run['final_grade'] = mmtrack.get_current_grade(course_run.edx_course_key)
+    # if the course is can-upgrade, we need to show the current grade if it is in progress
+    # or the final grade if it is final
+    elif status_for_user == CourseStatus.CAN_UPGRADE:
+        if mmtrack.has_frozen_grade(course_run.edx_course_key):
+            formatted_run['final_grade'] = mmtrack.get_final_grade(course_run.edx_course_key)
+        else:
+            formatted_run['current_grade'] = mmtrack.get_current_grade(course_run.edx_course_key)
     # any other status but "offered" should have the current grade
     elif status_for_user != CourseStatus.OFFERED:
         formatted_run['current_grade'] = mmtrack.get_current_grade(course_run.edx_course_key)
