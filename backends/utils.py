@@ -7,12 +7,7 @@ import pytz
 from requests.exceptions import HTTPError
 from social.apps.django_app.utils import load_strategy
 
-
-class InvalidCredentialStored(Exception):
-    """Custom exception to throw in some specific situations"""
-    def __init__(self, message, http_status_code):
-        super(InvalidCredentialStored, self).__init__(message)
-        self.http_status_code = http_status_code
+from backends.exceptions import InvalidCredentialStored
 
 
 def _send_refresh_request(user_social):

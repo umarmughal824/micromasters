@@ -44,7 +44,6 @@ class UserDashboard(APIView):
         Returns information needed to display the user
         dashboard for all the programs the user is enrolled in.
         """
-
         user = get_object_or_404(
             User,
             social_auth__uid=username,
@@ -52,6 +51,7 @@ class UserDashboard(APIView):
         )
 
         # get the credentials for the current user for edX
+        edx_client = None
         if user == request.user:
             user_social = request.user.social_auth.get(provider=EdxOrgOAuth2.name)
             try:
@@ -64,10 +64,18 @@ class UserDashboard(APIView):
             # create an instance of the client to query edX
             edx_client = EdxApi(user_social.extra_data, settings.EDXORG_BASE_URL)
 
-        else:
-            edx_client = None
-
-        return Response(get_user_program_info(user, edx_client))
+        try:
+            program_dashboard = get_user_program_info(user, edx_client)
+        except utils.InvalidCredentialStored as exc:
+            log.exception('Access token for user %s is fresh but invalid; forcing login.', user.username)
+            return Response(
+                status=exc.http_status_code,
+                data={'error': str(exc)}
+            )
+        return Response(
+            status=status.HTTP_200_OK,
+            data=program_dashboard
+        )
 
 
 class UserCourseEnrollment(APIView):

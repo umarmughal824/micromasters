@@ -9,8 +9,10 @@ import pytz
 from django.db import transaction
 from django.conf import settings
 from edx_api.client import EdxApi
+from requests.exceptions import HTTPError
 
 from backends import utils
+from backends.exceptions import InvalidCredentialStored
 from backends.edxorg import EdxOrgOAuth2
 from courses.models import CourseRun
 from dashboard import models
@@ -305,7 +307,16 @@ class CachedEdxDataApi:
             raise ValueError("{} is an unsupported cache type".format(cache_type))
         if not cls.is_cache_fresh(user, cache_type):
             update_func = cache_update_methods[cache_type]
-            update_func(user, edx_client)
+            try:
+                update_func(user, edx_client)
+            except HTTPError as exc:
+                if exc.response.status_code in (400, 401,):
+                    raise InvalidCredentialStored(
+                        message='Received a {} status code from the server even'
+                        ' if access token was supposed to be valid'.format(exc.response.status_code),
+                        http_status_code=exc.response.status_code
+                    )
+                raise
 
     @classmethod
     def update_all_cached_grade_data(cls, user):
