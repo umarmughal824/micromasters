@@ -179,6 +179,7 @@ describe('LearnerResult', () => {
     profile.first_name = 'queryname';
     profile.last_name = 'qÜeryson';
     profile.preferred_name = 'Querypreferred';
+    profile.username = 'queryfake.username';
     let result = renderElasticSearchResult(
       {
         _source: {
@@ -192,5 +193,6 @@ describe('LearnerResult', () => {
       'qÜery',
       'Query',
     ]);
+    assert.equal(result.find(".user-name .highlight").text(), "query");
   });
 });
