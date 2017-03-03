@@ -32,13 +32,13 @@ fi
 if [[ $(
     cat "$TMP_FILE" |
     grep -v 'ignored, nothing could be mapped' |
-    grep -v 'You are manually calling a React.PropTypes validation function' |
-    grep -v 'React.__spread is deprecated' |
     wc -l |
     awk '{print $1}'
     ) -ne 0 ]]  # is file empty?
 then
-    echo "Error output found, see test output logs to see which test they came from."
+    echo "Error output found:"
+    cat "$TMP_FILE"
+    echo "End of output"
     rm -f "$TMP_FILE"
     exit 1
 fi
