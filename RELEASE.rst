@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.49.5
+--------------
+
+- Added feature flag for showing exam card (#2769)
+- Switched FinalExamCard to use the romanized names, if present
+- Fixed TSV parsing to handle parsing errors (#2761)
+- Fixed phone numbers handling for pearson
+- Fixed postal code validation
+- small change to size of search box on learner page (#2762)
+
 Version 0.49.4
 --------------
 
