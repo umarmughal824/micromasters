@@ -50,7 +50,7 @@ class LearnerResult extends SearchkitComponent {
             { highlight(getUserDisplayName(profile), this.searchkit.state.q) }
           </span>
           <span className="user-name">
-            { profile.username }
+            { highlight(profile.username, this.searchkit.state.q) }
           </span>
           {profile.username === learnerChipVisibility ? <LearnerChip profile={profile} /> : null}
         </Cell>
