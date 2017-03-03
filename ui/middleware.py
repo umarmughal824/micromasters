@@ -55,7 +55,6 @@ class QueryStringFeatureFlagMiddleware(MiddlewareMixin):
             request (django.http.request.Request): the request to inspect
         """
         prefix = self.get_flag_key('')
-        print(prefix)
         if request.GET and any(key.startswith(prefix) for key in request.GET.keys()):
             response = shortcuts.redirect(request.path)
             if self.get_flag_key('CLEAR') in request.GET:

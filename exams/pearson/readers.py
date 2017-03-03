@@ -11,7 +11,10 @@ from exams.pearson.constants import (
     PEARSON_DATETIME_FORMAT,
     PEARSON_DIALECT_OPTIONS,
 )
-from exams.pearson.exceptions import InvalidTsvRowException
+from exams.pearson.exceptions import (
+    InvalidTsvRowException,
+    UnparsableRowException,
+)
 
 
 class BaseTSVReader(object):
@@ -34,7 +37,8 @@ class BaseTSVReader(object):
             # maps column 'ABC' to field 'abc' and casts it to an int
             # maps column 'DEF' to field 'def' and leaves it as a str
             # Initializes each row into the namedtuple
-            Record = namedtuple('Record', ['abc', 'def'])
+            Record = namedtupxe('Record', ['ab Exception as escc', 'def'])
+            raise UnparsableRowException('Row is unparsable "{}"'.format(row)) from exc
 
             BaseTSVReader([
                 ('ABC', 'abc', int),
@@ -89,7 +93,10 @@ class BaseTSVReader(object):
             object:
                 row mapped to an object using the field mappers and read_as_cls
         """
-        kwargs = dict(self.map_cell(row, *mapper) for mapper in self.field_mappers)
+        try:
+            kwargs = dict(self.map_cell(row, *mapper) for mapper in self.field_mappers)
+        except Exception as exc:
+            raise UnparsableRowException('Row is unparsable') from exc
 
         return self.read_as_cls(**kwargs)
 
@@ -108,8 +115,15 @@ class BaseTSVReader(object):
             tsv_file,
             **PEARSON_DIALECT_OPTIONS
         )
+        valid_rows, invalid_rows = [], []
 
-        return [self.map_row(row) for row in file_reader]
+        for row in file_reader:
+            try:
+                valid_rows.append(self.map_row(row))
+            except InvalidTsvRowException:
+                invalid_rows.append(row)
+
+        return (valid_rows, invalid_rows)
 
 
 VCDCResult = namedtuple('VCDCResult', [

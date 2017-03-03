@@ -170,6 +170,18 @@ class PearsonDownloadTest(SimpleTestCase):
 
         assert remove_mock.call_count == remove_count
 
+    def test_get_invalid_row_messages(self):
+        """Test generation of error messages"""
+        processor = download.ArchivedResponseProcessor(self.sftp)
+
+        messages = processor.get_invalid_row_messages([{
+            'Prop1': 'str',
+            'Prop2': 'bad_int',
+        }])
+
+        for msg in messages:
+            assert msg.startswith('Unable to parse row `')
+
 
 @override_settings(**EXAMS_SFTP_SETTINGS)
 @ddt.ddt
@@ -288,13 +300,15 @@ class VCDCDownloadTest(MockedESTestCase):
             ]
             cls.failure_profiles = ExamProfileFactory.create_batch(2)
 
-        cls.success_results = [VCDCResult(
-            client_candidate_id=exam_profile.profile.student_id,
-            status=VCDC_SUCCESS_STATUS,
-            date=cls.now,
-            message='',
-        ) for exam_profile in cls.success_profiles]
-        cls.failed_results = [
+        cls.success_results = ([
+            VCDCResult(
+                client_candidate_id=exam_profile.profile.student_id,
+                status=VCDC_SUCCESS_STATUS,
+                date=cls.now,
+                message='',
+            ) for exam_profile in cls.success_profiles
+        ], [])
+        cls.failed_results = ([
             VCDCResult(
                 client_candidate_id=cls.failure_profiles[0].profile.student_id,
                 status=VCDC_FAILURE_STATUS,
@@ -307,9 +321,12 @@ class VCDCDownloadTest(MockedESTestCase):
                 date=cls.now,
                 message='Bad address',
             ),
-        ]
+        ], [])
 
-        cls.all_results = cls.success_results + cls.failed_results
+        cls.all_results = (
+            cls.success_results[0] + cls.failed_results[0],
+            cls.success_results[1] + cls.failed_results[1],
+        )
 
     def test_process_result_vcdc(self):
         """
@@ -348,7 +365,7 @@ class VCDCDownloadTest(MockedESTestCase):
 
     def test_process_result_vcdc_when_invalid_data_in_file(self):
         """Tests for the situation where we don't have a matching record"""
-        results = [
+        results = ([
             VCDCResult(
                 client_candidate_id=10,
                 status=VCDC_SUCCESS_STATUS,
@@ -361,7 +378,7 @@ class VCDCDownloadTest(MockedESTestCase):
                 date=self.now,
                 message='Invalid address'
             )
-        ]
+        ], [])
 
         with patch('exams.pearson.download.VCDCReader.read', return_value=results):
             assert self.processor.process_vcdc_file("/tmp/file.ext") == (
@@ -387,14 +404,16 @@ class EACDownloadTest(MockedESTestCase):
         cls.success_auths = ExamAuthorizationFactory.create_batch(2, course=course)
         cls.failure_auths = ExamAuthorizationFactory.create_batch(2, course=course)
 
-        cls.success_results = [EACResult(
-            exam_authorization_id=auth.id,
-            candidate_id=auth.user.profile.student_id,
-            date=FIXED_DATETIME,
-            status=EAC_SUCCESS_STATUS,
-            message='',
-        ) for auth in cls.success_auths]
-        cls.failed_results = [
+        cls.success_results = ([
+            EACResult(
+                exam_authorization_id=auth.id,
+                candidate_id=auth.user.profile.student_id,
+                date=FIXED_DATETIME,
+                status=EAC_SUCCESS_STATUS,
+                message='',
+            ) for auth in cls.success_auths
+        ], [])
+        cls.failed_results = ([
             EACResult(
                 exam_authorization_id=cls.failure_auths[0].id,
                 candidate_id=cls.failure_auths[0].user.profile.student_id,
@@ -409,9 +428,12 @@ class EACDownloadTest(MockedESTestCase):
                 status=EAC_FAILURE_STATUS,
                 message='wrong username',
             ),
-        ]
+        ], [])
 
-        cls.all_results = cls.success_results + cls.failed_results
+        cls.all_results = (
+            cls.success_results[0] + cls.failed_results[0],
+            cls.success_results[1] + cls.failed_results[1],
+        )
 
     def test_process_result_eac(self):
         """
@@ -459,7 +481,7 @@ class EACDownloadTest(MockedESTestCase):
         Test Exam Authorization Confirmation files (EAC) file processing, when this is
         record in EAC corresponding to which there in no record in ExamAuthorization model.
         """
-        results = [
+        results = ([
             EACResult(
                 exam_authorization_id=10,
                 candidate_id=10,
@@ -474,7 +496,7 @@ class EACDownloadTest(MockedESTestCase):
                 status=EAC_FAILURE_STATUS,
                 message='wrong user name'
             )
-        ]
+        ], [])
 
         with patch('exams.pearson.download.EACReader.read', return_value=results):
             assert self.processor.process_eac_file("/tmp/file.ext") == (

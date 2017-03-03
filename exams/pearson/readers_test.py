@@ -93,20 +93,24 @@ class BaseTSVReaderTest(UnitTestCase):
         tsv_file = io.StringIO(
             "Prop1\tProp2\r\n"
             "137\t145\r\n"
+            "\tnot_an_int\r\n"
         )
         reader = BaseTSVReader([
             ('Prop1', 'prop1'),
             ('Prop2', 'prop2', int),
         ], PropTuple)
 
-        row = PropTuple(
+        valid_row = PropTuple(
             prop1='137',
             prop2=145,
         )
 
-        rows = reader.read(tsv_file)
+        results = reader.read(tsv_file)
 
-        assert rows == [row]
+        assert results == ([valid_row], [{
+            'Prop1': '',
+            'Prop2': 'not_an_int'
+        }])
 
 
 class VCDCReaderTest(UnitTestCase):
@@ -123,7 +127,7 @@ class VCDCReaderTest(UnitTestCase):
         reader = VCDCReader()
         results = reader.read(sample_data)
 
-        assert results == [
+        assert results == ([
             VCDCResult(
                 client_candidate_id=1, status='Accepted', date=FIXED_DATETIME, message=''
             ),
@@ -133,7 +137,7 @@ class VCDCReaderTest(UnitTestCase):
             VCDCResult(
                 client_candidate_id=345, status='Error', date=FIXED_DATETIME, message='Empty Address'
             ),
-        ]
+        ], [])
 
 
 class EACReaderTest(UnitTestCase):
@@ -150,7 +154,7 @@ class EACReaderTest(UnitTestCase):
         reader = EACReader()
         results = reader.read(sample_data)
 
-        assert results == [
+        assert results == ([
             EACResult(
                 exam_authorization_id=4,
                 candidate_id=1,
@@ -172,4 +176,4 @@ class EACReaderTest(UnitTestCase):
                 status='Error',
                 message='Invalid profile'
             )
-        ]
+        ], [])

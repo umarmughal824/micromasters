@@ -153,6 +153,22 @@ class ArchivedResponseProcessor:
 
         return False, []
 
+    def get_invalid_row_messages(self, rows):  # pylint: disable=no-self-use
+        """
+        Converts a list of failed rows to a list of error messages
+
+        Args:
+            rows (iterable): iterable of rows
+
+        Returns:
+            list(str): list of error messages
+        """
+        return [
+            "Unable to parse row `{row}`".format(
+                row=row,
+            ) for row in rows
+        ]
+
     def process_vcdc_file(self, extracted_file):  # pylint: disable=no-self-use
         """
         Processes a VCDC file extracted from the zip
@@ -164,8 +180,8 @@ class ArchivedResponseProcessor:
             (bool, list(str)): bool is True if file processed successfuly, error messages are returned in the list
         """
         log.debug('Found VCDC file: %s', extracted_file)
-        results = VCDCReader().read(extracted_file)
-        messages = []
+        results, invalid_rows = VCDCReader().read(extracted_file)
+        messages = self.get_invalid_row_messages(invalid_rows)
         for result in results:
             try:
                 exam_profile = ExamProfile.objects.get(profile__student_id=result.client_candidate_id)
@@ -207,8 +223,8 @@ class ArchivedResponseProcessor:
             (bool, list(str)): bool is True if file processed successfuly, error messages are returned in the list
         """
         log.debug('Found EAC file: %s', extracted_file)
-        results = EACReader().read(extracted_file)
-        messages = []
+        results, invalid_rows = EACReader().read(extracted_file)
+        messages = self.get_invalid_row_messages(invalid_rows)
         for result in results:
             try:
                 exam_authorization = ExamAuthorization.objects.get(id=result.exam_authorization_id)

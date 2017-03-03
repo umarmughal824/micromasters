@@ -15,6 +15,12 @@ class InvalidProfileDataException(InvalidTsvRowException):
     """
 
 
+class UnparsableRowException(InvalidTsvRowException):
+    """
+    Row from a TSV was unparsable
+    """
+
+
 class RetryableSFTPException(Exception):
     """
     A retryable exception during SFTP upload
