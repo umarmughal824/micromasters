@@ -116,6 +116,8 @@ export default class CourseAction extends React.Component {
 
   renderTextDescription = this.renderDescription('description', null);
 
+  renderActionBtnDescription = this.renderDescription('course-action-btn-footer', null);
+
   renderBoxedDescription = this.renderDescription('boxed description', null);
 
   renderStatusDescription = this.renderDescription('boxed description');
@@ -130,7 +132,7 @@ export default class CourseAction extends React.Component {
       <SpinnerButton
         component="button"
         spinning={inFlight}
-        className="mm-minor-action enroll-pay-later"
+        className="mm-minor-action course-action-btn-footer"
         onClick={() => this.handleAddCourseEnrollment(run)}
         key="2"
       >
@@ -167,7 +169,7 @@ export default class CourseAction extends React.Component {
       let date = moment(run.course_upgrade_deadline);
       action = this.renderEnrollButton(run);
       let text = ifValidDate('', date => `Payment due: ${date.format(DASHBOARD_FORMAT)}`, date);
-      description = this.renderTextDescription(text);
+      description = this.renderActionBtnDescription(text);
       break;
     }
     case STATUS_OFFERED: {
@@ -195,14 +197,14 @@ export default class CourseAction extends React.Component {
       break;
     case STATUS_PENDING_ENROLLMENT:
       action = this.renderEnrollButton(run);
-      description = this.renderTextDescription('Processing...');
+      description = this.renderActionBtnDescription('Processing...');
       break;
     case STATUS_PAID_BUT_NOT_ENROLLED: {
       const contactText = 'Contact us for help.';
       const contactHref = `mailto:${SETTINGS.support_email}`;
       const descriptionText = 'Something went wrong. You paid for this course but are not enrolled.';
       description = (
-        <div className='description' key='2'>
+        <div className="description" key="2">
           {descriptionText} <a href={contactHref}>{contactText}</a>
         </div>
       );

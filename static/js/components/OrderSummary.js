@@ -75,7 +75,7 @@ class OrderSummary extends React.Component {
     return (
       <div>
         <Card shadow={1}>
-          <p className="intro-text">You are about to enroll in <b>{ course.title }</b></p>
+          <p className="intro-text">You are about to pay for <b>{ course.title }</b></p>
           <div className="wrapper-box">
             <Grid className="summary-box">
               {this.showAmount('Cost of course', this.getCoursePrice())}

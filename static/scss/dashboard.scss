@@ -136,13 +136,13 @@
 
     .course-container {
       border-bottom: 1px solid $lightgrey;
-    }
 
-    .course-row {
-      width: 100%;
-      font-size: 11pt;
-      align-items: center;
-      padding: 14px 20px;
+      .course-row {
+        width: 100%;
+        font-size: 11pt;
+        align-items: center;
+        padding: 14px 20px;
+      }
 
       .course-description {
         .course-title {
@@ -188,16 +188,20 @@
         align-items: center;
         text-align: center;
 
-        a.enroll-pay-later {
-          font-weight: 400;
-          font-size: 14px;
-        }
-
         .mdl-button {
-          margin-bottom: 6px;
           min-width: 120px;
           padding: 0;
           text-align: center;
+        }
+
+        .mdl-button[disabled] {
+          background-color: $lightgrey;
+          color: #ffffff;
+        }
+
+        .course-action-btn-footer {
+          padding: 8px 0 0 0;
+          font-size: 14px;
         }
 
         .description {
@@ -218,11 +222,6 @@
           &.not-passed {
             background-color: #fce4e2;
           }
-        }
-
-        .mdl-button[disabled] {
-          background-color: $lightgrey;
-          color: #ffffff;
         }
 
         .disabled-with-spinner {

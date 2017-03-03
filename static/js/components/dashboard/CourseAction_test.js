@@ -56,13 +56,17 @@ describe('CourseAction', () => {
     }
     let description = renderedComponent.find(".description");
     let descriptionText = description.length === 1 ? description.text() : undefined;
-    let link = renderedComponent.find("SpinnerButton.enroll-pay-later");
-    let linkText = link.length === 1 ? link.children().text() : undefined;
+    let btnFooter = renderedComponent.find(".course-action-btn-footer");
+    let btnFooterText = btnFooter.length === 1 ? btnFooter.text() : undefined;
+    let payLaterLink = renderedComponent.find("SpinnerButton.course-action-btn-footer");
+    let payLaterLinkText = payLaterLink.length === 1 ? payLaterLink.children().text() : undefined;
     return {
       button: button,
       buttonText: buttonText,
       descriptionText: descriptionText,
-      linkText: linkText
+      btnFooterText: btnFooterText,
+      payLaterLink: payLaterLink,
+      payLaterLinkText: payLaterLinkText
     };
   };
   let assertEnrollNowButton = (button, courseId) => {
@@ -158,10 +162,10 @@ describe('CourseAction', () => {
 
     assert.isUndefined(elements.button.props().disabled);
     assert.include(elements.buttonText, 'Pay Now');
-    assert.equal(elements.linkText, 'Enroll and pay later');
+    assert.equal(elements.payLaterLinkText, 'Enroll and pay later');
     assertEnrollNowButton(elements.button, firstRun.course_id);
 
-    wrapper.find(".enroll-pay-later").simulate('click');
+    elements.payLaterLink.simulate('click');
     assert(addCourseEnrollmentStub.calledWith(firstRun.course_id));
   });
 
@@ -196,7 +200,7 @@ describe('CourseAction', () => {
 
       assert.isUndefined(elements.button.props().disabled);
       assert.include(elements.buttonText, 'Pay Now');
-      assert.equal(elements.linkText, 'Enroll and pay later');
+      assert.equal(elements.payLaterLinkText, 'Enroll and pay later');
       assertEnrollNowButton(elements.button, firstRun.course_id);
     });
   });
@@ -215,7 +219,7 @@ describe('CourseAction', () => {
 
     assert.isUndefined(elements.button.props().disabled);
     assert.include(elements.buttonText, 'Pay Now');
-    assert.equal(elements.descriptionText, `Payment due: ${formattedUpgradeDate}`);
+    assert.equal(elements.btnFooterText, `Payment due: ${formattedUpgradeDate}`);
     assertEnrollNowButton(elements.button, firstRun.course_id);
   });
 
@@ -352,7 +356,7 @@ describe('CourseAction', () => {
       courseRun: firstRun
     });
 
-    assert.equal(wrapper.find(".description").text(), "Processing...");
+    assert.equal(wrapper.find(".course-action-btn-footer").text(), "Processing...");
     let buttonProps = wrapper.find("SpinnerButton").props();
     assert.isTrue(buttonProps.spinning);
   });
@@ -397,7 +401,7 @@ describe('CourseAction', () => {
 
       assert.isUndefined(elements.button.props().disabled);
       assert.equal(elements.buttonText, 'Calculate Cost');
-      assert.equal(elements.linkText, 'Enroll and pay later');
+      assert.equal(elements.payLaterLinkText, 'Enroll and pay later');
     });
 
     it('shows an enroll/pay button if a user has skipped financial aid', () => {
@@ -418,7 +422,7 @@ describe('CourseAction', () => {
 
       assert.isUndefined(elements.button.props().disabled);
       assert.include(elements.buttonText, 'Pay Now');
-      assert.equal(elements.linkText, 'Enroll and pay later');
+      assert.equal(elements.payLaterLinkText, 'Enroll and pay later');
     });
 
     it('shows the price', () => {
@@ -458,7 +462,7 @@ describe('CourseAction', () => {
         // we don't show a spinner in this case, only for API loads or when waiting for Cybersource callback
         assert.isFalse(elements.button.props().spinning);
         assert.include(elements.buttonText, 'Pay Now');
-        assert.equal(elements.linkText, 'Enroll and pay later');
+        assert.equal(elements.payLaterLinkText, 'Enroll and pay later');
       });
     });
 
@@ -472,7 +476,7 @@ describe('CourseAction', () => {
         courseRun: firstRun,
         courseEnrollAddStatus: FETCH_PROCESSING
       });
-      let link = wrapper.find("SpinnerButton.enroll-pay-later");
+      let link = wrapper.find("SpinnerButton.course-action-btn-footer");
       assert.isTrue(link.props().spinning);
     });
 

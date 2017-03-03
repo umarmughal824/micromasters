@@ -6,11 +6,12 @@ import moment from 'moment';
 import CourseAction from './CourseAction';
 import type { CalculatedPrices } from '../../flow/couponTypes';
 import type { CourseRun, FinancialAidUserInfo } from '../../flow/programTypes';
-import { isCurrentlyEnrollable, formatGrade } from './util';
+import { isCurrentlyEnrollable, isUpgradable, formatGrade } from './util';
 import {
   STATUS_OFFERED,
   STATUS_NOT_PASSED,
   STATUS_PASSED,
+  STATUS_CAN_UPGRADE,
   DASHBOARD_FORMAT,
   DASHBOARD_MONTH_FORMAT,
 } from '../../constants';
@@ -55,6 +56,18 @@ export default class CourseSubRow extends React.Component {
     return <div className="detail" key="1">{ dateText }</div>;
   }
 
+  isCompletedCourseRun = (courseRun: CourseRun) => (
+    [STATUS_NOT_PASSED, STATUS_PASSED].includes(courseRun.status)
+  );
+
+  courseRunStatus = (courseRun: CourseRun) => {
+    if (courseRun.status === STATUS_NOT_PASSED) {
+      return 'Failed';
+    } else if (courseRun.status === STATUS_PASSED) {
+      return 'Passed';
+    }
+  };
+
   renderOfferedDescription(): Array<React$Element<*>> {
     const { courseRun, now } = this.props;
 
@@ -88,7 +101,6 @@ export default class CourseSubRow extends React.Component {
 
   renderDescription(): React$Element<*> {
     const { courseRun } = this.props;
-
     let description = (courseRun.status === STATUS_OFFERED) ?
       this.renderOfferedDescription() :
       this.getPastRunDateDisplay();
@@ -99,7 +111,7 @@ export default class CourseSubRow extends React.Component {
 
   renderAction(): ?React$Element<any> {
     const { courseRun } = this.props;
-    if (courseRun.status === STATUS_OFFERED) {
+    if ([STATUS_OFFERED, STATUS_CAN_UPGRADE].includes(courseRun.status)) {
       return this.renderCourseRunAction(courseRun);
     } else if (this.isCompletedCourseRun(courseRun)) {
       return this.renderCourseRunStatus(courseRun);
@@ -117,7 +129,8 @@ export default class CourseSubRow extends React.Component {
     } = this.props;
 
     let enrollStartDate = courseRun.enrollment_start_date ? moment(courseRun.enrollment_start_date) : null;
-    if (isCurrentlyEnrollable(enrollStartDate, now)) {
+    let upgradeDate = courseRun.course_upgrade_deadline ? moment(courseRun.course_upgrade_deadline) : null;
+    if (isCurrentlyEnrollable(enrollStartDate, now) || isUpgradable(upgradeDate, now)) {
       return <CourseAction
         courseRun={courseRun}
         now={now}
@@ -130,26 +143,16 @@ export default class CourseSubRow extends React.Component {
     }
   };
 
-  courseRunStatus = (courseRun: CourseRun) => {
-    if (courseRun.status === STATUS_NOT_PASSED) {
-      return 'Failed';
-    } else if (courseRun.status === STATUS_PASSED) {
-      return 'Passed';
-    }
-  };
-
   renderCourseRunStatus = (courseRun: CourseRun) => (
     <div className="course-action">
       { this.courseRunStatus(courseRun) }
     </div>
   );
 
-  isCompletedCourseRun = (courseRun: CourseRun) => (
-    [STATUS_NOT_PASSED, STATUS_PASSED].includes(courseRun.status)
-  );
-
-  courseRunGrade = (courseRun: CourseRun) => (
-    this.isCompletedCourseRun(courseRun) ? formatGrade(courseRun.final_grade) : ''
+  renderCourseRunGrade = (courseRun: CourseRun) => (
+    this.isCompletedCourseRun(courseRun) || courseRun.status === STATUS_CAN_UPGRADE ?
+      formatGrade(courseRun.final_grade) :
+      ''
   );
 
   render() {
@@ -163,12 +166,12 @@ export default class CourseSubRow extends React.Component {
       </Cell>;
     } else {
       contents = [
-        <Cell col={6} key="1">
+        <Cell col={5} key="1">
           { this.renderDescription() }
         </Cell>,
-        <Cell col={2} key="2">
+        <Cell col={3} key="2">
           <div className="course-grade">
-            { this.courseRunGrade(courseRun) }
+            { this.renderCourseRunGrade(courseRun) }
           </div>
         </Cell>,
         <Cell col={4} key="3">

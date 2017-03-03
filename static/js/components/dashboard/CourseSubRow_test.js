@@ -16,6 +16,7 @@ import {
   STATUS_NOT_PASSED,
   STATUS_PASSED,
   STATUS_OFFERED,
+  STATUS_CAN_UPGRADE,
 } from '../../constants';
 
 describe('CourseSubRow', () => {
@@ -86,7 +87,7 @@ describe('CourseSubRow', () => {
     assert.equal(wrapper.find(".course-grade").text().trim(), "");
     let actionCell = wrapper.find(".course-action");
     assert.equal(actionCell.find("button.pay-button").text(), "Calculate Cost");
-    assert.equal(actionCell.find("button.enroll-pay-later").text(), "Enroll and pay later");
+    assert.equal(actionCell.find("button.course-action-btn-footer").text(), "Enroll and pay later");
   });
 
   it('indicates future enrollment and if a future course run is offered', () => {
@@ -193,5 +194,21 @@ describe('CourseSubRow', () => {
       courseRun: courseRun,
     });
     assert.equal(wrapper.find(".course-description").text(), courseRun.fuzzy_start_date);
+  });
+
+  it('shows a final grade and a payment button with a past course run that was passed and still upgradable', () => {
+    Object.assign(courseRun, {
+      status: STATUS_CAN_UPGRADE,
+      course_end_date: moment().add(-1, 'months'),
+      course_upgrade_deadline: moment().add(1, 'months'),
+      final_grade: 75
+    });
+    const wrapper = renderSubRow({
+      courseRun: courseRun,
+    }, false);
+    assert.equal(wrapper.find(".course-grade").text(), "75%");
+    let courseAction = wrapper.find(".course-action");
+    assert.isAbove(courseAction.find(".pay-button").length, 0);
+    assert.include(courseAction.find(".course-action-btn-footer").text(), "Payment due");
   });
 });
