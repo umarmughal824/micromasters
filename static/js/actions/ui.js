@@ -75,9 +75,6 @@ export const setDeletionIndex = createAction(SET_DELETION_INDEX);
 export const SET_PROFILE_STEP = 'SET_PROFILE_STEP';
 export const setProfileStep = createAction(SET_PROFILE_STEP);
 
-export const SET_USER_MENU_OPEN = 'SET_USER_MENU_OPEN';
-export const setUserMenuOpen = createAction(SET_USER_MENU_OPEN);
-
 export const SET_SEARCH_FILTER_VISIBILITY = 'SET_SEARCH_FILTER_VISIBILITY';
 export const setSearchFilterVisibility = createAction(SET_SEARCH_FILTER_VISIBILITY);
 

@@ -1,4 +1,5 @@
 // @flow
+/* global SETTINGS: false */
 import React from 'react';
 import _ from 'lodash';
 import Select from 'react-select';
@@ -94,30 +95,36 @@ export default class ProgramSelector extends React.Component {
     let selected = programs.find(enrollment => enrollment.id === currentId);
     let options = this.makeOptions();
 
-    if (programs.length === 0 || selectorVisibility === false) {
-      return <div className="program-selector" />;
-    } else {
-      return <div className="program-selector">
-        <Select
-          options={options}
-          onChange={this.selectEnrollment}
-          searchable={false}
-          placeholder={selected ? selected.title : ""}
-          clearable={false}
-          tabSelectsValue={false}
-        />
-        <ProgramEnrollmentDialog
-          enrollInProgram={addProgramEnrollment}
-          programs={programs}
-          selectedProgram={enrollSelectedProgram}
-          error={enrollDialogError}
-          visibility={enrollDialogVisibility}
-          setError={setEnrollDialogError}
-          setVisibility={setEnrollDialogVisibility}
-          setSelectedProgram={setEnrollSelectedProgram}
-          fetchAddStatus={fetchAddStatus}
-        />
+    if (! SETTINGS.user) {
+      return <div className="user-menu no-auth">
+        <a href="/login/edxorg/">Sign in with edX.org</a>
       </div>;
+    } else {
+      if (programs.length === 0 || selectorVisibility === false) {
+        return <div className="program-selector" />;
+      } else {
+        return <div className="program-selector">
+          <Select
+            options={options}
+            onChange={this.selectEnrollment}
+            searchable={false}
+            placeholder={selected ? selected.title : ""}
+            clearable={false}
+            tabSelectsValue={false}
+          />
+          <ProgramEnrollmentDialog
+            enrollInProgram={addProgramEnrollment}
+            programs={programs}
+            selectedProgram={enrollSelectedProgram}
+            error={enrollDialogError}
+            visibility={enrollDialogVisibility}
+            setError={setEnrollDialogError}
+            setVisibility={setEnrollDialogVisibility}
+            setSelectedProgram={setEnrollSelectedProgram}
+            fetchAddStatus={fetchAddStatus}
+          />
+          </div>;
+      }
     }
   }
 }

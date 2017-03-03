@@ -1,12 +1,6 @@
 .micromasters-navbar {
   padding-bottom: 0;
 
-  .mobile-visible {
-    @include breakpoint(desktop) {
-      display: none;
-    }
-  }
-
   .desktop-visible {
     @include breakpoint(mobile) {
       display: none;
@@ -32,6 +26,26 @@
       display: flex;
       flex-direction: column;
       padding: 0 20px;
+
+      .row {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+
+
+        .mdl-button--icon {
+          width: 50px;
+
+          .material-icons {
+            font-size: 45px;
+          }
+        }
+
+        &:before, &:after { // overriding some bootstrap nonsense
+          display: none;
+        }
+      }
 
       .program-selector {
         padding: 0;

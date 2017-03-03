@@ -968,7 +968,10 @@ describe("LearnerPage", function() {
     it("should show all edit, delete icons for an authenticated user's own page" , () => {
       const username = SETTINGS.user.username;
       return renderComponent(`/learner/${username}`, userActions).then(([, div]) => {
-        let count = div.getElementsByClassName('mdl-button--icon').length;
+        let count = div
+          .querySelector('.page-content')
+          .getElementsByClassName('mdl-button--icon')
+          .length;
         // edit profile and edit about me represents hard coded 2 here.
         assert.equal(count,
           2 + USER_PROFILE_RESPONSE.work_history.length * 2 + USER_PROFILE_RESPONSE.education.length * 2
@@ -983,7 +986,10 @@ describe("LearnerPage", function() {
       };
       helper.profileGetStub.withArgs('other').returns(Promise.resolve(otherProfile));
       return renderComponent(`/learner/other`, userActions).then(([, div]) => {
-        let count = div.getElementsByClassName('mdl-button--icon').length;
+        let count = div
+          .querySelector('.page-content')
+          .getElementsByClassName('mdl-button--icon')
+          .length;
         assert.equal(count, 0);
       });
     });

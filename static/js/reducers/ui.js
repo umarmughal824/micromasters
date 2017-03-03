@@ -27,7 +27,6 @@ import {
   SET_DELETION_INDEX,
 
   SET_PROFILE_STEP,
-  SET_USER_MENU_OPEN,
   SET_SEARCH_FILTER_VISIBILITY,
 
   SET_EMAIL_DIALOG_VISIBILITY,
@@ -84,7 +83,6 @@ export type UIState = {
   dialog:                              UIDialog,
   profileStep:                         ?string,
   workDialogIndex:                     ?number,
-  userMenuOpen:                        boolean,
   searchFilterVisibility:              {[s: string]: boolean},
   tosDialogVisibility:                 boolean,
   emailDialogVisibility:               boolean,
@@ -124,7 +122,6 @@ export const INITIAL_UI_STATE: UIState = {
   dialog:                              {},
   profileStep:                         null,
   workDialogIndex:                     null,
-  userMenuOpen:                        false,
   searchFilterVisibility:              {},
   tosDialogVisibility:                 false,
   emailDialogVisibility:               false,
@@ -271,12 +268,6 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action<any, null>)
     return {
       ...state,
       profileStep: action.payload,
-    };
-  }
-  case SET_USER_MENU_OPEN: {
-    return {
-      ...state,
-      userMenuOpen: action.payload,
     };
   }
   case SET_SEARCH_FILTER_VISIBILITY: {

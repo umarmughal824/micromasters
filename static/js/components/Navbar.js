@@ -4,6 +4,7 @@ import React from 'react';
 import { Link } from 'react-router';
 import { Header, HeaderRow } from 'react-mdl';
 import Icon from 'react-mdl/lib/Icon';
+import IconButton from 'react-mdl/lib/IconButton';
 import { ReactPageClick } from 'react-page-click';
 import Swipeable from 'react-swipeable';
 import R from 'ramda';
@@ -13,7 +14,6 @@ import type {
   AvailablePrograms,
 } from '../flow/enrollmentTypes';
 import ProgramSelector from './ProgramSelector';
-import UserMenu from '../containers/UserMenu';
 import ProfileImage from '../containers/ProfileImage';
 import { getPreferredName } from '../util/util';
 import type { Profile } from '../flow/profileTypes';
@@ -21,6 +21,34 @@ import { hasAnyStaffRole } from '../lib/roles';
 
 const PROFILE_SETTINGS_REGEX = /^\/profile\/?|settings\/?|learner\/[a-z]?/;
 const PROFILE_REGEX = /^\/profile\/?/;
+
+const externalLink = (path, label, newTab) => (
+  <a target={newTab ? "_blank" : ""} href={path}>
+    { label }
+  </a>
+);
+
+const reactLink = (closeDrawer, path, label) => (
+  <Link to={path} onClick={closeDrawer}>
+    { label }
+  </Link>
+);
+
+const navLink = (onClick, path, label, iconName, external = false, newTab = false) => (
+  <div className="link">
+    <Icon name={iconName} aria-hidden="true" />
+    { external ? externalLink(path, label, newTab) : reactLink(onClick, path, label) }
+    { newTab ? <Icon name="open_in_new" aria-hidden="true" /> : null }
+  </div>
+);
+
+const adminLink = (...args) => (
+  hasAnyStaffRole(SETTINGS.roles) ? navLink(...args) : null
+);
+
+const learnerLink = (...args) => (
+  hasAnyStaffRole(SETTINGS.roles) ? null : navLink(...args)
+);
 
 export default class Navbar extends React.Component {
   props: {
@@ -53,11 +81,6 @@ export default class Navbar extends React.Component {
     <Link to={link} key="header-logo-link"><img src="/static/images/mit-logo-transparent.svg" alt="MIT" /></Link>,
     <span className="mdl-layout-title" key="header-text-link"><Link to={link}>MITx MicroMasters</Link></span>
   ]);
-
-  userMenu = (): void|React$Element<*> => {
-    const { empty } = this.props;
-    return empty === true ? undefined : <UserMenu />;
-  };
 
   programSelector = (): React$Element<*> => {
     const {
@@ -102,46 +125,31 @@ export default class Navbar extends React.Component {
         <ReactPageClick notify={closeDrawer}>
           <div className={drawerClass}>
             <div className="profile-info">
-              <ProfileImage profile={profile} />
+              <div className="row">
+                <ProfileImage profile={profile} />
+                <IconButton name="chevron_left" onClick={closeDrawer} className="no-hover-styling" />
+              </div>
               <div className="name">
                 { getPreferredName(profile) }
               </div>
               { this.programSelector() }
             </div>
             <div className="links">
-              <div className="link">
-                <Icon name="dashboard" aria-hidden="true" />
-                <Link to="/dashboard" onClick={closeDrawer} >
-                  Dashboard
-                </Link>
-              </div>
-              <div className="link">
-                <Icon name="person" aria-hidden="true" />
-                <Link to={`/learner/${SETTINGS.user.username}`}
-                  onClick={closeDrawer} >
-                  View Profile
-                </Link>
-              </div>
-              <div className="link">
-                <Icon name="camera_alt" aria-hidden="true" />
-                <button onClick={R.compose(() => setPhotoDialogVisibility(true), closeDrawer)}>
-                  Edit Photo
-                </button>
-              </div>
-              <div className="link">
-                <Icon name="settings" aria-hidden="true" />
-                <Link to="/settings" onClick={closeDrawer} >
-                  Settings
-                </Link>
-              </div>
+              { adminLink(closeDrawer, '/learners', 'Learners', 'people') }
+              { adminLink(closeDrawer, '/cms', 'CMS',  'description', true, true) }
+              { adminLink(closeDrawer, '/financial_aid/review/1', 'Personal Price Admin',  'attach_money', true, true) }
+              { learnerLink(closeDrawer, '/dashboard', 'Dashboard', 'dashboard') }
+              { navLink(closeDrawer, `/learner/${SETTINGS.user.username}`, 'My Profile', 'person')}
+              { navLink(
+                R.compose(() => setPhotoDialogVisibility(true), closeDrawer),
+                null,
+                'Edit Photo',
+                'camera_alt'
+              )}
+              { navLink(closeDrawer, '/settings', 'Settings', 'settings') }
             </div>
             <div className="logout-link">
-              <div className="link">
-                <Icon name="exit_to_app" aria-hidden="true" />
-                <a href="/logout">
-                  Logout
-                </a>
-              </div>
+              { navLink(null, '/logout', 'Logout', 'exit_to_app', true) }
             </div>
           </div>
         </ReactPageClick>
@@ -175,12 +183,9 @@ export default class Navbar extends React.Component {
                 <Icon name="menu" className="menu-icon" onClick={() => setNavDrawerOpen(true)} />
               </div>
               { PROFILE_REGEX.test(pathname) ? this.renderProfileHeader() : this.renderNormalHeader(link) }
-              <div className="desktop-visible">
-                { this.programSelector() }
-              </div>
             </div>
             <div className="desktop-visible">
-              { this.userMenu() }
+              { this.programSelector() }
             </div>
           </HeaderRow>
         </Header>

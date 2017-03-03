@@ -88,15 +88,20 @@ class BasicTests(SeleniumTestsBase):
         self.wait().until(verify_num_elements)
 
         # Go to profile and back to learners to verify that nothing breaks
-        self.selenium.find_element_by_class_name("user-menu").click()
+        self.selenium.find_element_by_class_name("menu-icon").click()
         self.wait().until(
-            lambda driver: "open" in driver.find_element_by_class_name("user-menu-dropdown").get_attribute("class")
+            lambda driver: "open" in driver.find_element_by_class_name("nav-drawer").get_attribute("class")
         )
-        profile_link_selector = ".user-menu-dropdown a[href='/learner/{username}']".format(
+        profile_link_selector = ".nav-drawer a[href='/learner/{username}']".format(
             username=self.username,
         )
         self.selenium.find_element_by_css_selector(profile_link_selector).click()
         self.wait().until(lambda driver: driver.find_element_by_class_name("user-page"))
+
         # Go back to learners
+        self.selenium.find_element_by_class_name("menu-icon").click()
+        self.wait().until(
+            lambda driver: "open" in driver.find_element_by_class_name("nav-drawer").get_attribute("class")
+        )
         self.selenium.find_element_by_css_selector("a[href='/learners']").click()
         self.wait().until(lambda driver: driver.find_element_by_class_name('learner-result'))

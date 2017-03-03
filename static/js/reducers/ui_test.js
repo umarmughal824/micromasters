@@ -20,7 +20,6 @@ import {
   setShowWorkDeleteDialog,
   setDeletionIndex,
   setProfileStep,
-  setUserMenuOpen,
   setSearchFilterVisibility,
   setEmailDialogVisibility,
   setEnrollProgramDialogError,
@@ -146,12 +145,6 @@ describe('ui reducers', () => {
   describe("profile step", () => {
     it(`should let you set the profile step`, () => {
       assertReducerResultState(setProfileStep, ui => ui.profileStep, null);
-    });
-  });
-
-  describe("user menu", () => {
-    it('should let you set the user menu open state', () => {
-      assertReducerResultState(setUserMenuOpen, ui => ui.userMenuOpen, false);
     });
   });
 

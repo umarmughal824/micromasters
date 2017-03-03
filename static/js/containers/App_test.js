@@ -194,7 +194,7 @@ describe('App', function() {
   describe('navbar', () => {
     for (const [title, url] of [
       ['Dashboard', '/dashboard'],
-      ['View Profile', `/learner/${SETTINGS.user.username}`],
+      ['My Profile', `/learner/${SETTINGS.user.username}`],
       ['Settings', '/settings'],
     ]) {
       it(`closes the drawer and changes the URL when ${title} is clicked`, () => {
@@ -216,7 +216,7 @@ describe('App', function() {
   it('closes the drawer and shows the photo dialog when edit photo is clicked', () => {
     helper.store.dispatch(setNavDrawerOpen(true));
     return renderComponent("/").then(([wrapper]) => {
-      let node = wrapper.find("button").filterWhere(x => x.text() === "Edit Photo");
+      let node = wrapper.find("a").filterWhere(x => x.text() === "Edit Photo");
 
       return listenForActions([
         SET_NAV_DRAWER_OPEN,
