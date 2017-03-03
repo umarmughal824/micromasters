@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.49.4
+--------------
+
+- Fixed dashboard UI to correctly display upgradable past course runs
+- Removed error message if there are no enrollments (#2754)
+- Upgraded searchkit to latest beta (#2741)
+- Missed one
+- Add trailing comma to tuple
+- Fixed EOFError (#2753)
+
 Version 0.49.3
 --------------
 
