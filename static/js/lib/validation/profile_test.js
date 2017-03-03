@@ -110,7 +110,9 @@ describe('Profile validation functions', () => {
     it('should error when first_name is non cp-1252 and romanized fields are missing', () => {
       let profile = {
         ...USER_PROFILE_RESPONSE,
-        first_name: 'عامر'
+        first_name: 'عامر',
+        romanized_first_name: undefined,
+        romanized_last_name: undefined,
       };
       let errors = {
         romanized_first_name: "Latin first name is required",
@@ -122,7 +124,9 @@ describe('Profile validation functions', () => {
     it('should error when last_name is non cp-1252 and romanized fields are missing', () => {
       let profile = {
         ...USER_PROFILE_RESPONSE,
-        last_name: 'عامر'
+        last_name: 'عامر',
+        romanized_first_name: undefined,
+        romanized_last_name: undefined,
       };
       let errors = {
         romanized_first_name: "Latin first name is required",

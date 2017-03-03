@@ -269,8 +269,8 @@ export function getPreferredName(profile: Profile, last: boolean = true): string
   return last && profile.last_name && !profile.preferred_name ? `${first} ${profile.last_name}` : first;
 }
 
-export const getFullName = (profile: Profile): string => (
-  `${profile.first_name} ${profile.last_name}`
+export const getRomanizedName = (profile: Profile): string => (
+  `${profile.romanized_first_name || profile.first_name} ${profile.romanized_last_name || profile.last_name}`
 );
 
 /**

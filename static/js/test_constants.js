@@ -227,6 +227,8 @@ export const USER_PROFILE_RESPONSE = deepFreeze({
   "email_optin": false,
   "first_name": "Jane",
   "last_name": "Garris",
+  "romanized_first_name": "Rjane",
+  "romanized_last_name": "Rgarris",
   "preferred_name": "Jane",
   "country": "US",
   "address": "123 Main Street",

@@ -13,7 +13,7 @@ import {
   generateNewEducation,
   generateNewWorkHistory,
   getPreferredName,
-  getFullName,
+  getRomanizedName,
   makeProfileProgressDisplay,
   userPrivilegeCheck,
   calculateDegreeInclusions,
@@ -167,17 +167,21 @@ describe('utility functions', () => {
   });
 
 
-  describe('getFullName', () => {
-    let profile;
-    beforeEach(() => {
-      profile = {
+  describe('getRomanizedName', () => {
+    it('returns romanized First Last', () => {
+      assert.equal('romanized_jane romanized_doe', getRomanizedName({
+        romanized_first_name: 'romanized_jane',
+        romanized_last_name: 'romanized_doe',
         first_name: 'jane',
         last_name: 'doe',
-      };
+      }));
     });
 
-    it('returns First Last', () => {
-      assert.equal('jane doe', getFullName(profile));
+    it('falls back to first / last if romanized is not there', () => {
+      assert.equal('jane doe', getRomanizedName({
+        first_name: 'jane',
+        last_name: 'doe',
+      }));
     });
   });
 
