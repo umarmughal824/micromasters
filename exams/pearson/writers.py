@@ -5,8 +5,8 @@ import csv
 import logging
 from collections import OrderedDict
 from operator import attrgetter
-import re
 
+import phonenumbers
 import pycountry
 
 from exams.pearson.constants import (
@@ -124,14 +124,6 @@ class BaseTSVWriter(object):
         return (valid_rows, invalid_rows)
 
 
-def split_phone_number(num):
-    """
-    split a phone number into the calling code and the rest of the number
-    """
-    reg = re.compile(r'^\+(\d*)\s?(.*)')
-    return reg.findall(num)[0]
-
-
 class CDDWriter(BaseTSVWriter):
     """
     A writer for Pearson Candidate Demographic Data (CDD) files
@@ -200,6 +192,25 @@ class CDDWriter(BaseTSVWriter):
         return state if country in PEARSON_STATE_SUPPORTED_COUNTRIES else ''
 
     @classmethod
+    def _parse_phone_number(cls, phone_number_string):
+        """
+        Parses a phone number string and raises proper exceptions in case it is invalid
+
+        Args:
+            phone_number_string (str): a string representing a phone number
+
+        Returns:
+            phonenumbers.phonenumber.PhoneNumber: a PhoneNumber object
+        """
+        try:
+            phone_number = phonenumbers.parse(phone_number_string)
+        except phonenumbers.phonenumberutil.NumberParseException:
+            raise InvalidProfileDataException('Stored phone number is in an invalid string')
+        if not phonenumbers.is_valid_number(phone_number):
+            raise InvalidProfileDataException('Stored phone number is in an invalid phone number')
+        return phone_number
+
+    @classmethod
     def profile_phone_number_to_country_code(cls, profile):
         """
         Get the country code for a profile's phone number
@@ -208,13 +219,10 @@ class CDDWriter(BaseTSVWriter):
             profile (profiles.models.Profile): the profile to get state data from
 
         Returns:
-            str: the 1 character country code
+            str: the country code
         """
-        try:
-            code, _ = split_phone_number(profile.phone_number)
-        except BaseException as ex:
-            raise InvalidProfileDataException() from ex
-        return code
+        phone_number = cls._parse_phone_number(profile.phone_number)
+        return str(phone_number.country_code)
 
     @classmethod
     def profile_phone_number_to_raw_number(cls, profile):
@@ -227,11 +235,8 @@ class CDDWriter(BaseTSVWriter):
         Returns:
             str: full phone number minus the country code
         """
-        try:
-            _, number = split_phone_number(profile.phone_number)
-        except BaseException as ex:
-            raise InvalidProfileDataException() from ex
-        return number
+        phone_number = cls._parse_phone_number(profile.phone_number)
+        return phonenumbers.national_significant_number(phone_number)
 
     @classmethod
     def profile_country_to_alpha3(cls, profile):

@@ -255,27 +255,40 @@ class CDDWriterTest(TSVWriterTestCase, TestCase):
         with self.assertRaises(InvalidProfileDataException):
             CDDWriter.profile_country_to_alpha3(profile)
 
-    def test_profile_phone_number_functions(self):
+    @ddt.data(
+        ("+1 617 293-3423", "1", "6172933423", ),
+        ("+39 345 9999999", "39", "3459999999", ),
+        ("+393459999999", "39", "3459999999", ),
+        ("+39 0827 99999", "39", "082799999", ),
+        ("+91 020-30303030", "91", "2030303030", ),
+        ("+17874061234", "1", "7874061234", ),
+        ("+52-55-60-521234", "52", "5560521234", ),
+        ("+229-97-09-1234", "229", "97091234", )
+    )
+    @ddt.unpack
+    def test_profile_phone_number_functions(self, input_number, expected_country_code, expected_number):
         """
         A profile with a valid phone number should be parsed correctly
         """
         with mute_signals(post_save):
-            profile = ProfileFactory(phone_number="+1 899 293-3423")
-        assert CDDWriter.profile_phone_number_to_raw_number(profile) == "899 293-3423"
-        assert CDDWriter.profile_phone_number_to_country_code(profile) == "1"
+            profile = ProfileFactory(phone_number=input_number)
+        assert CDDWriter.profile_phone_number_to_raw_number(profile) == expected_number
+        assert CDDWriter.profile_phone_number_to_country_code(profile) == expected_country_code
 
     @ddt.data(
         '',
         None,
         'bad string',
-        '120272727',
+        '120272727',  # nonsense number
+        '+1234567',  # number that resembles a real number
+        "+1 899 293-3423",  # invalid number even if it looks fine
     )
     def test_profile_phone_number_exceptions(self, bad_number):
         """
         It should raise exceptions for bad data
         """
         with mute_signals(post_save):
-            profile = ExamProfileFactory(profile__phone_number=bad_number)
+            profile = ProfileFactory(phone_number=bad_number)
         with self.assertRaises(InvalidProfileDataException):
             CDDWriter.profile_phone_number_to_raw_number(profile)
         with self.assertRaises(InvalidProfileDataException):
@@ -308,7 +321,7 @@ class CDDWriterTest(TSVWriterTestCase, TestCase):
             'profile__state_or_territory': 'US-MA',
             'profile__country': 'US',
             'profile__postal_code': '02115',
-            'profile__phone_number': '+1 999-999-9999',
+            'profile__phone_number': '+1 617 293-3423',
         }
 
         with mute_signals(post_save):
@@ -321,7 +334,7 @@ class CDDWriterTest(TSVWriterTestCase, TestCase):
             "14879\tJane\tSmith\tjane@example.com\t"
             "1 Main St, Room B345\t\t\t"  # triple tab is for blank address2 and address3
             "Boston\tMA\t02115\tUSA\t"
-            "999-999-9999\t1\t2016/05/15 15:02:55"
+            "6172933423\t1\t2016/05/15 15:02:55"
         )
 
     def test_write_cdd_file_with_blank_romanized_name(self):
@@ -334,12 +347,12 @@ class CDDWriterTest(TSVWriterTestCase, TestCase):
             'profile__last_name': 'Smith',
             'profile__romanized_first_name': None,
             'profile__romanized_last_name': None,
+            'profile__phone_number': '+1 617 293-3423',
         }
 
         with mute_signals(post_save):
             exam_profiles = [ExamProfileFactory.create(**kwargs)]
             exam_profiles[0].profile.updated_on = FIXED_DATETIME
-
         self.cdd_writer.write(self.tsv_file, exam_profiles)
 
         assert self.tsv_rows[0].startswith("9876\tJane\tSmith\t")
