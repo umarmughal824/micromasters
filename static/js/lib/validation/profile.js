@@ -92,6 +92,14 @@ export const personalValidation = (profile: Profile) => {
     if (profile.postal_code && !CP1252_REGEX.test(profile.postal_code)) {
       errors.postal_code = "Postal code must be in Latin characters";
     }
+    if (R.isNil(errors.postal_code)) {
+      if (profile.country === 'US' && !R.test(/^\d{5}(-\d{4})?$/, profile.postal_code)) {
+        errors.postal_code = "Postal code must be a valid US postal code.";
+      }
+      if (profile.country === 'CA' && !R.test(/^[A-Za-z0-9]{6}$/, profile.postal_code)) {
+        errors.postal_code = "Postal code must be a valid Canadian postal code.";
+      }
+    }
   } else {
     // postal code only shown/required for US and Canada
     delete errors.postal_code;

@@ -179,6 +179,18 @@ describe('Profile validation functions', () => {
       assert.deepEqual(personalValidation(profile), errors);
     });
 
+    let validPostalCodes = {
+      'US': ['12345', '12345-6789'],
+      'CA': ['123456', '123ABC', '123abc'],
+    };
+    let inValidPostalCodes = {
+      US: ['a', 'asdfb', '12345a', '%$#$%#$%', '12345-asdf', '12345-', 'a12345', '12345-1234a'],
+      CA: ['a', 'asdfb', '12345-asdf', '12345-1', '12345%', '1234512'],
+    };
+    let messages = {
+      US: "Postal code must be a valid US postal code.",
+      CA: "Postal code must be a valid Canadian postal code.",
+    };
     for (const country of ["US", "CA"]) {
       it(`should error when country is ${country} and no postal code`, () => {
         let profile = {
@@ -190,6 +202,31 @@ describe('Profile validation functions', () => {
           postal_code: "Postal code is required",
         };
         assert.deepEqual(personalValidation(profile), errors);
+      });
+
+      it(`should reject invalid postal codes for ${country}`, () => {
+        inValidPostalCodes[country].forEach(badCode => {
+          let profile = {
+            ...USER_PROFILE_RESPONSE,
+            country: country,
+            postal_code: badCode,
+          };
+          assert.deepEqual(
+            personalValidation(profile),
+            { postal_code: messages[country] }
+          );
+        });
+      });
+
+      it(`should accept valid postal codes for ${country}`, () => {
+        validPostalCodes[country].forEach(goodCode => {
+          let profile = {
+            ...USER_PROFILE_RESPONSE,
+            country: country,
+            postal_code: goodCode,
+          };
+          assert.deepEqual(personalValidation(profile), {});
+        });
       });
     }
 
