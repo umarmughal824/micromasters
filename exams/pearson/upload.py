@@ -19,5 +19,5 @@ def upload_tsv(file_path):
         with get_connection() as sftp:
             with sftp.cd(settings.EXAMS_SFTP_UPLOAD_DIR):
                 sftp.put(file_path)
-    except (EOFError, SSHException) as exc:
+    except (EOFError, SSHException,) as exc:
         raise RetryableSFTPException() from exc

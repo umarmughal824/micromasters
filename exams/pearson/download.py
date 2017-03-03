@@ -100,7 +100,7 @@ class ArchivedResponseProcessor:
                     finally:
                         if os.path.exists(local_path):
                             os.remove(local_path)
-        except (EOFError, SSHException) as exc:
+        except (EOFError, SSHException,) as exc:
             raise RetryableSFTPException("Exception processing response files") from exc
 
     def process_zip(self, local_path):
