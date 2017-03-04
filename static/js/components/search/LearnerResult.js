@@ -41,17 +41,20 @@ class LearnerResult extends SearchkitComponent {
           <ProfileImage profile={profile} useSmall={true} />
         </Cell>
         <Cell
-          col={5}
-          className="learner-name centered"
+          col={4}
+          className="learner-name"
           onMouseLeave={() => setLearnerChipVisibility(null)}
           onMouseEnter={() => setLearnerChipVisibility(profile.username)}
         >
           <span className="display-name">
             { highlight(getUserDisplayName(profile), this.searchkit.state.q) }
           </span>
+          <span className="user-name">
+            { highlight(profile.username, this.searchkit.state.q) }
+          </span>
           {profile.username === learnerChipVisibility ? <LearnerChip profile={profile} /> : null}
         </Cell>
-        <Cell col={3} className="centered learner-location">
+        <Cell col={4} className="centered learner-location">
           <span>
             { getLocation(profile) }
           </span>

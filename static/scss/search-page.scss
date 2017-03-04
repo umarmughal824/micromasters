@@ -386,8 +386,18 @@
       }
 
       .learner-name {
-        font-weight: 400;
-        font-size: 14px;
+        display: flex;
+        flex-direction: column;
+
+        .display-name {
+          font-size: 15px;
+          font-weight: 500;
+        }
+
+        .user-name {
+          color: $font-gray-light;
+          font-size: 13px;
+        }
       }
 
       .learner-location {
