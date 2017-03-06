@@ -104,7 +104,8 @@ const _fetchJSONWithCSRF = (input: string, init: Object = {}, loginOnError: bool
     // to force a new login
     if (loginOnError === true && (response.status === 400 || response.status === 401)) {
       const relativePath = window.location.pathname + window.location.search;
-      window.location = `/login/edxorg/?next=${encodeURIComponent(relativePath)}`;
+      const loginRedirect = `/login/edxorg/?next=${encodeURIComponent(relativePath)}`;
+      window.location = `/logout?next=${encodeURIComponent(loginRedirect)}`;
     }
 
     // For non 2xx status codes reject the promise adding the status code
