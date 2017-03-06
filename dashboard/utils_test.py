@@ -925,18 +925,20 @@ class MMTrackTest(MockedESTestCase):
         assert mmtrack.has_paid(key) is True
 
     @ddt.data(
-        ["", "", False, False, False],
-        ["", ExamProfile.PROFILE_ABSENT, True, False, False],
-        [ExamProfile.PROFILE_INVALID, ExamProfile.PROFILE_INVALID, True, True, False],
-        [ExamProfile.PROFILE_FAILED, ExamProfile.PROFILE_INVALID, True, True, False],
-        ["", ExamProfile.PROFILE_INVALID, True, True, False],
-        [ExamProfile.PROFILE_PENDING, ExamProfile.PROFILE_IN_PROGRESS, True, True, False],
-        [ExamProfile.PROFILE_IN_PROGRESS, ExamProfile.PROFILE_IN_PROGRESS, True, True, False],
-        [ExamProfile.PROFILE_SUCCESS, ExamProfile.PROFILE_SUCCESS, True, True, False],
-        [ExamProfile.PROFILE_SUCCESS, ExamProfile.PROFILE_SCHEDULABLE, True, True, True],
+        ["", "", False, False, False, False],
+        ["", ExamProfile.PROFILE_ABSENT, True, False, False, False],
+        [ExamProfile.PROFILE_INVALID, ExamProfile.PROFILE_INVALID, True, True, False, False],
+        [ExamProfile.PROFILE_FAILED, ExamProfile.PROFILE_INVALID, True, True, False, False],
+        ["", ExamProfile.PROFILE_INVALID, True, True, False, True],
+        [ExamProfile.PROFILE_PENDING, ExamProfile.PROFILE_IN_PROGRESS, True, True, False, False],
+        [ExamProfile.PROFILE_IN_PROGRESS, ExamProfile.PROFILE_IN_PROGRESS, True, True, False, False],
+        [ExamProfile.PROFILE_SUCCESS, ExamProfile.PROFILE_SUCCESS, True, True, False, False],
+        [ExamProfile.PROFILE_SUCCESS, ExamProfile.PROFILE_SCHEDULABLE, True, True, True, False],
     )
     @ddt.unpack  # pylint: disable=too-many-arguments
-    def test_get_pearson_exam_status(self, profile_status, expected_status, set_series_code, make_profile, make_auth):
+    @patch('dashboard.utils.log')
+    def test_get_pearson_exam_status(self, profile_status, expected_status, set_series_code,
+                                     make_profile, make_auth, log_error_called, log_mock):
         """
         test get_pearson_exam_status
         """
@@ -968,6 +970,7 @@ class MMTrackTest(MockedESTestCase):
         )
 
         assert mmtrack.get_pearson_exam_status() == expected_status
+        assert log_mock.error.called is log_error_called
 
         if not set_series_code:
             self.program.exam_series_code = exam_series_code

@@ -408,10 +408,10 @@ class MMTrack:
         except ExamProfile.DoesNotExist:
             return ExamProfile.PROFILE_ABSENT
 
-        if exam_profile.status in (ExamProfile.PROFILE_PENDING, ExamProfile.PROFILE_IN_PROGRESS):
+        if exam_profile.status in (ExamProfile.PROFILE_PENDING, ExamProfile.PROFILE_IN_PROGRESS,):
             return ExamProfile.PROFILE_IN_PROGRESS
 
-        elif exam_profile.status == ExamProfile.PROFILE_INVALID:
+        elif exam_profile.status in (ExamProfile.PROFILE_INVALID, ExamProfile.PROFILE_FAILED,):
             return ExamProfile.PROFILE_INVALID
 
         elif exam_profile.status == ExamProfile.PROFILE_SUCCESS:
