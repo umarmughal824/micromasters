@@ -23,6 +23,11 @@ describe('reducer utilities', () => {
       it('should return INITIAL_DASHBOARD_STATE otherwise', () => {
         assert.deepEqual(getOwnDashboard({}), INITIAL_DASHBOARD_STATE);
       });
+
+      it('should not freak out if SETTINGS.user === null', () => {// $FlowFixMe: SETTINGS.user = null
+        SETTINGS.user = null;
+        assert.deepEqual(getOwnDashboard({}), INITIAL_DASHBOARD_STATE);
+      });
     });
 
     describe('getDashboard', () => {
