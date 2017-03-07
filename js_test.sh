@@ -11,8 +11,8 @@ else
     export CMD="node ./node_modules/mocha/bin/_mocha"
 fi
 
-export FILE_PATTERN=${1:-'static/**/*/*_test.js'}
-CMD+=" --require ./static/js/babelhook.js static/js/global_init.js $FILE_PATTERN"
+export FILE_PATTERN=${1:-'"static/**/*/*_test.js"'}
+CMD_ARGS="--require ./static/js/babelhook.js static/js/global_init.js $FILE_PATTERN"
 
 # Second argument (if specified) should be a string that will match specific test case descriptions
 #
@@ -25,10 +25,10 @@ CMD+=" --require ./static/js/babelhook.js static/js/global_init.js $FILE_PATTERN
 #   (in command line...)
 #   > ./js_test.sh static/js/SomeComponent_test.js "should test basic arithmetic"
 if [[ ! -z "$2" ]]; then
-    CMD+=" -g \"$2\""
+    CMD_ARGS+=" -g \"$2\""
 fi
 
-eval $CMD 2> >(tee "$TMP_FILE")
+eval "$CMD $CMD_ARGS" 2> >(tee "$TMP_FILE")
 
 export TEST_RESULT=$?
 export TRAVIS_BUILD_DIR=$PWD
