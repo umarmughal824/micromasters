@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.51.0
+--------------
+
+- Filter out zendesk errors (#2800)
+- Fixed authorization_user_exam to authorize and not error (#2796)
+- Fixed faulty ui view tests
+- Added StaffLearnerInfoCard
+- Configured JS test script to allow for specific test cases to be run
+
 Version 0.50.0
 --------------
 
