@@ -32,10 +32,12 @@ import CustomSortingColumnHeaders from './search/CustomSortingColumnHeaders';
 import FilterVisibilityToggle from './search/FilterVisibilityToggle';
 import HitsCount from './search/HitsCount';
 import CustomNoHits from './search/CustomNoHits';
+import { EDUCATION_LEVELS } from '../constants';
+import { wrapWithProps } from '../util/util';
 import type { Option } from '../flow/generalTypes';
 import type { AvailableProgram } from '../flow/enrollmentTypes';
 import type { SearchSortItem } from '../flow/searchTypes';
-import { EDUCATION_LEVELS } from '../constants';
+import type { Profile } from '../flow/profileTypes';
 
 const makeCountryNameTranslations: () => Object = () => {
   let translations = {};
@@ -114,6 +116,7 @@ export default class LearnerSearch extends SearchkitComponent {
     checkFilterVisibility:          (s: string) => boolean,
     setFilterVisibility:            (s: string, v: boolean) => void,
     openSearchResultEmailComposer:  (searchkit: Object) => void,
+    openLearnerEmailComposer:       (profile: Profile) => void,
     children:                       React$Element<*>[],
     currentProgramEnrollment:       AvailableProgram,
   };
@@ -125,6 +128,14 @@ export default class LearnerSearch extends SearchkitComponent {
 
   countryNameTranslations: Object = makeCountryNameTranslations();
   degreeTranslations: Object = makeDegreeTranslations();
+
+  constructor(props: Object) {
+    super(props);
+    this.WrappedLearnerResult = wrapWithProps(
+      {openLearnerEmailComposer: this.props.openLearnerEmailComposer},
+      LearnerResult
+    );
+  }
 
   getNumberOfCoursesInProgram = (): number => {
     let results = this.getResults();
@@ -310,7 +321,8 @@ export default class LearnerSearch extends SearchkitComponent {
               <Hits
                 className="learner-results"
                 hitsPerPage={SETTINGS.es_page_size}
-                itemComponent={LearnerResult} />
+                itemComponent={this.WrappedLearnerResult}
+              />
               <CustomNoHits />
             </Card>
           </Cell>

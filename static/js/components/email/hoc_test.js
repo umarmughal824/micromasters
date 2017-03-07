@@ -17,24 +17,24 @@ import {
   INITIAL_TEST_EMAIL_STATE
 } from './test_constants';
 
-class TestContainerPage extends React.Component {
-  render () {
-    let { openEmailComposer } = this.props;
-
-    return <div>
-      <button onClick={openEmailComposer(TEST_EMAIL_TYPE)}>Open Email</button>
-    </div>;
-  }
-}
-
-const WrappedTestContainerPage = R.compose(
-  withEmailDialog({
-    [TEST_EMAIL_TYPE]: TEST_EMAIL_CONFIG
-  })
-)(TestContainerPage);
-
 describe('Email higher-order component', () => {
   let helper, listenForActions, openEmailSpy;
+
+  class TestContainerPage extends React.Component {
+    render () {
+      let { openEmailComposer } = this.props;
+
+      return <div>
+        <button onClick={openEmailComposer(TEST_EMAIL_TYPE)}>Open Email</button>
+      </div>;
+    }
+  }
+
+  const WrappedTestContainerPage = R.compose(
+    withEmailDialog({
+      [TEST_EMAIL_TYPE]: TEST_EMAIL_CONFIG
+    })
+  )(TestContainerPage);
 
   beforeEach(() => {
     helper = new IntegrationTestHelper();

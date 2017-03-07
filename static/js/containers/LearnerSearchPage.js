@@ -10,8 +10,8 @@ import LearnerSearch from '../components/LearnerSearch';
 import withSearchkitManager from '../components/search/WithSearchkitManager';
 import { setSearchFilterVisibility } from '../actions/ui';
 import type { UIState } from '../reducers/ui';
-import { SEARCH_EMAIL_TYPE } from '../components/email/constants';
-import { SEARCH_RESULT_EMAIL_CONFIG } from '../components/email/lib';
+import { SEARCH_EMAIL_TYPE, LEARNER_EMAIL_TYPE } from '../components/email/constants';
+import { SEARCH_RESULT_EMAIL_CONFIG, LEARNER_EMAIL_CONFIG } from '../components/email/lib';
 import { withEmailDialog } from '../components/email/hoc';
 import type { AllEmailsState } from '../flow/emailTypes';
 import type { AvailableProgram } from '../flow/enrollmentTypes';
@@ -51,6 +51,7 @@ class LearnerSearchPage extends React.Component {
         checkFilterVisibility={this.checkFilterVisibility}
         setFilterVisibility={this.setFilterVisibility}
         openSearchResultEmailComposer={openEmailComposer(SEARCH_EMAIL_TYPE)}
+        openLearnerEmailComposer={openEmailComposer(LEARNER_EMAIL_TYPE)}
         currentProgramEnrollment={currentProgramEnrollment}
       />
     );
@@ -74,6 +75,7 @@ export default R.compose(
   withSearchkitManager,
   connect(mapStateToProps),
   withEmailDialog({
-    [SEARCH_EMAIL_TYPE]: SEARCH_RESULT_EMAIL_CONFIG
-  }),
+    [SEARCH_EMAIL_TYPE]: SEARCH_RESULT_EMAIL_CONFIG,
+    [LEARNER_EMAIL_TYPE]: LEARNER_EMAIL_CONFIG
+  })
 )(LearnerSearchPage);

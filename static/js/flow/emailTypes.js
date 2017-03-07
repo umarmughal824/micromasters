@@ -1,6 +1,4 @@
 // @flow
-import type { Dispatcher } from './reduxTypes';
-
 export type EmailSendResponse = {
   errorStatusCode?: number,
 };
@@ -29,7 +27,8 @@ export type AllEmailsState = {
 
 export type EmailConfig = {
   title: string,
-  renderSubheading: (subheading: ?string) => React$Element<*>,
+  renderSubheading: (activeEmail: EmailState) => React$Element<*>,
   emailOpenParams: (args: any) => Object,
-  emailSendAction: (emailState: EmailState) => Dispatcher<EmailSendResponse>
+  getEmailSendFunction: () => Function,
+  emailSendParams: (emailState: EmailState) => Array<any>
 };

@@ -12,7 +12,7 @@ export default class EmailCompositionDialog extends React.Component {
     dialogVisibility:           boolean,
     activeEmail:                EmailState,
     title?:                     string,
-    subheadingRenderer?:        (subheading: ?string) => React$Element<*>,
+    subheadingRenderer?:        (activeEmail: EmailState) => React$Element<*>,
     closeAndClearEmailComposer: () => void,
     closeEmailComposerAndSend:  () => void,
     updateEmailFieldEdit:       () => void
@@ -26,22 +26,19 @@ export default class EmailCompositionDialog extends React.Component {
     }
   };
 
-  renderDefaultSubheading = (subheading: ?string): React$Element<*> => (
+  renderDefaultSubheading = (activeEmail: EmailState): React$Element<*> => (
     <div className="subheading-section">
-      <h5 className="subheading">{ subheading }</h5>
+      <h5 className="subheading default">{ activeEmail.subheading }</h5>
     </div>
   );
 
   renderSubheading = (): ?React$Element<*> => {
-    const {
-      activeEmail: { subheading },
-      subheadingRenderer
-    } = this.props;
-    if (isNilOrBlank(subheading)) {
+    const { activeEmail, subheadingRenderer } = this.props;
+    if (isNilOrBlank(activeEmail.subheading)) {
       return null;
     } else {
       let renderFunc = subheadingRenderer || this.renderDefaultSubheading;
-      return renderFunc(subheading);
+      return renderFunc(activeEmail);
     }
   };
 

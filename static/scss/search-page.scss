@@ -381,10 +381,6 @@
       position: relative;
       border-bottom: 1px solid $border-color;
 
-      img {
-        border-radius: 50px;
-      }
-
       .learner-name {
         display: flex;
         flex-direction: column;
@@ -428,7 +424,7 @@
         }
       }
 
-      .mdl-cell .card-image {
+      .rounded-profile-image {
         height: 37px;
       }
     }

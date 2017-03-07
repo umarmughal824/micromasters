@@ -16,15 +16,31 @@
         margin: 0;
         padding: 0;
         font-size: 16px;
-        font-style: italic;
         font-weight: normal;
 
-        &.rounded  {
+        &.default {
+          font-style: italic;
+        }
+
+        &.rounded {
           background-color: $bg-med-gray;
           line-height: 22px;
           padding: 10px 10px 10px 20px;
           border-radius: 20px;
           font-style: normal;
+        }
+
+        &.profile-image-bubble {
+          background-color: $bg-med-gray;
+          border-radius: 50px;
+          padding: 0 30px 0 0;
+          height: 43px;
+          display: inline-block;
+
+          >span {
+            display: inline-block;
+            padding-left: 15px;
+          }
         }
       }
     }

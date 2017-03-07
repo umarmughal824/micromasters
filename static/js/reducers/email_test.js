@@ -1,14 +1,14 @@
 // @flow
 import configureTestStore from 'redux-asserts';
 
+import IntegrationTestHelper from '../util/integration_test_helper';
 import { FETCH_SUCCESS, FETCH_FAILURE } from '../actions';
 import {
   startEmailEdit,
   updateEmailEdit,
   clearEmailEdit,
   updateEmailValidation,
-  sendSearchResultMail,
-  sendCourseTeamMail,
+  sendEmail,
   START_EMAIL_EDIT,
   UPDATE_EMAIL_EDIT,
   CLEAR_EMAIL_EDIT,
@@ -18,9 +18,8 @@ import {
   SEND_EMAIL_FAILURE,
 } from '../actions/email';
 import { INITIAL_ALL_EMAILS_STATE, INITIAL_EMAIL_STATE } from './email';
-import { SEARCH_EMAIL_TYPE, COURSE_EMAIL_TYPE } from '../components/email/constants';
+import { SEARCH_EMAIL_TYPE } from '../components/email/constants';
 import type { EmailSendResponse } from '../flow/emailTypes';
-import * as api from '../lib/api';
 import rootReducer from '../reducers';
 import { assert } from 'chai';
 import sinon from 'sinon';
@@ -82,76 +81,54 @@ describe('email reducers', () => {
       assert.deepEqual(state[emailType].validationErrors, errors);
     });
   });
+});
 
-  describe('for the sendSearchResultMail action', () => {
-    let sendSearchResultMailStub;
-    let MAIL_SUCCESS_RESPONSE: EmailSendResponse = { errorStatusCode: 200 },
-      searchRequest = { size: 50 };
+describe('email reducers for the sendMail action', () => {
+  let helper,
+    emailType,
+    MAIL_SUCCESS_RESPONSE: EmailSendResponse = { errorStatusCode: 200 },
+    searchRequest = { size: 50 };
+  let sendEmailArguments = ['subject', 'body', searchRequest];
 
-    beforeEach(() => {
-      emailType = SEARCH_EMAIL_TYPE;
-      sendSearchResultMailStub = sandbox.stub(api, 'sendSearchResultMail');
-      store.dispatch(startEmailEdit(emailType));
-    });
+  beforeEach(() => {
+    helper = new IntegrationTestHelper();
+    emailType = SEARCH_EMAIL_TYPE;
+    helper.store.dispatch(startEmailEdit(emailType));
+  });
 
-    it('should go through expected state changes when the send function succeeds', () => {
-      sendSearchResultMailStub.returns(Promise.resolve(MAIL_SUCCESS_RESPONSE));
+  afterEach(() => {
+    helper.cleanup();
+  });
 
-      return dispatchThen(
-        sendSearchResultMail('subject', 'body', searchRequest),
-        [INITIATE_SEND_EMAIL, SEND_EMAIL_SUCCESS]
-      ).then(emailState => {
-        assert.equal(emailState[emailType].fetchStatus, FETCH_SUCCESS);
-        assert.equal(sendSearchResultMailStub.callCount, 1);
-        assert.deepEqual(sendSearchResultMailStub.args[0], ['subject', 'body', searchRequest]);
-      });
-    });
+  it('should go through expected state changes when the send function succeeds', () => {
+    helper.sendSearchResultMail.returns(Promise.resolve(MAIL_SUCCESS_RESPONSE));
 
-    it('should go through expected state changes when the send function fails', () => {
-      sendSearchResultMailStub.returns(Promise.reject());
-
-      return dispatchThen(
-        sendSearchResultMail('subject', 'body', searchRequest),
-        [INITIATE_SEND_EMAIL, SEND_EMAIL_FAILURE]
-      ).then(emailState => {
-        assert.equal(emailState[emailType].fetchStatus, FETCH_FAILURE);
-      });
+    return helper.dispatchThen(
+      sendEmail(
+        emailType,
+        helper.sendSearchResultMail,
+        sendEmailArguments
+      ),
+      [INITIATE_SEND_EMAIL, SEND_EMAIL_SUCCESS]
+    ).then(state => {
+      assert.equal(state.email[emailType].fetchStatus, FETCH_SUCCESS);
+      assert.equal(helper.sendSearchResultMail.callCount, 1);
+      assert.deepEqual(helper.sendSearchResultMail.args[0], ['subject', 'body', searchRequest]);
     });
   });
 
-  describe('for the sendCourseTeamMail action', () => {
-    let sendCourseTeamMailStub;
-    let MAIL_SUCCESS_RESPONSE: EmailSendResponse = { errorStatusCode: 200 },
-      courseId = 123;
+  it('should go through expected state changes when the send function fails', () => {
+    helper.sendSearchResultMail.returns(Promise.reject());
 
-    beforeEach(() => {
-      emailType = COURSE_EMAIL_TYPE;
-      sendCourseTeamMailStub = sandbox.stub(api, 'sendCourseTeamMail');
-      store.dispatch(startEmailEdit(emailType));
-    });
-
-    it('should go through expected state changes when the send function succeeds', () => {
-      sendCourseTeamMailStub.returns(Promise.resolve(MAIL_SUCCESS_RESPONSE));
-
-      return dispatchThen(
-        sendCourseTeamMail('subject', 'body', courseId),
-        [INITIATE_SEND_EMAIL, SEND_EMAIL_SUCCESS]
-      ).then(emailState => {
-        assert.equal(emailState[emailType].fetchStatus, FETCH_SUCCESS);
-        assert.equal(sendCourseTeamMailStub.callCount, 1);
-        assert.deepEqual(sendCourseTeamMailStub.args[0], ['subject', 'body', courseId]);
-      });
-    });
-
-    it('should go through expected state changes when the send function fails', () => {
-      sendCourseTeamMailStub.returns(Promise.reject());
-
-      return dispatchThen(
-        sendCourseTeamMail('subject', 'body', courseId),
-        [INITIATE_SEND_EMAIL, SEND_EMAIL_FAILURE]
-      ).then(emailState => {
-        assert.equal(emailState[emailType].fetchStatus, FETCH_FAILURE);
-      });
+    return helper.dispatchThen(
+      sendEmail(
+        emailType,
+        helper.sendSearchResultMail,
+        sendEmailArguments
+      ),
+      [INITIATE_SEND_EMAIL, SEND_EMAIL_FAILURE]
+    ).then(state => {
+      assert.equal(state.email[emailType].fetchStatus, FETCH_FAILURE);
     });
   });
 });

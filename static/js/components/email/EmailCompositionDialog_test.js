@@ -96,7 +96,7 @@ describe('EmailCompositionDialog', () => {
 
   it('should show a subheading when subheading text exists in the state', () => {
     renderDialog(
-      {'subheading': 'this is a subheading'}
+      {subheading: 'this is a subheading'}
     );
     let subheading = document.querySelector('.test-subheading');
     assert.equal(subheading.tagName, 'DIV');

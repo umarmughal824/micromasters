@@ -242,6 +242,7 @@ export const USER_PROFILE_RESPONSE = deepFreeze({
   "gender": "f",
   "pretty_printed_student_id": "MMM000011",
   "phone_number": "+1 (234) 567-8910",
+  "student_id": 123,
   "work_history": [{
     "id": 1,
     "city": "Cambridge",

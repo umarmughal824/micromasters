@@ -4,6 +4,7 @@ import _ from 'lodash';
 import React from 'react';
 import R from 'ramda';
 import { Provider } from 'react-redux';
+import sinon from 'sinon';
 import { assert } from 'chai';
 import { mount } from 'enzyme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
@@ -32,8 +33,16 @@ import { codeToCountryName } from '../../lib/location';
 
 describe('LearnerResult', () => {
   let helper;
+  let resultData = {
+    _source: {
+      profile: USER_PROFILE_RESPONSE,
+      program: USER_PROGRAM_RESPONSE,
+    }
+  };
+
   beforeEach(() => {
     helper = new IntegrationTestHelper();
+
   });
   afterEach(() => {
     helper.cleanup();
@@ -50,6 +59,7 @@ describe('LearnerResult', () => {
           <SearchkitProvider searchkit={manager}>
             <LearnerResult
               result={result}
+              openLearnerEmailComposer={props.openLearnerEmailComposer || helper.sandbox.stub()}
               {...props}
             />
           </SearchkitProvider>
@@ -59,10 +69,7 @@ describe('LearnerResult', () => {
   };
 
   let renderLearnerResult = (props = {}) => renderElasticSearchResult(
-    { _source: {
-      profile: USER_PROFILE_RESPONSE,
-      program: USER_PROGRAM_RESPONSE,
-    }},
+    resultData,
     props
   );
 
@@ -161,6 +168,23 @@ describe('LearnerResult', () => {
       result.find(".learner-name").props().onMouseLeave();
     }).then(state => {
       assert.equal(state.ui.learnerChipVisibility, null);
+    });
+  });
+
+  it('should pass down a function that can open a dialog to email a learner', () => {
+    helper.store.dispatch(setLearnerChipVisibility(USER_PROFILE_RESPONSE.username));
+    let openLearnerEmailComposerStub = helper.sandbox.stub();
+
+    let result = renderLearnerResult({openLearnerEmailComposer: openLearnerEmailComposerStub});
+    return helper.listenForActions([SET_LEARNER_CHIP_VISIBILITY], () => {
+      result.find(".learner-name").props().onMouseEnter();
+    }).then(() => {
+      const chip = result.find("LearnerChip");
+      assert.lengthOf(chip, 1);
+      // Execute the openLearnerEmailComposer function passed down to the LearnerChip
+      chip.props().openLearnerEmailComposer();
+      sinon.assert.called(openLearnerEmailComposerStub);
+      sinon.assert.calledWith(openLearnerEmailComposerStub, USER_PROFILE_RESPONSE);
     });
   });
 

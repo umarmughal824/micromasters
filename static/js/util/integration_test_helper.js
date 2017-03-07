@@ -71,6 +71,8 @@ export default class IntegrationTestHelper {
     this.sendSearchResultMail.returns(Promise.resolve());
     this.sendCourseTeamMail = this.sandbox.stub(api, 'sendCourseTeamMail');
     this.sendCourseTeamMail.returns(Promise.resolve());
+    this.sendLearnerMail = this.sandbox.stub(api, 'sendLearnerMail');
+    this.sendLearnerMail.returns(Promise.resolve());
     this.scrollIntoViewStub = this.sandbox.stub();
     window.HTMLDivElement.prototype.scrollIntoView = this.scrollIntoViewStub;
     window.HTMLFieldSetElement.prototype.scrollIntoView = this.scrollIntoViewStub;
