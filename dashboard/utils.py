@@ -251,6 +251,9 @@ class MMTrack:
         Args:
             course_id (str): an edX course run id
 
+        Raises:
+            FinalGrade.DoesNotExist: raised if a FinalGrade record was not found
+
         Returns:
             bool: whether the user has passed the course
         """
@@ -280,6 +283,23 @@ class MMTrack:
                 log.error('Missing "end_date" for course run %s', course_id)
                 raise ImproperlyConfigured('Missing "end_date" for course run {}'.format(course_id))
             return cur_grade.passed and course_run.is_past
+
+    def has_passed_course_for_exam(self, course_id):
+        """
+        Returns whether the user has passed a course run for an exam.
+        This method is present because of the need to have a version that doesn't raise FinalGrade.DoesNotExist.
+        In those cases, we treat it as False.
+
+        Args:
+            course_id (str): an edX course run id
+
+        Returns:
+            bool: whether the user has passed the course
+        """
+        try:
+            return self.has_passed_course(course_id)
+        except FinalGrade.DoesNotExist:
+            return False
 
     def get_final_grade(self, course_id):
         """

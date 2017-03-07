@@ -424,6 +424,35 @@ class MMTrackTest(MockedESTestCase):
             mmtrack.has_passed_course(course_id)
         extr_grade_mock.assert_called_once_with(mmtrack, course_id)
 
+    @ddt.data(True, False)
+    @patch('dashboard.utils.MMTrack.has_passed_course', autospec=True)
+    def test_has_passed_course_for_exam(self, has_passed_course_value, has_passed_course_mock):
+        """Test that has_passed_course_for_exam return value of has_passed_course"""
+        course_id = "course-v1:odl+FOO101+CR-FALL15"
+        has_passed_course_mock.return_value = has_passed_course_value
+
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program,
+            edx_user_data=self.cached_edx_user_data
+        )
+
+        assert mmtrack.has_passed_course_for_exam(course_id) is has_passed_course_value
+
+    @patch('dashboard.utils.MMTrack.has_passed_course', autospec=True)
+    def test_has_passed_course_for_exam_no_final_grade(self, has_passed_course_mock):
+        """Test that has_passed_course_for_exam returns False if no FinalGrade"""
+        course_id = "course-v1:odl+FOO101+CR-FALL15"
+        has_passed_course_mock.side_effect = FinalGrade.DoesNotExist
+
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program,
+            edx_user_data=self.cached_edx_user_data
+        )
+
+        assert mmtrack.has_passed_course_for_exam(course_id) is False
+
     @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v1"})
     @patch('dashboard.utils.MMTrack.extract_final_grade', autospec=True)
     def test_get_final_grade(self, extr_grade_mock):
