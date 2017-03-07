@@ -271,6 +271,7 @@ class DashboardTests(ViewsTests):
     """
     Tests for dashboard views
     """
+    @override_settings(FEATURES={"EXAMS_CARD_ENABLED": False})
     def test_dashboard_settings(self):
         """
         Assert settings we pass to dashboard
@@ -669,6 +670,7 @@ class TestUsersPage(ViewsTests):
     Tests for user page
     """
 
+    @override_settings(FEATURES={"EXAMS_CARD_ENABLED": False})
     def test_users_logged_in(self):
         """
         Assert settings we pass to dashboard
@@ -743,6 +745,7 @@ class TestUsersPage(ViewsTests):
                     'zendesk_widget',
                 }
 
+    @override_settings(FEATURES={"EXAMS_CARD_ENABLED": False})
     def test_users_anonymous(self):
         """
         Assert settings we pass to dashboard
