@@ -672,11 +672,16 @@ class BulkExamUtilV1Tests(TestCase):
             )
 
         log.exception.assert_called_with(
-            '[Exam authorization] User: %s do not have complete FinalGrade for course %s',
+            'Unable to authorize user: %s for exam on course_id: %s',
             user.username,
-            self.course_run2.edx_course_key
+            course.id
         )
-        assert ExamProfile.objects.filter(profile=user.profile).exists() is False
+
+        mmtrack = get_mmtrack(user, self.program)
+        assert mmtrack.has_paid(self.course_run.edx_course_key) is True
+        assert mmtrack.has_paid(self.course_run2.edx_course_key) is True
+        assert ExamProfile.objects.filter(profile=user.profile).exists() is True
+        # because user has no complete final grade.
         assert ExamAuthorization.objects.filter(user=user, course=course).exists() is False
 
     def test_exam_authorization_no_exam_series_code_set(self):

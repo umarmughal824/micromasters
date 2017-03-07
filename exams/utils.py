@@ -261,20 +261,16 @@ def authorize_for_latest_passed_course(mmtrack, course_id):
 
     for enrollment in enrollments_qset:
         # only latest passed course_run per course allowed
-        edx_course_key = enrollment.course_run.edx_course_key
-        if _has_passed_course(mmtrack, edx_course_key) and _has_paid_for_exam(mmtrack, edx_course_key):
-            # if user has passed and paid for the course
-            # and not already authorized for exam the create authorizations.
-            try:
-                authorize_for_exam(mmtrack, enrollment.course_run)
-            except ExamAuthorizationException:
-                log.exception(
-                    'Unable to authorize user: %s for exam on course_id: %s',
-                    mmtrack.user.username,
-                    enrollment.course_run.course.id
-                )
-            else:
-                break
+        try:
+            authorize_for_exam(mmtrack, enrollment.course_run)
+        except ExamAuthorizationException:
+            log.exception(
+                'Unable to authorize user: %s for exam on course_id: %s',
+                mmtrack.user.username,
+                enrollment.course_run.course.id
+            )
+        else:
+            break
 
 
 def _match_field(profile, field):
