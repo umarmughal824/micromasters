@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.50.0
+--------------
+
+- Moved Elasticsearch connection management to own module (#2789)
+- Search: Included username and e-mail address in name search (#2729)
+
 Version 0.49.5
 --------------
 
