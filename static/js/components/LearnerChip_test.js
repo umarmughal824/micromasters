@@ -1,6 +1,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { assert } from 'chai';
+import sinon from 'sinon';
 
 import { USER_PROFILE_RESPONSE } from '../test_constants';
 import R from 'ramda';
@@ -9,40 +10,49 @@ import { getPreferredName } from '../util/util';
 import ProfileImage from '../containers/ProfileImage';
 
 describe('LearnerChip', () => {
-  let clone;
+  let profileClone;
 
-  const renderChip = profile => (
-    shallow(<LearnerChip profile={profile} />)
+  const renderChip = (profile, openLearnerEmailComposer) => (
+    shallow(<LearnerChip profile={profile} openLearnerEmailComposer={openLearnerEmailComposer} />)
   );
 
   beforeEach(() => {
-    clone = R.clone(USER_PROFILE_RESPONSE);
+    profileClone = R.clone(USER_PROFILE_RESPONSE);
   });
 
   it('should show the preferred name', () => {
-    let chip = renderChip(clone);
-    assert.equal(chip.find('.name').text(), getPreferredName(clone));
+    let chip = renderChip(profileClone);
+    assert.equal(chip.find('.name').text(), getPreferredName(profileClone));
   });
 
   it('should show the employer, if present', () => {
-    let chip = renderChip(clone);
+    let chip = renderChip(profileClone);
     assert.equal(chip.find('.employer').text(), "Planet Express");
   });
 
   it('should leave employer blank, if absent', () => {
-    clone.work_history = [];
-    let chip = renderChip(clone);
+    profileClone.work_history = [];
+    let chip = renderChip(profileClone);
     assert.equal(chip.find('.employer').text(), "");
   });
 
   it('should link to the profile', () => {
-    let chip = renderChip(clone);
+    let chip = renderChip(profileClone);
     let url = chip.find('a').props().href;
-    assert.equal(url, `/learner/${clone.username}`);
+    assert.equal(url, `/learner/${profileClone.username}`);
+  });
+
+  it('should provide a link to email the learner', () => {
+    let sandbox = sinon.sandbox.create();
+    let openLearnerEmailComposer = sandbox.stub();
+    let chip = renderChip(profileClone, openLearnerEmailComposer);
+    let emailLink = chip.find('button').at(0);
+    emailLink.simulate('click');
+    sinon.assert.calledOnce(openLearnerEmailComposer);
   });
 
   it('should include the profile image', () => {
-    let chip = renderChip(clone);
+    let chip = renderChip(profileClone);
     assert(
       chip.containsMatchingElement(<ProfileImage />),
       "chip should contain a ProfileImage component"

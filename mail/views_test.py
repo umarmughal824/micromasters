@@ -12,6 +12,7 @@ from factory.django import mute_signals
 
 from courses.factories import ProgramFactory, CourseFactory, CourseRunFactory
 from dashboard.factories import ProgramEnrollmentFactory, CachedEnrollmentFactory
+from dashboard.models import ProgramEnrollment
 from financialaid.api_test import (
     FinancialAidBaseTestCase,
     create_program,
@@ -37,7 +38,7 @@ def mocked_json(return_data=None):
     return json
 
 
-class MailViewsTests(MockedESTestCase, APITestCase):
+class SearchResultMailViewsTests(MockedESTestCase, APITestCase):
     """
     Tests for the mail API
     """
@@ -250,6 +251,89 @@ class CourseTeamMailViewTests(APITestCase, MockedESTestCase):
         url = reverse(self.url_name, kwargs={'course_id': new_course.id})
         resp = self.client.post(url, data=self.request_data, format='json')
         assert resp.status_code == status.HTTP_403_FORBIDDEN
+
+
+class LearnerMailViewTests(APITestCase, MockedESTestCase):
+    """
+    Tests for LearnerMailView
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        with mute_signals(post_save):
+            staff_profile = ProfileFactory.create(user__email='sender@example.com')
+            recipient_profile = ProfileFactory.create(user__email='recipient@example.com', student_id=123)
+        cls.staff_user = staff_profile.user
+        cls.recipient_user = recipient_profile.user
+        cls.program = ProgramFactory.create()
+        ProgramEnrollmentFactory.create(
+            user=cls.recipient_user,
+            program=cls.program
+        )
+        Role.objects.create(
+            user=cls.staff_user,
+            program=cls.program,
+            role=Staff.ROLE_ID
+        )
+        cls.url_name = 'learner_mail_api'
+        cls.request_data = {
+            'email_subject': 'email subject',
+            'email_body': 'email body'
+        }
+
+    @patch('mail.views.MailgunClient')
+    def test_send_learner_email_view(self, mock_mailgun_client):
+        """
+        Test that learner emails are correctly sent through the view
+        """
+        self.client.force_login(self.staff_user)
+        mock_mailgun_client.send_individual_email.return_value = Mock(
+            spec=Response,
+            status_code=status.HTTP_200_OK,
+            json=mocked_json()
+        )
+        url = reverse(self.url_name, kwargs={'student_id': self.recipient_user.profile.student_id})
+        resp_post = self.client.post(url, data=self.request_data, format='json')
+        assert resp_post.status_code == status.HTTP_200_OK
+        assert mock_mailgun_client.send_individual_email.called
+        _, called_kwargs = mock_mailgun_client.send_individual_email.call_args
+        assert called_kwargs['subject'] == self.request_data['email_subject']
+        assert called_kwargs['body'] == self.request_data['email_body']
+        assert called_kwargs['recipient'] == self.recipient_user.email
+        assert called_kwargs['sender_address'] == self.staff_user.email
+        assert called_kwargs['sender_name'] == self.staff_user.profile.display_name
+
+    def test_learner_view_invalid_student_id(self):
+        """
+        Test that a non-existent student_id will result in a 404 in the learner email view
+        """
+        self.client.force_login(self.staff_user)
+        url = reverse(self.url_name, kwargs={'student_id': 0})
+        resp_post = self.client.post(url, data=self.request_data, format='json')
+        assert resp_post.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_learner_view_missing_data(self):
+        """
+        Test that a request to the learner email view without required data in the body will
+        result in an error
+        """
+        self.client.force_login(self.staff_user)
+        url = reverse(self.url_name, kwargs={'student_id': self.recipient_user.profile.student_id})
+        resp_post = self.client.post(url, data={}, format='json')
+        assert resp_post.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_learner_view_not_program_staff(self):
+        """
+        Test that an attempt to email a recipient by a sender that doesn't have staff permission in any
+        of the recipient's enrolled programs will result in an error
+        """
+        self.client.force_login(self.staff_user)
+        # Get rid of existing recipient program enrollment that staff_user has a Staff role in
+        ProgramEnrollment.objects.filter(user=self.recipient_user).delete()
+        url = reverse(self.url_name, kwargs={'student_id': self.recipient_user.profile.student_id})
+        resp_post = self.client.post(url, data={}, format='json')
+        assert resp_post.status_code == status.HTTP_403_FORBIDDEN
 
 
 class FinancialAidMailViewTests(FinancialAidBaseTestCase, APITestCase):

@@ -1,5 +1,6 @@
 import React from 'react';
 import { INITIAL_EMAIL_STATE } from '../../reducers/email';
+import type { EmailState } from '../../flow/emailTypes';
 
 const dummyEmailActionDispatcher = () => (
   () => (
@@ -10,11 +11,11 @@ const dummyEmailActionDispatcher = () => (
 export const TEST_EMAIL_TYPE = 'TEST_EMAIL';
 export const TEST_EMAIL_CONFIG = {
   title: 'Test Email Dialog',
-  renderSubheading: (subheading: ?string) => (
-    <div className="test-subheading">{ subheading }</div>
+  renderSubheading: (emailState: EmailState) => (
+    <div className="test-subheading">{ emailState.subheading }</div>
   ),
   emailOpenParams: () => {},
-  emailSendAction: dummyEmailActionDispatcher
+  emailSendParams: dummyEmailActionDispatcher
 };
 export const INITIAL_TEST_EMAIL_STATE = {
   [TEST_EMAIL_TYPE]: { ...INITIAL_EMAIL_STATE },

@@ -99,6 +99,7 @@ class ProfileImage extends React.Component {
   render () {
     const { profile, showLink, useSmall } = this.props;
     const imageUrl = makeProfileImageUrl(profile, useSmall);
+    const imageSizeClass = useSmall ? 'small' : 'medium';
 
     return (
       <div className="profile-image">
@@ -110,7 +111,7 @@ class ProfileImage extends React.Component {
           <img
             src={imageUrl}
             alt={`Profile image for ${getPreferredName(profile, false)}`}
-            className="card-image"
+            className={`rounded-profile-image ${imageSizeClass}`}
           />
           { userPrivilegeCheck(profile, this.cameraIcon) }
         </div>

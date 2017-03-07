@@ -171,7 +171,7 @@ export function checkout(courseId: string): Promise<CheckoutResponse> {
 }
 
 export function sendSearchResultMail(subject: string, body: string, searchRequest: Object): Promise<EmailSendResponse> {
-  return fetchJSONWithCSRF('/api/v0/mail/', {
+  return fetchJSONWithCSRF('/api/v0/mail/search/', {
     method: 'POST',
     body: JSON.stringify({
       email_subject: subject,
@@ -183,6 +183,16 @@ export function sendSearchResultMail(subject: string, body: string, searchReques
 
 export function sendCourseTeamMail(subject: string, body: string, courseId: number): Promise<EmailSendResponse> {
   return fetchJSONWithCSRF(`/api/v0/mail/course/${courseId}/`, {
+    method: 'POST',
+    body: JSON.stringify({
+      email_subject: subject,
+      email_body: body
+    })
+  });
+}
+
+export function sendLearnerMail(subject: string, body: string, studentId: number): Promise<EmailSendResponse> {
+  return fetchJSONWithCSRF(`/api/v0/mail/learner/${studentId}/`, {
     method: 'POST',
     body: JSON.stringify({
       email_subject: subject,

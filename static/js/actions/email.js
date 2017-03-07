@@ -4,11 +4,6 @@ import { createAction } from 'redux-actions';
 
 import type { Dispatcher } from '../flow/reduxTypes';
 import type { EmailSendResponse } from '../flow/emailTypes';
-import {
-  SEARCH_EMAIL_TYPE,
-  COURSE_EMAIL_TYPE
-} from '../components/email/constants';
-import * as api from '../lib/api';
 
 export const START_EMAIL_EDIT = 'START_EMAIL_EDIT';
 export const startEmailEdit = createAction(START_EMAIL_EDIT);
@@ -31,36 +26,19 @@ export const sendEmailSuccess = createAction(SEND_EMAIL_SUCCESS);
 export const SEND_EMAIL_FAILURE = 'SEND_EMAIL_FAILURE';
 export const sendEmailFailure = createAction(SEND_EMAIL_FAILURE);
 
-export function sendSearchResultMail(
-  subject: string,
-  body: string,
-  searchRequest: Object
+export function sendEmail(
+  emailType: string,
+  sendFunction: () => Promise<EmailSendResponse>,
+  sendFunctionParams: Array<*>
 ): Dispatcher<EmailSendResponse> {
   return (dispatch: Dispatch) => {
-    dispatch(initiateSendEmail(SEARCH_EMAIL_TYPE));
-    return api.sendSearchResultMail(subject, body, searchRequest).
+    dispatch(initiateSendEmail(emailType));
+    return sendFunction(...sendFunctionParams).
       then(response => {
-        dispatch(sendEmailSuccess(SEARCH_EMAIL_TYPE));
+        dispatch(sendEmailSuccess(emailType));
         return Promise.resolve(response);
       }).catch(error => {
-        dispatch(sendEmailFailure({type: SEARCH_EMAIL_TYPE, error: error}));
-      });
-  };
-}
-
-export function sendCourseTeamMail(
-  subject: string,
-  body: string,
-  courseId: number
-): Dispatcher<EmailSendResponse> {
-  return (dispatch: Dispatch) => {
-    dispatch(initiateSendEmail(COURSE_EMAIL_TYPE));
-    return api.sendCourseTeamMail(subject, body, courseId).
-      then(response => {
-        dispatch(sendEmailSuccess(COURSE_EMAIL_TYPE));
-        return Promise.resolve(response);
-      }).catch(error => {
-        dispatch(sendEmailFailure({type: COURSE_EMAIL_TYPE, error: error}));
+        dispatch(sendEmailFailure({type: emailType, error: error}));
       });
   };
 }

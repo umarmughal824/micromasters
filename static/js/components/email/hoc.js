@@ -10,6 +10,7 @@ import {
   updateEmailEdit,
   clearEmailEdit,
   updateEmailValidation,
+  sendEmail
 } from '../../actions/email';
 import { emailValidation } from '../../lib/validation/profile';
 import { EMAIL_COMPOSITION_DIALOG } from './constants';
@@ -21,10 +22,6 @@ import type {
 export const withEmailDialog = R.curry(
   (emailConfigs: {[key: string]: EmailConfig}, WrappedComponent) => {
     class WithEmailDialog extends React.Component {
-      constructor(props) {
-        super(props);
-      }
-
       getActiveEmailType(): ?string {
         const { email } = this.props;
         return !isNilOrBlank(email.currentlyActive) ? email.currentlyActive : undefined;
@@ -71,7 +68,11 @@ export const withEmailDialog = R.curry(
         dispatch(updateEmailValidation({type: currentlyActive, errors: errors}));
         if (R.isEmpty(errors)) {
           dispatch(
-            emailConfigs[currentlyActive].emailSendAction(activeEmail)
+            sendEmail(
+              currentlyActive,
+              emailConfigs[currentlyActive].getEmailSendFunction(),
+              emailConfigs[currentlyActive].emailSendParams(activeEmail)
+            )
           ).then(() => {
             this.closeAndClearEmailComposer();
           });

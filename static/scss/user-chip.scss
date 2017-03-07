@@ -38,7 +38,7 @@
       text-decoration: underline;
     }
 
-    a.mm-minor-action {
+    .mm-minor-action {
       i {
         margin-right: 6px;
         font-size: 28px;
@@ -51,17 +51,9 @@
   .profile-image {
     float: right;
 
-    .avatar {
+    img.rounded-profile-image {
       width: 93px;
       float: right;
-
-      img {
-        border-radius: 50px;
-        width: 100%;
-        height: auto !important;
-        border: 1px solid rgba(0, 0, 0, 0.15);
-      }
     }
   }
-
 }

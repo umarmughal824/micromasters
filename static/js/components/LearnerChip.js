@@ -8,8 +8,10 @@ import ProfileImage from '../containers/ProfileImage';
 import { mstr } from '../lib/sanctuary';
 import type { Profile } from '../flow/profileTypes';
 
-const LearnerChip = ({ profile }: {profile: Profile}): React$Element<*> => (
-  <Card className="user-chip">
+const LearnerChip = (props: {profile: Profile, openLearnerEmailComposer: () => void}): React$Element<*> => {
+  const { profile, openLearnerEmailComposer } = props;
+
+  return <Card className="user-chip">
     <div className="profile-info">
       <span className="name">
         { getPreferredName(profile) }
@@ -18,12 +20,16 @@ const LearnerChip = ({ profile }: {profile: Profile}): React$Element<*> => (
         { mstr(getEmployer(profile)) }
       </span>
       <a href={`/learner/${profile.username}`} className="mm-minor-action">
-        <Icon name="person" />
-        <span>View profile</span>
+        <Icon name="person" aria-hidden="true" />
+        <span>View Profile</span>
       </a>
-      </div>
-    <ProfileImage profile={profile} />
-  </Card>
-);
+      <button onClick={openLearnerEmailComposer} className="mm-minor-action">
+        <Icon name="email" aria-hidden="true" />
+        <span>Send a Message</span>
+      </button>
+    </div>
+    <ProfileImage profile={profile}/>
+  </Card>;
+};
 
 export default LearnerChip;

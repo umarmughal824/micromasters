@@ -13,15 +13,20 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from profiles.models import Profile
+from profiles.util import full_name
 from courses.models import Course
 from financialaid.models import FinancialAid
 from financialaid.permissions import UserCanEditFinancialAid
 from mail.api import MailgunClient
 from mail.models import AutomaticEmail
-from mail.permissions import UserCanMessageLearnersPermission, UserCanMessageCourseTeamPermission
+from mail.permissions import (
+    UserCanMessageLearnersPermission,
+    UserCanMessageSpecificLearnerPermission,
+    UserCanMessageCourseTeamPermission
+)
 from mail.serializers import GenericMailSerializer
 from mail.utils import generate_mailgun_response_json
-from profiles.util import full_name
 from search.api import (
     create_search_obj,
     get_all_query_matching_emails
@@ -29,6 +34,41 @@ from search.api import (
 from search.models import PercolateQuery
 
 log = logging.getLogger(__name__)
+
+
+class LearnerMailView(GenericAPIView):
+    """
+    View class that handles HTTP requests to learner mail API
+    """
+    serializer_class = GenericMailSerializer
+    authentication_classes = (
+        authentication.SessionAuthentication,
+        authentication.TokenAuthentication,
+    )
+    permission_classes = (permissions.IsAuthenticated, UserCanMessageSpecificLearnerPermission, )
+    lookup_field = "student_id"
+    lookup_url_kwarg = "student_id"
+    queryset = Profile.objects.all()
+
+    def post(self, request, *args, **kargs):  # pylint: disable=unused-argument
+        """
+        POST method handler
+        """
+        sender_user = request.user
+        recipient_user = self.get_object().user
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        mailgun_response = MailgunClient.send_individual_email(
+            subject=request.data['email_subject'],
+            body=request.data['email_body'],
+            recipient=recipient_user.email,
+            sender_address=sender_user.email,
+            sender_name=sender_user.profile.display_name
+        )
+        return Response(
+            status=mailgun_response.status_code,
+            data=generate_mailgun_response_json(mailgun_response)
+        )
 
 
 class SearchResultMailView(APIView):

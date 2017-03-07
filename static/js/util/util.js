@@ -251,13 +251,14 @@ export function makeStrippedHtml(textOrElement: any): string {
 
 export function makeProfileImageUrl(profile: Profile, useSmall: ?boolean): string {
   let imageUrl = '/static/images/avatar_default.png';
-  if (profile !== undefined && profile.image_medium) {
-    imageUrl = profile.image_medium;
+  if (profile) {
+    if (profile.image_small && useSmall) {
+      imageUrl = profile.image_small;
+    }
+    else if (profile.image_medium) {
+      imageUrl = profile.image_medium;
+    }
   }
-  if (profile.image_small && useSmall) {
-    imageUrl = profile.image_small;
-  }
-
   return imageUrl;
 }
 
@@ -520,5 +521,19 @@ export function renderSeparatedComponents(
 export function getDisplayName(WrappedComponent: ReactClass<*>) {
   return WrappedComponent.displayName || WrappedComponent.name || 'Component';
 }
+
+export const wrapWithProps = (addedProps: Object, ComponentToWrap: ReactClass<*>): ReactClass<*> => {
+  class WithAdditionalProps extends React.Component {
+    render() {
+      return <ComponentToWrap
+        {...this.props}
+        {...addedProps}
+      />;
+    }
+  }
+
+  WithAdditionalProps.displayName = `WithAdditionalProps(${getDisplayName(ComponentToWrap)})`;
+  return WithAdditionalProps;
+};
 
 export const isNilOrBlank = R.either(R.isNil, R.isEmpty);

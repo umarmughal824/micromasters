@@ -2,8 +2,9 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
-import _ from 'lodash';
 import type { Dispatch } from 'redux';
+import R from 'ramda';
+import _ from 'lodash';
 
 import { setLearnerChipVisibility } from '../../actions/ui';
 import ProfileImage from '../../containers/ProfileImage';
@@ -13,13 +14,15 @@ import {
   getLocation,
   highlight,
 } from '../../util/util';
-import type { SearchResult } from '../../flow/searchTypes';
 import { SearchkitComponent } from 'searchkit';
+import type { SearchResult } from '../../flow/searchTypes';
+import type { Profile } from '../../flow/profileTypes';
 
 type LearnerResultProps = {
   result: { _source: SearchResult },
   setLearnerChipVisibility: (username: ?string) => void,
   learnerChipVisibility: ?string,
+  openLearnerEmailComposer: (profile: Profile) => void,
 };
 
 class LearnerResult extends SearchkitComponent {
@@ -34,7 +37,17 @@ class LearnerResult extends SearchkitComponent {
       result: { _source: { profile, program } },
       setLearnerChipVisibility,
       learnerChipVisibility,
+      openLearnerEmailComposer
     } = this.props;
+
+    let renderedLearnerChip;
+    if (profile.username === learnerChipVisibility) {
+      renderedLearnerChip = <LearnerChip
+        profile={profile}
+        openLearnerEmailComposer={R.partial(openLearnerEmailComposer, [profile])}
+      />;
+    }
+
     return (
       <Grid className="search-grid learner-result">
         <Cell col={1} className="learner-avatar">
@@ -52,7 +65,7 @@ class LearnerResult extends SearchkitComponent {
           <span className="user-name">
             { highlight(profile.username, this.searchkit.state.q) }
           </span>
-          {profile.username === learnerChipVisibility ? <LearnerChip profile={profile} /> : null}
+          { renderedLearnerChip }
         </Cell>
         <Cell col={4} className="centered learner-location">
           <span>
