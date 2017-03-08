@@ -688,7 +688,8 @@ describe('api', function() {
           });
 
           return assert.isRejected(fetchJSONWithCSRF('/url', {}, true)).then(() => {
-            assert.include(window.location.toString(), '/login/edxorg/');
+            const redirectUrl = `/logout?next=${encodeURIComponent('/login/edxorg/')}`;
+            assert.include(window.location.toString(), redirectUrl);
           });
         });
       }
