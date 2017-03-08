@@ -177,7 +177,9 @@ def freeze_user_final_grade(user, course_run, raise_on_exception=False):
                     course_run.edx_course_key
                 )
             ) from ex
-    return FinalGrade.objects.create(
+    # the final grade at this point should not exists, but putting a `get_or_create`
+    # should solve the problem when the function is called synchronously from the dashboard REST API multiple times
+    final_grade_obj, _ = FinalGrade.objects.get_or_create(
         user=user,
         course_run=course_run,
         grade=final_grade.grade,
@@ -185,3 +187,4 @@ def freeze_user_final_grade(user, course_run, raise_on_exception=False):
         status=FinalGradeStatus.COMPLETE,
         course_run_paid_on_edx=final_grade.payed_on_edx
     )
+    return final_grade_obj

@@ -364,3 +364,23 @@ class GradeAPITests(MockedESTestCase):
         assert fg_status.course_run == self.run_fa
         assert fg_status.grade == final_grade.grade
         assert fg_status.passed == final_grade.passed
+
+    @patch('dashboard.api_edx_cache.CachedEdxDataApi.update_all_cached_grade_data', new_callable=MagicMock)
+    def test_freeze_user_final_grade_multiple_calls(self, mock_refr):
+        """
+        Test for freeze_user_final_grade function in case it is called multiple times
+        """
+        fg_qset = FinalGrade.objects.filter(user=self.user, course_run=self.run_fa)
+        assert fg_qset.count() == 0
+
+        # first call
+        final_grade = api.freeze_user_final_grade(self.user, self.run_fa)
+        assert final_grade is not None
+        mock_refr.assert_called_once_with(self.user)
+        assert fg_qset.count() == 1
+
+        # second call
+        final_grade = api.freeze_user_final_grade(self.user, self.run_fa)
+        assert final_grade is not None
+        assert mock_refr.call_count == 2
+        assert fg_qset.count() == 1
