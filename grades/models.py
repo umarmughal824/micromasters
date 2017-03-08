@@ -104,6 +104,12 @@ class CourseRunGradingStatus(TimestampedModel):
         max_length=30,
     )
 
+    def __str__(self):
+        return 'Freezing status "{status}" for course "{course_id}"'.format(
+            course_id=self.course_run.edx_course_key,
+            status=self.status
+        )
+
     @classmethod
     def is_complete(cls, course_run):
         """
