@@ -1,6 +1,21 @@
 Release Notes
 =============
 
+Version 0.51.1
+--------------
+
+- Modified management commands for grades
+- Change VCDC processing to treat warnings as errors
+- Fixed layout user card safari (#2710)
+- Patch search.tasks instead of search.indexing_api (#2793)
+- Force logout before login after a 400/401 error from rest API
+- Load CSS URLs through Django template (#2734)
+- Fixed intermittent JS errors (#2818)
+- Fixed erroneous logging of ExamProfile.status (#2783)
+- Fixed JS test script to correctly match test files
+- Fixed issue with &#39;/learner&#39; page
+- Added staff-to-learner email with link in learner chip
+
 Version 0.51.0
 --------------
 
