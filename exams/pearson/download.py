@@ -193,7 +193,7 @@ class ArchivedResponseProcessor:
                 messages.append(error_message)
                 continue
 
-            if result.status == EAC_SUCCESS_STATUS:
+            if result.status == EAC_SUCCESS_STATUS and 'WARNING' not in result.message:
                 exam_profile.status = ExamProfile.PROFILE_SUCCESS
             else:
                 exam_profile.status = ExamProfile.PROFILE_FAILED

@@ -389,6 +389,30 @@ class VCDCDownloadTest(MockedESTestCase):
                 ]
             )
 
+    def test_process_result_vcdc_successful_warning(self):
+        """Tests for the situation where we get a success with a warning"""
+        message = "WARNING: success doesn't come that easy"
+        profile = self.failure_profiles[1].profile
+        results = ([
+            VCDCResult(
+                client_candidate_id=profile.student_id,
+                status=VCDC_SUCCESS_STATUS,
+                date=self.now,
+                message=message,
+            ),
+        ], [])
+
+        with patch('exams.pearson.download.VCDCReader.read', return_value=results):
+            assert self.processor.process_vcdc_file("/tmp/file.ext") == (
+                True,
+                [
+                    "ExamProfile sync failed for user `{username}`. Received error: '{message}'.".format(
+                        username=profile.user.username,
+                        message=message,
+                    )
+                ]
+            )
+
 
 @override_settings(**EXAMS_SFTP_SETTINGS)
 @ddt.ddt
