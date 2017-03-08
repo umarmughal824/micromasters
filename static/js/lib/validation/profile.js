@@ -88,6 +88,9 @@ export const personalValidation = (profile: Profile) => {
   if (profile.address && !CP1252_REGEX.test(profile.address)) {
     errors.address = "Street address must be in Latin characters";
   }
+  if (profile.city && !CP1252_REGEX.test(profile.city)) {
+    errors.city = "City must be in Latin characters";
+  }
   if (["US", "CA"].includes(profile.country)) {
     if (profile.postal_code && !CP1252_REGEX.test(profile.postal_code)) {
       errors.postal_code = "Postal code must be in Latin characters";
@@ -105,13 +108,26 @@ export const personalValidation = (profile: Profile) => {
     delete errors.postal_code;
   }
 
+  if (profile.first_name && profile.first_name.length > 30) {
+    errors.first_name = "Given name must be less than 30 characters";
+  }
+  if (profile.last_name && profile.last_name.length > 50) {
+    errors.last_name = "Family name must be less than 50 characters";
+  }
+
   if (shouldRenderRomanizedFields(profile)) {
     if (!profile.romanized_first_name || !CP1252_REGEX.test(profile.romanized_first_name)) {
-      errors.romanized_first_name = "Latin first name is required";
+      errors.romanized_first_name = "Latin given name is required";
+    }
+    else if (profile.romanized_first_name.length > 30) {
+      errors.romanized_first_name = "Given name must be less than 30 characters";
     }
 
     if (!profile.romanized_last_name || !CP1252_REGEX.test(profile.romanized_last_name)) {
-      errors.romanized_last_name = "Latin last name is required";
+      errors.romanized_last_name = "Latin family name is required";
+    }
+    else if (profile.romanized_last_name.length > 50) {
+      errors.romanized_last_name = "Family name must be less than 50 characters";
     }
   }
 

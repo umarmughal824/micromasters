@@ -115,8 +115,8 @@ describe('Profile validation functions', () => {
         romanized_last_name: undefined,
       };
       let errors = {
-        romanized_first_name: "Latin first name is required",
-        romanized_last_name: "Latin last name is required"
+        romanized_first_name: "Latin given name is required",
+        romanized_last_name: "Latin family name is required"
       };
       assert.deepEqual(personalValidation(profile), errors);
     });
@@ -129,8 +129,8 @@ describe('Profile validation functions', () => {
         romanized_last_name: undefined,
       };
       let errors = {
-        romanized_first_name: "Latin first name is required",
-        romanized_last_name: "Latin last name is required"
+        romanized_first_name: "Latin given name is required",
+        romanized_last_name: "Latin family name is required"
       };
       assert.deepEqual(personalValidation(profile), errors);
     });
@@ -143,7 +143,7 @@ describe('Profile validation functions', () => {
         romanized_last_name: 'test'
       };
       let errors = {
-        romanized_first_name: "Latin first name is required",
+        romanized_first_name: "Latin given name is required",
       };
       assert.deepEqual(personalValidation(profile), errors);
     });
@@ -156,7 +156,24 @@ describe('Profile validation functions', () => {
         romanized_last_name: 'عامر'
       };
       let errors = {
-        romanized_last_name: "Latin last name is required",
+        romanized_last_name: "Latin family name is required",
+      };
+      assert.deepEqual(personalValidation(profile), errors);
+    });
+
+    it('should error when any name is too long', () => {
+      let profile = {
+        ...USER_PROFILE_RESPONSE,
+        first_name: 'ر'.repeat(31),
+        last_name: 'ر'.repeat(51),
+        romanized_first_name: 'b'.repeat(31),
+        romanized_last_name: 'b'.repeat(51)
+      };
+      let errors = {
+        first_name: "Given name must be less than 30 characters",
+        last_name: "Family name must be less than 50 characters",
+        romanized_first_name: "Given name must be less than 30 characters",
+        romanized_last_name: "Family name must be less than 50 characters",
       };
       assert.deepEqual(personalValidation(profile), errors);
     });
@@ -179,6 +196,17 @@ describe('Profile validation functions', () => {
       };
       let errors = {
         postal_code: "Postal code must be in Latin characters",
+      };
+      assert.deepEqual(personalValidation(profile), errors);
+    });
+
+    it('should error when city is non cp-1252', () => {
+      let profile = {
+        ...USER_PROFILE_RESPONSE,
+        city: 'عامر',
+      };
+      let errors = {
+        city: "City must be in Latin characters",
       };
       assert.deepEqual(personalValidation(profile), errors);
     });
