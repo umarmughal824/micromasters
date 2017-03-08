@@ -55,6 +55,7 @@ class MMTrack:
             program (programs.models.Program): program where the user is enrolled
             edx_user_data (dashboard.api_edx_cache.CachedEdxUserData): A CachedEdxUserData object
         """
+        self.now = datetime.now(utc)
         self.user = user
         self.program = program
         self.enrollments = edx_user_data.enrollments
@@ -415,12 +416,11 @@ class MMTrack:
             return ExamProfile.PROFILE_INVALID
 
         elif exam_profile.status == ExamProfile.PROFILE_SUCCESS:
-            now = datetime.now(utc)
             auths = ExamAuthorization.objects.filter(
                 user=user,
                 status=ExamAuthorization.STATUS_SUCCESS,
-                date_first_eligible__lt=now,
-                date_last_eligible__gt=now,
+                date_first_eligible__lte=self.now.date(),
+                date_last_eligible__gte=self.now.date(),
             )
 
             if auths.exists():

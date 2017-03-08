@@ -31,7 +31,7 @@ from micromasters.utils import load_json_from_file
 from search.base import MockedESTestCase
 
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments, too-many-lines
 
 
 @ddt.ddt
@@ -959,8 +959,8 @@ class MMTrackTest(MockedESTestCase):
             ExamAuthorizationFactory.create(
                 user=self.user,
                 status=ExamAuthorization.STATUS_SUCCESS,
-                date_last_eligible=now + timedelta(weeks=1),
                 date_first_eligible=now - timedelta(weeks=1),
+                date_last_eligible=now + timedelta(weeks=1),
             )
 
         mmtrack = MMTrack(
@@ -974,3 +974,44 @@ class MMTrackTest(MockedESTestCase):
 
         if not set_series_code:
             self.program.exam_series_code = exam_series_code
+
+    def test_get_pearson_exam_status_eligible(self):
+        """
+        test get_pearson_exam_status against valid eligibility dates
+        """
+
+        ExamProfileFactory.create(
+            profile=self.user.profile,
+            status=ExamProfile.PROFILE_SUCCESS,
+        )
+
+        now = datetime(2016, 3, 15, tzinfo=pytz.UTC)
+        past = datetime(2016, 3, 10, tzinfo=pytz.UTC)
+        future = datetime(2016, 3, 20, tzinfo=pytz.UTC)
+        invalid_dates = [
+            past - timedelta(days=1),
+            future + timedelta(days=1),
+        ]
+
+        ExamAuthorizationFactory.create(
+            user=self.user,
+            status=ExamAuthorization.STATUS_SUCCESS,
+            date_first_eligible=past.date(),
+            date_last_eligible=future.date(),
+        )
+
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program,
+            edx_user_data=self.cached_edx_user_data
+        )
+
+        # should be considered schedulable if past <= datetime.now() <= future
+        for now_value in [past, now, future]:
+            mmtrack.now = now_value
+            assert mmtrack.get_pearson_exam_status() == ExamProfile.PROFILE_SCHEDULABLE
+
+        # no eligible
+        for now_value in invalid_dates:
+            mmtrack.now = now_value
+            assert mmtrack.get_pearson_exam_status() == ExamProfile.PROFILE_SUCCESS
