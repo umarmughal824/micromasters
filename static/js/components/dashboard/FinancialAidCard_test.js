@@ -44,7 +44,7 @@ describe("FinancialAidCard", () => {
     return mount(
       <MuiThemeProvider muiTheme={getMuiTheme()}>
         <FinancialAidCard
-          program={DASHBOARD_RESPONSE[1]}
+          program={DASHBOARD_RESPONSE.programs[1]}
           coursePrice={COURSE_PRICES_RESPONSE[0]}
           updateDocumentSentDate={sandbox.stub()}
           documents={{
@@ -65,7 +65,7 @@ describe("FinancialAidCard", () => {
   };
 
   let programWithStatus = (status = null) => {
-    const program = _.cloneDeep(DASHBOARD_RESPONSE[1]);
+    const program = _.cloneDeep(DASHBOARD_RESPONSE.programs[1]);
     program.financial_aid_availability = true;
     program.financial_aid_user_info = {
       application_status: status,

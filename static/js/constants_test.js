@@ -45,11 +45,12 @@ describe('constants', () => {
 
   describe("doesn't duplicate any id numbers within the same type of information", () => {
     it('for DASHBOARD_RESPONSE', () => {
-      assertResponse(DASHBOARD_RESPONSE);
+      assertResponse(DASHBOARD_RESPONSE.programs);
     });
 
     it('for a response from a factory', () => {
-      assertResponse(makeDashboard());
+      const dashboard = makeDashboard();
+      assertResponse(dashboard.programs);
     });
   });
 });

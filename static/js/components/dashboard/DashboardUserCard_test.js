@@ -11,7 +11,7 @@ import DashboardUserCard from './DashboardUserCard';
 
 describe('DashboardUserCard', () => {
   it('renders a user card', () => {
-    const program = DASHBOARD_RESPONSE[1];
+    const program = DASHBOARD_RESPONSE.programs[1];
     const profile = USER_PROFILE_RESPONSE;
     let wrapper = shallow(<DashboardUserCard profile={profile} program={program} />);
     assert.equal(wrapper.find(".dashboard-user-card-image").find(ProfileImage).props().profile, profile);

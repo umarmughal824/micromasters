@@ -30,7 +30,7 @@ describe('StaffLearnerInfoCard', () => {
     mount(
       <MuiThemeProvider muiTheme={getMuiTheme()}>
         <StaffLearnerInfoCard
-          program={DASHBOARD_RESPONSE[0]}
+          program={DASHBOARD_RESPONSE.programs[0]}
         />
       </MuiThemeProvider>
     )
@@ -40,7 +40,7 @@ describe('StaffLearnerInfoCard', () => {
     let card = renderCard();
     assert.include(
       stringStrip(card.text()),
-      `Progress ${DASHBOARD_RESPONSE[0].title}`
+      `Progress ${DASHBOARD_RESPONSE.programs[0].title}`
     );
   });
 
@@ -53,7 +53,7 @@ describe('StaffLearnerInfoCard', () => {
   });
 
   it('should show information for course runs the user is enrolled in', () => {
-    let numRuns = DASHBOARD_RESPONSE[0]
+    let numRuns = DASHBOARD_RESPONSE.programs[0]
       .courses
       .reduce((acc, course) => acc.concat(course.runs), [])
       .filter(run => run.status !== STATUS_OFFERED)

@@ -42,7 +42,7 @@ describe('coupon utility functions', () => {
   describe('calculatePrice', () => {
     it('uses calculateRunPrice to figure out price', () => {
       let program = makeProgram();
-      let coupons = makeCoupons([program]);
+      let coupons = makeCoupons({"programs": [program]});
       let price = makeCoursePrice(program);
       let course = program.courses[0];
       let run = course.runs[0];
@@ -66,9 +66,10 @@ describe('coupon utility functions', () => {
     });
 
     it('uses calculateRunPrice to figure out prices', () => {
-      let programs = makeDashboard();
-      let prices = makeCoursePrices(programs);
-      let coupons = makeCoupons(programs);
+      let dashboard = makeDashboard();
+      let programs = dashboard.programs;
+      let prices = makeCoursePrices(dashboard);
+      let coupons = makeCoupons(dashboard);
 
       let stubPrice = 5;
       let calculateRunPriceStub = sandbox.stub(couponFuncs, 'calculateRunPrice');

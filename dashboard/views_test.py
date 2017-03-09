@@ -85,8 +85,11 @@ class DashboardTest(MockedESTestCase, APITestCase):
         """Test for GET"""
         with patch('backends.utils.refresh_user_token', autospec=True):
             result = self.client.get(self.url)
-        assert len(result.data) == 2
-        assert [self.program_1.id, self.program_2.id] == [res_item['id'] for res_item in result.data]
+        assert 'programs' in result.data
+        assert 'is_edx_data_fresh' in result.data
+        assert result.data['is_edx_data_fresh'] is True
+        assert len(result.data['programs']) == 2
+        assert [self.program_1.id, self.program_2.id] == [res_item['id'] for res_item in result.data['programs']]
 
     @ddt.data(Instructor, Staff)
     @patch('dashboard.api.CachedEdxDataApi.update_cache_if_expired')
@@ -116,6 +119,17 @@ class DashboardTest(MockedESTestCase, APITestCase):
         refr_cache.side_effect = InvalidCredentialStored('foo message', status_code)
         result = self.client.get(self.url)
         assert result.status_code == status_code
+
+    @patch('backends.utils.refresh_user_token', autospec=True)
+    def test_refresh_token_fails(self, refr_token):
+        """
+        Test if the refresh_user_token raises any other kind of exception
+        """
+        refr_token.side_effect = ZeroDivisionError
+        result = self.client.get(self.url)
+        assert result.status_code == status.HTTP_200_OK
+        assert 'programs' in result.data
+        assert 'is_edx_data_fresh' in result.data
 
 
 class DashboardTokensTest(MockedESTestCase, APITestCase):

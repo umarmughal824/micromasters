@@ -13,9 +13,9 @@ import ddt
 import pytz
 from django.core.exceptions import ImproperlyConfigured
 from django.test import override_settings
+from rest_framework import status as http_status
 
-from exams.models import ExamProfile
-
+from backends.exceptions import InvalidCredentialStored
 from courses.factories import (
     CourseFactory,
     CourseRunFactory,
@@ -28,6 +28,7 @@ from dashboard import (
 from dashboard.api_edx_cache import CachedEdxDataApi
 from dashboard.factories import CachedEnrollmentFactory, CachedCurrentGradeFactory, UserCacheRefreshTimeFactory
 from dashboard.utils import MMTrack
+from exams.models import ExamProfile
 from grades.constants import FinalGradeStatus
 from grades.exceptions import FreezeGradeFailedException
 from grades.models import FinalGrade, CourseRunGradingStatus
@@ -1254,7 +1255,11 @@ class UserProgramInfoIntegrationTest(MockedESTestCase):
         for cache_type in CachedEdxDataApi.SUPPORTED_CACHES:
             mock_cache_refresh.assert_any_call(self.user, self.edx_client, cache_type)
 
-        assert len(result) == 2
+        assert isinstance(result, dict)
+        assert 'is_edx_data_fresh' in result
+        assert result['is_edx_data_fresh'] is False
+        assert 'programs' in result
+        assert len(result['programs']) == 2
         for i in range(2):
             expected = {
                 "id": self.expected_programs[i].id,
@@ -1262,7 +1267,7 @@ class UserProgramInfoIntegrationTest(MockedESTestCase):
                 "title": self.expected_programs[i].title,
                 "financial_aid_availability": self.expected_programs[i].financial_aid_availability,
             }
-            assert is_subset_dict(expected, result[i])
+            assert is_subset_dict(expected, result['programs'][i])
 
     @patch('dashboard.api_edx_cache.CachedEdxDataApi.update_cache_if_expired', new_callable=MagicMock)
     def test_when_edx_client_is_none(self, mock_cache_refresh):
@@ -1328,15 +1333,35 @@ class UserProgramInfoIntegrationTest(MockedESTestCase):
         result = api.get_user_program_info(self.user, self.edx_client)
         # extract the right program from the result
         program_result = None
-        for res in result:
+        for res in result['programs']:
             if res['id'] == program.pk:
                 program_result = res
                 break
         assert program_result is not None
-        assert len(result) > 0
-        assert len(result[0]['courses']) > 0
-        assert len(result[0]['courses'][0]['runs']) == 2
-        assert all([run['status'] == api.CourseStatus.NOT_PASSED for run in result[0]['courses'][0]['runs']])
+        assert len(result['programs']) > 0
+        assert len(result['programs'][0]['courses']) > 0
+        assert len(result['programs'][0]['courses'][0]['runs']) == 2
+        assert all(
+            [run['status'] == api.CourseStatus.NOT_PASSED for run in result['programs'][0]['courses'][0]['runs']]
+        )
+
+    @patch('dashboard.api_edx_cache.CachedEdxDataApi.update_cache_if_expired', new_callable=MagicMock)
+    def test_exception_in_refresh_cache_1(self, mock_cache_refresh):
+        """Test in case the backend refresh cache raises a InvalidCredentialStored exception"""
+        mock_cache_refresh.side_effect = InvalidCredentialStored('error', http_status.HTTP_400_BAD_REQUEST)
+        with self.assertRaises(InvalidCredentialStored):
+            api.get_user_program_info(self.user, self.edx_client)
+
+    @patch('dashboard.api_edx_cache.CachedEdxDataApi.update_cache_if_expired', new_callable=MagicMock)
+    def test_exception_in_refresh_cache_2(self, mock_cache_refresh):
+        """Test in case the backend refresh cache raises any other exception"""
+        mock_cache_refresh.side_effect = ZeroDivisionError
+        result = api.get_user_program_info(self.user, self.edx_client)
+        assert isinstance(result, dict)
+        assert 'is_edx_data_fresh' in result
+        assert result['is_edx_data_fresh'] is False
+        assert 'programs' in result
+        assert len(result['programs']) == 2
 
 
 class InfoProgramTest(MockedESTestCase):

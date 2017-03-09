@@ -1003,7 +1003,7 @@ describe("LearnerPage", function() {
 
 
     it('should show the staff learner info card, if the user has a staff role', () => {
-      const smallDashboard = DASHBOARD_RESPONSE.slice(0,1);
+      const smallDashboard = {"programs": DASHBOARD_RESPONSE.programs.slice(0,1), "isEdxDataFresh": true};
       helper.dashboardStub.returns(Promise.resolve(smallDashboard));
       const username = SETTINGS.user.username;
       SETTINGS.roles.push({ role: 'staff' });

@@ -144,7 +144,7 @@ describe("ProgramEnrollmentDialog", () => {
 
   it("only shows programs which the user is not already enrolled in", () => {
     let enrollmentLookup = new Map(PROGRAMS.map(enrollment => [enrollment.id, null]));
-    let unenrolledPrograms = DASHBOARD_RESPONSE.filter(program => !enrollmentLookup.has(program.id));
+    let unenrolledPrograms = DASHBOARD_RESPONSE.programs.filter(program => !enrollmentLookup.has(program.id));
     unenrolledPrograms = _.sortBy(unenrolledPrograms, 'title');
     unenrolledPrograms = unenrolledPrograms.map(program => ({
       title: program.title,

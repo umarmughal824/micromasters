@@ -32,7 +32,7 @@ describe('FinalExamCard', () => {
     sandbox = sinon.sandbox.create();
     navigateToProfileStub = sandbox.stub();
     submitPearsonSSOStub = sandbox.stub();
-    let program = _.cloneDeep(DASHBOARD_RESPONSE.find(program => (
+    let program = _.cloneDeep(DASHBOARD_RESPONSE.programs.find(program => (
       program.pearson_exam_status !== undefined
     )));
     props = {
