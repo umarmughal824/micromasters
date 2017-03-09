@@ -1,0 +1,47 @@
+version: 2
+jobs:
+  build:
+    working_directory: /src
+    docker:
+      - image: mitodl/mm_web_travis
+        environment:
+          DEBUG: 'False'
+          COVERAGE_DIR: htmlcov
+          PORT: 8079
+          NODE_ENV: 'production'
+          DATABASE_URL: postgres://postgres@localhost:5432/postgres
+          MICROMASTERS_SECURE_SSL_REDIRECT: 'False'
+          MICROMASTERS_DB_DISABLE_SSL: 'True'
+          ELASTICSEARCH_URL: localhost:9200
+          BROKER_URL: redis://localhost:6379/4
+          CELERY_RESULT_BACKEND: redis://localhost:6379/4
+          XDG_CACHE_HOME: /src/.cache
+          OPEN_EXCHANGE_RATES_URL: https://openexchangerates.org/api/
+          OPEN_EXCHANGE_RATES_APP_ID: fakeID123
+      - image: mitodl/mm_watch_travis
+        environment:
+          DEBUG: 'False'
+          COVERAGE_DIR: htmlcov
+          PORT: 8079
+          NODE_ENV: 'production'
+          DATABASE_URL: postgres://postgres@localhost:5432/postgres
+          MICROMASTERS_SECURE_SSL_REDIRECT: 'False'
+          MICROMASTERS_DB_DISABLE_SSL: 'True'
+          ELASTICSEARCH_URL: localhost:9200
+          BROKER_URL: redis://localhost:6379/4
+          CELERY_RESULT_BACKEND: redis://localhost:6379/4
+          XDG_CACHE_HOME: /src/.cache
+          OPEN_EXCHANGE_RATES_URL: https://openexchangerates.org/api/
+          OPEN_EXCHANGE_RATES_APP_ID: fakeID123
+      - image: redis
+      - image: elasticsearch:2.4.1
+      - image: elgalu/selenium
+      - image: postgres
+    steps:
+      - checkout
+      - setup_docker_engine
+      - run: pip install -r requirements.txt -r test_requirements.txt
+      - run: yarn install
+      - run: tox
+      - run: sh js_test.sh
+      - run: docker-compose -f travis-docker-compose.yml run -e DJANGO_LIVE_TEST_SERVER_ADDRESS=0.0.0.0:8266 selenium py.test ./selenium_tests
