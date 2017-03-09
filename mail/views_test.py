@@ -3,8 +3,10 @@ Tests for HTTP email API views
 """
 from unittest.mock import Mock, patch
 
+from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.db.models.signals import post_save
+from requests.exceptions import HTTPError
 from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework.response import Response
@@ -19,6 +21,7 @@ from financialaid.api_test import (
     create_enrolled_profile,
 )
 from financialaid.factories import FinancialAidFactory, TierProgramFactory
+from mail.exceptions import SendBatchException
 from mail.models import AutomaticEmail
 from profiles.factories import ProfileFactory
 from profiles.util import full_name
@@ -73,9 +76,7 @@ class SearchResultMailViewsTests(MockedESTestCase, APITestCase):
         with patch(
             'mail.views.get_all_query_matching_emails', autospec=True, return_value=email_results
         ) as mock_get_emails, patch('mail.views.MailgunClient') as mock_mailgun_client:
-            mock_mailgun_client.send_batch.return_value = [
-                Mock(spec=Response, status_code=status.HTTP_200_OK, json=mocked_json())
-            ]
+            mock_mailgun_client.send_batch.return_value = [Response()]
             resp_post = self.client.post(self.search_result_mail_url, data=self.request_data, format='json')
         assert resp_post.status_code == status.HTTP_200_OK
         assert mock_get_emails.called
@@ -91,41 +92,33 @@ class SearchResultMailViewsTests(MockedESTestCase, APITestCase):
         assert called_kwargs['body'] == self.request_data['email_body']
         assert called_kwargs['recipients'] == email_results
 
-    def test_view_response(self):
+    def test_view_response_error(self):
         """
-        Test the structure of the response returned by the SearchResultMailView
+        If there's at least one non-zero status code from Mailgun, we should return a 500 status code in our response.
         """
         email_results = ['a@example.com', 'b@example.com']
+        exception_pairs = [
+            ['b@example.com'], HTTPError()
+        ]
         with patch(
             'mail.views.get_all_query_matching_emails', autospec=True, return_value=email_results
         ), patch('mail.views.MailgunClient') as mock_mailgun_client:
-            mock_mailgun_client.send_batch.return_value = [
-                Mock(spec=Response, status_code=status.HTTP_200_OK, json=mocked_json()),
-                Mock(spec=Response, status_code=status.HTTP_400_BAD_REQUEST, json=mocked_json()),
-            ]
-            resp_post = self.client.post(self.search_result_mail_url, data=self.request_data, format='json')
-        assert resp_post.status_code == status.HTTP_200_OK
-        assert len(resp_post.data.keys()) == 2
-        for num in range(2):
-            batch = 'batch_{0}'.format(num)
-            assert batch in resp_post.data
-            assert 'status_code' in resp_post.data[batch]
-            assert 'data' in resp_post.data[batch]
-        assert resp_post.data['batch_0']['status_code'] == status.HTTP_200_OK
-        assert resp_post.data['batch_1']['status_code'] == status.HTTP_400_BAD_REQUEST
+            mock_mailgun_client.send_batch.side_effect = SendBatchException(exception_pairs)
+            with self.assertRaises(SendBatchException) as send_batch_exception:
+                self.client.post(self.search_result_mail_url, data=self.request_data, format='json')
+
+        assert send_batch_exception.exception.exception_pairs == exception_pairs
 
     def test_view_response_improperly_configured(self):
         """
         Test that the SearchResultMailView will raise ImproperlyConfigured if mailgun returns 401, which
-        results in returning 500 since micromasters.utils.custom_exception_hanlder catches ImproperlyConfigured
+        results in returning 500 since micromasters.utils.custom_exception_handler catches ImproperlyConfigured
         """
         email_results = ['a@example.com', 'b@example.com']
         with patch(
             'mail.views.get_all_query_matching_emails', autospec=True, return_value=email_results
         ), patch('mail.views.MailgunClient') as mock_mailgun_client:
-            mock_mailgun_client.send_batch.return_value = [
-                Mock(spec=Response, status_code=status.HTTP_401_UNAUTHORIZED),
-            ]
+            mock_mailgun_client.send_batch.side_effect = ImproperlyConfigured
             resp = self.client.post(self.search_result_mail_url, data=self.request_data, format='json')
         assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
 
@@ -161,9 +154,7 @@ class SearchResultMailViewsTests(MockedESTestCase, APITestCase):
         ) as mock_mailgun_client, patch(
             'search.signals.index_percolate_queries.delay', autospec=True
         ) as mocked_index_percolate_queries:
-            mock_mailgun_client.send_batch.return_value = [
-                Mock(spec=Response, status_code=status.HTTP_200_OK, json=mocked_json())
-            ]
+            mock_mailgun_client.send_batch.return_value = Response()
             resp_post = self.client.post(self.search_result_mail_url, data=request_data, format='json')
         assert resp_post.status_code == status.HTTP_200_OK
         assert mock_get_emails.called
@@ -230,6 +221,7 @@ class CourseTeamMailViewTests(APITestCase, MockedESTestCase):
         assert called_kwargs['course'] == self.course
         assert called_kwargs['subject'] == self.request_data['email_subject']
         assert called_kwargs['body'] == self.request_data['email_body']
+        assert 'raise_for_status' not in called_kwargs
 
     def test_course_team_email_with_no_enrollment(self):
         """
@@ -303,6 +295,18 @@ class LearnerMailViewTests(APITestCase, MockedESTestCase):
         assert called_kwargs['recipient'] == self.recipient_user.email
         assert called_kwargs['sender_address'] == self.staff_user.email
         assert called_kwargs['sender_name'] == self.staff_user.profile.display_name
+        assert 'raise_for_status' not in called_kwargs
+
+    @patch('mail.views.MailgunClient')
+    def test_send_learner_email_view_error(self, mock_mailgun_client):
+        """
+        Test that exceptions from send_individual_email are passed through the view
+        """
+        self.client.force_login(self.staff_user)
+        mock_mailgun_client.send_individual_email.side_effect = HTTPError()
+        url = reverse(self.url_name, kwargs={'student_id': self.recipient_user.profile.student_id})
+        with self.assertRaises(HTTPError):
+            self.client.post(url, data=self.request_data, format='json')
 
     def test_learner_view_invalid_student_id(self):
         """
@@ -400,17 +404,14 @@ class FinancialAidMailViewTests(FinancialAidBaseTestCase, APITestCase):
         assert called_kwargs['financial_aid'] == self.financial_aid
         assert called_kwargs['subject'] == self.request_data['email_subject']
         assert called_kwargs['body'] == self.request_data['email_body']
+        assert 'raise_for_status' not in called_kwargs
 
-    @patch('mail.views.MailgunClient')
-    def test_send_financial_aid_view_improperly_configured(self, mock_mailgun_client):
+    def test_send_financial_aid_view_improperly_configured(self):
         """
         Test that the FinancialAidMailView will raise ImproperlyConfigured if mailgun returns 401, which
         results in returning 500 since micromasters.utils.custom_exception_hanlder catches ImproperlyConfigured
         """
         self.client.force_login(self.staff_user_profile.user)
-        mock_mailgun_client.send_financial_aid_email.return_value = Mock(
-            spec=Response,
-            status_code=status.HTTP_401_UNAUTHORIZED
-        )
-        resp = self.client.post(self.url, data=self.request_data, format='json')
+        with patch('mail.views.MailgunClient.send_batch', side_effect=ImproperlyConfigured):
+            resp = self.client.post(self.url, data=self.request_data, format='json')
         assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR

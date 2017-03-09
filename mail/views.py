@@ -63,12 +63,26 @@ class LearnerMailView(GenericAPIView):
             body=request.data['email_body'],
             recipient=recipient_user.email,
             sender_address=sender_user.email,
-            sender_name=sender_user.profile.display_name
+            sender_name=sender_user.profile.display_name,
         )
         return Response(
             status=mailgun_response.status_code,
             data=generate_mailgun_response_json(mailgun_response)
         )
+
+
+def _make_batch_response_dict(response, exception):
+    """
+    Helper function to format a portion of a batch response
+    """
+    if exception is not None:
+        return {
+            "data": str(exception)
+        }
+    return {
+        "status_code": response.status_code,
+        "data": generate_mailgun_response_json(response),
+    }
 
 
 class SearchResultMailView(APIView):
@@ -104,22 +118,13 @@ class SearchResultMailView(APIView):
                     email_body=email_body,
                     sender_name=sender_name,
                 )
-
-        mailgun_responses = MailgunClient.send_batch(
+        MailgunClient.send_batch(
             subject=email_subject,
             body=email_body,
             recipients=emails,
             sender_name=sender_name,
         )
-        return Response(
-            status=status.HTTP_200_OK,
-            data={
-                "batch_{}".format(batch_num): {
-                    "status_code": resp.status_code,
-                    "data": generate_mailgun_response_json(resp)
-                } for batch_num, resp in enumerate(mailgun_responses)
-            }
-        )
+        return Response(status=status.HTTP_200_OK)
 
 
 class CourseTeamMailView(GenericAPIView):
