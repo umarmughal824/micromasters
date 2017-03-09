@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.51.2
+--------------
+
+- Add transaction.on_commit on signals (#2835)
+- Change date format to be globally accessible (#2826)
+- Fixed various profile field validations for exams (#2804)
+- Refactor MailgunClient for better error handling (#2775)
+- Fix exam auth eligibility date handlinng (#2814)
+- Reintroduce new course enrollment UX (#2802)
+- Freeze grade modified to be race condition safe
+
 Version 0.51.1
 --------------
 
