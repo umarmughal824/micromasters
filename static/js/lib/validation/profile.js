@@ -37,6 +37,41 @@ const findErrors = (input: Object, requiredKeys: string[], messages: ErrorMessag
   R.pick(R.difference(requiredKeys, filledOutFields(input)), messages)
 );
 
+export const checkProp = R.curry((key, message, predicates, profile) => {
+  if (R.propSatisfies(R.allPass(R.flatten([predicates])), key, profile)) {
+    return {};
+  }
+  return { [key]: message };
+});
+
+const checkIsNotNilOrEmpty = checkProp(R.__, R.__, R.complement(isNilOrEmptyString));
+
+export const mergeValidations = R.compose(
+  R.converge(
+    R.compose(
+      R.mergeAll,
+      Array.of
+    )
+  ),
+  Array.of
+);
+
+export const checkMaxLength = R.curry((key, label, maxLength, profile) => (
+  checkProp(
+    key,
+    `${label} must be no more than ${maxLength} characters`,
+    [
+      R.complement(isNilOrEmptyString),
+      R.pipe(
+        R.toString,
+        R.prop('length'),
+        R.lte(R.__, maxLength)
+      )
+    ],
+    profile
+  )
+));
+
 export type Validator = (a: Profile) => ValidationErrors;
 export type UIValidator = (a: Profile, b: UIState) => ValidationErrors;
 
@@ -71,7 +106,6 @@ const personalMessages: ErrorMessages = {
   'address': "Street address is required",
   'city': "City is required",
   'state_or_territory': 'State or Territory is required',
-  'postal_code': "Postal code is required",
   'country': "Country is required",
   'birth_country': "Country is required",
   'nationality': "Nationality is required",
@@ -79,66 +113,97 @@ const personalMessages: ErrorMessages = {
   'phone_number': 'A phone number is required',
 };
 
-export const personalValidation = (profile: Profile) => {
-  let errors = findErrors(profile, R.keys(personalMessages), personalMessages);
-  if (!moment(profile.date_of_birth).isBefore(moment(), 'day')) {
-    errors.date_of_birth = personalMessages.date_of_birth;
-  }
+export const checkLatin = R.curry((key, label, profile) => (
+  checkProp(
+    key,
+    `${label} must be in Latin characters`,
+    [
+      R.complement(isNilOrEmptyString),
+      R.test(CP1252_REGEX)
+    ],
+    profile
+  )
+));
 
-  if (profile.address && !CP1252_REGEX.test(profile.address)) {
-    errors.address = "Street address must be in Latin characters";
-  }
-  if (profile.city && !CP1252_REGEX.test(profile.city)) {
-    errors.city = "City must be in Latin characters";
-  }
+export const checkDateOfBirth: Validator = (
+  checkProp(
+    'date_of_birth',
+    personalMessages.date_of_birth,
+    [
+      R.complement(isNilOrEmptyString),
+      (dob => moment(dob).isBefore(moment(), 'day')),
+    ]
+  )
+);
+
+export const checkRomanizedNames: Validator = (
+  R.ifElse(
+    shouldRenderRomanizedFields,
+    mergeValidations(
+      checkLatin('romanized_first_name', 'Latin given name'),
+      checkMaxLength('romanized_first_name', 'Latin given name', 30),
+      checkIsNotNilOrEmpty('romanized_first_name', 'Latin given name is required'),
+      checkLatin('romanized_last_name', 'Latin family name'),
+      checkMaxLength('romanized_last_name', 'Latin family name', 50),
+      checkIsNotNilOrEmpty('romanized_last_name', 'Latin family name is required'),
+    ),
+    R.always({})
+  )
+);
+
+export const checkPostalCode: Validator = (profile) => {
   if (["US", "CA"].includes(profile.country)) {
-    if (profile.postal_code && !CP1252_REGEX.test(profile.postal_code)) {
-      errors.postal_code = "Postal code must be in Latin characters";
+    if (isNilOrEmptyString(profile.postal_code)) {
+      return { postal_code: "Postal code is required"};
     }
-    if (R.isNil(errors.postal_code)) {
-      if (profile.country === 'US' && !R.test(/^\d{5}(-\d{4})?$/, profile.postal_code)) {
-        errors.postal_code = "Postal code must be a valid US postal code.";
-      }
-      if (profile.country === 'CA' && !R.test(/^[A-Za-z0-9]{6}$/, profile.postal_code)) {
-        errors.postal_code = "Postal code must be a valid Canadian postal code.";
-      }
+    if (!CP1252_REGEX.test(profile.postal_code)) {
+      return { postal_code: "Postal code must be in Latin characters" };
     }
-  } else {
-    // postal code only shown/required for US and Canada
-    delete errors.postal_code;
-  }
-
-  if (profile.first_name && profile.first_name.length > 30) {
-    errors.first_name = "Given name must be less than 30 characters";
-  }
-  if (profile.last_name && profile.last_name.length > 50) {
-    errors.last_name = "Family name must be less than 50 characters";
-  }
-
-  if (shouldRenderRomanizedFields(profile)) {
-    if (!profile.romanized_first_name || !CP1252_REGEX.test(profile.romanized_first_name)) {
-      errors.romanized_first_name = "Latin given name is required";
+    if (profile.country === 'US' && !R.test(/^\d{5}(-\d{4})?$/, profile.postal_code)) {
+      return { postal_code: "Postal code must be a valid US postal code" };
     }
-    else if (profile.romanized_first_name.length > 30) {
-      errors.romanized_first_name = "Given name must be less than 30 characters";
-    }
-
-    if (!profile.romanized_last_name || !CP1252_REGEX.test(profile.romanized_last_name)) {
-      errors.romanized_last_name = "Latin family name is required";
-    }
-    else if (profile.romanized_last_name.length > 50) {
-      errors.romanized_last_name = "Family name must be less than 50 characters";
+    if (profile.country === 'CA' && !R.test(/^[A-Za-z0-9]{6}$/, profile.postal_code)) {
+      return { postal_code: "Postal code must be a valid Canadian postal code" };
     }
   }
-
-  if (profile.phone_number) {
-    let number = new PhoneNumber(profile.phone_number);
-    if (! number.isValid()) {
-      errors.phone_number = 'Please enter a valid phone number';
-    }
-  }
-  return errors;
+  return {};
 };
+
+export const checkPhoneNumber: Validator = (
+  checkProp(
+    'phone_number',
+    'Please enter a valid phone number',
+    [
+      R.complement(isNilOrEmptyString),
+      (phoneNumber => new PhoneNumber(phoneNumber).isValid()),
+    ]
+  )
+);
+
+const checkPersonalMessages = R.compose(
+  R.map(R.apply(checkIsNotNilOrEmpty)),
+  R.toPairs,
+)(personalMessages);
+
+// precedence is bottom-to-top
+export const personalValidation: Validator = mergeValidations(
+  // names
+  checkMaxLength('first_name', 'Given name', 30),
+  checkMaxLength('last_name', 'Family name', 50),
+  checkRomanizedNames,
+  // date of birth
+  checkDateOfBirth,
+  // address
+  checkLatin('address', 'Street address'),
+  // city
+  checkLatin('city', 'City'),
+  // postal code
+  checkPostalCode,
+  // phone number
+  checkPhoneNumber,
+  // field is required errors first
+  ...checkPersonalMessages,
+);
 
 /*
  * Helper for nested validators

@@ -14,6 +14,8 @@ import {
   emailValidation,
   validateFinancialAid,
   profileImageValidation,
+  checkProp,
+  checkLatin,
 } from './profile';
 import {
   HIGH_SCHOOL,
@@ -53,15 +55,54 @@ describe('Profile validation functions', () => {
     });
   });
 
+  describe('checkProp', () => {
+    const check = checkProp(
+      'name',
+      'invalid name',
+      (name) => name !== 'invalid'
+    );
+
+    it('should validate a valid property', () => {
+      assert.deepEqual(check({
+        name: 'valid'
+      }), {});
+    });
+
+    it('should validate an invalid property', () => {
+      assert.deepEqual(check({
+        name: 'invalid'
+      }), {
+        name: 'invalid name'
+      });
+    });
+  });
+
+  describe('checkLatin', () => {
+    const check = checkLatin('name', 'invalid name');
+    it('should validate a latin-only prop', () => {
+      assert.deepEqual(check({
+        name: 'valid'
+      }), {});
+    });
+
+    it('should invalidate a non-latin name', () => {
+      assert.deepEqual(check({
+        name: 'عامر'
+      }), {
+        name: 'invalid name must be in Latin characters'
+      });
+    });
+  });
+
   describe('Personal validation', () => {
     it('should return an empty object when all fields are present', () => {
-      assert.deepEqual({}, personalValidation(USER_PROFILE_RESPONSE));
+      assert.deepEqual(personalValidation(USER_PROFILE_RESPONSE), {});
     });
 
     it('should return an appropriate error if a field is missing', () => {
       let clone = _.cloneDeep(USER_PROFILE_RESPONSE);
       clone.first_name = '';
-      assert.deepEqual({first_name: "Given name is required"}, personalValidation(clone));
+      assert.deepEqual(personalValidation(clone), {first_name: "Given name is required"});
     });
 
     it('validates required fields', () => {
@@ -93,7 +134,7 @@ describe('Profile validation functions', () => {
       let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
       profile.first_name = 0;
       let errors = personalValidation(profile);
-      assert.deepEqual({}, errors);
+      assert.deepEqual(errors, {});
     });
 
     it('should error if date of birth is in the future', () => {
@@ -143,7 +184,7 @@ describe('Profile validation functions', () => {
         romanized_last_name: 'test'
       };
       let errors = {
-        romanized_first_name: "Latin given name is required",
+        romanized_first_name: "Latin given name must be in Latin characters",
       };
       assert.deepEqual(personalValidation(profile), errors);
     });
@@ -156,7 +197,7 @@ describe('Profile validation functions', () => {
         romanized_last_name: 'عامر'
       };
       let errors = {
-        romanized_last_name: "Latin family name is required",
+        romanized_last_name: "Latin family name must be in Latin characters",
       };
       assert.deepEqual(personalValidation(profile), errors);
     });
@@ -170,10 +211,10 @@ describe('Profile validation functions', () => {
         romanized_last_name: 'b'.repeat(51)
       };
       let errors = {
-        first_name: "Given name must be less than 30 characters",
-        last_name: "Family name must be less than 50 characters",
-        romanized_first_name: "Given name must be less than 30 characters",
-        romanized_last_name: "Family name must be less than 50 characters",
+        first_name: "Given name must be no more than 30 characters",
+        last_name: "Family name must be no more than 50 characters",
+        romanized_first_name: "Latin given name must be no more than 30 characters",
+        romanized_last_name: "Latin family name must be no more than 50 characters",
       };
       assert.deepEqual(personalValidation(profile), errors);
     });
@@ -220,8 +261,8 @@ describe('Profile validation functions', () => {
       CA: ['a', 'asdfb', '12345-asdf', '12345-1', '12345%', '1234512'],
     };
     let messages = {
-      US: "Postal code must be a valid US postal code.",
-      CA: "Postal code must be a valid Canadian postal code.",
+      US: "Postal code must be a valid US postal code",
+      CA: "Postal code must be a valid Canadian postal code",
     };
     for (const country of ["US", "CA"]) {
       it(`should error when country is ${country} and no postal code`, () => {
@@ -297,70 +338,70 @@ describe('Profile validation functions', () => {
 
   describe('Education validation', () => {
     it('should return an empty object when all fields are present', () => {
-      assert.deepEqual({}, educationValidation(USER_PROFILE_RESPONSE));
+      assert.deepEqual(educationValidation(USER_PROFILE_RESPONSE), {});
     });
 
     it('should return an appropriate error if a field is missing', () => {
       let clone = _.cloneDeep(USER_PROFILE_RESPONSE);
       clone.education[0].school_name = '';
       let expectation = {education: [{school_name: 'School name is required'}, {}]};
-      assert.deepEqual(expectation, educationValidation(clone));
+      assert.deepEqual(educationValidation(clone), expectation);
     });
 
     it('should return an empty object if no education present', () => {
       let clone = _.cloneDeep(USER_PROFILE_RESPONSE);
       clone.education = undefined;
-      assert.deepEqual({}, educationValidation(clone));
+      assert.deepEqual(educationValidation(clone), {});
     });
 
     it('should not validate field_of_study for high school students', () => {
       let clone = _.cloneDeep(USER_PROFILE_RESPONSE);
       clone.education[0].degree_name = HIGH_SCHOOL;
       clone.education[0].field_of_study = "";
-      assert.deepEqual({}, educationValidation(clone));
+      assert.deepEqual(educationValidation(clone), {});
     });
 
     it('should show all fields which are required', () => {
       let clone = _.cloneDeep(USER_PROFILE_RESPONSE);
       clone.education[0].school_name = '';
       clone.education[0].school_city = '';
-      assert.deepEqual({
+      assert.deepEqual(educationValidation(clone), {
         education: [{
           school_name: 'School name is required',
           school_city: 'City is required'
         }, {}]
-      }, educationValidation(clone));
+      });
     });
   });
 
   describe('Employment validation', () => {
     it('should return an empty object when all fields are present', () => {
-      assert.deepEqual({}, employmentValidation(USER_PROFILE_RESPONSE));
+      assert.deepEqual(employmentValidation(USER_PROFILE_RESPONSE), {});
     });
 
     it('should return an appropriate error if a field is missing', () => {
       let clone = _.cloneDeep(USER_PROFILE_RESPONSE);
       clone.work_history[0].company_name = '';
       let expectation = {work_history: [{company_name: 'Name of Employer is required'}, {}]};
-      assert.deepEqual(expectation, employmentValidation(clone));
+      assert.deepEqual(employmentValidation(clone), expectation);
     });
 
     it('should return an empty object if no employment present', () => {
       let clone = _.cloneDeep(USER_PROFILE_RESPONSE);
       clone.work_history = undefined;
-      assert.deepEqual({}, employmentValidation(clone));
+      assert.deepEqual(employmentValidation(clone), {});
     });
 
     it('should show all fields which are required', () => {
       let clone = _.cloneDeep(USER_PROFILE_RESPONSE);
       clone.work_history[0].company_name = '';
       clone.work_history[0].city = '';
-      assert.deepEqual({
+      assert.deepEqual(employmentValidation(clone), {
         work_history: [{
           city: 'City is required',
           company_name: 'Name of Employer is required'
         },{}]
-      }, employmentValidation(clone));
+      });
     });
 
     it('should reject end date before start date', () => {
@@ -374,7 +415,7 @@ describe('Profile validation functions', () => {
       let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
       profile.work_history[1].end_date = moment(profile.work_history[1].start_date).subtract(1, 'months').
         format(ISO_8601_FORMAT);
-      assert.deepEqual(errors, employmentValidation(profile));
+      assert.deepEqual(employmentValidation(profile), errors);
     });
 
     it('should reject an end date in the future', () => {
@@ -386,20 +427,20 @@ describe('Profile validation functions', () => {
       };
       let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
       profile.work_history[1].end_date = moment().add(1, 'month').format(ISO_8601_FORMAT);
-      assert.deepEqual(expectation, employmentValidation(profile));
+      assert.deepEqual(employmentValidation(profile), expectation);
     });
 
     it('should not reject an end date in the current month', () => {
       sandbox.useFakeTimers(moment('2016-10-01').valueOf());
       let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
       profile.work_history[1].end_date = moment().format(ISO_8601_FORMAT);
-      assert.deepEqual({}, employmentValidation(profile));
+      assert.deepEqual(employmentValidation(profile), {});
     });
 
     it('should not error if end_date is blank', () => {
       let profile = _.cloneDeep(USER_PROFILE_RESPONSE);
       profile.work_history[1].end_date = null;
-      assert.deepEqual({}, employmentValidation(profile));
+      assert.deepEqual(employmentValidation(profile), {});
     });
 
 
@@ -421,7 +462,7 @@ describe('Profile validation functions', () => {
         }, {
           [field]: "field"
         });
-        assert.deepEqual(errors, employmentValidation(profile));
+        assert.deepEqual(employmentValidation(profile), errors);
       });
     }
 
@@ -439,7 +480,7 @@ describe('Profile validation functions', () => {
         year: 1943,
         month: ""
       };
-      assert.deepEqual(errors, employmentValidation(profile));
+      assert.deepEqual(employmentValidation(profile), errors);
     });
 
     it('should not error if end_date has an edit value which is blank', () => {
@@ -449,7 +490,7 @@ describe('Profile validation functions', () => {
         year: "",
         month: ""
       };
-      assert.deepEqual({}, employmentValidation(profile));
+      assert.deepEqual(employmentValidation(profile), {});
     });
   });
 
@@ -523,7 +564,7 @@ describe('Profile validation functions', () => {
 
 describe('Privacy validation', () => {
   it('should return an empty object when all fields are present', () => {
-    assert.deepEqual({}, privacyValidation(USER_PROFILE_RESPONSE));
+    assert.deepEqual(privacyValidation(USER_PROFILE_RESPONSE), {});
   });
 
   it('should return an appropriate error if a field is missing', () => {
@@ -532,7 +573,7 @@ describe('Privacy validation', () => {
       account_privacy: '',
     };
     let expectation = {account_privacy: 'Privacy level is required'};
-    assert.deepEqual(expectation, privacyValidation(clone));
+    assert.deepEqual(privacyValidation(clone), expectation);
   });
 });
 
