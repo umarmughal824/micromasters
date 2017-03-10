@@ -1,31 +1,31 @@
 version: 2
 jobs:
   build:
-    working_directory: /src
-    docker:
-      - image: mitodl/mm_web_travis
-        environment:
-          DEBUG: 'False'
-          COVERAGE_DIR: htmlcov
-          PORT: 8079
-          NODE_ENV: 'production'
-          DATABASE_URL: postgres://postgres@localhost:5432/postgres
-          MICROMASTERS_SECURE_SSL_REDIRECT: 'False'
-          MICROMASTERS_DB_DISABLE_SSL: 'True'
-          ELASTICSEARCH_URL: localhost:9200
-          BROKER_URL: redis://localhost:6379/4
-          CELERY_RESULT_BACKEND: redis://localhost:6379/4
-          XDG_CACHE_HOME: /src/.cache
-          OPEN_EXCHANGE_RATES_URL: https://openexchangerates.org/api/
-          OPEN_EXCHANGE_RATES_APP_ID: fakeID123
-      - image: redis
-      - image: elasticsearch:2.4.1
-      - image: elgalu/selenium
-      - image: postgres
+    working_directory: ~/micromasters
+    machine:
+      enabled: true
     steps:
       - checkout
-      - run: pip install --user -r requirements.txt -r test_requirements.txt
-      - run: tox
-      - run: yarn install
-      - run: sh js_test.sh
-      - run: docker-compose -f travis-docker-compose.yml run -e DJANGO_LIVE_TEST_SERVER_ADDRESS=0.0.0.0:8266 selenium py.test ./selenium_tests
+      - run: sudo apt-get update && sudo apt-get install docker
+      - run: sudo service docker restart
+      - run: sudo pip install docker-compose
+      - run: cp .env.example .env
+      - run: docker-compose -f travis-docker-compose.yml build
+      - run:
+          name: Python
+          command: |
+            docker-compose -f travis-docker-compose.yml up 2>&1 &
+            sleep 5
+            docker-compose -f travis-docker-compose.yml run web tox
+      - run:
+          name: Javascript
+          command: |
+            docker build -t travis-watch -f travis/Dockerfile-travis-watch .
+            ./travis/js_tests.sh
+      - run:
+          name: Selenium
+          command: |
+            docker run --name travis-watch-container --env-file .env -e NODE_ENV=production -t travis-watch ./webpack_if_prod.sh
+            docker cp travis-watch-container:/src/webpack-stats.json .
+            docker cp travis-watch-container:/src/static/bundles ./static/bundles
+            docker-compose -f travis-docker-compose.yml run -e DEBUG=False -e DJANGO_LIVE_TEST_SERVER_ADDRESS=0.0.0.0:8286 selenium py.test ./selenium_tests
