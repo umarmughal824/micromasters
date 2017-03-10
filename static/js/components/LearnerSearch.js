@@ -211,22 +211,24 @@ export default class LearnerSearch extends SearchkitComponent {
       <Card className="fullwidth" shadow={1}>
         <FilterVisibilityToggle
           {...this.props}
+          title="Course"
           filterName="courses"
         >
           <HierarchicalRefinementFilter
             field={"program.enrollments"}
-            title="Course"
+            title=""
             id="courses"
           />
         </FilterVisibilityToggle>
         <FilterVisibilityToggle
           {...this.props}
           filterName="semester"
+          title="Semester"
         >
           <PatchedMenuFilter
             field="program.semester_enrollments.semester"
             fieldOptions={{ type: 'nested', options: {path: 'program.semester_enrollments'} }}
-            title="Semester"
+            title=""
             id="semester"
             bucketsTransform={sortSemesterBuckets}
           />
@@ -234,6 +236,7 @@ export default class LearnerSearch extends SearchkitComponent {
         <FilterVisibilityToggle
           {...this.props}
           filterName="num-courses-passed"
+          title="# of Courses Passed"
         >
           <RangeFilter
             field="program.num_courses_passed"
@@ -241,11 +244,12 @@ export default class LearnerSearch extends SearchkitComponent {
             min={0}
             max={this.getNumberOfCoursesInProgram()}
             showHistogram={false}
-            title="# of Courses Passed" />
+            title="" />
         </FilterVisibilityToggle>
         <FilterVisibilityToggle
           {...this.props}
           filterName="grade-average"
+          title="Average Grade in Program"
         >
           <RangeFilter
             field="program.grade_average"
@@ -253,16 +257,17 @@ export default class LearnerSearch extends SearchkitComponent {
             min={0}
             max={100}
             showHistogram={true}
-            title="Average Grade in Program"
+            title=""
           />
         </FilterVisibilityToggle>
         <FilterVisibilityToggle
           {...this.props}
           filterName="birth-location"
+          title="Country of Birth"
         >
           <RefinementListFilter
             id="birth_location"
-            title="Country of Birth"
+            title=""
             field="profile.birth_country"
             operator="OR"
             itemComponent={CountryRefinementOption}
@@ -271,22 +276,24 @@ export default class LearnerSearch extends SearchkitComponent {
         </FilterVisibilityToggle>
         <FilterVisibilityToggle
           {...this.props}
+          title="Current Residence"
           filterName="residence-country"
         >
           <HierarchicalMenuFilter
             fields={["profile.country", "profile.state_or_territory"]}
-            title="Current Residence"
+            title=""
             id="country"
             translations={this.countryNameTranslations}
           />
         </FilterVisibilityToggle>
         <FilterVisibilityToggle
           {...this.props}
+          title="Degree"
           filterName="education-level"
         >
           <PatchedMenuFilter
             id="education_level"
-            title="Degree"
+            title=""
             field="profile.education.degree_name"
             fieldOptions={{type: 'nested', options: { path: 'profile.education' } }}
             translations={this.degreeTranslations}
@@ -295,6 +302,7 @@ export default class LearnerSearch extends SearchkitComponent {
         <FilterVisibilityToggle
           {...this.props}
           filterName="company-name"
+          title="Company"
         >
           <WorkHistoryFilter id="company_name" />
         </FilterVisibilityToggle>
