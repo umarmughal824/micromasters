@@ -590,12 +590,9 @@ describe('api', function() {
         });
       }
 
-      for (let statusCode of [199, 300, 400, 500, 100]) {
+      for (let statusCode of [300, 400, 500]) {
         it(`rejects the promise if the status code is ${statusCode}`, () => {
-          fetchMock.mock('/url', () => {
-            return {status: statusCode};
-          });
-
+          fetchMock.get('/url', statusCode);
           return assert.isRejected(fetchWithCSRF('/url'));
         });
       }
@@ -661,15 +658,13 @@ describe('api', function() {
         });
       });
 
-      for (let statusCode of [199, 300, 400, 500, 100]) {
+      for (let statusCode of [300, 400, 500]) {
         it(`rejects the promise if the status code is ${statusCode}`, () => {
-          fetchMock.mock('/url', () => {
-            return {
-              status: statusCode,
-              body: JSON.stringify({
-                error: "an error"
-              })
-            };
+          fetchMock.mock('/url', {
+            status: statusCode,
+            body: JSON.stringify({
+              error: "an error"
+            })
           });
 
           return assert.isRejected(fetchJSONWithCSRF('/url')).then(responseBody => {
