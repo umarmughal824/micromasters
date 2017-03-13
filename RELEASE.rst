@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.51.3
+--------------
+
+- Add logging for recreate_index (#2843)
+- Implemented new navigation design
+- Allowed users to expand/hide search facets by clicking facet title (#2777)
+- fixes layout issue (#2840)
+
 Version 0.51.2
 --------------
 
