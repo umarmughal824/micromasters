@@ -202,6 +202,58 @@ describe('Profile validation functions', () => {
       assert.deepEqual(personalValidation(profile), errors);
     });
 
+    const invalidCharErrorSuffix = 'must not contain comma, double quote, or greater than characters';
+
+    for (const invalidChar of ['"', '>', ',']) {
+      it(`should error when first_name contains ${invalidChar}`, () => {
+        let profile = {
+          ...USER_PROFILE_RESPONSE,
+          first_name: invalidChar,
+        };
+        let errors = {
+          first_name: `Given name ${invalidCharErrorSuffix}`,
+        };
+        assert.deepEqual(personalValidation(profile), errors);
+      });
+
+      it(`should error when last_name contains ${invalidChar}`, () => {
+        let profile = {
+          ...USER_PROFILE_RESPONSE,
+          last_name: invalidChar,
+        };
+        let errors = {
+          last_name: `Family name ${invalidCharErrorSuffix}`,
+        };
+        assert.deepEqual(personalValidation(profile), errors);
+      });
+
+      it(`should error when romanized_first_name contains ${invalidChar}`, () => {
+        let profile = {
+          ...USER_PROFILE_RESPONSE,
+          first_name: 'ر',
+          romanized_first_name: invalidChar,
+          romanized_last_name: 'name',
+        };
+        let errors = {
+          romanized_first_name: `Latin given name ${invalidCharErrorSuffix}`,
+        };
+        assert.deepEqual(personalValidation(profile), errors);
+      });
+
+      it(`should error when romanized_last_name contains ${invalidChar}`, () => {
+        let profile = {
+          ...USER_PROFILE_RESPONSE,
+          first_name: 'ر',
+          romanized_first_name: 'name',
+          romanized_last_name: invalidChar,
+        };
+        let errors = {
+          romanized_last_name: `Latin family name ${invalidCharErrorSuffix}`,
+        };
+        assert.deepEqual(personalValidation(profile), errors);
+      });
+    }
+
     it('should error when any name is too long', () => {
       let profile = {
         ...USER_PROFILE_RESPONSE,

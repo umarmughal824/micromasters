@@ -12,6 +12,8 @@ export const DASHBOARD_FORMAT = 'MMM D, Y';
 export const DASHBOARD_MONTH_FORMAT = 'MM[/]YYYY';
 
 export const CP1252_REGEX = /^[\u0020-\u00FF]*$/;
+// greater-than, comma, quotation-mark
+export const INVALID_NAME_CHARS_REGEX = /[\u003E\u002C\u0022]/;
 
 // NOTE: this is in order of attainment
 export const EDUCATION_LEVELS = [

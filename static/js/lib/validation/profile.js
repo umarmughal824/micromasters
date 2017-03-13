@@ -21,7 +21,8 @@ import {
   PERSONAL_STEP,
   EDUCATION_STEP,
   EMPLOYMENT_STEP,
-  CP1252_REGEX
+  CP1252_REGEX,
+  INVALID_NAME_CHARS_REGEX,
 } from '../../constants';
 import { shouldRenderRomanizedFields } from '../../util/profile_edit';
 
@@ -125,6 +126,15 @@ export const checkLatin = R.curry((key, label, profile) => (
   )
 ));
 
+export const checkInvalidNameChars = R.curry((key, label, profile) => (
+  checkProp(
+    key,
+    `${label} must not contain comma, double quote, or greater than characters`,
+    R.complement(R.test(INVALID_NAME_CHARS_REGEX)),
+    profile
+  )
+));
+
 export const checkDateOfBirth: Validator = (
   checkProp(
     'date_of_birth',
@@ -141,9 +151,11 @@ export const checkRomanizedNames: Validator = (
     shouldRenderRomanizedFields,
     mergeValidations(
       checkLatin('romanized_first_name', 'Latin given name'),
+      checkInvalidNameChars('romanized_first_name', 'Latin given name'),
       checkMaxLength('romanized_first_name', 'Latin given name', 30),
       checkIsNotNilOrEmpty('romanized_first_name', 'Latin given name is required'),
       checkLatin('romanized_last_name', 'Latin family name'),
+      checkInvalidNameChars('romanized_last_name', 'Latin family name'),
       checkMaxLength('romanized_last_name', 'Latin family name', 50),
       checkIsNotNilOrEmpty('romanized_last_name', 'Latin family name is required'),
     ),
@@ -187,9 +199,12 @@ const checkPersonalMessages = R.compose(
 
 // precedence is bottom-to-top
 export const personalValidation: Validator = mergeValidations(
-  // names
+  // first name
   checkMaxLength('first_name', 'Given name', 30),
+  checkInvalidNameChars('first_name', 'Given name'),
+  // last name
   checkMaxLength('last_name', 'Family name', 50),
+  checkInvalidNameChars('last_name', 'Family name'),
   checkRomanizedNames,
   // date of birth
   checkDateOfBirth,
