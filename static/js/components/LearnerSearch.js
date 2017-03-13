@@ -295,6 +295,7 @@ export default class LearnerSearch extends SearchkitComponent {
             title=""
             id="country"
             translations={this.countryNameTranslations}
+            size={0}
           />
         </FilterVisibilityToggle>
         <FilterVisibilityToggle
