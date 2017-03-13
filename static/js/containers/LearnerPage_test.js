@@ -1006,7 +1006,7 @@ describe("LearnerPage", function() {
       const smallDashboard = DASHBOARD_RESPONSE.slice(0,1);
       helper.dashboardStub.returns(Promise.resolve(smallDashboard));
       const username = SETTINGS.user.username;
-      SETTINGS.roles.push({ role: 'staff' });
+      SETTINGS.roles.push({ role: 'staff', permissions: [] });
       const actions = userActions.concat([REQUEST_DASHBOARD, RECEIVE_DASHBOARD_SUCCESS]);
       return renderComponent(`/learner/${username}`, actions).then(([wrapper, ]) => {
         assert.equal(wrapper.find(StaffLearnerInfoCard).length, 1);

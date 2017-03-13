@@ -17,7 +17,11 @@ import ProgramSelector from './ProgramSelector';
 import ProfileImage from '../containers/ProfileImage';
 import { getPreferredName } from '../util/util';
 import type { Profile } from '../flow/profileTypes';
-import { hasAnyStaffRole } from '../lib/roles';
+import {
+  hasAnyStaffRole,
+  firstFinancialAidProgram,
+  hasEditAbility,
+} from '../lib/roles';
 
 const PROFILE_SETTINGS_REGEX = /^\/profile\/?|settings\/?|learner\/[a-z]?/;
 const PROFILE_REGEX = /^\/profile\/?/;
@@ -48,6 +52,10 @@ const adminLink = (...args) => (
 
 const learnerLink = (...args) => (
   hasAnyStaffRole(SETTINGS.roles) ? null : navLink(...args)
+);
+
+const financialAidLink = (...args) => (
+  R.find(hasEditAbility, SETTINGS.roles) ? navLink(...args) : null
 );
 
 export default class Navbar extends React.Component {
@@ -137,7 +145,14 @@ export default class Navbar extends React.Component {
             <div className="links">
               { adminLink(closeDrawer, '/learners', 'Learners', 'people') }
               { adminLink(closeDrawer, '/cms', 'CMS',  'description', true, true) }
-              { adminLink(closeDrawer, '/financial_aid/review/1', 'Personal Price Admin',  'attach_money', true, true) }
+              { financialAidLink(
+                closeDrawer,
+                `/financial_aid/review/${firstFinancialAidProgram(SETTINGS.roles)}`,
+                'Personal Price Admin',
+                'attach_money',
+                true,
+                true
+              )}
               { learnerLink(closeDrawer, '/dashboard', 'Dashboard', 'dashboard') }
               { navLink(closeDrawer, `/learner/${SETTINGS.user.username}`, 'My Profile', 'person')}
               { navLink(

@@ -4,6 +4,8 @@ import { assert } from 'chai';
 import {
   hasAnyStaffRole,
   hasStaffForProgram,
+  hasEditAbility,
+  firstFinancialAidProgram,
 } from './roles';
 
 describe('roles library', () => {
@@ -13,11 +15,13 @@ describe('roles library', () => {
     roles = [
       {
         "role": "staff",
-        "program": 1
+        "program": 1,
+        "permissions": [],
       },
       {
         "role": "student",
-        "program": 2
+        "program": 2,
+        "permissions": [],
       }
     ];
   });
@@ -40,6 +44,37 @@ describe('roles library', () => {
 
     it('should return false if the user is not staff on the specified program', () => {
       assert.isFalse(hasStaffForProgram({id: 2}, roles));
+    });
+  });
+
+  describe('hasEditAbility', () => {
+    it('should return false if user does not have the permission', () => {
+      roles.forEach(role => {
+        assert.isFalse(hasEditAbility(role));
+      });
+    });
+
+    it('should return true if user has permission on any program', () => {
+      roles[0].permissions.push("can_edit_financial_aid");
+      assert.isTrue(hasEditAbility(roles[0]));
+    });
+
+    it('should return false if the user only has other permissions', () => {
+      roles[0].permissions.push("can_make_bad_jokes");
+      assert.isFalse(hasEditAbility(roles[0]));
+    });
+  });
+
+  describe('firstFinancialAidProgram', () => {
+    it('should return null if the user doesnt have the right permission', () => {
+      assert.isNull(firstFinancialAidProgram(roles));
+    });
+
+    it('should return the program ID if the user does have the permission', () => {
+      roles[1].permissions.push("can_edit_financial_aid");
+      assert.equal(2, firstFinancialAidProgram(roles));
+      roles[0].permissions.push("can_edit_financial_aid");
+      assert.equal(1, firstFinancialAidProgram(roles));
     });
   });
 });

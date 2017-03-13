@@ -35,7 +35,7 @@ describe('Navbar', () => {
 
   it('has a link to the learner page if the user is staff or instructor', () => {
     for (let role of ['staff', 'instructor']) {
-      SETTINGS.roles = [{ role }];
+      SETTINGS.roles = [{ role, permissions: [] }];
       let wrapper = renderNavbar();
       let hrefs = wrapper.find(Link).map(link => link.props()['to']);
       assert.deepEqual(hrefs, [
@@ -47,6 +47,16 @@ describe('Navbar', () => {
         '/learners',
       ]);
     }
+  });
+
+  it('should show a link to the financial aid review page, if the user has that permission', () => {
+    SETTINGS.roles = [{
+      role: 'staff',
+      permissions: [ 'can_edit_financial_aid' ],
+      program: 1
+    }];
+    let wrapper = renderNavbar();
+    assert.equal(wrapper.find("a[href='/financial_aid/review/1']").text(), "Personal Price Admin");
   });
 
   it('has a logout link', () => {
