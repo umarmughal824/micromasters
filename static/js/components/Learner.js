@@ -13,22 +13,23 @@ import {
   employmentValidation,
   personalValidation,
 } from '../lib/validation/profile';
+import StaffLearnerInfoCard from './StaffLearnerInfoCard';
 import type { Profile, SaveProfileFunc } from '../flow/profileTypes';
 import type { UIState } from '../reducers/ui';
-import StaffLearnerInfoCard from './StaffLearnerInfoCard';
 import type { DashboardState } from '../flow/dashboardTypes';
 
 export default class Learner extends React.Component {
   props: {
     profile:                                Profile,
     profilePatchStatus:                     ?string,
-    setLearnerPageDialogVisibility:         () => void,
     ui:                                     UIState,
-    clearProfileEdit:                       () => void,
+    dashboard:                              DashboardState,
     saveProfile:                            SaveProfileFunc,
+    clearProfileEdit:                       () => void,
+    setLearnerPageDialogVisibility:         () => void,
     startProfileEdit:                       () => void,
     setLearnerPageAboutMeDialogVisibility:  () => void,
-    dashboard:                              DashboardState,
+    openLearnerEmailComposer:               () => void,
   };
 
   toggleShowPersonalDialog = (): void => {
@@ -65,7 +66,10 @@ export default class Learner extends React.Component {
   };
 
   render() {
-    const { profile } = this.props;
+    const {
+      profile,
+      openLearnerEmailComposer
+    } = this.props;
 
     return <div className="single-column dashboard">
       <LearnerPagePersonalDialog {...this.props} />
@@ -73,7 +77,8 @@ export default class Learner extends React.Component {
       <LearnerInfoCard
         profile={profile}
         toggleShowAboutMeDialog={this.toggleShowAboutMeDialog}
-        toggleShowPersonalDialog={this.toggleShowPersonalDialog} />
+        toggleShowPersonalDialog={this.toggleShowPersonalDialog}
+        openLearnerEmailComposer={openLearnerEmailComposer} />
       { this.showStaffInfo() }
       <EducationForm {...this.props} showSwitch={false} validator={educationValidation} />
       <EmploymentForm {...this.props} showSwitch={false} validator={employmentValidation} />

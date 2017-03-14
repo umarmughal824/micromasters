@@ -174,7 +174,7 @@
   background-color: $button-color;
 }
 
-.mm-minor-action {
+.mm-minor-action, .icon-button-link {
   color: $link-text;
   font-size: 15px;
   font-weight: 400;
@@ -185,12 +185,37 @@
 
   &:hover {
     color: $link-hover;
-    text-decoration: underline;
   }
 
   &[disabled] {
     color: $font-gray-disabled;
     text-decoration: none;
+  }
+}
+
+.mm-minor-action:hover {
+  text-decoration: underline;
+}
+
+
+.icon-button-link {
+  display: inline-flex;
+
+  &:hover {
+    text-decoration: none;
+  }
+
+  i.material-icons {
+    margin-right: 6px;
+    font-size: 28px;
+  }
+
+  span {
+    line-height: 28px;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 

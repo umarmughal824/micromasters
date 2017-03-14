@@ -5,6 +5,7 @@ Permission classes for mail views
 from rolepermissions.verifications import has_permission
 from rest_framework.permissions import BasePermission
 
+from courses.models import CourseRun
 from roles.roles import Permissions, Staff, Instructor
 from dashboard.models import ProgramEnrollment
 from dashboard.utils import MMTrack
@@ -38,15 +39,43 @@ class UserCanMessageSpecificLearnerPermission(BasePermission):
         Returns:
             boolean
         """
-        sender_user = request.user
-        if not has_permission(sender_user, Permissions.CAN_MESSAGE_LEARNERS):
+        if not obj.email_optin:
             return False
-        # Check if the sender is staff/instructor in a program that the recipient
-        # is enrolled in.
-        return sender_user.role_set.filter(
-            role__in=(Staff.ROLE_ID, Instructor.ROLE_ID),
-            program__programenrollment__user=obj.user,
-        ).exists()
+
+        sender_user = request.user
+        recipient_enrolled_program_ids = obj.user.programenrollment_set.values_list('program', flat=True)
+
+        # If the sender is a staff/instructor in any of the recipients enrolled programs, the
+        # sender has permission
+        if sender_user.role_set.filter(
+                role__in=[Staff.ROLE_ID, Instructor.ROLE_ID],
+                program__id__in=recipient_enrolled_program_ids
+        ).exists():
+            return True
+
+        # If the sender has paid for any course run in any of the recipient's enrolled programs, the
+        # sender has permission
+        matching_program_enrollments = (
+            sender_user.programenrollment_set
+            .filter(program__id__in=recipient_enrolled_program_ids)
+            .select_related('program').all()
+        )
+        edx_user_data = CachedEdxUserData(sender_user)
+        for program_enrollment in matching_program_enrollments:
+            mmtrack = MMTrack(
+                sender_user,
+                program_enrollment.program,
+                edx_user_data
+            )
+            course_run_keys = (
+                CourseRun.objects
+                .filter(course__program=program_enrollment.program)
+                .values_list('edx_course_key', flat=True)
+            )
+            if any(mmtrack.has_paid(course_run_key) for course_run_key in course_run_keys):
+                return True
+
+        return False
 
 
 class UserCanMessageCourseTeamPermission(BasePermission):

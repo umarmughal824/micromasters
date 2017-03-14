@@ -1,14 +1,17 @@
 // @flow
+/* global SETTINGS: false */
 import React from 'react';
 import { Card } from 'react-mdl/lib/Card';
+import Icon from 'react-mdl/lib/Icon';
 import IconButton from 'react-mdl/lib/IconButton';
 
 import ProfileImage from '../containers/ProfileImage';
+import { hasAnyStaffRole } from '../lib/roles';
 import {
   getEmployer,
   getPreferredName,
-  userPrivilegeCheck,
-  isProfileOfLoggedinUser
+  isProfileOfLoggedinUser,
+  isNilOrBlank
 } from '../util/util';
 import { mstr } from '../lib/sanctuary';
 import type { Profile } from '../flow/profileTypes';
@@ -18,50 +21,80 @@ export default class LearnerInfoCard extends React.Component {
     profile: Profile,
     toggleShowPersonalDialog: () => void,
     toggleShowAboutMeDialog: () => void,
+    openLearnerEmailComposer: () => void,
   };
 
-  email = (email: string): React$Element<*> => (
-    <span className="profile-email">{email}</span>
+  isOwnProfilePage = (): boolean => (
+    isProfileOfLoggedinUser(this.props.profile)
   );
+
+  shouldShowEmailLink = (): boolean => {
+    const { profile } = this.props;
+
+    return profile.email_optin &&
+      !isNilOrBlank(profile.email) &&
+      !this.isOwnProfilePage() &&
+      hasAnyStaffRole(SETTINGS.roles);
+  };
 
   renderAboutMeSection = (
     profile: Profile, toggleShowAboutMeDialog: Function
   ): React$Element<*> => {
-    let aboutMeContent = userPrivilegeCheck(
-      profile,
-      () => [
-        <h3 key="heading">About Me</h3>,
-        <div className="bio placeholder" key="bio-placeholder">
-          Write something about yourself, so others can learn a bit about you.
-        </div>
-      ],
-      null
-    );
+    let aboutMeContent, aboutMeEditContent;
+
     if (profile.about_me) {
-      aboutMeContent = [
-        <h3 key="heading">About Me</h3>,
-        <div className="bio" key="bio">{profile.about_me}</div>
-      ];
+      aboutMeContent = (
+        <div className="about-me">
+          <h3>About Me</h3>
+          <div className="bio">{profile.about_me}</div>
+        </div>
+      );
+    }
+    else if (this.isOwnProfilePage()) {
+      aboutMeContent = (
+        <div className="about-me">
+          <h3>About Me</h3>
+          <div className="bio placeholder">
+            Write something about yourself, so others can learn a bit about you.
+          </div>
+        </div>
+      );
+    }
+
+    if (this.isOwnProfilePage()) {
+      aboutMeEditContent = (
+        <div className="edit-about-me-holder">
+          <IconButton
+            name="edit about me section"
+            className="edit-about-me-button"
+            onClick={toggleShowAboutMeDialog}
+          />
+        </div>
+      );
     }
 
     return (
       <div className="profile-form-row">
-        <div className="about-me">{aboutMeContent}</div>
-        <div className="edit-about-me-holder">
-          {
-            userPrivilegeCheck(
-              profile,
-              () => <IconButton
-                name="edit about me section"
-                className="edit-about-me-button"
-                onClick={toggleShowAboutMeDialog}
-              />
-            )
-          }
-        </div>
+        {aboutMeContent}
+        {aboutMeEditContent}
       </div>
     );
-  }
+  };
+
+  renderEmailLink = (): ?React$Element<*> => {
+    const { openLearnerEmailComposer } = this.props;
+
+    let emailLink;
+    if (this.shouldShowEmailLink()) {
+      emailLink = (
+        <button onClick={openLearnerEmailComposer} className="icon-button-link">
+          <Icon name="email" aria-hidden="true" />
+          <span>Send a Message</span>
+        </button>
+      );
+    }
+    return emailLink;
+  };
 
   render() {
     const {
@@ -70,6 +103,19 @@ export default class LearnerInfoCard extends React.Component {
       toggleShowAboutMeDialog
     } = this.props;
 
+    let personalInfoEditContent;
+    if (this.isOwnProfilePage()) {
+      personalInfoEditContent = (
+        <div className="edit-profile-holder">
+          <IconButton
+            name="edit personal information"
+            onClick={toggleShowPersonalDialog}
+            className="edit-personal-info-button"
+          />
+        </div>
+      );
+    }
+
     return (
       <Card shadow={1} className="profile-form user-page">
         <div className="profile-form-row">
@@ -77,17 +123,9 @@ export default class LearnerInfoCard extends React.Component {
           <div className="col user-info">
             <div className="profile-title">{getPreferredName(profile)}</div>
             <div className="profile-company-name">{mstr(getEmployer(profile))}</div>
-            { (profile.email && !isProfileOfLoggedinUser(profile)) ? this.email(profile.email) : null }
+            {this.renderEmailLink()}
           </div>
-          <div className="edit-profile-holder">
-            {userPrivilegeCheck(profile, () => (
-              <IconButton
-                name="edit personal information"
-                onClick={toggleShowPersonalDialog}
-                className="edit-personal-info-button"
-              />
-            ))}
-          </div>
+          {personalInfoEditContent}
         </div>
         {this.renderAboutMeSection(profile, toggleShowAboutMeDialog)}
       </Card>

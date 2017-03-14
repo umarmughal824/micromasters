@@ -13,8 +13,12 @@ from rest_framework.response import Response
 from factory.django import mute_signals
 
 from courses.factories import ProgramFactory, CourseFactory, CourseRunFactory
-from dashboard.factories import ProgramEnrollmentFactory, CachedEnrollmentFactory
-from dashboard.models import ProgramEnrollment
+from dashboard.factories import (
+    ProgramEnrollmentFactory,
+    CachedEnrollmentFactory,
+    CachedEnrollmentVerifiedFactory
+)
+from dashboard.models import ProgramEnrollment, CachedEnrollment
 from financialaid.api_test import (
     FinancialAidBaseTestCase,
     create_program,
@@ -257,10 +261,13 @@ class LearnerMailViewTests(APITestCase, MockedESTestCase):
         super().setUpTestData()
         with mute_signals(post_save):
             staff_profile = ProfileFactory.create(user__email='sender@example.com')
-            recipient_profile = ProfileFactory.create(user__email='recipient@example.com', student_id=123)
+            recipient_profile = ProfileFactory.create(
+                user__email='recipient@example.com',
+                email_optin=True,
+            )
         cls.staff_user = staff_profile.user
         cls.recipient_user = recipient_profile.user
-        cls.program = ProgramFactory.create()
+        cls.program = ProgramFactory.create(financial_aid_availability=False)
         ProgramEnrollmentFactory.create(
             user=cls.recipient_user,
             program=cls.program
@@ -329,6 +336,20 @@ class LearnerMailViewTests(APITestCase, MockedESTestCase):
         resp_post = self.client.post(url, data={}, format='json')
         assert resp_post.status_code == status.HTTP_400_BAD_REQUEST
 
+    def test_learner_view_recipient_opted_out(self):
+        """
+        Test that an attempt to email a recipient who has opted out of emails will result in an error
+        """
+        self.client.force_login(self.staff_user)
+        with mute_signals(post_save):
+            opted_out_profile = ProfileFactory.create(
+                user__email='opted_out_recipient@example.com',
+                email_optin=False
+            )
+        url = reverse(self.url_name, kwargs={'student_id': opted_out_profile.student_id})
+        resp_post = self.client.post(url, data=self.request_data, format='json')
+        assert resp_post.status_code == status.HTTP_403_FORBIDDEN
+
     def test_learner_view_not_program_staff(self):
         """
         Test that an attempt to email a recipient by a sender that doesn't have staff permission in any
@@ -340,6 +361,34 @@ class LearnerMailViewTests(APITestCase, MockedESTestCase):
         url = reverse(self.url_name, kwargs={'student_id': self.recipient_user.profile.student_id})
         resp_post = self.client.post(url, data={}, format='json')
         assert resp_post.status_code == status.HTTP_403_FORBIDDEN
+
+    @patch('mail.views.MailgunClient')
+    def test_learner_view_needs_paid_learner(self, mock_mailgun_client):
+        """
+        Test that a learner attempting to email another learner will only succeed if the sender
+        has paid for a course run in a program that the recipient is enrolled in
+        """
+        mock_mailgun_client.send_individual_email.return_value = Mock(
+            spec=Response,
+            status_code=status.HTTP_200_OK,
+            json=mocked_json()
+        )
+        with mute_signals(post_save):
+            learner_profile = ProfileFactory.create(
+                user__email='learner_sender@example.com',
+                email_optin=True,
+            )
+        learner_user = learner_profile.user
+        ProgramEnrollmentFactory.create(user=learner_user, program=self.program)
+        CachedEnrollment.objects.filter(user=learner_user).delete()
+
+        self.client.force_login(learner_user)
+        url = reverse(self.url_name, kwargs={'student_id': self.recipient_user.profile.student_id})
+        resp_post = self.client.post(url, data=self.request_data, format='json')
+        assert resp_post.status_code == status.HTTP_403_FORBIDDEN
+        CachedEnrollmentVerifiedFactory.create(user=learner_user, course_run__course__program=self.program)
+        resp_post = self.client.post(url, data=self.request_data, format='json')
+        assert resp_post.status_code == status.HTTP_200_OK
 
 
 class FinancialAidMailViewTests(FinancialAidBaseTestCase, APITestCase):
