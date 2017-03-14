@@ -4,9 +4,8 @@ Management command to clear the Elasticsearch index
 
 from django.core.management.base import BaseCommand
 
-from search.indexing_api import (
-    clear_index,
-)
+from search.connection import get_default_alias
+from search.indexing_api import clear_index
 
 
 class Command(BaseCommand):
@@ -19,4 +18,4 @@ class Command(BaseCommand):
         """
         Clear the index
         """
-        clear_index()
+        clear_index(get_default_alias())
