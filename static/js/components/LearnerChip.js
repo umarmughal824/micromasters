@@ -11,6 +11,16 @@ import type { Profile } from '../flow/profileTypes';
 const LearnerChip = (props: {profile: Profile, openLearnerEmailComposer: () => void}): React$Element<*> => {
   const { profile, openLearnerEmailComposer } = props;
 
+  let emailLink;
+  if (profile.email_optin) {
+    emailLink = (
+      <button onClick={openLearnerEmailComposer} className="icon-button-link">
+        <Icon name="email" aria-hidden="true" />
+        <span>Send a Message</span>
+      </button>
+    );
+  }
+
   return <Card className="user-chip">
     <div className="profile-info">
       <span className="name">
@@ -19,14 +29,11 @@ const LearnerChip = (props: {profile: Profile, openLearnerEmailComposer: () => v
       <span className="employer">
         { mstr(getEmployer(profile)) }
       </span>
-      <a href={`/learner/${profile.username}`} className="mm-minor-action">
+      <a href={`/learner/${profile.username}`} className="icon-button-link">
         <Icon name="person" aria-hidden="true" />
         <span>View Profile</span>
       </a>
-      <button onClick={openLearnerEmailComposer} className="mm-minor-action">
-        <Icon name="email" aria-hidden="true" />
-        <span>Send a Message</span>
-      </button>
+      { emailLink }
     </div>
     <ProfileImage profile={profile}/>
   </Card>;

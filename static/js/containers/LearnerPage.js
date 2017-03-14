@@ -13,12 +13,16 @@ import {
   childrenWithProps,
 } from './ProfileFormContainer';
 import ErrorMessage from '../components/ErrorMessage';
-import type { ProfileContainerProps } from './ProfileFormContainer';
 import { fetchDashboard } from '../actions/dashboard';
 import { hasAnyStaffRole } from '../lib/roles';
 import { getDashboard } from '../reducers/util';
 import { S } from '../lib/sanctuary';
+import { LEARNER_EMAIL_TYPE } from '../components/email/constants';
+import { LEARNER_EMAIL_CONFIG } from '../components/email/lib';
+import { withEmailDialog } from '../components/email/hoc';
+import type { ProfileContainerProps } from './ProfileFormContainer';
 import type { DashboardsState } from '../flow/dashboardTypes';
+import type { AllEmailsState } from '../flow/emailTypes';
 
 const notFetchingOrFetched = R.compose(
   R.not, R.contains(R.__, [FETCH_PROCESSING, FETCH_SUCCESS])
@@ -26,6 +30,8 @@ const notFetchingOrFetched = R.compose(
 
 type LearnerPageProps = ProfileContainerProps & {
   dashboard: DashboardsState,
+  email: AllEmailsState,
+  openEmailComposer: (emailType: string, emailOpenParams: any) => void,
 };
 
 class LearnerPage extends React.Component<*, LearnerPageProps, *> {
@@ -70,6 +76,8 @@ class LearnerPage extends React.Component<*, LearnerPageProps, *> {
       profiles,
       children,
       profileProps,
+      email,
+      openEmailComposer
     } = this.props;
 
     let profile = {};
@@ -80,6 +88,8 @@ class LearnerPage extends React.Component<*, LearnerPageProps, *> {
       loaded = profiles[username].getStatus !== FETCH_PROCESSING;
       let props = {
         dashboard: S.maybe({}, R.identity, this.getFocusedDashboard()),
+        email: email,
+        openLearnerEmailComposer: R.partial(openEmailComposer(LEARNER_EMAIL_TYPE), [profile.profile]),
         ...profileProps(profile)
       };
       toRender = childrenWithProps(children, props);
@@ -94,11 +104,15 @@ class LearnerPage extends React.Component<*, LearnerPageProps, *> {
 const mapStateToProps = state => {
   return {
     dashboard: state.dashboard,
+    email: state.email,
     ...mapStateToProfileProps(state),
   };
 };
 
 export default R.compose(
   connect(mapStateToProps),
+  withEmailDialog({
+    [LEARNER_EMAIL_TYPE]: LEARNER_EMAIL_CONFIG
+  }),
   profileFormContainer
 )(LearnerPage);

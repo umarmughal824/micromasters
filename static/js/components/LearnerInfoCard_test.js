@@ -21,6 +21,7 @@ describe('LearnerInfoCard', () => {
       profile={ USER_PROFILE_RESPONSE }
       toggleShowPersonalDialog={ editProfileBtnStub }
       toggleShowAboutMeDialog={ editAboutMeBtnStub }
+      openLearnerEmailComposer={ () => {} }
       {...props}
     />)
   );
@@ -60,7 +61,7 @@ describe('LearnerInfoCard', () => {
     assert.equal(editAboutMeBtnStub.callCount, 1);
   });
 
-  it('edit about me is not available for other users is ', () => {
+  it('should not allow the user to edit "about me" when viewing a different profile', () => {
     let wrapper = renderInfoCard({
       profile: {
         ...USER_PROFILE_RESPONSE,
@@ -70,7 +71,7 @@ describe('LearnerInfoCard', () => {
     assert.equal(wrapper.find(".edit-about-me-holder").children().length, 0);
   });
 
-  it('set about me', () => {
+  it('shows an "about me" section', () => {
     let wrapper = renderInfoCard({
       profile: {
         ...USER_PROFILE_RESPONSE,
@@ -84,7 +85,7 @@ describe('LearnerInfoCard', () => {
     );
   });
 
-  it('check multilines works me', () => {
+  it('correctly shows a multiline "about me" section', () => {
     let wrapper = renderInfoCard({
       profile: {
         ...USER_PROFILE_RESPONSE,
@@ -97,14 +98,72 @@ describe('LearnerInfoCard', () => {
     );
   });
 
-  it('should show email if user is viewing not their own profile', () => {
-    SETTINGS.user.username = "My user";
-    let chip = renderInfoCard();
-    assert.equal(chip.find(".profile-email").text(), USER_PROFILE_RESPONSE.email);
-  });
+  describe('email link', () => {
+    let originalUsername = SETTINGS.user.username;
 
-  it('should not show email if user is viewing their own profile', () => {
-    let chip = renderInfoCard();
-    assert(!chip.find(".profile-email").exists(), 'email is shown');
+    beforeEach(() => {
+      SETTINGS.user.username = "My user";
+      SETTINGS.roles = [{
+        "role": "staff",
+        "program": 1
+      }];
+    });
+
+    it('should be shown if a staff user is viewing a different profile', () => {
+      let card = renderInfoCard({
+        profile: {
+          ...USER_PROFILE_RESPONSE,
+          email: 'learner@example.com',
+          email_optin: true
+        }
+      });
+      assert.include(card.find(".icon-button-link").text(), 'Send a Message');
+    });
+
+    it('should not be shown if the user is not opted in to email', () => {
+      let card = renderInfoCard({
+        profile: {
+          ...USER_PROFILE_RESPONSE,
+          email: 'learner@example.com',
+          email_optin: false
+        }
+      });
+      assert.lengthOf(card.find(".icon-button-link"), 0);
+    });
+
+    it('should not be shown if the user has no email address', () => {
+      let card = renderInfoCard({
+        profile: {
+          ...USER_PROFILE_RESPONSE,
+          email: null,
+          email_optin: true
+        }
+      });
+      assert.lengthOf(card.find(".icon-button-link"), 0);
+    });
+
+    it('should not be shown if the user is viewing their own profile page', () => {
+      SETTINGS.user.username = originalUsername;
+      let card = renderInfoCard({
+        profile: {
+          ...USER_PROFILE_RESPONSE,
+          email: 'learner@example.com',
+          email_optin: true
+        }
+      });
+      assert.lengthOf(card.find(".icon-button-link"), 0);
+    });
+
+    it('should not be shown if the logged-in user is not staff', () => {
+      SETTINGS.roles = [];
+      let card = renderInfoCard({
+        profile: {
+          ...USER_PROFILE_RESPONSE,
+          email: 'learner@example.com',
+          email_optin: true
+        }
+      });
+      assert.lengthOf(card.find(".icon-button-link"), 0);
+    });
   });
 });

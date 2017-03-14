@@ -26,11 +26,12 @@ class PrivacyForm extends ProfileFormFields {
       be visible to MIT faculty and staff.` }
   ];
 
+  emailOptions: Array<{value: string, label: string}> = [
+    { value: "true", label: "Faculty, staff, and other learners can send me emails"},
+    { value: "false", label: "I don't want to receive any emails" }
+  ];
+
   render() {
-    const emailOptions = [
-      { value: "true", label: "Faculty and staff can send me emails"},
-      { value: "false", label: "I don't want to receive any emails" }
-    ];
     return (
       <div>
         <Card shadow={1} className="profile-form">
@@ -42,7 +43,7 @@ class PrivacyForm extends ProfileFormFields {
         <Card shadow={1} className="profile-form">
           <h4 className="privacy-form-heading">Email Preferences</h4>
           <div className="profile-form-row">
-            { this.boundRadioGroupField(['email_optin'], '', emailOptions) }
+            { this.boundRadioGroupField(['email_optin'], '', this.emailOptions) }
           </div>
         </Card>
       </div>
