@@ -1,0 +1,5 @@
+- name: run_tests
+  type: parallel
+  steps:
+    - service: web
+      command: tox
