@@ -24,12 +24,16 @@ services:
     ports:
       - "8079:8079"
     links:
-      - web
+      - python
       - watch
 
   python:
     build: .
-    command: /bin/true
+    command: >
+      /bin/bash -c '
+      sleep 3 &&
+      python3 manage.py migrate &&
+      uwsgi uwsgi.ini'
     volumes:
       - .:/src
       - django_media:/var/media
@@ -50,17 +54,7 @@ services:
       EXAMS_SFTP_HOST: sftp
       EXAMS_SFTP_USERNAME: odl
       EXAMS_SFTP_PASSWORD: 123
-    env_file: .env
-
-  web:
-    image: micromasters_python
-    extends:
-      service: python
-    command: >
-      /bin/bash -c '
-      sleep 3 &&
-      python3 manage.py migrate &&
-      uwsgi uwsgi.ini'
+    env_file: .env.example
     ports:
       - "8077:8077"
     links:

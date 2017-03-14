@@ -1,5 +1,7 @@
 - name: run_tests
   type: parallel
   steps:
-    - service: web
+    - service: python
       command: tox
+    - command: ./travis/js_tests.sh
+      service: watch
