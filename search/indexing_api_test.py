@@ -523,7 +523,7 @@ class PercolateQueryTests(ESTestCase):
     def test_index_percolate_query(self):
         """Test that we index the percolate query"""
         query = {"query": {"match": {"profile.first_name": "here"}}}
-        percolate_query = PercolateQuery(query=query)
+        percolate_query = PercolateQuery(query=query, original_query="original")
         percolate_query_id = 123
         percolate_query.id = percolate_query_id
         # Don't save since that will trigger a signal which will update the index
@@ -551,7 +551,7 @@ class PercolateQueryTests(ESTestCase):
         """Test that we delete the percolate query from the index"""
         query = {"query": {"match": {"profile.first_name": "here"}}}
         with patch('search.signals.transaction', on_commit=lambda callback: callback()):
-            percolate_query = PercolateQuery.objects.create(query=query)
+            percolate_query = PercolateQuery.objects.create(query=query, original_query="original")
             assert es.get_percolate_query(percolate_query.id) == {
                 '_id': str(percolate_query.id),
                 '_index': es.get_default_backing_index(),

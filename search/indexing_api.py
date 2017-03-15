@@ -143,6 +143,7 @@ def index_program_enrolled_users(program_enrollments, indices=None, chunk_size=1
     if indices is None:
         indices = get_active_aliases()
 
+    count = 0
     for index in indices:
         count = _index_chunks(
             (serialize_program_enrolled_user(program_enrollment) for program_enrollment in program_enrollments),
