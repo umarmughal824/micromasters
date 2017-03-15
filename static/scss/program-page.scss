@@ -129,6 +129,10 @@
       margin-top: 0;
       line-height: 1.4em;
     }
+
+    > .semester-date:not(:last-child) {
+      margin-bottom: 10px;
+    }
   }
 
   .course-info {
