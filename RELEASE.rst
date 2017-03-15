@@ -1,6 +1,23 @@
 Release Notes
 =============
 
+Version 0.52.1
+--------------
+
+- Upgrade Wagtail to 1.9 (#2832)
+- Load the edX logo from CloudFront on the program page (#2839)
+- Improve searchkit query (#2868)
+- Fixed financial aid application review link on nav drawer
+- Added validation for invalid name chars (#2837)
+- Fixes layout issue with schedule an exam button (#2863)
+- Add UI to send automatic emails for learner search (#2727)
+- Upgraded some JS dependencies 🆙
+- Sent emails when new user fills out profile and their profile matches query (#2782)
+- small tweaks (#2866)
+- Use temporary index during recreate_index (#2845)
+- Enabled learner-to-learner emails
+- Updated required yarn version in readme file (#2864)
+
 Version 0.52.0
 --------------
 
