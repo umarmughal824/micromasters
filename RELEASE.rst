@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.52.0
+--------------
+
+- Added course history display to staff view of learner page
+- Fixed small searchkit bug
+- Final Grade Facet for Selected Course
+- Refactored profile validation for better scalability
+- Removed send_bcc (#2848)
+
 Version 0.51.3
 --------------
 
