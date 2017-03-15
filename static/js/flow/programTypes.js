@@ -35,6 +35,7 @@ export type Program = {
   financial_aid_availability: boolean,
   financial_aid_user_info: FinancialAidUserInfo,
   pearson_exam_status: string,
+  grade_average: ?number,
 };
 
 export type Course = {

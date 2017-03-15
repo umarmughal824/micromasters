@@ -5,11 +5,12 @@ import R from 'ramda';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 
 import { circularProgressWidget } from './ProgressWidget';
-import { programCourseInfo } from '../util/util';
+import { programCourseInfo, classify } from '../util/util';
 import type { Program } from '../flow/programTypes';
 import CourseDescription from '../components/dashboard/CourseDescription';
 import CourseGrade from '../components/dashboard/CourseGrade';
 import { STATUS_OFFERED } from '../constants';
+import { S, getm } from '../lib/sanctuary';
 
 type StaffLearnerCardProps = {
   program: Program,
@@ -42,7 +43,7 @@ const renderCourseRuns = R.addIndex(R.map)((props, index) => (
 ));
 
 const programInfoBadge = (title, text) => (
-  <div className="program-info-badge">
+  <div className={`program-info-badge ${classify(title)}`}>
     <div className="program-badge">
       { text }
     </div>
@@ -54,6 +55,16 @@ const programInfoBadge = (title, text) => (
 
 const displayCourseRuns = R.compose(
   renderCourseRuns, R.flatten, R.map(formatCourseRuns), R.prop('courses')
+);
+
+// getProgramProp :: String -> Program -> Either String Number
+const getProgramProp = (prop, program) => (
+  S.maybeToEither('--', getm(prop, program))
+);
+
+// formatCourseGrade :: Program -> String
+const formatCourseGrade = program => (
+  getProgramProp('grade_average', program).map(grade => `${grade}%`).value
 );
 
 const StaffLearnerInfoCard = (props: StaffLearnerCardProps) => {
@@ -70,7 +81,7 @@ const StaffLearnerInfoCard = (props: StaffLearnerCardProps) => {
           <div className="progress-widget">
             { circularProgressWidget(63, 7, totalPassedCourses, totalCourses) }
           </div>
-          { programInfoBadge('Average program grade', '--') }
+          { programInfoBadge('Average program grade', formatCourseGrade(program)) }
           { programInfoBadge('Course Price', '--') }
         </div>
         { displayCourseRuns(program) }

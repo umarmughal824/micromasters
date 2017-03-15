@@ -26,11 +26,11 @@ describe('StaffLearnerInfoCard', () => {
     sandbox.restore();
   });
 
-  let renderCard = () => (
+  let renderCard = (program = DASHBOARD_RESPONSE.programs[0]) => (
     mount(
       <MuiThemeProvider muiTheme={getMuiTheme()}>
         <StaffLearnerInfoCard
-          program={DASHBOARD_RESPONSE.programs[0]}
+          program={program}
         />
       </MuiThemeProvider>
     )
@@ -62,5 +62,18 @@ describe('StaffLearnerInfoCard', () => {
     let card = renderCard();
     assert.equal(card.find(CourseDescription).length, numRuns);
     assert.equal(card.find(CourseGrade).length, numRuns);
+  });
+
+  it('should show average grade, if present', () => {
+    let program = {...DASHBOARD_RESPONSE.programs[0]};
+    program.grade_average = 62;
+    let badge = renderCard(program)
+      .find('.average-program-grade .program-badge');
+    assert.equal(badge.text(), '62%');
+  });
+
+  it('should show "--" if the grade is not present', () => {
+    let badge = renderCard().find('.average-program-grade .program-badge');
+    assert.equal(badge.text(), '--');
   });
 });

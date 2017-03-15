@@ -2,7 +2,7 @@
 import { assert } from 'chai';
 import R from 'ramda';
 
-import { S, allJust, mstr, ifNil, guard } from './sanctuary';
+import { S, allJust, mstr, ifNil, guard, getm } from './sanctuary';
 const { Maybe, Just, Nothing } = S;
 
 export const assertMaybeEquality = (m1: Maybe, m2: Maybe) => {
@@ -91,6 +91,23 @@ describe('sanctuary util functions', () => {
           assertIsNothing(wrappedRestFunc(...R.update(i, nilVal, args)));
         }
       });
+    });
+  });
+
+  describe('getm', () => {
+    it('returns Nothing if a prop is not present', () => {
+      assertIsNothing(getm('prop', {}));
+    });
+
+    [null, undefined].forEach(nil => {
+      // $FlowFixMe
+      it(`returns Nothing if a prop is ${nil}`, () => {
+        assertIsNothing(getm('prop', {'prop': nil}));
+      });
+    });
+
+    it('returns Just(val) if a prop is present', () => {
+      assertIsJust(getm('prop', {prop: 'HI'}), 'HI');
     });
   });
 });
