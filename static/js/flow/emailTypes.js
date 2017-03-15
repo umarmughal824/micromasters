@@ -5,18 +5,20 @@ export type EmailSendResponse = {
 export type EmailSendError = EmailSendResponse;
 
 export type EmailInputs = {
-  subject?:   ?string,
-  body?:      ?string,
+  subject?:             ?string,
+  body?:                ?string,
+  sendAutomaticEmails?: boolean,
 };
 export type EmailValidationErrors = EmailInputs;
 
 export type EmailState = {
-  inputs:           EmailInputs,
-  subheading:       ?string,
-  params:           Object,
-  validationErrors: EmailValidationErrors,
-  sendError:        EmailSendError,
-  fetchStatus?:     ?string,
+  inputs:                   EmailInputs,
+  subheading:               ?string,
+  params:                   Object,
+  validationErrors:         EmailValidationErrors,
+  sendError:                EmailSendError,
+  fetchStatus?:             ?string,
+  supportsAutomaticEmails?: boolean,
 };
 
 export type AllEmailsState = {
