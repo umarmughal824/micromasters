@@ -30,7 +30,7 @@ import { makeCoupon } from '../../factories/dashboard';
 describe('CourseListCard', () => {
   let program, sandbox, helper, routerPushStub;
   beforeEach(() => {
-    program = _.cloneDeep(DASHBOARD_RESPONSE[1]);
+    program = _.cloneDeep(DASHBOARD_RESPONSE.programs[1]);
     assert.isAbove(program.courses.length, 0);
     sandbox = sinon.sandbox.create();
     routerPushStub = sandbox.stub();
@@ -43,7 +43,7 @@ describe('CourseListCard', () => {
   });
 
   let renderCourseListCard = (props = {}) => {
-    helper.store.dispatch(receiveGetProgramEnrollmentsSuccess(DASHBOARD_RESPONSE));
+    helper.store.dispatch(receiveGetProgramEnrollmentsSuccess(DASHBOARD_RESPONSE.programs));
     helper.store.dispatch(setCurrentProgramEnrollment(program));
     let coursePrice = COURSE_PRICES_RESPONSE.find(
       coursePrice => coursePrice.program_id === program.id

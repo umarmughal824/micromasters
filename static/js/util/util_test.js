@@ -606,7 +606,7 @@ describe('utility functions', () => {
 
     it('returns an empty object for each if selector never matches', () => {
       assert.deepEqual(
-        findCourseRun(DASHBOARD_RESPONSE, () => false),
+        findCourseRun(DASHBOARD_RESPONSE.programs, () => false),
         [null, null, null],
       );
     });

@@ -17,8 +17,10 @@ import type {
 import type {
   CoursePrice,
   CoursePrices,
-  Dashboard,
 } from '../flow/dashboardTypes';
+import type {
+  Program
+} from '../flow/programTypes';
 
 // For objects that have a program id, make a lookup for it
 type HasProgramId = {
@@ -28,7 +30,7 @@ function makeProgramIdLookup<T: HasProgramId>(arr: Array<T>): Map<number, T> {
   return new Map(arr.map((value: T) => [value.program_id, value]));
 }
 
-function* genPrices(programs: Dashboard, prices: CoursePrices, coupons: Coupons) {
+function* genPrices(programs: Array<Program>, prices: CoursePrices, coupons: Coupons) {
   const couponLookup: Map<number, Coupon> = makeProgramIdLookup(coupons);
   const priceLookup: Map<number, CoursePrice> = makeProgramIdLookup(prices);
 
@@ -54,7 +56,7 @@ export const calculatePrice = (
   return [coupon, calculateRunPrice(runId, courseId, price.program_id, price, coupon)];
 };
 
-export const calculatePrices = (programs: Dashboard, prices: CoursePrices, coupons: Coupons): CalculatedPrices => {
+export const calculatePrices = (programs: Array<Program>, prices: CoursePrices, coupons: Coupons): CalculatedPrices => {
   return new Map(genPrices(programs, prices, coupons));
 };
 

@@ -32,7 +32,7 @@ import LearnerSearchPage from '../containers/LearnerSearchPage';
 
 export function findCourse(courseSelector: (course: ?Course, program: ?Program) => boolean): Course {
   let [, course, ] = findCourseRun(
-    DASHBOARD_RESPONSE,
+    DASHBOARD_RESPONSE.programs,
     (courseRun, _course, program) => courseSelector(_course, program)
   );
   if (course !== null && course !== undefined) {

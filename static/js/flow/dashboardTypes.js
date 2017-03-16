@@ -3,11 +3,15 @@ import Decimal from 'decimal.js-light';
 import type { Program } from './programTypes';
 
 // likely to change in very near future
-export type Dashboard = Array<Program>;
+export type Dashboard = {
+  programs:   Array<Program>,
+  is_edx_data_fresh: boolean
+};
 
 export type DashboardState = {
-  programs:     Dashboard,
-  fetchStatus?: string,
+  programs:       Array<Program>,
+  isEdxDataFresh: boolean,
+  fetchStatus?:   string,
 };
 
 export type DashboardsState = {

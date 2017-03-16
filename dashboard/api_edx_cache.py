@@ -145,6 +145,18 @@ class CachedEdxDataApi:
         )
 
     @classmethod
+    def are_all_caches_fresh(cls, user):
+        """
+        Checks if all cache types are fresh.
+
+        Args:
+            user (django.contrib.auth.models.User): A user
+        Returns:
+            bool
+        """
+        return all(cls.is_cache_fresh(user, cache_type) for cache_type in cls.SUPPORTED_CACHES)
+
+    @classmethod
     def update_cached_enrollment(cls, user, enrollment, course_id, index_user=False):
         """
         Updates the cached enrollment based on an Enrollment object

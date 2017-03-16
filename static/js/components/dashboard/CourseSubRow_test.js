@@ -27,7 +27,7 @@ describe('CourseSubRow', () => {
     now = moment();
     openFinancialAidCalculator = sandbox.stub();
     addCourseEnrollment = sandbox.stub();
-    courseRun = _.cloneDeep(DASHBOARD_RESPONSE[1].courses[0]);
+    courseRun = _.cloneDeep(DASHBOARD_RESPONSE.programs[1].courses[0]);
   });
 
   afterEach(() => {

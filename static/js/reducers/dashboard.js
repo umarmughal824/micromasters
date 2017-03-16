@@ -21,7 +21,8 @@ import type {
 import type { Action } from '../flow/reduxTypes';
 
 export const INITIAL_DASHBOARD_STATE: DashboardState = {
-  programs: []
+  programs: [],
+  isEdxDataFresh: true
 };
 
 const INITIAL_DASHBOARDS_STATE: DashboardsState = {};
@@ -47,7 +48,8 @@ export const dashboard = (state: DashboardsState = INITIAL_DASHBOARDS_STATE, act
   case RECEIVE_DASHBOARD_SUCCESS:
     return updateDashboardState(state, username, {
       fetchStatus: FETCH_SUCCESS,
-      programs: action.payload
+      programs: action.payload.programs,
+      isEdxDataFresh: action.payload.is_edx_data_fresh
     });
   case RECEIVE_DASHBOARD_FAILURE:
     return updateDashboardState(state, username, {

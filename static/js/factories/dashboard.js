@@ -48,11 +48,12 @@ const newRunId = makeCounter();
 const newFinancialAidId = makeCounter();
 
 export const makeDashboard = (): Dashboard => {
-  return R.range(1, 3).map(makeProgram);
+  const programs = R.range(1, 3).map(makeProgram);
+  return { "programs": programs, "is_edx_data_fresh": true};
 };
 
 export const makeAvailablePrograms = (dashboard: Dashboard): AvailablePrograms => {
-  return dashboard.map(program => ({
+  return dashboard.programs.map(program => ({
     enrolled: true,
     id: program.id,
     programpage_url: `/page/${program.id}`,
@@ -125,8 +126,8 @@ export const makeCoupon = (program: Program): Coupon => ({
   object_id: program.id,
 });
 
-export const makeCoupons = (programs: Dashboard): Coupons => (
-  programs.map(makeCoupon)
+export const makeCoupons = (dashboard: Dashboard): Coupons => (
+  dashboard.programs.map(makeCoupon)
 );
 
 export const makeCoursePrice = (program: Program): CoursePrice => ({
@@ -136,6 +137,6 @@ export const makeCoursePrice = (program: Program): CoursePrice => ({
   has_financial_aid_request: true
 });
 
-export const makeCoursePrices = (programs: Dashboard): CoursePrices => (
-  programs.map(makeCoursePrice)
+export const makeCoursePrices = (dashboard: Dashboard): CoursePrices => (
+  dashboard.programs.map(makeCoursePrice)
 );

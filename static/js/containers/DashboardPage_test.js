@@ -246,7 +246,7 @@ describe('DashboardPage', () => {
       beforeEach(() => {
         calculatePricesStub = helper.sandbox.stub(libCoupon, 'calculatePrices');
         dashboard = makeDashboard();
-        program = dashboard[0];
+        program = dashboard.programs[0];
         run = program.courses[0].runs[0];
         run.enrollment_start_date = '2016-01-01';
         availablePrograms = makeAvailablePrograms(dashboard);
@@ -262,7 +262,7 @@ describe('DashboardPage', () => {
 
         return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
           assert.include(wrapper.text(), 'Enroll Now');
-          sinon.assert.calledWith(calculatePricesStub, dashboard, coursePrices, []);
+          sinon.assert.calledWith(calculatePricesStub, dashboard.programs, coursePrices, []);
         });
       });
 
@@ -309,9 +309,9 @@ describe('DashboardPage', () => {
         });
 
         it('should not care about coupons for other programs', () => {
-          coupon.program_id = dashboard[1].id;
-          coupon.object_id = dashboard[1].id;
-          dashboard[1].financial_aid_user_info = {
+          coupon.program_id = dashboard.programs[1].id;
+          coupon.object_id = dashboard.programs[1].id;
+          dashboard.programs[1].financial_aid_user_info = {
             application_status: FA_STATUS_APPROVED,
           };
 
@@ -434,7 +434,7 @@ describe('DashboardPage', () => {
     });
 
     it('without a race condition', () => {  // eslint-disable-line mocha/no-skipped-tests
-      let program = DASHBOARD_RESPONSE[1];
+      let program = DASHBOARD_RESPONSE.programs[1];
       let coupon1 = makeCoupon(program);
       let coupon2 = makeCoupon(program);
       coupon2.coupon_code = 'second-coupon';
@@ -475,14 +475,14 @@ describe('DashboardPage', () => {
 
     beforeEach(() => {
       // Limit the dashboard response to 1 program
-      dashboardResponse = [R.clone(DASHBOARD_RESPONSE[0])];
+      dashboardResponse = {"programs": [R.clone(DASHBOARD_RESPONSE.programs[0])]};
     });
 
     it('shows the email composition dialog when a user has permission to contact a course team', () => {
       let course = makeCourse();
       course.has_contact_email = true;
       course.runs[0].has_paid = true;
-      dashboardResponse[0].courses = [course];
+      dashboardResponse.programs[0].courses = [course];
       helper.dashboardStub.returns(Promise.resolve(dashboardResponse));
 
       return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
@@ -518,7 +518,7 @@ describe('DashboardPage', () => {
       course.has_contact_email = true;
       // Set all course runs to unpaid
       course.runs = R.chain(R.set(R.lensProp('has_paid'), false), course.runs);
-      dashboardResponse[0].courses = [course];
+      dashboardResponse.programs[0].courses = [course];
       helper.dashboardStub.returns(Promise.resolve(dashboardResponse));
 
       return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
@@ -544,13 +544,13 @@ describe('DashboardPage', () => {
 
     beforeEach(() => {
       // Limit the dashboard response to 1 program
-      dashboardResponse = [R.clone(DASHBOARD_RESPONSE[0])];
+      dashboardResponse = {"programs": [R.clone(DASHBOARD_RESPONSE.programs[0])]};
     });
 
     it('renders correctly', () => {
       let course = makeCourse();
       course.runs[0].enrollment_start_date = moment().subtract(2, 'days');
-      dashboardResponse[0].courses = [course];
+      dashboardResponse.programs[0].courses = [course];
       helper.dashboardStub.returns(Promise.resolve(dashboardResponse));
 
       return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {

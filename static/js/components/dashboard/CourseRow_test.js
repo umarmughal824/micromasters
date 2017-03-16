@@ -60,7 +60,7 @@ describe('CourseRow', () => {
   };
 
   it('forwards the appropriate props', () => {
-    const programs = makeDashboard();
+    const { programs } = makeDashboard();
     const course = programs[0].courses[0];
     // change this so there's something to show in CourseSubRow
     course.runs[1].status = STATUS_NOT_PASSED;
@@ -91,7 +91,7 @@ describe('CourseRow', () => {
   });
 
   describe('with failed/missed-upgrade-deadline runs', () => {
-    let courseToClone = DASHBOARD_RESPONSE[1].courses[0];
+    let courseToClone = DASHBOARD_RESPONSE.programs[1].courses[0];
 
     it('shows two-column view when the upgrade deadline was missed', () => {
       let pastCourseRunCount = 1;

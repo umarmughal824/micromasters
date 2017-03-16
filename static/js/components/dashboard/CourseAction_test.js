@@ -92,7 +92,7 @@ describe('CourseAction', () => {
   };
 
   let renderCourseAction = (props = {}) => {
-    let prices = calculatePrices(DASHBOARD_RESPONSE, COURSE_PRICES_RESPONSE, []);
+    let prices = calculatePrices(DASHBOARD_RESPONSE.programs, COURSE_PRICES_RESPONSE, []);
     return shallow(
       <CourseAction
         hasFinancialAid={false}

@@ -292,406 +292,409 @@ export const USER_PROGRAM_RESPONSE = deepFreeze({
   "grade_average": 83
 });
 
-export const DASHBOARD_RESPONSE: Dashboard = deepFreeze([
-  {
-    "description": "Not passed program",
-    "title": "Not passed program",
-    "courses": [
-      {
-        "prerequisites": "",
-        "runs": [
-          {
-            "position": 1,
-            "title": "Gio Test Course #15",
-            "course_id": "course-v1:odl+GIO101+CR-FALL15",
-            "status": STATUS_NOT_PASSED,
-            "id": 1,
-            "course_start_date": "2016-09-22T11:48:27Z",
-            "fuzzy_start_date": "Fall 2016",
-            "course_end_date": "2016-09-09T10:20:10Z"
-          },
-          {
-            "position": 2,
-            "title": "Gio Test Course #14",
-            "course_id": "course-v1:odl+GIO101+FALL14",
-            "status": STATUS_NOT_PASSED,
-            "final_grade": "33",
-            "id": 2,
-            "course_start_date": "2016-08-22T11:48:27Z",
-            "fuzzy_start_date": "Fall 2017",
-            "course_end_date": "2016-09-09T10:20:10Z",
-          },
-          {
-            "certificate_url": "www.google.com",
-            "title": "Gio Test Course #13",
-            "status": STATUS_PASSED,
-            "position": 3,
-            "final_grade": "66",
-            "course_id": "course-v1:odl+GIO101+FALL13",
-            "id": 3,
-            "course_start_date": "2016-08-22T11:48:27Z",
-            "fuzzy_start_date": "Fall 2017",
-            "course_end_date": "2016-09-09T10:20:10Z",
-          }
-        ],
+export const DASHBOARD_RESPONSE: Dashboard = deepFreeze({
+  "is_edx_data_fresh": true,
+  "programs": [
+    {
+      "description": "Not passed program",
+      "title": "Not passed program",
+      "courses": [
+        {
+          "prerequisites": "",
+          "runs": [
+            {
+              "position": 1,
+              "title": "Gio Test Course #15",
+              "course_id": "course-v1:odl+GIO101+CR-FALL15",
+              "status": STATUS_NOT_PASSED,
+              "id": 1,
+              "course_start_date": "2016-09-22T11:48:27Z",
+              "fuzzy_start_date": "Fall 2016",
+              "course_end_date": "2016-09-09T10:20:10Z"
+            },
+            {
+              "position": 2,
+              "title": "Gio Test Course #14",
+              "course_id": "course-v1:odl+GIO101+FALL14",
+              "status": STATUS_NOT_PASSED,
+              "final_grade": "33",
+              "id": 2,
+              "course_start_date": "2016-08-22T11:48:27Z",
+              "fuzzy_start_date": "Fall 2017",
+              "course_end_date": "2016-09-09T10:20:10Z",
+            },
+            {
+              "certificate_url": "www.google.com",
+              "title": "Gio Test Course #13",
+              "status": STATUS_PASSED,
+              "position": 3,
+              "final_grade": "66",
+              "course_id": "course-v1:odl+GIO101+FALL13",
+              "id": 3,
+              "course_start_date": "2016-08-22T11:48:27Z",
+              "fuzzy_start_date": "Fall 2017",
+              "course_end_date": "2016-09-09T10:20:10Z",
+            }
+          ],
+          "position_in_program": 0,
+          "title": "Gio Course - failed, no grade",
+          "description": "",
+          "id": 1
+        },
+        {
+          "prerequisites": "",
+          "runs": [],
+          "position_in_program": 1,
+          "title": "8.MechCx Advanced Introductory Classical Mechanics",
+          "description": "",
+          "id": 2
+        },
+        {
+          "prerequisites": "",
+          "runs": [],
+          "position_in_program": 2,
+          "title": "EDX Demo course",
+          "description": "",
+          "id": 3
+        },
+        {
+          "prerequisites": "",
+          "runs": [],
+          "position_in_program": 3,
+          "title": "Peter Course",
+          "description": "",
+          "id": 4
+        }
+      ],
+      "financial_aid_availability": false,
+      "id": 3
+    },
+    {
+      "courses": [
+        {
+          "id": 5,
+          "position_in_program": 1,
+          "title": "Supply Chain and Logistics Fundamentals - enroll button",
+          "runs": [
+            {
+              "course_id": "course-v1:supply+chain",
+              "id": 4,
+              "status": STATUS_OFFERED,
+              "fuzzy_enrollment_start_date": null,
+              "title": "Supply Chain Design",
+              "enrollment_start_date": "2016-03-04T01:00:00Z",
+              "position": 0,
+              "price": 50.00,
+              "course_start_date": "2016-08-22T11:48:27Z",
+              "fuzzy_start_date": "Fall 2017",
+              "course_end_date": "2016-09-09T10:20:10Z",
+            }
+          ],
+          "description": null,
+          "prerequisites": null
+        },
+        {
+          "id": 6,
+          "position_in_program": 5,
+          "title": "Passed course - check mark, grade is 88%",
+          "runs": [
+            {
+              "certificate_url": "www.google.com",
+              "course_id": "course-v1:edX+DemoX+Demo_Course",
+              "id": 5,
+              "status": STATUS_PASSED,
+              "title": "Demo course",
+              "final_grade": "88",
+              "position": 0,
+              "course_start_date": "2016-08-22T11:48:27Z",
+              "fuzzy_start_date": "Fall 2017",
+              "course_end_date": "2016-09-09T10:20:10Z",
+            }
+          ],
+          "description": "The demo course",
+          "prerequisites": ""
+        },
+        {
+          "id": 7,
+          "position_in_program": 2,
+          "title": "Empty course - no status text",
+          "runs": [
+          ],
+          "description": null,
+          "prerequisites": null
+        },
+        {
+          "id": 6789,
+          "position_in_program": 11,
+          "title": "Current verified course - grade is 88%",
+          "runs": [
+            {
+              "certificate_url": "www.google.com",
+              "course_id": "course-v1:current",
+              "id": 5678,
+              "status": STATUS_CURRENTLY_ENROLLED,
+              "title": "Current course run",
+              "current_grade": "23",
+              "position": 0,
+              "course_start_date": "2016-08-22T11:48:27Z",
+              "fuzzy_start_date": "Fall 2017",
+              "course_end_date": "2016-09-09T10:20:10Z",
+            }
+          ],
+          "description": "The demo course",
+          "prerequisites": ""
+        },
+        {
+          "id": 8,
+          "position_in_program": 3,
+          "title": "Not verified course - upgrade button",
+          "runs": [
+            {
+              "id": 7,
+              "status": STATUS_CAN_UPGRADE,
+              "title": "Not verified run",
+              "course_id": "not-verified",
+              "position": 0,
+              "price": 50.00,
+              "course_start_date": "2016-08-22T11:48:27Z",
+              "fuzzy_start_date": "Fall 2017",
+              "course_end_date": "2016-09-09T10:20:10Z",
+              "course_upgrade_deadline": "2016-08-20T11:48:27Z",
+            }
+          ],
+          "description": null,
+          "prerequisites": null
+        },
+        {
+          "id": 10,
+          "position_in_program": 4,
+          "title": "Enrollment starting course - disabled enroll button, text says Enrollment begins 3/3/2106",
+          "runs": [
+            {
+              "course_id": "course-v1:supply+chain2",
+              "id": 8,
+              "status": STATUS_OFFERED,
+              "fuzzy_enrollment_start_date": null,
+              "title": "Enrollment starting run",
+              "enrollment_start_date": "2106-03-04T01:00:00Z",
+              "position": 0,
+              "price": 30.00,
+              "course_start_date": "2016-08-22T11:48:27Z",
+              "fuzzy_start_date": "Fall 2017",
+              "course_end_date": "2016-09-09T10:20:10Z",
+            }
+          ],
+          "description": null,
+          "prerequisites": null
+        },
+        {
+          "id": 1278,
+          "title": "Passed course, most recent run non-passed, older passed",
+          "position_in_program": 7,
+          "runs": [
+            {
+              "certificate_url": "www.google.com",
+              "title": "Passed run missing grade",
+              "status": STATUS_PASSED,
+              "position": 2,
+              "course_id": "course_id_one",
+              "id": 100,
+              "course_start_date": "2015-08-22T11:48:27Z",
+              "fuzzy_start_date": "Fall 2015",
+              "course_end_date": "2015-09-09T10:20:10Z",
+            },
+            {
+              "certificate_url": "www.google.com",
+              "title": "Passed run missing grade",
+              "status": STATUS_PASSED,
+              "position": 1,
+              "course_id": "course_id_two",
+              "final_grade": "88",
+              "id": 102,
+              "course_start_date": "2015-08-22T11:48:27Z",
+              "fuzzy_start_date": "Fall 2015",
+              "course_end_date": "2015-09-09T10:20:10Z",
+            },
+            {
+              "certificate_url": "www.google.com",
+              "title": "Passed run missing grade",
+              "status": STATUS_NOT_PASSED,
+              "position": 0,
+              "course_id": "course_id_three",
+              "final_grade": "43",
+              "id": 101,
+              "course_start_date": "2016-08-22T11:48:27Z",
+              "fuzzy_start_date": "Fall 2017",
+              "course_end_date": "2016-09-09T10:20:10Z",
+            }
+          ]
+        },
+        {
+          "id": 17,
+          "title": "Passed course missing grade - check mark, no grade",
+          "position_in_program": 6,
+          "runs": [
+            {
+              "certificate_url": "www.google.com",
+              "title": "Passed run missing grade",
+              "status": STATUS_PASSED,
+              "position": 0,
+              "course_id": "course_id",
+              "id": 10,
+              "course_start_date": "2016-08-22T11:48:27Z",
+              "fuzzy_start_date": "Fall 2017",
+              "course_end_date": "2016-09-09T10:20:10Z",
+            }
+          ]
+        },
+        {
+          "id": 15,
+          "position_in_program": 9,
+          "title": "verified not completed, course starts in future - action text is Course starting",
+          "runs": [
+            {
+              "id": 13,
+              "status": STATUS_WILL_ATTEND,
+              "course_start_date": "8765-03-21",
+              "title": "First run",
+              "position": 0,
+              "fuzzy_start_date": "Fall 2017",
+              "course_end_date": "2016-09-09T10:20:10Z",
+              "course_id": "verified",
+            }
+          ]
+        },
+        {
+          "id": 11,
+          "position_in_program": 0,
+          "title": "Fuzzy enrollment starting course - First in program, action text is enrollment begins soonish",
+          "runs": [
+            {
+              "course_id": "course-v1:supply+chain3",
+              "id": 9,
+              "status": STATUS_OFFERED,
+              "fuzzy_enrollment_start_date": "soonish",
+              "title": "Fuzzy enrollment starting run",
+              "position": 0,
+              "price": 40.00,
+              "course_start_date": "2016-08-22T11:48:27Z",
+              "fuzzy_start_date": "Fall 2017",
+              "course_end_date": "2016-09-09T10:20:10Z",
+            }
+          ],
+          "description": null,
+          "prerequisites": null
+        },
+        {
+          "id": 16,
+          "position_in_program": 10,
+          "title": "Pending enrollment course",
+          "runs": [
+            {
+              "course_id": "course-v1:pending",
+              "id": 47,
+              "title": "Pending enrollment course run",
+              "position": 0,
+              "status": STATUS_PENDING_ENROLLMENT,
+              "course_start_date": "2018-08-22T11:48:27Z",
+              "course_end_date": "2018-09-09T10:20:10Z",
+              "enrollment_start_date": "2016-03-04T01:00:00Z",
+            }
+          ]
+        }
+      ],
+      "title": "Master Program",
+      "description": null,
+      "financial_aid_availability": false,
+      "id": 4
+    },
+    {
+      "financial_aid_availability": false,
+      "title": "Missed deadline program",
+      "description": "Missed deadline program",
+      "courses": [{
+        "id": 9,
         "position_in_program": 0,
-        "title": "Gio Course - failed, no grade",
-        "description": "",
-        "id": 1
-      },
-      {
+        "title": "Course for the missed deadline program",
+        "description": "Course for the missed deadline program",
         "prerequisites": "",
-        "runs": [],
+        "runs": [{
+          "course_id": "course-v1:edX+missed+deadline",
+          "id": 12,
+          "status": STATUS_MISSED_DEADLINE,
+          "title": "Course run for the missed deadline program",
+          "position": 0,
+          "course_start_date": "2016-01-01",
+          "course_end_date": "2016-09-09T10:20:10Z",
+        }]
+      }],
+      "id": 5
+    },
+    {
+      "financial_aid_availability": false,
+      "title": "Empty program",
+      "description": "The empty program",
+      "courses": [
+      ],
+      "id": 2
+    },
+    {
+      "title": "Last program",
+      "description": "The last program",
+      "pearson_exam_status": "",
+      "courses": [
+        {
+          "id": 13,
+          "position_in_program": 0,
+          "title": "Course for last program in progress - no grade, action or description",
+          "runs": [
+            {
+              "course_id": "course-v1:edX+DemoX+Demo_Course2",
+              "id": 11,
+              "status": STATUS_CURRENTLY_ENROLLED,
+              "title": "Course run for last program",
+              "position": 0,
+              "course_start_date": "2016-01-01",
+              "fuzzy_start_date": "Fall 2017",
+              "course_end_date": "2016-09-09T10:20:10Z",
+            }
+          ],
+          "description": "Course for Last program",
+          "prerequisites": ""
+        },
+      ],
+      "financial_aid_availability": false,
+      "id": 6
+    },
+    {
+      "title": "Paid but not enrolled",
+      "description": "Paid but not enrolled",
+      "courses": [{
+        "id": 24,
         "position_in_program": 1,
-        "title": "8.MechCx Advanced Introductory Classical Mechanics",
-        "description": "",
-        "id": 2
-      },
-      {
+        "title": "Course for paid but not enrolled program",
+        "description": "Course for paid but not enrolled program",
         "prerequisites": "",
-        "runs": [],
-        "position_in_program": 2,
-        "title": "EDX Demo course",
-        "description": "",
-        "id": 3
-      },
-      {
-        "prerequisites": "",
-        "runs": [],
-        "position_in_program": 3,
-        "title": "Peter Course",
-        "description": "",
-        "id": 4
-      }
-    ],
-    "financial_aid_availability": false,
-    "id": 3
-  },
-  {
-    "courses": [
-      {
-        "id": 5,
-        "position_in_program": 1,
-        "title": "Supply Chain and Logistics Fundamentals - enroll button",
-        "runs": [
-          {
-            "course_id": "course-v1:supply+chain",
-            "id": 4,
-            "status": STATUS_OFFERED,
-            "fuzzy_enrollment_start_date": null,
-            "title": "Supply Chain Design",
-            "enrollment_start_date": "2016-03-04T01:00:00Z",
-            "position": 0,
-            "price": 50.00,
-            "course_start_date": "2016-08-22T11:48:27Z",
-            "fuzzy_start_date": "Fall 2017",
-            "course_end_date": "2016-09-09T10:20:10Z",
-          }
-        ],
-        "description": null,
-        "prerequisites": null
-      },
-      {
-        "id": 6,
-        "position_in_program": 5,
-        "title": "Passed course - check mark, grade is 88%",
-        "runs": [
-          {
-            "certificate_url": "www.google.com",
-            "course_id": "course-v1:edX+DemoX+Demo_Course",
-            "id": 5,
-            "status": STATUS_PASSED,
-            "title": "Demo course",
-            "final_grade": "88",
-            "position": 0,
-            "course_start_date": "2016-08-22T11:48:27Z",
-            "fuzzy_start_date": "Fall 2017",
-            "course_end_date": "2016-09-09T10:20:10Z",
-          }
-        ],
-        "description": "The demo course",
-        "prerequisites": ""
-      },
-      {
-        "id": 7,
-        "position_in_program": 2,
-        "title": "Empty course - no status text",
-        "runs": [
-        ],
-        "description": null,
-        "prerequisites": null
-      },
-      {
-        "id": 6789,
-        "position_in_program": 11,
-        "title": "Current verified course - grade is 88%",
-        "runs": [
-          {
-            "certificate_url": "www.google.com",
-            "course_id": "course-v1:current",
-            "id": 5678,
-            "status": STATUS_CURRENTLY_ENROLLED,
-            "title": "Current course run",
-            "current_grade": "23",
-            "position": 0,
-            "course_start_date": "2016-08-22T11:48:27Z",
-            "fuzzy_start_date": "Fall 2017",
-            "course_end_date": "2016-09-09T10:20:10Z",
-          }
-        ],
-        "description": "The demo course",
-        "prerequisites": ""
-      },
-      {
-        "id": 8,
-        "position_in_program": 3,
-        "title": "Not verified course - upgrade button",
-        "runs": [
-          {
-            "id": 7,
-            "status": STATUS_CAN_UPGRADE,
-            "title": "Not verified run",
-            "course_id": "not-verified",
-            "position": 0,
-            "price": 50.00,
-            "course_start_date": "2016-08-22T11:48:27Z",
-            "fuzzy_start_date": "Fall 2017",
-            "course_end_date": "2016-09-09T10:20:10Z",
-            "course_upgrade_deadline": "2016-08-20T11:48:27Z",
-          }
-        ],
-        "description": null,
-        "prerequisites": null
-      },
-      {
-        "id": 10,
-        "position_in_program": 4,
-        "title": "Enrollment starting course - disabled enroll button, text says Enrollment begins 3/3/2106",
-        "runs": [
-          {
-            "course_id": "course-v1:supply+chain2",
-            "id": 8,
-            "status": STATUS_OFFERED,
-            "fuzzy_enrollment_start_date": null,
-            "title": "Enrollment starting run",
-            "enrollment_start_date": "2106-03-04T01:00:00Z",
-            "position": 0,
-            "price": 30.00,
-            "course_start_date": "2016-08-22T11:48:27Z",
-            "fuzzy_start_date": "Fall 2017",
-            "course_end_date": "2016-09-09T10:20:10Z",
-          }
-        ],
-        "description": null,
-        "prerequisites": null
-      },
-      {
-        "id": 1278,
-        "title": "Passed course, most recent run non-passed, older passed",
-        "position_in_program": 7,
-        "runs": [
-          {
-            "certificate_url": "www.google.com",
-            "title": "Passed run missing grade",
-            "status": STATUS_PASSED,
-            "position": 2,
-            "course_id": "course_id_one",
-            "id": 100,
-            "course_start_date": "2015-08-22T11:48:27Z",
-            "fuzzy_start_date": "Fall 2015",
-            "course_end_date": "2015-09-09T10:20:10Z",
-          },
-          {
-            "certificate_url": "www.google.com",
-            "title": "Passed run missing grade",
-            "status": STATUS_PASSED,
-            "position": 1,
-            "course_id": "course_id_two",
-            "final_grade": "88",
-            "id": 102,
-            "course_start_date": "2015-08-22T11:48:27Z",
-            "fuzzy_start_date": "Fall 2015",
-            "course_end_date": "2015-09-09T10:20:10Z",
-          },
-          {
-            "certificate_url": "www.google.com",
-            "title": "Passed run missing grade",
-            "status": STATUS_NOT_PASSED,
-            "position": 0,
-            "course_id": "course_id_three",
-            "final_grade": "43",
-            "id": 101,
-            "course_start_date": "2016-08-22T11:48:27Z",
-            "fuzzy_start_date": "Fall 2017",
-            "course_end_date": "2016-09-09T10:20:10Z",
-          }
-        ]
-      },
-      {
-        "id": 17,
-        "title": "Passed course missing grade - check mark, no grade",
-        "position_in_program": 6,
-        "runs": [
-          {
-            "certificate_url": "www.google.com",
-            "title": "Passed run missing grade",
-            "status": STATUS_PASSED,
-            "position": 0,
-            "course_id": "course_id",
-            "id": 10,
-            "course_start_date": "2016-08-22T11:48:27Z",
-            "fuzzy_start_date": "Fall 2017",
-            "course_end_date": "2016-09-09T10:20:10Z",
-          }
-        ]
-      },
-      {
-        "id": 15,
-        "position_in_program": 9,
-        "title": "verified not completed, course starts in future - action text is Course starting",
-        "runs": [
-          {
-            "id": 13,
-            "status": STATUS_WILL_ATTEND,
-            "course_start_date": "8765-03-21",
-            "title": "First run",
-            "position": 0,
-            "fuzzy_start_date": "Fall 2017",
-            "course_end_date": "2016-09-09T10:20:10Z",
-            "course_id": "verified",
-          }
-        ]
-      },
-      {
-        "id": 11,
-        "position_in_program": 0,
-        "title": "Fuzzy enrollment starting course - First in program, action text is enrollment begins soonish",
-        "runs": [
-          {
-            "course_id": "course-v1:supply+chain3",
-            "id": 9,
-            "status": STATUS_OFFERED,
-            "fuzzy_enrollment_start_date": "soonish",
-            "title": "Fuzzy enrollment starting run",
-            "position": 0,
-            "price": 40.00,
-            "course_start_date": "2016-08-22T11:48:27Z",
-            "fuzzy_start_date": "Fall 2017",
-            "course_end_date": "2016-09-09T10:20:10Z",
-          }
-        ],
-        "description": null,
-        "prerequisites": null
-      },
-      {
-        "id": 16,
-        "position_in_program": 10,
-        "title": "Pending enrollment course",
-        "runs": [
-          {
-            "course_id": "course-v1:pending",
-            "id": 47,
-            "title": "Pending enrollment course run",
-            "position": 0,
-            "status": STATUS_PENDING_ENROLLMENT,
-            "course_start_date": "2018-08-22T11:48:27Z",
-            "course_end_date": "2018-09-09T10:20:10Z",
-            "enrollment_start_date": "2016-03-04T01:00:00Z",
-          }
-        ]
-      }
-    ],
-    "title": "Master Program",
-    "description": null,
-    "financial_aid_availability": false,
-    "id": 4
-  },
-  {
-    "financial_aid_availability": false,
-    "title": "Missed deadline program",
-    "description": "Missed deadline program",
-    "courses": [{
-      "id": 9,
-      "position_in_program": 0,
-      "title": "Course for the missed deadline program",
-      "description": "Course for the missed deadline program",
-      "prerequisites": "",
-      "runs": [{
-        "course_id": "course-v1:edX+missed+deadline",
-        "id": 12,
-        "status": STATUS_MISSED_DEADLINE,
-        "title": "Course run for the missed deadline program",
-        "position": 0,
-        "course_start_date": "2016-01-01",
-        "course_end_date": "2016-09-09T10:20:10Z",
-      }]
-    }],
-    "id": 5
-  },
-  {
-    "financial_aid_availability": false,
-    "title": "Empty program",
-    "description": "The empty program",
-    "courses": [
-    ],
-    "id": 2
-  },
-  {
-    "title": "Last program",
-    "description": "The last program",
-    "pearson_exam_status": "",
-    "courses": [
-      {
-        "id": 13,
-        "position_in_program": 0,
-        "title": "Course for last program in progress - no grade, action or description",
-        "runs": [
-          {
-            "course_id": "course-v1:edX+DemoX+Demo_Course2",
-            "id": 11,
-            "status": STATUS_CURRENTLY_ENROLLED,
-            "title": "Course run for last program",
-            "position": 0,
-            "course_start_date": "2016-01-01",
-            "fuzzy_start_date": "Fall 2017",
-            "course_end_date": "2016-09-09T10:20:10Z",
-          }
-        ],
-        "description": "Course for Last program",
-        "prerequisites": ""
-      },
-    ],
-    "financial_aid_availability": false,
-    "id": 6
-  },
-  {
-    "title": "Paid but not enrolled",
-    "description": "Paid but not enrolled",
-    "courses": [{
-      "id": 24,
-      "position_in_program": 1,
-      "title": "Course for paid but not enrolled program",
-      "description": "Course for paid but not enrolled program",
-      "prerequisites": "",
-      "runs": [{
-        "position": 1,
-        "course_id": "course-v1:MITx+paid+not+enrolled+100+Jan_2015",
-        "id": 66,
-        "course_start_date": "2016-12-20T00:00:00Z",
-        "course_end_date": "2018-05-15T00:00:00Z",
-        "enrollment_url": "",
-        "fuzzy_start_date": "",
-        "current_grade": null,
-        "title": "Digital Learning 100 - January 2015",
-        "status": STATUS_PAID_BUT_NOT_ENROLLED
-      }]
-    }],
-    "financial_aid_availability": true,
-    "id": 7
-  },
-]);
+        "runs": [{
+          "position": 1,
+          "course_id": "course-v1:MITx+paid+not+enrolled+100+Jan_2015",
+          "id": 66,
+          "course_start_date": "2016-12-20T00:00:00Z",
+          "course_end_date": "2018-05-15T00:00:00Z",
+          "enrollment_url": "",
+          "fuzzy_start_date": "",
+          "current_grade": null,
+          "title": "Digital Learning 100 - January 2015",
+          "status": STATUS_PAID_BUT_NOT_ENROLLED
+        }]
+      }],
+      "financial_aid_availability": true,
+      "id": 7
+    },
+  ]
+});
 
-export const PROGRAMS: AvailablePrograms = deepFreeze(DASHBOARD_RESPONSE.map(program => ({
+export const PROGRAMS: AvailablePrograms = deepFreeze(DASHBOARD_RESPONSE.programs.map(program => ({
   id: program.id,
   title: program.title,
   programpage_url: `/program${program.id}/`,
@@ -705,7 +708,7 @@ export const FINANCIAL_AID_PARTIAL_RESPONSE: FinancialAidUserInfo = deepFreeze({
   min_possible_cost: 1000
 });
 
-export const COURSE_PRICES_RESPONSE: CoursePrices = deepFreeze(DASHBOARD_RESPONSE.map(program => ({
+export const COURSE_PRICES_RESPONSE: CoursePrices = deepFreeze(DASHBOARD_RESPONSE.programs.map(program => ({
   program_id: program.id,
   price: Decimal(program.id * 1000),
   financial_aid_availability: false,

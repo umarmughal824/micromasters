@@ -240,6 +240,27 @@ class CachedEdxDataApiTests(MockedESTestCase):
         for cache_type in CachedEdxDataApi.SUPPORTED_CACHES:
             assert CachedEdxDataApi.is_cache_fresh(self.user, cache_type) is False
 
+    @ddt.data('certificate', 'enrollment', 'current_grade')
+    def test_are_all_caches_fresh(self, cache_type):
+        """Test for are_all_caches_fresh"""
+        assert UserCacheRefreshTime.objects.filter(user=self.user).exists() is False
+        assert CachedEdxDataApi.are_all_caches_fresh(self.user) is False
+        now = datetime.now(tz=pytz.UTC)
+        yesterday = now - timedelta(days=1)
+        user_cache = UserCacheRefreshTimeFactory.create(
+            user=self.user,
+            enrollment=now,
+            certificate=now,
+            current_grade=now,
+        )
+        assert CachedEdxDataApi.are_all_caches_fresh(self.user) is True
+        setattr(user_cache, cache_type, yesterday)
+        user_cache.save()
+        assert CachedEdxDataApi.are_all_caches_fresh(self.user) is False
+        setattr(user_cache, cache_type, now)
+        user_cache.save()
+        assert CachedEdxDataApi.are_all_caches_fresh(self.user) is True
+
     @patch('search.tasks.index_users', autospec=True)
     def test_update_cached_enrollment(self, mocked_index):
         """Test for update_cached_enrollment"""

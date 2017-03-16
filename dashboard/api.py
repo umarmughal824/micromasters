@@ -9,6 +9,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
 import pytz
 
+from backends.exceptions import InvalidCredentialStored
 from courses.models import Program
 from dashboard.api_edx_cache import CachedEdxDataApi, CachedEdxUserData
 from dashboard.utils import MMTrack
@@ -127,12 +128,21 @@ def get_user_program_info(user, edx_client):
     # update cache
     # NOTE: this part can be moved to an asynchronous task
     if edx_client is not None:
-        for cache_type in CachedEdxDataApi.SUPPORTED_CACHES:
-            CachedEdxDataApi.update_cache_if_expired(user, edx_client, cache_type)
+        try:
+            for cache_type in CachedEdxDataApi.SUPPORTED_CACHES:
+                CachedEdxDataApi.update_cache_if_expired(user, edx_client, cache_type)
+        except InvalidCredentialStored:
+            # this needs to raise in order to force the user re-login
+            raise
+        except:  # pylint: disable=bare-except
+            log.exception('Impossible to refresh edX cache')
 
     edx_user_data = CachedEdxUserData(user)
 
-    response_data = []
+    response_data = {
+        "programs": [],
+        "is_edx_data_fresh": CachedEdxDataApi.are_all_caches_fresh(user)
+    }
     all_programs = (
         Program.objects.filter(live=True, programenrollment__user=user).prefetch_related('course_set__courserun_set')
     )
@@ -142,7 +152,7 @@ def get_user_program_info(user, edx_client):
             program,
             edx_user_data
         )
-        response_data.append(get_info_for_program(mmtrack_info))
+        response_data['programs'].append(get_info_for_program(mmtrack_info))
     return response_data
 
 

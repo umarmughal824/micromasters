@@ -53,12 +53,13 @@ describe('dashboard reducers', () => {
       RECEIVE_DASHBOARD_SUCCESS
     ]).then(state => {
       let dashboardState = state[SETTINGS.user.username];
-      assert.deepEqual(dashboardState.programs, DASHBOARD_RESPONSE);
+      assert.deepEqual(dashboardState.programs, DASHBOARD_RESPONSE.programs);
+      assert.equal(dashboardState.isEdxDataFresh, DASHBOARD_RESPONSE.is_edx_data_fresh);
       assert.equal(dashboardState.fetchStatus, FETCH_SUCCESS);
 
       return dispatchThen(clearDashboard(SETTINGS.user.username), [CLEAR_DASHBOARD]).then(state => {
         let dashboardState = state[SETTINGS.user.username];
-        assert.deepEqual(dashboardState, { programs: [] });
+        assert.deepEqual(dashboardState, { programs: [], isEdxDataFresh: true });
       });
     });
   });
@@ -79,7 +80,7 @@ describe('dashboard reducers', () => {
 
     let getRun = programs => programs[1].courses[0].runs[0];
 
-    let run = getRun(DASHBOARD_RESPONSE);
+    let run = getRun(DASHBOARD_RESPONSE.programs);
     assert.notEqual(run.status, 'new_status');
     return dispatchThen(
       updateCourseStatus(SETTINGS.user.username, run.course_id, 'new_status'),
@@ -95,7 +96,8 @@ describe('dashboard reducers', () => {
     let _username = '_username';
 
     let successExpectation = {
-      programs: DASHBOARD_RESPONSE,
+      programs: DASHBOARD_RESPONSE.programs,
+      isEdxDataFresh: DASHBOARD_RESPONSE.is_edx_data_fresh,
       fetchStatus: FETCH_SUCCESS
     };
 
@@ -123,7 +125,7 @@ describe('dashboard reducers', () => {
       ]).then(state => {
         assert.deepEqual(state, {
           [_username]: successExpectation,
-          [username]: { programs: [] }
+          [username]: { programs: [], isEdxDataFresh: true }
         });
       });
     });
@@ -139,7 +141,8 @@ describe('dashboard reducers', () => {
           [_username]: {
             fetchStatus: FETCH_FAILURE,
             errorInfo: 'err',
-            programs: []
+            programs: [],
+            isEdxDataFresh: true
           }
         });
       });
@@ -150,7 +153,7 @@ describe('dashboard reducers', () => {
 
       let getRun = programs => programs[1].courses[0].runs[0];
 
-      let run = getRun(DASHBOARD_RESPONSE);
+      let run = getRun(DASHBOARD_RESPONSE.programs);
       assert.notEqual(run.status, 'new_status');
 
       return dispatchThen(

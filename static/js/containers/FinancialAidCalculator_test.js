@@ -11,7 +11,7 @@ import * as inputUtil from '../components/inputs/util';
 import FinancialAidCalculator from '../containers/FinancialAidCalculator';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import { modifyTextField, modifySelectField, clearSelectField } from '../util/test_utils';
-import { DASHBOARD_RESPONSE, FINANCIAL_AID_PARTIAL_RESPONSE } from '../test_constants';
+import { DASHBOARD_RESPONSE, FINANCIAL_AID_PARTIAL_RESPONSE, PROGRAMS } from '../test_constants';
 import {
   requestAddFinancialAid,
   requestSkipFinancialAid,
@@ -49,7 +49,7 @@ import { DASHBOARD_SUCCESS_ACTIONS } from './test_util';
 describe('FinancialAidCalculator', () => {
   let listenForActions, renderComponent, helper;
   let financialAidDashboard = _.cloneDeep(DASHBOARD_RESPONSE);
-  let program = financialAidDashboard.find(program => (
+  let program = financialAidDashboard.programs.find(program => (
     program.title === "Not passed program"
   ));
   program.financial_aid_availability = true;
@@ -375,7 +375,7 @@ if you continue to have problems.`
   });
 
   it('should show nothing if there is no program found', () => {
-    helper.store.dispatch(receiveGetProgramEnrollmentsSuccess(DASHBOARD_RESPONSE));
+    helper.store.dispatch(receiveGetProgramEnrollmentsSuccess(PROGRAMS));
     helper.store.dispatch(setCurrentProgramEnrollment({
       id: 123456
     }));

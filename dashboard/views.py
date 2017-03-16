@@ -61,6 +61,8 @@ class UserDashboard(APIView):
                     status=exc.http_status_code,
                     data={'error': str(exc)}
                 )
+            except:  # pylint: disable=bare-except
+                log.exception('Impossible to refresh user credentials in dashboard view')
             # create an instance of the client to query edX
             edx_client = EdxApi(user_social.extra_data, settings.EDXORG_BASE_URL)
 
