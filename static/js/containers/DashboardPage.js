@@ -7,6 +7,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import R from 'ramda';
 import Dialog from 'material-ui/Dialog';
+import Alert from 'react-bootstrap/lib/Alert';
 
 import Loader from '../components/Loader';
 import { calculatePrices } from '../lib/coupon';
@@ -569,6 +570,30 @@ class DashboardPage extends React.Component {
     />;
   }
 
+  renderEdxCacheRefreshErrorMessage() {
+    const { dashboard } = this.props;
+    if (dashboard.isEdxDataFresh) {
+      return null;
+    }
+    const email = SETTINGS.support_email;
+
+    return (
+      <div className="alert-message alert-message-inline">
+        <Alert bsStyle="danger">
+          <p>
+            Sorry, edx.org is not responding as expected, so some of the information
+            on this page may not be up to date. <br />
+            Please refresh the browser, or check back later.
+          </p>
+          <p>
+            If the error persists, contact <a href={`mailto:${email}`}>
+            {email}</a> for help.
+          </p>
+        </Alert>
+      </div>
+    );
+  }
+
   renderErrorMessage = (): React$Element<*>|null => {
     const {
       dashboard,
@@ -629,6 +654,7 @@ class DashboardPage extends React.Component {
 
     return (
       <div>
+        {this.renderEdxCacheRefreshErrorMessage()}
         <h5 className="program-title-dashboard">{program.title}</h5>
         <div className="double-column">
           <DocsInstructionsDialog
