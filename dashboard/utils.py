@@ -398,14 +398,14 @@ class MMTrack:
 
         course_runs_for_program = CourseRun.objects.filter(
             course__program=self.program
-        )
+        ).select_related('course__program').only('course', 'edx_course_key')
 
         if not any(course_run.has_exam for course_run in course_runs_for_program):
             return ""
 
         user = self.user
         try:
-            exam_profile = ExamProfile.objects.get(profile=user.profile)
+            exam_profile = ExamProfile.objects.only('status').get(profile=user.profile)
         except ExamProfile.DoesNotExist:
             return ExamProfile.PROFILE_ABSENT
 
