@@ -10,7 +10,8 @@ from factory.django import mute_signals
 from backends.edxorg import EdxOrgOAuth2
 from courses.models import Program, Course, CourseRun
 from dashboard.models import ProgramEnrollment
-from ecommerce.models import Order, Line, CoursePrice
+from ecommerce.models import CoursePrice
+from grades.models import FinalGrade, FinalGradeStatus
 from micromasters.utils import (
     get_field_names,
     load_json_from_file,
@@ -24,14 +25,14 @@ from search.indexing_api import recreate_index
 from seed_data.utils import filter_dict_by_key_set
 from seed_data.lib import (
     CachedEnrollmentHandler,
-    CachedCertificateHandler,
-    CachedCurrentGradeHandler,
     fake_programs_query,
     ensure_cached_data_freshness,
+    add_paid_order_for_course
 )
 from seed_data.management.commands import (  # pylint: disable=import-error
     USER_DATA_PATH, PROGRAM_DATA_PATH,
-    FAKE_USER_USERNAME_PREFIX, FAKE_PROGRAM_DESC_PREFIX
+    FAKE_USER_USERNAME_PREFIX, FAKE_PROGRAM_DESC_PREFIX,
+    PASSING_GRADE
 )
 from seed_data.management.commands.create_tiers import create_tiers
 
@@ -79,15 +80,6 @@ def deserialize_model_data(model_cls, data, **additional_data):
     return model_cls.objects.create(**model_data)
 
 
-def add_paid_order_for_course(user, course_run):
-    """
-    Adds an Order and Line for a FA-enabled CourseRun and a User
-    """
-    course_price_value = course_run.course.program.get_course_price()
-    order = Order.objects.create(user=user, status=Order.FULFILLED, total_price_paid=course_price_value)
-    Line.objects.create(order=order, course_key=course_run.edx_course_key, price=course_price_value)
-
-
 # User data deserialization
 
 def deserialize_user_data(user_data, programs):
@@ -106,12 +98,12 @@ def deserialize_user_data(user_data, programs):
     profile = deserialize_model_data(Profile, user_data, user=user)
     deserialize_profile_detail_data(profile, Employment, user_data['work_history'])
     deserialize_profile_detail_data(profile, Education, user_data['education'])
-    deserialize_edx_data(user, user_data, programs)
+    deserialize_dashboard_data(user, user_data, programs)
     ensure_cached_data_freshness(user)
     return user
 
 
-def deserialize_edx_data(user, user_data, programs):
+def deserialize_dashboard_data(user, user_data, programs):
     """
     Deserializes enrollment/grade data for a user
     """
@@ -122,7 +114,7 @@ def deserialize_edx_data(user, user_data, programs):
     enrollment_list = user_data.get('_enrollments', [])
     grade_list = user_data.get('_grades', [])
     deserialize_enrollment_data(user, social_username, fake_course_runs, enrollment_list)
-    deserialize_grade_data(user, social_username, fake_course_runs, grade_list)
+    deserialize_grade_data(user, fake_course_runs, grade_list)
 
 
 def deserialize_enrollment_data(user, social_username, course_runs, enrollment_data_list):
@@ -147,12 +139,10 @@ def deserialize_enrollment_data(user, social_username, course_runs, enrollment_d
         ProgramEnrollment.objects.get_or_create(user=user, program=enrolled_program)
 
 
-def deserialize_grade_data(user, social_username, course_runs, grade_data_list):
+def deserialize_grade_data(user, course_runs, grade_data_list):
     """
     Deserializes grade data for a user
     """
-    cert_handler = CachedCertificateHandler(user, social_username=social_username)
-    cur_grade_handler = CachedCurrentGradeHandler(user, social_username=social_username)
     edx_course_key = None
     for grade_data in grade_data_list:
         edx_course_key = grade_data['edx_course_key']
@@ -161,10 +151,14 @@ def deserialize_grade_data(user, social_username, course_runs, grade_data_list):
             lambda cr: cr.edx_course_key == edx_course_key
         )
         grade = Decimal(grade_data['grade'])
-        if course_run.course.program.financial_aid_availability:
-            cur_grade_handler.set_or_create(course_run, grade=grade)
-        else:
-            cert_handler.set_or_create(course_run, grade=grade)
+        FinalGrade.objects.update_or_create(
+            user=user,
+            course_run=course_run,
+            grade=grade,
+            passed=grade >= PASSING_GRADE,
+            status=FinalGradeStatus.COMPLETE,
+            course_run_paid_on_edx=True
+        )
 
 
 def deserialize_profile_detail_data(profile, model_cls, profile_detail_data):

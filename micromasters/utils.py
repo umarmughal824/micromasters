@@ -118,6 +118,16 @@ def first_matching_item(iterable, predicate):
     return next(filter(predicate, iterable), None)
 
 
+def remove_falsey_values(iterable):
+    """
+    Provides a generator that yields all truthy values in an iterable
+
+    Yields:
+        Truthy item in iterable
+    """
+    return (item for item in iterable if item)
+
+
 def is_subset_dict(dict_to_test, master_dict):
     """
     Checks if a dictionary is a subset of another dictionary
