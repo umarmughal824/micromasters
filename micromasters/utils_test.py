@@ -32,6 +32,7 @@ from micromasters.utils import (
     get_field_names,
     is_near_now,
     is_subset_dict,
+    remove_falsey_values,
     serialize_model_object,
 )
 from search.base import MockedESTestCase
@@ -183,6 +184,14 @@ class UtilTests(unittest.TestCase):
         assert first_matching == 1
         assert second_matching == 5
         assert third_matching is None
+
+    def test_remove_falsey_values(self):
+        """
+        Tests that remove_falsey_values returns a generator that yields only truthy values from an iterable
+        """
+        iterable = [1, 2, 'truthy', True, False, 0, '']
+        truthy_iterable = remove_falsey_values(iterable)
+        assert list(truthy_iterable) == [1, 2, 'truthy', True]
 
     def test_is_subset_dict(self):
         """

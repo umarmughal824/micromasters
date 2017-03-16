@@ -3,26 +3,28 @@ Library functions for interacting with test data
 """
 import re
 from datetime import datetime, timedelta
-from functools import wraps
 import pytz
+from django.db import transaction
 from django.db.utils import IntegrityError
 from django.contrib.auth.models import User
 from courses.models import Program, Course, CourseRun
 from dashboard.api_edx_cache import CachedEdxDataApi
 from dashboard.models import CachedCertificate, CachedEnrollment, CachedCurrentGrade, UserCacheRefreshTime
-from financialaid.factories import TierProgramFactory
-from financialaid.models import TierProgram
+from grades.models import FinalGrade, FinalGradeStatus
+from ecommerce.models import Line, Order
+from micromasters.utils import remove_falsey_values
 from seed_data.management.commands import (
     DEFAULT_GRADE,
     FAKE_PROGRAM_DESC_PREFIX,
-    PASSING_GRADE
+    PASSING_GRADE,
+    DEFAULT_PRICE,
 )
 from seed_data.utils import (
     create_active_date_range,
     create_future_date_range,
     create_past_date_range,
     future_date,
-    accepts_or_calculates_now
+    accepts_or_calculates_now,
 )
 
 
@@ -132,25 +134,6 @@ class CourseRunFinder(ModelFinder):
         if 'course_run_key' in kwargs:
             params['edx_course_key__contains'] = kwargs['course_run_key']
         return params
-
-
-def course_state_editor(func):
-    """Decorator for any method that will be used to alter a Course's 'state' """
-    @wraps(func)
-    def wrapper(*args, **kwargs):  # pylint: disable=missing-docstring
-        user = kwargs['user']
-        course_run = kwargs.get('course_run')
-        if not course_run:
-            course = kwargs['course']
-            clear_edx_data(user, course=course)
-            course_run = course.courserun_set.order_by('fuzzy_start_date', '-start_date').first()
-            kwargs['course_run'] = course_run
-            del kwargs['course']
-        ret_val = func(*args, **kwargs)
-        if is_fake_program_course_run(course_run) and course_run.start_date:
-            update_fake_course_run_edx_key(user, course_run)
-        return ret_val
-    return wrapper
 
 
 class CachedHandler(object):
@@ -284,27 +267,48 @@ def ensure_cached_data_freshness(user):
     UserCacheRefreshTime.objects.update_or_create(user=user, defaults=updated_values)
 
 
-def clear_edx_data(user, course=None, course_run=None, models=None):
-    """Clears all of a User's cached edX data for a Course/CourseRun, or just the data for specific cached models"""
+def clear_course_payment_data(user, course=None, course_run=None):
+    """
+    Clears all course payment data (Order/Line) for a given User and an associated Course or CourseRun.
+    This will be a no-op with any Course/CourseRun that is not part of an FA-enabled program.
+    """
+    program = None
+    course_run_params = {}
+    if course:
+        program = course.program
+        course_run_params['course'] = course
+    elif course_run:
+        program = course_run.course.program
+        course_run_params['id'] = course_run.id
+    if program.financial_aid_availability:
+        course_keys = CourseRun.objects.filter(**course_run_params).values_list("edx_course_key", flat=True)
+        Order.objects.filter(
+            user=user,
+            line__course_key__in=remove_falsey_values(course_keys)
+        ).delete()
+
+
+def clear_dashboard_data(user, course=None, course_run=None, models=None):
+    """
+    Clears all of a User's final grade data and all cached edX data for a Course/CourseRun
+    (or just the cached data for specific models)
+    """
+    # Delete all cached edX data for the associated edX models (or all of them if no model is specified)
     if models:
         handlers = [CACHED_HANDLERS[model] for model in models]
     else:
         handlers = CACHED_HANDLERS.values()
     for cached_model_handler in handlers:
         cached_model_handler(user).clear_all(course=course, course_run=course_run)
-
-
-def update_cached_edx_data_for_run(user, course_run):
-    """
-    Convenience method to updates the course id in a User's cached edX records
-    based on a CourseRun.edx_course_key value
-    """
-    for cached_handler_cls in CACHED_HANDLERS.values():
-        cached_handler = cached_handler_cls(user)
-        cached_obj = cached_handler.find(course_run)
-        if cached_obj:
-            cached_handler.set_edx_key(cached_obj, course_run)
-            cached_obj.save()
+    # Delete FinalGrade records
+    final_grade_params = dict(user=user)
+    if course:
+        final_grade_params['course_run__course'] = course
+    if course_run:
+        final_grade_params['course_run'] = course_run
+    FinalGrade.objects.filter(**final_grade_params).delete()
+    # Delete course payment records (if the associated program is FA-enabled)
+    clear_course_payment_data(user, course=course, course_run=course_run)
 
 
 def generate_enrollment_date_range(course_start_date, day_spread=10):
@@ -313,7 +317,8 @@ def generate_enrollment_date_range(course_start_date, day_spread=10):
     return course_start_date - timedelta(days=day_incr), course_start_date + timedelta(days=day_incr)
 
 
-def set_course_run_past(course_run, end_date=None, save=True):
+@accepts_or_calculates_now
+def set_course_run_past(course_run, end_date=None, upgradeable=False, save=True, now=None):
     """Sets relevant CourseRun dates to the past relative to now"""
     day_spread = 30
     if end_date:
@@ -322,6 +327,10 @@ def set_course_run_past(course_run, end_date=None, save=True):
     else:
         course_run.start_date, course_run.end_date = create_past_date_range(ended_days_ago=30, day_spread=day_spread)
     course_run.enrollment_start, course_run.enrollment_end = generate_enrollment_date_range(course_run.start_date)
+    if upgradeable:
+        course_run.upgrade_deadline = now + timedelta(days=15)
+    else:
+        course_run.upgrade_deadline = course_run.enrollment_end
     if save:
         course_run.save()
     return course_run
@@ -365,21 +374,44 @@ def set_course_run_future(course_run, enrollable_now=False, enrollable_past=Fals
     return course_run
 
 
-def set_program_financial_aid(program, set_to=True):
-    """Changes a Program's financial aid availability"""
-    if set_to is True and TierProgram.objects.filter(program=program).count() == 0:
-        TierProgramFactory.create(program=program)
-    Program.objects.filter(id=program.id).update(financial_aid_availability=set_to)
+@accepts_or_calculates_now
+def set_course_run_to_past_graded(user, course_run, grade, paid=True,  # pylint: disable=too-many-arguments
+                                  upgradeable=False, now=None):
+    """Ensures that a CourseRun is in the past and has an associated final grade for a given User"""
+    if not course_run.is_past:
+        set_course_run_past(course_run, upgradeable=upgradeable, save=True)
+    elif upgradeable and not course_run.is_upgradable:
+        course_run.upgrade_deadline = now + timedelta(days=15)
+        course_run.save()
+    FinalGrade.objects.update_or_create(
+        user=user,
+        course_run=course_run,
+        grade=grade,
+        passed=grade >= PASSING_GRADE,
+        status=FinalGradeStatus.COMPLETE,
+        course_run_paid_on_edx=paid
+    )
+    return course_run
 
 
-def needs_non_fa_program(func):
-    """Decorator that wraps any function that requires a non-financial-aid Program"""
-    @wraps(func)
-    def wrapper(*args, **kwargs):  # pylint: disable=missing-docstring
-        if kwargs['course_run'].course.program.financial_aid_availability:
-            raise Exception('Program needs to be non-FA to set course to passed')
-        return func(*args, **kwargs)
-    return wrapper
+def add_paid_order_for_course(user, course_run, price=None):
+    """
+    Adds an Order and Line for a FA-enabled CourseRun and a User
+    """
+    course_price_value = price or course_run.course.program.get_course_price()
+    order = Order.objects.create(user=user, status=Order.FULFILLED, total_price_paid=course_price_value)
+    Line.objects.create(order=order, course_key=course_run.edx_course_key, price=course_price_value)
+
+
+def set_course_run_to_paid(user, course_run):
+    """Ensures that a User will be considered as having paid for a CourseRun"""
+    with transaction.atomic():
+        is_already_paid = Line.objects.filter(
+            course_key=course_run.edx_course_key, order__user=user, order__status=Order.FULFILLED
+        ).exists()
+        if not is_already_paid:
+            add_paid_order_for_course(user, course_run, price=DEFAULT_PRICE)
+    return course_run
 
 
 def update_fake_course_run_edx_key(user, course_run):
@@ -404,9 +436,21 @@ def update_fake_course_run_edx_key(user, course_run):
     return course_run
 
 
+def update_cached_edx_data_for_run(user, course_run):
+    """
+    Convenience method to update the course id in a User's cached edX records
+    based on a CourseRun.edx_course_key value
+    """
+    for cached_handler_cls in CACHED_HANDLERS.values():
+        cached_handler = cached_handler_cls(user)
+        cached_obj = cached_handler.find(course_run)
+        if cached_obj:
+            cached_handler.set_edx_key(cached_obj, course_run)
+            cached_obj.save()
+
+
 def is_fake_program_course_run(course_run):
     """
     Checks if a given CourseRun was added by the seed_db command
     """
-    fake_program_titles = [program.title.replace(' ', '+') for program in fake_programs_query().all()]
-    return any([title in getattr(course_run, 'edx_course_key', '') for title in fake_program_titles])
+    return course_run.course.program in fake_programs_query()

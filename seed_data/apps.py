@@ -5,5 +5,5 @@ from django.apps import AppConfig
 
 
 class SeedDataConfig(AppConfig):
-    """AppConfig for Courses"""
+    """AppConfig for seed data"""
     name = 'seed_data'

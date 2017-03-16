@@ -4,10 +4,12 @@ Management commands that can be used to fine-tune course/program data
 """
 from decimal import Decimal
 import json
+from functools import wraps
 from django.core.management import BaseCommand, CommandError
 from django.db import transaction
 
-from courses.models import Program, CourseRun
+from courses.models import CourseRun
+from grades.models import FinalGrade
 from seed_data.management.commands import DEFAULT_GRADE, DEFAULT_FAILED_GRADE
 from seed_data.utils import (
     accepts_or_calculates_now,
@@ -20,15 +22,16 @@ from seed_data.lib import (
     CourseFinder,
     CourseRunFinder,
     UserFinder,
-    course_state_editor,
-    needs_non_fa_program,
     CachedEnrollmentHandler,
-    CachedCertificateHandler,
     CachedCurrentGradeHandler,
-    set_course_run_past,
+    set_course_run_to_past_graded,
     set_course_run_current,
     set_course_run_future,
-    set_program_financial_aid,
+    set_course_run_to_paid,
+    clear_course_payment_data,
+    clear_dashboard_data,
+    is_fake_program_course_run,
+    update_fake_course_run_edx_key,
 )
 
 
@@ -69,11 +72,17 @@ USAGE_DETAILS = (
     # Set the 'Analog Learning' 100-level course to have an offered course run with a fuzzy start date
     alter_data set_to_offered --username=staff --program-title='Analog' --course-title='100' --fuzzy
 
-    # Add a past failed course run with a specific grade
-    alter_data add_past_failed_run --username=staff --program-title='Analog' --course-title='100' --grade=30
+    # Set the 'Analog Learning' 100-level course to be paid but not enrolled
+    alter_data set_to_paid_but_not_enrolled --username=staff --course-title='Analog Learning 100'
 
-    # Add a past passed course run with a default grade
-    alter_data add_past_passed_run --username=staff --program-title='Analog' --course-title='100'
+    # Get a past course run for a course and set it to failed with a specific grade
+    alter_data set_past_run_to_failed --username=staff --program-title='Analog' --course-title='100' --grade=30
+
+    # Get a past course run for a course and set it to passed
+    alter_data set_past_run_to_passed --username=staff --program-title='Analog' --course-title='100'
+
+    # Set a course to have a past course run that is passed, unpaid, and still upgradeable
+    alter_data set_past_run_to_passed --username=staff --course-title='Digital Learning 100' --audit
 
     # Set a specific course run to failed
     alter_data set_to_failed --username=staff --course-run-key='MITx+Analog+Learning+100+Dec_2016'
@@ -81,45 +90,93 @@ USAGE_DETAILS = (
     # Add an enrollable future course run for a program called 'Test Program' and a course called 'Test Course'
     alter_data add_future_run --username=staff --program-title='Test Program' --course-title='Test Course'
 
-    # Turn financial aid off/on for a program for the 'Analog Learning' program
-    alter_data turn_financial_aid_off --program-title='Analog'
-    alter_data turn_financial_aid_on --program-title='Analog'
+    # Clear all of a user's dashboard data (final grade data, cached edX data, payment data) for a course
+    alter_data clear_user_dashboard_data --username=staff --course-title='Analog Learning 100'
     """
 )
 
 NEW_COURSE_RUN_PREFIX = 'new-course-run'
 
 
-@course_state_editor
-@needs_non_fa_program
-def set_to_passed(user=None, course_run=None, grade=DEFAULT_GRADE):
-    """Sets a course to have a passed course run"""
-    if not course_run.is_past:
-        set_course_run_past(course_run, save=True)
-    CachedEnrollmentHandler(user).set_or_create(course_run=course_run)
-    CachedCertificateHandler(user).set_or_create(course_run=course_run, grade=grade)
-    return course_run
+def course_state_editor(func):
+    """
+    Decorator for any method that will be used to alter a Course's 'state'. It does a few useful things:
+
+     1. Clears any lingering dashboard data for a given course run to ensure that it will be in the right state
+        after the command.
+     2. Allows the user to specify a Course instead of CourseRun and automatically choose the most recent CourseRun
+        related to that Course.
+     3. Change some edX data for our fake CourseRuns to match any update CourseRun dates (eg: edx_course_keys that
+        reference the CourseRun.start_date)
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs):  # pylint: disable=missing-docstring
+        user = kwargs['user']
+        course_run = kwargs.get('course_run')
+        # If a Course was specified instead of a CourseRun, use the latest CourseRun in the set
+        if not course_run:
+            course = kwargs['course']
+            course_run = course.courserun_set.order_by('fuzzy_start_date', '-start_date').first()
+            kwargs['course_run'] = course_run
+            del kwargs['course']
+        # Clear existing dashboard data for the CourseRun (cached edX data, final grades, etc.)
+        clear_dashboard_data(user, course_run=course_run)
+        # Call the wrapped function
+        ret_val = func(*args, **kwargs)
+        # If this is a fake course run, update associated edX data to match any new dates set
+        # on the CourseRun (eg: edx_course_key and course id's in raw edX data)
+        if is_fake_program_course_run(course_run) and course_run.start_date:
+            update_fake_course_run_edx_key(user, course_run)
+        return ret_val
+    return wrapper
 
 
 @course_state_editor
-@needs_non_fa_program
-def set_to_failed(user=None, course_run=None, grade=DEFAULT_FAILED_GRADE):
-    """Sets a course to have a failed course run"""
-    if not course_run.is_past:
-        set_course_run_past(course_run, save=True)
-    CachedEnrollmentHandler(user).set_or_create(course_run=course_run)
-    CachedCurrentGradeHandler(user).set_or_create(course_run=course_run, grade=grade)
-    return course_run
+def set_to_passed(user=None, course_run=None, grade=DEFAULT_GRADE, audit=False, missed_deadline=False):
+    """Sets a course run to have a passing grade"""
+    return set_course_run_to_past_graded(
+        user=user,
+        course_run=course_run,
+        grade=grade,
+        paid=not audit,
+        upgradeable=audit and not missed_deadline
+    )
+
+
+@course_state_editor
+def set_to_failed(user=None, course_run=None, grade=DEFAULT_FAILED_GRADE, audit=False):
+    """Sets a course run to have a failing grade"""
+    return set_course_run_to_past_graded(
+        user=user,
+        course_run=course_run,
+        grade=grade,
+        paid=not audit,
+    )
+
+
+@accepts_or_calculates_now
+def set_past_run_to_passed(user=None, course=None, now=None, **kwargs):
+    """Adds a past passed course run for a given user and course"""
+    ungraded_past_run = get_past_ungraded_course_run(user, course, now)
+    return set_to_passed(user=user, course_run=ungraded_past_run, **kwargs)
+
+
+@accepts_or_calculates_now
+def set_past_run_to_failed(user=None, course=None, now=None, **kwargs):
+    """Adds a past failed course run for a given user and course"""
+    ungraded_past_run = get_past_ungraded_course_run(user, course, now)
+    return set_to_failed(user=user, course_run=ungraded_past_run, **kwargs)
 
 
 @course_state_editor
 @accepts_or_calculates_now
 def set_to_offered(user=None, course_run=None, now=None,  # pylint: disable=unused-argument
                    in_future=False, fuzzy=False):
-    """Sets a course to have an offered course run that a given user is not enrolled in"""
+    """Sets a course run to be in the present or future, and unenrolled for a user"""
     if fuzzy:
-        course_run.fuzzy_start_date = 'Spring 2017'
-        course_run.fuzzy_enrollment_start_date = 'Spring 2017'
+        fuzzy_date_string = 'Spring {}'.format(now.year + 1)
+        course_run.fuzzy_start_date = fuzzy_date_string
+        course_run.fuzzy_enrollment_start_date = fuzzy_date_string
         course_run.start_date = None
         course_run.end_date = None
         course_run.enrollment_end = None
@@ -134,7 +191,7 @@ def set_to_offered(user=None, course_run=None, now=None,  # pylint: disable=unus
 @course_state_editor
 def set_to_enrolled(user=None, course_run=None, in_future=False,  # pylint: disable=too-many-arguments
                     grade=None, audit=False, missed_deadline=False):
-    """Sets a course to have a currently-enrolled course run"""
+    """Sets a course run to be current and enrolled"""
     enrollable_setting = dict(enrollable_past=True) if missed_deadline else dict(enrollable_now=True)
     if in_future:
         set_course_run_future(course_run, save=True, **enrollable_setting)
@@ -143,14 +200,26 @@ def set_to_enrolled(user=None, course_run=None, in_future=False,  # pylint: disa
     CachedEnrollmentHandler(user).set_or_create(course_run, verified=not audit)
     if grade:
         CachedCurrentGradeHandler(user).set_or_create(course_run, grade=grade)
+    if course_run.course.program.financial_aid_availability:
+        if audit:
+            clear_course_payment_data(user=user, course_run=course_run)
+        else:
+            set_course_run_to_paid(user=user, course_run=course_run)
     return course_run
 
 
-@course_state_editor
 def set_to_needs_upgrade(**kwargs):
-    """Sets a course to have an enrolled course run that needs to be upgraded (aka 'audit')"""
+    """Sets a course run to be current, enrolled, and in need of upgrading"""
     kwargs.update(dict(audit=True, in_future=False))
     return set_to_enrolled(**kwargs)
+
+
+def set_to_paid_but_not_enrolled(user=None, **kwargs):
+    """Sets a course run to be paid but not enrolled for a user"""
+    course_run = set_to_offered(user=user, **kwargs)
+    if course_run.course.program.financial_aid_availability:
+        set_course_run_to_paid(user=user, course_run=course_run)
+    return course_run
 
 
 @accepts_or_calculates_now
@@ -178,38 +247,9 @@ def clear_added_runs(user=None, course=None):  # pylint: disable=unused-argument
     return CourseRun.objects.filter(course=course, edx_course_key__startswith=NEW_COURSE_RUN_PREFIX).delete()
 
 
-def get_past_ungraded_course_run(user=None, course=None, now=None):
-    """Loop through past course runs and find one without grade data"""
-    past_runs = CourseRun.objects.filter(
-        course=course,
-        end_date__lt=now,
-    ).exclude(end_date=None).order_by('-end_date').all()
-    for past_run in past_runs:
-        if not (CachedCurrentGradeHandler(user).exists(past_run) or
-                CachedCertificateHandler(user).exists(past_run)):
-            return past_run
-    raise CommandError("Can't find past run that isn't already passed/failed for Course '{}'".format(course.title))
-
-
-@accepts_or_calculates_now
-def add_past_failed_run(user=None, course=None, now=None, grade=DEFAULT_FAILED_GRADE):
-    """Adds a past failed course run for a given user and course"""
-    ungraded_past_run = get_past_ungraded_course_run(user, course, now)
-    return set_to_failed(user=user, course_run=ungraded_past_run, grade=grade)
-
-
-@accepts_or_calculates_now
-def add_past_passed_run(user=None, course=None, now=None, grade=DEFAULT_GRADE):
-    """Adds a past passed course run for a given user and course"""
-    ungraded_past_run = get_past_ungraded_course_run(user, course, now)
-    return set_to_passed(user=user, course_run=ungraded_past_run, grade=grade)
-
-
-def _formatted_datetime(dt):
-    """Returns a string of a given datetime to be printed in command output"""
-    if not dt:
-        return None
-    return localized_datetime(dt).isoformat()
+def clear_user_dashboard_data(user=None, course=None, course_run=None):
+    """Clears all of a user's final grade data and all cached edX data for a course/course run"""
+    clear_dashboard_data(user=user, course=course, course_run=course_run)
 
 
 def course_info(user=None, course=None):
@@ -234,9 +274,34 @@ def course_info(user=None, course=None):
             if obj:
                 run_result['edx_data'] = run_result.get('edx_data', {})
                 run_result['edx_data'][model_cls.__name__] = obj.data
+        final_grade = FinalGrade.objects.filter(user=user, course_run=run).first()
+        if final_grade:
+            run_result['final_grade'] = 'Grade: {}, Status: {}, Passed: {}, Paid on edX: {}'.format(
+                final_grade.grade, final_grade.status, final_grade.passed, final_grade.course_run_paid_on_edx
+            )
         run_results.append(run_result)
     results['course_runs'] = run_results
     return results
+
+
+def get_past_ungraded_course_run(user=None, course=None, now=None):
+    """Loop through past course runs and find one without grade data"""
+    past_runs = CourseRun.objects.filter(
+        course=course,
+        end_date__lt=now,
+    ).exclude(end_date=None).order_by('-end_date').all()
+    for past_run in past_runs:
+        if not (CachedCurrentGradeHandler(user).exists(past_run) or
+                FinalGrade.objects.filter(user=user, course_run=past_run).exists()):
+            return past_run
+    raise CommandError("Can't find past run that isn't already passed/failed for Course '{}'".format(course.title))
+
+
+def _formatted_datetime(dt):
+    """Returns a string of a given datetime to be printed in command output"""
+    if not dt:
+        return None
+    return localized_datetime(dt).isoformat()
 
 
 COURSE_COMMAND_FUNCTIONS = {
@@ -246,10 +311,12 @@ COURSE_COMMAND_FUNCTIONS = {
         set_to_failed,
         set_to_enrolled,
         set_to_needs_upgrade,
+        set_to_paid_but_not_enrolled,
         add_future_run,
+        set_past_run_to_failed,
+        set_past_run_to_passed,
         clear_added_runs,
-        add_past_failed_run,
-        add_past_passed_run,
+        clear_user_dashboard_data,
         course_info,
     ]
 }
@@ -291,11 +358,11 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         # Add arguments for allowed actions
         allowed_action_names = list(COURSE_COMMAND_FUNCTIONS.keys())
-        allowed_action_names.extend(['turn_financial_aid_off', 'turn_financial_aid_on', EXAMPLE_USAGE_COMMAND_NAME])
+        allowed_action_names.extend([EXAMPLE_USAGE_COMMAND_NAME])
         parser.add_argument(
             'action',
             choices=allowed_action_names,
-            help='Program-/Course-related action (choose one)'
+            help='Program-/Course-/CourseRun-related action (choose one)'
         )
         # Add arguments for parameters that will be used to find Courses/Users
         for finder_cls in {CourseFinder, CourseRunFinder, UserFinder}:
@@ -324,10 +391,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if options['action'] == EXAMPLE_USAGE_COMMAND_NAME:
             self.stdout.write(USAGE_DETAILS)
-        elif 'turn_financial_aid_' in options['action']:
-            program = Program.objects.get(title__contains=options['program_title'])
-            set_to = options['action'].endswith('on')
-            set_program_financial_aid(program, set_to=set_to)
         else:
             action_func = COURSE_COMMAND_FUNCTIONS[options['action']]
             action_params = {}
@@ -355,5 +418,5 @@ class Command(BaseCommand):
                 ))
             elif isinstance(result, dict):
                 self.stdout.write(json.dumps(result, indent=2))
-            else:
+            elif result:
                 self.stdout.write(result)
