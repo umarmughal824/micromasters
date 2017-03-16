@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.52.2
+--------------
+
+- Modified Dashboard REST API to include edx data freshness status
+- Update requirements from pip-compile (#2884)
+- Fixed alter_data commands to work with FA programs and added states
+- Fixed lifecycle handling of DashboardPage to reload cleared items (#2880)
+- Restrict pay now button to when financial aid is in terminal state (#2877)
+- Various small style tweaks (#2874)
+
 Version 0.52.1
 --------------
 
