@@ -6,7 +6,6 @@ from decimal import Decimal
 
 from datetime import datetime
 from django.core.exceptions import ImproperlyConfigured
-from django.conf import settings
 from django.db import transaction
 from django.db.models import Max, Min, Q
 from pytz import utc
@@ -159,15 +158,11 @@ class MMTrack:
         Returns:
             bool: whether the user is paid
         """
-        get_grade_algorithm_version = settings.FEATURES.get("FINAL_GRADE_ALGORITHM", "v0")
-        if get_grade_algorithm_version == "v1" and self.has_frozen_grade(course_id):
+        if self.has_frozen_grade(course_id):
             final_grade = self.extract_final_grade(course_id)
-            if self.financial_aid_available:
-                # this is a special case to take in account the case when the users
-                # took a course on edx and we want to consider it as paid overriding the flag
-                return course_id in self.paid_course_ids or final_grade.course_run_paid_on_edx
-            else:
-                return final_grade.course_run_paid_on_edx
+            if final_grade.course_run_paid_on_edx:
+                return True
+
         # financial aid programs need to have an audit enrollment and a paid entry for the course
         if self.financial_aid_available:
             return course_id in self.paid_course_ids
@@ -258,32 +253,8 @@ class MMTrack:
         Returns:
             bool: whether the user has passed the course
         """
-        get_grade_algorithm_version = settings.FEATURES.get("FINAL_GRADE_ALGORITHM", "v0")
-        if get_grade_algorithm_version == "v1":
-            final_grade = self.extract_final_grade(course_id)
-            return final_grade.passed
-
-        # part for get_grade_algorithm_version == v0
-        if not self.is_enrolled_mmtrack(course_id):
-            return False
-
-        # for normal programs need to check the certificate
-        if not self.financial_aid_available:
-            return self.has_passing_certificate(course_id)
-        # financial aid programs need to have an audit enrollment,
-        # a current grade with a passed attribute and the course should be ended
-        else:
-            cur_grade = self.current_grades.get_current_grade(course_id)
-            if cur_grade is None:
-                return False
-            course_run = CourseRun.objects.filter(edx_course_key=course_id).first()
-            if course_run is None:
-                # this should never happen, but just in case
-                return False
-            if course_run.end_date is None:
-                log.error('Missing "end_date" for course run %s', course_id)
-                raise ImproperlyConfigured('Missing "end_date" for course run {}'.format(course_id))
-            return cur_grade.passed and course_run.is_past
+        final_grade = self.extract_final_grade(course_id)
+        return final_grade.passed
 
     def has_passed_course_for_exam(self, course_id):
         """
@@ -312,23 +283,8 @@ class MMTrack:
         Returns:
             float: the final grade of the user in the course
         """
-        get_grade_algorithm_version = settings.FEATURES.get("FINAL_GRADE_ALGORITHM", "v0")
-        if get_grade_algorithm_version == "v1":
-            final_grade = self.extract_final_grade(course_id)
-            return final_grade.grade * 100
-
-        # part for get_grade_algorithm_version == v0
-        if not self.has_passed_course(course_id):
-            return
-        # for normal programs need to pull from the certificate
-        if not self.financial_aid_available:
-            certificate = self.certificates.get_verified_cert(course_id)
-            return float(certificate.grade) * 100
-        # financial aid programs need to get the current grade
-        # the `self.has_passed_course(course_id)` part already checked if the course is ended
-        else:
-            current_grade = self.current_grades.get_current_grade(course_id)
-            return float(current_grade.percent) * 100
+        final_grade = self.extract_final_grade(course_id)
+        return final_grade.grade * 100
 
     def get_all_final_grades(self):
         """

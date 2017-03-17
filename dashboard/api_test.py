@@ -12,7 +12,6 @@ from unittest.mock import (
 import ddt
 import pytz
 from django.core.exceptions import ImproperlyConfigured
-from django.test import override_settings
 from rest_framework import status as http_status
 
 from backends.exceptions import InvalidCredentialStored
@@ -197,24 +196,9 @@ class FormatRunTest(CourseTests):
             self.expected_ret_data
         )
 
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": 'v0'})
-    def test_format_run_with_not_passed_v0(self):
-        """
-        Test for format_courserun_for_dashboard with not passed in v0
-        """
-        self.expected_ret_data.update({
-            'status': api.CourseStatus.NOT_PASSED,
-            'final_grade': 33.33,
-        })
-        self.assertEqual(
-            api.format_courserun_for_dashboard(self.crun, api.CourseStatus.NOT_PASSED, self.mmtrack),
-            self.expected_ret_data
-        )
-
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": 'v1'})
     def test_format_run_with_not_passed(self):
         """
-        Test for format_courserun_for_dashboard with not passed in v1
+        Test for format_courserun_for_dashboard with not passed
         """
         self.expected_ret_data.update({
             'status': api.CourseStatus.NOT_PASSED,
@@ -374,7 +358,6 @@ class CourseRunTest(CourseTests):
         assert run_status.status == api.CourseRunStatus.CURRENTLY_ENROLLED
         assert run_status.course_run == crun
 
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": 'v1'})
     @patch('courses.models.CourseRun.is_upgradable', new_callable=PropertyMock)
     @ddt.data(
         (True, False, None, api.CourseRunStatus.CHECK_IF_PASSED),
@@ -408,16 +391,14 @@ class CourseRunTest(CourseTests):
         assert self.mmtrack.is_enrolled.call_count == 0
 
     @ddt.data(
-        (True, api.CourseRunStatus.CHECK_IF_PASSED, 'v1'),
-        (False, api.CourseRunStatus.CURRENTLY_ENROLLED, 'v1'),
-        (True, api.CourseRunStatus.CHECK_IF_PASSED, 'v0'),
-        (False, api.CourseRunStatus.CHECK_IF_PASSED, 'v0')
+        (True, api.CourseRunStatus.CHECK_IF_PASSED),
+        (False, api.CourseRunStatus.CURRENTLY_ENROLLED)
     )
     @ddt.unpack
-    def test_check_if_passed_if_has_frozen_grade(self, has_frozen_grades, expected_status, grade_algo):
+    def test_status_with_frozen_grade(self, has_frozen_grades, expected_status):
         """
         test for get_status_for_courserun for a finished course if enrolled
-        and in case the user has a final grade (if the grade_algorithm is v1)
+        and in case the user has a final grade
         """
         self.mmtrack.configure_mock(**{
             'is_enrolled.return_value': True,
@@ -439,19 +420,18 @@ class CourseRunTest(CourseTests):
         with patch(
             'courses.models.CourseRun.has_frozen_grades',
             new_callable=PropertyMock
-        ) as frozen_mock, override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": grade_algo}):
+        ) as frozen_mock:
             frozen_mock.return_value = has_frozen_grades
             run_status = api.get_status_for_courserun(crun, self.mmtrack)
         assert run_status.status == expected_status
         assert run_status.course_run == crun
 
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": 'v1'})
     @patch('grades.api.freeze_user_final_grade', autospec=True)
     @patch('courses.models.CourseRun.has_frozen_grades', new_callable=PropertyMock)
     def test_check_if_passed_if_no_frozen_grade(self, has_frozen_mock, freeze_grades_mock):
         """
         test for get_status_for_courserun for a finished course if enrolled
-        and in case the user has not a final grade (if the grade_algorithm is v1)
+        and in case the user has not a final grade
         """
         self.mmtrack.configure_mock(**{
             'is_enrolled.return_value': True,
@@ -478,7 +458,6 @@ class CourseRunTest(CourseTests):
         with self.assertRaises(FreezeGradeFailedException):
             api.get_status_for_courserun(crun, self.mmtrack)
 
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": 'v1'})
     def test_read_will_attend(self):
         """test for get_status_for_courserun for an enrolled and paid future course"""
         self.mmtrack.configure_mock(**{
@@ -699,7 +678,6 @@ class CourseRunTest(CourseTests):
         (False, api.CourseRunStatus.NOT_PASSED)
     )
     @ddt.unpack
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": 'v1'})
     def test_not_paid_in_past_grade_frozen_exists(self, passed, status, froz_mock, upgr_mock):
         """
         test for get_status_for_courserun for course

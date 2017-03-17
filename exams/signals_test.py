@@ -73,7 +73,6 @@ class ExamSignalsTest(MockedESTestCase):
 
         assert profile_exam.status == ExamProfile.PROFILE_PENDING
 
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v1"})
     def test_update_exam_authorization_final_grade(self):
         """
         Verify that update_exam_authorization_final_grade is called when a FinalGrade saves
@@ -104,7 +103,6 @@ class ExamSignalsTest(MockedESTestCase):
             course=self.course_run.course
         ).exists() is True
 
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v1"})
     def test_update_exam_authorization_final_grade_when_user_not_paid(self):
         """
         Verify that update_exam_authorization_final_grade is called and log exception when
