@@ -6,7 +6,7 @@ import { S, allJust, mstr, ifNil, guard, getm } from './sanctuary';
 const { Maybe, Just, Nothing } = S;
 
 export const assertMaybeEquality = (m1: Maybe, m2: Maybe) => {
-  assert(m1.equals(m2), `expected ${m1.value} to equal ${m2.value}`);
+  assert(S.equals(m1, m2), `expected ${m1.value} to equal ${m2.value}`);
 };
 
 export const assertIsNothing = (m: Maybe) => {
@@ -21,8 +21,8 @@ export const assertIsJust = (m: Maybe, val: any) => {
 describe('sanctuary util functions', () => {
   describe('allJust', () => {
     let maybes = [
-      Maybe.of(2),
-      Maybe.of('maybe?')
+      Just(2),
+      Just('maybe?')
     ];
 
     it('should return Just(values) if passed an array of Just values', () => {
@@ -32,13 +32,13 @@ describe('sanctuary util functions', () => {
     });
 
     it('should return Nothing if passed an array with a Nothing in it', () => {
-      assertIsNothing(allJust(maybes.concat(Nothing())));
+      assertIsNothing(allJust(maybes.concat(Nothing)));
     });
   });
 
   describe('mstr', () => {
     it('should print an empty string if called on Nothing', () => {
-      assert.equal("", mstr(Nothing()));
+      assert.equal("", mstr(Nothing));
     });
 
     it('should print the value wrapped with Just', () => {

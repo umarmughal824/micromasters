@@ -58,13 +58,15 @@ const displayCourseRuns = R.compose(
 );
 
 // getProgramProp :: String -> Program -> Either String Number
-const getProgramProp = (prop, program) => (
+const getProgramProp = R.curry((prop, program) => (
   S.maybeToEither('--', getm(prop, program))
-);
+));
 
 // formatCourseGrade :: Program -> String
-const formatCourseGrade = program => (
-  getProgramProp('grade_average', program).map(grade => `${grade}%`).value
+const formatCourseGrade = R.compose(
+  R.prop('value'),
+  S.map(grade => `${grade}%`),
+  getProgramProp('grade_average')
 );
 
 const StaffLearnerInfoCard = (props: StaffLearnerCardProps) => {

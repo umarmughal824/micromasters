@@ -102,7 +102,7 @@
     "redux-logger": "^2.8.2",
     "redux-thunk": "^2.2.0",
     "rrssb": "^1.10.0",
-    "sanctuary": "0.11.1",
+    "sanctuary": "^0.12.2",
     "sass-lint": "^1.10.2",
     "sass-loader": "^6.0.3",
     "searchkit": "1.0.0-7",

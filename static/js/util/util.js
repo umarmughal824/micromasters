@@ -299,13 +299,13 @@ export function getLocation(profile: Profile, showState: boolean = true): string
 export function getEmployer(profile: Profile): Maybe<string> {
   let entries = workEntriesByDate(profile.work_history);
   if (_.isEmpty(entries)) {
-    return Nothing();
+    return Nothing;
   }
   let [, entry] = entries[0];
   if (entry.company_name) {
     return Just(entry.company_name);
   }
-  return Nothing();
+  return Nothing;
 }
 
 export function calculateDegreeInclusions(profile: Profile) {

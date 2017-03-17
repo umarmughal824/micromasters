@@ -5,7 +5,7 @@ import _ from 'lodash';
 import R from 'ramda';
 import TextField from 'material-ui/TextField';
 import { S, mstr, allJust } from '../../lib/sanctuary';
-const { Maybe } = S;
+const { Just } = S;
 
 import { ISO_8601_FORMAT } from '../../constants';
 import { validationErrorSelector } from '../../util/util';
@@ -94,14 +94,14 @@ export default class DateField extends React.Component {
       };
 
       const firstIfNumEqual = R.curry((x, y) => Number(x) === y ? x : y);
-      let validatedDay = Maybe.of(1);
+      let validatedDay = Just(1);
       if (!omitDay) {
         validatedDay = validateDay(newEdit.day);
-        newEdit.day = mstr(validatedDay.map(firstIfNumEqual(newEdit.day)));
+        newEdit.day = mstr(S.map(firstIfNumEqual(newEdit.day), validatedDay));
       }
 
       let validatedMonth = validateMonth(newEdit.month);
-      newEdit.month = mstr(validatedMonth.map(firstIfNumEqual(newEdit.month)));
+      newEdit.month = mstr(S.map(firstIfNumEqual(newEdit.month), validatedMonth));
 
       let validatedYear;
       if (allowFutureYear) {
@@ -120,15 +120,18 @@ export default class DateField extends React.Component {
       let dateList = [validatedYear, validatedMonth, validatedDay];
 
       let stringifyDates = R.compose(
-        R.join("-"), R.map(mstr), R.adjust(x => x.map(padYear), 0)
+        R.join("-"), R.map(mstr), R.adjust(S.map(padYear), 0)
       );
 
       let dateString = S.maybe("", stringifyDates, allJust(dateList));
 
-      let rawDate = Maybe.of(moment(dateString, ISO_8601_FORMAT));
+      let rawDate = Just(moment(dateString, ISO_8601_FORMAT));
 
-      let validatedDate = rawDate.filter(date => date.isValid()).
-        filter(date => date.isAfter(moment("1800", "YYYY")));
+      let validatedDate = R.compose(
+        S.filter(date => date.isValid),
+        S.filter(date => date.isAfter(moment("1800", "YYYY"))),
+      )(rawDate);
+
 
       if (validatedDate.isNothing) {
         _.set(clone, keySet, null);

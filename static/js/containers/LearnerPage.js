@@ -57,17 +57,19 @@ class LearnerPage extends React.Component<*, LearnerPageProps, *> {
 
   getFocusedDashboard() {
     const { dashboard, params: { username }} = this.props;
-    return getDashboard(username, dashboard).filter(() => (
-      hasAnyStaffRole(SETTINGS.roles)
-    ));
+    return S.filter(
+      () => hasAnyStaffRole(SETTINGS.roles),
+      getDashboard(username, dashboard)
+    );
   }
 
   fetchDashboard() {
     const { dispatch, params: { username } } = this.props;
 
-    this.getFocusedDashboard()
-      .filter(R.propSatisfies(notFetchingOrFetched, 'fetchStatus'))
-      .map(() => dispatch(fetchDashboard(username)));
+    R.compose(
+      S.map(() => dispatch(fetchDashboard(username))),
+      S.filter(R.propSatisfies(notFetchingOrFetched, 'fetchStatus'))
+    )(this.getFocusedDashboard());
   }
 
   render() {

@@ -3,7 +3,7 @@ import R from 'ramda';
 import moment from 'moment';
 
 import { S, ifNil } from '../sanctuary';
-const { Maybe, Nothing } = S;
+const { Just, Nothing } = S;
 import { filterPositiveInt } from '../../util/util';
 import { YEAR_VALIDATION_CUTOFF } from '../../constants';
 
@@ -23,7 +23,7 @@ export const sanitizeNumberString = R.curry((length, input) => (
 /**
   * validate a day input
   */
-export const checkDayRange = ifNil(day => day > 31 ? Maybe.of(31) : Maybe.of(day));
+export const checkDayRange = ifNil(day => day > 31 ? Just(31) : Just(day));
 
 export const validateDay = R.compose(
   checkDayRange, filterPositiveInt, sanitizeNumberString(2)
@@ -32,7 +32,7 @@ export const validateDay = R.compose(
 /**
  * Validate a month input
  */
-export const checkMonthRange = ifNil(month => month > 12 ? Maybe.of(12) : Maybe.of(month));
+export const checkMonthRange = ifNil(month => month > 12 ? Just(12) : Just(month));
 
 export const validateMonth = R.compose(
   checkMonthRange, filterPositiveInt, sanitizeNumberString(2)
@@ -47,15 +47,15 @@ export const validateMonth = R.compose(
   */
 export const validYearInput = R.curry((highCutoff, year) => {
   if (year === undefined) {
-    return Nothing();
+    return Nothing;
   } else {
-    return String(year).length < 4 ? Maybe.of(year) : checkYearRange(highCutoff, year);
+    return String(year).length < 4 ? Just(year) : checkYearRange(highCutoff, year);
   }
 });
 
 export const checkYearRange = (highCutoff: number, year: number) => {
   let now = moment().year();
-  return Maybe.of(R.max(now - YEAR_VALIDATION_CUTOFF, R.min(highCutoff, year)));
+  return Just(R.max(now - YEAR_VALIDATION_CUTOFF, R.min(highCutoff, year)));
 };
 
 export const validateYear = ifNil(
