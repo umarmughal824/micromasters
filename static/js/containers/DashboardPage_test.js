@@ -73,6 +73,7 @@ import { findCourseRun } from '../util/util';
 import {
   COUPON,
   DASHBOARD_RESPONSE,
+  ERROR_RESPONSE,
 } from '../test_constants';
 import {
   FA_ALL_STATUSES,
@@ -91,7 +92,10 @@ import {
   findCourse,
   modifyTextField,
 } from '../util/test_utils';
-import { DASHBOARD_SUCCESS_ACTIONS } from './test_util';
+import {
+  DASHBOARD_SUCCESS_ACTIONS,
+  DASHBOARD_ERROR_ACTIONS,
+} from './test_util';
 
 describe('DashboardPage', () => {
   let renderComponent, helper, listenForActions;
@@ -562,6 +566,37 @@ describe('DashboardPage', () => {
           assert.isTrue(state.ui.enrollCourseDialogVisibility);
           assert.deepEqual(state.ui.enrollSelectedCourseRun, course.runs[0]);
         });
+      });
+    });
+  });
+
+  describe('edx cache refresh error message', () => {
+    let dashboardResponse;
+    const ERROR_MESSAGE_SELECTOR = '.alert-message-inline';
+
+    beforeEach(() => {
+      dashboardResponse = R.clone(DASHBOARD_RESPONSE);
+    });
+
+    it('if the edx is fresh there is no error box', () => {
+      helper.dashboardStub.returns(Promise.resolve(dashboardResponse));
+      return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
+        assert.lengthOf(wrapper.find(ERROR_MESSAGE_SELECTOR), 0);
+      });
+    });
+
+    it('if the edx is not fresh there is the error box', () => {
+      dashboardResponse.is_edx_data_fresh = false;
+      helper.dashboardStub.returns(Promise.resolve(dashboardResponse));
+      return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
+        assert.lengthOf(wrapper.find(ERROR_MESSAGE_SELECTOR), 1);
+      });
+    });
+
+    it('if the dashboard does not load there is no error box for edx cache', () => {
+      helper.dashboardStub.returns(Promise.reject(ERROR_RESPONSE));
+      return renderComponent("/dashboard", DASHBOARD_ERROR_ACTIONS).then(([wrapper]) => {
+        assert.lengthOf(wrapper.find(ERROR_MESSAGE_SELECTOR), 0);
       });
     });
   });
