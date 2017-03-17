@@ -4,7 +4,7 @@ import type { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 
 import { fetchDashboard } from './dashboard';
-import { fetchCoursePrices } from './';
+import { fetchCoursePrices } from './course_prices';
 import type { Dispatcher } from '../flow/reduxTypes';
 import * as api from '../lib/api';
 
@@ -24,7 +24,7 @@ export const addCourseEnrollment = (courseId: string): Dispatcher<*> => {
       then(() => {
         dispatch(receiveAddCourseEnrollmentSuccess());
         dispatch(fetchDashboard(SETTINGS.user.username));
-        dispatch(fetchCoursePrices());
+        dispatch(fetchCoursePrices(SETTINGS.user.username));
         return Promise.resolve();
       }).
       catch(() => {

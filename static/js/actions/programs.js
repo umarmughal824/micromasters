@@ -8,7 +8,7 @@ import {
   TOAST_FAILURE,
 } from '../constants';
 import { fetchDashboard } from './dashboard';
-import { fetchCoursePrices } from './';
+import { fetchCoursePrices } from './course_prices';
 import { setToastMessage, setEnrollProgramDialogVisibility } from '../actions/ui';
 import type { Dispatcher } from '../flow/reduxTypes';
 import type {
@@ -62,7 +62,7 @@ export const addProgramEnrollment = (programId: number): Dispatcher<AvailablePro
         }));
         dispatch(setEnrollProgramDialogVisibility(false));
         dispatch(fetchDashboard(SETTINGS.user.username));
-        dispatch(fetchCoursePrices());
+        dispatch(fetchCoursePrices(SETTINGS.user.username));
       }).
       catch(error => {
         dispatch(receiveAddProgramEnrollmentFailure(error));

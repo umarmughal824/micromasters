@@ -19,6 +19,7 @@ import type {
   DashboardState,
 } from '../flow/dashboardTypes';
 import type { Action } from '../flow/reduxTypes';
+import { updateStateByUsername } from './util';
 
 export const INITIAL_DASHBOARD_STATE: DashboardState = {
   programs: [],
@@ -27,32 +28,28 @@ export const INITIAL_DASHBOARD_STATE: DashboardState = {
 
 const INITIAL_DASHBOARDS_STATE: DashboardsState = {};
 
-const updateDashboardState = (state, username, update) => (
-  _.merge({}, state, {[username]: update })
-);
-
 export const dashboard = (state: DashboardsState = INITIAL_DASHBOARDS_STATE, action: Action<any, string>) => {
   const { meta: username } = action;
   switch (action.type) {
   case REQUEST_DASHBOARD: // eslint-disable-line no-case-declarations
     let newBaseState = R.dissoc(username, state);
     if (action.payload === true) {
-      return updateDashboardState(newBaseState, username, INITIAL_DASHBOARD_STATE);
+      return updateStateByUsername(newBaseState, username, INITIAL_DASHBOARD_STATE);
     } else {
-      return updateDashboardState(
+      return updateStateByUsername(
         newBaseState,
         username,
         _.merge({}, INITIAL_DASHBOARD_STATE, { fetchStatus: FETCH_PROCESSING })
       );
     }
   case RECEIVE_DASHBOARD_SUCCESS:
-    return updateDashboardState(state, username, {
+    return updateStateByUsername(state, username, {
       fetchStatus: FETCH_SUCCESS,
       programs: action.payload.programs,
       isEdxDataFresh: action.payload.is_edx_data_fresh
     });
   case RECEIVE_DASHBOARD_FAILURE:
-    return updateDashboardState(state, username, {
+    return updateStateByUsername(state, username, {
       fetchStatus: FETCH_FAILURE,
       errorInfo: action.payload,
     });
@@ -68,10 +65,10 @@ export const dashboard = (state: DashboardsState = INITIAL_DASHBOARDS_STATE, act
         }
       }
     }
-    return updateDashboardState(state, username, { programs });
+    return updateStateByUsername(state, username, { programs });
   }
   case CLEAR_DASHBOARD:
-    return updateDashboardState(
+    return updateStateByUsername(
       R.dissoc(username, state), username, INITIAL_DASHBOARD_STATE
     );
   default:

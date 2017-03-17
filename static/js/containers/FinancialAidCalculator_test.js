@@ -43,7 +43,7 @@ import {
 import {
   REQUEST_COURSE_PRICES,
   RECEIVE_COURSE_PRICES_SUCCESS,
-} from '../actions/index';
+} from '../actions/course_prices';
 import { DASHBOARD_SUCCESS_ACTIONS } from './test_util';
 
 describe('FinancialAidCalculator', () => {

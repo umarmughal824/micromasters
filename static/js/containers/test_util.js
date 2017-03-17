@@ -7,7 +7,7 @@ import {
 import {
   REQUEST_COURSE_PRICES,
   RECEIVE_COURSE_PRICES_SUCCESS,
-} from '../actions';
+} from '../actions/course_prices';
 import {
   REQUEST_FETCH_COUPONS,
   RECEIVE_FETCH_COUPONS_SUCCESS,

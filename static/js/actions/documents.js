@@ -4,7 +4,7 @@ import { createAction } from 'redux-actions';
 import type { Dispatch } from 'redux';
 
 import { fetchDashboard } from './dashboard';
-import { fetchCoursePrices } from './';
+import { fetchCoursePrices } from './course_prices';
 import * as api from '../lib/api';
 import type { Dispatcher } from '../flow/reduxTypes';
 
@@ -27,7 +27,7 @@ export const updateDocumentSentDate = (financialAidId: number, dateSent: string)
       () => {
         dispatch(receiveUpdateDocumentSentDateSuccess());
         dispatch(fetchDashboard(SETTINGS.user.username));
-        dispatch(fetchCoursePrices());
+        dispatch(fetchCoursePrices(SETTINGS.user.username));
         return Promise.resolve();
       },
       () => {

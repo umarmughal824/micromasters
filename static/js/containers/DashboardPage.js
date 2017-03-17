@@ -14,9 +14,11 @@ import { calculatePrices } from '../lib/coupon';
 import {
   FETCH_SUCCESS,
   FETCH_PROCESSING,
+} from '../actions';
+import {
   fetchCoursePrices,
   clearCoursePrices,
-} from '../actions';
+} from '../actions/course_prices';
 import {
   updateCourseStatus,
   fetchDashboard,
@@ -101,7 +103,7 @@ import {
 } from '../actions/pearson';
 import { generateSSOForm } from '../lib/pearson';
 import type { PearsonAPIState } from '../reducers/pearson';
-import { getOwnDashboard } from '../reducers/util';
+import { getOwnDashboard, getOwnCoursePrices } from '../reducers/util';
 
 const isProcessing = R.equals(FETCH_PROCESSING);
 const PEARSON_TOS_DIALOG = "pearsonTOSDialogVisible";
@@ -268,7 +270,7 @@ class DashboardPage extends React.Component {
   fetchCoursePrices() {
     const { prices, dispatch } = this.props;
     if (prices.fetchStatus === undefined) {
-      dispatch(fetchCoursePrices());
+      dispatch(fetchCoursePrices(SETTINGS.user.username));
     }
   }
 
@@ -745,7 +747,7 @@ const mapStateToProps = (state) => {
   return {
     profile: profile,
     dashboard: getOwnDashboard(state),
-    prices: state.prices,
+    prices: getOwnCoursePrices(state),
     programs: state.programs,
     currentProgramEnrollment: state.currentProgramEnrollment,
     ui: state.ui,

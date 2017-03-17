@@ -17,7 +17,7 @@ import {
   RECEIVE_UPDATE_DOCUMENT_SENT_DATE_FAILURE,
   updateDocumentSentDate,
 } from '../actions/documents';
-import * as actions from '../actions';
+import * as coursePriceActions from '../actions/course_prices';
 import * as dashboardActions from '../actions/dashboard';
 import type { DocumentsState } from '../reducers/documents';
 import rootReducer from '../reducers';
@@ -51,7 +51,7 @@ describe('documents reducers', () => {
 
     beforeEach(() => {
       updateDocumentSentDateStub = sandbox.stub(api, 'updateDocumentSentDate');
-      fetchCoursePricesStub = sandbox.stub(actions, 'fetchCoursePrices');
+      fetchCoursePricesStub = sandbox.stub(coursePriceActions, 'fetchCoursePrices');
       fetchCoursePricesStub.returns({type: "fake"});
       fetchDashboardStub = sandbox.stub(dashboardActions, 'fetchDashboard');
       fetchDashboardStub.returns({type: "fake"});

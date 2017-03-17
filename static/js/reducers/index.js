@@ -23,11 +23,6 @@ import {
   RECEIVE_CHECKOUT_SUCCESS,
   RECEIVE_CHECKOUT_FAILURE,
 
-  REQUEST_COURSE_PRICES,
-  RECEIVE_COURSE_PRICES_SUCCESS,
-  RECEIVE_COURSE_PRICES_FAILURE,
-  CLEAR_COURSE_PRICES,
-
   FETCH_FAILURE,
   FETCH_PROCESSING,
   FETCH_SUCCESS,
@@ -39,7 +34,6 @@ import {
   programs,
 } from './programs';
 import { courseEnrollments } from './course_enrollments';
-import type { CoursePricesState } from '../flow/dashboardTypes';
 import type { Action } from '../flow/reduxTypes';
 import type {
   ProfileGetResult,
@@ -53,6 +47,7 @@ import { orderReceipt } from './order_receipt';
 import { coupons } from './coupons';
 import { pearson } from './pearson';
 import { dashboard } from './dashboard';
+import { prices } from './course_prices';
 import { ALL_ERRORS_VISIBLE } from '../constants';
 
 export const INITIAL_PROFILES_STATE = {};
@@ -200,35 +195,6 @@ export const checkout = (state: CheckoutState = INITIAL_CHECKOUT_STATE, action: 
       ...state,
       fetchStatus: FETCH_FAILURE,
     };
-  default:
-    return state;
-  }
-};
-
-const INITIAL_COURSE_PRICES_STATE: CoursePricesState = {
-  coursePrices: []
-};
-export const prices = (state: CoursePricesState = INITIAL_COURSE_PRICES_STATE, action: Action<any, null>) => {
-  switch (action.type) {
-  case REQUEST_COURSE_PRICES:
-    return {
-      ...state,
-      fetchStatus: FETCH_PROCESSING
-    };
-  case RECEIVE_COURSE_PRICES_SUCCESS:
-    return {
-      ...state,
-      fetchStatus: FETCH_SUCCESS,
-      coursePrices: action.payload
-    };
-  case RECEIVE_COURSE_PRICES_FAILURE:
-    return {
-      ...state,
-      fetchStatus: FETCH_FAILURE,
-      errorInfo: action.payload
-    };
-  case CLEAR_COURSE_PRICES:
-    return INITIAL_COURSE_PRICES_STATE;
   default:
     return state;
   }

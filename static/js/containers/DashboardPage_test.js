@@ -21,10 +21,8 @@ import {
   UPDATE_COURSE_STATUS,
   CLEAR_DASHBOARD,
 } from '../actions/dashboard';
-import {
-  CLEAR_COURSE_PRICES,
-  FETCH_SUCCESS,
-} from '../actions';
+import { CLEAR_COURSE_PRICES } from '../actions/course_prices';
+import { FETCH_SUCCESS } from '../actions';
 import * as dashboardActions from '../actions/dashboard';
 import { CLEAR_COUPONS } from '../actions/coupons';
 import {

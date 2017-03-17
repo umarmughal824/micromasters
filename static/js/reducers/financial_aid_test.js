@@ -28,7 +28,7 @@ import {
   FETCH_PROCESSING,
   FETCH_SUCCESS,
 } from '../actions';
-import * as actions from '../actions';
+import * as coursePriceActions from '../actions/course_prices';
 import * as dashboardActions from '../actions/dashboard';
 import { setCurrentProgramEnrollment } from '../actions/programs';
 import { FINANCIAL_AID_EDIT } from './financial_aid';
@@ -49,7 +49,7 @@ describe('financial aid reducers', () => {
     skipFinancialAidStub = sandbox.stub(api, 'skipFinancialAid');
     fetchDashboardStub = sandbox.stub(dashboardActions, 'fetchDashboard');
     fetchDashboardStub.returns({type: "fake"});
-    fetchCoursePricesStub = sandbox.stub(actions, 'fetchCoursePrices');
+    fetchCoursePricesStub = sandbox.stub(coursePriceActions, 'fetchCoursePrices');
     fetchCoursePricesStub.returns({type: "fake"});
   });
 

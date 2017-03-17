@@ -6,7 +6,7 @@ import { createAction } from 'redux-actions';
 import type { Dispatcher } from '../flow/reduxTypes';
 import * as api from '../lib/api';
 import { fetchDashboard } from './dashboard';
-import { fetchCoursePrices } from './';
+import { fetchCoursePrices } from './course_prices';
 
 export const START_CALCULATOR_EDIT = 'START_CALCULATOR_EDIT';
 export const startCalculatorEdit = createAction(START_CALCULATOR_EDIT);
@@ -35,7 +35,7 @@ export const addFinancialAid = (income: number, currency: string, programId: num
     return api.addFinancialAid(income, currency, programId).then(
       () => {
         dispatch(receiveAddFinancialAidSuccess());
-        dispatch(fetchCoursePrices());
+        dispatch(fetchCoursePrices(SETTINGS.user.username));
         dispatch(fetchDashboard(SETTINGS.user.username));
         return Promise.resolve();
       },
@@ -64,7 +64,7 @@ export const skipFinancialAid = (programId: number): Dispatcher<*> => {
     return api.skipFinancialAid(programId).then(
       () => {
         dispatch(receiveSkipFinancialAidSuccess());
-        dispatch(fetchCoursePrices());
+        dispatch(fetchCoursePrices(SETTINGS.user.username));
         dispatch(fetchDashboard(SETTINGS.user.username));
         return Promise.resolve();
       },

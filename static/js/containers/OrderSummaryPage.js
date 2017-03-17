@@ -9,12 +9,11 @@ import type { Profiles } from '../flow/profileTypes';
 import type { CoursePricesState, DashboardState } from '../flow/dashboardTypes';
 import type { AvailableProgram } from '../flow/enrollmentTypes';
 import OrderSummary from '../components/OrderSummary';
+import { FETCH_PROCESSING, checkout } from '../actions';
 import {
-  FETCH_PROCESSING,
   fetchCoursePrices,
-  checkout,
   clearCoursePrices,
-} from '../actions';
+} from '../actions/course_prices';
 import {
   clearDashboard,
   fetchDashboard,
@@ -27,7 +26,7 @@ import type { CouponsState } from '../reducers/coupons';
 import type { CheckoutState } from '../reducers';
 import { createForm, findCourseRun } from '../util/util';
 import { calculatePrice } from '../lib/coupon';
-import { getOwnDashboard } from '../reducers/util';
+import { getOwnDashboard, getOwnCoursePrices } from '../reducers/util';
 
 class OrderSummaryPage extends React.Component {
   static contextTypes = {
@@ -69,7 +68,7 @@ class OrderSummaryPage extends React.Component {
   fetchCoursePrices() {
     const { prices, dispatch } = this.props;
     if (prices.fetchStatus === undefined) {
-      dispatch(fetchCoursePrices());
+      dispatch(fetchCoursePrices(SETTINGS.user.username));
     }
   }
 
@@ -155,8 +154,8 @@ const mapStateToProps = (state) => {
   return {
     profile: profile,
     dashboard: getOwnDashboard(state),
+    prices: getOwnCoursePrices(state),
     currentProgramEnrollment: state.currentProgramEnrollment,
-    prices: state.prices,
     orderReceipt: state.orderReceipt,
     checkout: state.checkout,
     coupons: state.coupons,

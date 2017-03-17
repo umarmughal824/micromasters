@@ -31,3 +31,7 @@ export type CoursePricesState = {
   coursePrices: CoursePrices,
   fetchStatus?: string,
 }
+
+export type CoursePriceReducerState = {
+  [username: string]: CoursePricesState
+};
