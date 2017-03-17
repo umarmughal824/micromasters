@@ -105,6 +105,13 @@ class SearchTests(ESTestCase, APITestCase):
         self.client.force_login(user)
         self.assert_status_code(status.HTTP_403_FORBIDDEN)
 
+    def test_enrolled_user_has_access(self):
+        """Normal user with enrollment can access"""
+        user = UserFactory.create()
+        ProgramEnrollmentFactory.create(user=user, program=self.program1)
+        self.client.force_login(user)
+        self.assert_status_code()
+
     @ddt.data(
         Staff.ROLE_ID,
         Instructor.ROLE_ID,
@@ -120,6 +127,32 @@ class SearchTests(ESTestCase, APITestCase):
         self.client.force_login(user)
         self.assert_status_code()
 
+    @ddt.data(
+        (Staff.ROLE_ID, True),
+        (Instructor.ROLE_ID, True),
+        (Staff.ROLE_ID, False),
+        (Instructor.ROLE_ID, False),
+    )
+    @ddt.unpack
+    def test_staff_and_instructor_in_other_program_no_results(self, role, is_enrolled):
+        """A user with staff or instructor role in another program gets no results"""
+        user = UserFactory.create()
+        Role.objects.create(
+            user=user,
+            program=self.program2,
+            role=role,
+        )
+        if is_enrolled:
+            ProgramEnrollmentFactory.create(user=user, program=self.program1)
+        params = {
+            "post_filter": {
+                "term": {"program.id": self.program1.id}
+            }
+        }
+        self.client.force_login(user)
+        resp = self.assert_status_code(json=params)
+        assert len(resp.data['hits']['hits']) == 0
+
     def test_require_access_to_program(self):
         """A user must be staff or instructor of some program"""
         # user is superuser so they have all permissions, but they are still not staff or instructor
@@ -127,7 +160,7 @@ class SearchTests(ESTestCase, APITestCase):
         self.client.force_login(user)
         self.assert_status_code(status_code=status.HTTP_403_FORBIDDEN)
 
-    def test_proxy_woks(self):
+    def test_proxy_works(self):
         """
         Test the proxy actually returns something
         """
@@ -172,22 +205,15 @@ class SearchTests(ESTestCase, APITestCase):
         # request just users in one program with filters and query
         wanted_program_id = self.program3.id
 
-        filter_params = {
-            "filter": {
-                "term": {"program.id": wanted_program_id}
-            }
-        }
-        post_filter_params = {
+        params = {
             "post_filter": {
                 "term": {"program.id": wanted_program_id}
             }
         }
-        for params in [filter_params, post_filter_params]:
-            # verify that only the wanted program is in the hits
-            resp = self.assert_status_code(json=params)
-            program_ids_in_hits = self.get_program_ids_in_hits(resp.data['hits']['hits'])
-            assert len(program_ids_in_hits) == 1
-            assert program_ids_in_hits[0] == wanted_program_id
+        # verify that only the wanted program is in the hits
+        resp = self.assert_status_code(json=params)
+        program_ids_in_hits = self.get_program_ids_in_hits(resp.data['hits']['hits'])
+        assert program_ids_in_hits == [wanted_program_id]
 
     def test_query_filters(self):
         """
@@ -201,7 +227,7 @@ class SearchTests(ESTestCase, APITestCase):
             profile.save()
 
         data = {
-            "filter": {
+            "post_filter": {
                 "term": {
                     "program.id": self.program2.id
                 }
@@ -232,7 +258,7 @@ class SearchTests(ESTestCase, APITestCase):
         Test that we don't filter out the from part of the query
         """
         data = {
-            "filter": {
+            "post_filter": {
                 "term": {
                     "program.id": self.program1.id
                 }

@@ -1,15 +1,19 @@
 // @flow
+/* global SETTINGS: false */
 import React from 'react';
+import { connect } from 'react-redux';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 import R from 'ramda';
 
+import { canAdvanceSearchProgram } from '../../lib/roles';
 import type { SearchSortItem } from '../../flow/searchTypes';
+import type { AvailableProgram } from '../../flow/enrollmentTypes';
 
 const nameKeys = ['name_a_z', 'name_z_a'];
 const locationKeys = ['loc-a-z', 'loc-z-a'];
 const gradeKeys = ['grade-high-low', 'grade-low-high'];
 
-export default class CustomSortingColumnHeaders extends React.Component {
+class CustomSortingColumnHeaders extends React.Component {
   // these props are all passed down by searchkit
   props: {
     // A list of available options for sorting
@@ -18,6 +22,8 @@ export default class CustomSortingColumnHeaders extends React.Component {
     setItems: (keys: Array<string>) => void,
     // The currently selected set of sorting keys, if any are selected
     selectedItems: ?Array<string>,
+    // the currently selected program
+    currentProgramEnrollment: AvailableProgram,
   };
 
   toggleSort = ([defaultSort, otherSort]: [string, string]) => {
@@ -66,6 +72,8 @@ export default class CustomSortingColumnHeaders extends React.Component {
   };
 
   render() {
+    const { currentProgramEnrollment } = this.props;
+    const showGrade = canAdvanceSearchProgram(currentProgramEnrollment, SETTINGS.roles);
     return (
       <Grid className="sorting-row">
         <Cell col={1}/>
@@ -73,20 +81,24 @@ export default class CustomSortingColumnHeaders extends React.Component {
           Name {this.sortDirection(nameKeys)}
         </Cell>
         <Cell
-          col={4}
+          col={showGrade ? 4 : 7}
           onClick={this.toggleLocationSort}
           className={`residence ${this.selectedClass(locationKeys)}`}
         >
           Residence {this.sortDirection(locationKeys)}
         </Cell>
-        <Cell
+        { showGrade ? <Cell
           col={3}
           onClick={this.toggleGradeSort}
           className={`grade ${this.selectedClass(gradeKeys)}`}
         >
           Program grade {this.sortDirection(gradeKeys)}
-        </Cell>
+        </Cell> : null }
       </Grid>
     );
   }
 }
+
+const mapStateToProps = R.pickAll(['currentProgramEnrollment']);
+
+export default connect(mapStateToProps)(CustomSortingColumnHeaders);

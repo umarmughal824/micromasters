@@ -31,6 +31,7 @@ from micromasters.exceptions import PossiblyImproperlyConfigured
 from micromasters.utils import (
     chunks,
     custom_exception_handler,
+    dict_with_keys,
     first_matching_item,
     get_field_names,
     is_near_now,
@@ -284,3 +285,12 @@ class UtilTests(unittest.TestCase):
         # removes the file
         safely_remove_file('/tmp/test_file.txt')
         assert os.path.exists('/tmp/test_file.txt') is False
+
+    def test_dict_with_keys(self):
+        """Tests that dict_with_keys correctly extracts the specified keys"""
+        source_dict = {'a': 1, 'b': 2}
+
+        assert dict_with_keys(source_dict, ['a']) == {
+            'a': 1,
+        }
+        assert dict_with_keys(source_dict, ['a', 'b']) == source_dict

@@ -10,7 +10,6 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from search.permissions import UserCanSearchPermission
 from search.api import prepare_and_execute_search
 from search.exceptions import NoProgramAccessException
 
@@ -26,7 +25,7 @@ class ElasticProxyView(APIView):
         SessionAuthentication,
         TokenAuthentication,
     )
-    permission_classes = (IsAuthenticated, UserCanSearchPermission, )
+    permission_classes = (IsAuthenticated,)
 
     def _execute_search_from_request(self, user, request_data):
         """
@@ -39,9 +38,8 @@ class ElasticProxyView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
                 data={'detail': 'You do not have access to this search.'}
             )
-        return Response(
-            results.to_dict()
-        )
+
+        return Response(results.to_dict())
 
     def post(self, request, *args, **kwargs):
         """

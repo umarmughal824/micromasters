@@ -28,6 +28,7 @@ import { modifyTextField } from '../util/test_utils';
 import EmailCompositionDialog from '../components/email/EmailCompositionDialog';
 
 describe('LearnerSearchPage', function () {
+  const EMAIL_LINK_SELECTOR = '#email-selected';
   let renderComponent, listenForActions, helper, mockAxios, replySpy;
 
   beforeEach(() => {
@@ -40,6 +41,12 @@ describe('LearnerSearchPage', function () {
     mockAxios.onPost('/_search').reply(replySpy);
     renderComponent = helper.renderComponent.bind(helper);
     listenForActions = helper.listenForActions.bind(helper);
+    SETTINGS.roles = [{
+      "role": "staff",
+      "program": PROGRAMS[0].id,
+      "permissions": ["can_message_learners"],
+    }];
+
   });
 
   afterEach(() => {
@@ -84,7 +91,6 @@ describe('LearnerSearchPage', function () {
   });
 
   it('should set sendAutomaticEmails flag', () => {
-    const EMAIL_LINK_SELECTOR = '#email-selected';
     const EMAIL_DIALOG_ACTIONS = [
       START_EMAIL_EDIT,
       SHOW_DIALOG
@@ -107,7 +113,6 @@ describe('LearnerSearchPage', function () {
   });
 
   it('sends an email using the email link', () => {
-    const EMAIL_LINK_SELECTOR = '#email-selected';
     const EMAIL_DIALOG_ACTIONS = [
       START_EMAIL_EDIT,
       SHOW_DIALOG
@@ -149,6 +154,52 @@ describe('LearnerSearchPage', function () {
             ]
           );
         });
+      });
+    });
+  });
+
+  it('does not render the email link for learner users', () => {
+    SETTINGS.roles = [];
+
+    return renderComponent('/learners').then(([wrapper]) => {
+      assert.isFalse(wrapper.find(EMAIL_LINK_SELECTOR).exists());
+    });
+  });
+
+  const STAFF_ONLY_FILTERS = [
+    'payment_status', 'num-courses-passed', 'grade-average', 'education_level',
+  ];
+
+  describe('does not render staff filters for learner users', () => {
+    for (let selector of STAFF_ONLY_FILTERS) {
+      it(`.filter--${selector}`, () => {
+        SETTINGS.roles = [];
+        return renderComponent('/learners').then(([wrapper]) => {
+          assert.isFalse(wrapper.find(`.filter--${selector}`).exists());
+        });
+      });
+    }
+    it('.final-grade-wrapper', () => {
+      // special case for final grade since it is handled differently
+      SETTINGS.roles = [];
+      return renderComponent('/learners').then(([wrapper]) => {
+        assert.isFalse(wrapper.find('.final-grade-wrapper').exists());
+      });
+    });
+  });
+
+  describe('does render staff filters for staff users', () => {
+    for (let selector of STAFF_ONLY_FILTERS) {
+      it(`.filter--${selector}`, () => {
+        return renderComponent('/learners').then(([wrapper]) => {
+          assert.isTrue(wrapper.find(`.filter--${selector}`).exists());
+        });
+      });
+    }
+    it('.final-grade-wrapper', () => {
+      // special case for final grade since it is handled differently
+      return renderComponent('/learners').then(([wrapper]) => {
+        assert.isTrue(wrapper.find('.final-grade-wrapper').exists());
       });
     });
   });

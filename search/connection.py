@@ -12,7 +12,13 @@ _CONN_VERIFIED = False
 PERCOLATE_DOC_TYPE = '.percolator'
 
 USER_DOC_TYPE = 'program_user'
-DOC_TYPES = (USER_DOC_TYPE, )
+PUBLIC_USER_DOC_TYPE = 'public_program_user'
+VALIDATABLE_DOC_TYPES = (
+    USER_DOC_TYPE,
+    # need to run recreate_index once in each env first, otherwise this will fail
+    # uncomment in the next release
+    # PUBLIC_USER_DOC_TYPE,
+)
 
 
 def get_conn(verify=True, verify_index=None):
@@ -56,7 +62,7 @@ def get_conn(verify=True, verify_index=None):
             index_name=verify_index
         ))
 
-    for doc_type in DOC_TYPES:
+    for doc_type in VALIDATABLE_DOC_TYPES:
         mapping = _CONN.indices.get_mapping(index=verify_index, doc_type=doc_type)
         if not mapping:
             raise ReindexException("Mapping {doc_type} not found".format(

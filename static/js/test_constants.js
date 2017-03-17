@@ -531,7 +531,8 @@ export const USER_PROFILE_RESPONSE = deepFreeze({
 });
 
 export const USER_PROGRAM_RESPONSE = deepFreeze({
-  "grade_average": 83
+  "id": 1,
+  "grade_average": 83,
 });
 
 export const DASHBOARD_RESPONSE: Dashboard = deepFreeze({

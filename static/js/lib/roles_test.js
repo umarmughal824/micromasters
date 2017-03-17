@@ -5,6 +5,10 @@ import {
   hasAnyStaffRole,
   hasStaffForProgram,
   hasEditAbility,
+  canAdvanceSearchProgram,
+  canMessageLearnersProgram,
+  hasRolePerm,
+  hasPermForProgram,
   firstFinancialAidProgram,
 } from './roles';
 
@@ -47,6 +51,29 @@ describe('roles library', () => {
     });
   });
 
+  describe('hasRolePerm', () => {
+    it('should return false if the user has perm on the specified program', () => {
+      const role = {"permissions":[]};
+      assert.isFalse(hasRolePerm("can_edit_financial_aid", role));
+    });
+
+    it('should return true if the user has perm on the specified program', () => {
+      const role = {"permissions":["can_edit_financial_aid"]};
+      assert.isTrue(hasRolePerm("can_edit_financial_aid", role));
+    });
+  });
+
+  describe('hasPermForProgram', () => {
+    it('should return false if the user has perm on the specified program', () => {
+      assert.isFalse(hasPermForProgram("can_edit_financial_aid", {id: 1}, roles));
+    });
+
+    it('should return true if the user has perm on the specified program', () => {
+      roles[0].permissions.push("can_edit_financial_aid");
+      assert.isTrue(hasPermForProgram("can_edit_financial_aid", {id: 1}, roles));
+    });
+  });
+
   describe('hasEditAbility', () => {
     it('should return false if user does not have the permission', () => {
       roles.forEach(role => {
@@ -62,6 +89,38 @@ describe('roles library', () => {
     it('should return false if the user only has other permissions', () => {
       roles[0].permissions.push("can_make_bad_jokes");
       assert.isFalse(hasEditAbility(roles[0]));
+    });
+  });
+
+  describe('canAdvanceSearchProgram', () => {
+    it('should return false if user does not have the permission', () => {
+      assert.isFalse(canAdvanceSearchProgram({id: 1}, roles));
+    });
+
+    it('should return true if user has permission on any program', () => {
+      roles[0].permissions.push("can_advance_search");
+      assert.isTrue(canAdvanceSearchProgram({id: 1}, roles));
+    });
+
+    it('should return false if the user only has other permissions', () => {
+      roles[0].permissions.push("can_make_bad_jokes");
+      assert.isFalse(canAdvanceSearchProgram({id: 1}, roles));
+    });
+  });
+
+  describe('canMessageLearnersProgram', () => {
+    it('should return false if user does not have the permission', () => {
+      assert.isFalse(canMessageLearnersProgram({id: 1}, roles));
+    });
+
+    it('should return true if user has permission on any program', () => {
+      roles[0].permissions.push("can_message_learners");
+      assert.isTrue(canMessageLearnersProgram({id: 1}, roles));
+    });
+
+    it('should return false if the user only has other permissions', () => {
+      roles[0].permissions.push("can_make_bad_jokes");
+      assert.isFalse(canMessageLearnersProgram({id: 1}, roles));
     });
   });
 

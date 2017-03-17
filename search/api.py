@@ -2,15 +2,18 @@
 Functions for executing ES searches
 """
 from django.conf import settings
+from django.db.models import Q as Query
 from elasticsearch_dsl import Search, Q
 
+from courses.models import Program
 from dashboard.models import ProgramEnrollment
-from roles.api import get_advance_searchable_programs
+from profiles.models import Profile
+from roles.api import get_advance_searchable_program_ids
 from search.connection import (
     get_default_alias,
     get_conn,
-    DOC_TYPES,
     USER_DOC_TYPE,
+    PUBLIC_USER_DOC_TYPE,
 )
 from search.models import PercolateQuery
 from search.exceptions import (
@@ -37,20 +40,41 @@ def execute_search(search_obj):
     return search_obj.execute()
 
 
-def create_program_limit_query(user, filter_on_email_optin=False):
+def get_searchable_programs(user, staff_program_ids):
+    """
+    Determines the programs a user is eligible to search
+
+    Args:
+        user (django.contrib.auth.models.User): the user that is searching
+        staff_program_ids (list of int): the list of program ids the user is staff for if any
+
+    Returns:
+        set(courses.models.Program): set of programs the user can search in
+    """
+
+    # filter only to the staff programs or enrolled programs
+    # NOTE: this has an accepted limitation that if you are staff on any program,
+    # you can't use search on non-staff programs
+    return set(Program.objects.filter(
+        Query(id__in=staff_program_ids) if staff_program_ids else Query(programenrollment__user=user)
+    ).distinct())
+
+
+def create_program_limit_query(user, staff_program_ids, filter_on_email_optin=False):
     """
     Constructs and returns a query that limits a user to data for their allowed programs
 
     Args:
         user (django.contrib.auth.models.User): A user
+        staff_program_ids (list of int): the list of program ids the user is staff for if any
         filter_on_email_optin (bool): If true, filter out profiles where email_optin != true
 
     Returns:
         elasticsearch_dsl.query.Q: An elasticsearch query
     """
-    users_allowed_programs = get_advance_searchable_programs(user)
+    users_allowed_programs = get_searchable_programs(user, staff_program_ids)
     # if the user cannot search any program, raise an exception.
-    # in theory this should never happen because `UserCanSearchPermission`
+    # in theory this should never happen because `UserCanAdvanceSearchPermission`
     # takes care of doing the same check, but better to keep it to avoid
     # that a theoretical bug exposes all the data in the index
     if not users_allowed_programs:
@@ -76,6 +100,16 @@ def create_program_limit_query(user, filter_on_email_optin=False):
     )
 
 
+def _get_search_doc_types(is_advance_search_capable):
+    """
+    Determines searchable doc types based on search capabilities
+
+    Args:
+        is_advance_search_capable (bool): If true, allows user to perform staff search
+    """
+    return (USER_DOC_TYPE,) if is_advance_search_capable else (PUBLIC_USER_DOC_TYPE,)
+
+
 def create_search_obj(user, search_param_dict=None, filter_on_email_optin=False):
     """
     Creates a search object and prepares it with metadata and query parameters that
@@ -89,17 +123,23 @@ def create_search_obj(user, search_param_dict=None, filter_on_email_optin=False)
     Returns:
         Search: elasticsearch_dsl Search object
     """
-    search_obj = Search(index=get_default_alias(), doc_type=DOC_TYPES)
+    staff_program_ids = get_advance_searchable_program_ids(user)
+    is_advance_search_capable = bool(staff_program_ids)
+    search_obj = Search(index=get_default_alias(), doc_type=_get_search_doc_types(is_advance_search_capable))
     # Update from search params first so our server-side filtering will overwrite it if necessary
     if search_param_dict is not None:
         search_obj.update_from_dict(search_param_dict)
-        # Early versions of searchkit use filter which isn't in the DSL but it acts equivalently to post_filter
-        if 'filter' in search_param_dict:
-            search_obj = search_obj.post_filter(search_param_dict['filter'])
+
+    if not is_advance_search_capable:
+        # Learners can't search for other learners with privacy set to private
+        search_obj = search_obj.filter(
+            ~Q('term', **{'profile.account_privacy': Profile.PRIVATE})
+        )
 
     # Limit results to one of the programs the user is staff on
     search_obj = search_obj.filter(create_program_limit_query(
         user,
+        staff_program_ids,
         filter_on_email_optin=filter_on_email_optin
     ))
     # Filter so that only filled_out profiles are seen
@@ -111,17 +151,28 @@ def create_search_obj(user, search_param_dict=None, filter_on_email_optin=False)
     if search_param_dict is not None and search_param_dict.get('from') is not None:
         update_dict['from'] = search_param_dict['from']
     search_obj.update_from_dict(update_dict)
+
     return search_obj
 
 
-def prepare_and_execute_search(user, search_param_dict=None, search_func=execute_search, filter_on_email_optin=False):
+def prepare_and_execute_search(user, search_param_dict=None, search_func=execute_search,
+                               filter_on_email_optin=False):
     """
     Prepares a Search object and executes the search against ES
+
+    Args:
+        user (User): User object
+        search_param_dict (dict): A dict representing the body of an ES query
+        search_func (callable): The function that executes the search
+        filter_on_email_optin (bool): If true, filter out profiles where email_optin != True
+
+    Returns:
+        elasticsearch_dsl.result.Response: ES response
     """
     search_obj = create_search_obj(
         user,
         search_param_dict=search_param_dict,
-        filter_on_email_optin=filter_on_email_optin
+        filter_on_email_optin=filter_on_email_optin,
     )
     return search_func(search_obj)
 

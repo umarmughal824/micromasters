@@ -52,17 +52,20 @@ from search.indexing_api import (
     index_program_enrolled_users,
     remove_program_enrolled_user,
     serialize_program_enrolled_user,
-    USER_DOC_TYPE,
+    serialize_public_enrolled_user,
     filter_current_work,
     index_percolate_queries,
     delete_percolate_query,
     PERCOLATE_DOC_TYPE,
+    PUBLIC_USER_DOC_TYPE,
+    USER_DOC_TYPE,
 )
 from search.base import ESTestCase
 from search.exceptions import ReindexException
 from search.models import PercolateQuery
 from search.util import traverse_mapping
-from micromasters.utils import dict_without_key
+
+DOC_TYPES_PER_ENROLLMENT = 2  # USER_DOC_TYPE and PUBLIC_USER_DOC_TYPE
 
 
 class ESTestActions:
@@ -97,21 +100,48 @@ es = ESTestActions()
 
 def get_sources(results):
     """get sources from es hits"""
-    return sorted([hit['_source'] for hit in results['hits']], key=lambda hit: hit['id'])
+    sorted_hits = sorted(results['hits'], key=lambda hit: hit['_source']['id'])
+    return (
+        [hit['_source'] for hit in sorted_hits if hit['_type'] == USER_DOC_TYPE],
+        [hit['_source'] for hit in sorted_hits if hit['_type'] == PUBLIC_USER_DOC_TYPE],
+    )
+
+
+def remove_es_keys(hit):
+    """
+    Removes ES keys from a hit object in-place
+
+    Args:
+        hit: Elasticsearch hit object
+
+    Returns:
+        hit: modified Elasticsearch hit object
+    """
+    del hit['_id']
+    if '_type' in hit:
+        del hit['_type']
+    return hit
 
 
 def assert_search(results, program_enrollments):
     """
     Assert that search results match program-enrolled users
     """
-    assert results['total'] == len(program_enrollments)
-    sources = get_sources(results)
+    assert results['total'] == len(program_enrollments) * DOC_TYPES_PER_ENROLLMENT
+    sources_advanced, sources_public = get_sources(results)
     sorted_program_enrollments = sorted(program_enrollments, key=lambda program_enrollment: program_enrollment.id)
-    serialized = [
-        dict_without_key(serialize_program_enrolled_user(program_enrollment), "_id")
+    serialized_advanced = [
+        remove_es_keys(serialize_program_enrolled_user(program_enrollment))
         for program_enrollment in sorted_program_enrollments
     ]
-    assert serialized == sources
+    serialized_public = [
+        remove_es_keys(serialize_public_enrolled_user(
+            serialize_program_enrolled_user(program_enrollment)
+        ))
+        for program_enrollment in sorted_program_enrollments
+    ]
+    assert serialized_advanced == sources_advanced
+    assert serialized_public == sources_public
 
 
 # pylint: disable=unused-argument
@@ -135,7 +165,7 @@ class IndexTests(ESTestCase):
         Test that ProgramEnrollment is removed from index after the user is removed
         """
         program_enrollment = ProgramEnrollmentFactory.create()
-        assert es.search()['total'] == 1
+        assert es.search()['total'] == DOC_TYPES_PER_ENROLLMENT
         program_enrollment.user.delete()
         assert es.search()['total'] == 0
 
@@ -144,7 +174,7 @@ class IndexTests(ESTestCase):
         Test that ProgramEnrollment is reindexed after the User's Profile has been updated
         """
         program_enrollment = ProgramEnrollmentFactory.create()
-        assert es.search()['total'] == 1
+        assert es.search()['total'] == DOC_TYPES_PER_ENROLLMENT
         profile = program_enrollment.user.profile
         profile.first_name = 'updated'
         profile.save()
@@ -155,7 +185,7 @@ class IndexTests(ESTestCase):
         Test that Education is indexed after being added
         """
         program_enrollment = ProgramEnrollmentFactory.create()
-        assert es.search()['total'] == 1
+        assert es.search()['total'] == DOC_TYPES_PER_ENROLLMENT
         EducationFactory.create(profile=program_enrollment.user.profile)
         assert_search(es.search(), [program_enrollment])
 
@@ -164,7 +194,7 @@ class IndexTests(ESTestCase):
         Test that Education is reindexed after being updated
         """
         program_enrollment = ProgramEnrollmentFactory.create()
-        assert es.search()['total'] == 1
+        assert es.search()['total'] == DOC_TYPES_PER_ENROLLMENT
         education = EducationFactory.create(profile=program_enrollment.user.profile)
         education.school_city = 'city'
         education.save()
@@ -185,7 +215,7 @@ class IndexTests(ESTestCase):
         Test that Employment is indexed after being added
         """
         program_enrollment = ProgramEnrollmentFactory.create()
-        assert es.search()['total'] == 1
+        assert es.search()['total'] == DOC_TYPES_PER_ENROLLMENT
         EmploymentFactory.create(profile=program_enrollment.user.profile, end_date=None)
         assert_search(es.search(), [program_enrollment])
 
@@ -194,7 +224,7 @@ class IndexTests(ESTestCase):
         Test that Employment is reindexed after being updated
         """
         program_enrollment = ProgramEnrollmentFactory.create()
-        assert es.search()['total'] == 1
+        assert es.search()['total'] == DOC_TYPES_PER_ENROLLMENT
         employment = EmploymentFactory.create(profile=program_enrollment.user.profile, end_date=None)
         employment.city = 'city'
         employment.save()
@@ -251,13 +281,44 @@ class IndexTests(ESTestCase):
             'search.indexing_api._index_chunk', autospec=True, return_value=0
         ) as index_chunk, patch(
             'search.indexing_api.serialize_program_enrolled_user', autospec=True, side_effect=lambda x: x
-        ) as serialize_mock:
+        ) as serialize_mock, patch(
+            'search.indexing_api.serialize_public_enrolled_user', autospec=True, side_effect=lambda x: x
+        ) as serialize_public_mock:
             index_program_enrolled_users(program_enrollments, chunk_size=4)
-            assert index_chunk.call_count == 3
-            index_chunk.assert_any_call(program_enrollments[0:4], USER_DOC_TYPE, get_default_alias())
+            assert index_chunk.call_count == 5  # 2 doctypes for each of 10 enrollments
+            for offset in range(5):
+                # each enrollment should get yielded twice to account for each doctype
+                index_chunk.assert_any_call([
+                    program_enrollments[offset*2],
+                    program_enrollments[offset*2],
+                    program_enrollments[offset*2+1],
+                    program_enrollments[offset*2+1],
+                ], USER_DOC_TYPE, get_default_alias())
             assert serialize_mock.call_count == len(program_enrollments)
+            assert serialize_public_mock.call_count == len(program_enrollments)
             for enrollment in program_enrollments:
                 serialize_mock.assert_any_call(enrollment)
+                serialize_public_mock.assert_any_call(enrollment)
+
+    def test_index_program_enrolled_users_missing_profiles(self, mock_on_commit):
+        """
+        Test that index_program_enrolled_users doesn't index users missing profiles
+        """
+        with mute_signals(post_save):
+            program_enrollments = [ProgramEnrollmentFactory.build() for _ in range(10)]
+        with patch(
+            'search.indexing_api._index_chunk', autospec=True, return_value=0
+        ) as index_chunk, patch(
+            'search.indexing_api.serialize_program_enrolled_user',
+            autospec=True,
+            side_effect=lambda x: None  # simulate a missing profile
+        ) as serialize_mock, patch(
+            'search.indexing_api.serialize_public_enrolled_user', autospec=True, side_effect=lambda x: x
+        ) as serialize_public_mock:
+            index_program_enrolled_users(program_enrollments)
+            assert index_chunk.call_count == 0
+            assert serialize_public_mock.call_count == 0
+            assert serialize_mock.call_count == len(program_enrollments)
 
     def test_index_user_other_index(self, mock_on_commit):
         """
@@ -275,7 +336,7 @@ class IndexTests(ESTestCase):
         """
         program_enrollment = ProgramEnrollmentFactory.create()
         for edx_cached_model_factory in [CachedCertificateFactory, CachedEnrollmentFactory, CachedCurrentGradeFactory]:
-            assert es.search()['total'] == 1
+            assert es.search()['total'] == DOC_TYPES_PER_ENROLLMENT
             course = CourseFactory.create(program=program_enrollment.program)
             course_run = CourseRunFactory.create(course=course)
             edx_cached_model_factory.create(user=program_enrollment.user, course_run=course_run)
@@ -288,7 +349,7 @@ class IndexTests(ESTestCase):
         """
         program_enrollment = ProgramEnrollmentFactory.create()
         for edx_cached_model_factory in [CachedCertificateFactory, CachedEnrollmentFactory, CachedCurrentGradeFactory]:
-            assert es.search()['total'] == 1
+            assert es.search()['total'] == DOC_TYPES_PER_ENROLLMENT
             course = CourseFactory.create(program=program_enrollment.program)
             course_run = CourseRunFactory.create(course=course)
             edx_record = edx_cached_model_factory.create(user=program_enrollment.user, course_run=course_run)
@@ -349,8 +410,8 @@ class IndexTests(ESTestCase):
         Test that `is_learner` status is change when role is save
         """
         program_enrollment = ProgramEnrollmentFactory.create()
-        assert es.search()['total'] == 1
-        sources = get_sources(es.search())
+        assert es.search()['total'] == DOC_TYPES_PER_ENROLLMENT
+        sources, _ = get_sources(es.search())
         # user is learner
         assert sources[0]['program']['is_learner'] is True
 
@@ -359,9 +420,9 @@ class IndexTests(ESTestCase):
             program=program_enrollment.program,
             role=role
         )
-        assert es.search()['total'] == 1
+        assert es.search()['total'] == DOC_TYPES_PER_ENROLLMENT
         # user is not learner
-        sources = get_sources(es.search())
+        sources, _ = get_sources(es.search())
         assert sources[0]['program']['is_learner'] is False
 
     @data(Staff.ROLE_ID, Instructor.ROLE_ID)
@@ -370,8 +431,8 @@ class IndexTests(ESTestCase):
         Test that `is_learner` status is restore once role is removed for a user.
         """
         program_enrollment = ProgramEnrollmentFactory.create()
-        assert es.search()['total'] == 1
-        sources = get_sources(es.search())
+        assert es.search()['total'] == DOC_TYPES_PER_ENROLLMENT
+        sources, _ = get_sources(es.search())
         # user is learner
         assert sources[0]['program']['is_learner'] is True
         Role.objects.create(
@@ -379,9 +440,9 @@ class IndexTests(ESTestCase):
             program=program_enrollment.program,
             role=role
         )
-        assert es.search()['total'] == 1
+        assert es.search()['total'] == DOC_TYPES_PER_ENROLLMENT
         # user is not learner
-        sources = get_sources(es.search())
+        sources, _ = get_sources(es.search())
         assert sources[0]['program']['is_learner'] is False
 
         # when staff role is deleted
@@ -390,8 +451,8 @@ class IndexTests(ESTestCase):
             program=program_enrollment.program,
             role=role
         ).delete()
-        assert es.search()['total'] == 1
-        sources = get_sources(es.search())
+        assert es.search()['total'] == DOC_TYPES_PER_ENROLLMENT
+        sources, _ = get_sources(es.search())
         # user is learner
         assert sources[0]['program']['is_learner'] is True
 
@@ -400,24 +461,27 @@ class SerializerTests(ESTestCase):
     """
     Tests for document serializers
     """
+    @classmethod
+    def setUpTestData(cls):
+        with mute_signals(post_save):
+            cls.profile = ProfileFactory.create()
+        EducationFactory.create(profile=cls.profile)
+        EmploymentFactory.create(profile=cls.profile)
+        EmploymentFactory.create(profile=cls.profile, end_date=None)
+        program = ProgramFactory.create()
+        course = CourseFactory.create(program=program)
+        course_runs = [CourseRunFactory.create(course=course) for _ in range(2)]
+        for course_run in course_runs:
+            CachedCertificateFactory.create(user=cls.profile.user, course_run=course_run)
+            CachedEnrollmentFactory.create(user=cls.profile.user, course_run=course_run)
+        cls.program_enrollment = ProgramEnrollment.objects.create(user=cls.profile.user, program=program)
 
     def test_program_enrolled_user_serializer(self):
         """
         Asserts the output of the serializer for program-enrolled users (ProgramEnrollments)
         """
-        with mute_signals(post_save):
-            profile = ProfileFactory.create()
-        EducationFactory.create(profile=profile)
-        EmploymentFactory.create(profile=profile)
-        EmploymentFactory.create(profile=profile, end_date=None)
-        program = ProgramFactory.create()
-        course = CourseFactory.create(program=program)
-        course_runs = [CourseRunFactory.create(course=course) for _ in range(2)]
-        for course_run in course_runs:
-            CachedCertificateFactory.create(user=profile.user, course_run=course_run)
-            CachedEnrollmentFactory.create(user=profile.user, course_run=course_run)
-        program_enrollment = ProgramEnrollment.objects.create(user=profile.user, program=program)
-
+        profile = self.profile
+        program_enrollment = self.program_enrollment
         assert serialize_program_enrolled_user(program_enrollment) == {
             '_id': program_enrollment.id,
             'id': program_enrollment.id,
@@ -425,6 +489,51 @@ class SerializerTests(ESTestCase):
             'email': profile.user.email,
             'profile': filter_current_work(ProfileSerializer(profile).data),
             'program': UserProgramSearchSerializer.serialize(program_enrollment)
+        }
+
+    def test_public_enrolled_user_serializer(self):
+        """
+        Asserts the output of the public serializer for program-enrolled users (ProgramEnrollments)
+        """
+        profile = self.profile
+        program_enrollment = self.program_enrollment
+
+        serialized = serialize_program_enrolled_user(program_enrollment)
+        print(profile.user.username)
+        print(serialized)
+
+        assert serialize_public_enrolled_user(serialized) == {
+            '_id': program_enrollment.id,
+            '_type': 'public_program_user',
+            'id': program_enrollment.id,
+            'user_id': profile.user.id,
+            'profile': {
+                'first_name': profile.first_name,
+                'last_name': profile.last_name,
+                'preferred_name': profile.preferred_name,
+                'romanized_first_name': profile.romanized_first_name,
+                'romanized_last_name': profile.romanized_last_name,
+                'image': '/media/{}'.format(profile.image),
+                'image_small': '/media/{}'.format(profile.image_small),
+                'image_medium': '/media/{}'.format(profile.image_medium),
+                'username': None,  # bug in ProfileSerializer, issue #3166
+                'filled_out': profile.filled_out,
+                'account_privacy': profile.account_privacy,
+                'country': profile.country,
+                'state_or_territory': profile.state_or_territory,
+                'city': profile.city,
+                'birth_country': profile.birth_country,
+                'work_history': serialized['profile']['work_history'],
+            },
+            'program': {
+                'id': program_enrollment.program.id,
+                'enrollments': [{
+                    'course_title': enrollment['course_title'],
+                    'semester': enrollment['semester'],
+                } for enrollment in serialized['program']['enrollments']],
+                'is_learner': True,
+                'total_courses': 1,
+            }
         }
 
 

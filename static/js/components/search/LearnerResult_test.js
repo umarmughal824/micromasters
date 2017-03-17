@@ -42,7 +42,6 @@ describe('LearnerResult', () => {
 
   beforeEach(() => {
     helper = new IntegrationTestHelper();
-
   });
   afterEach(() => {
     helper.cleanup();
@@ -110,11 +109,26 @@ describe('LearnerResult', () => {
   });
 
   it("should include the user's current program grade when a grade is available", () => {
+    SETTINGS.roles = [{
+      "role": "staff",
+      "program": 1,
+      "permissions": ["can_advance_search"],
+    }];
     let result = renderLearnerResult().find(".learner-grade .percent");
     assert.include(result.text(), `${USER_PROGRAM_RESPONSE.grade_average}%`);
   });
 
+  it("should not include the user's current program grade if the searching user is not staff", () => {
+    SETTINGS.roles = [];
+    assert.isFalse(renderLearnerResult().find(".learner-grade .percent").exists());
+  });
+
   it("should show an indicator when a user has a missing/null program grade", () => {
+    SETTINGS.roles = [{
+      "role": "staff",
+      "program": 1,
+      "permissions": ["can_advance_search"],
+    }];
     let emptyGradeElasticHit = {
       _source: {
         profile: USER_PROFILE_RESPONSE,

@@ -34,14 +34,18 @@ def webpack_dev_server_url(request):
     return 'http://{}:{}'.format(webpack_dev_server_host(request), settings.WEBPACK_DEV_SERVER_PORT)
 
 
-def dict_without_key(dictionary, key):
+def dict_with_keys(dictionary, keys):
     """
-    Helper method to remove a key from a dict and return the dict.
-    This can be used in cases like a list comprehension
-    where the actual dictionary is needed once the key is deleted ('del' does not return anything)
+    Returns a new dictionary including only the specified keys
+
+    Args:
+        dictionary(dict): dictionary to filter keys
+        keys(iterable): iterable of keys to filter to
+
+    Returns:
+        dict: copy of original dictionary inclusive only of specified keys
     """
-    del dictionary[key]
-    return dictionary
+    return {key: dictionary[key] for key in keys}
 
 
 def load_json_from_file(project_rel_filepath):

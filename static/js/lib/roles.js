@@ -16,9 +16,28 @@ export const hasStaffForProgram = R.curry((program, roles) => (
   R.any(R.both(sameProgram(program), hasStaffRole), roles)
 ));
 
-export const hasEditAbility = R.propSatisfies(
-  R.contains('can_edit_financial_aid'), 'permissions'
-);
+export const hasRolePerm = R.curry((perm, role) => (
+  R.propSatisfies(
+    R.contains(perm),
+    'permissions',
+    role
+  )
+));
+
+export const hasPermForProgram = R.curry((perm, program, roles) => (
+  R.any(
+    R.both(
+      sameProgram(program),
+      hasRolePerm(perm)
+    ),
+    roles
+  )
+));
+
+export const canAdvanceSearchProgram = hasPermForProgram('can_advance_search');
+export const canMessageLearnersProgram = hasPermForProgram('can_message_learners');
+
+export const hasEditAbility = hasRolePerm('can_edit_financial_aid');
 
 export const firstFinancialAidProgram = R.compose(
   R.propOr(null, 'program'), R.find(hasEditAbility)

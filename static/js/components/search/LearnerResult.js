@@ -1,4 +1,5 @@
 // @flow
+/* global SETTINGS: false */
 import React from 'react';
 import { connect } from 'react-redux';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
@@ -7,6 +8,7 @@ import R from 'ramda';
 import _ from 'lodash';
 
 import { setLearnerChipVisibility } from '../../actions/ui';
+import { canAdvanceSearchProgram } from '../../lib/roles';
 import ProfileImage from '../../containers/ProfileImage';
 import LearnerChip from '../LearnerChip';
 import {
@@ -40,6 +42,8 @@ class LearnerResult extends SearchkitComponent {
       openLearnerEmailComposer
     } = this.props;
 
+    const showGrade = program && canAdvanceSearchProgram(program, SETTINGS.roles);
+
     let renderedLearnerChip;
     if (profile.username === learnerChipVisibility) {
       renderedLearnerChip = <LearnerChip
@@ -67,16 +71,16 @@ class LearnerResult extends SearchkitComponent {
           </span>
           { renderedLearnerChip }
         </Cell>
-        <Cell col={4} className="centered learner-location">
+        <Cell col={showGrade ? 4 : 7} className="centered learner-location">
           <span>
             { getLocation(profile) }
           </span>
         </Cell>
-        <Cell col={3} className="learner-grade">
+        { showGrade ? <Cell col={3} className="learner-grade">
           <span className="percent">
             { LearnerResult.hasGrade(program) ? `${program.grade_average}%` : '-' }
           </span>
-        </Cell>
+        </Cell> : null}
       </Grid>
     );
   }

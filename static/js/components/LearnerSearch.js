@@ -40,6 +40,10 @@ import type { Option } from '../flow/generalTypes';
 import type { AvailableProgram } from '../flow/enrollmentTypes';
 import type { SearchSortItem } from '../flow/searchTypes';
 import type { Profile } from '../flow/profileTypes';
+import {
+  canMessageLearnersProgram,
+  hasStaffForProgram,
+} from '../lib/roles';
 
 export const makeCountryNameTranslations: () => Object = () => {
   let translations = {};
@@ -135,7 +139,8 @@ export default class LearnerSearch extends SearchkitComponent {
   };
 
   renderSearchHeader = (): React$Element<*>|null => {
-    const { openSearchResultEmailComposer } = this.props;
+    const { openSearchResultEmailComposer, currentProgramEnrollment } = this.props;
+    const canEmailLearners = canMessageLearnersProgram(currentProgramEnrollment, SETTINGS.roles);
 
     if (_.isNull(this.getResults())) {
       return null;
@@ -144,13 +149,13 @@ export default class LearnerSearch extends SearchkitComponent {
     return (
       <Grid noSpacing={true} className="search-header">
         <Cell col={6} className="result-info">
-          <button
+          { canEmailLearners ? <button
             id="email-selected"
             className="mdl-button minor-action"
             onClick={R.partial(openSearchResultEmailComposer, [this.searchkit])}
           >
             Email These Learners
-          </button>
+          </button> : null }
           <HitsStats component={HitsCount} />
         </Cell>
         <Cell col={6} className="pagination-search">
@@ -193,6 +198,7 @@ export default class LearnerSearch extends SearchkitComponent {
         </Card>
       );
     }
+    const isStaff = hasStaffForProgram(currentProgram, SETTINGS.roles);
 
     return (
       <Card className="fullwidth" shadow={1}>
@@ -209,7 +215,7 @@ export default class LearnerSearch extends SearchkitComponent {
             id="courses"
           />
         </FilterVisibilityToggle>
-        <div className="final-grade-wrapper">
+        { isStaff ? <div className="final-grade-wrapper">
           <FinalGradeRangeFilter
             field="program.enrollments.final_grade"
             fieldOptions={{ type: 'nested', options: {path: 'program.enrollments'} }}
@@ -219,8 +225,8 @@ export default class LearnerSearch extends SearchkitComponent {
             showHistogram={true}
             title="Final Grade in Selected Course"
           />
-        </div>
-        <FilterVisibilityToggle
+        </div> : null }
+        { isStaff ? <FilterVisibilityToggle
           {...this.props}
           filterName="payment_status"
           title="Payment Status"
@@ -232,7 +238,7 @@ export default class LearnerSearch extends SearchkitComponent {
             orderKey="_term"
             id="payment_status"
           />
-        </FilterVisibilityToggle>
+        </FilterVisibilityToggle> : null }
         <FilterVisibilityToggle
           {...this.props}
           filterName="semester"
@@ -246,7 +252,7 @@ export default class LearnerSearch extends SearchkitComponent {
             bucketsTransform={sortSemesterBuckets}
           />
         </FilterVisibilityToggle>
-        <FilterVisibilityToggle
+        { isStaff ? <FilterVisibilityToggle
           {...this.props}
           filterName="num-courses-passed"
           title="# of Courses Passed"
@@ -258,8 +264,8 @@ export default class LearnerSearch extends SearchkitComponent {
             max={this.getNumberOfCoursesInProgram()}
             showHistogram={false}
             title="" />
-        </FilterVisibilityToggle>
-        <FilterVisibilityToggle
+        </FilterVisibilityToggle> : null }
+        { isStaff ? <FilterVisibilityToggle
           {...this.props}
           filterName="grade-average"
           title="Average Grade in Program"
@@ -272,7 +278,7 @@ export default class LearnerSearch extends SearchkitComponent {
             showHistogram={true}
             title=""
           />
-        </FilterVisibilityToggle>
+        </FilterVisibilityToggle> : null }
         <FilterVisibilityToggle
           {...this.props}
           filterName="birth-location"
@@ -300,13 +306,13 @@ export default class LearnerSearch extends SearchkitComponent {
             size={0}
           />
         </FilterVisibilityToggle>
-        <FilterVisibilityToggle
+        { isStaff ? <FilterVisibilityToggle
           {...this.props}
           filterName="education-level"
           title="Degree"
         >
           <EducationFilter id="education_level" />
-        </FilterVisibilityToggle>
+        </FilterVisibilityToggle> : null }
         <FilterVisibilityToggle
           {...this.props}
           filterName="company-name"
@@ -314,7 +320,6 @@ export default class LearnerSearch extends SearchkitComponent {
         >
           <WorkHistoryFilter id="company_name" />
         </FilterVisibilityToggle>
-
       </Card>
     );
   };

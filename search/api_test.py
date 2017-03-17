@@ -3,6 +3,7 @@ Tests for search API functionality
 """
 import math
 from unittest.mock import Mock, patch
+import ddt
 from elasticsearch_dsl import Search, Q
 from factory.django import mute_signals
 from django.test import (
@@ -25,7 +26,8 @@ from search.api import (
 )
 from search.base import ESTestCase
 from search.connection import (
-    DOC_TYPES,
+    USER_DOC_TYPE,
+    PUBLIC_USER_DOC_TYPE,
     get_default_alias,
 )
 from search.exceptions import (
@@ -58,7 +60,8 @@ def create_fake_search_result(hits_cls):
     return Mock(hits=hits_cls())
 
 
-class SearchAPITests(ESTestCase):  # pylint: disable=missing-docstring
+@ddt.ddt  # pylint: disable=missing-docstring
+class SearchAPITests(ESTestCase):
     @classmethod
     def setUpTestData(cls):
         with mute_signals(post_save):
@@ -96,11 +99,13 @@ class SearchAPITests(ESTestCase):  # pylint: disable=missing-docstring
             assert search_obj.execute.called
             assert mock_get_conn.called
 
-    def test_create_search_obj_filter(self):
+    @ddt.data(True, False)
+    def test_create_search_obj_filter(self, is_advance_search_capable):
         """
         Test that Search objects are created with program-limiting and filled_out=True query parameters
         """
-        search_obj = create_search_obj(self.user)
+        user = self.user if is_advance_search_capable else self.learner
+        search_obj = create_search_obj(user)
         search_query_dict = search_obj.to_dict()
         expected_program_query = Q(
             'bool',
@@ -113,14 +118,18 @@ class SearchAPITests(ESTestCase):  # pylint: disable=missing-docstring
             ]
         )
         expected_filled_out_query = Q('term', **{'profile.filled_out': True})
+        expected_privacy_query = ~Q('term', **{'profile.account_privacy': 'private'})
         assert 'query' in search_query_dict
         assert 'bool' in search_query_dict['query']
         assert 'filter' in search_query_dict['query']['bool']
-        assert len(search_query_dict['query']['bool']['filter']) == 2
-        assert search_query_dict['query']['bool']['filter'] == [
+        assert len(search_query_dict['query']['bool']['filter']) == 2 if is_advance_search_capable else 3
+        expected_filters = [
             expected_program_query.to_dict(),
             expected_filled_out_query.to_dict(),
         ]
+        if not is_advance_search_capable:
+            expected_filters.insert(0, expected_privacy_query.to_dict())
+        assert search_query_dict['query']['bool']['filter'] == expected_filters
 
     @override_settings(ELASTICSEARCH_DEFAULT_PAGE_SIZE=5)
     def test_size_param_in_query(self):
@@ -132,16 +141,27 @@ class SearchAPITests(ESTestCase):  # pylint: disable=missing-docstring
         assert 'size' in search_query_dict
         assert search_query_dict['size'] == 5
 
-    def test_create_search_obj_metadata(self):
+    @ddt.data(
+        (True, [USER_DOC_TYPE]),
+        (False, [PUBLIC_USER_DOC_TYPE]),
+    )
+    @ddt.unpack
+    def test_create_search_obj_metadata(self, is_advance_search_capable, expected_doc_type):
         """
         Test that Search objects are created with proper metadata
         """
+        user = self.user if is_advance_search_capable else self.learner
         search_param_dict = {'size': 50}
         with patch('search.api.Search.update_from_dict', autospec=True) as mock_update_from_dict:
-            search_obj = create_search_obj(self.user, search_param_dict=search_param_dict)
-        assert search_obj._doc_type == list(DOC_TYPES)  # pylint: disable=protected-access
+            search_obj = create_search_obj(
+                user,
+                search_param_dict=search_param_dict,
+            )
+        assert search_obj._doc_type == expected_doc_type  # pylint: disable=protected-access
         assert search_obj._index == [get_default_alias()]  # pylint: disable=protected-access
-        mock_update_from_dict.assert_called_with(search_obj, search_param_dict)
+        assert mock_update_from_dict.call_count == 2
+        assert isinstance(mock_update_from_dict.call_args[0][0], Search)
+        assert mock_update_from_dict.call_args[0][1] == search_param_dict
 
     def test_user_with_no_program_access(self):
         """
@@ -152,23 +172,25 @@ class SearchAPITests(ESTestCase):  # pylint: disable=missing-docstring
         with self.assertRaises(NoProgramAccessException):
             create_search_obj(profile.user)
 
-    def test_prepare_and_execute_search(self):
+    @ddt.data(True, False)
+    def test_prepare_and_execute_search(self, is_advance_search_capable):
         """
         Test that a Search object is properly prepared and executed
         """
+        user = self.user if is_advance_search_capable else self.learner
         mock_search_func = Mock(name='execute', return_value=['result1', 'result2'])
         params = {'size': 50}
         with patch('search.api.create_search_obj', autospec=True, return_value=None) as mock_create_search_obj:
             results = prepare_and_execute_search(
-                self.user,
+                user,
                 search_param_dict=params,
                 search_func=mock_search_func,
-                filter_on_email_optin=True
+                filter_on_email_optin=True,
             )
             mock_create_search_obj.assert_called_with(
-                self.user,
+                user,
                 search_param_dict=params,
-                filter_on_email_optin=True
+                filter_on_email_optin=True,
             )
             assert results == ['result1', 'result2']
 
@@ -195,7 +217,7 @@ class SearchAPITests(ESTestCase):  # pylint: disable=missing-docstring
         results = prepare_and_execute_search(
             self.user,
             search_param_dict=params,
-            filter_on_email_optin=True
+            filter_on_email_optin=True,
         )
 
         self.assertEqual(len(results), 1)

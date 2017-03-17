@@ -179,6 +179,10 @@
         display: flex;
         flex-direction: row;
       }
+
+      .sk-panel {
+        margin-bottom: 10px;
+      }
     }
 
     .filter-visibility-toggle {
@@ -360,6 +364,10 @@
     .result-info {
       justify-content: flex-start;
       margin-left: 0;
+    }
+
+    .result-info > button {
+      margin-right: 15px;
     }
 
     .result-info > span {
