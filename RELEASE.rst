@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.52.3
+--------------
+
+- Removed feature flag code related to the final grade algorithm
+- Added message for failed edx cache refresh
+- Optimized the exam status query in MMTrack
+- Added average grade to the staff view of the Learner page
+
 Version 0.52.2
 --------------
 
