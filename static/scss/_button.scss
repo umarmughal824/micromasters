@@ -101,16 +101,6 @@
     background: #1d67a7 !important;
   }
 
-  &.progress-button {
-    color: #ffffff !important;
-    background-color: #989898 !important;
-    box-shadow: none;
-  }
-
-  &.progress-button:hover {
-    box-shadow: none;
-  }
-
   &.minor-action {
     font-size: 13px;
     color: #4a4a4a;
@@ -141,6 +131,17 @@
     background: none;
     box-shadow: none;
     background-color: none;
+  }
+
+  &[disabled], &.progress-button[disabled] {
+    color: white;
+    background-color: $medgrey;
+    box-shadow: none;
+
+    &:hover {
+      cursor: not-allowed;
+      box-shadow: none;
+    }
   }
 }
 
@@ -236,11 +237,6 @@
   &[disabled] {
     background-color: adjust-color($button-color, $alpha: -0.5);
   }
-}
-
-.disabled {
-  background-color: $lightgrey;
-  cursor: not-allowed;
 }
 
 a.btn {

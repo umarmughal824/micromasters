@@ -138,6 +138,6 @@ describe('ProgressWidget', () => {
       wrapper.find(".heading-paragraph").text(),
       "On completion, you can apply for the master’s degree program"
     );
-    assert.isTrue(wrapper.find(".progress-button").hasClass('disabled'), 'Button is disable');
+    assert.isTrue(wrapper.find(".progress-button").props().disabled, 'Button is disable');
   });
 });
