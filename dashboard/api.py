@@ -4,7 +4,6 @@ Apis for the dashboard
 import datetime
 import logging
 
-from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
 import pytz
@@ -306,16 +305,15 @@ def get_status_for_courserun(course_run, mmtrack):
     Returns:
         CourseRunUserStatus: an object representing the run status for the user
     """
-    get_grade_algorithm_version = settings.FEATURES.get("FINAL_GRADE_ALGORITHM", "v0")
-    if get_grade_algorithm_version == "v1":
-        if mmtrack.has_paid_frozen_grade(course_run.edx_course_key):
-            return CourseRunUserStatus(CourseRunStatus.CHECK_IF_PASSED, course_run)
-        elif mmtrack.has_frozen_grade(course_run.edx_course_key):
-            if course_run.is_upgradable:
-                return CourseRunUserStatus(CourseRunStatus.CAN_UPGRADE, course_run)
-            else:
-                return CourseRunUserStatus(CourseRunStatus.MISSED_DEADLINE, course_run)
-    if not mmtrack.is_enrolled(course_run.edx_course_key):
+
+    if mmtrack.has_paid_frozen_grade(course_run.edx_course_key):
+        return CourseRunUserStatus(CourseRunStatus.CHECK_IF_PASSED, course_run)
+    elif mmtrack.has_frozen_grade(course_run.edx_course_key):
+        if course_run.is_upgradable:
+            return CourseRunUserStatus(CourseRunStatus.CAN_UPGRADE, course_run)
+        else:
+            return CourseRunUserStatus(CourseRunStatus.MISSED_DEADLINE, course_run)
+    elif not mmtrack.is_enrolled(course_run.edx_course_key):
         if mmtrack.has_paid(course_run.edx_course_key):
             return CourseRunUserStatus(CourseRunStatus.PAID_BUT_NOT_ENROLLED, course_run)
         return CourseRunUserStatus(CourseRunStatus.NOT_ENROLLED, course_run)
@@ -326,18 +324,15 @@ def get_status_for_courserun(course_run, mmtrack):
         elif course_run.is_future:
             status = CourseRunStatus.WILL_ATTEND
         # the following statement needs to happen only with the new version of the algorithm
-        elif course_run.has_frozen_grades and get_grade_algorithm_version == "v1":
+        elif course_run.has_frozen_grades:
             # be sure that the user has a final grade or freeze now
             if not mmtrack.has_frozen_grade(course_run.edx_course_key):
                 api.freeze_user_final_grade(mmtrack.user, course_run, raise_on_exception=True)
             status = CourseRunStatus.CHECK_IF_PASSED
         # this last check needs to be done as last one
         elif course_run.is_past:
-            if get_grade_algorithm_version == "v1":
-                # in this case with v1 the course has not frozen final grades yet
-                status = CourseRunStatus.CURRENTLY_ENROLLED
-            else:
-                status = CourseRunStatus.CHECK_IF_PASSED
+            # At this point the course has no frozen final grades yet
+            status = CourseRunStatus.CURRENTLY_ENROLLED
         else:
             raise ImproperlyConfigured(
                 'The course {0} results are not either current, past, or future at the same time'.format(
@@ -413,15 +408,8 @@ def format_courserun_for_dashboard(course_run, status_for_user, mmtrack, positio
     for extra_field in extra_fields:
         formatted_run[extra_field['format_field']] = getattr(course_run, extra_field['course_run_field'])
 
-    if status_for_user == CourseStatus.PASSED:
+    if status_for_user in (CourseStatus.PASSED, CourseStatus.NOT_PASSED):
         formatted_run['final_grade'] = mmtrack.get_final_grade(course_run.edx_course_key)
-    # if the course is not passed the final grade is the current grade
-    elif status_for_user == CourseStatus.NOT_PASSED:
-        get_grade_algorithm_version = settings.FEATURES.get("FINAL_GRADE_ALGORITHM", "v0")
-        if get_grade_algorithm_version == "v1":
-            formatted_run['final_grade'] = mmtrack.get_final_grade(course_run.edx_course_key)
-        else:
-            formatted_run['final_grade'] = mmtrack.get_current_grade(course_run.edx_course_key)
     # if the course is can-upgrade, we need to show the current grade if it is in progress
     # or the final grade if it is final
     elif status_for_user == CourseStatus.CAN_UPGRADE:

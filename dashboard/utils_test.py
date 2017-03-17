@@ -10,7 +10,6 @@ from unittest.mock import (
 
 import pytz
 from django.core.exceptions import ImproperlyConfigured
-from django.test import override_settings
 import ddt
 
 from courses.factories import ProgramFactory, CourseFactory, CourseRunFactory
@@ -382,7 +381,6 @@ class MMTrackTest(MockedESTestCase):
         )
         assert mmtrack.is_enrolled_mmtrack(course_id) is True
 
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v1"})
     @patch('dashboard.utils.MMTrack.extract_final_grade', autospec=True)
     def test_has_passed_course(self, extr_grade_mock):
         """
@@ -402,7 +400,6 @@ class MMTrackTest(MockedESTestCase):
         assert mmtrack.has_passed_course(course_id) is True
         extr_grade_mock.assert_called_once_with(mmtrack, course_id)
 
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v1"})
     @patch('dashboard.utils.MMTrack.extract_final_grade', autospec=True)
     def test_has_passed_course_raises(self, extr_grade_mock):
         """
@@ -453,7 +450,6 @@ class MMTrackTest(MockedESTestCase):
 
         assert mmtrack.has_passed_course_for_exam(course_id) is False
 
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v1"})
     @patch('dashboard.utils.MMTrack.extract_final_grade', autospec=True)
     def test_get_final_grade(self, extr_grade_mock):
         """
@@ -474,7 +470,6 @@ class MMTrackTest(MockedESTestCase):
         assert round(mmtrack.get_final_grade(course_id)) == 57.0
         extr_grade_mock.assert_called_once_with(mmtrack, course_id)
 
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v1"})
     @patch('dashboard.utils.MMTrack.extract_final_grade', autospec=True)
     def test_get_final_grade_raises(self, extr_grade_mock):
         """
@@ -600,95 +595,26 @@ class MMTrackTest(MockedESTestCase):
             user=self.user
         )
 
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v0"})
-    def test_has_passed_course_normal_v0(self):
-        """
-        Test for has_passed_course method in case of a normal program
-        V0 default behavior soon to be deprecated
-        """
-        mmtrack = MMTrack(
-            user=self.user,
-            program=self.program,
-            edx_user_data=self.cached_edx_user_data
-        )
-        # this is a verified enrollment and a verified certificate from edx
-        assert mmtrack.has_passed_course("course-v1:edX+DemoX+Demo_Course") is True
-        # this is a audit enrollment and a non verified certificate from edx
-        assert mmtrack.has_passed_course("course-v1:MITx+8.MechCX+2014_T1") is False
-
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v0"})
-    def test_has_passed_course_fa_v0(self):
-        """
-        Test for has_passed_course method in case of a financial aid program
-        V0 default behavior soon to be deprecated
-        """
-        course_id = "course-v1:odl+FOO101+CR-FALL15"
-        self.pay_for_fa_course(course_id)
-        mmtrack = MMTrack(
-            user=self.user,
-            program=self.program_financial_aid,
-            edx_user_data=self.cached_edx_user_data
-        )
-        assert mmtrack.has_passed_course(course_id) is True
-
-        # in case there is no current grade for the run
-        with patch('edx_api.grades.models.CurrentGrades.get_current_grade', return_value=None):
-            assert mmtrack.has_passed_course(course_id) is False
-
-        # move the end date in the future
-        self.crun_fa.end_date = datetime.now(pytz.utc) + timedelta(weeks=1)
-        self.crun_fa.save()
-        assert mmtrack.has_passed_course(course_id) is False
-
-        # remove the end date
-        self.crun_fa.end_date = None
-        self.crun_fa.save()
-        with self.assertRaises(ImproperlyConfigured):
-            mmtrack.has_passed_course(course_id)
-
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v0"})
-    def test_get_final_grade_normal_v0(self):
-        """
-        Test for get_final_grade method in case of a normal program
-        V0 default behavior soon to be deprecated
-        """
-        mmtrack = MMTrack(
-            user=self.user,
-            program=self.program,
-            edx_user_data=self.cached_edx_user_data
-        )
-        # this is a verified enrollment and a verified certificate from edx
-        assert mmtrack.get_final_grade("course-v1:edX+DemoX+Demo_Course") == 98.0
-        # this is a audit enrollment and a non verified certificate from edx
-        assert mmtrack.get_final_grade("course-v1:MITx+8.MechCX+2014_T1") is None
-
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v0"})
-    def test_get_final_grade_fa_v0(self):
-        """
-        Test for get_final_grade method in case of a financial aid program
-        V0 default behavior soon to be deprecated
-        """
-        course_id = "course-v1:odl+FOO101+CR-FALL15"
-        self.pay_for_fa_course(course_id)
-        mmtrack = MMTrack(
-            user=self.user,
-            program=self.program_financial_aid,
-            edx_user_data=self.cached_edx_user_data
-        )
-        assert mmtrack.get_final_grade(course_id) == 69.0
-        assert mmtrack.get_final_grade("course-v1:edX+DemoX+Demo_Course") is None
-
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v0"})
     def test_get_all_final_grades(self):
         """
         Test for get_all_final_grades
         """
+        final_grades = FinalGradeFactory.create_batch(
+            3,
+            user=self.user,
+            course_run__course__program=self.program,
+            grade=0.75,
+            passed=True
+        )
         mmtrack = MMTrack(
             user=self.user,
             program=self.program,
             edx_user_data=self.cached_edx_user_data
         )
-        assert mmtrack.get_all_final_grades() == {'course-v1:edX+DemoX+Demo_Course': 98.0}
+        assert mmtrack.get_all_final_grades() == {
+            final_grade.course_run.edx_course_key: final_grade.grade * 100
+            for final_grade in final_grades
+        }
 
     def test_get_current_grade(self):
         """
@@ -707,39 +633,6 @@ class MMTrackTest(MockedESTestCase):
         with patch('edx_api.grades.models.CurrentGrades.get_current_grade', return_value=None):
             assert mmtrack.get_current_grade("course-v1:MITx+8.MechCX+2014_T1") is None
 
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v0"})
-    def test_count_courses_passed_normal_v0(self):
-        """
-        Assert that count_courses_passed works in case of a normal program.
-        """
-        mmtrack = MMTrack(
-            user=self.user,
-            program=self.program,
-            edx_user_data=self.cached_edx_user_data
-        )
-        assert mmtrack.count_courses_passed() == 1
-
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v0"})
-    def test_count_courses_passed_fa_v0(self):
-        """
-        Assert that count_courses_passed works in case of fa program.
-        """
-        mmtrack = MMTrack(
-            user=self.user,
-            program=self.program_financial_aid,
-            edx_user_data=self.cached_edx_user_data
-        )
-        assert mmtrack.count_courses_passed() == 0
-
-        self.pay_for_fa_course(self.crun_fa.edx_course_key)
-        mmtrack = MMTrack(
-            user=self.user,
-            program=self.program_financial_aid,
-            edx_user_data=self.cached_edx_user_data
-        )
-        assert mmtrack.count_courses_passed() == 1
-
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v1"})
     def test_count_courses_passed_normal(self):
         """
         Assert that count_courses_passed works in case of normal program.
@@ -758,7 +651,6 @@ class MMTrackTest(MockedESTestCase):
         )
         assert mmtrack.count_courses_passed() == 1
 
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v1"})
     def test_count_courses_passed_fa(self):
         """
         Assert that count_courses_passed works in case of fa program.
@@ -778,7 +670,7 @@ class MMTrackTest(MockedESTestCase):
 
     def test_has_paid_fa_no_final_grade(self):
         """
-        Assert that has_paid works for FA programs in case there is no final grade or or with v0 algorithm
+        Assert that has_paid works for FA programs in case there is no final grade
         """
         mmtrack = MMTrack(
             user=self.user,
@@ -796,7 +688,6 @@ class MMTrackTest(MockedESTestCase):
         )
         assert mmtrack.has_paid(key) is True
 
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v1"})
     def test_has_paid_fa_with_final_grade(self):
         """
         Test for has_paid for FA programs in case there is a final grade
@@ -816,7 +707,7 @@ class MMTrackTest(MockedESTestCase):
 
     def test_has_paid_not_fa_no_final_grade(self):
         """
-        Assert that has_paid works for non-FA programs in case there is no final grade or with v0 algorithm
+        Assert that has_paid works for non-FA programs in case there is no final grade
         """
         mmtrack = MMTrack(
             user=self.user,
@@ -826,7 +717,6 @@ class MMTrackTest(MockedESTestCase):
         key = "course-v1:edX+DemoX+Demo_Course"
         assert mmtrack.has_paid(key) is True
 
-    @override_settings(FEATURES={"FINAL_GRADE_ALGORITHM": "v1"})
     def test_has_paid_not_fa_with_final_grade(self):
         """
         Assert that has_paid works for non-FA programs in case there is a final grade
