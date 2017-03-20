@@ -7,7 +7,6 @@ from django.conf.urls import url
 
 from financialaid.views import (
     CoursePriceListView,
-    CoursePriceDetailView,
     FinancialAidActionView,
     FinancialAidDetailView,
     FinancialAidRequestView,
@@ -16,9 +15,7 @@ from financialaid.views import (
 )
 
 urlpatterns = [
-    url(r'^api/v0/course_prices/$', CoursePriceListView.as_view(), name='course_price_list'),
-    url(r'^api/v0/course_prices/(?P<program_id>[\d]+)/$',
-        CoursePriceDetailView.as_view(), name='course_price_detail'),
+    url(r'^api/v0/course_prices/(?P<username>[-\w.]+)/$', CoursePriceListView.as_view(), name='course_price_list'),
     url(
         r'^financial_aid/review/(?P<program_id>[\d]+)/?$',
         ReviewFinancialAidView.as_view(),

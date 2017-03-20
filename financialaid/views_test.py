@@ -6,6 +6,7 @@ from decimal import Decimal
 import json
 from unittest.mock import Mock, patch
 
+from backends.edxorg import EdxOrgOAuth2
 import ddt
 from django.core.urlresolvers import reverse
 from django.db.models import Q
@@ -770,109 +771,6 @@ class FinancialAidDetailViewTests(FinancialAidBaseTestCase, APIClient):
         self.make_http_request(self.client.patch, self.docs_sent_url, status.HTTP_400_BAD_REQUEST, data=self.data)
 
 
-class CoursePriceDetailViewTests(FinancialAidBaseTestCase, APIClient):
-    """
-    Tests for course price detail views
-    """
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
-        cls.course_price_url = reverse("course_price_detail", kwargs={"program_id": cls.program.id})
-
-    def setUp(self):
-        super().setUp()
-        self.program.refresh_from_db()
-        self.client.force_login(self.profile.user)
-
-    def test_anonymous(self):
-        """
-        Anonymous users can't use the course price API
-        """
-        self.client.logout()
-        resp = self.client.get(self.course_price_url)
-        assert resp.status_code == status.HTTP_403_FORBIDDEN
-
-    def test_not_enrolled(self):
-        """
-        Tests ReviewFinancialAidView that are not allowed
-        """
-        # Bad request if not enrolled
-        program, _ = create_program()
-        profile = create_enrolled_profile(program)
-        self.client.force_login(profile.user)
-        self.make_http_request(self.client.get, self.course_price_url, status.HTTP_404_NOT_FOUND)
-
-    def test_get_learner_price_for_enrolled_with_financial_aid(self):
-        """
-        Tests ReviewFinancialAidView for enrolled user who has approved financial aid
-        """
-        financial_aid = FinancialAidFactory.create(
-            user=self.profile.user,
-            tier_program=self.tier_programs["25k"],
-            status=FinancialAidStatus.APPROVED,
-        )
-        course_price = self.program.price
-        resp = self.make_http_request(self.client.get, self.course_price_url, status.HTTP_200_OK)
-        expected_price = course_price - financial_aid.tier_program.discount_amount
-        expected_response = {
-            "program_id": self.program.id,
-            "price": str(expected_price),
-            "has_financial_aid_request": True,
-            "financial_aid_availability": True
-        }
-        self.assertDictEqual(resp.data, expected_response)
-
-    def test_get_learner_price_for_enrolled_with_pending_financial_aid(self):
-        """
-        Tests ReviewFinancialAidView for enrolled user who has pending financial aid
-        """
-        financial_aid = FinancialAidFactory.create(
-            user=self.profile.user,
-            tier_program=self.tier_programs["25k"],
-            status=FinancialAidStatus.PENDING_MANUAL_APPROVAL,
-        )
-        course_price = self.program.price
-        resp = self.make_http_request(self.client.get, self.course_price_url, status.HTTP_200_OK)
-        expected_price = course_price - financial_aid.tier_program.discount_amount
-        expected_response = {
-            "program_id": self.program.id,
-            "price": str(expected_price),
-            "has_financial_aid_request": True,
-            "financial_aid_availability": True
-        }
-        self.assertDictEqual(resp.data, expected_response)
-
-    def test_get_learner_price_for_enrolled_with_no_financial_aid_requested(self):
-        """
-        Tests ReviewFinancialAidView for enrolled user who has no financial aid request
-        """
-        course_price = self.program.price
-        resp = self.make_http_request(self.client.get, self.course_price_url, status.HTTP_200_OK)
-        expected_response = {
-            "program_id": self.program.id,
-            "price": str(course_price),
-            "has_financial_aid_request": False,
-            "financial_aid_availability": True
-        }
-        self.assertDictEqual(resp.data, expected_response)
-
-    def test_get_learner_price_for_enrolled_but_no_financial_aid_availability(self):
-        """
-        Tests ReviewFinancialAidView for enrolled user in program without financial aid
-        """
-        course_price = self.program.price
-        self.program.financial_aid_availability = False
-        self.program.save()
-        resp = self.make_http_request(self.client.get, self.course_price_url, status.HTTP_200_OK)
-        expected_response = {
-            "program_id": self.program.id,
-            "price": str(course_price),
-            "has_financial_aid_request": False,
-            "financial_aid_availability": False
-        }
-        self.assertDictEqual(resp.data, expected_response)
-
-
 @ddt.ddt
 class LearnerSkipsFinancialAid(FinancialAidBaseTestCase, APIClient):
     """
@@ -988,6 +886,14 @@ class LearnerSkipsFinancialAid(FinancialAidBaseTestCase, APIClient):
         self.make_http_request(self.client.delete, self.skip_url, status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
+def decimalize_price(fcp):
+    """
+    Convert the `price` key in the dictionary from a string to a Decimal
+    """
+    fcp["price"] = Decimal(fcp["price"])
+    return fcp
+
+
 class CoursePriceListViewTests(FinancialAidBaseTestCase, APIClient):
     """
     Tests for course price list views
@@ -996,12 +902,33 @@ class CoursePriceListViewTests(FinancialAidBaseTestCase, APIClient):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        cls.course_price_url = reverse("course_price_list")
+        cls.username = "{}_edx".format(cls.profile.user.username)
+        cls.staff_username = "{}_edx".format(cls.staff_user_profile.user.username)
+        cls.instructor_username = "{}_edx".format(cls.instructor_user_profile.user.username)
+        cls.profile.user.social_auth.create(
+            provider=EdxOrgOAuth2.name,
+            uid=cls.username,
+            extra_data={"access_token": "fooooootoken"}
+        )
+        cls.staff_user_profile.user.social_auth.create(
+            provider=EdxOrgOAuth2.name,
+            uid=cls.staff_username,
+            extra_data={"access_token": "fooooootoken"}
+        )
+
+        cls.course_price_url = reverse("course_price_list", args=[cls.username])
+        cls.staff_course_price_url = reverse("course_price_list", args=[cls.staff_username])
         # create a second program
         program, _ = create_program()
         ProgramEnrollment.objects.create(
             program=program,
             user=cls.profile.user,
+        )
+        # one just for the staff user
+        other_program, _ = create_program()
+        ProgramEnrollment.objects.create(
+            program=other_program,
+            user=cls.staff_user_profile.user,
         )
 
     def setUp(self):
@@ -1037,14 +964,29 @@ class CoursePriceListViewTests(FinancialAidBaseTestCase, APIClient):
     def test_get_all_course_prices(self):
         """
         Test that the course_price_list route will return a list of formatted course prices
+        which should only include entries from the program the user is enrolled in.
         """
-        def decimalize_price(fcp):
-            """
-            Convert the `price` key in the dictionary from a string to a Decimal
-            """
-            fcp["price"] = Decimal(fcp["price"])
-            return fcp
+        resp = self.make_http_request(self.client.get, self.course_price_url, status.HTTP_200_OK)
+        expected = sorted([
+            get_formatted_course_price(enrollment)
+            for enrollment in ProgramEnrollment.objects.filter(user=self.profile.user)
+        ], key=lambda x: x['program_id'])
+        actual = sorted([
+            decimalize_price(fcp) for fcp in resp.data
+        ], key=lambda x: x['program_id'])
+        assert actual == expected
 
+    def test_non_staff_cannot_get_another_user(self):
+        """
+        Learners should not be able to get the data of others
+        """
+        self.make_http_request(self.client.get, self.staff_course_price_url, status.HTTP_404_NOT_FOUND)
+
+    def test_staff_can_get_other_user(self):
+        """
+        A staff user should be able to get the data for a learner enrolled in their program
+        """
+        self.client.force_login(self.staff_user_profile.user)
         resp = self.make_http_request(self.client.get, self.course_price_url, status.HTTP_200_OK)
         expected = sorted([
             get_formatted_course_price(enrollment)

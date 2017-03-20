@@ -21,7 +21,7 @@ export const clearCoursePrices = withUsername(CLEAR_COURSE_PRICES);
 export function fetchCoursePrices(username: string, noSpinner: boolean = false): Dispatcher<CoursePrices> {
   return (dispatch: Dispatch) => {
     dispatch(requestCoursePrices(username, noSpinner));
-    return api.getCoursePrices().
+    return api.getCoursePrices(username).
       then(coursePrices => dispatch(receiveCoursePricesSuccess(username, coursePrices))).
       catch(error => {
         dispatch(receiveCoursePricesFailure(username, error));

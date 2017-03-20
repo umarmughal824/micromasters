@@ -246,8 +246,8 @@ export function addFinancialAid(income: number, currency: string, programId: num
   });
 }
 
-export function getCoursePrices(): Promise<CoursePrices> {
-  return fetchJSONWithCSRF('/api/v0/course_prices/', {}).then(coursePrices => {
+export function getCoursePrices(username: string): Promise<CoursePrices> {
+  return fetchJSONWithCSRF(`/api/v0/course_prices/${username}/`, {}).then(coursePrices => {
     // turn `price` from string into decimal
     return R.map(R.evolve({price: Decimal}), coursePrices);
   });

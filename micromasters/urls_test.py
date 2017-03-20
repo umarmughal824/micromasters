@@ -31,6 +31,5 @@ class URLTests(TestCase):
         ) == '/financial_aid/review/5/xyz'
         assert reverse('financial_aid_skip', kwargs={'program_id': 3}) == '/api/v0/financial_aid_skip/3/'
         assert reverse('financial_aid', kwargs={'financial_aid_id': 123}) == '/api/v0/financial_aid/123/'
-        assert reverse('course_price_list') == '/api/v0/course_prices/'
-        assert reverse('course_price_detail', kwargs={'program_id': 4}) == '/api/v0/course_prices/4/'
+        assert reverse('course_price_list', args=['username']) == '/api/v0/course_prices/username/'
         assert reverse('order-fulfillment') == '/api/v0/order_fulfillment/'

@@ -7,6 +7,7 @@ from functools import reduce
 
 from django.conf import settings
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.models import User
 from django.db.models import F, Q
 from django.views.generic import ListView
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
@@ -27,6 +28,7 @@ from rolepermissions.verifications import (
 
 from courses.models import Program
 from dashboard.models import ProgramEnrollment
+from dashboard.permissions import CanReadIfStaffOrSelf
 from financialaid.api import (
     get_formatted_course_price,
     get_no_discount_tier_program,
@@ -55,6 +57,7 @@ from roles.models import (
     Staff,
 )
 from roles.roles import Permissions
+from backends.edxorg import EdxOrgOAuth2
 
 
 class FinancialAidRequestView(CreateAPIView):
@@ -329,13 +332,18 @@ class CoursePriceListView(APIView):
         SessionAuthentication,
         TokenAuthentication,
     )
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, CanReadIfStaffOrSelf)
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, username, *args, **kwargs):
         """
         GET handler
         """
-        user = request.user
+        user = get_object_or_404(
+            User,
+            social_auth__uid=username,
+            social_auth__provider=EdxOrgOAuth2.name
+        )
+
         program_enrollments = (
             ProgramEnrollment.objects
             .select_related('user', 'program')
