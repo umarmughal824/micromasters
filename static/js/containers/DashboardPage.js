@@ -47,6 +47,8 @@ import {
   setPaymentTeaserDialogVisibility,
   setEnrollCourseDialogVisibility,
   setEnrollSelectedCourseRun,
+  showDialog,
+  hideDialog,
 } from '../actions/ui';
 import { findCourseRun } from '../util/util';
 import CourseListCard from '../components/dashboard/CourseListCard';
@@ -102,6 +104,7 @@ import type { PearsonAPIState } from '../reducers/pearson';
 import { getOwnDashboard } from '../reducers/util';
 
 const isProcessing = R.equals(FETCH_PROCESSING);
+const PEARSON_TOS_DIALOG = "pearsonTOSDialogVisible";
 
 class DashboardPage extends React.Component {
   static contextTypes = {
@@ -476,6 +479,15 @@ class DashboardPage extends React.Component {
     )(this.props);
   };
 
+  showPearsonTOSDialog = (open: boolean) => {
+    const { dispatch } = this.props;
+    if (open) {
+      dispatch(showDialog(PEARSON_TOS_DIALOG));
+    } else {
+      dispatch(hideDialog(PEARSON_TOS_DIALOG));
+    }
+  }
+
   renderCouponDialog() {
     const {
       programs,
@@ -669,8 +681,10 @@ class DashboardPage extends React.Component {
               profile={profile}
               program={program}
               pearson={pearson}
+              ui={ui}
               navigateToProfile={this.navigateToProfile}
               submitPearsonSSO={this.submitPearsonSSO}
+              showPearsonTOSDialog={this.showPearsonTOSDialog}
             />
             {financialAidCard}
             <CourseListCard

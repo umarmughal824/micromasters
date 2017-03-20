@@ -451,3 +451,28 @@
   padding: 0 10px;
   margin: 10px auto 29px;
 }
+
+.dialog-to-pearson-site {
+  .content {
+    max-width: 590px !important;
+
+    .dialog-container {
+      display: flex;
+      flex-direction: column;
+
+      .dialog-title {
+        padding: 20px 0;
+        color: $font-black;
+        font-weight: 500;
+      }
+
+      > p {
+        color: $font-black;
+      }
+    }
+
+    .actions {
+      border-top: 0 !important;
+    }
+  }
+}
