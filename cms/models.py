@@ -3,6 +3,7 @@ Page models for the CMS
 """
 import json
 
+from datetime import datetime
 from django.conf import settings
 from django.db import models
 from django.utils.text import slugify
@@ -21,6 +22,8 @@ from micromasters.utils import webpack_dev_server_host
 from profiles.api import get_social_username
 from roles.models import Instructor, Staff
 from cms.util import get_coupon_code
+
+now = datetime.now()
 
 
 class HomePage(Page):
@@ -191,6 +194,7 @@ class ProgramPage(Page):
         InlinePanel('courses', label='Program Courses'),
         InlinePanel('info_links', label='More Info Links'),
         InlinePanel('faculty_members', label='Faculty'),
+        InlinePanel('semester_dates', label='Future Semester Dates'),
     ]
 
     def get_context(self, request):
@@ -252,6 +256,29 @@ class InfoLinks(Orderable):
             [
                 FieldPanel('url'),
                 FieldPanel('title_url')
+            ]
+        )
+    ]
+
+
+class SemesterDate(Orderable):
+    """
+    Dates for future start dates of semesters
+    """
+    program_page = ParentalKey(ProgramPage, related_name='semester_dates')
+    semester_name = models.CharField(
+        max_length=50,
+        help_text='Name for the semester. For example: "Fall" or "Fall {year}"'.format(
+            year=now.year + 1
+        )
+    )
+    start_date = models.DateField()
+
+    content_panels = [
+        MultiFieldPanel(
+            [
+                FieldPanel('semester_name'),
+                FieldPanel('start_date')
             ]
         )
     ]
