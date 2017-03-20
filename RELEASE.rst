@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.53.0
+--------------
+
+- Added dialog before opening pearson site (#2865)
+- CMS: Added Semester Start Dates
+- Show image upload only for logged in user (#2919)
+- Gray, not grey (#2902)
+- Improve disabled UI buttons (#2901)
+- Fix refresh loop on learner page (#2906)
+- More small UI layout tweaks for Mobile etc (#2897)
+- Reindexed search on adding or deleting user role (#2869)
+
 Version 0.52.3
 --------------
 
