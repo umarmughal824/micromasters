@@ -172,7 +172,7 @@ def get_info_for_program(mmtrack):
         "title": mmtrack.program.title,
         "financial_aid_availability": mmtrack.financial_aid_available,
         "courses": [],
-        "pearson_exam_status": mmtrack.pearson_exam_status,
+        "pearson_exam_status": mmtrack.get_pearson_exam_status(),
         "grade_average": mmtrack.calculate_final_grade_average(),
     }
     if mmtrack.financial_aid_available:

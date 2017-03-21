@@ -70,7 +70,6 @@ class MMTrack:
                 ).values_list("edx_course_key", "course__id")
             )
             self.course_ids = self.edx_key_course_map.keys()
-            self.pearson_exam_status = self.get_pearson_exam_status()
 
             if self.financial_aid_available:
                 self.paid_course_ids = set(Line.objects.filter(

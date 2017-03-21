@@ -1368,7 +1368,7 @@ class InfoProgramTest(MockedESTestCase):
         self.mmtrack.configure_mock(**{
             'program': self.program,
             'financial_aid_available': False,
-            'pearson_exam_status': ExamProfile.PROFILE_SUCCESS,
+            'get_pearson_exam_status.return_value': ExamProfile.PROFILE_SUCCESS,
             'calculate_final_grade_average.return_value': 91,
         })
         mock_info_course.return_value = {'position_in_program': 1}
@@ -1392,7 +1392,7 @@ class InfoProgramTest(MockedESTestCase):
         self.mmtrack.configure_mock(**{
             'program': self.program_no_courses,
             'financial_aid_available': False,
-            'pearson_exam_status': ExamProfile.PROFILE_INVALID,
+            'get_pearson_exam_status.return_value': ExamProfile.PROFILE_INVALID,
             'calculate_final_grade_average.return_value': 91,
         })
         res = api.get_info_for_program(self.mmtrack)
@@ -1403,7 +1403,7 @@ class InfoProgramTest(MockedESTestCase):
             "title": self.program_no_courses.title,
             "courses": [],
             "financial_aid_availability": False,
-            'pearson_exam_status': ExamProfile.PROFILE_INVALID,
+            "pearson_exam_status": ExamProfile.PROFILE_INVALID,
             "grade_average": 91,
         }
         self.assertEqual(res, expected_data)
@@ -1420,7 +1420,7 @@ class InfoProgramTest(MockedESTestCase):
             'financial_aid_min_price': 123,
             'financial_aid_max_price': 456,
             'financial_aid_date_documents_sent': datetime.now(pytz.utc) - timedelta(hours=12),
-            'pearson_exam_status': ExamProfile.PROFILE_IN_PROGRESS,
+            'get_pearson_exam_status.return_value': ExamProfile.PROFILE_IN_PROGRESS,
             'calculate_final_grade_average.return_value': 91,
         }
         self.mmtrack.configure_mock(**kwargs)
