@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.53.1
+--------------
+
+- Upgraded sanctuary to latest version
+
 Version 0.53.0
 --------------
 
