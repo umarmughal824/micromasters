@@ -125,3 +125,7 @@ export const PEARSON_PROFILE_SUCCESS = 'success';
 export const PEARSON_PROFILE_IN_PROGRESS = 'in-progress';
 export const PEARSON_PROFILE_INVALID = 'invalid';
 export const PEARSON_PROFILE_SCHEDULABLE = 'schedulable';
+
+export const GET = 'GET';
+export const PATCH = 'PATCH';
+export const POST = 'POST';
