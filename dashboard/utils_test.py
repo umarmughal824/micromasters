@@ -119,12 +119,12 @@ class MMTrackTest(MockedESTestCase):
         assert mmtrack.current_grades == self.cached_edx_user_data.current_grades
         assert mmtrack.certificates == self.cached_edx_user_data.certificates
         assert mmtrack.financial_aid_available == self.program.financial_aid_availability
-        assert mmtrack.course_ids == {
+        assert mmtrack.edx_course_keys == {
             "course-v1:edX+DemoX+Demo_Course",
             "course-v1:MITx+8.MechCX+2014_T1",
             "course-v1:odl+FOO102+CR-FALL16"
         }
-        assert mmtrack.paid_course_ids == set()
+        assert mmtrack.paid_course_keys == set()
 
     def test_init_financial_aid_track(self):
         """
@@ -142,8 +142,8 @@ class MMTrackTest(MockedESTestCase):
         assert mmtrack.current_grades == self.cached_edx_user_data.current_grades
         assert mmtrack.certificates == self.cached_edx_user_data.certificates
         assert mmtrack.financial_aid_available == self.program_financial_aid.financial_aid_availability
-        assert mmtrack.course_ids == {"course-v1:odl+FOO101+CR-FALL15"}
-        assert mmtrack.paid_course_ids == set()
+        assert mmtrack.edx_course_keys == {"course-v1:odl+FOO101+CR-FALL15"}
+        assert mmtrack.paid_course_keys == set()
 
     def test_fa_paid(self):
         """
@@ -157,14 +157,14 @@ class MMTrackTest(MockedESTestCase):
             program=self.program_financial_aid,
             edx_user_data=self.cached_edx_user_data
         )
-        assert mmtrack_paid.paid_course_ids == {key}
+        assert mmtrack_paid.paid_course_keys == {key}
 
         mmtrack = MMTrack(
             user=UserFactory.create(),
             program=self.program_financial_aid,
             edx_user_data=self.cached_edx_user_data
         )
-        assert mmtrack.paid_course_ids == set()
+        assert mmtrack.paid_course_keys == set()
 
     def test_is_course_in_program(self):
         """

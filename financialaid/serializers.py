@@ -3,6 +3,7 @@ Serializers from financial aid
 """
 import logging
 import datetime
+import copy
 
 from django.db.models import Max, Min, Q
 from django.core.exceptions import ImproperlyConfigured
@@ -213,7 +214,7 @@ class FormattedCoursePriceSerializer(serializers.Serializer):
 
 
 class FinancialAidDashboardSerializer:
-    initial_serialized = {
+    default_serialized = {
         "id": None,
         "has_user_applied": None,
         "application_status": None,
@@ -230,7 +231,7 @@ class FinancialAidDashboardSerializer:
         if not program.financial_aid_availability:
             return {}
         # TODO:
-        serialized = {k: v for k, v in cls.initial_serialized.items()}
+        serialized = copy.copy(cls.default_serialized)
         financial_aid_qset = FinancialAid.objects.filter(
             Q(user=user) & Q(tier_program__program=program)
         ).exclude(status=FinancialAidStatus.RESET)
