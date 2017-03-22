@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.53.2
+--------------
+
+- Removed &#39;view on edx&#39; link for staff (#2925)
+- Refactored course price API frontend code to namespace on username
+- Upgrade yarn (#2920)
+- Generate robotic avatars (#2910)
+- Create thumbnails in Profile.save (#2903)
+
 Version 0.53.1
 --------------
 
