@@ -1409,39 +1409,36 @@ class InfoProgramTest(MockedESTestCase):
         self.assertEqual(res, expected_data)
 
     @patch('dashboard.api.get_info_for_course', autospec=True)
-    def test_program_financial_aid(self, mock_info_course):
+    @patch('financialaid.serializers.FinancialAidDashboardSerializer.serialize', new_callable=MagicMock)
+    def test_program_financial_aid(self, mock_fin_aid_serialize, mock_info_course):
         """Test happy path"""
-        kwargs = {
-            'financial_aid_id': 1122334455,
+        self.mmtrack.configure_mock(**{
             'program': self.program,
-            'financial_aid_available': True,
-            'financial_aid_applied': True,
-            'financial_aid_status': 'WHO-KNOWS',
-            'financial_aid_min_price': 123,
-            'financial_aid_max_price': 456,
-            'financial_aid_date_documents_sent': datetime.now(pytz.utc) - timedelta(hours=12),
             'get_pearson_exam_status.return_value': ExamProfile.PROFILE_IN_PROGRESS,
             'calculate_final_grade_average.return_value': 91,
+            'financial_aid_available': True,
+        })
+        serialized_fin_aid = {
+            "id": 123,
+            "has_user_applied": True,
+            "application_status": "WHO-KNOWS",
+            "min_possible_cost": 100,
+            "max_possible_cost": 200,
+            "date_documents_sent": datetime.now(pytz.utc) - timedelta(hours=12)
         }
-        self.mmtrack.configure_mock(**kwargs)
+        mock_fin_aid_serialize.return_value = serialized_fin_aid
         mock_info_course.return_value = {'position_in_program': 1}
         res = api.get_info_for_program(self.mmtrack)
         for course in self.courses:
             mock_info_course.assert_any_call(course, self.mmtrack)
+
         expected_data = {
             "id": self.program.pk,
             "description": self.program.description,
             "title": self.program.title,
             "courses": [{'position_in_program': 1}, {'position_in_program': 1}],
-            "financial_aid_availability": kwargs['financial_aid_available'],
-            "financial_aid_user_info": {
-                "id": kwargs['financial_aid_id'],
-                "has_user_applied": kwargs['financial_aid_applied'],
-                "application_status": kwargs['financial_aid_status'],
-                "min_possible_cost": kwargs['financial_aid_min_price'],
-                "max_possible_cost": kwargs['financial_aid_max_price'],
-                "date_documents_sent": kwargs['financial_aid_date_documents_sent'],
-            },
+            "financial_aid_availability": True,
+            "financial_aid_user_info": serialized_fin_aid,
             "pearson_exam_status": ExamProfile.PROFILE_IN_PROGRESS,
             "grade_average": 91,
         }

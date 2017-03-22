@@ -8,19 +8,16 @@ from unittest.mock import (
 )
 
 import pytz
-from django.core.exceptions import ImproperlyConfigured
 import ddt
 
 from courses.factories import ProgramFactory, CourseFactory, CourseRunFactory
 from dashboard.api_edx_cache import CachedEdxUserData
 from dashboard.models import CachedEnrollment, CachedCertificate, CachedCurrentGrade
 from dashboard.utils import get_mmtrack, MMTrack
-from ecommerce.factories import CoursePriceFactory, LineFactory, OrderFactory
+from ecommerce.factories import LineFactory, OrderFactory
 from ecommerce.models import Order
 from exams.factories import ExamProfileFactory, ExamAuthorizationFactory
 from exams.models import ExamProfile, ExamAuthorization
-from financialaid.constants import FinancialAidStatus
-from financialaid.factories import TierProgramFactory, FinancialAidFactory
 from grades.factories import FinalGradeFactory
 from grades.models import FinalGrade
 from micromasters.factories import UserFactory
@@ -93,23 +90,6 @@ class MMTrackTest(MockedESTestCase):
             edx_course_key=None
         )
 
-        # create price for the financial aid course
-        CoursePriceFactory.create(
-            course_run=cls.crun_fa,
-            is_valid=True,
-            price=1000
-        )
-        cls.min_tier_program = TierProgramFactory.create(
-            program=cls.program_financial_aid,
-            discount_amount=750,
-            current=True
-        )
-        cls.max_tier_program = TierProgramFactory.create(
-            program=cls.program_financial_aid,
-            discount_amount=0,
-            current=True
-        )
-
     def pay_for_fa_course(self, course_id):
         """
         Helper function to pay for a financial aid course
@@ -145,12 +125,6 @@ class MMTrackTest(MockedESTestCase):
             "course-v1:odl+FOO102+CR-FALL16"
         }
         assert mmtrack.paid_course_ids == set()
-        assert mmtrack.financial_aid_applied is None
-        assert mmtrack.financial_aid_status is None
-        assert mmtrack.financial_aid_id is None
-        assert mmtrack.financial_aid_min_price is None
-        assert mmtrack.financial_aid_max_price is None
-        assert mmtrack.financial_aid_date_documents_sent is None
 
     def test_init_financial_aid_track(self):
         """
@@ -170,12 +144,6 @@ class MMTrackTest(MockedESTestCase):
         assert mmtrack.financial_aid_available == self.program_financial_aid.financial_aid_availability
         assert mmtrack.course_ids == {"course-v1:odl+FOO101+CR-FALL15"}
         assert mmtrack.paid_course_ids == set()
-        assert mmtrack.financial_aid_applied is False
-        assert mmtrack.financial_aid_status is None
-        assert mmtrack.financial_aid_id is None
-        assert mmtrack.financial_aid_min_price == 250
-        assert mmtrack.financial_aid_max_price == 1000
-        assert mmtrack.financial_aid_date_documents_sent is None
 
     def test_fa_paid(self):
         """
@@ -197,113 +165,6 @@ class MMTrackTest(MockedESTestCase):
             edx_user_data=self.cached_edx_user_data
         )
         assert mmtrack.paid_course_ids == set()
-
-    def test_init_financial_aid_with_application(self):
-        """
-        Sub case of test_init_financial_aid_track where there is a financial aid application for the user
-        """
-        # create a financial aid application
-        fin_aid = FinancialAidFactory.create(
-            user=self.user,
-            tier_program=self.min_tier_program,
-            date_documents_sent=None,
-        )
-        mmtrack = MMTrack(
-            user=self.user,
-            program=self.program_financial_aid,
-            edx_user_data=self.cached_edx_user_data
-        )
-
-        assert mmtrack.financial_aid_applied is True
-        assert mmtrack.financial_aid_status == fin_aid.status
-        assert mmtrack.financial_aid_id == fin_aid.id
-        assert mmtrack.financial_aid_min_price == 250
-        assert mmtrack.financial_aid_max_price == 1000
-        assert mmtrack.financial_aid_date_documents_sent is None
-
-    def test_init_financial_aid_with_application_in_reset(self):
-        """
-        Sub case of test_init_financial_aid_with_application where
-        there is a financial aid application for the user but the state is `reset`
-        """
-        FinancialAidFactory.create(
-            user=self.user,
-            tier_program=self.min_tier_program,
-            date_documents_sent=None,
-            status=FinancialAidStatus.RESET
-        )
-        mmtrack = MMTrack(
-            user=self.user,
-            program=self.program_financial_aid,
-            edx_user_data=self.cached_edx_user_data
-        )
-        # the result is like if the user never applied
-        assert mmtrack.financial_aid_applied is False
-        assert mmtrack.financial_aid_status is None
-        assert mmtrack.financial_aid_id is None
-        assert mmtrack.financial_aid_min_price == 250
-        assert mmtrack.financial_aid_max_price == 1000
-        assert mmtrack.financial_aid_date_documents_sent is None
-
-    def test_init_financial_aid_with_documents_sent(self):
-        """
-        Sub case of test_init_financial_aid_with_application
-        where the user set a date for the financial aid documents sent
-        """
-        # create a financial aid application
-        fin_aid = FinancialAidFactory.create(
-            user=self.user,
-            tier_program=self.min_tier_program,
-            date_documents_sent=self.now,
-        )
-        mmtrack = MMTrack(
-            user=self.user,
-            program=self.program_financial_aid,
-            edx_user_data=self.cached_edx_user_data
-        )
-
-        assert mmtrack.financial_aid_applied is True
-        assert mmtrack.financial_aid_status == fin_aid.status
-        assert mmtrack.financial_aid_id == fin_aid.id
-        assert mmtrack.financial_aid_min_price == 250
-        assert mmtrack.financial_aid_max_price == 1000
-        assert mmtrack.financial_aid_date_documents_sent == self.now.date()
-
-    def test_course_price_mandatory(self):
-        """
-        Test that if financial aid is available for the program, at least one course price should be available.
-        """
-        program = ProgramFactory.create(live=True, financial_aid_availability=True)
-        TierProgramFactory.create(
-            program=program,
-            discount_amount=750,
-            current=True
-        )
-        with self.assertRaises(ImproperlyConfigured):
-            MMTrack(
-                user=self.user,
-                program=program,
-                edx_user_data=self.cached_edx_user_data
-            )
-
-    def test_course_tier_mandatory(self):
-        """
-        Test that if financial aid is available for the program, at least one tier should be available.
-        """
-        program = ProgramFactory.create(live=True, financial_aid_availability=True)
-        course = CourseFactory.create(program=program)
-        crun_fa = CourseRunFactory.create(course=course)
-        CoursePriceFactory.create(
-            course_run=crun_fa,
-            is_valid=True,
-            price=1000
-        )
-        with self.assertRaises(ImproperlyConfigured):
-            MMTrack(
-                user=self.user,
-                program=program,
-                edx_user_data=self.cached_edx_user_data
-            )
 
     def test_is_course_in_program(self):
         """

@@ -12,6 +12,7 @@ from backends.exceptions import InvalidCredentialStored
 from courses.models import Program
 from dashboard.api_edx_cache import CachedEdxDataApi, CachedEdxUserData
 from dashboard.utils import MMTrack
+from financialaid.serializers import FinancialAidDashboardSerializer
 from grades import api
 from grades.models import FinalGrade
 from exams.models import ExamAuthorization
@@ -176,14 +177,7 @@ def get_info_for_program(mmtrack):
         "grade_average": mmtrack.calculate_final_grade_average(),
     }
     if mmtrack.financial_aid_available:
-        data["financial_aid_user_info"] = {
-            "id": mmtrack.financial_aid_id,
-            "has_user_applied": mmtrack.financial_aid_applied,
-            "application_status": mmtrack.financial_aid_status,
-            "min_possible_cost": mmtrack.financial_aid_min_price,
-            "max_possible_cost": mmtrack.financial_aid_max_price,
-            "date_documents_sent": mmtrack.financial_aid_date_documents_sent,
-        }
+        data["financial_aid_user_info"] = FinancialAidDashboardSerializer.serialize(mmtrack.user, mmtrack.program)
     for course in mmtrack.program.course_set.all():
         data['courses'].append(
             get_info_for_course(course, mmtrack)

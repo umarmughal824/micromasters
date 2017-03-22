@@ -5,16 +5,13 @@ import logging
 from decimal import Decimal
 
 from datetime import datetime
-from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
-from django.db.models import Max, Min, Q
+from django.db.models import Q
 from pytz import utc
 
 from courses.models import CourseRun
 from dashboard.api_edx_cache import CachedEdxUserData
 from ecommerce.models import Line
-from financialaid.constants import FinancialAidStatus
-from financialaid.models import FinancialAid, TierProgram
 from grades.constants import FinalGradeStatus
 from grades.models import FinalGrade
 from exams.models import ExamProfile, ExamAuthorization
@@ -38,13 +35,6 @@ class MMTrack:
     certificates = None
     course_ids = set()
     paid_course_ids = set()  # financial aid course ids for paid with the MM app
-    financial_aid_available = None
-    financial_aid_applied = None
-    financial_aid_status = None
-    financial_aid_id = None
-    financial_aid_min_price = None
-    financial_aid_max_price = None
-    financial_aid_date_documents_sent = None
     pearson_exam_status = None
 
     def __init__(self, user, program, edx_user_data):
@@ -76,44 +66,11 @@ class MMTrack:
                     Q(order__status='fulfilled') & Q(course_key__in=self.course_ids) & Q(order__user=user)
                 ).values_list("course_key", flat=True))
 
-                financial_aid_qset = FinancialAid.objects.filter(
-                    Q(user=user) & Q(tier_program__program=program)
-                ).exclude(status=FinancialAidStatus.RESET)
-                self.financial_aid_applied = financial_aid_qset.exists()
-                if self.financial_aid_applied:
-                    financial_aid = financial_aid_qset.first()
-                    self.financial_aid_status = financial_aid.status
-                    # set the sent document date
-                    self.financial_aid_date_documents_sent = financial_aid.date_documents_sent
-                    # and the financial aid ID
-                    self.financial_aid_id = financial_aid.id
-
-                # set the price range for the program
-                self.financial_aid_min_price, self.financial_aid_max_price = self._get_program_fa_prices()
-
     def __str__(self):
         return 'MMTrack for user {0} on program "{1}"'.format(
             self.user.username,
             self.program.title
         )
-
-    def _get_program_fa_prices(self):
-        """
-        Returns the financial aid possible cost range.
-        """
-        course_max_price = self.program.get_course_price()
-        # get all the possible discounts for the program
-        program_tiers_qset = TierProgram.objects.filter(
-            Q(program=self.program) & Q(current=True)).order_by('discount_amount')
-        if not program_tiers_qset.exists():
-            log.error('The program "%s" needs at least one tier configured', self.program.title)
-            raise ImproperlyConfigured(
-                'The program "{}" needs at least one tier configured'.format(self.program.title))
-        min_discount = program_tiers_qset.aggregate(
-            Min('discount_amount')).get('discount_amount__min', 0)
-        max_discount = program_tiers_qset.aggregate(
-            Max('discount_amount')).get('discount_amount__max', 0)
-        return course_max_price - max_discount, course_max_price - min_discount
 
     def _is_course_in_program(self, course_id):
         """
