@@ -2,11 +2,15 @@
 Models for the grades app
 """
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import JSONField
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.utils import IntegrityError
 
-from courses.models import CourseRun
+from courses.models import (
+    Course,
+    CourseRun,
+)
 from grades.constants import FinalGradeStatus
 from micromasters.models import (
     AuditableModel,
@@ -24,7 +28,7 @@ class CourseRunGradingAlreadyCompleteError(Exception):
 
 class FinalGrade(TimestampedModel, AuditableModel):
     """
-    Model to store final grades
+    Model to store edx final grades
     """
     user = models.ForeignKey(User, null=False)
     course_run = models.ForeignKey(CourseRun, null=False)
@@ -146,3 +150,55 @@ class CourseRunGradingStatus(TimestampedModel):
             raise CourseRunGradingAlreadyCompleteError(
                 'Course Run "{0}" has already been completed'.format(course_run.edx_course_key))
         return course_fg_info
+
+
+class ProctoredExamGrade(TimestampedModel, AuditableModel):
+    """
+    Model to store proctored exam grades (like the pearson exams)
+    """
+    # relationship to other models
+    user = models.ForeignKey(User, null=False)
+    course = models.ForeignKey(Course, null=False)
+
+    # fields from proctorate exam results
+    passing_score = models.FloatField()
+    score = models.FloatField()
+    grade = models.TextField()
+    client_authorization_id = models.TextField()
+
+    # dump of all the remaining fields coming from the proctorate exam results
+    row_data = JSONField(null=False)
+
+    # custom fields based on proctorate exam results
+    passed = models.BooleanField()
+    percentage_grade = models.FloatField(null=False)
+
+    @classmethod
+    def get_audit_class(cls):
+        return ProctoredExamGradeAudit
+
+    def to_dict(self):
+        return serialize_model_object(self)
+
+    def __str__(self):
+        return 'Proctored Exam Grade in course "{course_title}", user "{user}"'.format(
+            user=self.user.username,
+            course_title=self.course.title
+        )
+
+
+class ProctoredExamGradeAudit(AuditModel):
+    """
+    Audit table for the ProctoredExamGrade
+    """
+    proctored_exam_grade = models.ForeignKey(ProctoredExamGrade, null=True, on_delete=models.SET_NULL)
+
+    @classmethod
+    def get_related_field_name(cls):
+        return 'proctored_exam_grade'
+
+    def __str__(self):
+        return 'Proctored Exam Grade audit for user "{user}", course "{course_title}"'.format(
+            user=self.proctored_exam_grade.user,
+            course_title=self.proctored_exam_grade.course.title
+        )
