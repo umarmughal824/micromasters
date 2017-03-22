@@ -37,8 +37,9 @@ class Command(BaseCommand):
                 )
             )
         elif CourseRunGradingStatus.is_pending(run):
-            group_results_id = CACHE_ID_BASE_STR.format(edx_course_key)
-            if cache_redis.get(group_results_id):
+            cache_id = CACHE_ID_BASE_STR.format(edx_course_key)
+            group_results_id = cache_redis.get(cache_id)
+            if group_results_id is not None:
                 results = GroupResult.restore(group_results_id)
                 if not results.ready():
                     self.stdout.write(
