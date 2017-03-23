@@ -47,8 +47,9 @@ class Command(BaseCommand):
             return
 
         # check if there are tasks running
-        group_results_id = CACHE_ID_BASE_STR.format(edx_course_key)
-        if cache_redis.get(group_results_id):
+        cache_id = CACHE_ID_BASE_STR.format(edx_course_key)
+        group_results_id = cache_redis.get(cache_id)
+        if group_results_id is not None:
             results = GroupResult.restore(group_results_id)
             if results and not results.ready():
                 self.stdout.write(
