@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.53.3
+--------------
+
+- Fixed bug with gdm_grade_task_fail_bug management command
+
 Version 0.53.2
 --------------
 
