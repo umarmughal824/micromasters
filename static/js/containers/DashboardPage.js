@@ -694,6 +694,7 @@ class DashboardPage extends React.Component {
               coursePrice={coursePrice}
               prices={calculatedPrices}
               key={program.id}
+              ui={ui}
               openFinancialAidCalculator={this.openFinancialAidCalculator}
               addCourseEnrollment={this.addCourseEnrollment}
               openCourseContactDialog={this.openCourseContactDialog}
@@ -715,7 +716,10 @@ class DashboardPage extends React.Component {
       dashboard,
       prices
     } = this.props;
-    const loaded = R.none(isProcessing, [dashboard.fetchStatus, prices.fetchStatus]);
+    const loaded = R.or(
+      R.none(isProcessing, [dashboard.fetchStatus, prices.fetchStatus]),
+      R.or(dashboard.noSpinner, prices.noSpinner)
+    );
     const fetchStarted = !_.isNil(prices.fetchStatus) && !_.isNil(dashboard.fetchStatus);
 
     const errorMessage = this.renderErrorMessage();
