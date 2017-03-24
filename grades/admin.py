@@ -8,7 +8,7 @@ from micromasters.utils import get_field_names
 
 
 class FinalGradeAdmin(admin.ModelAdmin):
-    """Admin for FinalGradeA"""
+    """Admin for FinalGrade"""
     model = models.FinalGrade
     list_display = ('id', 'grade', 'user', 'course_run', )
     ordering = ('course_run',)
@@ -39,12 +39,44 @@ class FinalGradeAuditAdmin(admin.ModelAdmin):
 
 
 class CourseRunGradingStatusAdmin(admin.ModelAdmin):
-    """Admin for FinalGradeA"""
+    """Admin for CourseRunGradingStatus"""
     model = models.CourseRunGradingStatus
     list_display = ('id', 'course_run', 'status')
     ordering = ('course_run',)
 
 
+class ProctoredExamGradeAdmin(admin.ModelAdmin):
+    """Admin for ProctoredExamGrade"""
+    model = models.ProctoredExamGrade
+    list_display = ('id', 'user', 'course', )
+    ordering = ('course', 'user')
+
+    def has_delete_permission(self, *args, **kwargs):  # pylint: disable=unused-argument
+        return False
+
+    def save_model(self, request, obj, form, change):
+        """
+        Saves object and logs change to object
+        """
+        obj.save_and_log(request.user)
+
+
+class ProctoredExamGradeAuditAdmin(admin.ModelAdmin):
+    """Admin for ProctoredExamGradeAudit"""
+    model = models.ProctoredExamGradeAudit
+    readonly_fields = get_field_names(models.ProctoredExamGradeAudit)
+    list_display = ('id', 'proctored_exam_grade', )
+    ordering = ('proctored_exam_grade', 'id', )
+    list_filter = ('proctored_exam_grade__course__title', )
+
+    def has_add_permission(self, *args, **kwargs):  # pylint: disable=unused-argument
+        return False
+
+    def has_delete_permission(self, *args, **kwargs):  # pylint: disable=unused-argument
+        return False
+
 admin.site.register(models.FinalGrade, FinalGradeAdmin)
 admin.site.register(models.FinalGradeAudit, FinalGradeAuditAdmin)
 admin.site.register(models.CourseRunGradingStatus, CourseRunGradingStatusAdmin)
+admin.site.register(models.ProctoredExamGrade, ProctoredExamGradeAdmin)
+admin.site.register(models.ProctoredExamGradeAudit, ProctoredExamGradeAuditAdmin)
