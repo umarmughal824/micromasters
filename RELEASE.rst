@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.53.4
+--------------
+
+- Enroll and pay later: Load dashboard page without reloading (#2821)
+- Added full name search support (#2940)
+- Added model and admin for Proctorate Exam Grades
+- Changed course description to show: Auditing or Paid (#2936)
+
 Version 0.53.3
 --------------
 
