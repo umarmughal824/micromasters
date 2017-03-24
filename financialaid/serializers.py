@@ -214,6 +214,9 @@ class FormattedCoursePriceSerializer(serializers.Serializer):
 
 
 class FinancialAidDashboardSerializer:
+    """
+    Serializer of financial aid information for the dashboard API
+    """
     default_serialized = {
         "id": None,
         "has_user_applied": None,
@@ -230,7 +233,6 @@ class FinancialAidDashboardSerializer:
         """
         if not program.financial_aid_availability:
             return {}
-        # TODO:
         serialized = copy.copy(cls.default_serialized)
         financial_aid_qset = FinancialAid.objects.filter(
             Q(user=user) & Q(tier_program__program=program)
@@ -253,7 +255,7 @@ class FinancialAidDashboardSerializer:
     @classmethod
     def get_program_price_range(cls, program):
         """
-        Returns the financial aid possible cost range.
+        Returns the financial aid possible cost range
         """
         course_max_price = program.get_course_price()
         # get all the possible discounts for the program

@@ -513,6 +513,25 @@ class MMTrackTest(MockedESTestCase):
         final_grade.save()
         assert mmtrack.has_paid(key) is False
 
+    def test_has_paid_for_any_in_program(self):
+        """
+        Assert that has_paid_for_any_in_program returns True if any CourseRun associated with a Program has been
+        paid for.
+        """
+        new_program = ProgramFactory.create()
+        new_course_runs = CourseRunFactory.create_batch(2, course__program=new_program)
+        mmtrack = MMTrack(
+            user=self.user,
+            program=new_program,
+            edx_user_data=self.cached_edx_user_data
+        )
+        assert mmtrack.has_paid_for_any_in_program() is False
+        fg = FinalGradeFactory.create(user=self.user, course_run=new_course_runs[0], course_run_paid_on_edx=True)
+        assert mmtrack.has_paid_for_any_in_program() is True
+        fg.delete()
+        FinalGradeFactory.create(user=self.user, course_run=new_course_runs[1], course_run_paid_on_edx=True)
+        assert mmtrack.has_paid_for_any_in_program() is True
+
     @ddt.data(
         ("verified", "downloadable", True),
         ("audit", "downloadable", False),

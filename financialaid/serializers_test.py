@@ -15,12 +15,14 @@ from ecommerce.factories import CoursePriceFactory
 
 
 class FinancialAidDashboardSerializerTests(MockedESTestCase):
+    """
+    Tests for FinancialAidDashboardSerializer
+    """
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
         cls.user = UserFactory.create()
         cls.program = ProgramFactory.create(live=True, financial_aid_availability=True)
-        # create price for the financial aid course
         CoursePriceFactory.create(
             course_run__course__program=cls.program,
             is_valid=True,

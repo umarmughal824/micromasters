@@ -133,6 +133,12 @@ class MMTrack:
         # normal programs need to have a verified enrollment
         return self.has_verified_enrollment(edx_course_key)
 
+    def has_paid_for_any_in_program(self):
+        """
+        Returns true if a user has paid for any course run in the program
+        """
+        return any(self.has_paid(edx_course_key) for edx_course_key in self.edx_course_keys)
+
     def has_verified_enrollment(self, edx_course_key):
         """
         Returns true if user has a verified enrollment
