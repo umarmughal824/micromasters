@@ -216,7 +216,7 @@ class MMTrack:
         Returns:
             bool: whether a frozen final grade exists
         """
-        return self.final_grade_qset.paid_on_edx().for_course_run_key(course_id).exists()
+        return self.final_grade_qset.paid_on_edx().for_course_run_key(edx_course_key).exists()
 
     def has_passed_course(self, edx_course_key):
         """
