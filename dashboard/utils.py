@@ -11,7 +11,7 @@ from pytz import utc
 
 from courses.models import CourseRun
 from dashboard.api_edx_cache import CachedEdxUserData
-from ecommerce.models import Line
+from ecommerce.models import Order, Line
 from grades.constants import FinalGradeStatus
 from grades.models import FinalGrade
 from exams.models import ExamProfile, ExamAuthorization
@@ -63,7 +63,7 @@ class MMTrack:
 
             if self.financial_aid_available:
                 self.paid_course_keys = set(Line.objects.filter(
-                    order__status='fulfilled', course_key__in=self.edx_course_keys, order__user=user
+                    order__status=Order.FULFILLED, course_key__in=self.edx_course_keys, order__user=user
                 ).values_list("course_key", flat=True))
 
     def __str__(self):
