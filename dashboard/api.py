@@ -14,6 +14,7 @@ from dashboard.api_edx_cache import CachedEdxDataApi, CachedEdxUserData
 from dashboard.utils import MMTrack
 from grades import api
 from grades.models import FinalGrade
+from grades.serializers import ProctoredExamGradeSerializer
 from exams.models import ExamAuthorization
 
 log = logging.getLogger(__name__)
@@ -214,6 +215,9 @@ def get_info_for_course(course, mmtrack):
         "has_contact_email": bool(course.contact_email),
         "can_schedule_exam": is_exam_schedulable(mmtrack.user, course),
         "runs": [],
+        "proctorate_exams_grades": ProctoredExamGradeSerializer(
+            mmtrack.get_course_proctorate_exam_results(course), many=True
+        ).data
     }
 
     def _add_run(run, mmtrack_, status):

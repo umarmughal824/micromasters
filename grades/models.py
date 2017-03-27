@@ -161,6 +161,7 @@ class ProctoredExamGrade(TimestampedModel, AuditableModel):
     course = models.ForeignKey(Course, null=False)
 
     # fields from proctorate exam results
+    exam_date = models.DateTimeField()
     passing_score = models.FloatField()
     score = models.FloatField()
     grade = models.TextField()
@@ -176,6 +177,13 @@ class ProctoredExamGrade(TimestampedModel, AuditableModel):
     @classmethod
     def get_audit_class(cls):
         return ProctoredExamGradeAudit
+
+    @classmethod
+    def for_user_course(cls, user, course):
+        """
+        Returns a queryset of the exam result for an user in a course of a program
+        """
+        return cls.objects.filter(user=user, course=course)
 
     def to_dict(self):
         return serialize_model_object(self)
