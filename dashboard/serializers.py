@@ -5,7 +5,6 @@ from courses.utils import get_year_season_from_course_run
 from dashboard.models import CachedEnrollment
 from dashboard.utils import get_mmtrack
 from roles.api import is_learner
-from grades.models import FinalGrade
 
 
 class UserProgramSearchSerializer:
@@ -51,10 +50,7 @@ class UserProgramSearchSerializer:
         """
         final_grades = []
         for enrollment in enrollments:
-            try:
-                final_grade = mmtrack.get_final_grade(enrollment.course_run.edx_course_key)
-            except FinalGrade.DoesNotExist:
-                continue
+            final_grade = mmtrack.get_final_grade_percent(enrollment.course_run.edx_course_key)
             if final_grade:
                 final_grades.append({'title': enrollment.course_run.course.title, 'grade': final_grade})
         return final_grades

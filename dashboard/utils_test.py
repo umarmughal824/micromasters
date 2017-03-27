@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 from unittest.mock import (
     patch,
     MagicMock,
-    Mock,
 )
 
 import pytz
@@ -22,7 +21,6 @@ from exams.factories import ExamProfileFactory, ExamAuthorizationFactory
 from exams.models import ExamProfile, ExamAuthorization
 from financialaid.constants import FinancialAidStatus
 from financialaid.factories import TierProgramFactory, FinancialAidFactory
-from grades.constants import FinalGradeStatus
 from grades.factories import FinalGradeFactory
 from grades.models import FinalGrade
 from micromasters.factories import UserFactory
@@ -77,6 +75,7 @@ class MMTrackTest(MockedESTestCase):
             )
             if course_key:
                 cls.cruns.append(course_run)
+
         # and the program with financial aid
         finaid_course = CourseFactory.create(program=cls.program_financial_aid)
         cls.now = datetime.now(pytz.utc)
@@ -381,240 +380,158 @@ class MMTrackTest(MockedESTestCase):
         )
         assert mmtrack.is_enrolled_mmtrack(course_id) is True
 
-    @patch('dashboard.utils.MMTrack.extract_final_grade', autospec=True)
-    def test_has_passed_course(self, extr_grade_mock):
+    @ddt.data(True, False)
+    def test_has_passed_course(self, final_grade_passed):
         """
-        Test for has_passed_course method.
-        V1 new behavior soon to be default
+        Test that has_passed_course returns True when a passed FinalGrade exists
         """
-        course_id = "course-v1:odl+FOO101+CR-FALL15"
-        grade_mock = Mock(passed=True)
-        extr_grade_mock.return_value = grade_mock
-
+        final_grade = FinalGradeFactory.create(
+            user=self.user,
+            course_run=self.cruns[0],
+            passed=final_grade_passed
+        )
         mmtrack = MMTrack(
             user=self.user,
             program=self.program,
             edx_user_data=self.cached_edx_user_data
         )
+        assert mmtrack.has_passed_course(final_grade.course_run.edx_course_key) is final_grade_passed
 
-        assert mmtrack.has_passed_course(course_id) is True
-        extr_grade_mock.assert_called_once_with(mmtrack, course_id)
-
-    @patch('dashboard.utils.MMTrack.extract_final_grade', autospec=True)
-    def test_has_passed_course_raises(self, extr_grade_mock):
+    def test_has_passed_course_no_grade(self):
         """
-        Test for has_passed_course method in case the called function raises.
-        V1 new behavior soon to be default
+        Test that has_passed_course returns False when no FinalGrade exists
         """
-        course_id = "course-v1:odl+FOO101+CR-FALL15"
-        grade_mock = Mock(passed=True)
-        extr_grade_mock.return_value = grade_mock
-
         mmtrack = MMTrack(
             user=self.user,
             program=self.program,
             edx_user_data=self.cached_edx_user_data
         )
+        assert mmtrack.has_passed_course('random-course-id') is False
 
-        extr_grade_mock.side_effect = FinalGrade.DoesNotExist
-        with self.assertRaises(FinalGrade.DoesNotExist):
-            mmtrack.has_passed_course(course_id)
-        extr_grade_mock.assert_called_once_with(mmtrack, course_id)
+    def test_get_final_grade_percent(self):
+        """
+        Test that get_final_grade_percent returns a final grade in percent form
+        """
+        final_grade = FinalGradeFactory.create(
+            user=self.user,
+            course_run=self.cruns[0],
+            grade=0.57
+        )
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program,
+            edx_user_data=self.cached_edx_user_data
+        )
+        # calling round here because we do not want to add it in `get_final_grade` and let the frontend handle it
+        assert round(mmtrack.get_final_grade_percent(final_grade.course_run.edx_course_key)) == 57.0
+
+    def test_get_final_grade_percent_none(self):
+        """
+        Test that get_final_grade_percent returns a None when there is no final grade
+        """
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program,
+            edx_user_data=self.cached_edx_user_data
+        )
+        assert mmtrack.get_final_grade_percent('random-course-id') is None
+
+    def test_has_final_grade(self):
+        """
+        Test that has_final_grade returns True when a FinalGrade exists
+        """
+        final_grade = FinalGradeFactory.create(
+            user=self.user,
+            course_run=self.cruns[0]
+        )
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program,
+            edx_user_data=self.cached_edx_user_data
+        )
+        assert mmtrack.has_final_grade(final_grade.course_run.edx_course_key) is True
+        assert mmtrack.has_final_grade('random-course-id') is False
 
     @ddt.data(True, False)
-    @patch('dashboard.utils.MMTrack.has_passed_course', autospec=True)
-    def test_has_passed_course_for_exam(self, has_passed_course_value, has_passed_course_mock):
-        """Test that has_passed_course_for_exam return value of has_passed_course"""
-        course_id = "course-v1:odl+FOO101+CR-FALL15"
-        has_passed_course_mock.return_value = has_passed_course_value
-
+    def test_has_paid_final_grade(self, has_paid):
+        """
+        Test that has_paid_final_grade returns True when the associated FinalGrade is paid
+        """
+        final_grade = FinalGradeFactory.create(
+            user=self.user,
+            course_run=self.cruns[0],
+            course_run_paid_on_edx=has_paid
+        )
         mmtrack = MMTrack(
             user=self.user,
             program=self.program,
             edx_user_data=self.cached_edx_user_data
         )
+        assert mmtrack.has_paid_final_grade(final_grade.course_run.edx_course_key) is has_paid
 
-        assert mmtrack.has_passed_course_for_exam(course_id) is has_passed_course_value
-
-    @patch('dashboard.utils.MMTrack.has_passed_course', autospec=True)
-    def test_has_passed_course_for_exam_no_final_grade(self, has_passed_course_mock):
-        """Test that has_passed_course_for_exam returns False if no FinalGrade"""
-        course_id = "course-v1:odl+FOO101+CR-FALL15"
-        has_passed_course_mock.side_effect = FinalGrade.DoesNotExist
-
+    def test_has_paid_final_grade_none(self):
+        """
+        Test that has_paid_final_grade returns False when a FinalGrade doesn't exist
+        """
         mmtrack = MMTrack(
             user=self.user,
             program=self.program,
             edx_user_data=self.cached_edx_user_data
         )
+        assert mmtrack.has_paid_final_grade('random-course-id') is False
 
-        assert mmtrack.has_passed_course_for_exam(course_id) is False
-
-    @patch('dashboard.utils.MMTrack.extract_final_grade', autospec=True)
-    def test_get_final_grade(self, extr_grade_mock):
+    def test_get_final_grade(self):
         """
-        Test for has_passed_course method.
-        V1 new behavior soon to be default
+        Test that get_final_grade returns the FinalGrade associated with a user's course run
         """
-        course_id = "course-v1:odl+FOO101+CR-FALL15"
-        grade_mock = Mock(grade=0.57)
-        extr_grade_mock.return_value = grade_mock
-
+        final_grade = FinalGradeFactory.create(
+            user=self.user,
+            course_run=self.cruns[0],
+        )
         mmtrack = MMTrack(
             user=self.user,
             program=self.program,
             edx_user_data=self.cached_edx_user_data
         )
+        assert mmtrack.get_final_grade(final_grade.course_run.edx_course_key) == final_grade
 
-        # calling round here because we do not want to add it in `get_final_grade` and let the frontend handle it
-        assert round(mmtrack.get_final_grade(course_id)) == 57.0
-        extr_grade_mock.assert_called_once_with(mmtrack, course_id)
-
-    @patch('dashboard.utils.MMTrack.extract_final_grade', autospec=True)
-    def test_get_final_grade_raises(self, extr_grade_mock):
+    def test_get_final_grade_none(self):
         """
-        Test for has_passed_course method in case the called function raises.
-        V1 new behavior soon to be default
+        Test for get_final_grade returns None if there is no associated FinalGrade
         """
-        course_id = "course-v1:odl+FOO101+CR-FALL15"
-        grade_mock = Mock(grade=0.57)
-        extr_grade_mock.return_value = grade_mock
-
         mmtrack = MMTrack(
             user=self.user,
             program=self.program,
             edx_user_data=self.cached_edx_user_data
         )
+        assert mmtrack.get_final_grade('random-course-id') is None
 
-        extr_grade_mock.side_effect = FinalGrade.DoesNotExist
+    def test_get_required_final_grade(self):
+        """
+        Test that get_required_final_grade returns the FinalGrade associated with a user's course run
+        """
+        final_grade = FinalGradeFactory.create(
+            user=self.user,
+            course_run=self.cruns[0],
+        )
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program,
+            edx_user_data=self.cached_edx_user_data
+        )
+        assert mmtrack.get_required_final_grade(final_grade.course_run.edx_course_key) == final_grade
+
+    def test_get_required_final_grade_raises(self):
+        """
+        Test for get_required_final_grade raises an exception if there is no associated FinalGrade
+        """
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program,
+            edx_user_data=self.cached_edx_user_data
+        )
         with self.assertRaises(FinalGrade.DoesNotExist):
-            mmtrack.has_passed_course(course_id)
-        extr_grade_mock.assert_called_once_with(mmtrack, course_id)
-
-    @patch('grades.models.FinalGrade.objects.get', autospec=True)
-    @ddt.data(
-        (True, False),
-        (False, True),
-    )
-    @ddt.unpack
-    def test_has_frozen_grade(self, get_frozen_raises, expected_result, get_grades_mock):
-        """
-        Test for has_frozen_grade method.
-        """
-        course_id = "course-v1:odl+FOO101+CR-FALL15"
-        if not get_frozen_raises:
-            grade_mock = Mock(grade=0.97, passed=True)
-            get_grades_mock.return_value = grade_mock
-        else:
-            get_grades_mock.side_effect = FinalGrade.DoesNotExist
-
-        mmtrack = MMTrack(
-            user=self.user,
-            program=self.program,
-            edx_user_data=self.cached_edx_user_data
-        )
-        assert mmtrack.has_frozen_grade(course_id) is expected_result
-
-    @patch('dashboard.utils.MMTrack.has_paid', autospec=True)
-    @patch('grades.models.FinalGrade.objects.get', autospec=True)
-    @ddt.data(
-        (True, True, False),
-        (True, False, False),
-        (False, True, True),
-        (False, False, False),
-    )
-    @ddt.unpack
-    def test_has_paid_frozen_grade(
-            self, get_frozen_raises, has_paid, expected_result,
-            get_grades_mock, has_paid_mock):
-        """
-        Test for extract_final_grade method.
-        """
-        course_id = "course-v1:odl+FOO101+CR-FALL15"
-        if not get_frozen_raises:
-            grade_mock = Mock(grade=0.97, passed=True)
-            get_grades_mock.return_value = grade_mock
-        else:
-            get_grades_mock.side_effect = FinalGrade.DoesNotExist
-        has_paid_mock.return_value = has_paid
-
-        mmtrack = MMTrack(
-            user=self.user,
-            program=self.program,
-            edx_user_data=self.cached_edx_user_data
-        )
-        assert mmtrack.has_paid_frozen_grade(course_id) is expected_result
-
-    @patch('grades.models.FinalGrade.objects.get', autospec=True)
-    def test_extract_final_grade(self, get_grades_mock):
-        """
-        Test for extract_final_grade method.
-        """
-        course_id = "course-v1:odl+FOO101+CR-FALL15"
-        grade_mock = Mock(grade=0.97, passed=True)
-        get_grades_mock.return_value = grade_mock
-
-        mmtrack = MMTrack(
-            user=self.user,
-            program=self.program,
-            edx_user_data=self.cached_edx_user_data
-        )
-
-        res = mmtrack.extract_final_grade(course_id)
-        assert res.grade == 0.97
-        assert res.passed is True
-        get_grades_mock.assert_called_once_with(
-            course_run__edx_course_key=course_id,
-            status=FinalGradeStatus.COMPLETE,
-            user=self.user
-        )
-
-    @patch('grades.models.FinalGrade.objects.get', autospec=True)
-    def test_extract_final_grade_raises(self, get_grades_mock):
-        """
-        Test for extract_final_grade method in case the called model raises.
-        """
-        course_id = "course-v1:odl+FOO101+CR-FALL15"
-        grade_mock = Mock(grade=0.97, passed=True)
-        get_grades_mock.return_value = grade_mock
-
-        mmtrack = MMTrack(
-            user=self.user,
-            program=self.program,
-            edx_user_data=self.cached_edx_user_data
-        )
-
-        # it raises if the FinalGrade model raises
-        get_grades_mock.side_effect = FinalGrade.DoesNotExist
-        mmtrack.final_grades = {}
-        with self.assertRaises(FinalGrade.DoesNotExist):
-            mmtrack.extract_final_grade(course_id)
-        get_grades_mock.assert_called_once_with(
-            course_run__edx_course_key=course_id,
-            status=FinalGradeStatus.COMPLETE,
-            user=self.user
-        )
-
-    def test_get_all_final_grades(self):
-        """
-        Test for get_all_final_grades
-        """
-        final_grades = FinalGradeFactory.create_batch(
-            3,
-            user=self.user,
-            course_run__course__program=self.program,
-            grade=0.75,
-            passed=True
-        )
-        mmtrack = MMTrack(
-            user=self.user,
-            program=self.program,
-            edx_user_data=self.cached_edx_user_data
-        )
-        assert mmtrack.get_all_final_grades() == {
-            final_grade.course_run.edx_course_key: final_grade.grade * 100
-            for final_grade in final_grades
-        }
+            mmtrack.get_required_final_grade('random-course-id')
 
     def test_get_current_grade(self):
         """

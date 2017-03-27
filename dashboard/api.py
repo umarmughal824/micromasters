@@ -306,9 +306,9 @@ def get_status_for_courserun(course_run, mmtrack):
         CourseRunUserStatus: an object representing the run status for the user
     """
 
-    if mmtrack.has_paid_frozen_grade(course_run.edx_course_key):
+    if mmtrack.has_paid_final_grade(course_run.edx_course_key):
         return CourseRunUserStatus(CourseRunStatus.CHECK_IF_PASSED, course_run)
-    elif mmtrack.has_frozen_grade(course_run.edx_course_key):
+    elif mmtrack.has_final_grade(course_run.edx_course_key):
         if course_run.is_upgradable:
             return CourseRunUserStatus(CourseRunStatus.CAN_UPGRADE, course_run)
         else:
@@ -326,7 +326,7 @@ def get_status_for_courserun(course_run, mmtrack):
         # the following statement needs to happen only with the new version of the algorithm
         elif course_run.has_frozen_grades:
             # be sure that the user has a final grade or freeze now
-            if not mmtrack.has_frozen_grade(course_run.edx_course_key):
+            if not mmtrack.has_final_grade(course_run.edx_course_key):
                 api.freeze_user_final_grade(mmtrack.user, course_run, raise_on_exception=True)
             status = CourseRunStatus.CHECK_IF_PASSED
         # this last check needs to be done as last one
@@ -353,7 +353,7 @@ def get_status_for_courserun(course_run, mmtrack):
                     status = CourseRunStatus.CAN_UPGRADE
                 else:
                     try:
-                        final_grade = mmtrack.extract_final_grade(course_run.edx_course_key)
+                        final_grade = mmtrack.get_required_final_grade(course_run.edx_course_key)
                     except FinalGrade.DoesNotExist:
                         # this is a very special case that happens if the user has logged in
                         # for the first time after we have already frozen the final grades
@@ -409,12 +409,12 @@ def format_courserun_for_dashboard(course_run, status_for_user, mmtrack, positio
         formatted_run[extra_field['format_field']] = getattr(course_run, extra_field['course_run_field'])
 
     if status_for_user in (CourseStatus.PASSED, CourseStatus.NOT_PASSED):
-        formatted_run['final_grade'] = mmtrack.get_final_grade(course_run.edx_course_key)
+        formatted_run['final_grade'] = mmtrack.get_final_grade_percent(course_run.edx_course_key)
     # if the course is can-upgrade, we need to show the current grade if it is in progress
     # or the final grade if it is final
     elif status_for_user == CourseStatus.CAN_UPGRADE:
-        if mmtrack.has_frozen_grade(course_run.edx_course_key):
-            formatted_run['final_grade'] = mmtrack.get_final_grade(course_run.edx_course_key)
+        if mmtrack.has_final_grade(course_run.edx_course_key):
+            formatted_run['final_grade'] = mmtrack.get_final_grade_percent(course_run.edx_course_key)
         else:
             formatted_run['current_grade'] = mmtrack.get_current_grade(course_run.edx_course_key)
     # any other status but "offered" should have the current grade

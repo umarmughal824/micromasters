@@ -26,10 +26,45 @@ class CourseRunGradingAlreadyCompleteError(Exception):
     """
 
 
+class FinalGradeQuerySet(models.QuerySet):
+    """
+    QuerySet class defining common query parameters for FinalGrade
+    """
+    def passed(self):
+        """
+        Returns a queryset with a filter that will only fetch passed course runs
+        """
+        return self.filter(passed=True)
+
+    def paid_on_edx(self):
+        """
+        Returns a queryset with a filter that will only fetch course runs that are paid on edX.
+        Note that a course run can still be paid via an Order if this value is False for a given user.
+        """
+        return self.filter(course_run_paid_on_edx=True)
+
+    def for_course_run_key(self, edx_course_key):
+        """
+        Returns a queryset with a filter that will only fetch course runs that match a course key
+        """
+        return self.filter(course_run__edx_course_key=edx_course_key)
+
+    def for_course_run_keys(self, edx_course_keys):
+        """
+        Returns a queryset with a filter that will only fetch course runs that match one of many course keys
+        """
+        return self.filter(course_run__edx_course_key__in=edx_course_keys)
+
+
 class FinalGrade(TimestampedModel, AuditableModel):
     """
     Model to store edx final grades
     """
+    # Set a custom manager for this model. This lets us do a couple useful things:
+    # (1) Apply commonly-needed filters by a short, easily-recognized name, and (2) compose a query piece-by-piece.
+    # Docs: https://docs.djangoproject.com/en/1.10/topics/db/managers/#creating-a-manager-with-queryset-methods
+    objects = FinalGradeQuerySet.as_manager()
+
     user = models.ForeignKey(User, null=False)
     course_run = models.ForeignKey(CourseRun, null=False)
     grade = models.FloatField(
@@ -54,6 +89,11 @@ class FinalGrade(TimestampedModel, AuditableModel):
 
     def to_dict(self):
         return serialize_model_object(self)
+
+    @property
+    def grade_percent(self):
+        """Returns the grade field value as a number out of 100 (or None if the value is None)"""
+        return self.grade * 100 if self.grade else None
 
     @classmethod
     def get_frozen_users(cls, course_run):

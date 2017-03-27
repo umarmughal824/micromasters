@@ -158,10 +158,8 @@ class MMTrack:
         Returns:
             bool: whether the user is paid
         """
-        if self.has_frozen_grade(course_id):
-            final_grade = self.extract_final_grade(course_id)
-            if final_grade.course_run_paid_on_edx:
-                return True
+        if self.has_paid_final_grade(course_id):
+            return True
 
         # financial aid programs need to have an audit enrollment and a paid entry for the course
         if self.financial_aid_available:
@@ -197,37 +195,48 @@ class MMTrack:
         certificate = self.certificates.get_verified_cert(course_id)
         return certificate.status == 'downloadable'
 
-    def extract_final_grade(self, course_id):
+    @property
+    def final_grade_qset(self):
+        """Base queryset for the MMTrack User's completed FinalGrades"""
+        return FinalGrade.objects.filter(user=self.user, status=FinalGradeStatus.COMPLETE)
+
+    def get_final_grade(self, course_id):
         """
-        Helper function that extract a final grade from the database.
+        Gets a user's FinalGrade for a CourseRun matching a course run key
 
         Args:
             course_id (str): an edX course run id
         Returns:
+            FinalGrade: a Final Grade object or None
+        """
+        return self.final_grade_qset.for_course_run_key(course_id).first()
+
+    def get_required_final_grade(self, course_id):
+        """
+        Gets a user's FinalGrade for a CourseRun matching a course run key. This should be used
+        in cases where a user is expected to have a FinalGrade for the given CourseRun.
+
+        Args:
+            course_id (str): an edX course run id
+        Raises:
+            FinalGrade.DoesNotExist: raised if a FinalGrade record was not found
+        Returns:
             FinalGrade: a Final Grade object
         """
-        return FinalGrade.objects.get(
-            course_run__edx_course_key=course_id,
-            user=self.user,
-            status=FinalGradeStatus.COMPLETE,
-        )
+        return self.final_grade_qset.for_course_run_key(course_id).get()
 
-    def has_frozen_grade(self, course_id):
+    def has_final_grade(self, course_id):
         """
-        Checks if there is a frozen grade for the course run
+        Checks if there is a final grade for the course run
 
         Args:
             course_id (str): an edX course run id
         Returns:
             bool: whether a frozen final grade exists
         """
-        try:
-            self.extract_final_grade(course_id)
-            return True
-        except FinalGrade.DoesNotExist:
-            return False
+        return self.final_grade_qset.for_course_run_key(course_id).exists()
 
-    def has_paid_frozen_grade(self, course_id):
+    def has_paid_final_grade(self, course_id):
         """
         Checks if there is a a frozen final grade and the user paid for it.
 
@@ -236,80 +245,42 @@ class MMTrack:
         Returns:
             bool: whether a frozen final grade exists
         """
-        return self.has_frozen_grade(course_id) and self.has_paid(course_id)
+        return self.final_grade_qset.paid_on_edx().for_course_run_key(course_id).exists()
 
     def has_passed_course(self, course_id):
         """
         Returns whether the user has passed a course run.
-        This means if the user has a verified certificate for normal programs
-        or a current_grade with passed property and the course has ended.
 
         Args:
             course_id (str): an edX course run id
-
-        Raises:
-            FinalGrade.DoesNotExist: raised if a FinalGrade record was not found
-
         Returns:
             bool: whether the user has passed the course
         """
-        final_grade = self.extract_final_grade(course_id)
-        return final_grade.passed
+        final_grade = self.get_final_grade(course_id)
+        return final_grade.passed if final_grade else False
 
-    def has_passed_course_for_exam(self, course_id):
-        """
-        Returns whether the user has passed a course run for an exam.
-        This method is present because of the need to have a version that doesn't raise FinalGrade.DoesNotExist.
-        In those cases, we treat it as False.
-
-        Args:
-            course_id (str): an edX course run id
-
-        Returns:
-            bool: whether the user has passed the course
-        """
-        try:
-            return self.has_passed_course(course_id)
-        except FinalGrade.DoesNotExist:
-            return False
-
-    def get_final_grade(self, course_id):
+    def get_final_grade_percent(self, course_id):
         """
         Returns the course final grade number for the user if she passed.
 
         Args:
             course_id (str): an edX course run id
-
         Returns:
             float: the final grade of the user in the course
         """
-        final_grade = self.extract_final_grade(course_id)
-        return final_grade.grade * 100
-
-    def get_all_final_grades(self):
-        """
-        Returns a list of final grades for only the passed courses.
-
-        Returns:
-            dict: dictionary of course_ids: floats representing final grades for a course
-        """
-        final_grades = {}
-        for course_id in self.course_ids:
-            try:
-                final_grade = self.get_final_grade(course_id)
-            except FinalGrade.DoesNotExist:
-                continue
-            if final_grade is not None:
-                final_grades[course_id] = final_grade
-        return final_grades
+        final_grade = self.get_final_grade(course_id)
+        return final_grade.grade_percent if final_grade else None
 
     def calculate_final_grade_average(self):
         """
         Calculates an average grade (integer) from the program final grades
         """
-        final_grades = self.get_all_final_grades()
+        final_grades = self.final_grade_qset.for_course_run_keys(self.course_ids)
         if final_grades:
-            return round(sum(Decimal(final_grade) for final_grade in final_grades.values()) / len(final_grades))
+            return round(
+                sum(Decimal(final_grade.grade_percent) for final_grade in final_grades) /
+                len(final_grades)
+            )
 
     def get_current_grade(self, course_id):
         """
@@ -317,7 +288,6 @@ class MMTrack:
 
         Args:
             course_id (str): an edX course run id
-
         Returns:
             float: the current grade of the user in the course
         """
@@ -335,14 +305,11 @@ class MMTrack:
         Returns:
             int: A number of passed courses.
         """
-        passed_courses = set()
-        for course_id in self.course_ids:
-            try:
-                if self.has_passed_course(course_id):
-                    passed_courses.add(self.edx_key_course_map[course_id])
-            except FinalGrade.DoesNotExist:
-                continue
-        return len(passed_courses)
+        return (
+            self.final_grade_qset.for_course_run_keys(self.course_ids).passed()
+            .values_list('course_run__course__id', flat=True)
+            .distinct().count()
+        )
 
     def get_pearson_exam_status(self):  # pylint: disable=too-many-return-statements
         """

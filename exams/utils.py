@@ -119,7 +119,7 @@ def authorize_for_exam(mmtrack, course_run):
     # if user passed the course and currently not authorization for that run then give
     # her authorizations.
     ok_for_authorization = (
-        mmtrack.has_passed_course_for_exam(course_run.edx_course_key) and
+        mmtrack.has_passed_course(course_run.edx_course_key) and
         not ExamAuthorization.objects.filter(
             user=mmtrack.user,
             course=course_run.course,
