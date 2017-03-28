@@ -92,13 +92,13 @@ class SeedDBDeserializationTests(MockedESTestCase):
         "description": "An introductory course to Digital Learning",
         "course_runs": [
             {
-                "enrollment_start": "2016-01-15T00:00:00",
+                "enrollment_start": "2016-01-15T00:00:00+00:00",
                 "edx_course_key": "course-v1:MITx+Digital+Learning+100+Jan_2016",
-                "enrollment_end": "2016-01-29T00:00:00",
+                "enrollment_end": "2016-01-29T00:00:00+00:00",
                 "title": "Digital Learning 100 - January 2016",
-                "upgrade_deadline": "2016-01-22T00:00:00",
-                "end_date": "2016-05-15T00:00:00",
-                "start_date": "2016-01-15T00:00:00"
+                "upgrade_deadline": "2016-01-22T00:00:00+00:00",
+                "end_date": "2016-05-15T00:00:00+00:00",
+                "start_date": "2016-01-15T00:00:00+00:00"
             },
         ],
         "title": "Digital Learning 100",
@@ -118,21 +118,21 @@ class SeedDBDeserializationTests(MockedESTestCase):
                 "course_runs": [
                     {
                         "title": "Digital Learning 100 - January 2016",
-                        "upgrade_deadline": "2016-01-22T00:00:00",
+                        "upgrade_deadline": "2016-01-22T00:00:00+00:00",
                         "edx_course_key": "course-v1:MITx+Digital+Learning+100+Jan_2016",
-                        "enrollment_start": "2016-01-15T00:00:00",
-                        "end_date": "2016-05-15T00:00:00",
-                        "start_date": "2016-01-15T00:00:00",
-                        "enrollment_end": "2016-01-29T00:00:00"
+                        "enrollment_start": "2016-01-15T00:00:00+00:00",
+                        "end_date": "2016-05-15T00:00:00+00:00",
+                        "start_date": "2016-01-15T00:00:00+00:00",
+                        "enrollment_end": "2016-01-29T00:00:00+00:00"
                     },
                     {
                         "title": "Digital Learning 100 - August 2016",
-                        "upgrade_deadline": "2016-08-22T00:00:00",
+                        "upgrade_deadline": "2016-08-22T00:00:00+00:00",
                         "edx_course_key": "course-v1:MITx+Digital+Learning+100+Aug_2016",
-                        "enrollment_start": "2016-08-15T00:00:00",
-                        "end_date": "2016-12-15T00:00:00",
-                        "start_date": "2016-08-15T00:00:00",
-                        "enrollment_end": "2016-08-29T00:00:00"
+                        "enrollment_start": "2016-08-15T00:00:00+00:00",
+                        "end_date": "2016-12-15T00:00:00+00:00",
+                        "start_date": "2016-08-15T00:00:00+00:00",
+                        "enrollment_end": "2016-08-29T00:00:00+00:00"
                     },
                 ]
             },
