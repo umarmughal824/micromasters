@@ -5,7 +5,6 @@ Permission classes for mail views
 from rolepermissions.verifications import has_permission
 from rest_framework.permissions import BasePermission
 
-from courses.models import CourseRun
 from roles.roles import Permissions, Staff, Instructor
 from dashboard.models import ProgramEnrollment
 from dashboard.utils import MMTrack
@@ -67,12 +66,7 @@ class UserCanMessageSpecificLearnerPermission(BasePermission):
                 program_enrollment.program,
                 edx_user_data
             )
-            course_run_keys = (
-                CourseRun.objects
-                .filter(course__program=program_enrollment.program)
-                .values_list('edx_course_key', flat=True)
-            )
-            if any(mmtrack.has_paid(course_run_key) for course_run_key in course_run_keys):
+            if mmtrack.has_paid_for_any_in_program():
                 return True
 
         return False

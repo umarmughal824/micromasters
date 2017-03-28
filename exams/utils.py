@@ -205,7 +205,7 @@ def authorize_for_exam_given_program(program, username=None):
             program_enrollment.user,
             program_enrollment.program
         )
-        course_ids = set(mmtrack.edx_key_course_map.values())
+        course_ids = mmtrack.get_course_ids()
 
         # get latest course_run from given course
         for course_id in course_ids:

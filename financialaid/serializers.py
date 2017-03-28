@@ -1,8 +1,12 @@
 """
 Serializers from financial aid
 """
+import logging
 import datetime
+import copy
 
+from django.db.models import Max, Min, Q
+from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -33,6 +37,9 @@ from financialaid.models import (
 )
 from mail.api import MailgunClient
 from mail.utils import generate_financial_aid_email
+
+
+log = logging.getLogger(__name__)
 
 
 class FinancialAidRequestSerializer(serializers.Serializer):
@@ -204,3 +211,62 @@ class FormattedCoursePriceSerializer(serializers.Serializer):
     price = DecimalField(max_digits=None, decimal_places=2)
     financial_aid_availability = BooleanField()
     has_financial_aid_request = BooleanField()
+
+
+class FinancialAidDashboardSerializer:
+    """
+    Serializer of financial aid information for the dashboard API
+    """
+    default_serialized = {
+        "id": None,
+        "has_user_applied": None,
+        "application_status": None,
+        "min_possible_cost": None,
+        "max_possible_cost": None,
+        "date_documents_sent": None,
+    }
+
+    @classmethod
+    def serialize(cls, user, program):
+        """
+        Serializes financial aid info for a user in a program
+        """
+        if not program.financial_aid_availability:
+            return {}
+        serialized = copy.copy(cls.default_serialized)
+        financial_aid_qset = FinancialAid.objects.filter(
+            Q(user=user) & Q(tier_program__program=program)
+        ).exclude(status=FinancialAidStatus.RESET)
+        serialized["has_user_applied"] = financial_aid_qset.exists()
+        if serialized["has_user_applied"]:
+            financial_aid = financial_aid_qset.first()
+            serialized.update({
+                "application_status": financial_aid.status,
+                "date_documents_sent": financial_aid.date_documents_sent,
+                "id": financial_aid.id
+            })
+        financial_aid_min_price, financial_aid_max_price = cls.get_program_price_range(program)
+        serialized.update({
+            "min_possible_cost": financial_aid_min_price,
+            "max_possible_cost": financial_aid_max_price
+        })
+        return serialized
+
+    @classmethod
+    def get_program_price_range(cls, program):
+        """
+        Returns the financial aid possible cost range
+        """
+        course_max_price = program.get_course_price()
+        # get all the possible discounts for the program
+        program_tiers_qset = TierProgram.objects.filter(
+            Q(program=program) & Q(current=True)).order_by('discount_amount')
+        if not program_tiers_qset.exists():
+            log.error('The program "%s" needs at least one tier configured', program.title)
+            raise ImproperlyConfigured(
+                'The program "{}" needs at least one tier configured'.format(program.title))
+        min_discount = program_tiers_qset.aggregate(
+            Min('discount_amount')).get('discount_amount__min', 0)
+        max_discount = program_tiers_qset.aggregate(
+            Max('discount_amount')).get('discount_amount__max', 0)
+        return course_max_price - max_discount, course_max_price - min_discount
