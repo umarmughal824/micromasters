@@ -30,6 +30,7 @@ class AutomaticEmail(TimestampedModel):
     email_subject = models.TextField(null=False, blank=True)
     email_body = models.TextField(null=False, blank=True)
     sender_name = models.TextField(null=False, blank=True)
+    staff_user = models.ForeignKey(User, null=True)
 
     def __str__(self):
         """String representation of AutomaticEmail"""

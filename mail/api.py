@@ -293,7 +293,7 @@ def send_automatic_emails(program_enrollment):
             log.exception("Error sending mailgun mail for automatic email %s", automatic_email)
 
 
-def add_automatic_email(original_search, email_subject, email_body, sender_name):
+def add_automatic_email(original_search, email_subject, email_body, sender_name, staff_user):
     """
     Add an automatic email entry
 
@@ -304,6 +304,7 @@ def add_automatic_email(original_search, email_subject, email_body, sender_name)
         email_subject (str): Subject for the email
         email_body (str): Body for the email
         sender_name (str): The name of the sender of the email
+        staff_user (User): The staff user creating the email
     """
     updated_search = adjust_search_for_percolator(original_search)
     with transaction.atomic():
@@ -317,6 +318,7 @@ def add_automatic_email(original_search, email_subject, email_body, sender_name)
             email_subject=email_subject,
             email_body=email_body,
             sender_name=sender_name,
+            staff_user=staff_user,
         )
 
 

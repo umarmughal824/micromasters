@@ -8,7 +8,7 @@ from rest_framework import (
     permissions,
     status,
 )
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -26,8 +26,9 @@ from mail.permissions import (
     UserCanMessageLearnersPermission,
     UserCanMessageSpecificLearnerPermission,
 )
-from mail.serializers import GenericMailSerializer
+from mail.serializers import GenericMailSerializer, AutomaticEmailSerializer
 from mail.utils import generate_mailgun_response_json
+from mail.models import AutomaticEmail
 from profiles.models import Profile
 from profiles.util import full_name
 from search.api import (
@@ -71,6 +72,22 @@ class LearnerMailView(GenericAPIView):
             status=mailgun_response.status_code,
             data=generate_mailgun_response_json(mailgun_response)
         )
+
+
+class AutomaticEmailView(ListAPIView):
+    """
+    View class that deals with listing and editing automatic mails
+    """
+    authentication_classes = (
+        authentication.SessionAuthentication,
+        authentication.TokenAuthentication,
+    )
+    permission_classes = (permissions.IsAuthenticated, UserCanMessageLearnersPermission, )
+    serializer_class = AutomaticEmailSerializer
+
+    def get_queryset(self):
+        """Get the queryset which should be serialized"""
+        return AutomaticEmail.objects.filter(staff_user=self.request.user)
 
 
 def _make_batch_response_dict(response, exception):
@@ -118,6 +135,7 @@ class SearchResultMailView(APIView):
                 email_subject=request.data['email_subject'],
                 email_body=request.data['email_body'],
                 sender_name=sender_name,
+                staff_user=request.user,
             )
 
         try:

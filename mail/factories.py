@@ -8,6 +8,7 @@ from factory.fuzzy import FuzzyText
 
 from mail.models import AutomaticEmail
 from search.factories import PercolateQueryFactory
+from micromasters.factories import UserFactory
 
 
 class AutomaticEmailFactory(DjangoModelFactory):
@@ -17,6 +18,7 @@ class AutomaticEmailFactory(DjangoModelFactory):
     email_subject = FuzzyText()
     email_body = FuzzyText()
     sender_name = Faker('name')
+    staff_user = SubFactory(UserFactory)
 
     class Meta:
         model = AutomaticEmail

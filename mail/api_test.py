@@ -42,6 +42,7 @@ from mail.models import (
 from mail.factories import AutomaticEmailFactory
 from mail.views_test import mocked_json
 from profiles.factories import ProfileFactory
+from micromasters.factories import UserFactory
 from search.api import adjust_search_for_percolator
 from search.base import MockedESTestCase
 
@@ -519,6 +520,8 @@ class AutomaticEmailTests(MockedESTestCase):
             automatic_email=cls.automatic_email,
             user=cls.program_enrollment_sent.user,
         )
+        with mute_signals(post_save):
+            cls.staff_user = UserFactory.create()
 
     def test_send_automatic_emails(self):
         """send_automatic_emails should send emails to users which fit criteria and mark them so we don't send twice"""
@@ -585,12 +588,13 @@ class AutomaticEmailTests(MockedESTestCase):
         assert AutomaticEmail.objects.count() == 2
         search_obj = Search.from_dict({"query": {"match": {}}})
 
-        new_automatic = add_automatic_email(search_obj, 'subject', 'body', 'sender')
+        new_automatic = add_automatic_email(search_obj, 'subject', 'body', 'sender', self.staff_user)
         assert AutomaticEmail.objects.count() == 3
         assert new_automatic.sender_name == 'sender'
         assert new_automatic.email_subject == 'subject'
         assert new_automatic.email_body == 'body'
         assert new_automatic.query.query == adjust_search_for_percolator(search_obj).to_dict()
+        assert new_automatic.staff_user == self.staff_user
 
     def test_mark_emails_as_sent(self):
         """Mark emails as sent"""

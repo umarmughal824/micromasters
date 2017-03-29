@@ -27,7 +27,8 @@ from financialaid.api_test import (
 from financialaid.factories import FinancialAidFactory, TierProgramFactory
 from mail.exceptions import SendBatchException
 from mail.factories import AutomaticEmailFactory
-from mail.models import SentAutomaticEmail
+from mail.models import SentAutomaticEmail, AutomaticEmail
+from mail.serializers import AutomaticEmailSerializer
 from profiles.factories import (
     ProfileFactory,
     UserFactory,
@@ -191,6 +192,7 @@ class AutomaticEmailTests(SearchResultMailViewsBase):
             "email_subject": self.request_data['email_subject'],
             "email_body": self.request_data['email_body'],
             "sender_name": full_name(self.staff),
+            "staff_user": self.staff,
         }
 
         assert SentAutomaticEmail.objects.filter(
@@ -229,11 +231,63 @@ class AutomaticEmailTests(SearchResultMailViewsBase):
             "email_subject": self.request_data['email_subject'],
             "email_body": self.request_data['email_body'],
             "sender_name": full_name(self.staff),
+            "staff_user": self.staff,
         }
 
         assert sorted(SentAutomaticEmail.objects.filter(
             user__email__in=self.email_results, automatic_email=self.automatic_email,
         ).values_list('user__email', flat=True)) == sorted(success_emails)
+
+
+class AutomaticEmailViewTests(APITestCase, MockedESTestCase):
+    """
+    AutomaticEmailViewTests
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.staff_user = UserFactory.create()
+        cls.program = ProgramFactory.create()
+        Role.objects.create(
+            user=cls.staff_user,
+            program=cls.program,
+            role=Staff.ROLE_ID,
+        )
+        cls.url = reverse('automatic_email_api')
+
+    def setUp(self):
+        self.client.force_login(self.staff_user)
+
+    def test_normal_users_cant_get(self):
+        """
+        normal users shouldnt be able to get any data
+        """
+        normal_user = UserFactory.create()
+        self.client.force_login(normal_user)
+        response = self.client.get(self.url)
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_should_get_empty_list_if_no_emails(self):
+        """
+        should return an empty list if there are no emails associated with that user
+        """
+        response = self.client.get(self.url)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == []
+
+    def test_should_get_list_of_automatic_emails(self):
+        """
+        If the user is a staff user and they have AutomaticEmails they
+        should be able to get the data
+        """
+        for _ in range(2):
+            AutomaticEmailFactory.create(staff_user=self.staff_user)
+        response = self.client.get(self.url)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == AutomaticEmailSerializer(
+            AutomaticEmail.objects.all(),
+            many=True,
+        ).data
 
 
 class CourseTeamMailViewTests(APITestCase, MockedESTestCase):
