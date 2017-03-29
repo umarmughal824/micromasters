@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.53.6
+--------------
+
+- Fixed bug with grade in case the grade is 0
+- Add refresh_index to fix race condition with percolate (#2960)
+- Fixed lint for dashboard/utils that did not appear because of parallel changes
+- Update UserProgramSerializer to use current enrollments and existing grades (#2945)
+- Fixed Order Summary text (#2962)
+- Implemented Redux REST wrapper
+- Added program.price, removed CoursePrice (#2956)
+- Modified dashboard rest API to return proctorate exam grades
+
 Version 0.53.5
 --------------
 
