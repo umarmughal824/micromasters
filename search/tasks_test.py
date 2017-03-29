@@ -1,12 +1,18 @@
 """Tests for search tasks"""
 from dashboard.factories import ProgramEnrollmentFactory
+from django.test import override_settings
 from search.base import MockedESTestCase
+from search.indexing_api import get_default_alias
 from search.tasks import (
     index_users,
     index_program_enrolled_users,
 )
 
 
+FAKE_INDEX = 'fake'
+
+
+@override_settings(ELASTICSEARCH_INDEX=FAKE_INDEX)
 class SearchTasksTests(MockedESTestCase):
     """
     Tests for search tasks
@@ -22,6 +28,8 @@ class SearchTasksTests(MockedESTestCase):
                 self.index_program_enrolled_users_mock = mock
             elif mock.name == "_send_automatic_emails":
                 self.send_automatic_emails_mock = mock
+            elif mock.name == "_refresh_index":
+                self.refresh_index_mock = mock
 
     def test_index_users(self):
         """
@@ -33,6 +41,7 @@ class SearchTasksTests(MockedESTestCase):
         self.index_users_mock.assert_called_with([enrollment1.user])
         for enrollment in [enrollment1, enrollment2]:
             self.send_automatic_emails_mock.assert_any_call(enrollment)
+        self.refresh_index_mock.assert_called_with(get_default_alias())
 
     def test_index_program_enrolled_users(self):
         """
@@ -43,3 +52,4 @@ class SearchTasksTests(MockedESTestCase):
         self.index_program_enrolled_users_mock.assert_called_with(enrollments)
         for enrollment in enrollments:
             self.send_automatic_emails_mock.assert_any_call(enrollment)
+        self.refresh_index_mock.assert_called_with(get_default_alias())
