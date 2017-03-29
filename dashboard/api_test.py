@@ -30,7 +30,9 @@ from dashboard.utils import MMTrack
 from exams.models import ExamProfile
 from grades.constants import FinalGradeStatus
 from grades.exceptions import FreezeGradeFailedException
-from grades.models import FinalGrade, CourseRunGradingStatus
+from grades.factories import ProctoredExamGradeFactory
+from grades.models import FinalGrade, CourseRunGradingStatus, ProctoredExamGrade
+from grades.serializers import ProctoredExamGradeSerializer
 from micromasters.factories import UserFactory
 from micromasters.utils import is_subset_dict
 from search.base import MockedESTestCase
@@ -780,8 +782,14 @@ class InfoCourseTest(CourseTests):
             title="Demo 2"
         )
 
-    def assert_course_equal(self, course, course_data_from_call, can_schedule_exam=False):
+    def setUp(self):
+        super().setUp()
+        # default behavior for some mmtrack mocked methods
+        self.mmtrack.get_course_proctorate_exam_results.return_value = []
+
+    def assert_course_equal(self, course, course_data_from_call, can_schedule_exam=False, proct_exams=None):
         """Helper to format the course info"""
+        proct_exams = proct_exams or []
         expected_data = {
             "id": course.pk,
             "title": course.title,
@@ -790,6 +798,7 @@ class InfoCourseTest(CourseTests):
             "prerequisites": course.prerequisites,
             "has_contact_email": bool(course.contact_email),
             "can_schedule_exam": can_schedule_exam,
+            "proctorate_exams_grades": proct_exams,
         }
         # remove the runs part: assumed checked with the mock assertion
         del course_data_from_call['runs']
@@ -1199,6 +1208,26 @@ class InfoCourseTest(CourseTests):
             )
         mock_format.assert_called_once_with(run1, api.CourseStatus.OFFERED, self.mmtrack, position=1)
         assert mock_schedulable.call_count == 1
+
+    @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
+    @patch('dashboard.api.is_exam_schedulable', return_value=False)
+    def test_course_with_proctorate_exam(self, mock_schedulable, mock_format):
+        """
+        Test with proctorate exam results
+        """
+        for _ in range(3):
+            ProctoredExamGradeFactory.create(user=self.user, course=self.course_noruns)
+        proct_exam_qset = ProctoredExamGrade.for_user_course(user=self.user, course=self.course_noruns)
+        serialized_proct_exams = ProctoredExamGradeSerializer(proct_exam_qset, many=True).data
+        self.mmtrack.get_course_proctorate_exam_results.return_value = serialized_proct_exams
+        self.assert_course_equal(
+            self.course_noruns,
+            api.get_info_for_course(self.course_noruns, self.mmtrack),
+            proct_exams=serialized_proct_exams
+        )
+        assert mock_format.called is False
+        assert mock_schedulable.call_count == 1
+        self.mmtrack.get_course_proctorate_exam_results.assert_called_once_with(self.course_noruns)
 
 
 class UserProgramInfoIntegrationTest(MockedESTestCase):

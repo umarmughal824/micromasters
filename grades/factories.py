@@ -1,11 +1,28 @@
 """Factories for the grades app"""
-from factory import SubFactory, Faker
-from factory.django import DjangoModelFactory
-from factory.fuzzy import FuzzyFloat
+import datetime
 
-from courses.factories import CourseRunFactory
+import pytz
+from factory import (
+    SubFactory,
+    Faker,
+    LazyAttribute,
+)
+from factory.django import DjangoModelFactory
+from factory.fuzzy import (
+    FuzzyFloat,
+    FuzzyDateTime,
+    FuzzyText,
+)
+
+from courses.factories import (
+    CourseFactory,
+    CourseRunFactory,
+)
 from grades.constants import FinalGradeStatus
-from grades.models import FinalGrade
+from grades.models import (
+    FinalGrade,
+    ProctoredExamGrade,
+)
 from micromasters.factories import UserFactory
 
 
@@ -20,3 +37,21 @@ class FinalGradeFactory(DjangoModelFactory):
 
     class Meta:  # pylint: disable=missing-docstring,no-init,too-few-public-methods,old-style-class
         model = FinalGrade
+
+
+class ProctoredExamGradeFactory(DjangoModelFactory):
+    """Factory for ProctoredExamGrade"""
+    user = SubFactory(UserFactory)
+    course = SubFactory(CourseFactory)
+    exam_date = FuzzyDateTime(datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(weeks=4))
+    # this assumes that the max score is 100
+    passing_score = 60.0
+    score = LazyAttribute(lambda x: x.percentage_grade * 100)
+    grade = LazyAttribute(lambda x: 'Pass' if x.passed else 'Fail')
+    client_authorization_id = FuzzyText()
+    row_data = {"From factory": True}
+    passed = Faker('boolean')
+    percentage_grade = FuzzyFloat(low=0, high=1)
+
+    class Meta:  # pylint: disable=missing-docstring,no-init,too-few-public-methods,old-style-class
+        model = ProctoredExamGrade

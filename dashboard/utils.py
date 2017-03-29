@@ -13,7 +13,10 @@ from courses.models import CourseRun
 from dashboard.api_edx_cache import CachedEdxUserData
 from ecommerce.models import Order, Line
 from grades.constants import FinalGradeStatus
-from grades.models import FinalGrade
+from grades.models import (
+    FinalGrade,
+    ProctoredExamGrade,
+)
 from exams.models import ExamProfile, ExamAuthorization
 
 
@@ -358,6 +361,18 @@ class MMTrack:
                 exam_profile.id
             )
             return ExamProfile.PROFILE_INVALID
+
+    def get_course_proctorate_exam_results(self, course):
+        """
+        Returns the queryset of the proctorate exams results for the user in a course
+
+        Args:
+            course (courses.models.Course): a course
+
+        Returns:
+            qset: a queryset of grades.models.ProctoredExamGrade
+        """
+        return ProctoredExamGrade.for_user_course(self.user, course)
 
 
 def get_mmtrack(user, program):
