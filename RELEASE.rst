@@ -1,6 +1,19 @@
 Release Notes
 =============
 
+Version 0.53.5
+--------------
+
+- PR fix
+- merge fix
+- Added helper method for determining if user paid for any course run in a program
+- Renamed &#39;course_id&#39; to &#39;edx_course_key&#39; etc
+- Moved FA serialization from MMTrack to separate class
+- Got rid of pearson exam status variable setting in init
+- Cleaned up MMTrack final grade code
+- Revert &quot;Fixed Order Summary text&quot;
+- Fixed Order Summary text
+
 Version 0.53.4
 --------------
 
