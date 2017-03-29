@@ -29,7 +29,7 @@ class MMTrack:
     Needed because the user enrollment "verified" and user passed status
     can be checked in different ways depending on if the program offers financial aid or not.
     """
-    # pylint: disable=too-many-instance-attributes, too-many-arguments
+    # pylint: disable=too-many-instance-attributes, too-many-arguments, too-many-public-methods
 
     user = None
     program = None
