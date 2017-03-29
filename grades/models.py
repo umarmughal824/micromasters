@@ -93,7 +93,7 @@ class FinalGrade(TimestampedModel, AuditableModel):
     @property
     def grade_percent(self):
         """Returns the grade field value as a number out of 100 (or None if the value is None)"""
-        return self.grade * 100 if self.grade else None
+        return self.grade * 100 if self.grade is not None else None
 
     @classmethod
     def get_frozen_users(cls, course_run):
