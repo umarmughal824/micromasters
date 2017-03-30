@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 
 from django.conf import settings
 import pytz
-from social.backends.oauth import BaseOAuth2
+from social_core.backends.oauth import BaseOAuth2
 
 
 class EdxOrgOAuth2(BaseOAuth2):
