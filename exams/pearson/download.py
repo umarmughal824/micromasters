@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from django.conf import settings
 from paramiko import SSHException
 
+from exams.pearson import audit
 from exams.pearson.constants import (
     EAC_SUCCESS_STATUS,
     PEARSON_FILE_TYPE_EAC,
@@ -55,6 +56,7 @@ class ArchivedResponseProcessor:
     """
     def __init__(self, sftp):
         self.sftp = sftp
+        self.auditor = audit.ExamDataAuditor()
 
     def fetch_file(self, remote_path):
         """        Fetches a remote file and returns the local path
@@ -92,6 +94,7 @@ class ArchivedResponseProcessor:
                     try:
                         if self.process_zip(local_path):
                             self.sftp.remove(remote_path)
+
                         log.debug("Processed remote file: %s", remote_path)
                     except (EOFError, SSHException,):
                         raise
@@ -114,6 +117,9 @@ class ArchivedResponseProcessor:
             bool: True if all files processed successfully
         """
         processed = True
+
+        # audit before we process in case the process dies
+        self.auditor.audit_response_file(local_path)
 
         log.info('Processing Pearson zip file: %s', local_path)
 

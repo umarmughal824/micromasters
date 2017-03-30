@@ -3,6 +3,8 @@ Tests for the utils module
 """
 import datetime
 from math import ceil
+import os
+import pathlib
 import unittest
 from unittest.mock import patch
 
@@ -34,6 +36,7 @@ from micromasters.utils import (
     is_near_now,
     is_subset_dict,
     remove_falsey_values,
+    safely_remove_file,
     serialize_model_object,
 )
 from search.base import MockedESTestCase
@@ -270,3 +273,14 @@ class UtilTests(unittest.TestCase):
         for chunk in chunk_output:
             range_list += chunk
         assert range_list == list(range(count))
+
+    def test_safely_remove_file(self):
+        """test for safely_remove_file"""
+        # shouldn't error if the file already got removed (or never existed)
+        safely_remove_file('/tmp/unlikely_to_exist')
+
+        pathlib.Path('/tmp/test_file.txt').touch()
+        assert os.path.exists('/tmp/test_file.txt') is True
+        # removes the file
+        safely_remove_file('/tmp/test_file.txt')
+        assert os.path.exists('/tmp/test_file.txt') is False

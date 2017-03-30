@@ -5,6 +5,7 @@ import datetime
 from itertools import islice
 import json
 import logging
+import os
 
 import pytz
 from django.conf import settings
@@ -188,3 +189,17 @@ def chunks(iterable, chunk_size=20):
     while len(chunk) > 0:
         yield chunk
         chunk = list(islice(iterable, chunk_size))
+
+
+def safely_remove_file(file_path):
+    """
+    Safely removes a file from the filesystem regardless of exceptions triggered
+
+    Args:
+        file_path(str): the path to the file to be removed
+    """
+    if os.path.exists(file_path):
+        try:
+            os.remove(file_path)
+        except:  # pylint: disable=bare-except
+            pass

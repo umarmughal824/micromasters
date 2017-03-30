@@ -9,6 +9,7 @@ from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
 from django.test import TestCase, override_settings
 from factory.django import mute_signals
+import pytest
 
 from exams.pearson.exceptions import RetryableSFTPException
 from exams.factories import (
@@ -27,6 +28,7 @@ from exams.tasks import (
 
 
 @override_settings(FEATURES={"PEARSON_EXAMS_SYNC": True})
+@pytest.mark.usefixtures('auditor')
 @ddt
 class ExamTasksTest(TestCase):
     """
@@ -47,6 +49,7 @@ class ExamTasksTest(TestCase):
             task.delay()
 
         retry.assert_called_once_with(countdown=1, exc=error)
+        assert self.auditor.return_value.audit_request_file.call_count == 1
 
     @data(
         (
@@ -59,7 +62,7 @@ class ExamTasksTest(TestCase):
         )
     )
     @unpack
-    def test_task_improperly_config_logged(self, task, expected_warning_message):
+    def test_task_upload_improperly_config_logged(self, task, expected_warning_message):
         """
         Verify that when a ImproperlyConfigured error occurs that the task logs exception
         """
@@ -68,6 +71,54 @@ class ExamTasksTest(TestCase):
             task.delay()
 
         log.exception.assert_called_with(expected_warning_message)
+        assert self.auditor.return_value.audit_request_file.call_count == 1
+
+    @data(
+        export_exam_authorizations,
+        export_exam_profiles,
+    )
+    def test_task_upload_any_exception_logged(self, task):
+        """
+        Verify that when a any error occurs that the task logs exception
+        """
+        with patch("exams.tasks.log") as log, patch('exams.pearson.upload.upload_tsv') as upload_tsv_mock:
+            upload_tsv_mock.side_effect = Exception('error')
+            task.delay()
+
+        assert log.exception.call_count == 1
+        assert self.auditor.return_value.audit_request_file.call_count == 1
+
+    @data(
+        export_exam_authorizations,
+        export_exam_profiles,
+    )
+    def test_task_auditor_improperly_config_logged(self, task):
+        """
+        Verify that when the auditor raises an ImproperlyConfigured error that the task logs exception
+        """
+        self.auditor.return_value.audit_request_file.side_effect = ImproperlyConfigured()
+        with patch("exams.tasks.log") as log, patch('exams.pearson.upload.upload_tsv') as upload_tsv_mock:
+            task.delay()
+
+        assert log.exception.call_count == 1
+        assert upload_tsv_mock.call_count == 0
+        assert self.auditor.return_value.audit_request_file.call_count == 1
+
+    @data(
+        export_exam_authorizations,
+        export_exam_profiles,
+    )
+    def test_task_auditor_any_exception_logged(self, task):
+        """
+        Verify that when the auditor raises any other error that the task logs exception
+        """
+        self.auditor.return_value.audit_request_file.side_effect = Exception('error')
+        with patch("exams.tasks.log") as log, patch('exams.pearson.upload.upload_tsv') as upload_tsv_mock:
+            task.delay()
+
+        assert log.exception.call_count == 1
+        assert upload_tsv_mock.call_count == 0
+        assert self.auditor.return_value.audit_request_file.call_count == 1
 
     @override_settings(FEATURES={"PEARSON_EXAMS_SYNC": False})
     @data(export_exam_authorizations, export_exam_profiles)
@@ -77,9 +128,12 @@ class ExamTasksTest(TestCase):
             task.delay()
 
         assert upload_tsv_mock.called is False
+        assert self.auditor.return_value.audit_request_file.call_count == 0
 
 
 @override_settings(FEATURES={"PEARSON_EXAMS_SYNC": True})
+@pytest.mark.usefixtures('auditor')
+@patch('exams.pearson.upload.upload_tsv')
 class ExamProfileTasksTest(TestCase):
     """
     Tests for exam profile tasks
@@ -94,7 +148,6 @@ class ExamProfileTasksTest(TestCase):
             cls.expected_invalid_profiles = ExamProfileFactory.create_batch(5, status=ExamProfile.PROFILE_PENDING)
             cls.all_profiles = cls.expected_in_progress_profiles + cls.expected_invalid_profiles
 
-    @patch('exams.pearson.upload.upload_tsv')
     def test_export_exam_profiles(self, upload_tsv_mock):
         """
         Verify that export_exam_profiles makes calls to export the pending profiles
@@ -128,6 +181,7 @@ class ExamProfileTasksTest(TestCase):
 
         assert cdd_writer_mock_cls.call_count == 1
         assert cdd_writer_instance.write.call_count == 1
+        assert self.auditor.return_value.audit_request_file.call_count == 1
 
         invalid_profiles = ExamProfile.objects.filter(status=ExamProfile.PROFILE_INVALID)
         in_progress_profiles = ExamProfile.objects.filter(status=ExamProfile.PROFILE_IN_PROGRESS)
@@ -144,8 +198,7 @@ class ExamProfileTasksTest(TestCase):
             assert exam_profile in in_progress_profiles
 
     @patch('exams.tasks.validate_profile', return_value=False, autospec=True)
-    @patch('exams.pearson.upload.upload_tsv', autospec=True)
-    def test_writing_only_valid_profiles(self, upload_tsv_mock, validate_profile_mock):
+    def test_writing_only_valid_profiles(self, validate_profile_mock, upload_tsv_mock):
         """
         Verify invalid profiles are not writen to file and set to 'invalid'
         """
@@ -166,6 +219,7 @@ class ExamProfileTasksTest(TestCase):
 
         assert upload_tsv_mock.call_count == 1
         assert validate_profile_mock.call_count == 10
+        assert self.auditor.return_value.audit_request_file.call_count == 1
 
         invalid_profiles = ExamProfile.objects.filter(status=ExamProfile.PROFILE_INVALID)
         in_progress_profiles = ExamProfile.objects.filter(status=ExamProfile.PROFILE_IN_PROGRESS)
@@ -175,6 +229,7 @@ class ExamProfileTasksTest(TestCase):
 
 
 @override_settings(FEATURES={"PEARSON_EXAMS_SYNC": True})
+@pytest.mark.usefixtures('auditor')
 class ExamAuthorizationTasksTest(TestCase):
     """
     Tests for exam authorization tasks
@@ -221,6 +276,7 @@ class ExamAuthorizationTasksTest(TestCase):
 
         assert ead_writer_mock_cls.call_count == 1
         assert ead_writer_instance.write.call_count == 1
+        assert self.auditor.return_value.audit_request_file.call_count == 1
 
         in_progress_auths = ExamAuthorization.objects.filter(status=ExamAuthorization.STATUS_IN_PROGRESS)
 
@@ -231,13 +287,13 @@ class ExamAuthorizationTasksTest(TestCase):
 
 
 @override_settings(FEATURES={"PEARSON_EXAMS_SYNC": True})
+@patch('exams.pearson.download.ArchivedResponseProcessor')
+@patch('exams.pearson.sftp.get_connection')
 class BatchProcessingTasksTest(TestCase):
     """
     Tests for batch response processing tasks
     """
 
-    @patch('exams.pearson.download.ArchivedResponseProcessor')
-    @patch('exams.pearson.sftp.get_connection')
     def test_batch_process(self, get_connection_mock, processor_mock):  # pylint: disable=no-self-use
         """
         Verify that batch_process_pearson_zip_files works in the happy path
@@ -251,8 +307,6 @@ class BatchProcessingTasksTest(TestCase):
         processor_mock.assert_called_once_with(sftp_mock)
         processor_mock.return_value.process.assert_called_once_with()
 
-    @patch('exams.pearson.download.ArchivedResponseProcessor')
-    @patch('exams.pearson.sftp.get_connection')
     def test_batch_process_retryable(self, get_connection_mock, processor_mock):  # pylint: disable=no-self-use
         """
         Verify that batch_process_pearson_zip_files doesn't error when a RetryableSFTPException raises

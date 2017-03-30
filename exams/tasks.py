@@ -8,6 +8,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
 import pytz
 
+from exams.pearson import audit
 from exams.pearson.exceptions import RetryableSFTPException
 from exams.pearson import download
 from exams.pearson import sftp
@@ -69,6 +70,15 @@ def export_exam_profiles(self):
         tsv.flush()
 
         try:
+            audit.ExamDataAuditor().audit_request_file(tsv.name)
+        except ImproperlyConfigured:
+            log.exception('Exam auditing improperly configured')
+            return
+        except:  # pylint: disable=bare-except
+            log.exception('Unexpected error auditing CDD file')
+            return
+
+        try:
             # upload to SFTP server
             upload.upload_tsv(tsv.name)
         except ImproperlyConfigured:
@@ -127,6 +137,15 @@ def export_exam_authorizations(self):
 
         # flush data to disk before upload
         tsv.flush()
+
+        try:
+            audit.ExamDataAuditor().audit_request_file(tsv.name)
+        except ImproperlyConfigured:
+            log.exception('Exam auditing improperly configured')
+            return
+        except:  # pylint: disable=bare-except
+            log.exception('Unexpected error auditing EAD file')
+            return
 
         try:
             # upload to SFTP server

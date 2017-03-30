@@ -9,6 +9,7 @@ from unittest.mock import (
 )
 
 import ddt
+import pytest
 import pytz
 from factory.django import mute_signals
 from django.db.models.signals import post_save
@@ -47,6 +48,7 @@ FIXED_DATETIME = datetime(2016, 5, 15, 15, 2, 55, tzinfo=pytz.UTC)
 
 # pylint: disable=too-many-arguments
 @ddt.ddt
+@pytest.mark.usefixtures('auditor')
 @override_settings(**EXAMS_SFTP_SETTINGS)
 class PearsonDownloadTest(SimpleTestCase):
     """
@@ -122,28 +124,32 @@ class PearsonDownloadTest(SimpleTestCase):
         process_extracted_file_mock.side_effect = results
         zip_file_mock.return_value.__enter__.return_value.namelist.return_value = files
 
-        processor = download.ArchivedResponseProcessor(self.sftp)
         with patch(
             'exams.pearson.utils.email_processing_failures'
         ) as email_processing_failures_mock, patch(
             'exams.pearson.download.locally_extracted'
         ) as locally_extracted_mock:
             locally_extracted_mock.__enter__.return_value = []
+            processor = download.ArchivedResponseProcessor(self.sftp)
             assert processor.process_zip('local.zip') == expected_result
 
+        self.auditor.return_value.audit_response_file.assert_called_once_with('local.zip')
         email_processing_failures_mock.assert_not_called()
 
     @patch('zipfile.ZipFile', spec=True)
     @patch('exams.pearson.download.ArchivedResponseProcessor.process_extracted_file')
-    def test_process_zip_email(self, process_extracted_file_mock, zip_file_mock):  # pylint: disable=no-self-use
+    def test_process_zip_email(self, process_extracted_file_mock, zip_file_mock):
         """Tests that an email is sent if errors returned"""
         process_extracted_file_mock.return_value = (True, ['ERROR'])
         zip_file_mock.return_value.__enter__.return_value.namelist.return_value = ['a.dat']
 
-        processor = download.ArchivedResponseProcessor(self.sftp)
-        with patch('exams.pearson.utils.email_processing_failures') as email_processing_failures_mock:
+        with patch(
+            'exams.pearson.utils.email_processing_failures'
+        ) as email_processing_failures_mock:
+            processor = download.ArchivedResponseProcessor(self.sftp)
             processor.process_zip('local.zip')
 
+        self.auditor.return_value.audit_response_file.assert_called_once_with('local.zip')
         email_processing_failures_mock.assert_called_once_with('a.dat', 'local.zip', ['ERROR'])
 
     @ddt.data(

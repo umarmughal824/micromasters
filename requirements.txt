@@ -28,7 +28,7 @@ django-storages-redux==1.3.2
 django-taggit==0.22.0     # via wagtail
 django-treebeard==4.1.0   # via wagtail
 django-webpack-loader==0.4.1
-django==1.10.5            # via django-role-permissions, django-server-status, django-treebeard, jsonfield, wagtail
+django==1.10.5
 djangorestframework==3.5.2
 edx-api-client==0.3.0
 edx-opaque-keys==0.4
@@ -36,6 +36,7 @@ elasticsearch-dsl==2.1.0
 elasticsearch==2.3.0
 factory-boy==2.8.1
 faker==0.7.10
+gnupg==2.2.0
 html5lib==0.999999999
 idna==2.5                 # via cryptography
 ipython-genutils==0.2.0   # via traitlets
@@ -50,8 +51,9 @@ pbr==2.0.0                # via stevedore
 pexpect==4.2.1            # via ipython
 phonenumbers==8.3.2
 pickleshare==0.7.4        # via ipython
-pillow==3.4.2             # via robohash, wagtail
+pillow==3.4.2
 prompt-toolkit==1.0.14    # via ipython
+psutil==5.2.1             # via gnupg
 psycopg2==2.6
 ptyprocess==0.5.1         # via pexpect
 pyasn1==0.2.3             # via paramiko
