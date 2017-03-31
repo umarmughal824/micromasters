@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.53.7
+--------------
+
+- Bringing back the runtime to python-3.5.2
+- Implemented AutomaticEmail API
+- Unmarked some files as executable
+- Switched library for python social auth
+- Refactored course price API to take a &#39;username&#39; parameter
+- Fixed seed data for naive timestamps (#2712)
+
 Version 0.53.6
 --------------
 
