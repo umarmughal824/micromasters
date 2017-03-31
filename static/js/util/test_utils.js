@@ -29,6 +29,7 @@ import EmploymentTab from '../components/EmploymentTab';
 import LearnerPage from '../containers/LearnerPage';
 import Learner from '../components/Learner';
 import LearnerSearchPage from '../containers/LearnerSearchPage';
+import AutomaticEmailPage from '../containers/AutomaticEmailPage';
 
 export function findCourse(courseSelector: (course: ?Course, program: ?Program) => boolean): Course {
   let [, course, ] = findCourseRun(
@@ -281,6 +282,7 @@ export const testRoutes = (
       <Route path=":username" component={Learner} />
     </Route>
     <Route path="/learners" component={LearnerSearchPage} />
+    <Route path="/automaticemails" component={AutomaticEmailPage} />
   </Route>
 );
 

@@ -1103,3 +1103,20 @@ export const EDX_CHECKOUT_RESPONSE = deepFreeze({
   "method": "GET"
 });
 /* eslint-enable max-len */
+
+export const GET_AUTOMATIC_EMAILS_RESPONSE = [
+  {
+    enabled: true,
+    email_subject: 'First Email',
+    email_body: 'such a great email, literally so great',
+    sender_name: 'Simone de Beauvoir',
+    id: 1,
+  },
+  {
+    enabled: false,
+    email_subject: 'Second (disabled) Email',
+    email_body: 'this one was not as good :(',
+    sender_name: 'Jean-Paul Sartre',
+    id: 2,
+  }
+];

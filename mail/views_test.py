@@ -253,7 +253,7 @@ class AutomaticEmailViewTests(APITestCase, MockedESTestCase):
             program=cls.program,
             role=Staff.ROLE_ID,
         )
-        cls.url = reverse('automatic_email_api')
+        cls.url = reverse('automatic_email_api-list')
 
     def setUp(self):
         self.client.force_login(self.staff_user)
@@ -288,6 +288,36 @@ class AutomaticEmailViewTests(APITestCase, MockedESTestCase):
             AutomaticEmail.objects.all(),
             many=True,
         ).data
+
+    def test_normal_users_cant_patch(self):
+        """
+        A non-staff user shouldn't be able to issue a PATCH request
+        """
+        normal_user = UserFactory.create()
+        self.client.force_login(normal_user)
+        automatic = AutomaticEmailFactory.create(staff_user=self.staff_user)
+        url = reverse('automatic_email_api-detail', kwargs={'email_id': automatic.id})
+        response = self.client.patch(url, {}, format='json')
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_should_patch_and_update(self):
+        """
+        Should let us update an existing automatic email!
+        """
+        automatic = AutomaticEmailFactory.create(staff_user=self.staff_user)
+        url = reverse('automatic_email_api-detail', kwargs={'email_id': automatic.id})
+        update = {
+            "enabled": not automatic.enabled,
+            "email_subject": "new subject",
+            "email_body": "new body",
+            "id": automatic.id
+        }
+        response = self.client.patch(url, update, format='json')
+        assert response.status_code == status.HTTP_200_OK
+        automatic.refresh_from_db()
+        assert automatic.email_subject == update["email_subject"]
+        assert automatic.email_body == update["email_body"]
+        assert automatic.enabled == update["enabled"]
 
 
 class CourseTeamMailViewTests(APITestCase, MockedESTestCase):

@@ -20,7 +20,7 @@ import {
   INITIAL_STATE,
   actions,
 } from './redux_rest';
-import { couponEndpoint } from '../reducers/coupons';
+import { automaticEmailsEndpoint } from '../reducers/automatic_emails';
 import { GET, POST } from '../constants';
 import rootReducer from '../reducers';
 
@@ -59,6 +59,17 @@ describe('redux REST', () => {
         [clearActionType, 'CLEAR_FOOBAR'],
       ].forEach(([deriver, expectation]) => {
         assert.equal(deriver('foobar'), expectation);
+      });
+    });
+
+    it('should snake_case a camelCase name', () => {
+      [
+        [requestActionType, 'REQUEST_FOO_BAR'],
+        [successActionType, 'RECEIVE_FOO_BAR_SUCCESS'],
+        [failureActionType, 'RECEIVE_FOO_BAR_FAILURE'],
+        [clearActionType, 'CLEAR_FOO_BAR'],
+      ].forEach(([deriver, expectation]) => {
+        assert.equal(deriver('fooBar'), expectation);
       });
     });
   });
@@ -171,10 +182,10 @@ describe('redux REST', () => {
     describe('exported derived actions', () => {
       it('should define all the actions we need', () => {
         [
-          'coupons'
+          automaticEmailsEndpoint
         ].forEach(endpoint => {
-          let endpointActions = actions[endpoint];
-          checkForVerbs(couponEndpoint, verb => {
+          let endpointActions = actions[endpoint.name];
+          checkForVerbs(endpoint, verb => {
             assert.isFunction(endpointActions[R.toLower(verb)]);
           });
         });
@@ -314,7 +325,7 @@ describe('redux REST', () => {
       });
     });
 
-    describe.skip('exported reducers', () => { // eslint-disable-line mocha/no-skipped-tests
+    describe('exported reducers', () => { // eslint-disable-line mocha/no-skipped-tests
       beforeEach(() => {
         sandbox = sinon.sandbox.create();
         store = configureTestStore(rootReducer);
@@ -326,7 +337,7 @@ describe('redux REST', () => {
       });
 
       let endpoints = [
-        couponEndpoint
+        automaticEmailsEndpoint
       ];
 
       it('should include all reducers that we expect it to', () => {

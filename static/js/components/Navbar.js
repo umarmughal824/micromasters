@@ -153,6 +153,7 @@ export default class Navbar extends React.Component {
                 true,
                 true
               )}
+              { adminLink(closeDrawer, '/automaticemails', 'Email Campaigns', 'email') }
               { learnerLink(closeDrawer, '/dashboard', 'Dashboard', 'dashboard') }
               { navLink(closeDrawer, `/learner/${SETTINGS.user.username}`, 'My Profile', 'person')}
               { navLink(

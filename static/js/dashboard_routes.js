@@ -118,6 +118,14 @@ export const routes = {
           .then(loadRoute(cb))
           .catch(errorLoading);
       }
+    },
+    {
+      path: 'automaticemails',
+      getComponent(nextState, cb) {
+        import('./containers/AutomaticEmailPage')
+          .then(loadRoute(cb))
+          .catch(errorLoading);
+      }
     }
   ]
 };

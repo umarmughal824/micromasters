@@ -49,6 +49,7 @@ import { pearson } from './pearson';
 import { dashboard } from './dashboard';
 import { prices } from './course_prices';
 import { ALL_ERRORS_VISIBLE } from '../constants';
+import { reducers } from '../lib/redux_rest';
 
 export const INITIAL_PROFILES_STATE = {};
 export const profiles = (state: Profiles = INITIAL_PROFILES_STATE, action: Action<any, null>) => {
@@ -217,4 +218,5 @@ export default combineReducers({
   orderReceipt,
   coupons,
   pearson,
+  ...reducers,
 });

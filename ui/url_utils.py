@@ -11,6 +11,7 @@ TERMS_OF_SERVICE_URL = '/terms_of_service/'
 SETTINGS_URL = "/settings/"
 SEARCH_URL = "/learners/"
 ORDER_SUMMARY = "/order_summary/"
+EMAIL_URL = "/automaticemails/"
 
 DASHBOARD_URLS = [
     DASHBOARD_URL,
@@ -21,4 +22,5 @@ DASHBOARD_URLS = [
     SETTINGS_URL,
     SEARCH_URL,
     ORDER_SUMMARY,
+    EMAIL_URL,
 ]

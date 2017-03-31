@@ -9,7 +9,9 @@ from rest_framework import (
     status,
 )
 from rest_framework.generics import GenericAPIView, ListAPIView
+from rest_framework.mixins import UpdateModelMixin
 from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet
 from rest_framework.response import Response
 
 from courses.models import Course
@@ -74,7 +76,7 @@ class LearnerMailView(GenericAPIView):
         )
 
 
-class AutomaticEmailView(ListAPIView):
+class AutomaticEmailView(ListAPIView, UpdateModelMixin, GenericViewSet):
     """
     View class that deals with listing and editing automatic mails
     """
@@ -84,6 +86,9 @@ class AutomaticEmailView(ListAPIView):
     )
     permission_classes = (permissions.IsAuthenticated, UserCanMessageLearnersPermission, )
     serializer_class = AutomaticEmailSerializer
+    lookup_field = "id"
+    lookup_url_kwarg = "email_id"
+    lookup_value_regex = '[-\w.]+'  # pylint: disable=anomalous-backslash-in-string
 
     def get_queryset(self):
         """Get the queryset which should be serialized"""

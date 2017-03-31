@@ -27,5 +27,6 @@ class AutomaticEmailSerializer(serializers.ModelSerializer):
             'enabled',
             'email_subject',
             'email_body',
-            'sender_name'
+            'sender_name',
+            'id'
         )

@@ -2,6 +2,7 @@
 import { createAction } from 'redux-actions';
 import type { Dispatch } from 'redux';
 import R from 'ramda';
+import _ from 'lodash';
 
 import type { Action, ActionType, Dispatcher } from '../flow/reduxTypes';
 import type { Endpoint, RestState } from '../flow/restTypes';
@@ -12,9 +13,9 @@ import {
   FETCH_FAILURE,
 } from '../actions';
 import { GET, PATCH, POST } from '../constants';
-import { couponEndpoint } from '../reducers/coupons';
+import { automaticEmailsEndpoint } from '../reducers/automatic_emails';
 
-const actionize = R.compose(R.toUpper, R.join("_"));
+const actionize = R.compose(R.toUpper, R.join("_"), R.map(_.snakeCase));
 
 export const requestActionType = (...xs: string[]) => `REQUEST_${actionize(xs)}`;
 
@@ -24,7 +25,7 @@ export const failureActionType = (...xs: string[]) => `RECEIVE_${actionize(xs)}_
 
 export const clearActionType = (...xs: string[]) => `CLEAR_${actionize(xs)}`;
 
-export const INITIAL_STATE: RestState = {
+export const INITIAL_STATE: RestState<*> = {
   loaded: false,
   processing: false,
 };
@@ -35,8 +36,22 @@ const getPrefixForEndpoint = (verb, endpoint) => (
   R.propOr(defaultRESTPrefixes[verb], `${R.toLower(verb)}Prefix`, endpoint)
 );
 
-export function makeFetchFunc(endpoint: Endpoint): (...args: any) => Promise<*> {
-  return (...args) => fetchJSONWithCSRF(endpoint.url, endpoint.makeOptions(...args));
+const getUrl = (endpoint: Endpoint, verb: string) => (
+  endpoint[`${R.toLower(verb)}Url`]
+);
+
+const simpleOptions = () => ({});
+
+const getMakeOptions = (endpoint: Endpoint, verb: string) => (
+  endpoint[`${R.toLower(verb)}Options`] || simpleOptions
+);
+
+export function makeFetchFunc(endpoint: Endpoint, verb: string): (...args: any) => Promise<*> {
+  let url = getUrl(endpoint, verb);
+  let options = getMakeOptions(endpoint, verb);
+  return (...args) => {
+    return fetchJSONWithCSRF(_.isFunction(url) ? url(...args) : url, options(...args));
+  };
 }
 
 type DerivedAction = {
@@ -62,7 +77,7 @@ export const deriveAction = (endpoint: Endpoint, verb: string): DerivedAction =>
   const failureAction = createAction(failureType);
 
   const fetchFunc = R.propOr(
-    makeFetchFunc(endpoint),
+    makeFetchFunc(endpoint, verb),
     `${R.toLower(verb)}Func`,
     endpoint
   );
@@ -121,6 +136,8 @@ export const deriveActions = (endpoint: Endpoint) => {
 export const deriveReducer = (endpoint: Endpoint, action: Function, verb: string) => {
   let fetchStatus = `${R.toLower(verb)}Status`;
 
+  let successHandler = R.propOr(R.identity, `${R.toLower(verb)}SuccessHandler`, endpoint);
+
   return {
     [action.requestType]: (state: Object, action: Action<any, any>) => ({
       ...state,
@@ -131,7 +148,7 @@ export const deriveReducer = (endpoint: Endpoint, action: Function, verb: string
     [action.successType]: (state: Object, action: Action<any, any>) => ({
       ...state,
       [fetchStatus]: FETCH_SUCCESS,
-      data: action.payload,
+      data: successHandler(action.payload, state.data),
       loaded: true,
       processing: false,
     }),
@@ -160,7 +177,7 @@ export const deriveReducers = (endpoint: Endpoint, actions: Function) => {
 };
 
 export const endpoints: Array<Endpoint> = [
-  couponEndpoint,
+  automaticEmailsEndpoint,
 ];
 
 const reducers: Object = {};

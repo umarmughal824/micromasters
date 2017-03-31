@@ -43,3 +43,11 @@ export type EmailConfig = {
   emailSendParams: (emailState: EmailState) => Array<any>,
   renderRecipients?: (filters: ?Array<Filter>) => React$Element<*>,
 };
+
+export type AutomaticEmail = {
+  enabled:        boolean,
+  email_subject:  string,
+  email_body:     string,
+  sender_name:    string,
+  id:             number,
+};

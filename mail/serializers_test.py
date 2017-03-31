@@ -22,4 +22,5 @@ class AutomaticEmailSerializerTests(MockedESTestCase):
             "email_subject": automatic.email_subject,
             "email_body": automatic.email_body,
             "sender_name": automatic.sender_name,
+            "id": automatic.id,
         }

@@ -33,13 +33,14 @@ describe('Navbar', () => {
     ]);
   });
 
-  it('has a link to the learner page if the user is staff or instructor', () => {
+  it('has a link to the learner page and the email page if the user is staff or instructor', () => {
     for (let role of ['staff', 'instructor']) {
       SETTINGS.roles = [{ role, permissions: [] }];
       let wrapper = renderNavbar();
       let hrefs = wrapper.find(Link).map(link => link.props()['to']);
       assert.deepEqual(hrefs, [
         '/learners',
+        '/automaticemails',
         '/learner/jane',
         null,
         '/settings',
