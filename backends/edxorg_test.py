@@ -2,7 +2,10 @@
 Oauth Backend Tests
 """
 from unittest import TestCase
-from .edxorg import EdxOrgOAuth2
+
+from social_django.utils import load_strategy
+
+from backends.edxorg import EdxOrgOAuth2
 
 
 class EdxOrgOAuth2Tests(TestCase):
@@ -11,7 +14,7 @@ class EdxOrgOAuth2Tests(TestCase):
         """
         Should have properly formed payload if working.
         """
-        eoo = EdxOrgOAuth2()
+        eoo = EdxOrgOAuth2(strategy=load_strategy())
         result = eoo.get_user_details({
             'id': 5,
             'username': 'darth',
@@ -32,7 +35,7 @@ class EdxOrgOAuth2Tests(TestCase):
         """
         If the user only has one name, last_name should be blank.
         """
-        eoo = EdxOrgOAuth2()
+        eoo = EdxOrgOAuth2(strategy=load_strategy())
         result = eoo.get_user_details({
             'id': 5,
             'username': 'staff',

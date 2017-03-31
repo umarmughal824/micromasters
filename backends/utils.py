@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import pytz
 
 from requests.exceptions import HTTPError
-from social.apps.django_app.utils import load_strategy
+from social_django.utils import load_strategy
 
 from backends.exceptions import InvalidCredentialStored
 

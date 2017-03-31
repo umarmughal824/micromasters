@@ -110,7 +110,7 @@ INSTALLED_APPS = (
     'rest_framework',
     'rest_framework.authtoken',
     'server_status',
-    'social.apps.django_app.default',
+    'social_django',
 
     # WAGTAIL
     'wagtail.wagtailforms',
@@ -165,7 +165,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
     'wagtail.wagtailcore.middleware.SiteMiddleware',
     'wagtail.wagtailredirects.middleware.RedirectMiddleware',
-    'social.apps.django_app.middleware.SocialAuthExceptionMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
 )
 
 # enable the nplusone profiler only in debug mode
@@ -189,17 +189,17 @@ EDXORG_BASE_URL = get_var('EDXORG_BASE_URL', 'https://courses.edx.org/')
 SOCIAL_AUTH_EDXORG_KEY = get_var('EDXORG_CLIENT_ID', '')
 SOCIAL_AUTH_EDXORG_SECRET = get_var('EDXORG_CLIENT_SECRET', '')
 SOCIAL_AUTH_PIPELINE = (
-    'social.pipeline.social_auth.social_details',
-    'social.pipeline.social_auth.social_uid',
-    'social.pipeline.social_auth.auth_allowed',
-    'social.pipeline.social_auth.social_user',
-    'social.pipeline.user.get_username',
-    'social.pipeline.user.create_user',
-    'social.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.get_username',
+    'social_core.pipeline.user.create_user',
+    'social_core.pipeline.social_auth.associate_user',
     # the following custom pipeline func goes before load_extra_data
     'backends.pipeline_api.set_last_update',
-    'social.pipeline.social_auth.load_extra_data',
-    'social.pipeline.user.user_details',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
     'backends.pipeline_api.update_profile_from_edx',
 )
 SOCIAL_AUTH_EDXORG_AUTH_EXTRA_ARGUMENTS = {
@@ -227,8 +227,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'social.apps.django_app.context_processors.backends',
-                'social.apps.django_app.context_processors.login_redirect',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
                 'ui.context_processors.api_keys',
                 'ui.context_processors.do_not_track',
             ],

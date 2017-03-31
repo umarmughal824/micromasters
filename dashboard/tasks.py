@@ -12,7 +12,7 @@ from django.contrib.auth.models import User
 from django.core.cache import caches
 from django.db.models import Q
 from edx_api.client import EdxApi
-from social.apps.django_app.default.models import UserSocialAuth
+from social_django.models import UserSocialAuth
 
 from backends import utils
 from backends.edxorg import EdxOrgOAuth2
