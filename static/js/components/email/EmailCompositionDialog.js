@@ -22,6 +22,7 @@ export default class EmailCompositionDialog extends React.Component {
     updateEmailFieldEdit:       () => void,
     showExtraUI?:               boolean,
     setAutomaticEmailType:      (b: string) => void,
+    renderRecipients?:          (filters: ?Array<any>) => React$Element<*>
   };
 
   showValidationError = (fieldName: string): ?React$Element<*> => {
@@ -77,7 +78,8 @@ export default class EmailCompositionDialog extends React.Component {
         fetchStatus,
         inputs,
         supportsAutomaticEmails,
-        automaticEmailType = ONE_TIME_EMAIL
+        automaticEmailType = ONE_TIME_EMAIL,
+        filters
       },
       title,
       dialogVisibility,
@@ -85,7 +87,8 @@ export default class EmailCompositionDialog extends React.Component {
       closeEmailComposerAndSend,
       updateEmailFieldEdit,
       showExtraUI,
-      setAutomaticEmailType
+      setAutomaticEmailType,
+      renderRecipients,
     } = this.props;
 
     return <Dialog
@@ -108,6 +111,7 @@ export default class EmailCompositionDialog extends React.Component {
         { R.equals(showExtraUI, true) ? <AutomaticEmailOptions automaticEmailType={automaticEmailType}
           setAutomaticEmailType={setAutomaticEmailType} /> : null }
         { this.renderSubheading() }
+        { renderRecipients ? renderRecipients(filters) : null }
         <textarea
           rows="1"
           className="email-subject"
