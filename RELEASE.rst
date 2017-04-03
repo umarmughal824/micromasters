@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.53.8
+--------------
+
+- Remove remove_user (#2982)
+- Do percolate on document instead of document id (#2980)
+
 Version 0.53.7
 --------------
 
