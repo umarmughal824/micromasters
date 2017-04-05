@@ -48,7 +48,12 @@ class Employment(models.Model):
     profile = models.ForeignKey('Profile', on_delete=models.CASCADE, related_name='work_history')
 
     def __str__(self):
-        return 'Employment history for "{0}"'.format(self.profile.user.username)
+        return 'Employment for {user}, {title} {start}-{end}'.format(
+            user=self.profile.user.username,
+            title=self.company_name,
+            start=self.start_date.strftime("%b %Y") if self.start_date else "",
+            end=self.end_date.strftime("%b %Y") if self.end_date else "Current",
+        )
 
 
 class Profile(models.Model):
@@ -288,3 +293,13 @@ class Education(models.Model):
     school_city = models.TextField()
     school_state_or_territory = models.TextField()
     school_country = models.TextField()
+
+    def __str__(self):
+        degree_title = dict(self.DEGREE_CHOICES).get(self.degree_name, '')
+
+        return 'Education for {user}, {degree} at {title} {date}'.format(
+            user=self.profile.user.username,
+            degree=degree_title,
+            title=self.school_name,
+            date=self.graduation_date.strftime("%b %Y"),
+        )
