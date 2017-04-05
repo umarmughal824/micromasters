@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.53.9
+--------------
+
+- Set thumbnails to null if main image is null (#2999)
+- Upgraded celery to 3.1.25 as 1st step to migrate to celery 4
+- Progress widget: Removed apply for master button and text (#2996)
+
 Version 0.53.8
 --------------
 
