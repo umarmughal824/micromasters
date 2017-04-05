@@ -11,7 +11,7 @@ asn1crypto==0.22.0        # via cryptography
 beautifulsoup4==4.5.3     # via wagtail
 billiard==3.3.0.23        # via celery
 boto==2.39.0
-celery==3.1.23
+celery==3.1.25
 cffi==1.10.0              # via cryptography
 contextlib2==0.5.4        # via raven
 cryptography==1.8.1       # via paramiko
@@ -77,11 +77,11 @@ social-auth-app-django==1.1.0
 social-auth-core==1.2.0   # via social-auth-app-django
 static3==0.5.1
 stevedore==1.21.0         # via edx-opaque-keys
-tornado==4.4.2            # via robohash
+tornado==4.4.3            # via robohash
 traitlets==4.3.2          # via ipython
 unidecode==0.4.20         # via wagtail
 urllib3==1.20             # via elasticsearch
-uwsgi==2.0.14
+uwsgi==2.0.15
 wagtail==1.9
 wcwidth==0.1.7            # via prompt-toolkit
 webencodings==0.5         # via html5lib
