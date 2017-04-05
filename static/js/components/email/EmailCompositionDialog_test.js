@@ -64,6 +64,25 @@ describe('EmailCompositionDialog', () => {
     assert.equal(document.querySelector('h3').textContent, 'Test Email Dialog');
   });
 
+  it('renders a radio button for setting whether an email is automatic or not', () => {
+    renderDialog({
+      supportsAutomaticEmails: true,
+      inputs: {
+        sendAutomaticEmails: false
+      }
+    });
+    const radioGroupDiv = document.querySelector(".type-radio-group");
+    assert.equal(radioGroupDiv.childElementCount, 2);
+    assert.include(
+      document.querySelector(".type-radio-group").textContent,
+      'Send a one-time email'
+    );
+    assert.include(
+      document.querySelector(".type-radio-group").textContent,
+      'Create an Email Campaign'
+    );
+  });
+
   it('should fire the send handler when the "send" button is clicked', () => {
     renderDialog(
       {inputs: {subject: 'abc', body: 'abc'}}
