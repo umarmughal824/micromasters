@@ -116,32 +116,6 @@ class MMTrack:
         """
         return self.is_enrolled(edx_course_key) and self.has_paid(edx_course_key)
 
-    def has_paid(self, edx_course_key):
-        """
-        Returns true if user paid for a course run.
-
-        Args:
-            edx_course_key (str): an edX course run key
-
-        Returns:
-            bool: whether the user is paid
-        """
-        if self.has_paid_final_grade(edx_course_key):
-            return True
-
-        # financial aid programs need to have an audit enrollment and a paid entry for the course
-        if self.financial_aid_available:
-            return edx_course_key in self.paid_course_keys
-
-        # normal programs need to have a verified enrollment
-        return self.has_verified_enrollment(edx_course_key)
-
-    def has_paid_for_any_in_program(self):
-        """
-        Returns true if a user has paid for any course run in the program
-        """
-        return any(self.has_paid(edx_course_key) for edx_course_key in self.edx_course_keys)
-
     def has_verified_enrollment(self, edx_course_key):
         """
         Returns true if user has a verified enrollment
@@ -210,6 +184,42 @@ class MMTrack:
         """
         return self.final_grade_qset.for_course_run_key(edx_course_key).exists()
 
+    def has_paid(self, edx_course_key):
+        """
+        Returns true if user paid for a course run.
+
+        Args:
+            edx_course_key (str): an edX course run key
+
+        Returns:
+            bool: whether the user is paid
+        """
+        # financial aid programs need to have a paid entry for the course
+        if self.financial_aid_available:
+            return edx_course_key in self.paid_course_keys
+
+        # normal programs need to have paid_on_edx in the final grades or a verified enrollment
+        if self.has_final_grade(edx_course_key):
+            return self.has_final_grade_paid_on_edx(edx_course_key)
+        return self.has_verified_enrollment(edx_course_key)
+
+    def has_paid_for_any_in_program(self):
+        """
+        Returns true if a user has paid for any course run in the program
+        """
+        return any(self.has_paid(edx_course_key) for edx_course_key in self.edx_course_keys)
+
+    def has_final_grade_paid_on_edx(self, edx_course_key):
+        """
+        Checks if there is a a frozen final grade and the user paid for it.
+
+        Args:
+            edx_course_key (str): an edX course run key
+        Returns:
+            bool: whether or not a user has a final grade and has paid
+        """
+        return self.final_grade_qset.paid_on_edx().for_course_run_key(edx_course_key).exists()
+
     def has_paid_final_grade(self, edx_course_key):
         """
         Checks if there is a a frozen final grade and the user paid for it.
@@ -219,7 +229,7 @@ class MMTrack:
         Returns:
             bool: whether a frozen final grade exists
         """
-        return self.final_grade_qset.paid_on_edx().for_course_run_key(edx_course_key).exists()
+        return self.has_final_grade(edx_course_key) and self.has_paid(edx_course_key)
 
     def has_passed_course(self, edx_course_key):
         """
