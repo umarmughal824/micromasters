@@ -509,6 +509,8 @@ CELERYBEAT_SCHEDULE = {
         'schedule': crontab(minute=0, hour='*')
     },
 }
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 
 

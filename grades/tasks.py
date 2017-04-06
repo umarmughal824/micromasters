@@ -5,6 +5,7 @@ import logging
 
 from celery import group
 from celery.result import GroupResult
+from django.contrib.auth.models import User
 from django.core.cache import caches
 
 from courses.models import CourseRun
@@ -12,6 +13,7 @@ from grades import api
 from grades.models import CourseRunGradingStatus
 from micromasters.celery import async
 from micromasters.utils import chunks
+from search.tasks import lookup_id
 
 
 CACHE_ID_BASE_STR = "freeze_grade_{0}"
@@ -34,20 +36,24 @@ def find_course_runs_and_freeze_grades():
     """
     runs_to_freeze = CourseRun.get_freezable()
     for run in runs_to_freeze:
-        freeze_course_run_final_grades.delay(run)
+        freeze_course_run_final_grades.delay(run.id)
 
 
 @async.task
-def freeze_course_run_final_grades(course_run):
+def freeze_course_run_final_grades(course_run_id):
     """
     Async task manager to freeze all the users' final grade in a course run
 
     Args:
-        course_run (CourseRun): a course run model object
+        course_run_id (int): a course run id
 
     Returns:
         None
     """
+    # Deprecated! lookup_id is used to handle queued tasks at the time of deployment
+    # In the near future course_run_id will always be an integer
+    course_run_id = lookup_id(course_run_id)
+    course_run = CourseRun.objects.get(id=course_run_id)
     # no need to do anything if the course run is not ready
     if not course_run.can_freeze_grades:
         log.info('the grades course "%s" cannot be frozen yet', course_run.edx_course_key)
@@ -79,10 +85,10 @@ def freeze_course_run_final_grades(course_run):
         results.delete()
 
     # extract the users to be frozen for this course
-    users_qset = api.get_users_without_frozen_final_grade(course_run)
+    user_ids_qset = api.get_users_without_frozen_final_grade(course_run).values_list('id', flat=True)
 
     # if there are no more users to be froze, just complete the task
-    if users_qset.count() == 0:
+    if not user_ids_qset.exists():
         CourseRunGradingStatus.set_to_complete(course_run)
         return
 
@@ -93,7 +99,7 @@ def freeze_course_run_final_grades(course_run):
 
     # create a group of subtasks to be run in parallel
     job = group(
-        freeze_users_final_grade_async.s(list_users, course_run) for list_users in chunks(users_qset)
+        freeze_users_final_grade_async.s(list_user_ids, course_run.id) for list_user_ids in chunks(user_ids_qset)
     )
     results = job.apply_async()
     # save the result ID in the celery backend
@@ -103,19 +109,23 @@ def freeze_course_run_final_grades(course_run):
 
 
 @async.task
-def freeze_users_final_grade_async(users, course_run):
+def freeze_users_final_grade_async(user_ids, course_run_id):
     """
     Async task to freeze the final grade in a course run for a list of users.
 
     Args:
-        users (list): a list of django users
-        course_run (CourseRun): a course run model object
+        user_ids (list): a list of django user ids
+        course_run_id (int): a course run id
 
     Returns:
         None
     """
     # pylint: disable=bare-except
-    for user in users:
+    # Deprecated! lookup_id is used to handle queued tasks at the time of deployment
+    # In the near future course_run_id will always be an integer
+    course_run_id = lookup_id(course_run_id)
+    course_run = CourseRun.objects.get(id=course_run_id)
+    for user in User.objects.filter(id__in=user_ids):
         try:
             api.freeze_user_final_grade(user, course_run)
         except:
