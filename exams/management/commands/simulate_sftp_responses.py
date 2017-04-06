@@ -13,8 +13,7 @@ from django.core.management.base import BaseCommand
 
 from exams.pearson.constants import (
     PEARSON_DATETIME_FORMAT,
-    PEARSON_FILE_TYPE_EAC,
-    PEARSON_FILE_TYPE_VCDC,
+    PEARSON_FILE_TYPES,
 )
 from exams.pearson import sftp
 
@@ -125,7 +124,7 @@ class Command(BaseCommand):
         self.write_zip(
             sftp_conn,
             result_file.getvalue(),
-            now.strftime('{}-%Y-%m-%d.dat'.format(PEARSON_FILE_TYPE_EAC)),
+            now.strftime('{}-%Y-%m-%d.dat'.format(PEARSON_FILE_TYPES.EAC)),
             now
         )
 
@@ -159,7 +158,7 @@ class Command(BaseCommand):
         self.write_zip(
             sftp_conn,
             result_file.getvalue(),
-            now.strftime('{}-%Y-%m-%d.dat'.format(PEARSON_FILE_TYPE_VCDC)),
+            now.strftime('{}-%Y-%m-%d.dat'.format(PEARSON_FILE_TYPES.VCDC)),
             now
         )
 

@@ -1,11 +1,31 @@
 """Pearson-related constants"""
+from types import SimpleNamespace
 
 # Pearson TSV constants
 PEARSON_DATE_FORMAT = "%Y/%m/%d"
 PEARSON_DATETIME_FORMAT = "%Y/%m/%d %H:%M:%S"
 
-PEARSON_FILE_TYPE_EAC = 'eac'
-PEARSON_FILE_TYPE_VCDC = 'vcdc'
+PEARSON_FILE_TYPES = SimpleNamespace(
+    EAC='eac',
+    VCDC='vcdc',
+    EXAM='exam',
+    CAND='cand',
+    SURV='surv',
+    CMNT='cmnt',
+    SECT='sect',
+    RESP='resp',
+    ITEM='item',
+)
+
+# these are files we intentionally skip, but treat as if we processed them
+PEARSON_INTENDED_SKIP_FILE_TYPES = (
+    PEARSON_FILE_TYPES.CAND,
+    PEARSON_FILE_TYPES.SURV,
+    PEARSON_FILE_TYPES.CMNT,
+    PEARSON_FILE_TYPES.SECT,
+    PEARSON_FILE_TYPES.ITEM,
+    PEARSON_FILE_TYPES.RESP,
+)
 
 # SFTP Upload constants
 PEARSON_UPLOAD_REQUIRED_SETTINGS = [
@@ -34,3 +54,11 @@ VCDC_FAILURE_STATUS = "Error"
 # Exam Authorization Confirmation (EAC) file statuses
 EAC_SUCCESS_STATUS = "Accepted"
 EAC_FAILURE_STATUS = "Error"
+
+# EXAM constants
+EXAM_GRADE_PASS = 'pass'
+EXAM_GRADE_FAIL = 'fail'
+EXAM_GRADES = (
+    EXAM_GRADE_PASS,
+    EXAM_GRADE_FAIL,
+)

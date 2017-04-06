@@ -91,6 +91,7 @@ class ExamAuthorization(TimestampedModel):
         choices=STATUS_CHOICES,
         default=STATUS_PENDING,
     )
+    exam_taken = models.BooleanField(default=False)
 
     date_first_eligible = models.DateField()
     date_last_eligible = models.DateField()

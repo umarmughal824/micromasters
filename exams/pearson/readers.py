@@ -3,17 +3,17 @@ Readers for data Pearson exports
 """
 import csv
 from collections import namedtuple
-from datetime import datetime
 
-import pytz
+from exams.pearson.constants import PEARSON_DIALECT_OPTIONS
 
-from exams.pearson.constants import (
-    PEARSON_DATETIME_FORMAT,
-    PEARSON_DIALECT_OPTIONS,
-)
 from exams.pearson.exceptions import (
     InvalidTsvRowException,
     UnparsableRowException,
+)
+from exams.pearson.utils import (
+    parse_bool,
+    parse_datetime,
+    parse_or_default,
 )
 
 
@@ -51,13 +51,6 @@ class BaseTSVReader(object):
         """
         self.field_mappers = field_mappers
         self.read_as_cls = read_as_cls
-
-    @classmethod
-    def parse_datetime(cls, dt):
-        """
-        Parses a datetime from Pearson's format
-        """
-        return datetime.strptime(dt, PEARSON_DATETIME_FORMAT).replace(tzinfo=pytz.UTC)
 
     @classmethod
     def map_cell(cls, row, source, target, transformer=None):
@@ -142,14 +135,14 @@ class VCDCReader(BaseTSVReader):
         super().__init__([
             ('ClientCandidateID', 'client_candidate_id', int),
             ('Status', 'status'),
-            ('Date', 'date', self.parse_datetime),
+            ('Date', 'date', parse_datetime),
             ('Message', 'message'),
         ], VCDCResult)
 
 
 EACResult = namedtuple('EACResult', [
-    'exam_authorization_id',
-    'candidate_id',
+    'client_authorization_id',
+    'client_candidate_id',
     'date',
     'status',
     'message'
@@ -162,9 +155,66 @@ class EACReader(BaseTSVReader):
     """
     def __init__(self):
         super().__init__([
-            ('ClientAuthorizationID', 'exam_authorization_id', int),
-            ('ClientCandidateID', 'candidate_id', int),
-            ('Date', 'date', self.parse_datetime),
+            ('ClientAuthorizationID', 'client_authorization_id', int),
+            ('ClientCandidateID', 'client_candidate_id', int),
+            ('Date', 'date', parse_datetime),
             ('Status', 'status'),
             ('Message', 'message')
         ], EACResult)
+
+
+EXAMResult = namedtuple('EXAMResult', [
+    'registration_id',
+    'client_candidate_id',
+    'tc_id',
+    'exam_series_code',
+    'exam_name',
+    'exam_revision',
+    'form',
+    'exam_language',
+    'attempt',
+    'exam_date',
+    'time_used',
+    'passing_score',
+    'score',
+    'grade',
+    'no_show',
+    'nda_refused',
+    'correct',
+    'incorrect',
+    'skipped',
+    'unscored',
+    'client_authorization_id',
+    'voucher',
+])
+
+
+class EXAMReader(BaseTSVReader):
+    """
+    Reader for Pearson VUE Exam result files (EXAM) files.
+    """
+    def __init__(self):
+        super().__init__([
+            ('RegistrationID', 'registration_id', int),
+            ('ClientCandidateID', 'client_candidate_id', int),
+            ('TCID', 'tc_id', int),
+            ('ExamSeriesCode', 'exam_series_code'),
+            ('ExamName', 'exam_name'),
+            ('ExamRevision', 'exam_revision'),
+            ('Form', 'form'),
+            ('ExamLanguage', 'exam_language'),
+            ('Attempt', 'attempt', parse_or_default(int, None)),
+            ('ExamDate', 'exam_date', parse_datetime),
+            ('TimeUsed', 'time_used'),
+            ('PassingScore', 'passing_score', float),
+            ('Score', 'score', float),
+            ('Grade', 'grade'),
+            ('NoShow', 'no_show', parse_bool),
+            ('NDARefused', 'nda_refused', parse_bool),
+            ('Correct', 'correct', int),
+            ('Incorrect', 'incorrect', int),
+            ('Skipped', 'skipped', int),
+            ('Unscored', 'unscored', int),
+            ('ClientAuthorizationID', 'client_authorization_id', int),
+            ('Voucher', 'voucher'),
+        ], EXAMResult)

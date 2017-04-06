@@ -9,14 +9,17 @@ from paramiko import SSHException
 
 from exams.pearson import audit
 from exams.pearson.constants import (
+    EXAM_GRADES,
+    EXAM_GRADE_PASS,
     EAC_SUCCESS_STATUS,
-    PEARSON_FILE_TYPE_EAC,
-    PEARSON_FILE_TYPE_VCDC,
     VCDC_SUCCESS_STATUS,
+    PEARSON_INTENDED_SKIP_FILE_TYPES,
+    PEARSON_FILE_TYPES,
 )
 from exams.pearson.exceptions import RetryableSFTPException
 from exams.pearson.readers import (
     EACReader,
+    EXAMReader,
     VCDCReader,
 )
 from exams.pearson import utils
@@ -24,6 +27,7 @@ from exams.models import (
     ExamAuthorization,
     ExamProfile,
 )
+from grades.models import ProctoredExamGrade
 
 log = logging.getLogger(__name__)
 
@@ -50,6 +54,22 @@ def locally_extracted(zip_file, member):
             os.remove(extracted_file_path)
 
 
+def format_and_log_error(message, **kwargs):
+    """
+    Formats and logs an error messages
+
+    Args:
+        error: error message
+
+    Returns:
+        str: formatted error message
+    """
+    formatted_values = ' '.join("{}='{}'".format(k, v) for k, v in kwargs.items() if v)
+    formatted_message = '{}: {}'.format(message, formatted_values)
+    log.error(formatted_message)
+    return formatted_message
+
+
 class ArchivedResponseProcessor:
     """
     Handles fetching and processing of files stored in a ZIP archive on Pearson SFTP
@@ -59,7 +79,8 @@ class ArchivedResponseProcessor:
         self.auditor = audit.ExamDataAuditor()
 
     def fetch_file(self, remote_path):
-        """        Fetches a remote file and returns the local path
+        """
+        Fetches a remote file and returns the local path
 
         Args:
             remote_path (str): the remote path of the file to fetch
@@ -121,12 +142,12 @@ class ArchivedResponseProcessor:
         # audit before we process in case the process dies
         self.auditor.audit_response_file(local_path)
 
-        log.info('Processing Pearson zip file: %s', local_path)
+        log.debug('Processing Pearson zip file: %s', local_path)
 
         # extract the zip and walk the files
         with zipfile.ZipFile(local_path) as zip_file:
             for extracted_filename in zip_file.namelist():
-                log.info('Processing file %s extracted from %s', extracted_filename, local_path)
+                log.debug('Processing file %s extracted from %s', extracted_filename, local_path)
                 with locally_extracted(zip_file, extracted_filename) as extracted_file:
                     result, errors = self.process_extracted_file(extracted_file, extracted_filename)
 
@@ -148,14 +169,20 @@ class ArchivedResponseProcessor:
         Returns:
             (bool, list(str)): bool is True if file processed successfuly, error messages are returned in the list
         """
-        file_type = utils.get_file_type(extracted_filename)
 
-        if file_type == PEARSON_FILE_TYPE_VCDC:
+        if extracted_filename.startswith(PEARSON_FILE_TYPES.VCDC):
             # We send Pearson CDD files and get the results as VCDC files
             return self.process_vcdc_file(extracted_file)
-        elif file_type == PEARSON_FILE_TYPE_EAC:
+        elif extracted_filename.startswith(PEARSON_FILE_TYPES.EAC):
             # We send Pearson EAD files and get the results as EAC files
             return self.process_eac_file(extracted_file)
+        elif extracted_filename.startswith(PEARSON_FILE_TYPES.EXAM):
+            return self.process_exam_file(extracted_file)
+        elif any(extracted_filename.startswith(file_type) for file_type in PEARSON_INTENDED_SKIP_FILE_TYPES):
+            # for files we don't care about, act like we processed them
+            # so they don't cause us to leave the zip file on the server
+            # this would cause us to reprocess these zip files forever
+            return True, []
 
         return False, []
 
@@ -170,12 +197,12 @@ class ArchivedResponseProcessor:
             list(str): list of error messages
         """
         return [
-            "Unable to parse row `{row}`".format(
+            "Unable to parse row '{row}'".format(
                 row=row,
             ) for row in rows
         ]
 
-    def process_vcdc_file(self, extracted_file):  # pylint: disable=no-self-use
+    def process_vcdc_file(self, extracted_file):
         """
         Processes a VCDC file extracted from the zip
 
@@ -192,33 +219,29 @@ class ArchivedResponseProcessor:
             try:
                 exam_profile = ExamProfile.objects.get(profile__student_id=result.client_candidate_id)
             except ExamProfile.DoesNotExist:
-                error_message = "Unable to find an ExamProfile record for profile_id `{profile_id}`".format(
-                    profile_id=result.client_candidate_id
-                )
-                log.error(error_message)
-                messages.append(error_message)
+                messages.append(format_and_log_error(
+                    'Unable to find an ExamProfile record:',
+                    client_candidate_id=result.client_candidate_id,
+                    error=result.message,
+                ))
                 continue
 
             if result.status == EAC_SUCCESS_STATUS and 'WARNING' not in result.message:
                 exam_profile.status = ExamProfile.PROFILE_SUCCESS
             else:
                 exam_profile.status = ExamProfile.PROFILE_FAILED
-                error_message = "ExamProfile sync failed for user `{username}`.{error_message}".format(
+                messages.append(format_and_log_error(
+                    'ExamProfile sync failed:',
+                    client_candidate_id=result.client_candidate_id,
                     username=exam_profile.profile.user.username,
-                    error_message=(
-                        " Received error: '{error}'.".format(
-                            error=result.message
-                        ) if result.message else ''
-                    )
-                )
-                log.error(error_message)
-                messages.append(error_message)
+                    error=result.message,
+                ))
 
             exam_profile.save()
 
         return True, messages
 
-    def process_eac_file(self, extracted_file):  # pylint: disable=no-self-use
+    def process_eac_file(self, extracted_file):
         """
         Processes a EAC file extracted from the zip
 
@@ -233,38 +256,90 @@ class ArchivedResponseProcessor:
         messages = self.get_invalid_row_messages(invalid_rows)
         for result in results:
             try:
-                exam_authorization = ExamAuthorization.objects.get(id=result.exam_authorization_id)
+                exam_authorization = ExamAuthorization.objects.get(id=result.client_authorization_id)
             except ExamAuthorization.DoesNotExist:
-                error_message = (
-                    'Unable to find information for authorization_id: `{authorization_id}` and '
-                    'candidate_id: `{candidate_id}` in our system.'
-                ).format(
-                    authorization_id=result.exam_authorization_id,
-                    candidate_id=result.candidate_id
-                )
-                log.error(error_message)
-                messages.append(error_message)
+                messages.append(format_and_log_error(
+                    'Unable to find a matching ExamAuthorization record:',
+                    client_candidate_id=result.client_candidate_id,
+                    client_authorization_id=result.client_authorization_id,
+                    error=result.message,
+                ))
                 continue
 
             if result.status == VCDC_SUCCESS_STATUS:
                 exam_authorization.status = ExamAuthorization.STATUS_SUCCESS
             else:
                 exam_authorization.status = ExamAuthorization.STATUS_FAILED
-                error_message = (
-                    "Exam authorization failed for user `{username}` "
-                    "with authorization id `{authorization_id}`. {error_message}"
-                ).format(
+                messages.append(format_and_log_error(
+                    'ExamAuthorization sync failed:',
                     username=exam_authorization.user.username,
-                    authorization_id=result.exam_authorization_id,
-                    error_message=(
-                        "Received error: '{error}'.".format(
-                            error=result.message
-                        ) if result.message else ''
-                    )
-                )
-                log.error(error_message)
-                messages.append(error_message)
+                    client_authorization_id=result.client_authorization_id,
+                    error=result.message,
+                ))
 
+            exam_authorization.save()
+
+        return True, messages
+
+    def process_exam_file(self, extracted_file):
+        """
+        Processes a EXAM file extracted from the zip
+
+        Args:
+            extracted_file (zipfile.ZipExtFile): the extracted file-like object
+
+        Returns:
+            (bool, list(str)): bool is True if file processed successfuly, error messages are returned in the list
+        """
+        log.debug('Found EXAM file: %s', extracted_file)
+        results, invalid_rows = EXAMReader().read(extracted_file)
+        messages = self.get_invalid_row_messages(invalid_rows)
+
+        for result in results:
+            try:
+                exam_authorization = ExamAuthorization.objects.get(id=result.client_authorization_id)
+            except ExamAuthorization.DoesNotExist:
+                messages.append(format_and_log_error(
+                    'Unable to find a matching ExamAuthorization record:',
+                    client_candidate_id=result.client_candidate_id,
+                    client_authorization_id=result.client_authorization_id,
+                ))
+                continue
+
+            if result.grade.lower() not in EXAM_GRADES:
+                messages.append(format_and_log_error(
+                    'Unexpected grade value:',
+                    client_authorization_id=result.client_authorization_id,
+                    client_candidate_id=result.client_candidate_id,
+                    username=exam_authorization.user.username,
+                    grade=result.grade,
+                ))
+                continue
+
+            row_data = dict(result._asdict())  # OrderedDict -> dict
+            row_data['exam_date'] = row_data['exam_date'].isoformat()  # datetime doesn't serialize
+
+            # extract certain keys to store directly in row columns
+            defaults = {
+                'exam_date': result.exam_date,
+                'passing_score': result.passing_score,
+                'score': result.score,
+                'grade': result.grade,
+                'percentage_grade': result.score / 100.0,
+                'client_authorization_id': result.client_authorization_id,
+                'passed': result.grade.lower() == EXAM_GRADE_PASS,
+                'row_data': row_data,
+            }
+
+            # create the grade or update it
+            ProctoredExamGrade.objects.update_or_create(
+                user=exam_authorization.user,
+                course=exam_authorization.course,
+                client_authorization_id=result.client_authorization_id,
+                defaults=defaults
+            )
+
+            exam_authorization.exam_taken = True
             exam_authorization.save()
 
         return True, messages

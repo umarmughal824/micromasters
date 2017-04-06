@@ -33,14 +33,17 @@ from exams.pearson.constants import (
     EAC_FAILURE_STATUS,
     VCDC_SUCCESS_STATUS,
     VCDC_FAILURE_STATUS,
+    EXAM_GRADE_PASS,
 )
 from exams.pearson import download
 from exams.pearson.exceptions import RetryableSFTPException
+from exams.pearson.factories import EXAMResultFactory
 from exams.pearson.readers import (
     EACResult,
     VCDCResult,
 )
 from exams.pearson.sftp_test import EXAMS_SFTP_SETTINGS
+from grades.models import ProctoredExamGrade
 from search.base import MockedESTestCase
 
 FIXED_DATETIME = datetime(2016, 5, 15, 15, 2, 55, tzinfo=pytz.UTC)
@@ -87,28 +90,29 @@ class PearsonDownloadTest(SimpleTestCase):
         self.sftp.listdir.assert_called_once_with()
         assert self.sftp.isfile.call_args_list == [call(arg) for arg in listdir_values]
 
-    @patch('exams.pearson.utils.get_file_type')
     @patch('exams.pearson.download.ArchivedResponseProcessor.process_eac_file')
     @patch('exams.pearson.download.ArchivedResponseProcessor.process_vcdc_file')
-    def test_process_extracted_file(self, process_vcdc_file_mock, process_eac_file_mock, get_file_type_mock):
+    @patch('exams.pearson.download.ArchivedResponseProcessor.process_exam_file')
+    def test_process_extracted_file(self, process_exam_file_mock, process_vcdc_file_mock, process_eac_file_mock):
         """
         Test that process_extracted_file handles file types correctly
         """
         extracted_file = Mock()
         process_eac_file_mock.return_value = (True, ['EAC'])
         process_vcdc_file_mock.return_value = (True, ['VCDC'])
+        process_exam_file_mock.return_value = (True, ['EXAM'])
         processor = download.ArchivedResponseProcessor(self.sftp)
 
-        get_file_type_mock.return_value = 'eac'
-        assert processor.process_extracted_file(extracted_file, '') == process_eac_file_mock.return_value
+        assert processor.process_extracted_file(extracted_file, 'eac-07-04-2016.dat') == (True, ['EAC'])
         processor.process_eac_file.assert_called_once_with(extracted_file)
 
-        get_file_type_mock.return_value = 'vcdc'
-        assert processor.process_extracted_file(extracted_file, '') == process_vcdc_file_mock.return_value
+        assert processor.process_extracted_file(extracted_file, 'vcdc-07-04-2016.dat') == (True, ['VCDC'])
         processor.process_vcdc_file.assert_called_once_with(extracted_file)
 
-        get_file_type_mock.return_value = None
-        assert processor.process_extracted_file(extracted_file, '') == (False, [])
+        assert processor.process_extracted_file(extracted_file, 'exam-07-04-2016.dat') == (True, ['EXAM'])
+        processor.process_exam_file.assert_called_once_with(extracted_file)
+
+        assert processor.process_extracted_file(extracted_file, 'notatype-07-04-2016.dat') == (False, [])
 
     @ddt.data(
         (['a.file', 'b.file'], [(True, []), (True, [])], True),
@@ -186,7 +190,7 @@ class PearsonDownloadTest(SimpleTestCase):
         }])
 
         for msg in messages:
-            assert msg.startswith('Unable to parse row `')
+            assert msg.startswith('Unable to parse row')
 
 
 @override_settings(**EXAMS_SFTP_SETTINGS)
@@ -342,9 +346,9 @@ class VCDCDownloadTest(MockedESTestCase):
         with patch('exams.pearson.download.VCDCReader.read', return_value=self.success_results):
             assert self.processor.process_vcdc_file("/tmp/file.ext") == (True, [])
 
-            for profile in self.success_profiles:
-                profile.refresh_from_db()
-                assert profile.status == ExamProfile.PROFILE_SUCCESS
+        for profile in self.success_profiles:
+            profile.refresh_from_db()
+            assert profile.status == ExamProfile.PROFILE_SUCCESS
 
     def test_process_result_vcdc_when_error(self):
         """
@@ -352,22 +356,19 @@ class VCDCDownloadTest(MockedESTestCase):
         """
 
         with patch('exams.pearson.download.VCDCReader.read', return_value=self.all_results):
-            assert self.processor.process_vcdc_file("/tmp/file.ext") == (
-                True,
-                [
-                    "ExamProfile sync failed for user `{username}`.".format(
-                        username=self.failure_profiles[0].profile.user.username),
-                    "ExamProfile sync failed for user `{username}`. Received error: 'Bad address'.".format(
-                        username=self.failure_profiles[1].profile.user.username),
-                ]
-            )
-            for profile in self.success_profiles:
-                profile.refresh_from_db()
-                assert profile.status == ExamProfile.PROFILE_SUCCESS
+            result, errors = self.processor.process_vcdc_file("/tmp/file.ext")
 
-            for profile in self.failure_profiles:
-                profile.refresh_from_db()
-                assert profile.status == ExamProfile.PROFILE_FAILED
+        assert result is True
+        assert all(error.startswith('ExamProfile sync failed:') for error in errors)
+        assert "error='Bad address'" in errors[1]
+
+        for profile in self.success_profiles:
+            profile.refresh_from_db()
+            assert profile.status == ExamProfile.PROFILE_SUCCESS
+
+        for profile in self.failure_profiles:
+            profile.refresh_from_db()
+            assert profile.status == ExamProfile.PROFILE_FAILED
 
     def test_process_result_vcdc_when_invalid_data_in_file(self):
         """Tests for the situation where we don't have a matching record"""
@@ -387,13 +388,11 @@ class VCDCDownloadTest(MockedESTestCase):
         ], [])
 
         with patch('exams.pearson.download.VCDCReader.read', return_value=results):
-            assert self.processor.process_vcdc_file("/tmp/file.ext") == (
-                True,
-                [
-                    'Unable to find an ExamProfile record for profile_id `10`',
-                    'Unable to find an ExamProfile record for profile_id `11`',
-                ]
-            )
+            result, errors = self.processor.process_vcdc_file("/tmp/file.ext")
+
+        assert result is True
+        assert len(errors) == 2
+        assert all(error.startswith('Unable to find an ExamProfile record:') for error in errors)
 
     def test_process_result_vcdc_successful_warning(self):
         """Tests for the situation where we get a success with a warning"""
@@ -409,15 +408,11 @@ class VCDCDownloadTest(MockedESTestCase):
         ], [])
 
         with patch('exams.pearson.download.VCDCReader.read', return_value=results):
-            assert self.processor.process_vcdc_file("/tmp/file.ext") == (
-                True,
-                [
-                    "ExamProfile sync failed for user `{username}`. Received error: '{message}'.".format(
-                        username=profile.user.username,
-                        message=message,
-                    )
-                ]
-            )
+            result, errors = self.processor.process_vcdc_file("/tmp/file.ext")
+
+        assert result is True
+        assert errors[0].startswith('ExamProfile sync failed:')
+        assert "error='{}'".format(message) in errors[0]
 
 
 @override_settings(**EXAMS_SFTP_SETTINGS)
@@ -436,8 +431,8 @@ class EACDownloadTest(MockedESTestCase):
 
         cls.success_results = ([
             EACResult(
-                exam_authorization_id=auth.id,
-                candidate_id=auth.user.profile.student_id,
+                client_authorization_id=auth.id,
+                client_candidate_id=auth.user.profile.student_id,
                 date=FIXED_DATETIME,
                 status=EAC_SUCCESS_STATUS,
                 message='',
@@ -445,15 +440,15 @@ class EACDownloadTest(MockedESTestCase):
         ], [])
         cls.failed_results = ([
             EACResult(
-                exam_authorization_id=cls.failure_auths[0].id,
-                candidate_id=cls.failure_auths[0].user.profile.student_id,
+                client_authorization_id=cls.failure_auths[0].id,
+                client_candidate_id=cls.failure_auths[0].user.profile.student_id,
                 date=FIXED_DATETIME,
                 status=EAC_FAILURE_STATUS,
                 message='',
             ),
             EACResult(
-                exam_authorization_id=cls.failure_auths[1].id,
-                candidate_id=cls.failure_auths[1].user.profile.student_id,
+                client_authorization_id=cls.failure_auths[1].id,
+                client_candidate_id=cls.failure_auths[1].user.profile.student_id,
                 date=FIXED_DATETIME,
                 status=EAC_FAILURE_STATUS,
                 message='wrong username',
@@ -473,9 +468,9 @@ class EACDownloadTest(MockedESTestCase):
         with patch('exams.pearson.download.EACReader.read', return_value=self.success_results):
             assert self.processor.process_eac_file("/tmp/file.ext") == (True, [])
 
-            for auth in self.success_auths:
-                auth.refresh_from_db()
-                assert auth.status == ExamAuthorization.STATUS_SUCCESS
+        for auth in self.success_auths:
+            auth.refresh_from_db()
+            assert auth.status == ExamAuthorization.STATUS_SUCCESS
 
     def test_process_result_eac_when_error(self):
         """
@@ -483,28 +478,19 @@ class EACDownloadTest(MockedESTestCase):
         """
 
         with patch('exams.pearson.download.EACReader.read', return_value=self.all_results):
-            assert self.processor.process_eac_file("/tmp/file.ext") == (
-                True,
-                [
-                    "Exam authorization failed for user `{username}` with authorization "
-                    "id `{auth_id}`. ".format(
-                        username=self.failure_auths[0].user.username,
-                        auth_id=self.failure_auths[0].id
-                    ),
-                    "Exam authorization failed for user `{username}` with authorization id `{auth_id}`. "
-                    "Received error: 'wrong username'.".format(
-                        username=self.failure_auths[1].user.username,
-                        auth_id=self.failure_auths[1].id
-                    )
-                ]
-            )
-            for auth in self.success_auths:
-                auth.refresh_from_db()
-                assert auth.status == ExamAuthorization.STATUS_SUCCESS
+            result, errors = self.processor.process_eac_file("/tmp/file.ext")
 
-            for auth in self.failure_auths:
-                auth.refresh_from_db()
-                assert auth.status == ExamAuthorization.STATUS_FAILED
+        assert result is True
+        assert all(error.startswith('ExamAuthorization sync failed:') for error in errors)
+        assert "error='wrong username'" in errors[1]
+
+        for auth in self.success_auths:
+            auth.refresh_from_db()
+            assert auth.status == ExamAuthorization.STATUS_SUCCESS
+
+        for auth in self.failure_auths:
+            auth.refresh_from_db()
+            assert auth.status == ExamAuthorization.STATUS_FAILED
 
     def test_process_result_eac_when_invalid_data_in_file(self):
         """
@@ -513,15 +499,15 @@ class EACDownloadTest(MockedESTestCase):
         """
         results = ([
             EACResult(
-                exam_authorization_id=10,
-                candidate_id=10,
+                client_authorization_id=10,
+                client_candidate_id=10,
                 date=FIXED_DATETIME,
                 status=EAC_SUCCESS_STATUS,
                 message=''
             ),
             EACResult(
-                exam_authorization_id=11,
-                candidate_id=11,
+                client_authorization_id=11,
+                client_candidate_id=11,
                 date=FIXED_DATETIME,
                 status=EAC_FAILURE_STATUS,
                 message='wrong user name'
@@ -529,12 +515,70 @@ class EACDownloadTest(MockedESTestCase):
         ], [])
 
         with patch('exams.pearson.download.EACReader.read', return_value=results):
-            assert self.processor.process_eac_file("/tmp/file.ext") == (
-                True,
-                [
-                    "Unable to find information for authorization_id: `10` and candidate_id: `10` "
-                    "in our system.",
-                    "Unable to find information for authorization_id: `11` and candidate_id: `11` "
-                    "in our system."
-                ]
-            )
+            result, errors = self.processor.process_eac_file("/tmp/file.ext")
+
+        assert result is True
+        assert len(errors) == 2
+        assert all(error.startswith('Unable to find a matching ExamAuthorization record:') for error in errors)
+        assert "error='wrong user name'" in errors[1]
+
+
+@override_settings(**EXAMS_SFTP_SETTINGS)
+@ddt.ddt
+class EXAMDownloadTest(MockedESTestCase):
+    """
+    Test for Exam result files (EXAM) files processing.
+    """
+    @classmethod
+    def setUpTestData(cls):
+        cls.processor = download.ArchivedResponseProcessor(Mock())
+        cls.course = CourseFactory.create()
+
+    def test_process_result_exam(self):
+        """Test that the authorization is marked as taken and a ProctoredExamGrade created"""
+        exam_results = []
+        auths = []
+
+        # create a bunch of results that are passes
+        for auth in ExamAuthorizationFactory.create_batch(5, course=self.course):
+            exam_results.append(EXAMResultFactory.create(
+                passed=True,
+                client_candidate_id=auth.user.profile.student_id,
+                client_authorization_id=auth.id,
+            ))
+            auths.append(auth)
+
+        # create a bunch of results that are failed
+        for auth in ExamAuthorizationFactory.create_batch(5, course=self.course):
+            exam_results.append(EXAMResultFactory.create(
+                failed=True,
+                client_candidate_id=auth.user.profile.student_id,
+                client_authorization_id=auth.id,
+            ))
+            auths.append(auth)
+
+        grades = ProctoredExamGrade.objects.filter(course=self.course)
+        assert grades.count() == 0
+
+        with patch('exams.pearson.download.EXAMReader.read', return_value=(exam_results, [])):
+            assert self.processor.process_exam_file("/tmp/file.ext") == (True, [])
+
+        for auth in auths:
+            auth.refresh_from_db()
+            assert auth.exam_taken is True
+
+        sorted_exam_results = sorted(exam_results, key=lambda result: result.client_authorization_id)
+        sorted_grades = list(grades.order_by('client_authorization_id'))
+
+        assert len(sorted_grades) == len(sorted_exam_results)
+
+        for grade, exam_result in zip(sorted_grades, sorted_exam_results):
+            assert grade.exam_date == exam_result.exam_date
+            assert grade.passing_score == exam_result.passing_score
+            assert grade.grade == exam_result.grade
+            assert grade.score == exam_result.score
+            assert grade.passed is (exam_result.grade == EXAM_GRADE_PASS)
+            assert grade.percentage_grade == float(exam_result.score / 100.0)
+            expected_data = dict(exam_result._asdict())  # _asdict() returns an OrderedDict
+            expected_data['exam_date'] = expected_data['exam_date'].isoformat()
+            assert grade.row_data == expected_data

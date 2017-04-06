@@ -26,12 +26,6 @@ class BaseTSVReaderTest(UnitTestCase):
     Tests for Pearson reader code
     """
 
-    def test_parse_datetime(self):
-        """
-        Tests that datetimes format correctly according to Pearson spec
-        """
-        assert BaseTSVReader.parse_datetime('2016/05/15 15:02:55') == FIXED_DATETIME
-
     def test_reader_init(self):
         """
         Tests that the reader initializes correctly
@@ -156,22 +150,22 @@ class EACReaderTest(UnitTestCase):
 
         assert results == ([
             EACResult(
-                exam_authorization_id=4,
-                candidate_id=1,
+                client_authorization_id=4,
+                client_candidate_id=1,
                 date=FIXED_DATETIME,
                 status='Accepted',
                 message=''
             ),
             EACResult(
-                exam_authorization_id=5,
-                candidate_id=2,
+                client_authorization_id=5,
+                client_candidate_id=2,
                 date=FIXED_DATETIME,
                 status='Accepted',
                 message='WARNING: There be dragons'
             ),
             EACResult(
-                exam_authorization_id=6,
-                candidate_id=3,
+                client_authorization_id=6,
+                client_candidate_id=3,
                 date=FIXED_DATETIME,
                 status='Error',
                 message='Invalid profile'
