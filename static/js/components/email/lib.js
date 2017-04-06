@@ -1,5 +1,6 @@
 import React from 'react';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
+import R from 'ramda';
 
 import {
   sendCourseTeamMail,
@@ -9,10 +10,18 @@ import {
 import { makeProfileImageUrl } from '../../util/util';
 import type { Profile } from '../../flow/profileTypes';
 import type { Course } from '../../flow/programTypes';
-import type { EmailConfig, EmailState } from '../../flow/emailTypes';
+import type { EmailConfig, EmailState, Filter } from '../../flow/emailTypes';
 
 // NOTE: getEmailSendFunction is a function that returns a function. It is implemented this way
 // so that we can stub/mock the function that it returns (as we do in integration_test_helper.js)
+
+const renderFilterOptions = R.map(filter => (
+  <div className="sk-selected-filters-option sk-selected-filters__item" key={filter.id}>
+    <div className="sk-selected-filters-option__name">
+      {filter.name}: {filter.value}
+    </div>
+  </div>
+));
 
 export const COURSE_TEAM_EMAIL_CONFIG: EmailConfig = {
   title: 'Contact the Course Team',
@@ -46,6 +55,7 @@ export const SEARCH_RESULT_EMAIL_CONFIG: EmailConfig = {
   emailOpenParams: (searchkit: Object) => ({
     subheading: `${searchkit.getHitsCount() || 0} recipients selected`,
     supportsAutomaticEmails: true,
+    filters: searchkit.query.getSelectedFilters()
   }),
 
   getEmailSendFunction: () => sendSearchResultMail,
@@ -55,7 +65,23 @@ export const SEARCH_RESULT_EMAIL_CONFIG: EmailConfig = {
     emailState.inputs.body || '',
     emailState.searchkit.buildQuery().query,
     emailState.inputs.sendAutomaticEmails || false,
-  ])
+  ]),
+
+  renderRecipients: (filters?: Array<Filter>) => {
+    if (!filters || filters.length <= 0) {
+      return null;
+    }
+    return (
+      <div className="sk-selected-filters-display">
+        <div className="sk-selected-filters-title">
+          Recipients
+        </div>
+        <div className="sk-selected-filters">
+          {renderFilterOptions(filters)}
+        </div>
+      </div>
+    );
+  }
 };
 
 export const LEARNER_EMAIL_CONFIG: EmailConfig = {

@@ -7,6 +7,7 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import TestUtils from 'react-addons-test-utils';
 
+import { SEARCH_RESULT_EMAIL_CONFIG } from './lib';
 import * as inputUtil from '../inputs/util';
 import { FETCH_PROCESSING } from '../../actions';
 import { modifyTextField } from '../../util/test_utils';
@@ -159,5 +160,20 @@ describe('EmailCompositionDialog', () => {
         assert.equal(message, errorMessage);
       });
     });
+  });
+
+  it('should render recipients', () => {
+    renderDialog({
+      filters: [{
+        id: '1',
+        name: "key",
+        value: "test"
+      }]
+    }, { renderRecipients: SEARCH_RESULT_EMAIL_CONFIG.renderRecipients });
+
+    assert.include(
+      getDialog().querySelector('.sk-selected-filters-option__name').textContent,
+      "key: test"
+    );
   });
 });
