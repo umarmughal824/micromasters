@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.53.10
+---------------
+
+- Pass object ids to Celery tasks instead of objects (#2984)
+- Use reverse nested aggregation for education and fix related tests (#3010)
+- Added UI for email composition type (#2961)
+
 Version 0.53.9
 --------------
 
