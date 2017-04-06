@@ -23,7 +23,8 @@ import {
 } from '../../constants';
 import { INITIAL_PEARSON_STATE } from '../../reducers/pearson';
 import { INITIAL_UI_STATE } from '../../reducers/ui';
-import { stringStrip } from '../../util/test_utils';
+import { stringStrip, getEl } from '../../util/test_utils';
+import type { Program } from '../../flow/programTypes';
 
 describe('FinalExamCard', () => {
   let sandbox;
@@ -37,9 +38,9 @@ describe('FinalExamCard', () => {
     navigateToProfileStub = sandbox.stub();
     submitPearsonSSOStub = sandbox.stub();
     showPearsonTOSDialogStub = sandbox.stub();
-    let program = _.cloneDeep(DASHBOARD_RESPONSE.programs.find(program => (
+    let program: Program = (_.cloneDeep(DASHBOARD_RESPONSE.programs.find(program => (
       program.pearson_exam_status !== undefined
-    )));
+    ))): any);
     props = {
       profile: profile,
       program: program,
@@ -158,11 +159,11 @@ pay for the course and pass the online work.`;
     props.program.pearson_exam_status = PEARSON_PROFILE_SCHEDULABLE;
     renderCard(props);
     assert.include(
-      document.querySelector('.dialog-container').textContent,
+      getEl(document, ".dialog-container").textContent,
       "Test Registration is completed on the Pearson VUE website"
     );
     assert.include(
-      document.querySelector('.dialog-container').textContent,
+      getEl(document, ".dialog-container").textContent,
       'I acknowledge that by clicking Continue I will be leaving the MicroMasters website and going to ' +
       'the Pearson VUE website, and that I accept the Pearson VUE Group’s Terms of Service'
     );
@@ -172,7 +173,7 @@ pay for the course and pass the online work.`;
     props.ui.dialogVisibility = { 'pearsonTOSDialogVisible': true };
     props.program.pearson_exam_status = PEARSON_PROFILE_SCHEDULABLE;
     renderCard(props);
-    TestUtils.Simulate.click(getDialog().querySelector(".cancel-button"));
+    TestUtils.Simulate.click(getEl(getDialog(), ".cancel-button"));
     assert.equal(showPearsonTOSDialogStub.callCount, 1);
   });
 
@@ -180,7 +181,7 @@ pay for the course and pass the online work.`;
     props.ui.dialogVisibility = { 'pearsonTOSDialogVisible': true };
     props.program.pearson_exam_status = PEARSON_PROFILE_SCHEDULABLE;
     renderCard(props);
-    let btnContinue = getDialog().querySelector(".save-button");
+    let btnContinue = getEl(getDialog(), ".save-button");
     assert.equal(btnContinue.textContent, "CONTINUE");
     TestUtils.Simulate.click(btnContinue);
     assert.equal(submitPearsonSSOStub.callCount, 1);

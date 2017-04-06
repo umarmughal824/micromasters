@@ -10,6 +10,7 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import { setDialogVisibility } from '../actions/signup_dialog';
 import SignupDialog from './SignupDialog';
 import IntegratedTestHelper from '../util/integration_test_helper';
+import { getEl } from '../util/test_utils';
 
 describe("SignupDialog", () => {
   let helper;
@@ -38,7 +39,7 @@ describe("SignupDialog", () => {
     helper.store.dispatch(setDialogVisibility(true));
     renderDialog();
 
-    const link = document.body.querySelector(".signup-dialog a");
+    const link = getEl(document.body, ".signup-dialog a");
     assert.equal(link.getAttribute('href'), `/login/edxorg${queryParams}`);
   });
 
@@ -47,7 +48,7 @@ describe("SignupDialog", () => {
     helper.store.dispatch(setDialogVisibility(true));
     renderDialog();
 
-    const link = document.body.querySelector(".signup-dialog a");
+    const link = getEl(document.body, ".signup-dialog a");
     const expectedNext = URI("/dashboard/").setQuery("coupon", "aBc-123.");
     const expectedUrl = URI("/login/edxorg").setQuery("next", expectedNext);
     assert.equal(link.getAttribute('href'), expectedUrl.toString());
@@ -58,7 +59,7 @@ describe("SignupDialog", () => {
     helper.store.dispatch(setDialogVisibility(true));
     renderDialog();
 
-    const link = document.body.querySelector(".signup-dialog a");
+    const link = getEl(document.body, ".signup-dialog a");
     assert.equal(link.getAttribute('href'), "/login/edxorg?next=a");
   });
 
@@ -67,7 +68,7 @@ describe("SignupDialog", () => {
     helper.store.dispatch(setDialogVisibility(true));
     renderDialog();
 
-    const link = document.body.querySelector(".signup-dialog a");
+    const link = getEl(document.body, ".signup-dialog a");
     assert.equal(link.getAttribute('href'), "/login/edxorg");
   });
 });

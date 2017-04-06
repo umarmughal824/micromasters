@@ -98,7 +98,8 @@ export const modifyTextField = (field: HTMLInputElement, text: string): void => 
 };
 
 export const modifySelectField = (field: HTMLElement, text: string): void => {
-  let input = field.querySelector('.Select-input').querySelector('input');
+  // let input = field.querySelector('.Select-input').querySelector('input');
+  let input = getEl(getEl(field, '.Select-input'), 'input');
   TestUtils.Simulate.focus(input);
   TestUtils.Simulate.change(input, { target: { value: text } });
   TestUtils.Simulate.keyDown(input, { keyCode: 9, key: 'Tab' });
@@ -112,7 +113,8 @@ export const modifyWrapperSelectField = (wrapper: Object, text: string): void =>
 };
 
 export const clearSelectField = (field: HTMLElement): void => {
-  let input = field.querySelector('.Select-input').querySelector('input');
+  // let input = field.querySelector('.Select-input').querySelector('input');
+  let input = getEl(getEl(field, '.Select-input'), 'input');
   TestUtils.Simulate.focus(input);
   TestUtils.Simulate.keyDown(input, { keyCode: 8, key: 'Backspace' });
   TestUtils.Simulate.keyDown(input, { keyCode: 9, key: 'Tab' });
@@ -242,6 +244,10 @@ export class GoogleMapsStub {
   }
 }
 
+export  const getEl = (div: any, selector: string): HTMLElement => {
+  let el: HTMLElement = (div.querySelector(selector): any);
+  return el;
+};
 
 export function createAssertReducerResultState<State>(store: Store, getReducerState: (x: any) => State) {
   return (

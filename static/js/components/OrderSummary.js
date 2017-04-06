@@ -21,18 +21,22 @@ class OrderSummary extends React.Component {
     checkout:         Function,
     checkoutStatus?:  string,
   };
+
   getCoursePrice(): string {
     const { coursePrice } = this.props;
     return formatPrice(coursePrice.price);
   }
+
   getFinalPrice(): string {
     const { finalPrice } = this.props;
     return formatPrice(finalPrice);
   }
+
   getDiscountAmount(): string {
     const { discount } = this.props;
     return `-${formatPrice(discount)}`;
   }
+
   getExplanationText(): React$Element<*> {
     const { finalPrice, coursePrice } = this.props;
     let text;
@@ -49,6 +53,7 @@ class OrderSummary extends React.Component {
 
   showAmount(description: string, amount: string): Array<React$Element<*>> {
     return [
+      // $FlowFixMe: flow hates this for some reason
       <Cell col={8} tablet={4} phone={2} className="description" key={description}>
         {description}
       </Cell>,
@@ -93,9 +98,9 @@ class OrderSummary extends React.Component {
           component={Button}
           spinning={checkoutStatus === FETCH_PROCESSING}
           onClick={()=>(checkout(courseRun.course_id))}
-      >
-        Continue
-      </SpinnerButton>
+        >
+          Continue
+        </SpinnerButton>
       </div>
     );
   }

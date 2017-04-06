@@ -35,3 +35,7 @@ declare class FormData {
   get(s: string): any,
   append(x: any, y: any): void,
 }
+
+declare var module: {
+  hot: any,
+}

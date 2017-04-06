@@ -27,6 +27,7 @@ import {
   COUPON_AMOUNT_TYPE_PERCENT_DISCOUNT,
 } from '../../constants';
 import { makeCoupon } from '../../factories/dashboard';
+import type { CoursePrice } from '../../flow/dashboardTypes';
 
 describe('CourseListCard', () => {
   let program, sandbox, helper, routerPushStub;
@@ -46,9 +47,9 @@ describe('CourseListCard', () => {
   let renderCourseListCard = (props = {}) => {
     helper.store.dispatch(receiveGetProgramEnrollmentsSuccess(DASHBOARD_RESPONSE.programs));
     helper.store.dispatch(setCurrentProgramEnrollment(program));
-    let coursePrice = COURSE_PRICES_RESPONSE.find(
+    let coursePrice: CoursePrice = (COURSE_PRICES_RESPONSE.find(
       coursePrice => coursePrice.program_id === program.id
-    );
+    ): any);
 
     let prices = calculatePrices([program], [coursePrice], []);
     return mount(

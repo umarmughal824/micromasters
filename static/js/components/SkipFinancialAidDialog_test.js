@@ -23,7 +23,7 @@ describe('SkipFinancialAidDialog', () => {
     sandbox.restore();
   });
 
-  let renderDialog = (open = true) => {
+  let renderDialog = (open = true): HTMLElement => {
     mount(
       <MuiThemeProvider muiTheme={getMuiTheme()}>
         <SkipFinancialAidDialog
@@ -34,7 +34,7 @@ describe('SkipFinancialAidDialog', () => {
         />
       </MuiThemeProvider>
     );
-    return document.querySelector('.skip-financial-aid-dialog');
+    return (document.querySelector('.skip-financial-aid-dialog'): any);
   };
 
   it('should have some text and a title, including the full price amount', () => {

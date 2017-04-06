@@ -43,7 +43,9 @@ export default class ProgramSelector extends React.Component {
       setEnrollDialogError(null);
     } else {
       let selected = programs.find(program => program.id === option.value);
-      setCurrentProgramEnrollment(selected);
+      if (selected) {
+        setCurrentProgramEnrollment(selected);
+      }
     }
   };
 

@@ -23,7 +23,7 @@ export const setDialogVisibility = createAction(SET_DIALOG_VISIBILITY);
 
 // work history actions
 export const SET_WORK_HISTORY_EDIT = 'SET_WORK_HISTORY_EDIT';
-export const setWorkHistoryEdit = (bool: boolean): Dispatcher<null> => {
+export const setWorkHistoryEdit = (bool: boolean): Dispatcher<void> => {
   return dispatch => {
     dispatch({ type: SET_WORK_HISTORY_EDIT, payload: bool});
     return Promise.resolve();

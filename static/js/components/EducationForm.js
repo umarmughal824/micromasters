@@ -288,7 +288,7 @@ class EducationForm extends ProfileFormFields {
     setShowEducationDeleteDialog(true);
   };
 
-  editEducationForm = (): void => {
+  editEducationForm = (): React$Element<*> => {
     const {
       ui: { educationDialogIndex },
       showSwitch,

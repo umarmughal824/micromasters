@@ -10,7 +10,7 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import CourseEnrollmentDialog from './CourseEnrollmentDialog';
 import { makeCourse, makeRun } from '../factories/dashboard';
-
+import { getEl } from '../util/test_utils';
 
 describe("CourseEnrollmentDialog", () => {
   let sandbox, setVisibilityStub, addCourseEnrollmentStub, routerPushStub;
@@ -50,7 +50,8 @@ describe("CourseEnrollmentDialog", () => {
         }
       },
     );
-    return document.querySelector('.course-enrollment-dialog');
+    let el: HTMLElement = (document.querySelector('.course-enrollment-dialog'): any);
+    return el;
   };
 
   it('can render without price', () => {
@@ -58,7 +59,7 @@ describe("CourseEnrollmentDialog", () => {
     const payButton = ((wrapper.querySelector('.pay-button'): any): HTMLButtonElement);
     assert.equal(payButton.textContent, "Pay Now");
     assert.isTrue(payButton.disabled);
-    const auditButton = wrapper.querySelector('.audit-button');
+    const auditButton = getEl(wrapper, '.audit-button');
     assert.equal(auditButton.textContent, "Audit for Free & Pay Later");
   });
 
@@ -68,7 +69,7 @@ describe("CourseEnrollmentDialog", () => {
     const payButton = ((wrapper.querySelector('.pay-button'): any): HTMLButtonElement);
     assert.equal(payButton.textContent, "Pay Now ($123.45)");
     assert.isFalse(payButton.disabled);
-    const auditButton = wrapper.querySelector('.audit-button');
+    const auditButton = getEl(wrapper, '.audit-button');
     assert.equal(auditButton.textContent, "Audit for Free & Pay Later");
   });
 

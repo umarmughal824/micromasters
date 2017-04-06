@@ -51,7 +51,7 @@
     "express": "^4.15.2",
     "fetch-mock": "^5.9.4",
     "file-loader": "^0.10.1",
-    "flow-bin": "^0.30.0",
+    "flow-bin": "^0.43.1",
     "history": "^4.6.0",
     "iflow-lodash": "^1.1.16",
     "iflow-react-router": "^1.1.16",

@@ -54,7 +54,7 @@ export default class CourseDescription extends React.Component {
       switch (run.status) {
       case STATUS_PASSED:
       case STATUS_NOT_PASSED:
-        dateMessage = this.renderCourseDateMessage('Ended', run.course_end_date);
+        dateMessage = this.renderCourseDateMessage('Ended', run.course_end_date || "");
         break;
       case STATUS_CAN_UPGRADE:
       case STATUS_MISSED_DEADLINE:

@@ -92,7 +92,7 @@ class OrderSummaryPage extends React.Component {
 
       if (method === 'POST') {
         const form = createForm(url, payload);
-        const body = document.querySelector("body");
+        const body: HTMLElement = (document.querySelector("body"): any);
         body.appendChild(form);
         form.submit();
       } else {

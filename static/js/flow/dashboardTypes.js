@@ -1,6 +1,7 @@
 // @flow
 import Decimal from 'decimal.js-light';
 import type { Program } from './programTypes';
+import type { APIErrorInfo } from '../flow/generalTypes';
 
 // likely to change in very near future
 export type Dashboard = {
@@ -12,7 +13,8 @@ export type DashboardState = {
   programs:       Array<Program>,
   isEdxDataFresh: boolean,
   fetchStatus?:   string,
-  noSpinner:      boolean
+  noSpinner:      boolean,
+  errorInfo?:     APIErrorInfo,
 };
 
 export type DashboardsState = {
@@ -31,7 +33,8 @@ export type CoursePrices = Array<CoursePrice>;
 export type CoursePricesState = {
   coursePrices: CoursePrices,
   fetchStatus?: string,
-  noSpinner?:   boolean
+  noSpinner?:   boolean,
+  errorInfo?:   APIErrorInfo,
 }
 
 export type CoursePriceReducerState = {

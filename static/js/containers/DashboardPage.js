@@ -88,7 +88,7 @@ import type {
 import type { FinancialAidState } from '../reducers/financial_aid';
 import type { CouponsState } from '../reducers/coupons';
 import type { ProfileGetResult } from '../flow/profileTypes';
-import type { Course, CourseRun } from '../flow/programTypes';
+import type { Course, CourseRun, Program } from '../flow/programTypes';
 import type { Coupon } from '../flow/couponTypes';
 import { skipFinancialAid } from '../actions/financial_aid';
 import { currencyForCountry } from '../lib/currency';
@@ -506,9 +506,9 @@ class DashboardPage extends React.Component {
     );
     let couponCourse = null;
     if (coupon.content_type === COUPON_CONTENT_TYPE_COURSE) {
-      const dashboardCouponProgram = dashboard.programs.find(
+      const dashboardCouponProgram: Program = (dashboard.programs.find(
         program => program.id === coupon.program_id
-      );
+      ): any);
       couponCourse = dashboardCouponProgram.courses.find(
         course => course.id === coupon.object_id
       );

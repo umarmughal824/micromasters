@@ -114,6 +114,7 @@ export default class CourseRow extends React.Component {
     const optionalProps = pickExistingProps(['coupon'], this.props);
 
     columns.push(
+      // $FlowFixMe: I have no idea why, but Flow complains about <Cell />
       <Cell col={lastColumnSize} className={lastColumnClass} key="3">
         <CourseAction
           courseRun={run}

@@ -34,6 +34,7 @@ export const createFormInput = R.curry((form, [name, value]) => {
 
 const createForm = () => {
   let form = document.createElement('form');
+  // $FlowFixMe: flow disagrees
   document.body.appendChild(form);
   if (R.isNil(SETTINGS.EXAMS_SSO_URL)) {
     throw "EXAMS_SSO_URL not configured";
