@@ -20,7 +20,7 @@ export const requestCheckout = (courseId: string) => ({
   payload: { courseId }
 });
 
-export function checkout(courseId: string): Dispatcher<CheckoutResponse> {
+export function checkout(courseId: string): Dispatcher<?CheckoutResponse> {
   return (dispatch: Dispatch) => {
     dispatch(requestCheckout(courseId));
     return api.checkout(courseId).
@@ -28,7 +28,7 @@ export function checkout(courseId: string): Dispatcher<CheckoutResponse> {
         const {url, payload} = response;
         dispatch(receiveCheckoutSuccess(url, payload));
         return Promise.resolve(response);
-      }).catch(error => {
+      }, error => {
         dispatch(receiveCheckoutFailure(error));
       });
   };

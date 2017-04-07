@@ -11,10 +11,7 @@ import { fetchDashboard } from './dashboard';
 import { fetchCoursePrices } from './course_prices';
 import { setToastMessage, setEnrollProgramDialogVisibility } from '../actions/ui';
 import type { Dispatcher } from '../flow/reduxTypes';
-import type {
-  AvailableProgram,
-  AvailablePrograms,
-} from '../flow/enrollmentTypes';
+import type { AvailableProgram } from '../flow/enrollmentTypes';
 import * as api from '../lib/api';
 
 export const SET_CURRENT_PROGRAM_ENROLLMENT = 'SET_CURRENT_PROGRAM_ENROLLMENT';
@@ -29,12 +26,13 @@ export const receiveGetProgramEnrollmentsSuccess = createAction(RECEIVE_GET_PROG
 export const RECEIVE_GET_PROGRAM_ENROLLMENTS_FAILURE = 'RECEIVE_GET_PROGRAM_ENROLLMENTS_FAILURE';
 export const receiveGetProgramEnrollmentsFailure = createAction(RECEIVE_GET_PROGRAM_ENROLLMENTS_FAILURE);
 
-export function fetchProgramEnrollments(): Dispatcher<AvailablePrograms> {
+export function fetchProgramEnrollments(): Dispatcher<void> {
   return (dispatch: Dispatch) => {
     dispatch(requestGetProgramEnrollments());
     return api.getPrograms().
-      then(enrollments => dispatch(receiveGetProgramEnrollmentsSuccess(enrollments))).
-      catch(error => {
+      then(enrollments => {
+        dispatch(receiveGetProgramEnrollmentsSuccess(enrollments));
+      }, error => {
         dispatch(receiveGetProgramEnrollmentsFailure(error));
         // the exception is assumed handled and will not be propagated
       });
@@ -50,7 +48,7 @@ export const receiveAddProgramEnrollmentSuccess = createAction(RECEIVE_ADD_PROGR
 export const RECEIVE_ADD_PROGRAM_ENROLLMENT_FAILURE = 'RECEIVE_ADD_PROGRAM_ENROLLMENT_FAILURE';
 export const receiveAddProgramEnrollmentFailure = createAction(RECEIVE_ADD_PROGRAM_ENROLLMENT_FAILURE);
 
-export const addProgramEnrollment = (programId: number): Dispatcher<AvailableProgram> => {
+export const addProgramEnrollment = (programId: number): Dispatcher<?AvailableProgram> => {
   return (dispatch: Dispatch) => {
     dispatch(requestAddProgramEnrollment(programId));
     return api.addProgramEnrollment(programId).
@@ -63,8 +61,7 @@ export const addProgramEnrollment = (programId: number): Dispatcher<AvailablePro
         dispatch(setEnrollProgramDialogVisibility(false));
         dispatch(fetchDashboard(SETTINGS.user.username));
         dispatch(fetchCoursePrices(SETTINGS.user.username));
-      }).
-      catch(error => {
+      }, error => {
         dispatch(receiveAddProgramEnrollmentFailure(error));
         dispatch(setToastMessage({
           message: "There was an error during enrollment",

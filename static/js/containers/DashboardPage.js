@@ -356,7 +356,7 @@ class DashboardPage extends React.Component {
       this.context.router.push('/dashboard/');
       // update coupon state in Redux
       dispatch(fetchCoupons());
-    }).catch(() => {
+    }, () => {
       dispatch(setToastMessage({
         title: "Coupon failed",
         message: "This coupon code is invalid or does not exist.",
@@ -407,7 +407,7 @@ class DashboardPage extends React.Component {
     ) {
       dispatch(skipFinancialAid(programId)).then(() => {
         this.setConfirmSkipDialogVisibility(false);
-      }).catch(() => {
+      }, () => {
         this.setConfirmSkipDialogVisibility(false);
         dispatch(setToastMessage({
           message: "Failed to skip financial aid.",

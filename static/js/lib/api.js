@@ -12,6 +12,7 @@ import type { Dashboard, CoursePrices } from '../flow/dashboardTypes';
 import type { AvailableProgram, AvailablePrograms } from '../flow/enrollmentTypes';
 import type { EmailSendResponse } from '../flow/emailTypes';
 import type { PearsonSSOParameters } from '../flow/pearsonTypes';
+import { S, parseJSON, filterE } from './sanctuary';
 
 export function getCookie(name: string): string|null {
   let cookieValue = null;
@@ -84,6 +85,19 @@ const _fetchWithCSRF = (path: string, init: Object = {}): Promise<*> => {
 export { _fetchWithCSRF as fetchWithCSRF };
 import { fetchWithCSRF } from './api';
 
+// resolveEither :: Either -> Promise
+// if the Either is a Left, returns Promise.reject(val)
+// if the Either is a Right, returns Promise.resolve(val)
+// where val is the unwrapped value in the Either
+const resolveEither = S.either(
+  val => Promise.reject(val),
+  val => Promise.resolve(val)
+);
+
+const handleEmptyJSON = json => (
+  json.length === 0 ? JSON.stringify({}) : json
+);
+
 /**
  * Calls to fetch but does a few other things:
  *  - turn cookies on for this domain
@@ -94,10 +108,6 @@ import { fetchWithCSRF } from './api';
  */
 const _fetchJSONWithCSRF = (input: string, init: Object = {}, loginOnError: boolean = false): Promise<*> => {
   return fetch(input, formatJSONRequest(init)).then(response => {
-    // Not using response.json() here since it doesn't handle empty responses
-    // Also note that text is a promise here, not a string
-    let text = response.text();
-
     // For 400 and 401 errors, force login
     // the 400 error comes from edX in case there are problems with the refresh
     // token because the data stored locally is wrong and the solution is only
@@ -108,34 +118,21 @@ const _fetchJSONWithCSRF = (input: string, init: Object = {}, loginOnError: bool
       window.location = `/logout?next=${encodeURIComponent(loginRedirect)}`;
     }
 
-    // For non 2xx status codes reject the promise adding the status code
-    if (response.status < 200 || response.status >= 300) {
-      return text.then(text => {
-        return Promise.reject([text, response.status]);
-      });
-    }
-
-    return text;
-  }).then(text => {
-    if (text.length !== 0) {
-      return JSON.parse(text);
-    } else {
-      return "";
-    }
-  }).catch(([text, statusCode]) => {
-    let respJson = {};
-    if (text.length !== 0) {
-      try {
-        respJson = JSON.parse(text);
-      }
-      catch(e) {
-        // If the JSON.parse raises, it means that the backend sent a JSON invalid
-        // string, and in this context the content received is not important
-        // and can be discarded
-      }
-    }
-    respJson.errorStatusCode = statusCode;
-    return Promise.reject(respJson);
+    // Here in the .then callback we use the `parseJSON` function, which returns an Either.
+    // Left records an error parsing the JSON, and Right success. `filterE` will turn a Right
+    // into a Left based on a boolean function (similar to filtering a Maybe), and we use `bimap`
+    // to merge an error code into a Left. The `resolveEither` function above will resolve a Right
+    // and reject a Left.
+    return response.text().then(R.compose(
+      resolveEither,
+      S.bimap(
+        R.merge({ errorStatusCode: response.status }),
+        R.identity,
+      ),
+      filterE(() => response.ok),
+      parseJSON,
+      handleEmptyJSON,
+    ));
   });
 };
 

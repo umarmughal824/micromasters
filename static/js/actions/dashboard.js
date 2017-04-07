@@ -3,7 +3,6 @@ import type { Dispatch } from 'redux';
 
 import * as api from '../lib/api';
 import type { Dispatcher } from '../flow/reduxTypes';
-import type { Dashboard } from '../flow/dashboardTypes';
 import { withUsername } from './util';
 
 export const UPDATE_COURSE_STATUS = 'UPDATE_COURSE_STATUS';
@@ -24,12 +23,13 @@ export const receiveDashboardFailure = withUsername(RECEIVE_DASHBOARD_FAILURE);
 export const CLEAR_DASHBOARD = 'CLEAR_DASHBOARD';
 export const clearDashboard = withUsername(CLEAR_DASHBOARD);
 
-export function fetchDashboard(username: string, noSpinner: boolean = false): Dispatcher<Dashboard> {
+export function fetchDashboard(username: string, noSpinner: boolean = false): Dispatcher<void> {
   return (dispatch: Dispatch) => {
     dispatch(requestDashboard(username, noSpinner));
     return api.getDashboard(username).
-      then(dashboard => dispatch(receiveDashboardSuccess(username, dashboard))).
-      catch(error => {
+      then(dashboard => {
+        dispatch(receiveDashboardSuccess(username, dashboard));
+      }, error => {
         dispatch(receiveDashboardFailure(username, error));
         // the exception is assumed handled and will not be propagated
       });

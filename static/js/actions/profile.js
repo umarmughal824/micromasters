@@ -47,12 +47,13 @@ const receivePatchUserProfileFailure = createAction(RECEIVE_PATCH_USER_PROFILE_F
   (username, errorInfo) => ({ username, errorInfo })
 );
 
-export const saveProfile = (username: string, profile: Profile): Dispatcher<Profile> => {
+export const saveProfile = (username: string, profile: Profile): Dispatcher<void> => {
   return (dispatch: Dispatch) => {
     dispatch(requestPatchUserProfile(username));
     return api.patchUserProfile(username, profile).
-      then(newProfile => dispatch(receivePatchUserProfileSuccess(username, newProfile))).
-      catch(error => {
+      then(newProfile => {
+        dispatch(receivePatchUserProfileSuccess(username, newProfile));
+      }, error => {
         dispatch(receivePatchUserProfileFailure(username, error));
         // the exception is assumed handled and will not be propagated
       });
@@ -69,12 +70,13 @@ export const updateValidationVisibility = createAction(UPDATE_VALIDATION_VISIBIL
   (username, keySet) => ({ username, keySet })
 );
 
-export function fetchUserProfile(username: string): Dispatcher<Profile> {
+export function fetchUserProfile(username: string): Dispatcher<void> {
   return (dispatch: Dispatch) => {
     dispatch(requestGetUserProfile(username));
     return api.getUserProfile(username).
-      then(json => dispatch(receiveGetUserProfileSuccess(username, json))).
-      catch(error => {
+      then(json => {
+        dispatch(receiveGetUserProfileSuccess(username, json));
+      }, error => {
         dispatch(receiveGetUserProfileFailure(username, error));
         // the exception is assumed handled and will not be propagated
       });

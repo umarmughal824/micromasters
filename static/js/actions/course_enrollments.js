@@ -28,8 +28,7 @@ export const addCourseEnrollment = (courseId: string): Dispatcher<*> => {
         dispatch(fetchCoursePrices(SETTINGS.user.username, true));
         dispatch(showEnrollPayLaterSuccessMessage(courseId));
         return Promise.resolve();
-      }).
-      catch(() => {
+      }, () => {
         dispatch(receiveAddCourseEnrollmentFailure());
         return Promise.reject();
       });

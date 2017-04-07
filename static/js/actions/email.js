@@ -30,14 +30,14 @@ export function sendEmail(
   emailType: string,
   sendFunction: () => Promise<EmailSendResponse>,
   sendFunctionParams: Array<*>
-): Dispatcher<EmailSendResponse> {
+): Dispatcher<?EmailSendResponse> {
   return (dispatch: Dispatch) => {
     dispatch(initiateSendEmail(emailType));
     return sendFunction(...sendFunctionParams).
       then(response => {
         dispatch(sendEmailSuccess(emailType));
         return Promise.resolve(response);
-      }).catch(error => {
+      }, error => {
         dispatch(sendEmailFailure({type: emailType, error: error}));
       });
   };

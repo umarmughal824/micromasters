@@ -9,14 +9,17 @@ import Navbar from '../components/Navbar';
 import {
   REQUEST_DASHBOARD,
   RECEIVE_DASHBOARD_SUCCESS,
+  CLEAR_DASHBOARD,
 } from '../actions/dashboard';
 import {
   REQUEST_COURSE_PRICES,
   RECEIVE_COURSE_PRICES_SUCCESS,
+  CLEAR_COURSE_PRICES,
 } from '../actions/course_prices';
 import {
   REQUEST_FETCH_COUPONS,
   RECEIVE_FETCH_COUPONS_SUCCESS,
+  CLEAR_COUPONS,
 } from '../actions/coupons';
 import {
   REQUEST_GET_USER_PROFILE,
@@ -143,15 +146,18 @@ describe('App', function() {
       helper.programsGetStub.returns(Promise.reject("error"));
       let types = [
         REQUEST_DASHBOARD,
-        RECEIVE_DASHBOARD_SUCCESS,
         REQUEST_COURSE_PRICES,
-        RECEIVE_COURSE_PRICES_SUCCESS,
         REQUEST_FETCH_COUPONS,
-        RECEIVE_FETCH_COUPONS_SUCCESS,
         REQUEST_GET_USER_PROFILE,
-        RECEIVE_GET_USER_PROFILE_SUCCESS,
         REQUEST_GET_PROGRAM_ENROLLMENTS,
         RECEIVE_GET_PROGRAM_ENROLLMENTS_FAILURE,
+        CLEAR_DASHBOARD,
+        CLEAR_COURSE_PRICES,
+        CLEAR_COUPONS,
+        RECEIVE_DASHBOARD_SUCCESS,
+        RECEIVE_COURSE_PRICES_SUCCESS,
+        RECEIVE_FETCH_COUPONS_SUCCESS,
+        RECEIVE_GET_USER_PROFILE_SUCCESS,
       ];
       return renderComponent('/dashboard', types).then(([wrapper]) => {
         let text = wrapper.find('.page-content').text();

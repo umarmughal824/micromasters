@@ -654,7 +654,7 @@ describe('api', function() {
           method: 'PATCH',
           body: JSON.stringify(expectedJSON)
         }).then(responseBody => {
-          assert.deepEqual(responseBody, '');
+          assert.deepEqual(responseBody, {});
         });
       });
 
