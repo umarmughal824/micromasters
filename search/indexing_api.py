@@ -283,19 +283,12 @@ def program_enrolled_user_mapping():
         'num_courses_passed': LONG_TYPE,
         'total_courses': LONG_TYPE,
         'is_learner': BOOL_TYPE,
-        'final_grades': {'type': 'nested', 'properties': {
-            'title':  NOT_ANALYZED_STRING_TYPE,
-            'grade': LONG_TYPE
-        }},
         'enrollments': {'type': 'nested', 'properties': {
-            'level': LONG_TYPE,
-            'ancestors': NOT_ANALYZED_STRING_TYPE,
-            'value': NOT_ANALYZED_STRING_TYPE,
-            'order': LONG_TYPE
+            'final_grade': LONG_TYPE,
+            'semester': NOT_ANALYZED_STRING_TYPE,
+            'course_title': NOT_ANALYZED_STRING_TYPE,
+            'status': NOT_ANALYZED_STRING_TYPE,
         }},
-        'semester_enrollments': {'type': 'nested', 'properties': {
-            'semester': NOT_ANALYZED_STRING_TYPE
-        }}
     })
     # Make strings not_analyzed by default
     mapping.meta('dynamic_templates', [{

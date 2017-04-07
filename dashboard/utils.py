@@ -273,7 +273,7 @@ class MMTrack:
             if course_id in final_grades or self.enrollments.is_enrolled_in(course_id):
                 enrolled_course_ids.append(course_id)
 
-        return list(CourseRun.objects.filter(edx_course_key__in=enrolled_course_ids))
+        return list(CourseRun.objects.filter(edx_course_key__in=enrolled_course_ids).select_related('course'))
 
     def calculate_final_grade_average(self):
         """

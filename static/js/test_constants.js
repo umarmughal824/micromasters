@@ -487,21 +487,73 @@ export const ELASTICSEARCH_RESPONSE = deepFreeze({
       },
       "doc_count": 1
     },
-    "program.semester_enrollments.semester5": {
+    // Adding aggregation response for an enrollment field, which is structured differently
+    // because of custom query building...
+    //
+    // This agg response is structured as if no filters were applied to enrollments
+    "program.enrollments.course_title3": {
+      "doc_count": 250,
       "inner": {
-        "program.semester_enrollments.semester": {
-          "doc_count_error_upper_bound": 0,
-          "buckets": [],
-          "sum_other_doc_count": 0
+        "doc_count": 250,
+        "program.enrollments.course_title_count": {
+          "value": 3
         },
-        "doc_count": 0,
-        "program.semester_enrollments.semester_count": {
-          "value": 0
+        "program.enrollments.course_title": {
+          "doc_count_error_upper_bound": 0,
+          "sum_other_doc_count": 0,
+          "buckets": [
+            {
+              "key": "Test Course 100",
+              "doc_count": 150,
+              "top_level_doc_count": {
+                "doc_count": 15
+              }
+            },
+            {
+              "key": "Test Course 200",
+              "doc_count": 100,
+              "top_level_doc_count": {
+                "doc_count": 10
+              }
+            }
+          ]
         }
-      },
-      "doc_count": 1
+      }
+    },
+    // This agg response is structured as if one or more filters were applied to enrollments
+    "program.enrollments.payment_status4": {
+      "doc_count": 20,
+      "inner": {
+        "doc_count": 50,
+        "program.enrollments.payment_status": {
+          "doc_count": 20,
+          "nested_terms": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Auditing",
+                "doc_count": 15,
+                "top_level_doc_count": {
+                  "doc_count": 15
+                }
+              },
+              {
+                "key": "Paid",
+                "doc_count": 5,
+                "top_level_doc_count": {
+                  "doc_count": 5
+                }
+              }
+            ]
+          }
+        },
+        "program.enrollments.payment_status_count": {
+          "value": 2
+        }
+      }
     }
-  },
+  }
 });
 
 export const USER_PROFILE_RESPONSE = deepFreeze({

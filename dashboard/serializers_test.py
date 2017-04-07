@@ -71,13 +71,6 @@ class UserProgramSearchSerializerTests(MockedESTestCase):
             factory_kwargs['data'] = data
         return [CachedEnrollmentFactory.create(course_run=course_run, **factory_kwargs) for course_run in course_runs]
 
-    @staticmethod
-    def sort_final_grades_values(final_grades):
-        """
-        Returns a sorted list of serialized final grades
-        """
-        return sorted(final_grades, key=lambda k: k['grade'])
-
     @classmethod
     def setUpTestData(cls):
         with mute_signals(post_save):
@@ -125,8 +118,6 @@ class UserProgramSearchSerializerTests(MockedESTestCase):
         non_fa_cached_edx_data = CachedEdxUserData(cls.user, program=program)
         non_fa_mmtrack = MMTrack(cls.user, program, non_fa_cached_edx_data)
         cls.serialized_enrollments = UserProgramSearchSerializer.serialize_enrollments(non_fa_mmtrack)
-        cls.semester_enrollments = UserProgramSearchSerializer.serialize_semester_enrollments(non_fa_mmtrack)
-        cls.final_grades = UserProgramSearchSerializer.serialize_final_grades(non_fa_mmtrack)
         cls.program_enrollment = ProgramEnrollment.objects.create(user=cls.user, program=program)
         # create a financial aid program
         cls.fa_program, _ = create_program()
@@ -158,8 +149,6 @@ class UserProgramSearchSerializerTests(MockedESTestCase):
         cls.fa_serialized_enrollments = (
             UserProgramSearchSerializer.serialize_enrollments(fa_mmtrack)
         )
-        cls.fa_semester_enrollments = UserProgramSearchSerializer.serialize_semester_enrollments(fa_mmtrack)
-        cls.fa_final_grades = UserProgramSearchSerializer.serialize_final_grades(fa_mmtrack)
 
     def test_full_program_user_serialization(self):
         """
@@ -170,16 +159,12 @@ class UserProgramSearchSerializerTests(MockedESTestCase):
         expected_values = {
             'id': program.id,
             'enrollments': self.serialized_enrollments,
-            'semester_enrollments': self.semester_enrollments,
-            'final_grades': self.sort_final_grades_values(self.final_grades),
             'grade_average': 75,
             'is_learner': True,
             'num_courses_passed': 1,
             'total_courses': 1
         }
         serialized_enrollments = UserProgramSearchSerializer.serialize(self.program_enrollment)
-        serialized_enrollments['final_grades'] = self.sort_final_grades_values(serialized_enrollments['final_grades'])
-
         assert serialized_enrollments == expected_values
 
     def test_full_program_user_serialization_financial_aid(self):
@@ -193,15 +178,12 @@ class UserProgramSearchSerializerTests(MockedESTestCase):
         expected_result = {
             'id': self.fa_program.id,
             'enrollments': self.fa_serialized_enrollments,
-            'semester_enrollments': self.fa_semester_enrollments,
-            'final_grades': self.sort_final_grades_values(self.fa_final_grades),
             'grade_average': 95,
             'is_learner': True,
             'num_courses_passed': 1,
             'total_courses': 2
         }
         serialized_enrollments = UserProgramSearchSerializer.serialize(self.fa_program_enrollment)
-        serialized_enrollments['final_grades'] = self.sort_final_grades_values(serialized_enrollments['final_grades'])
         assert serialized_enrollments == expected_result
 
     def test_full_program_user_serialization_staff(self):
@@ -218,15 +200,12 @@ class UserProgramSearchSerializerTests(MockedESTestCase):
         expected_result = {
             'id': program.id,
             'enrollments': self.serialized_enrollments,
-            'semester_enrollments': self.semester_enrollments,
-            'final_grades': self.sort_final_grades_values(self.final_grades),
             'grade_average': 75,
             'is_learner': False,
             'num_courses_passed': 1,
             'total_courses': 1
         }
         serialized_enrollments = UserProgramSearchSerializer.serialize(self.program_enrollment)
-        serialized_enrollments['final_grades'] = self.sort_final_grades_values(serialized_enrollments['final_grades'])
         assert serialized_enrollments == expected_result
 
     def test_full_program_user_serialization_with__no_passed_course(self):
@@ -240,21 +219,16 @@ class UserProgramSearchSerializerTests(MockedESTestCase):
             expected_result = {
                 'id': program.id,
                 'enrollments': self.serialized_enrollments,
-                'semester_enrollments': self.semester_enrollments,
-                'final_grades': self.sort_final_grades_values(self.final_grades),
                 'grade_average': 75,
                 'is_learner': True,
                 'num_courses_passed': 0,
                 'total_courses': 1
             }
             serialized_enrollments = UserProgramSearchSerializer.serialize(self.program_enrollment)
-            serialized_enrollments['final_grades'] = self.sort_final_grades_values(
-                serialized_enrollments['final_grades']
-            )
             assert serialized_enrollments == expected_result
 
 
-class UserProgramSearchSerializerEdxTests(MockedESTestCase):
+class UserProgramSerializerEnrollmentsTests(MockedESTestCase):
     """
     Test cases for the serialization of a user's course enrollments for search results
     """
@@ -278,10 +252,10 @@ class UserProgramSearchSerializerEdxTests(MockedESTestCase):
             serialized_enrollments (list): A list of serialized enrollments
             course (dashboard.models.Course): A Course Object
         """
-        return any([
-            enrollment['value'] == course.title and enrollment['level'] == 1
+        return any(
+            enrollment['course_title'] == course.title
             for enrollment in serialized_enrollments
-        ])
+        )
 
     @classmethod
     def is_course_serialized_with_status(cls, serialized_enrollments, course, is_verified=True):
@@ -293,11 +267,11 @@ class UserProgramSearchSerializerEdxTests(MockedESTestCase):
             course (dashboard.models.Course): A Course Object
             is_verified (bool): Flag to indicate if the enrollment should be verified
         """
-        expected_serialization = [
-            {'level': 1, 'value': course.title, 'ancestors': []},
-            {'level': 2, 'value': 'Paid' if is_verified else 'Auditing', 'ancestors': [course.title]}
-        ]
-        return all(line in serialized_enrollments for line in expected_serialization)
+        expected_payment_status = 'Paid' if is_verified else 'Auditing'
+        return any(
+            enrollment['course_title'] == course.title and enrollment['payment_status'] == expected_payment_status
+            for enrollment in serialized_enrollments
+        )
 
     @classmethod
     def all_courses_serialized(cls, serialized_enrollments, courses):
@@ -372,8 +346,7 @@ class UserProgramSearchSerializerEdxTests(MockedESTestCase):
             # Serialize the program enrollment and make sure each course is serialized properly
             serialized_program_user = UserProgramSearchSerializer.serialize(program_enrollment)
             serialized_enrollments = serialized_program_user['enrollments']
-            # Serialized enrollments have 2 lines per enrolled course
-            assert len(serialized_enrollments) == 4
+            assert len(serialized_enrollments) == 2
             # A course with a mix of verified and unverified course runs should be serialized as verified
             assert self.is_course_serialized_with_status(serialized_enrollments, existing_course, is_verified=True)
             # A course with a mix of all unverified course runs should be serialized as unverified
@@ -409,8 +382,21 @@ class UserProgramSearchSerializerEdxTests(MockedESTestCase):
         # Number of serialized enrollments should be unaffected
         assert len(serialized_program_user['enrollments']) == serialized_count_before_addition
 
+    def test_course_final_grade_serialization(self):
+        """
+        Tests that a user's final grades for a course run are properly serialized
+        """
+        # Final grades should all be None since none have been created yet
+        serialized_program_user = UserProgramSearchSerializer.serialize(self.fa_program_enrollment)
+        assert all(enrollment['final_grade'] is None for enrollment in serialized_program_user['enrollments'])
+        # Add some final grades and test that their values are properly serialized
+        for enrollment in self.fa_enrollments:
+            FinalGradeFactory.create(user=self.user, course_run=enrollment.course_run, grade=0.8, passed=True)
+        serialized_program_user = UserProgramSearchSerializer.serialize(self.fa_program_enrollment)
+        assert all(enrollment['final_grade'] == 80.0 for enrollment in serialized_program_user['enrollments'])
 
-class UserProgramSemesterSerializerEdxTests(MockedESTestCase):
+
+class UserProgramSerializerSemesterTests(MockedESTestCase):
     """
     Test cases for the serialization of a user's semester enrollments for search results
     """
@@ -421,19 +407,6 @@ class UserProgramSemesterSerializerEdxTests(MockedESTestCase):
             profile = ProfileFactory.create()
         cls.user = profile.user
         cls.program = ProgramFactory.create()
-        courses = CourseFactory.create_batch(5, program=cls.program)
-        runs = list()
-        # Add course runs that have a valid, edX-parse-able course key
-        runs.append(CourseRunFactory.create(course=courses[0], edx_course_key='course-v1:MITx+course1+1T2016'))
-        runs.append(CourseRunFactory.create(course=courses[1], edx_course_key='course-v1:MITx+course2+3T2016'))
-        # Add course runs that have an invalid key; they will be serialized based on their start_date
-        fall_2015_dt = datetime(2015, 10, 1)
-        summer_2015_dt = datetime(2015, 7, 1)
-        spring_2015_dt = datetime(2015, 1, 1)
-        runs.append(CourseRunFactory.create(course=courses[2], start_date=fall_2015_dt, edx_course_key='invalid1'))
-        runs.append(CourseRunFactory.create(course=courses[3], start_date=summer_2015_dt, edx_course_key='invalid2'))
-        runs.append(CourseRunFactory.create(course=courses[4], start_date=spring_2015_dt, edx_course_key='invalid3'))
-        cls.enrollments = [CachedEnrollmentFactory.create(user=cls.user, course_run=run) for run in runs]
         cls.program_enrollment = ProgramEnrollment.objects.create(user=cls.user, program=cls.program)
 
     @staticmethod
@@ -442,48 +415,36 @@ class UserProgramSemesterSerializerEdxTests(MockedESTestCase):
         Returns a sorted list of serialized semester values
         """
         return sorted([
-            serialized['semester'] for serialized in serialized_program_user['semester_enrollments']
-        ])
+            serialized['semester'] for serialized in serialized_program_user['enrollments']
+        ], key=lambda x: float('inf') if x is None else x)
 
-    def test_semester_enrollments_format(self):
+    def test_semester_serialization(self):
         """
-        Tests that a user's semester enrollments are serialized in a specific format
+        Tests that each course run has a string semester value as part of its serialization
         """
-        serialized_program_user = UserProgramSearchSerializer.serialize(self.program_enrollment)
-        sorted_semester_enrollment_values = self.get_sorted_semester_values(serialized_program_user)
-        expected_semester_enrollment_values = [
-            '2016 - Fall',
-            '2016 - Spring',
-            '2015 - Fall',
-            '2015 - Summer',
-            '2015 - Spring'
-        ]
-        assert sorted_semester_enrollment_values == sorted(expected_semester_enrollment_values)
-
-    def test_multiple_semester_enrollments(self):
-        """
-        Tests that enrollments in multiple course runs with the same season/year will not yield
-        additional serialized semesters
-        """
-        serialized_program_user = UserProgramSearchSerializer.serialize(self.program_enrollment)
-        # Add a second Spring 2016 course run
-        course_run = CourseRunFactory.create(
-            course__program=self.program,
-            edx_course_key='course-v1:MITx+newcourse+1T2016'
+        num_courses = 5
+        courses = CourseFactory.create_batch(num_courses, program=self.program)
+        course_runs = [CourseRunFactory.create(course=course) for course in courses]
+        for course_run in course_runs:
+            CachedEnrollmentVerifiedFactory.create(user=self.user, course_run=course_run)
+        with patch(
+            'dashboard.serializers.get_year_season_from_course_run', autospec=True, return_value=(2017, 'Spring')
+        ) as get_year_season_patch:
+            serialized_program_user = UserProgramSearchSerializer.serialize(self.program_enrollment)
+        assert len(serialized_program_user['enrollments']) == num_courses
+        assert all(
+            enrollment['semester'] == '2017 - Spring'
+            for enrollment in serialized_program_user['enrollments']
         )
-        CachedEnrollmentFactory.create(user=self.user, course_run=course_run)
-        new_serialized_program_user = UserProgramSearchSerializer.serialize(self.program_enrollment)
-        assert self.get_sorted_semester_values(serialized_program_user) == \
-            self.get_sorted_semester_values(new_serialized_program_user)
+        assert get_year_season_patch.call_count == num_courses
 
-    def test_enrollment_with_no_season_info(self):
+    def test_serialized_semester_value(self):
         """
-        Tests that an enrollment in a course run with insufficient year/season info won't be serialized
+        Tests that semester information in a course run is serialized to the right values
         """
-        serialized_program_user = UserProgramSearchSerializer.serialize(self.program_enrollment)
-        # Add a course run that can't have year/season information parsed from it
-        course_run = CourseRunFactory.create(course__program=self.program, start_date=None, edx_course_key='bad_key')
-        CachedEnrollmentFactory.create(user=self.user, course_run=course_run)
-        new_serialized_program_user = UserProgramSearchSerializer.serialize(self.program_enrollment)
-        assert self.get_sorted_semester_values(serialized_program_user) == \
-            self.get_sorted_semester_values(new_serialized_program_user)
+        valid_semester_course_run = CourseRunFactory.build(start_date=datetime(2017, 1, 1))
+        no_semester_course_run = CourseRunFactory.build(start_date=None, edx_course_key='bad_key')
+        valid_semester_serialized = UserProgramSearchSerializer.serialize_semester(valid_semester_course_run)
+        no_semester_serialized = UserProgramSearchSerializer.serialize_semester(no_semester_course_run)
+        assert valid_semester_serialized == '2017 - Spring'
+        assert no_semester_serialized is None

@@ -253,7 +253,7 @@ describe('LearnerSearchPage', function () {
     });
   });
 
-  describe('education', () => {
+  describe('education facet', () => {
     it('has the expected aggregations', () => {
       return renderSearch().then(() => {
         assert.equal(replySpy.callCount, 1);
@@ -318,6 +318,55 @@ describe('LearnerSearchPage', function () {
           {doc_count: 1, key: 'hs'},
           {doc_count: 1, key: 'm'}
         ]);
+      });
+    });
+  });
+
+  describe('course enrollment filters', () => {
+    it('have the expected aggregations', () => {
+      let innerKey = "program.enrollments.course_title";
+      let topLevelKey = `${innerKey}3`;
+
+      return renderSearch().then(() => {
+        const callArgs = replySpy.firstCall.args[0];
+        const body = JSON.parse(callArgs.data);
+        assert.isDefined(body.aggs[topLevelKey]);
+
+        let innerAggs = body.aggs[topLevelKey].aggs.inner;
+        assert.deepEqual(innerAggs.nested, {path: 'program.enrollments'});
+        assert.equal(innerAggs.aggs[innerKey].terms.field, innerKey);
+        assert.deepEqual(
+          innerAggs.aggs[innerKey].aggs,
+          {top_level_doc_count: {reverse_nested: {}}}
+        );
+      });
+    });
+
+    it('displays the correct options and counts in the UI', () => {
+      return renderSearch().then(([wrapper]) => {
+        const allEnrollmentItems = wrapper.find("NestedAggregatingMenuFilter ItemList");
+        const courseTitleItems = allEnrollmentItems.at(0).prop('items');
+        const paymentStatusItems = allEnrollmentItems.at(1).prop('items');
+
+        assert.deepEqual(
+          _.pick(courseTitleItems[0], ['key', 'doc_count']),
+          // doc_count for these custom nested aggregations should be set to the reverse_nested count
+          // instead of the normal doc_count
+          {doc_count: 15, key: 'Test Course 100'}
+        );
+        assert.deepEqual(
+          _.pick(courseTitleItems[1], ['key', 'doc_count']),
+          {doc_count: 10, key: 'Test Course 200'}
+        );
+
+        assert.deepEqual(
+          _.pick(paymentStatusItems[0], ['key', 'doc_count']),
+          {doc_count: 15, key: 'Auditing'}
+        );
+        assert.deepEqual(
+          _.pick(paymentStatusItems[1], ['key', 'doc_count']),
+          {doc_count: 5, key: 'Paid'}
+        );
       });
     });
   });
