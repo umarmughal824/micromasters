@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.53.11
+---------------
+
+- Mail: displayed search filters as recipients (#2992)
+- Search: Fix SelectedFilters titles (#3006)
+- Remove deprecated object handling code for Celery tasks (#2985)
+
 Version 0.53.10
 ---------------
 
