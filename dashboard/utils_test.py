@@ -466,9 +466,10 @@ class MMTrackTest(MockedESTestCase):
         )
         assert mmtrack.has_paid(key) is True
 
-    def test_has_paid_fa_with_final_grade(self):
+    def test_not_paid_fa_with_course_run_paid_on_edx(self):
         """
-        Test for has_paid for FA programs in case there is a final grade
+        Test for has_paid is False for FA programs even in case
+        there is a final grade with course_run_paid_on_edx=True
         """
         mmtrack = MMTrack(
             user=self.user,
@@ -478,10 +479,30 @@ class MMTrackTest(MockedESTestCase):
         key = self.crun_fa.edx_course_key
         assert mmtrack.has_paid(key) is False
         final_grade = FinalGradeFactory.create(user=self.user, course_run=self.crun_fa, course_run_paid_on_edx=True)
-        assert mmtrack.has_paid(key) is True
+        assert mmtrack.has_paid(key) is False
         final_grade.course_run_paid_on_edx = False
         final_grade.save()
         assert mmtrack.has_paid(key) is False
+
+    def test_has_paid_fa_with_course_run_paid_on_mm(self):
+        """
+        Test for has_paid is True for FA programs when the course has been paid on MicroMasters
+        """
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program_financial_aid,
+            edx_user_data=self.cached_edx_user_data
+        )
+        key = self.crun_fa.edx_course_key
+        assert mmtrack.has_paid(key) is False
+
+        self.pay_for_fa_course(key)
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program_financial_aid,
+            edx_user_data=self.cached_edx_user_data
+        )
+        assert mmtrack.has_paid(key) is True
 
     def test_has_paid_not_fa_no_final_grade(self):
         """
