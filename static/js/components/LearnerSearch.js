@@ -6,7 +6,6 @@ import {
   HierarchicalMenuFilter,
   Hits,
   SelectedFilters,
-  HierarchicalRefinementFilter,
   RefinementListFilter,
   HitsStats,
   Pagination,
@@ -26,7 +25,7 @@ import ProgramFilter from './ProgramFilter';
 import LearnerResult from './search/LearnerResult';
 import CountryRefinementOption from './search/CountryRefinementOption';
 import EducationFilter from './search/EducationFilter';
-import PatchedMenuFilter from './search/PatchedMenuFilter';
+import NestedAggregatingMenuFilter from './search/NestedAggregatingMenuFilter';
 import WorkHistoryFilter from './search/WorkHistoryFilter';
 import CustomPaginationDisplay from './search/CustomPaginationDisplay';
 import CustomResetFiltersDisplay from './search/CustomResetFiltersDisplay';
@@ -34,13 +33,12 @@ import CustomSortingColumnHeaders from './search/CustomSortingColumnHeaders';
 import FilterVisibilityToggle from './search/FilterVisibilityToggle';
 import HitsCount from './search/HitsCount';
 import CustomNoHits from './search/CustomNoHits';
+import ModifiedSelectedFilter from './search/ModifiedSelectedFilter';
 import { wrapWithProps } from '../util/util';
 import type { Option } from '../flow/generalTypes';
 import type { AvailableProgram } from '../flow/enrollmentTypes';
 import type { SearchSortItem } from '../flow/searchTypes';
 import type { Profile } from '../flow/profileTypes';
-import FinalGradeRangeFilter  from './search/FinalGradeRangeFilter';
-import ModifiedSelectedFilter from './search/ModifiedSelectedFilter';
 
 export const makeCountryNameTranslations: () => Object = () => {
   let translations = {};
@@ -202,30 +200,35 @@ export default class LearnerSearch extends SearchkitComponent {
           title="Course"
           filterName="courses"
         >
-          <HierarchicalRefinementFilter
-            field={"program.enrollments"}
+          <NestedAggregatingMenuFilter
+            field="program.enrollments.course_title"
+            fieldOptions={{ type: 'nested', options: {path: 'program.enrollments'} }}
             title=""
+            orderKey="_term"
             id="courses"
           />
         </FilterVisibilityToggle>
-        <div className="final-grade-wrapper">
-          <FinalGradeRangeFilter
-            field="program.final_grades.grade"
-            id="final-grade"
-            min={0}
-            max={100}
-            showHistogram={true}
-            title="Final Grade in Selected Course"
+        <FilterVisibilityToggle
+          {...this.props}
+          filterName="payment_status"
+          title="Payment Status"
+        >
+          <NestedAggregatingMenuFilter
+            field="program.enrollments.payment_status"
+            fieldOptions={{ type: 'nested', options: {path: 'program.enrollments'} }}
+            title=""
+            orderKey="_term"
+            id="payment_status"
           />
-        </div>
+        </FilterVisibilityToggle>
         <FilterVisibilityToggle
           {...this.props}
           filterName="semester"
           title="Semester"
         >
-          <PatchedMenuFilter
-            field="program.semester_enrollments.semester"
-            fieldOptions={{ type: 'nested', options: {path: 'program.semester_enrollments'} }}
+          <NestedAggregatingMenuFilter
+            field="program.enrollments.semester"
+            fieldOptions={{ type: 'nested', options: {path: 'program.enrollments'} }}
             title=""
             id="semester"
             bucketsTransform={sortSemesterBuckets}
@@ -287,17 +290,17 @@ export default class LearnerSearch extends SearchkitComponent {
         </FilterVisibilityToggle>
         <FilterVisibilityToggle
           {...this.props}
-          title="Degree"
           filterName="education-level"
+          title="Degree"
         >
-          <EducationFilter />
+          <EducationFilter id="education_level" />
         </FilterVisibilityToggle>
         <FilterVisibilityToggle
           {...this.props}
           filterName="company-name"
           title="Company"
         >
-          <WorkHistoryFilter />
+          <WorkHistoryFilter id="company_name" />
         </FilterVisibilityToggle>
 
       </Card>

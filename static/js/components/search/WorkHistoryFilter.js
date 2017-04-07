@@ -48,9 +48,9 @@ export default class WorkHistoryFilter extends SearchkitComponent {
   render() {
     return (
       <RefinementListFilter
+        id={this.props.id || "company_name"}
         field="profile.work_history.company_name"
         title=""
-        id="company_name"
         operator="OR"
         fieldOptions={{type: 'nested', options: { path: 'profile.work_history'}}}
         listComponent={ModifiedMultiSelect}

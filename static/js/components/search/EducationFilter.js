@@ -65,7 +65,7 @@ export default class EducationFilter extends SearchkitComponent {
 
   render() {
     return <PatchedMenuFilter
-      id="education_level"
+      id={this.props.id || "education_level"}
       bucketsTransform={this.bucketsTransform}
       title=""
       field="profile.education.degree_name"
