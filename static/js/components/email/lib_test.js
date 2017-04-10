@@ -11,9 +11,14 @@ import { USER_PROFILE_RESPONSE } from '../../test_constants';
 import { withEmailDialog } from './hoc';
 import {
   EMAIL_COMPOSITION_DIALOG,
-  LEARNER_EMAIL_TYPE
+  LEARNER_EMAIL_TYPE,
+  AUTOMATIC_EMAIL_ADMIN_TYPE,
 } from './constants';
-import { LEARNER_EMAIL_CONFIG } from './lib';
+import {
+  LEARNER_EMAIL_CONFIG,
+  AUTOMATIC_EMAIL_ADMIN_CONFIG,
+  convertEmailEdit,
+} from './lib';
 import {
   START_EMAIL_EDIT,
   UPDATE_EMAIL_VALIDATION,
@@ -21,6 +26,7 @@ import {
 } from '../../actions/email';
 import { SHOW_DIALOG } from '../../actions/ui';
 import { INITIAL_EMAIL_STATE } from '../../reducers/email';
+import { actions } from '../../lib/redux_rest';
 
 describe('Specific email config', () => {
   let helper,
@@ -153,6 +159,70 @@ describe('Specific email config', () => {
         assert.deepEqual(helper.sendLearnerMail.firstCall.args, ['subject', 'body', 123]);
       });
     });
+
+    it('shouldnt use the sendMail email action, if the email config specifies differently', () => {
+      let wrapped = wrapContainerComponent(
+        TestContainerPage,
+        AUTOMATIC_EMAIL_ADMIN_TYPE,
+        AUTOMATIC_EMAIL_ADMIN_CONFIG,
+      );
+      wrapper = renderTestComponentWithDialog(
+        wrapped,
+        AUTOMATIC_EMAIL_ADMIN_TYPE,
+        {emailState: filledOutEmailState, dialogVisible: true}
+      );
+      let dialogComponent = wrapper.find('EmailCompositionDialog');
+      return listenForActions([
+        UPDATE_EMAIL_VALIDATION,
+        actions.automaticEmails.patch.requestType,
+      ], () => {
+        dialogComponent.props().closeEmailComposerAndSend();
+      }).then(() => {
+        assert.isFalse(helper.sendLearnerMail.called);
+      });
+    });
+  });
+
+  describe('helper functions', () => {
+    describe('convertEmailEdit', () => {
+      it('should turn any keys like `email_foo` to be `foo`', () => {
+        [
+          [{ email_foo: 'a' }, { foo: 'a' }],
+          [{ email_subject: 'a' }, { subject: 'a' }],
+          [{ email_body: 'a' }, { body: 'a' }],
+        ].forEach(([obj, expectation]) => {
+          assert.deepEqual(convertEmailEdit(obj), expectation);
+        });
+      });
+
+      it('it should preserve any other keys', () => {
+        let obj = {
+          email_subject: 'potato',
+          other_field: 'should be here!',
+        };
+        let expectation = {
+          subject: 'potato',
+          other_field: 'should be here!',
+        };
+        assert.deepEqual(convertEmailEdit(obj), expectation);
+      });
+
+      it('should transform `subject` and `body` by prefixing `email_`', () => {
+        [
+          [{ subject: 'a'}, { email_subject: 'a' }],
+          [{ body: 'a'}, { email_body: 'a' }],
+        ].forEach(([obj, exp]) => assert.deepEqual(convertEmailEdit(obj), exp));
+      });
+
+      it('should be a symmetric relation (sorta)', () => {
+        [
+          { email_subject: 'a', no: 'way' },
+          { email_body: 'a', what: 'even' },
+          { other_field: 'yea...' },
+        ].forEach(obj => {
+          assert.deepEqual(convertEmailEdit(convertEmailEdit(obj)), obj);
+        });
+      });
+    });
   });
 });
-

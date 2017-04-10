@@ -69,7 +69,8 @@ export const email = (state: AllEmailsState = INITIAL_ALL_EMAILS_STATE, action: 
       params: action.payload.params || {},
       subheading: action.payload.subheading,
       supportsAutomaticEmails: action.payload.supportsAutomaticEmails,
-      filters: action.payload.filters
+      filters: action.payload.filters,
+      inputs: action.payload.inputs || NEW_EMAIL_EDIT,
     };
     newState.currentlyActive = emailType;
     return newState;

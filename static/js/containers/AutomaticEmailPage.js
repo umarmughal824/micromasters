@@ -14,6 +14,9 @@ import type { RestState } from '../flow/restTypes';
 import { hasAnyStaffRole } from '../lib/roles';
 import Spinner from 'react-mdl/lib/Spinner';
 import { toggleEmailPatchInFlight } from '../actions/automatic_emails';
+import { withEmailDialog } from '../components/email/hoc';
+import { AUTOMATIC_EMAIL_ADMIN_TYPE } from '../components/email/constants';
+import { AUTOMATIC_EMAIL_ADMIN_CONFIG } from '../components/email/lib';
 
 const fetchingEmail = R.propEq('getStatus', FETCH_PROCESSING);
 
@@ -35,8 +38,9 @@ type AutomaticEmailsType = RestState<Array<AutomaticEmail>> & {
 
 class AutomaticEmailPage extends React.Component {
   props: {
-    automaticEmails:  AutomaticEmailsType,
-    dispatch:         Dispatch,
+    automaticEmails:    AutomaticEmailsType,
+    dispatch:           Dispatch,
+    openEmailComposer:  (e: string) => (e: AutomaticEmail) => void,
   };
 
   static contextTypes = {
@@ -86,7 +90,10 @@ class AutomaticEmailPage extends React.Component {
   };
 
   render () {
-    const { automaticEmails: { emailsInFlight }} = this.props;
+    const {
+      automaticEmails: { emailsInFlight },
+      openEmailComposer,
+    } = this.props;
 
     return (
       <div className="single-column automatic-emails">
@@ -94,6 +101,7 @@ class AutomaticEmailPage extends React.Component {
           getEmails={this.getEmails}
           toggleEmailActive={this.toggleEmailActive}
           emailsInFlight={emailsInFlight}
+          openEmailComposer={openEmailComposer(AUTOMATIC_EMAIL_ADMIN_TYPE)}
         />
       </div>
     );
@@ -101,7 +109,12 @@ class AutomaticEmailPage extends React.Component {
 }
 
 const mapStateToProps = state => ({
-  automaticEmails: state.automaticEmails
+  automaticEmails: state.automaticEmails,
+  email: state.email,
+  ui: state.ui,
 });
 
-export default connect(mapStateToProps)(AutomaticEmailPage);
+export default R.compose(
+  connect(mapStateToProps),
+  withEmailDialog({ [AUTOMATIC_EMAIL_ADMIN_TYPE]: AUTOMATIC_EMAIL_ADMIN_CONFIG }),
+)(AutomaticEmailPage);

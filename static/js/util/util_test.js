@@ -35,6 +35,7 @@ import {
   isNilOrBlank,
   highlight,
   sortedCourseRuns,
+  mapObj,
 } from '../util/util';
 import {
   EDUCATION_LEVELS,
@@ -846,6 +847,16 @@ describe('utility functions', () => {
       const expected = [run1, run2, run3, run4];
       const actual = sortedCourseRuns(program);
       assert.deepEqual(actual, expected);
+    });
+  });
+
+  describe('mapObj', () => {
+    it('it allows you to edit keys and values', () => {
+      let obj = { foo: 'bar' };
+      let edited = mapObj(
+        ([k, v]) => [`baz_${k}`, `baz_${v}`], obj
+      );
+      assert.deepEqual(edited, { baz_foo: 'baz_bar' });
     });
   });
 });

@@ -7,10 +7,11 @@ import {
   sendSearchResultMail,
   sendLearnerMail
 } from '../../lib/api';
-import { makeProfileImageUrl } from '../../util/util';
+import { makeProfileImageUrl, mapObj } from '../../util/util';
 import type { Profile } from '../../flow/profileTypes';
 import type { Course } from '../../flow/programTypes';
 import type { EmailConfig, EmailState, Filter } from '../../flow/emailTypes';
+import { actions } from '../../lib/redux_rest.js';
 
 // NOTE: getEmailSendFunction is a function that returns a function. It is implemented this way
 // so that we can stub/mock the function that it returns (as we do in integration_test_helper.js)
@@ -120,4 +121,15 @@ export const LEARNER_EMAIL_CONFIG: EmailConfig = {
     emailState.inputs.body || '',
     emailState.params.studentId
   ])
+};
+
+export const convertEmailEdit = mapObj(([k, v]) => (
+  [k.match(/^subject$|^body$/) ? `email_${k}` : k.replace(/^email_/, ""), v]
+));
+
+export const AUTOMATIC_EMAIL_ADMIN_CONFIG: EmailConfig = {
+  title: 'Edit Message',
+  editEmail: actions.automaticEmails.patch,
+  emailOpenParams: R.compose(R.objOf('inputs'), convertEmailEdit),
+  emailSendParams: R.compose(convertEmailEdit, R.prop('inputs')),
 };

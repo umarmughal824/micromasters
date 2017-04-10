@@ -67,15 +67,21 @@ export const withEmailDialog = R.curry(
         let errors = emailValidation(activeEmail.inputs);
         dispatch(updateEmailValidation({type: currentlyActive, errors: errors}));
         if (R.isEmpty(errors)) {
-          dispatch(
-            sendEmail(
-              currentlyActive,
-              emailConfigs[currentlyActive].getEmailSendFunction(),
-              emailConfigs[currentlyActive].emailSendParams(activeEmail)
-            )
-          ).then(() => {
-            this.closeAndClearEmailComposer();
-          });
+          if (emailConfigs[currentlyActive].editEmail) {
+            dispatch(
+              emailConfigs[currentlyActive].editEmail(
+                emailConfigs[currentlyActive].emailSendParams(activeEmail)
+              )
+            ).then(this.closeAndClearEmailComposer);
+          } else {
+            dispatch(
+              sendEmail(
+                currentlyActive,
+                emailConfigs[currentlyActive].getEmailSendFunction(),
+                emailConfigs[currentlyActive].emailSendParams(activeEmail)
+              )
+            ).then(this.closeAndClearEmailComposer);
+          }
         }
       };
 

@@ -546,3 +546,11 @@ export function sortedCourseRuns(program: Program): Array<CourseRun> {
     R.map(R.sortBy(R.prop('position')), R.pluck('runs', sortedCourses))
   );
 }
+
+// lets you edit both keys and values
+// just pass a function that expects and returns [key, value]
+export const mapObj = R.curry((fn, obj) => R.compose(
+  R.fromPairs,
+  R.map(fn),
+  R.toPairs
+)(obj));

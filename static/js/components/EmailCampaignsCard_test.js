@@ -19,6 +19,7 @@ describe('EmailCampaignsCard', () => {
       getEmails: sandbox.stub(),
       emailsInFlight: new Set(),
       toggleEmailActive: sandbox.stub(),
+      openEmailComposer: sandbox.stub(),
     };
 
     emailCardProps.getEmails.returns(S.Right(GET_AUTOMATIC_EMAILS_RESPONSE));
@@ -62,6 +63,12 @@ describe('EmailCampaignsCard', () => {
     let card = renderCard();
     card.find(Switch).first().props().onChange();
     assert(emailCardProps.toggleEmailActive.calledWith(GET_AUTOMATIC_EMAILS_RESPONSE[0]));
+  });
+
+  it('should render an "edit" button, and call openEmailComposer with the AutomaticEmail on click', () => {
+    let card = renderCard();
+    card.find('a').first().simulate('click');
+    assert(emailCardProps.openEmailComposer.calledWith(GET_AUTOMATIC_EMAILS_RESPONSE[0]));
   });
 
   it('should show a spinner when a request is in-flight', () => {
