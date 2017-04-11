@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.53.12
+---------------
+
+- Implemented AutomaticEmail admin page
+- Bumped the flow-bin version @latest
+- Add specific environment variables to tox.ini instead of using * (#3024)
+- Modified the mmtrack has paid to better handle FA programs
+- Fixed unexpected course enrollment counts/results in learners search
+
 Version 0.53.11
 ---------------
 
