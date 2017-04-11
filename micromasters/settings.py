@@ -22,7 +22,7 @@ from celery.schedules import crontab
 from django.core.exceptions import ImproperlyConfigured
 
 
-VERSION = "0.53.12"
+VERSION = "0.54.0"
 
 CONFIG_PATHS = [
     os.environ.get('MICROMASTERS_CONFIG', ''),
