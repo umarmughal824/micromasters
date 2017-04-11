@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.54.0
+--------------
+
+- Fixed faulty course ordering in search facet
+- Fixed selected search filter label regression (#3042)
+- Fixed handling of currently active email dialog on page without config (#3044)
+- Exams: Removed FEATURE_SUPPRESS_PAYMENT_FOR_EXAM feature flag (#3020)
+- Save and restore database between tests (#3031)
+- Fixed promise error handling
+- Upgrade postgres-client (#3029)
+
 Version 0.53.12
 ---------------
 
