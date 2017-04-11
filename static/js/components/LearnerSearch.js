@@ -204,7 +204,6 @@ export default class LearnerSearch extends SearchkitComponent {
             field="program.enrollments.course_title"
             fieldOptions={{ type: 'nested', options: {path: 'program.enrollments'} }}
             title=""
-            orderKey="_term"
             id="courses"
           />
         </FilterVisibilityToggle>
