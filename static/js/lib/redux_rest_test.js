@@ -21,6 +21,7 @@ import {
   actions,
 } from './redux_rest';
 import { automaticEmailsEndpoint } from '../reducers/automatic_emails';
+import { courseEnrollmentsEndpoint } from '../reducers/course_enrollments';
 import { GET, POST } from '../constants';
 import rootReducer from '../reducers';
 
@@ -337,7 +338,8 @@ describe('redux REST', () => {
       });
 
       let endpoints = [
-        automaticEmailsEndpoint
+        automaticEmailsEndpoint,
+        courseEnrollmentsEndpoint,
       ];
 
       it('should include all reducers that we expect it to', () => {

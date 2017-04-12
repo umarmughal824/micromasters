@@ -33,7 +33,6 @@ import {
   currentProgramEnrollment,
   programs,
 } from './programs';
-import { courseEnrollments } from './course_enrollments';
 import type { Action } from '../flow/reduxTypes';
 import type {
   ProfileGetResult,
@@ -209,7 +208,6 @@ export default combineReducers({
   checkout,
   prices,
   programs,
-  courseEnrollments,
   currentProgramEnrollment,
   signupDialog,
   imageUpload,

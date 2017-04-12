@@ -14,6 +14,7 @@ import {
 } from '../actions';
 import { GET, PATCH, POST } from '../constants';
 import { automaticEmailsEndpoint } from '../reducers/automatic_emails';
+import { courseEnrollmentsEndpoint } from '../reducers/course_enrollments';
 
 const actionize = R.compose(R.toUpper, R.join("_"), R.map(_.snakeCase));
 
@@ -178,6 +179,7 @@ export const deriveReducers = (endpoint: Endpoint, actions: Function) => {
 
 export const endpoints: Array<Endpoint> = [
   automaticEmailsEndpoint,
+  courseEnrollmentsEndpoint,
 ];
 
 const reducers: Object = {};

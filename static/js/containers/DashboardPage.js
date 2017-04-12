@@ -39,7 +39,6 @@ import {
   STATUS_CURRENTLY_ENROLLED,
   STATUS_PAID_BUT_NOT_ENROLLED,
 } from '../constants';
-import { addCourseEnrollment } from '../actions/course_enrollments';
 import {
   setToastMessage,
   setConfirmSkipDialogVisibility,
@@ -52,6 +51,7 @@ import {
   showDialog,
   hideDialog,
 } from '../actions/ui';
+import { showEnrollPayLaterSuccessMessage } from '../actions/course_enrollments';
 import { findCourseRun } from '../util/util';
 import CourseListCard from '../components/dashboard/CourseListCard';
 import DashboardUserCard from '../components/dashboard/DashboardUserCard';
@@ -104,6 +104,7 @@ import {
 import { generateSSOForm } from '../lib/pearson';
 import type { PearsonAPIState } from '../reducers/pearson';
 import { getOwnDashboard, getOwnCoursePrices } from '../reducers/util';
+import { actions } from '../lib/redux_rest';
 
 const isProcessing = R.equals(FETCH_PROCESSING);
 const PEARSON_TOS_DIALOG = "pearsonTOSDialogVisible";
@@ -429,7 +430,11 @@ class DashboardPage extends React.Component {
 
   addCourseEnrollment = (courseId: string): Promise<*> => {
     const { dispatch } = this.props;
-    return dispatch(addCourseEnrollment(courseId)).catch(() => {
+    return dispatch(actions.courseEnrollments.post(courseId)).then(() => {
+      dispatch(fetchDashboard(SETTINGS.user.username, true));
+      dispatch(fetchCoursePrices(SETTINGS.user.username, true));
+      dispatch(showEnrollPayLaterSuccessMessage(courseId));
+    }, () => {
       dispatch(setToastMessage({
         message: "Failed to add course enrollment.",
         icon: TOAST_FAILURE,

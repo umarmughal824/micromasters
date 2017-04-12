@@ -2,33 +2,12 @@
 import { assert } from 'chai';
 import configureTestStore from 'redux-asserts';
 
-import {
-  requestAddCourseEnrollment,
-  receiveAddCourseEnrollmentSuccess,
-  receiveAddCourseEnrollmentFailure,
-  showEnrollPayLaterSuccessMessage,
-
-  REQUEST_ADD_COURSE_ENROLLMENT,
-  RECEIVE_ADD_COURSE_ENROLLMENT_SUCCESS,
-  RECEIVE_ADD_COURSE_ENROLLMENT_FAILURE,
-} from './course_enrollments';
-import { assertCreatedActionHelper } from './test_util';
+import { showEnrollPayLaterSuccessMessage } from './course_enrollments';
 import {
   showEnrollPayLaterSuccess,
-
-  SHOW_ENROLL_PAY_LATER_SUCCESS
+  SHOW_ENROLL_PAY_LATER_SUCCESS,
 } from './ui';
 import rootReducer from '../reducers';
-
-describe('course enrollment actions', () => {
-  it('should create all action creators', () => {
-    [
-      [requestAddCourseEnrollment, REQUEST_ADD_COURSE_ENROLLMENT],
-      [receiveAddCourseEnrollmentSuccess, RECEIVE_ADD_COURSE_ENROLLMENT_SUCCESS],
-      [receiveAddCourseEnrollmentFailure, RECEIVE_ADD_COURSE_ENROLLMENT_FAILURE],
-    ].forEach(assertCreatedActionHelper);
-  });
-});
 
 describe('show and hide enroll pay later success alert', () => {
   let store, dispatchThen;
