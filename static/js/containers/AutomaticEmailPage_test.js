@@ -4,7 +4,6 @@ import { assert } from 'chai';
 
 import IntegrationTestHelper from '../util/integration_test_helper';
 import { actions } from '../lib/redux_rest.js';
-import * as api from '../lib/api';
 import { GET_AUTOMATIC_EMAILS_RESPONSE } from '../test_constants';
 import { DASHBOARD_SUCCESS_ACTIONS } from './test_util';
 import {
@@ -18,13 +17,11 @@ import {
 import Spinner from 'react-mdl/lib/Spinner';
 
 describe('AutomaticEmailPage', () => {
-  let renderComponent, helper, fetchStub;
+  let renderComponent, helper;
 
   beforeEach(() => {
     helper = new IntegrationTestHelper();
     renderComponent = helper.renderComponent.bind(helper);
-    fetchStub = helper.sandbox.stub(api, 'fetchJSONWithCSRF');
-    fetchStub.returns(Promise.resolve(GET_AUTOMATIC_EMAILS_RESPONSE));
 
     SETTINGS.roles = [{
       "role": "staff",
@@ -84,7 +81,7 @@ describe('AutomaticEmailPage', () => {
   });
 
   it('shows a placeholder if there is no data', () => {
-    fetchStub.returns(Promise.resolve([]));
+    helper.getEmailsStub.returns(Promise.resolve([]));
 
     return renderComponent('/automaticemails', successActions).then(([wrapper]) => {
       let cardText = wrapper.find(".empty-message").text();

@@ -22,8 +22,8 @@ import type { Endpoint } from '../flow/restTypes';
 
 export const couponEndpoint: Endpoint = {
   name: 'coupons',
-  url: "",
-  makeOptions: () => ({}),
+  namespaceOnUsername: false,
+  checkNoSpinner: false,
   getPrefix: 'FETCH',
   postPrefix: 'ATTACH',
   getFunc: getCoupons,

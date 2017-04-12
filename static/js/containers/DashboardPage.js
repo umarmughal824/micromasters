@@ -17,10 +17,6 @@ import {
   FETCH_PROCESSING,
 } from '../actions';
 import {
-  fetchCoursePrices,
-  clearCoursePrices,
-} from '../actions/course_prices';
-import {
   updateCourseStatus,
   fetchDashboard,
   clearDashboard,
@@ -82,7 +78,7 @@ import { singleBtnDialogActions } from '../components/inputs/util';
 import type { UIState } from '../reducers/ui';
 import type { OrderReceiptState } from '../reducers/order_receipt';
 import type { DocumentsState } from '../reducers/documents';
-import type { CoursePricesState, DashboardState } from '../flow/dashboardTypes';
+import type { CoursePrices, DashboardState } from '../flow/dashboardTypes';
 import type {
   AvailableProgram, AvailableProgramsState
 } from '../flow/enrollmentTypes';
@@ -104,6 +100,7 @@ import {
 } from '../actions/pearson';
 import { generateSSOForm } from '../lib/pearson';
 import type { PearsonAPIState } from '../reducers/pearson';
+import type { RestState } from '../flow/restTypes';
 import { getOwnDashboard, getOwnCoursePrices } from '../reducers/util';
 import { actions } from '../lib/redux_rest';
 
@@ -121,7 +118,7 @@ class DashboardPage extends React.Component {
     currentProgramEnrollment: AvailableProgram,
     programs:                 AvailableProgramsState,
     dashboard:                DashboardState,
-    prices:                   CoursePricesState,
+    prices:                   RestState<CoursePrices>,
     dispatch:                 Dispatch,
     ui:                       UIState,
     email:                    AllEmailsState,
@@ -149,7 +146,7 @@ class DashboardPage extends React.Component {
   componentWillUnmount() {
     const { dispatch } = this.props;
     dispatch(clearDashboard(SETTINGS.user.username));
-    dispatch(clearCoursePrices());
+    dispatch(actions.prices.clear(SETTINGS.user.username));
     dispatch(clearCoupons());
   }
 
@@ -271,8 +268,8 @@ class DashboardPage extends React.Component {
 
   fetchCoursePrices() {
     const { prices, dispatch } = this.props;
-    if (prices.fetchStatus === undefined) {
-      dispatch(fetchCoursePrices(SETTINGS.user.username));
+    if (prices.getStatus === undefined) {
+      dispatch(actions.prices.get(SETTINGS.user.username));
     }
   }
 
@@ -433,7 +430,7 @@ class DashboardPage extends React.Component {
     const { dispatch } = this.props;
     return dispatch(actions.courseEnrollments.post(courseId)).then(() => {
       dispatch(fetchDashboard(SETTINGS.user.username, true));
-      dispatch(fetchCoursePrices(SETTINGS.user.username, true));
+      dispatch(actions.prices.get(SETTINGS.user.username, true));
       dispatch(showEnrollPayLaterSuccessMessage(courseId));
     }, () => {
       dispatch(setToastMessage({
@@ -578,7 +575,7 @@ class DashboardPage extends React.Component {
     ) {
       const calculatedPrices = calculatePrices(
         dashboard.programs,
-        prices.coursePrices,
+        prices.data || [],
         coupons.coupons
       );
       price = calculatedPrices.get(courseRun.id);
@@ -626,8 +623,8 @@ class DashboardPage extends React.Component {
     if (dashboard.errorInfo) {
       return <ErrorMessage errorInfo={dashboard.errorInfo}/>;
     }
-    if (prices.errorInfo) {
-      return <ErrorMessage errorInfo={prices.errorInfo}/>;
+    if (prices.error) {
+      return <ErrorMessage errorInfo={prices.error}/>;
     }
     return null;
   };
@@ -647,9 +644,13 @@ class DashboardPage extends React.Component {
     if (!program) {
       throw "no program; should never get here";
     }
-    const coursePrice = prices.coursePrices.find(
-      coursePrice => coursePrice.program_id === program.id
-    );
+    let coursePrice;
+
+    if (prices.data) {
+      coursePrice = prices.data.find(
+        coursePrice => coursePrice.program_id === program.id
+      );
+    }
 
     let financialAidCard;
     if (program.financial_aid_availability && !this.shouldSkipFinancialAid()) {
@@ -668,7 +669,7 @@ class DashboardPage extends React.Component {
       />;
     }
 
-    const calculatedPrices = calculatePrices(dashboard.programs, prices.coursePrices, coupons.coupons);
+    const calculatedPrices = calculatePrices(dashboard.programs, prices.data || [], coupons.coupons);
 
     const courseListCardOptionalProps = {};
     const coupon = coupons.coupons.find(coupon => coupon.program_id === program.id);
@@ -727,10 +728,10 @@ class DashboardPage extends React.Component {
       prices
     } = this.props;
     const loaded = R.or(
-      R.none(isProcessing, [dashboard.fetchStatus, prices.fetchStatus]),
-      R.or(dashboard.noSpinner, prices.noSpinner)
+      R.none(isProcessing, [dashboard.fetchStatus, prices.getStatus]),
+      R.or(dashboard.noSpinner, prices.processing)
     );
-    const fetchStarted = !_.isNil(prices.fetchStatus) && !_.isNil(dashboard.fetchStatus);
+    const fetchStarted = !_.isNil(prices.getStatus) && !_.isNil(dashboard.fetchStatus);
 
     const errorMessage = this.renderErrorMessage();
     let pageContent;

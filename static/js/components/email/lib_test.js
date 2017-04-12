@@ -161,6 +161,11 @@ describe('Specific email config', () => {
     });
 
     it('shouldnt use the sendMail email action, if the email config specifies differently', () => {
+      let automaticEmailState = _.clone(filledOutEmailState);
+      automaticEmailState.inputs.id = 1;
+      helper.fetchJSONWithCSRFStub.withArgs('/api/v0/mail/automatic_email/1/').
+        returns(Promise.resolve());
+
       let wrapped = wrapContainerComponent(
         TestContainerPage,
         AUTOMATIC_EMAIL_ADMIN_TYPE,
@@ -169,7 +174,7 @@ describe('Specific email config', () => {
       wrapper = renderTestComponentWithDialog(
         wrapped,
         AUTOMATIC_EMAIL_ADMIN_TYPE,
-        {emailState: filledOutEmailState, dialogVisible: true}
+        {emailState: automaticEmailState, dialogVisible: true}
       );
       let dialogComponent = wrapper.find('EmailCompositionDialog');
       return listenForActions([

@@ -4,9 +4,9 @@ import { createAction } from 'redux-actions';
 import type { Dispatch } from 'redux';
 
 import { fetchDashboard } from './dashboard';
-import { fetchCoursePrices } from './course_prices';
 import * as api from '../lib/api';
 import type { Dispatcher } from '../flow/reduxTypes';
+import { actions } from '../lib/redux_rest';
 
 export const SET_DOCUMENT_SENT_DATE = 'SET_DOCUMENT_SENT_DATE';
 export const setDocumentSentDate = createAction(SET_DOCUMENT_SENT_DATE);
@@ -27,7 +27,7 @@ export const updateDocumentSentDate = (financialAidId: number, dateSent: string)
       () => {
         dispatch(receiveUpdateDocumentSentDateSuccess());
         dispatch(fetchDashboard(SETTINGS.user.username));
-        dispatch(fetchCoursePrices(SETTINGS.user.username));
+        dispatch(actions.prices.get(SETTINGS.user.username));
         return Promise.resolve();
       },
       () => {

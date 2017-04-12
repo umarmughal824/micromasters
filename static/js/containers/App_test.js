@@ -12,11 +12,6 @@ import {
   CLEAR_DASHBOARD,
 } from '../actions/dashboard';
 import {
-  REQUEST_COURSE_PRICES,
-  RECEIVE_COURSE_PRICES_SUCCESS,
-  CLEAR_COURSE_PRICES,
-} from '../actions/course_prices';
-import {
   REQUEST_FETCH_COUPONS,
   RECEIVE_FETCH_COUPONS_SUCCESS,
   CLEAR_COUPONS,
@@ -52,6 +47,7 @@ import {
 import IntegrationTestHelper from '../util/integration_test_helper';
 import { GoogleMapsStub } from '../util/test_utils';
 import { SUCCESS_ACTIONS } from './test_util';
+import { actions } from '../lib/redux_rest';
 
 const REDIRECT_ACTIONS = SUCCESS_ACTIONS.concat([
   START_PROFILE_EDIT,
@@ -145,16 +141,16 @@ describe('App', function() {
       helper.programsGetStub.returns(Promise.reject("error"));
       let types = [
         REQUEST_DASHBOARD,
-        REQUEST_COURSE_PRICES,
+        actions.prices.get.requestType,
         REQUEST_FETCH_COUPONS,
         REQUEST_GET_USER_PROFILE,
         REQUEST_GET_PROGRAM_ENROLLMENTS,
         RECEIVE_GET_PROGRAM_ENROLLMENTS_FAILURE,
         CLEAR_DASHBOARD,
-        CLEAR_COURSE_PRICES,
+        actions.prices.clearType,
         CLEAR_COUPONS,
         RECEIVE_DASHBOARD_SUCCESS,
-        RECEIVE_COURSE_PRICES_SUCCESS,
+        actions.prices.get.successType,
         RECEIVE_FETCH_COUPONS_SUCCESS,
         RECEIVE_GET_USER_PROFILE_SUCCESS,
       ];

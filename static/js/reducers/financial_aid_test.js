@@ -28,12 +28,12 @@ import {
   FETCH_PROCESSING,
   FETCH_SUCCESS,
 } from '../actions';
-import * as coursePriceActions from '../actions/course_prices';
 import * as dashboardActions from '../actions/dashboard';
 import { setCurrentProgramEnrollment } from '../actions/programs';
 import { FINANCIAL_AID_EDIT } from './financial_aid';
 import rootReducer from '../reducers';
 import * as api from '../lib/api';
+import { actions } from '../lib/redux_rest';
 
 describe('financial aid reducers', () => {
   let sandbox, store, dispatchThen;
@@ -49,7 +49,7 @@ describe('financial aid reducers', () => {
     skipFinancialAidStub = sandbox.stub(api, 'skipFinancialAid');
     fetchDashboardStub = sandbox.stub(dashboardActions, 'fetchDashboard');
     fetchDashboardStub.returns({type: "fake"});
-    fetchCoursePricesStub = sandbox.stub(coursePriceActions, 'fetchCoursePrices');
+    fetchCoursePricesStub = sandbox.stub(actions.prices, 'get');
     fetchCoursePricesStub.returns({type: "fake"});
   });
 

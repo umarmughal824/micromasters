@@ -46,7 +46,6 @@ import { orderReceipt } from './order_receipt';
 import { coupons } from './coupons';
 import { pearson } from './pearson';
 import { dashboard } from './dashboard';
-import { prices } from './course_prices';
 import { ALL_ERRORS_VISIBLE } from '../constants';
 import { reducers } from '../lib/redux_rest';
 
@@ -206,7 +205,6 @@ export default combineReducers({
   ui,
   email,
   checkout,
-  prices,
   programs,
   currentProgramEnrollment,
   signupDialog,

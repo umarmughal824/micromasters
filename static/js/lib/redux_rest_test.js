@@ -17,13 +17,14 @@ import {
   deriveActions,
   deriveReducer,
   deriveReducers,
-  INITIAL_STATE,
   actions,
 } from './redux_rest';
+import { INITIAL_STATE } from './redux_rest_constants';
 import { automaticEmailsEndpoint } from '../reducers/automatic_emails';
 import { courseEnrollmentsEndpoint } from '../reducers/course_enrollments';
 import { GET, POST } from '../constants';
 import rootReducer from '../reducers';
+import * as actionUtils from '../actions/util';
 
 describe('redux REST', () => {
   let sandbox, store, dispatchThen;
@@ -154,6 +155,27 @@ describe('redux REST', () => {
           ]).then(() => {
             assert.deepEqual(endpoint.getFunc.args[0][0], args);
           });
+        });
+      });
+
+      it('should allow for username-based namespacing, when the flag is set', () => {
+        endpoint.namespaceOnUsername = true;
+        endpoint.getFunc.returns(Promise.resolve(['data']));
+
+        let withUsernameReturnStub = sandbox.stub();
+        withUsernameReturnStub.returns({ type: 'TESTING_WITH_USERNAME'});
+        let withUsernameStub = sandbox.stub(actionUtils, 'withUsername');
+        withUsernameStub.returns(withUsernameReturnStub);
+
+        let derived = deriveAction(endpoint, GET);
+        return dispatchThen(derived.action('username'), [
+          'TESTING_WITH_USERNAME',
+          'TESTING_WITH_USERNAME',
+        ]).then(() => {
+          assert.deepEqual(withUsernameReturnStub.args, [
+            [ 'username' ],
+            [ 'username', [ 'data' ]]
+          ]);
         });
       });
     });
@@ -323,6 +345,22 @@ describe('redux REST', () => {
         let initialState = { initial: 'State' };
         let result = reducer(initialState, { type: '❤❤❤❤❤', payload: '<3<3<3<3<3'});
         assert.equal(result, initialState);
+      });
+
+      it('should namespace on username, if flag is set', () => {
+        endpoint.namespaceOnUsername = true;
+        let actions = deriveActions(endpoint);
+        let reducer = deriveReducers(endpoint, actions);
+
+        let result = reducer({}, { meta: 'username', payload: 'foobar', type: actions.get.successType });
+        assert.deepEqual(result, {
+          username: {
+            getStatus: 'FETCH_SUCCESS',
+            data: 'foobar',
+            loaded: true,
+            processing: false
+          }
+        });
       });
     });
 

@@ -8,11 +8,11 @@ import {
   TOAST_FAILURE,
 } from '../constants';
 import { fetchDashboard } from './dashboard';
-import { fetchCoursePrices } from './course_prices';
 import { setToastMessage, setEnrollProgramDialogVisibility } from '../actions/ui';
 import type { Dispatcher } from '../flow/reduxTypes';
 import type { AvailableProgram } from '../flow/enrollmentTypes';
 import * as api from '../lib/api';
+import { actions } from '../lib/redux_rest';
 
 export const SET_CURRENT_PROGRAM_ENROLLMENT = 'SET_CURRENT_PROGRAM_ENROLLMENT';
 export const setCurrentProgramEnrollment = createAction(SET_CURRENT_PROGRAM_ENROLLMENT);
@@ -60,7 +60,7 @@ export const addProgramEnrollment = (programId: number): Dispatcher<?AvailablePr
         }));
         dispatch(setEnrollProgramDialogVisibility(false));
         dispatch(fetchDashboard(SETTINGS.user.username));
-        dispatch(fetchCoursePrices(SETTINGS.user.username));
+        dispatch(actions.prices.get(SETTINGS.user.username));
       }, error => {
         dispatch(receiveAddProgramEnrollmentFailure(error));
         dispatch(setToastMessage({

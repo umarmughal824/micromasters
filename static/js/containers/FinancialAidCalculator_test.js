@@ -40,11 +40,8 @@ import {
   REQUEST_DASHBOARD,
   RECEIVE_DASHBOARD_SUCCESS,
 } from '../actions/dashboard';
-import {
-  REQUEST_COURSE_PRICES,
-  RECEIVE_COURSE_PRICES_SUCCESS,
-} from '../actions/course_prices';
 import { DASHBOARD_SUCCESS_ACTIONS } from './test_util';
+import { actions } from '../lib/redux_rest';
 
 describe('FinancialAidCalculator', () => {
   let listenForActions, renderComponent, helper;
@@ -93,9 +90,9 @@ describe('FinancialAidCalculator', () => {
         SET_CONFIRM_SKIP_DIALOG_VISIBILITY,
         REQUEST_SKIP_FINANCIAL_AID,
         RECEIVE_SKIP_FINANCIAL_AID_SUCCESS,
-        REQUEST_COURSE_PRICES,
+        actions.prices.get.requestType,
         REQUEST_DASHBOARD,
-        RECEIVE_COURSE_PRICES_SUCCESS,
+        actions.prices.get.successType,
         RECEIVE_DASHBOARD_SUCCESS,
         SET_CONFIRM_SKIP_DIALOG_VISIBILITY,
       ], () => {
@@ -273,9 +270,9 @@ describe('FinancialAidCalculator', () => {
         SET_CONFIRM_INCOME_DIALOG_VISIBILITY,
         REQUEST_ADD_FINANCIAL_AID,
         RECEIVE_ADD_FINANCIAL_AID_SUCCESS,
-        REQUEST_COURSE_PRICES,
+        actions.prices.get.requestType,
         REQUEST_DASHBOARD,
-        RECEIVE_COURSE_PRICES_SUCCESS,
+        actions.prices.get.successType,
         RECEIVE_DASHBOARD_SUCCESS,
         CLEAR_CALCULATOR_EDIT,
       ], () => {

@@ -32,7 +32,6 @@ describe('OrderSummaryPage', () => {
   });
 
   it('shows a spinner when dashboard get is processing', () => {
-
     return renderComponent(url, DASHBOARD_SUCCESS_ACTIONS).then(([, div]) => {
 
       assert.notOk(div.querySelector(".loader"), "Found spinner but no fetch in progress");

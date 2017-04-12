@@ -17,13 +17,13 @@ import {
   RECEIVE_UPDATE_DOCUMENT_SENT_DATE_FAILURE,
   updateDocumentSentDate,
 } from '../actions/documents';
-import * as coursePriceActions from '../actions/course_prices';
 import * as dashboardActions from '../actions/dashboard';
 import type { DocumentsState } from '../reducers/documents';
 import rootReducer from '../reducers';
 import * as api from '../lib/api';
 import type { AssertReducerResultState } from '../flow/reduxTypes';
 import { createAssertReducerResultState } from '../util/test_utils';
+import { actions } from '../lib/redux_rest';
 
 describe('documents reducers', () => {
   let sandbox, store, dispatchThen, assertReducerResultState: AssertReducerResultState<DocumentsState>;
@@ -51,7 +51,7 @@ describe('documents reducers', () => {
 
     beforeEach(() => {
       updateDocumentSentDateStub = sandbox.stub(api, 'updateDocumentSentDate');
-      fetchCoursePricesStub = sandbox.stub(coursePriceActions, 'fetchCoursePrices');
+      fetchCoursePricesStub = sandbox.stub(actions.prices, 'get');
       fetchCoursePricesStub.returns({type: "fake"});
       fetchDashboardStub = sandbox.stub(dashboardActions, 'fetchDashboard');
       fetchDashboardStub.returns({type: "fake"});

@@ -13,6 +13,7 @@ import {
   PROGRAMS,
   USER_PROFILE_RESPONSE,
   ATTACH_COUPON_RESPONSE,
+  GET_AUTOMATIC_EMAILS_RESPONSE,
 } from '../test_constants';
 import {
   REQUEST_GET_USER_PROFILE,
@@ -48,13 +49,25 @@ export default class IntegrationTestHelper {
       return reducer(...args);
     });
 
+    // we need this to deal with the 'endpoint' objects, it's now necessary
+    // to directly mock out the fetch call because at module load time the
+    // endpoint object already holds a reference to the unmocked API function
+    // (e.g. getCoupons) which Sinon doesn't seem to be able to deal with.
+    this.fetchJSONWithCSRFStub = this.sandbox.stub(api, 'fetchJSONWithCSRF');
+
     this.listenForActions = this.store.createListenForActions();
     this.dispatchThen = this.store.createDispatchThen();
 
     this.dashboardStub = this.sandbox.stub(api, 'getDashboard');
     this.dashboardStub.returns(Promise.resolve(DASHBOARD_RESPONSE));
-    this.coursePricesStub = this.sandbox.stub(api, 'getCoursePrices');
+    this.coursePricesStub = this.fetchJSONWithCSRFStub.withArgs(
+      `/api/v0/course_prices/${SETTINGS.user.username}/`
+    );
     this.coursePricesStub.returns(Promise.resolve(COURSE_PRICES_RESPONSE));
+    this.getEmailsStub = this.fetchJSONWithCSRFStub.withArgs(
+      '/api/v0/mail/automatic_email/'
+    );
+    this.getEmailsStub.returns(Promise.resolve(GET_AUTOMATIC_EMAILS_RESPONSE));
     this.couponsStub = this.sandbox.stub(api, 'getCoupons');
     this.couponsStub.returns(Promise.resolve([]));
     this.profileGetStub = this.sandbox.stub(api, 'getUserProfile');

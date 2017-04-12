@@ -29,9 +29,9 @@ import {
   SET_CURRENT_PROGRAM_ENROLLMENT,
 } from '../actions/programs';
 import * as api from '../lib/api';
-import * as coursePriceActions from '../actions/course_prices';
 import * as dashboardActions from '../actions/dashboard';
 import rootReducer from '../reducers';
+import { actions } from '../lib/redux_rest';
 
 describe('enrollments', () => {
   let sandbox, store, getPrograms, addProgramEnrollmentStub;
@@ -57,7 +57,7 @@ describe('enrollments', () => {
     beforeEach(() => {
       dispatchThen = store.createDispatchThen(state => state.programs);
 
-      fetchCoursePricesStub = sandbox.stub(coursePriceActions, 'fetchCoursePrices');
+      fetchCoursePricesStub = sandbox.stub(actions.prices, 'get');
       fetchCoursePricesStub.returns({type: "fake"});
       fetchDashboardStub = sandbox.stub(dashboardActions, 'fetchDashboard');
       fetchDashboardStub.returns({type: "fake"});

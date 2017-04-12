@@ -5,7 +5,7 @@ import R from 'ramda';
 import _ from 'lodash';
 
 import type { Action, ActionType, Dispatcher } from '../flow/reduxTypes';
-import type { Endpoint, RestState } from '../flow/restTypes';
+import type { Endpoint } from '../flow/restTypes';
 import { fetchJSONWithCSRF } from './api';
 import {
   FETCH_PROCESSING,
@@ -15,6 +15,10 @@ import {
 import { GET, PATCH, POST } from '../constants';
 import { automaticEmailsEndpoint } from '../reducers/automatic_emails';
 import { courseEnrollmentsEndpoint } from '../reducers/course_enrollments';
+import { coursePricesEndpoint } from '../reducers/course_prices';
+import { withUsername } from '../actions/util';
+import { updateStateByUsername } from '../reducers/util';
+import { INITIAL_STATE } from './redux_rest_constants';
 
 const actionize = R.compose(R.toUpper, R.join("_"), R.map(_.snakeCase));
 
@@ -25,11 +29,6 @@ export const successActionType = (...xs: string[]) => `RECEIVE_${actionize(xs)}_
 export const failureActionType = (...xs: string[]) => `RECEIVE_${actionize(xs)}_FAILURE`;
 
 export const clearActionType = (...xs: string[]) => `CLEAR_${actionize(xs)}`;
-
-export const INITIAL_STATE: RestState<*> = {
-  loaded: false,
-  processing: false,
-};
 
 const defaultRESTPrefixes = { GET, PATCH, POST };
 
@@ -73,9 +72,13 @@ export const deriveAction = (endpoint: Endpoint, verb: string): DerivedAction =>
   const successType = successActionType(prefix, endpoint.name);
   const failureType = failureActionType(prefix, endpoint.name);
 
-  const requestAction = createAction(requestType);
-  const successAction = createAction(successType);
-  const failureAction = createAction(failureType);
+  const createActionFunc = endpoint.namespaceOnUsername
+    ? withUsername
+    : createAction;
+
+  const requestAction = createActionFunc(requestType);
+  const successAction = createActionFunc(successType);
+  const failureAction = createActionFunc(failureType);
 
   const fetchFunc = R.propOr(
     makeFetchFunc(endpoint, verb),
@@ -86,12 +89,21 @@ export const deriveAction = (endpoint: Endpoint, verb: string): DerivedAction =>
   return {
     action: (...params) => {
       return (dispatch: Dispatch): Promise<*> => {
-        dispatch(requestAction());
+        dispatch(requestAction(...params));
         return fetchFunc(...params).then(data => {
-          dispatch(successAction(data));
+          if (endpoint.namespaceOnUsername) {
+            // params[0] is the username, in this case
+            dispatch(successAction(params[0], data));
+          } else {
+            dispatch(successAction(data));
+          }
           return Promise.resolve(data);
         }, error => {
-          dispatch(failureAction(error));
+          if (endpoint.namespaceOnUsername) {
+            dispatch(failureAction(params[0], error));
+          } else {
+            dispatch(failureAction(error));
+          }
           return Promise.reject(error);
         });
       };
@@ -122,7 +134,11 @@ export const deriveActions = (endpoint: Endpoint) => {
   });
   let clearType = clearActionType(endpoint.name);
   actions.clearType = clearType;
-  actions.clear = createAction(clearType);
+  if (endpoint.namespaceOnUsername) {
+    actions.clear = withUsername(clearType);
+  } else {
+    actions.clear = createAction(clearType);
+  }
   return actions;
 };
 
@@ -139,27 +155,42 @@ export const deriveReducer = (endpoint: Endpoint, action: Function, verb: string
 
   let successHandler = R.propOr(R.identity, `${R.toLower(verb)}SuccessHandler`, endpoint);
 
+  let updateFunc = (state, action, update) => {
+    if (endpoint.namespaceOnUsername) {
+      return updateStateByUsername(
+        state,
+        action.meta,
+        { ...endpoint.usernameInitialState, ...update },
+      );
+    } else {
+      return { ...state, ...update };
+    }
+  };
+
   return {
-    [action.requestType]: (state: Object, action: Action<any, any>) => ({
-      ...state,
-      [fetchStatus]: FETCH_PROCESSING,
-      loaded: false,
-      processing: true,
-    }),
-    [action.successType]: (state: Object, action: Action<any, any>) => ({
-      ...state,
-      [fetchStatus]: FETCH_SUCCESS,
-      data: successHandler(action.payload, state.data),
-      loaded: true,
-      processing: false,
-    }),
-    [action.failureType]: (state: Object, action: Action<any, any>) => ({
-      ...state,
-      [fetchStatus]: FETCH_FAILURE,
-      error: action.payload,
-      loaded: true,
-      processing: false,
-    }),
+    [action.requestType]: (state: Object, action: Action<any, any>) => (
+      updateFunc(state, action, {
+        [fetchStatus]: FETCH_PROCESSING,
+        loaded: false,
+        processing: endpoint.checkNoSpinner ? action.payload : true
+      })
+    ),
+    [action.successType]: (state: Object, action: Action<any, any>) => (
+      updateFunc(state, action, {
+        [fetchStatus]: FETCH_SUCCESS,
+        data: successHandler(action.payload, state.data),
+        loaded: true,
+        processing: false,
+      })
+    ),
+    [action.failureType]: (state: Object, action: Action<any, any>) => (
+      updateFunc(state, action, {
+        [fetchStatus]: FETCH_FAILURE,
+        error: action.payload,
+        loaded: true,
+        processing: false,
+      })
+    ),
   };
 };
 
@@ -180,6 +211,7 @@ export const deriveReducers = (endpoint: Endpoint, actions: Function) => {
 export const endpoints: Array<Endpoint> = [
   automaticEmailsEndpoint,
   courseEnrollmentsEndpoint,
+  coursePricesEndpoint,
 ];
 
 const reducers: Object = {};

@@ -156,7 +156,7 @@ describe('api', function() {
     it('gets course prices', () => {
       fetchJSONStub.returns(Promise.resolve(COURSE_PRICES_RESPONSE));
       return getCoursePrices('username').then(coursePrices => {
-        assert.ok(fetchJSONStub.calledWith('/api/v0/course_prices/username/', {}));
+        assert.ok(fetchJSONStub.calledWith('/api/v0/course_prices/username/'));
         assert.deepEqual(coursePrices, COURSE_PRICES_RESPONSE);
       });
     });

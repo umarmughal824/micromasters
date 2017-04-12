@@ -4,11 +4,13 @@ import R from 'ramda';
 import { GET, PATCH } from '../constants';
 import type { Endpoint } from '../flow/restTypes';
 import type { Action } from '../flow/reduxTypes';
-import { INITIAL_STATE } from '../lib/redux_rest';
+import { INITIAL_STATE } from '../lib/redux_rest_constants';
 import { TOGGLE_EMAIL_PATCH_IN_FLIGHT } from '../actions/automatic_emails';
 
 export const automaticEmailsEndpoint: Endpoint = {
   name: 'automaticEmails',
+  namespaceOnUsername: false,
+  checkNoSpinner: false,
   verbs: [GET, PATCH],
   getUrl: '/api/v0/mail/automatic_email/',
   patchUrl: email => `/api/v0/mail/automatic_email/${email.id}/`,

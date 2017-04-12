@@ -1,5 +1,5 @@
-/* global SETTINGS: false */
 // @flow
+/* global SETTINGS: false */
 import deepFreeze from 'deep-freeze';
 import Decimal from 'decimal.js-light';
 

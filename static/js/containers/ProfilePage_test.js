@@ -41,7 +41,9 @@ import { GoogleMapsStub, activeDialog } from '../util/test_utils';
 describe("ProfilePage", function() {
   this.timeout(5000);  // eslint-disable-line no-invalid-this
 
-  let listenForActions, renderComponent, helper, gmaps, patchUserProfileStub;
+  let listenForActions, renderComponent, helper, gmaps;
+  let addProgramEnrollmentStub, patchUserProfileStub;
+
   let profileSteps = [
     PERSONAL_STEP,
     EDUCATION_STEP,
@@ -73,6 +75,8 @@ describe("ProfilePage", function() {
     listenForActions = helper.listenForActions.bind(helper);
     renderComponent = helper.renderComponent.bind(helper);
     patchUserProfileStub = helper.sandbox.stub(api, 'patchUserProfile');
+    addProgramEnrollmentStub = helper.sandbox.stub(api, 'addProgramEnrollment');
+    addProgramEnrollmentStub.returns(Promise.resolve());
   });
 
   afterEach(() => {
@@ -212,15 +216,14 @@ describe("ProfilePage", function() {
   }
 
   it('should enroll the user when they go to the next page', () => {
-    let addEnrollmentStub = helper.sandbox.stub(api, 'addProgramEnrollment');
     let program = PROGRAMS[0];
-    addEnrollmentStub.returns(Promise.resolve(program));
+    addProgramEnrollmentStub.returns(Promise.resolve(program));
 
     patchUserProfileStub.returns(Promise.resolve(USER_PROFILE_RESPONSE));
 
     helper.store.dispatch(setProgram(program));
     return renderComponent('/profile/personal', SUCCESS_ACTIONS).then(([wrapper]) => {
-      assert.isFalse(addEnrollmentStub.called);
+      assert.isFalse(addProgramEnrollmentStub.called);
 
       return helper.listenForActions([
         REQUEST_PATCH_USER_PROFILE,
@@ -235,7 +238,7 @@ describe("ProfilePage", function() {
       ], () => {
         wrapper.find(".next").simulate("click");
       }).then(() => {
-        assert.isTrue(addEnrollmentStub.called);
+        assert.isTrue(addProgramEnrollmentStub.called);
       });
     });
   });

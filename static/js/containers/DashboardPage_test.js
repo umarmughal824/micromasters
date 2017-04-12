@@ -19,7 +19,6 @@ import {
   UPDATE_COURSE_STATUS,
   CLEAR_DASHBOARD,
 } from '../actions/dashboard';
-import { CLEAR_COURSE_PRICES } from '../actions/course_prices';
 import { FETCH_SUCCESS } from '../actions';
 import * as dashboardActions from '../actions/dashboard';
 import { CLEAR_COUPONS } from '../actions/coupons';
@@ -92,6 +91,7 @@ import {
   DASHBOARD_SUCCESS_ACTIONS,
   DASHBOARD_ERROR_ACTIONS,
 } from './test_util';
+import { actions } from '../lib/redux_rest';
 
 describe('DashboardPage', () => {
   let renderComponent, helper, listenForActions;
@@ -378,7 +378,7 @@ describe('DashboardPage', () => {
         CLEAR_UI,
         CLEAR_ENROLLMENTS,
         CLEAR_DASHBOARD,
-        CLEAR_COURSE_PRICES,
+        actions.prices.clearType,
         CLEAR_COUPONS,
       ], () => {
         ReactDOM.unmountComponentAtNode(div);

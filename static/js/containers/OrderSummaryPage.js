@@ -6,14 +6,10 @@ import { connect } from 'react-redux';
 
 import Loader from '../components/Loader';
 import type { Profiles } from '../flow/profileTypes';
-import type { CoursePricesState, DashboardState } from '../flow/dashboardTypes';
+import type { CoursePrices, DashboardState } from '../flow/dashboardTypes';
 import type { AvailableProgram } from '../flow/enrollmentTypes';
 import OrderSummary from '../components/OrderSummary';
 import { FETCH_PROCESSING, checkout } from '../actions';
-import {
-  fetchCoursePrices,
-  clearCoursePrices,
-} from '../actions/course_prices';
 import {
   clearDashboard,
   fetchDashboard,
@@ -27,6 +23,8 @@ import type { CheckoutState } from '../reducers';
 import { createForm, findCourseRun } from '../util/util';
 import { calculatePrice } from '../lib/coupon';
 import { getOwnDashboard, getOwnCoursePrices } from '../reducers/util';
+import { actions } from '../lib/redux_rest';
+import type { RestState } from '../flow/restTypes';
 
 class OrderSummaryPage extends React.Component {
   static contextTypes = {
@@ -39,7 +37,7 @@ class OrderSummaryPage extends React.Component {
     checkout:                 CheckoutState,
     dashboard:                DashboardState,
     dispatch:                 Dispatch,
-    prices:                   CoursePricesState,
+    prices:                   RestState<CoursePrices>,
     coupons:                  CouponsState,
     location:                 Object,
   };
@@ -55,7 +53,7 @@ class OrderSummaryPage extends React.Component {
   componentWillUnmount() {
     const { dispatch } = this.props;
     dispatch(clearDashboard());
-    dispatch(clearCoursePrices());
+    dispatch(actions.prices.clear(SETTINGS.user.username));
     dispatch(clearCoupons());
   }
 
@@ -65,10 +63,11 @@ class OrderSummaryPage extends React.Component {
       dispatch(fetchDashboard(SETTINGS.user.username));
     }
   }
+
   fetchCoursePrices() {
     const { prices, dispatch } = this.props;
-    if (prices.fetchStatus === undefined) {
-      dispatch(fetchCoursePrices(SETTINGS.user.username));
+    if (prices.getStatus === undefined) {
+      dispatch(actions.prices.get(SETTINGS.user.username));
     }
   }
 
@@ -84,6 +83,7 @@ class OrderSummaryPage extends React.Component {
     this.fetchCoursePrices();
     this.fetchCoupons();
   };
+
   dispatchCheckout = (courseId: string) => {
     const { dispatch } = this.props;
 
@@ -113,7 +113,9 @@ class OrderSummaryPage extends React.Component {
     let courseRun, course, orderSummaryContent, coursePrice;
     let courseKey = query.course_key;
     [courseRun, course] = findCourseRun(dashboard.programs, run => run !== null && run.course_id === courseKey);
-    coursePrice = prices.coursePrices.find(coursePrice => coursePrice.program_id === currentProgramEnrollment.id);
+    if (prices.data) {
+      coursePrice = prices.data.find(coursePrice => coursePrice.program_id === currentProgramEnrollment.id);
+    }
 
     if (course && courseRun && coursePrice) {
       const [coupon, calculatedPrice] = calculatePrice(courseRun.id, course.id, coursePrice, coupons.coupons);
@@ -144,6 +146,7 @@ class OrderSummaryPage extends React.Component {
     );
   }
 }
+
 const mapStateToProps = (state) => {
   let profile = {
     profile: {}
@@ -161,7 +164,5 @@ const mapStateToProps = (state) => {
     coupons: state.coupons,
   };
 };
-
-
 
 export default connect(mapStateToProps)(OrderSummaryPage);
