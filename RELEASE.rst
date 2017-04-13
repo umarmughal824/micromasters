@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.54.1
+--------------
+
+- Fixed menu icon display when user is logged out (#3056)
+- Added auditing of exam-related files (#2896)
+- Added ability to edit emails on the email admin page
+- Add mail_id and template variables to Mailgun functions (#3019)
+
 Version 0.54.0
 --------------
 
