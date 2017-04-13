@@ -25,6 +25,7 @@ import {
 } from '../actions/ui';
 import { EMAIL_COMPOSITION_DIALOG } from '../components/email/constants';
 import { modifyTextField } from '../util/test_utils';
+import EmailCompositionDialog from '../components/email/EmailCompositionDialog';
 
 describe('LearnerSearchPage', function () {
   let renderComponent, listenForActions, helper, mockAxios, replySpy;
@@ -121,7 +122,10 @@ describe('LearnerSearchPage', function () {
         assert.isTrue(state.ui.dialogVisibility[EMAIL_COMPOSITION_DIALOG]);
 
         modifyTextField(document.querySelector('.email-subject'), 'subject');
-        modifyTextField(document.querySelector('.email-body'), 'body');
+        // it is difficult to programmatically edit the draft-js field
+        wrapper.find(EmailCompositionDialog)
+          .props()
+          .updateEmailFieldEdit('body', {target: {value: 'body' }});
         document.querySelector('.create-campaign input').click();
 
         return listenForActions([

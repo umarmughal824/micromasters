@@ -92,6 +92,7 @@ import {
   DASHBOARD_ERROR_ACTIONS,
 } from './test_util';
 import { actions } from '../lib/redux_rest';
+import EmailCompositionDialog from '../components/email/EmailCompositionDialog';
 
 describe('DashboardPage', () => {
   let renderComponent, helper, listenForActions;
@@ -499,7 +500,10 @@ describe('DashboardPage', () => {
           assert.isTrue(state.ui.dialogVisibility[EMAIL_COMPOSITION_DIALOG]);
 
           modifyTextField(document.querySelector('.email-subject'), 'subject');
-          modifyTextField(document.querySelector('.email-body'), 'body');
+          // it is difficult to programmatically edit the draft-js field
+          wrapper.find(EmailCompositionDialog)
+            .props()
+            .updateEmailFieldEdit('body', {target: {value: 'body' }});
 
           return listenForActions([
             UPDATE_EMAIL_VALIDATION,

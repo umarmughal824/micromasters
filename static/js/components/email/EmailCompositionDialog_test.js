@@ -34,6 +34,7 @@ describe('EmailCompositionDialog', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     sendStub = sandbox.stub();
+    sendStub.returns(Promise.resolve());
     closeStub = sandbox.stub();
     updateStub = sandbox.stub();
   });
@@ -48,6 +49,7 @@ describe('EmailCompositionDialog', () => {
       <MuiThemeProvider muiTheme={getMuiTheme()}>
         <EmailCompositionDialog
           updateEmailFieldEdit={() => (updateStub)}
+          updateEmailBody={updateStub}
           closeAndClearEmailComposer={closeStub}
           closeEmailComposerAndSend={sendStub}
           dialogVisibility={true}
@@ -128,37 +130,65 @@ describe('EmailCompositionDialog', () => {
     assert.equal(document.querySelector('h3').textContent, 'New Email');
   });
 
-  ['subject', 'body'].forEach(field => {
-    describe(`editing ${field}`, () => {
-      let getField = () => document.querySelector(`.email-${field}`);
+  describe('editing subject', () => {
+    let getField = () => document.querySelector('.email-subject');
 
-      it('should show placeholder text if the store value is empty', () => {
-        renderDialog();
-        assert.notEqual(getField().placeholder, "");
-      });
+    it('should show placeholder text if the store value is empty', () => {
+      renderDialog();
+      assert.notEqual(getField().placeholder, "");
+    });
 
-      it('should display the value from the store', () => {
-        renderDialog(
-          {inputs: {[field]: `${field} value!`}}
-        );
-        assert.equal(getField().value, `${field} value!`);
-      });
+    it('should display the value from the store', () => {
+      renderDialog(
+        {inputs: {subject: "subject value" }}
+      );
+      assert.equal(getField().value, "subject value");
+    });
 
-      it('should fire the updateEmailEdit callback on change', () => {
-        renderDialog();
-        let fieldInput = getField();
-        modifyTextField(fieldInput, "HI");
-        assert.isTrue(updateStub.called, "called update handler");
-      });
+    it('should fire the updateEmailEdit callback on change', () => {
+      renderDialog();
+      let fieldInput = getField();
+      modifyTextField(fieldInput, "HI");
+      assert.isTrue(updateStub.called, "called update handler");
+    });
 
-      it('should show an error if an error for the field is passed in', () => {
-        let errorMessage = `${field} error!`;
-        renderDialog(
-          {validationErrors: {[field]: errorMessage}}
-        );
-        let message = getDialog().querySelector('.validation-error').textContent;
-        assert.equal(message, errorMessage);
-      });
+    it('should show an error if an error for the field is passed in', () => {
+      let errorMessage = "error!";
+      renderDialog(
+        {validationErrors: {subject: errorMessage}}
+      );
+      let message = getDialog().querySelector('.validation-error').textContent;
+      assert.equal(message, errorMessage);
+    });
+  });
+
+  describe('editing email body', () => {
+    let getEditorContents = () => document.querySelector('.public-DraftEditor-content');
+
+    it('should be empty at first', () => {
+      renderDialog();
+      assert.equal(getEditorContents().textContent, "");
+    });
+
+    it('should display the value in the store', () => {
+      renderDialog({ inputs: { body: "HEY THERE" }});
+      assert.equal(getEditorContents().textContent, 'HEY THERE');
+    });
+
+    it('should display passed-in HTML', () => {
+      renderDialog({inputs: {
+        body: "<h1>TITLE IS BIG</h1>"
+      }});
+      assert.equal(getEditorContents().querySelector('h1').textContent, 'TITLE IS BIG');
+    });
+
+    it('shouldnt mangle links in the passed-in HTML', () => {
+      renderDialog({inputs: {
+        body: '<a href="https://en.wikipedia.org/wiki/Potato">A Link!</a>'
+      }});
+      let link = getEditorContents().querySelector('a');
+      assert.equal(link.textContent, 'A Link!');
+      assert.equal(link.href, "https://en.wikipedia.org/wiki/Potato");
     });
   });
 

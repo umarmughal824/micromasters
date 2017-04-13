@@ -24,5 +24,7 @@ import 'style-loader!css-loader!react-geosuggest/module/geosuggest.css';
 // react-telephone-input stylesheet
 import 'style-loader!css-loader!react-telephone-input/css/default.css';
 
+import 'style-loader!css-loader!react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
+
 // This should come last to override other styles
 import '../../scss/layout.scss';

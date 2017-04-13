@@ -343,9 +343,20 @@ let emailMessages: ErrorMessages = {
   'body': 'Please fill in a body',
 };
 
-export const emailValidation = (emailInputs: EmailInputs): ValidationErrors => (
-  findErrors(emailInputs, R.keys(emailMessages), emailMessages)
+const emailBodyValid = R.ifElse(
+  R.test(/<a.*>.*<\/a>/),
+  R.compose(R.not, R.test(/<a\s.*href=("|')(?!http|https)/)),
+  R.T,
 );
+
+export const emailValidation = (emailInputs: EmailInputs): ValidationErrors => {
+  let errors = findErrors(emailInputs, R.keys(emailMessages), emailMessages);
+
+  if (!R.has('body', errors) && !emailBodyValid(emailInputs.body)) {
+    errors['body'] = "All link URLs must start with 'http' or 'https'";
+  }
+  return errors;
+};
 
 /*
 check that the profile is complete. we make the assumption that a

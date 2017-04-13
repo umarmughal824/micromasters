@@ -12,6 +12,8 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
 from rest_framework import status
 
+from bs4 import BeautifulSoup
+
 from mail.exceptions import SendBatchException
 from mail.models import (
     AutomaticEmail,
@@ -126,6 +128,14 @@ class MailgunClient:
             )
             recipients = [(settings.MAILGUN_RECIPIENT_OVERRIDE, {})]
 
+        # parse our HTML body in order to generate a plain-text fallback
+        # the only thing we need to do manually is ensure that we keep the
+        # href for any URLs in the text
+        soup = BeautifulSoup(body, 'html5lib')
+        for link in soup.find_all('a'):
+            link.replace_with(link.attrs['href'])
+        fallback_text = soup.get_text().strip()
+
         responses = []
         exception_pairs = []
 
@@ -136,7 +146,8 @@ class MailgunClient:
             params = {
                 'to': emails,
                 'subject': subject,
-                'text': body,
+                'html': body,
+                'text': fallback_text,
                 'recipient-variables': json.dumps(chunk_dict),
             }
             if sender_address:

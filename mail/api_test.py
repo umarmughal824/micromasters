@@ -68,12 +68,14 @@ class MailAPITests(MockedESTestCase):
         Test that MailgunClient.send_batch sends expected parameters to the Mailgun API
         Base case with only one batch call to the Mailgun API.
         """
-        MailgunClient.send_batch('email subject', 'email body', self.batch_recipient_arg, sender_name=sender_name)
+        email_body = '<h1>A title</h1><p> and some text <a href="www.google.com">google</a></p>'
+        MailgunClient.send_batch('email subject', email_body, self.batch_recipient_arg, sender_name=sender_name)
         assert mock_post.called
         called_args, called_kwargs = mock_post.call_args
         assert list(called_args)[0] == '{}/{}'.format(settings.MAILGUN_URL, 'messages')
         assert called_kwargs['auth'] == ('api', settings.MAILGUN_KEY)
-        assert called_kwargs['data']['text'].startswith('email body')
+        assert called_kwargs['data']['text'] == "A title and some text www.google.com"
+        assert called_kwargs['data']['html'] == email_body
         assert called_kwargs['data']['subject'] == 'email subject'
         assert sorted(called_kwargs['data']['to']) == sorted([email for email, _ in self.batch_recipient_arg])
         assert called_kwargs['data']['recipient-variables'] == json.dumps(

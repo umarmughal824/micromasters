@@ -18,6 +18,8 @@ import type {
   EmailState,
   EmailConfig
 } from '../../flow/emailTypes';
+import { stateToHTML } from 'draft-js-export-html';
+import type { EditorState } from '../../flow/draftJSTypes';
 
 export const withEmailDialog = R.curry(
   (emailConfigs: {[key: string]: EmailConfig}, WrappedComponent) => {
@@ -43,17 +45,25 @@ export const withEmailDialog = R.curry(
         dispatch(showDialog(EMAIL_COMPOSITION_DIALOG));
       });
 
-      updateEmailFieldEdit = R.curry((fieldName, e): void => {
+      saveEmailChanges = (fieldName, value) => {
         const { dispatch, email: { currentlyActive } } = this.props;
         let activeEmail = this.getActiveEmailState();
         let inputsClone = R.clone(activeEmail.inputs);
-        inputsClone[fieldName] = e.target.value;
+        inputsClone[fieldName] = value;
         dispatch(updateEmailEdit({type: currentlyActive, inputs: inputsClone}));
         if (!R.isEmpty(activeEmail.validationErrors)) {
           let cloneErrors = emailValidation(inputsClone);
           dispatch(updateEmailValidation({type: currentlyActive, errors: cloneErrors}));
         }
+      }
+
+      updateEmailFieldEdit = R.curry((fieldName, e): void => {
+        this.saveEmailChanges(fieldName, e.target.value);
       });
+
+      updateEmailBody = (editorState: EditorState): void => {
+        this.saveEmailChanges('body', stateToHTML(editorState.getCurrentContent()));
+      }
 
       closeAndClearEmailComposer = (): void => {
         const { dispatch, email: { currentlyActive } } = this.props;
@@ -61,28 +71,34 @@ export const withEmailDialog = R.curry(
         dispatch(hideDialog(EMAIL_COMPOSITION_DIALOG));
       };
 
-      closeEmailComposerAndSend = (): void => {
+      closeEmailComposerAndSend = (): Promise<void> => {
         const { dispatch, email: { currentlyActive } } = this.props;
         let activeEmail = this.getActiveEmailState();
         let errors = emailValidation(activeEmail.inputs);
         dispatch(updateEmailValidation({type: currentlyActive, errors: errors}));
-        if (R.isEmpty(errors)) {
+        return new Promise((resolve, reject) => {
+          if (R.isEmpty(errors)) {
+            resolve();
+          } else {
+            reject();
+          }
+        }).then(() => {
           if (emailConfigs[currentlyActive].editEmail) {
-            dispatch(
+            return dispatch(
               emailConfigs[currentlyActive].editEmail(
                 emailConfigs[currentlyActive].emailSendParams(activeEmail)
               )
             ).then(this.closeAndClearEmailComposer);
           } else {
-            dispatch(
+            return dispatch(
               sendEmail(
                 currentlyActive,
                 emailConfigs[currentlyActive].getEmailSendFunction(),
                 emailConfigs[currentlyActive].emailSendParams(activeEmail)
               )
-            ).then(this.closeAndClearEmailComposer);
+            ).then(this.closeAndClearEmailComposer());
           }
-        }
+        });
       };
 
       renderCompositionDialog(): ?React$Element<*> {
@@ -103,6 +119,7 @@ export const withEmailDialog = R.curry(
             title={emailConfig.title}
             subheadingRenderer={emailConfig.renderSubheading}
             renderRecipients={emailConfig.renderRecipients}
+            updateEmailBody={this.updateEmailBody}
           />
         );
       }
