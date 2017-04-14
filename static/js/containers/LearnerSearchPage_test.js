@@ -48,12 +48,8 @@ describe('LearnerSearchPage', function () {
 
   const renderSearch = () => {
     return renderComponent('/learners').then(([wrapper]) => {
-      return new Promise(resolve => {
-        // wait 10 millis for the request to be made
-        setTimeout(() => {
-          resolve([wrapper]);
-        }, 10);
-      });
+      let searchkit = wrapper.find("SearchkitProvider").props().searchkit;
+      return searchkit.registrationCompleted.then(() => Promise.resolve([wrapper]));
     });
   };
 
