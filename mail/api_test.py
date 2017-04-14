@@ -538,6 +538,7 @@ class CourseTeamMailAPITests(MockedESTestCase):
         assert response.json() == {}
 
 
+@ddt
 class AutomaticEmailTests(MockedESTestCase):
     """Tests regarding automatic emails"""
 
@@ -554,6 +555,13 @@ class AutomaticEmailTests(MockedESTestCase):
         SentAutomaticEmail.objects.create(
             automatic_email=cls.automatic_email,
             user=cls.program_enrollment_sent.user,
+            status=SentAutomaticEmail.SENT,
+        )
+        # User was sent email connected to a different AutomaticEmail
+        SentAutomaticEmail.objects.create(
+            user=cls.program_enrollment_unsent.user,
+            automatic_email=AutomaticEmailFactory.create(enabled=True),
+            status=SentAutomaticEmail.SENT,
         )
         with mute_signals(post_save):
             cls.staff_user = UserFactory.create()
@@ -565,12 +573,14 @@ class AutomaticEmailTests(MockedESTestCase):
         ) as mock_search_queries, patch('mail.api.MailgunClient') as mock_mailgun:
             send_automatic_emails(self.program_enrollment_unsent)
 
+        recipient_tuples = [
+            (context['email'], context) for context in get_mail_vars([self.program_enrollment_unsent.user.email])
+        ]
         mock_search_queries.assert_called_with(self.program_enrollment_unsent.id)
-        mock_mailgun.send_individual_email.assert_called_with(
+        mock_mailgun.send_batch.assert_called_with(
             self.automatic_email.email_subject,
             self.automatic_email.email_body,
-            self.program_enrollment_unsent.user.email,
-            recipient_variables=list(get_mail_vars([self.program_enrollment_unsent.user.email]))[0],
+            recipient_tuples,
             sender_name=self.automatic_email.sender_name,
         )
 
@@ -617,31 +627,40 @@ class AutomaticEmailTests(MockedESTestCase):
             send_automatic_emails(self.program_enrollment_unsent)
 
         mock_search_queries.assert_called_with(self.program_enrollment_unsent.id)
-        assert mock_mailgun.send_individual_email.call_count == 2
+        assert mock_mailgun.send_batch.call_count == 2
 
     def test_add_automatic_email(self):
         """Add an AutomaticEmail entry with associated PercolateQuery"""
-        assert AutomaticEmail.objects.count() == 2
+        assert AutomaticEmail.objects.count() == 3
         search_obj = Search.from_dict({"query": {"match": {}}})
 
         new_automatic = add_automatic_email(search_obj, 'subject', 'body', 'sender', self.staff_user)
-        assert AutomaticEmail.objects.count() == 3
+        assert AutomaticEmail.objects.count() == 4
         assert new_automatic.sender_name == 'sender'
         assert new_automatic.email_subject == 'subject'
         assert new_automatic.email_body == 'body'
         assert new_automatic.query.query == adjust_search_for_percolator(search_obj).to_dict()
         assert new_automatic.staff_user == self.staff_user
 
-    def test_mark_emails_as_sent(self):
+    @data(True, False)
+    def test_mark_emails_as_sent(self, errored):
         """Mark emails as sent"""
         emails = [
             self.program_enrollment_unsent.user.email,
             self.program_enrollment_sent.user.email,
         ]
-        mark_emails_as_sent(self.automatic_email, emails)
-        assert sorted(self.automatic_email.sentautomaticemail_set.values_list('user__email', flat=True)) == sorted(
-            emails
-        )
+        try:
+            with mark_emails_as_sent(self.automatic_email, emails) as user_ids:
+                assert sorted(user_ids) == [self.program_enrollment_unsent.user.id]
+                if errored:
+                    raise KeyError
+        except KeyError:
+            pass
+
+        expected = [self.program_enrollment_sent.user.email] if errored else sorted(emails)
+        assert sorted(self.automatic_email.sentautomaticemail_set.filter(
+            status=SentAutomaticEmail.SENT
+        ).values_list('user__email', flat=True)) == expected
 
 
 class RecipientVariablesTests(MockedESTestCase):
