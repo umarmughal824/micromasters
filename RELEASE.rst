@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.54.2
+--------------
+
+- Added tables to database for country code and country sub division look-ups (#3014)
+- Refactored course enrollments API to use redux-rest
+
 Version 0.54.1
 --------------
 
