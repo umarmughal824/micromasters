@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.54.3
+--------------
+
+- CMS: increased file upload size of a document (#3065)
+- CMS: Text changes to Future Semester Dates section (#3066)
+- Fix race condition resulting in multiple emails sent (#3053)
+- Preserve search URL on reload (#3061)
+- Fixed course contact message for non fa courses (#3062)
+
 Version 0.54.2
 --------------
 
