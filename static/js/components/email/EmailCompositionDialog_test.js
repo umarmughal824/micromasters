@@ -166,14 +166,30 @@ describe('EmailCompositionDialog', () => {
     renderDialog({
       filters: [{
         id: '1',
-        name: "key",
-        value: "test"
+        name: "program.enrollments.semester",
+        value: "2015"
+      }, {
+        id: '2',
+        name: "ES",
+        value: "foo"
+      },{
+        id: '3',
+        name: "profile.birth_country",
+        value: "ES"
       }]
     }, { renderRecipients: SEARCH_RESULT_EMAIL_CONFIG.renderRecipients });
 
     assert.include(
-      getDialog().querySelector('.sk-selected-filters-option__name').textContent,
-      "key: test"
+      getDialog().querySelector('.sk-selected-filters').textContent,
+      "Semester: 2015"
+    );
+    assert.include(
+      getDialog().querySelector('.sk-selected-filters').textContent,
+      "Spain: foo"
+    );
+    assert.include(
+      getDialog().querySelector('.sk-selected-filters').textContent,
+      "Country of Birth: Spain"
     );
   });
 });
