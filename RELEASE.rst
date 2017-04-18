@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.55.0
+--------------
+
+- Pinned pylint deps
+- Added EXAM file processing (#2791)
+- [Regression] Fixed recipient keys on email composition dialog (#3074)
+- Removed Edit Photo from Sidenav. Also, link user photo to profile. (#3075)
+- Search: fixed error message, when there are no results (#3073)
+
 Version 0.54.3
 --------------
 
