@@ -6,7 +6,6 @@ from decimal import Decimal
 import json
 from functools import wraps
 from django.core.management import BaseCommand, CommandError
-from django.db import transaction
 
 from courses.models import CourseRun
 from grades.models import FinalGrade
@@ -28,7 +27,7 @@ from seed_data.lib import (
     set_course_run_current,
     set_course_run_future,
     set_course_run_to_paid,
-    clear_course_payment_data,
+    set_course_run_payment_status,
     clear_dashboard_data,
     is_fake_program_course_run,
     update_fake_course_run_edx_key,
@@ -45,50 +44,47 @@ USAGE_DETAILS = (
     # For a user with a username 'staff', set the 'Analog Learning' 100-level course to enrolled
     alter_data set_to_enrolled --username=staff --program-title='Analog' --course-title='100'
 
-    # Set the 'Analog Learning' 200-level course to failed with a specific grade
-    alter_data set_to_failed --username=staff --program-title='Analog' --course-title='200' --grade=45
+    # Same result as above, but the course title is specific enough to match a single Course
+    alter_data set_to_enrolled --username=staff --course-title='Analog Learning 100'
 
-    # Set the 'Analog Learning' 300-level course to enrolled
-    alter_data set_to_enrolled --username=staff --program-title='Analog' --course-title='300'
+    # Same result as above, but the CourseRun is targeted directly instead of picking the most recent from the Course
+    alter_data set_to_enrolled --username=staff --course-run-key='course-v1:MITx+Analog+Learning+100+Apr_2017'
 
     # Set the 'Analog Learning' 300-level course to enrolled, and set it to start in the future
-    """
-    "alter_data set_to_enrolled --username=staff --program-title='Analog' --course-title='300' "
-    "--in-future"
-    """
+    alter_data set_to_enrolled --username=staff --course-title='Analog Learning 300' --in-future
+
+    # Set the 'Analog Learning' 200-level course to passed with a default grade
+    alter_data set_to_passed --username=staff --course-title='Analog Learning 200'
+
+    # Set the 'Analog Learning' 200-level course to failed with a specific grade
+    alter_data set_to_failed --username=staff --course-title='Analog Learning 200' --grade=45
 
     # Set the 'Analog Learning' 300-level course to enrolled, but in need of upgrade (aka 'audit')
     alter_data set_to_needs_upgrade --username=staff --program-title='Analog' --course-title='300'
 
     # (Another way to achieve the result of the above command...)
-    alter_data set_to_enrolled --username=staff --program-title='Analog' --course-title='100' --audit
+    alter_data set_to_enrolled --username=staff --course-title='Analog Learning 100' --audit
 
     # Set the 'Analog Learning' 300-level course to enrolled and in need of upgrade, but past the deadline
-    alter_data set_to_needs_upgrade --username=staff --program-title='Analog' --course-title='300' --missed-deadline
+    alter_data set_to_needs_upgrade --username=staff --course-title='Analog Learning 300' --missed-deadline
 
     # Set the 'Analog Learning' 100-level course to have an offered course run (and no enrollments)
-    alter_data set_to_offered --username=staff --program-title='Analog' --course-title='100'
+    alter_data set_to_offered --username=staff --course-title='Analog Learning 100'
 
     # Set the 'Analog Learning' 100-level course to have an offered course run with a fuzzy start date
-    alter_data set_to_offered --username=staff --program-title='Analog' --course-title='100' --fuzzy
+    alter_data set_to_offered --username=staff --course-title='Analog Learning 100' --fuzzy
 
     # Set the 'Analog Learning' 100-level course to be paid but not enrolled
     alter_data set_to_paid_but_not_enrolled --username=staff --course-title='Analog Learning 100'
 
-    # Get a past course run for a course and set it to failed with a specific grade
+    # Get a past ungraded course run for a course and set it to failed with a specific grade
     alter_data set_past_run_to_failed --username=staff --program-title='Analog' --course-title='100' --grade=30
 
-    # Get a past course run for a course and set it to passed
+    # Get a past ungraded course run for a course and set it to passed
     alter_data set_past_run_to_passed --username=staff --program-title='Analog' --course-title='100'
 
     # Set a course to have a past course run that is passed, unpaid, and still upgradeable
     alter_data set_past_run_to_passed --username=staff --course-title='Digital Learning 100' --audit
-
-    # Set a specific course run to failed
-    alter_data set_to_failed --username=staff --course-run-key='MITx+Analog+Learning+100+Dec_2016'
-
-    # Add an enrollable future course run for a program called 'Test Program' and a course called 'Test Course'
-    alter_data add_future_run --username=staff --program-title='Test Program' --course-title='Test Course'
 
     # Clear all of a user's dashboard data (final grade data, cached edX data, payment data) for a course
     alter_data clear_user_dashboard_data --username=staff --course-title='Analog Learning 100'
@@ -134,24 +130,26 @@ def course_state_editor(func):
 @course_state_editor
 def set_to_passed(user=None, course_run=None, grade=DEFAULT_GRADE, audit=False, missed_deadline=False):
     """Sets a course run to have a passing grade"""
-    return set_course_run_to_past_graded(
+    set_course_run_to_past_graded(
         user=user,
         course_run=course_run,
         grade=grade,
-        paid=not audit,
         upgradeable=audit and not missed_deadline
     )
+    set_course_run_payment_status(user, course_run, paid=not audit)
+    return course_run
 
 
 @course_state_editor
 def set_to_failed(user=None, course_run=None, grade=DEFAULT_FAILED_GRADE, audit=False):
     """Sets a course run to have a failing grade"""
-    return set_course_run_to_past_graded(
+    set_course_run_to_past_graded(
         user=user,
         course_run=course_run,
-        grade=grade,
-        paid=not audit,
+        grade=grade
     )
+    set_course_run_payment_status(user, course_run, paid=not audit)
+    return course_run
 
 
 @accepts_or_calculates_now
@@ -166,6 +164,35 @@ def set_past_run_to_failed(user=None, course=None, now=None, **kwargs):
     """Adds a past failed course run for a given user and course"""
     ungraded_past_run = get_past_ungraded_course_run(user, course, now)
     return set_to_failed(user=user, course_run=ungraded_past_run, **kwargs)
+
+
+@course_state_editor
+def set_to_enrolled(user=None, course_run=None, in_future=False,  # pylint: disable=too-many-arguments
+                    grade=None, audit=False, missed_deadline=False):
+    """Sets a course run to be current and enrolled"""
+    enrollable_setting = dict(enrollable_past=True) if missed_deadline else dict(enrollable_now=True)
+    if in_future:
+        set_course_run_future(course_run, save=True, **enrollable_setting)
+    else:
+        set_course_run_current(course_run, upgradeable=not missed_deadline, save=True, **enrollable_setting)
+    CachedEnrollmentHandler(user).set_or_create(course_run, verified=not audit)
+    if grade:
+        CachedCurrentGradeHandler(user).set_or_create(course_run, grade=grade)
+    set_course_run_payment_status(user, course_run, paid=not audit)
+    return course_run
+
+
+def set_to_needs_upgrade(**kwargs):
+    """Sets a course run to be current, enrolled, and in need of upgrading"""
+    kwargs.update(dict(audit=True, in_future=False))
+    return set_to_enrolled(**kwargs)
+
+
+def set_to_paid_but_not_enrolled(user=None, **kwargs):
+    """Sets a course run to be paid but not enrolled for a user"""
+    course_run = set_to_offered(user=user, **kwargs)
+    set_course_run_to_paid(user=user, course_run=course_run)
+    return course_run
 
 
 @course_state_editor
@@ -186,65 +213,6 @@ def set_to_offered(user=None, course_run=None, now=None,  # pylint: disable=unus
         set_course_run_current(course_run)
     course_run.save()
     return course_run
-
-
-@course_state_editor
-def set_to_enrolled(user=None, course_run=None, in_future=False,  # pylint: disable=too-many-arguments
-                    grade=None, audit=False, missed_deadline=False):
-    """Sets a course run to be current and enrolled"""
-    enrollable_setting = dict(enrollable_past=True) if missed_deadline else dict(enrollable_now=True)
-    if in_future:
-        set_course_run_future(course_run, save=True, **enrollable_setting)
-    else:
-        set_course_run_current(course_run, upgradeable=not missed_deadline, save=True, **enrollable_setting)
-    CachedEnrollmentHandler(user).set_or_create(course_run, verified=not audit)
-    if grade:
-        CachedCurrentGradeHandler(user).set_or_create(course_run, grade=grade)
-    if course_run.course.program.financial_aid_availability:
-        if audit:
-            clear_course_payment_data(user=user, course_run=course_run)
-        else:
-            set_course_run_to_paid(user=user, course_run=course_run)
-    return course_run
-
-
-def set_to_needs_upgrade(**kwargs):
-    """Sets a course run to be current, enrolled, and in need of upgrading"""
-    kwargs.update(dict(audit=True, in_future=False))
-    return set_to_enrolled(**kwargs)
-
-
-def set_to_paid_but_not_enrolled(user=None, **kwargs):
-    """Sets a course run to be paid but not enrolled for a user"""
-    course_run = set_to_offered(user=user, **kwargs)
-    if course_run.course.program.financial_aid_availability:
-        set_course_run_to_paid(user=user, course_run=course_run)
-    return course_run
-
-
-@accepts_or_calculates_now
-def add_future_run(user=None, course=None, now=None):  # pylint: disable=unused-argument
-    """Adds a future enrollable course run for a course"""
-    base_edx_course_key = '{}-{}'.format(NEW_COURSE_RUN_PREFIX, now.strftime('%m-%d-%Y'))
-    default_title = base_edx_course_key
-    key_append = 0
-    new_course_run = None
-    created = False
-    with transaction.atomic():
-        while not new_course_run or not created:
-            new_course_run, created = CourseRun.objects.get_or_create(
-                course=course,
-                title=default_title,
-                edx_course_key='{}-{}'.format(base_edx_course_key, key_append),
-            )
-            key_append += 1
-    set_course_run_future(new_course_run, save=True)
-    return new_course_run
-
-
-def clear_added_runs(user=None, course=None):  # pylint: disable=unused-argument
-    """Clears course runs that were added by this script"""
-    return CourseRun.objects.filter(course=course, edx_course_key__startswith=NEW_COURSE_RUN_PREFIX).delete()
 
 
 def clear_user_dashboard_data(user=None, course=None, course_run=None):
@@ -312,10 +280,8 @@ COURSE_COMMAND_FUNCTIONS = {
         set_to_enrolled,
         set_to_needs_upgrade,
         set_to_paid_but_not_enrolled,
-        add_future_run,
         set_past_run_to_failed,
         set_past_run_to_passed,
-        clear_added_runs,
         clear_user_dashboard_data,
         course_info,
     ]
