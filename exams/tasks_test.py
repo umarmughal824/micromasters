@@ -15,6 +15,7 @@ from exams.pearson.exceptions import RetryableSFTPException
 from exams.factories import (
     ExamAuthorizationFactory,
     ExamProfileFactory,
+    ExamRunFactory,
 )
 from exams.models import (
     ExamAuthorization,
@@ -24,7 +25,10 @@ from exams.tasks import (
     batch_process_pearson_zip_files,
     export_exam_authorizations,
     export_exam_profiles,
+    authorize_exam_runs,
+    update_exam_run,
 )
+from search.base import MockedESTestCase
 
 
 @override_settings(FEATURES={"PEARSON_EXAMS_SYNC": True})
@@ -134,7 +138,7 @@ class ExamTasksTest(TestCase):
 @override_settings(FEATURES={"PEARSON_EXAMS_SYNC": True})
 @pytest.mark.usefixtures('auditor')
 @patch('exams.pearson.upload.upload_tsv')
-class ExamProfileTasksTest(TestCase):
+class ExamProfileTasksTest(MockedESTestCase):
     """
     Tests for exam profile tasks
     """
@@ -230,7 +234,7 @@ class ExamProfileTasksTest(TestCase):
 
 @override_settings(FEATURES={"PEARSON_EXAMS_SYNC": True})
 @pytest.mark.usefixtures('auditor')
-class ExamAuthorizationTasksTest(TestCase):
+class ExamAuthorizationTasksTest(MockedESTestCase):
     """
     Tests for exam authorization tasks
     """
@@ -317,3 +321,42 @@ class BatchProcessingTasksTest(TestCase):
 
         get_connection_mock.assert_called_once_with()
         processor_mock.assert_not_called()
+
+
+@ddt
+class ExamRunTasksTest(MockedESTestCase):
+    """Tests for ExamRun tasks"""
+
+    @patch('exams.api.update_authorizations_for_exam_run')
+    def test_update_exam_run(self, update_mock):
+        """Test update_exam_run()"""
+        exam_run = ExamRunFactory.create()
+
+        update_exam_run(exam_run.id)
+        update_exam_run(-exam_run.id)
+
+        update_mock.assert_called_once_with(exam_run)
+
+    @data(True, False)
+    @patch('exams.api.bulk_authorize_for_exam_run')
+    def test_authorize_exam_runs(self, authorized, bulk_authorize_for_exam_run_mock):
+        """Test authorize_exam_runs()"""
+        current_run = ExamRunFactory.create(authorized=authorized)
+        past_run = ExamRunFactory.create(scheduling_future=True, authorized=authorized)
+        future_run = ExamRunFactory.create(scheduling_past=True, authorized=authorized)
+
+        authorize_exam_runs()
+
+        if authorized:
+            assert bulk_authorize_for_exam_run_mock.call_count == 0
+        else:
+            assert bulk_authorize_for_exam_run_mock.call_count == 2
+            # past run shouldn't be called
+            bulk_authorize_for_exam_run_mock.assert_any_call(current_run)
+            bulk_authorize_for_exam_run_mock.assert_any_call(future_run)
+
+            for exam_run in (current_run, future_run):
+                exam_run.refresh_from_db()
+                assert exam_run.authorized is True
+            past_run.refresh_from_db()
+            assert past_run.authorized is False

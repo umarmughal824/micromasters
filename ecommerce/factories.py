@@ -47,6 +47,11 @@ class OrderFactory(DjangoModelFactory):
     class Meta:
         model = Order
 
+    class Params:
+        fulfilled = Trait(
+            status=Order.FULFILLED
+        )
+
 
 class LineFactory(DjangoModelFactory):
     """Factory for Line"""

@@ -8,19 +8,24 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
 import pytz
 
-from exams.pearson import audit
+from exams import api
 from exams.pearson.exceptions import RetryableSFTPException
-from exams.pearson import download
-from exams.pearson import sftp
 from exams.models import (
     ExamAuthorization,
     ExamProfile,
+    ExamRun,
 )
 from exams.pearson import (
+    audit,
+    download,
+    sftp,
     upload,
     writers,
 )
-from exams.utils import exponential_backoff, validate_profile
+from exams.utils import (
+    exponential_backoff,
+    validate_profile,
+)
 from micromasters.celery import async
 
 PEARSON_CDD_FILE_PREFIX = "cdd-%Y%m%d%H_"
@@ -188,3 +193,34 @@ def batch_process_pearson_zip_files():
         log.exception('PEARSON_EXAMS_SYNC enabled, but not configured correctly')
     except RetryableSFTPException:
         log.exception('Retryable error during SFTP operation')
+
+
+@async.task
+def update_exam_run(exam_run_id):
+    """
+    An updated ExamRun means all authorizations should be updated
+
+    Args:
+        exam_run_id(int): id for the ExamRun to update
+    """
+    try:
+        exam_run = ExamRun.objects.get(id=exam_run_id)
+    except ExamRun.DoesNotExist:
+        return
+
+    api.update_authorizations_for_exam_run(exam_run)
+
+
+@async.task
+def authorize_exam_runs():
+    """
+    Check for outstanding exam runs
+    """
+    for exam_run in ExamRun.objects.filter(
+            authorized=False,
+            date_first_schedulable__lte=datetime.now(pytz.utc),
+    ):
+        api.bulk_authorize_for_exam_run(exam_run)
+
+        exam_run.authorized = True
+        exam_run.save()

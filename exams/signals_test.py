@@ -18,7 +18,8 @@ from dashboard.factories import (
     CachedCurrentGradeFactory,
     CachedEnrollmentFactory,
 )
-from exams.utils_test import create_order
+from exams.factories import ExamRunFactory
+from exams.api_test import create_order
 from exams.models import (
     ExamProfile,
     ExamAuthorization
@@ -54,6 +55,10 @@ class ExamSignalsTest(MockedESTestCase):
             }
         )
         CachedCertificateFactory.create(user=cls.profile.user, course_run=cls.course_run)
+        ExamRunFactory.create(
+            course=cls.course_run.course,
+            date_first_schedulable=datetime.now(pytz.utc) - timedelta(days=1),
+        )
 
     def test_update_exam_profile_called(self):
         """

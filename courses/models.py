@@ -10,7 +10,6 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 
-from courses.utils import is_blank
 from grades.constants import FinalGradeStatus
 from micromasters.models import TimestampedModel
 from micromasters.utils import first_matching_item
@@ -273,12 +272,7 @@ class CourseRun(models.Model):
         """
         Check if the user is authorized for an exam for a course run
         """
-        return (
-            self.edx_course_key and
-            self.course and
-            not is_blank(self.course.exam_module) and
-            not is_blank(self.course.program.exam_series_code)
-        )
+        return self.course.exam_runs.filter(date_last_eligible__gt=datetime.now(pytz.utc).date()).exists()
 
     @classmethod
     def get_freezable(cls):

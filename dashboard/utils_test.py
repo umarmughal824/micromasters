@@ -16,7 +16,7 @@ from dashboard.models import CachedEnrollment, CachedCertificate, CachedCurrentG
 from dashboard.utils import get_mmtrack, MMTrack
 from ecommerce.factories import LineFactory, OrderFactory
 from ecommerce.models import Order
-from exams.factories import ExamProfileFactory, ExamAuthorizationFactory
+from exams.factories import ExamProfileFactory, ExamAuthorizationFactory, ExamRunFactory
 from exams.models import ExamProfile, ExamAuthorization
 from grades.factories import FinalGradeFactory
 from grades.models import FinalGrade
@@ -55,7 +55,7 @@ class MMTrackTest(MockedESTestCase):
         cls.program_financial_aid = ProgramFactory.create(live=True, financial_aid_availability=True, price=1000)
 
         # create course runs for the normal program
-        course = CourseFactory.create(program=cls.program)
+        cls.course = CourseFactory.create(program=cls.program)
         expected_course_keys = [
             "course-v1:edX+DemoX+Demo_Course",
             "course-v1:MITx+8.MechCX+2014_T1",
@@ -67,7 +67,7 @@ class MMTrackTest(MockedESTestCase):
         cls.cruns = []
         for course_key in expected_course_keys:
             course_run = CourseRunFactory.create(
-                course=course,
+                course=cls.course,
                 edx_course_key=course_key
             )
             if course_key:
@@ -645,16 +645,19 @@ class MMTrackTest(MockedESTestCase):
     )
     @ddt.unpack  # pylint: disable=too-many-arguments
     @patch('dashboard.utils.log')
-    def test_get_pearson_exam_status(self, profile_status, expected_status, set_series_code,
+    def test_get_pearson_exam_status(self, profile_status, expected_status, make_exam_run,
                                      make_profile, make_auth, log_error_called, log_mock):
         """
         test get_pearson_exam_status
         """
-
-        if not set_series_code:
-            exam_series_code = self.program.exam_series_code
-            self.program.exam_series_code = None
-            self.program.save()
+        now = datetime.now(pytz.utc)
+        exam_run = None
+        if make_exam_run:
+            exam_run = ExamRunFactory.create(
+                course=self.course,
+                date_first_eligible=now - timedelta(weeks=1),
+                date_last_eligible=now + timedelta(weeks=1),
+            )
 
         if make_profile:
             ExamProfileFactory.create(
@@ -663,12 +666,10 @@ class MMTrackTest(MockedESTestCase):
             )
 
         if make_auth:
-            now = datetime.now(pytz.utc)
             ExamAuthorizationFactory.create(
                 user=self.user,
                 status=ExamAuthorization.STATUS_SUCCESS,
-                date_first_eligible=now - timedelta(weeks=1),
-                date_last_eligible=now + timedelta(weeks=1),
+                exam_run=exam_run,
             )
 
         mmtrack = MMTrack(
@@ -679,9 +680,6 @@ class MMTrackTest(MockedESTestCase):
 
         assert mmtrack.get_pearson_exam_status() == expected_status
         assert log_mock.error.called is log_error_called
-
-        if not set_series_code:
-            self.program.exam_series_code = exam_series_code
 
     def test_get_pearson_exam_status_eligible(self):
         """
@@ -696,16 +694,22 @@ class MMTrackTest(MockedESTestCase):
         now = datetime(2016, 3, 15, tzinfo=pytz.UTC)
         past = datetime(2016, 3, 10, tzinfo=pytz.UTC)
         future = datetime(2016, 3, 20, tzinfo=pytz.UTC)
-        invalid_dates = [
+        valid_dates = [
             past - timedelta(days=1),
+            past,
+            now,
+            future,
+        ]
+        invalid_dates = [
             future + timedelta(days=1),
         ]
 
         ExamAuthorizationFactory.create(
             user=self.user,
             status=ExamAuthorization.STATUS_SUCCESS,
-            date_first_eligible=past.date(),
-            date_last_eligible=future.date(),
+            exam_run__course=self.course,
+            exam_run__date_first_eligible=past.date(),
+            exam_run__date_last_eligible=future.date(),
         )
 
         mmtrack = MMTrack(
@@ -715,11 +719,11 @@ class MMTrackTest(MockedESTestCase):
         )
 
         # should be considered schedulable if past <= datetime.now() <= future
-        for now_value in [past, now, future]:
+        for now_value in valid_dates:
             mmtrack.now = now_value
             assert mmtrack.get_pearson_exam_status() == ExamProfile.PROFILE_SCHEDULABLE
 
-        # no eligible
+        # not eligible
         for now_value in invalid_dates:
             mmtrack.now = now_value
             assert mmtrack.get_pearson_exam_status() == ExamProfile.PROFILE_SUCCESS

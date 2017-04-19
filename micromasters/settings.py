@@ -497,6 +497,10 @@ CELERYBEAT_SCHEDULE = {
         'task': 'financialaid.tasks.sync_currency_exchange_rates',
         'schedule': crontab(minute=0, hour='3')
     },
+    'authorize_exam_runs-every-1-hrs': {
+        'task': 'exams.tasks.authorize_exam_runs',
+        'schedule': crontab(minute=0, hour='*')
+    },
     'export_exam_profiles-every-1-hrs': {
         'task': 'exams.tasks.export_exam_profiles',
         'schedule': crontab(minute=0, hour='*')

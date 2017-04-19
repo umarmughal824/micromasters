@@ -17,7 +17,11 @@ from grades.models import (
     FinalGrade,
     ProctoredExamGrade,
 )
-from exams.models import ExamProfile, ExamAuthorization
+from exams.models import (
+    ExamProfile,
+    ExamAuthorization,
+    ExamRun,
+)
 
 
 log = logging.getLogger(__name__)
@@ -332,13 +336,16 @@ class MMTrack:
         Returns:
             str: description of Pearson profile status
         """
+        exam_runs = ExamRun.objects.filter(
+            course__program=self.program,
+        )
 
-        course_runs_for_program = CourseRun.objects.filter(
-            course__program=self.program
-        ).select_related('course__program').only('course', 'edx_course_key')
-
-        if not any(course_run.has_exam for course_run in course_runs_for_program):
+        if not exam_runs.exists():
             return ""
+
+        future_runs = exam_runs.filter(
+            date_last_eligible__gte=self.now.date(),
+        )
 
         user = self.user
         try:
@@ -356,8 +363,7 @@ class MMTrack:
             auths = ExamAuthorization.objects.filter(
                 user=user,
                 status=ExamAuthorization.STATUS_SUCCESS,
-                date_first_eligible__lte=self.now.date(),
-                date_last_eligible__gte=self.now.date(),
+                exam_run__in=future_runs,
             )
 
             if auths.exists():

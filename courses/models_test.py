@@ -15,6 +15,7 @@ from courses.factories import (
     CourseRunFactory,
 )
 from courses.models import CourseRun
+from exams.factories import ExamRunFactory
 from grades.models import CourseRunGradingStatus
 from grades.constants import FinalGradeStatus
 from search.base import MockedESTestCase
@@ -453,20 +454,26 @@ class CourseRunTests(CourseModelTests):
         for run in course_runs[1:]:
             assert run.pk not in freeze_run_ids
 
-    @data(
-        (None, None, False),
-        ("Foo", None, False),
-        (None, "Bar", False),
-        ("", "", False),
-        ("Foo", "", False),
-        ("", "Bar", False),
-        ("Foo", "Bar", True)
-    )
-    @unpack
-    def test_has_exam(self, exam_module, exam_series_code, expected_has_exam):
+    def test_has_exam(self):
         """Test course has exam"""
         course_run = self.create_run()
-        course_run.course.exam_module = exam_module
-        course_run.course.program.exam_series_code = exam_series_code
 
-        assert course_run.has_exam is expected_has_exam
+        assert course_run.has_exam is False
+        exam_run = ExamRunFactory.create(course=course_run.course)
+        assert course_run.has_exam is True
+        exam_run.delete()
+
+        assert course_run.has_exam is False
+        exam_run = ExamRunFactory.create(
+            course=course_run.course,
+            date_last_eligible=datetime.now(pytz.utc).date(),
+        )
+        assert course_run.has_exam is False
+        exam_run.delete()
+
+        assert course_run.has_exam is False
+        ExamRunFactory.create(
+            course=course_run.course,
+            date_last_eligible=(datetime.now(pytz.utc) - timedelta(days=1)).date(),
+        )
+        assert course_run.has_exam is False

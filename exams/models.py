@@ -1,10 +1,72 @@
 """
 Models for exams
 """
+from datetime import datetime
+
+import pytz
 from django.contrib.auth.models import User
 from django.db import models
 
 from micromasters.models import TimestampedModel
+
+
+class ExamRun(TimestampedModel):
+    """Represents an individual run of an exam"""
+    course = models.ForeignKey('courses.Course', related_name='exam_runs')
+    exam_series_code = models.CharField(max_length=20)
+
+    date_first_schedulable = models.DateTimeField()
+    date_last_schedulable = models.DateTimeField()
+
+    date_first_eligible = models.DateField()
+    date_last_eligible = models.DateField()
+
+    authorized = models.BooleanField(default=False)
+
+    @classmethod
+    def get_currently_schedulable(cls, course):
+        """
+        Get a QuerySet with currently schedulable exam runs
+
+        Args:
+            course (courses.models.Course): the course to find exam runs for
+
+        Returns:
+            django.db.models.query.QuerySet: A Queryset filtered to currently schedulable exam runs
+        """
+        now = datetime.now(pytz.utc)
+        return cls.objects.filter(
+            course=course,
+            date_first_schedulable__lte=now,
+            date_last_schedulable__gte=now,
+        )
+
+    def __str__(self):
+        return 'Exam run for course "{}" with exam series code "{}"'.format(
+            self.course.title,
+            self.exam_series_code
+        )
+
+    @property
+    def is_schedulable(self):
+        """
+        Determines if the run is schedulable or not
+
+        Returns:
+            bool: True if the exam run is currently schedulable
+        """
+        now = datetime.now(pytz.utc)
+        return self.date_first_schedulable <= now < self.date_last_schedulable
+
+    @property
+    def has_authorizations(self):
+        """
+        Determines if the run has authorizations
+
+        Returns:
+            bool: True if authorizations exist
+        """
+        return self.exam_authorizations.exists()
 
 
 class ExamProfile(TimestampedModel):
@@ -13,6 +75,16 @@ class ExamProfile(TimestampedModel):
 
     We need to sync profile data to Pearson. This model tracks the state of that syncing.
     It corresponds to a row in a Pearson CDD file.
+
+    ExamProfile.status is a state machine following this flow:
+
+                   pending
+                  /       \
+            in-progress   invalid
+             /       \
+         success   failed
+
+    The state machine can transition to the root node from any other node to restart the flow
     """
     PROFILE_INVALID = 'invalid'
     PROFILE_PENDING = 'pending'
@@ -52,6 +124,18 @@ class ExamAuthorization(TimestampedModel):
 
     Exam Authorization record are sent to Pearson authorizing an individual for a specific exam.
     This model exists so we can track state on our side and corresponds to a row in a Pearson EAD file.
+
+    ExamAuthorization.status is a state machine following this flow:
+
+              pending
+                 |
+              sending
+                 |
+            in-progress
+             /       \
+         success   failed
+
+    The state machine can transition to the root node from any other node to restart the flow
     """
     OPERATION_ADD = 'add'
     OPERATION_DELETE = 'delete'
@@ -64,12 +148,14 @@ class ExamAuthorization(TimestampedModel):
     ])
 
     STATUS_PENDING = 'pending'
+    STATUS_SENDING = 'sending'
     STATUS_IN_PROGRESS = 'in-progress'
     STATUS_FAILED = 'failed'
     STATUS_SUCCESS = 'success'
 
     STATUS_CHOICES = (
         (STATUS_PENDING, 'Sync Pending'),
+        (STATUS_SENDING, 'Sync Sending'),
         (STATUS_IN_PROGRESS, 'Sync in Progress'),
         (STATUS_FAILED, 'Sync Failed'),
         (STATUS_SUCCESS, 'Sync Suceeded'),
@@ -77,6 +163,7 @@ class ExamAuthorization(TimestampedModel):
 
     user = models.ForeignKey(User, related_name='exam_authorizations')
     course = models.ForeignKey('courses.Course', related_name='exam_authorizations')
+    exam_run = models.ForeignKey(ExamRun, related_name='exam_authorizations', null=True)
 
     operation = models.CharField(
         max_length=30,
@@ -92,8 +179,8 @@ class ExamAuthorization(TimestampedModel):
     )
     exam_taken = models.BooleanField(default=False)
 
-    date_first_eligible = models.DateField()
-    date_last_eligible = models.DateField()
+    date_first_eligible = models.DateField(null=True)
+    date_last_eligible = models.DateField(null=True)
 
     def __str__(self):
         return 'Exam Authorization "{0}" with status "{1}" for user {2}'.format(

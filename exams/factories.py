@@ -14,6 +14,7 @@ from courses.factories import CourseFactory
 from exams.models import (
     ExamAuthorization,
     ExamProfile,
+    ExamRun,
 )
 from micromasters.factories import UserFactory
 from profiles.factories import ProfileFactory
@@ -32,6 +33,48 @@ class ExamProfileFactory(DjangoModelFactory):
 
     class Meta:
         model = ExamProfile
+
+
+class ExamRunFactory(DjangoModelFactory):
+    """
+    Factory for ExamRun
+    """
+    course = SubFactory(CourseFactory)
+    exam_series_code = factory.Faker('lexify', text="????_MicroMasters")
+    date_first_schedulable = factory.LazyFunction(
+        lambda: FAKE.date_time_this_year(before_now=True, after_now=False, tzinfo=pytz.utc)
+    )
+    date_last_schedulable = factory.LazyFunction(
+        lambda: FAKE.date_time_this_year(before_now=False, after_now=True, tzinfo=pytz.utc)
+    )
+    date_first_eligible = factory.LazyFunction(
+        lambda: FAKE.date_time_this_year(before_now=False, after_now=True, tzinfo=pytz.utc).date()
+    )
+    date_last_eligible = factory.LazyAttribute(
+        lambda exam_run: exam_run.date_first_eligible + timedelta(days=20)
+    )
+    authorized = False
+
+    class Meta:
+        model = ExamRun
+
+    class Params:
+        scheduling_past = factory.Trait(
+            date_first_schedulable=factory.LazyAttribute(
+                lambda exam_run: exam_run.date_last_schedulable - timedelta(days=10)
+            ),
+            date_last_schedulable=factory.LazyFunction(
+                lambda: FAKE.date_time_this_year(before_now=True, after_now=False, tzinfo=pytz.utc)
+            )
+        )
+        scheduling_future = factory.Trait(
+            date_first_schedulable=factory.LazyFunction(
+                lambda: FAKE.date_time_this_year(before_now=False, after_now=True, tzinfo=pytz.utc)
+            ),
+            date_last_schedulable=factory.LazyAttribute(
+                lambda exam_run: exam_run.date_first_schedulable + timedelta(days=10)
+            )
+        )
 
 
 class ExamAuthorizationFactory(DjangoModelFactory):
@@ -53,6 +96,8 @@ class ExamAuthorizationFactory(DjangoModelFactory):
     date_last_eligible = factory.LazyAttribute(
         lambda exam_auth: exam_auth.date_first_eligible + timedelta(days=365)
     )
+
+    exam_run = SubFactory(ExamRunFactory)
 
     class Meta:
         model = ExamAuthorization
