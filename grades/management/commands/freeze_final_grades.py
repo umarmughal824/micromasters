@@ -38,7 +38,7 @@ class Command(BaseCommand):
             )
             return
 
-        freeze_course_run_final_grades.delay(run)
+        freeze_course_run_final_grades.delay(run.id)
         self.stdout.write(
             self.style.SUCCESS(
                 'Successfully submitted async task to freeze final grades for course "{0}"'.format(edx_course_key)
