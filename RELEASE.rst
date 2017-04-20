@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.55.1
+--------------
+
+- Fixed alter_data payment and grade issues, and cleaned up docs
+- Fixed issue where date change is empty (#3082)
+
 Version 0.55.0
 --------------
 
