@@ -118,7 +118,7 @@ services:
       - grid
 
   grid:
-    image: elgalu/selenium
+    image: elgalu/selenium:2
 
 volumes:
   django_media: {}
