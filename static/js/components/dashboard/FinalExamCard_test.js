@@ -159,13 +159,22 @@ pay for the course and pass the online work.`;
     props.program.pearson_exam_status = PEARSON_PROFILE_SCHEDULABLE;
     renderCard(props);
     assert.include(
-      getEl(document, ".dialog-container").textContent,
-      "Test Registration is completed on the Pearson VUE website"
+      getEl(document, ".dialog-title").textContent,
+      "You are being redirected to Pearson VUE’s website."
     );
     assert.include(
-      getEl(document, ".dialog-container").textContent,
-      'I acknowledge that by clicking Continue I will be leaving the MicroMasters website and going to ' +
-      'the Pearson VUE website, and that I accept the Pearson VUE Group’s Terms of Service'
+      getEl(document, ".tos-container").textContent,
+      'You acknowledge that by clicking Continue, you will be leaving the MITx MicroMasters ' +
+      'website and going to a third-party website over which MIT’s MITx does not have control, '
+    );
+    assert.include(
+      getEl(document, ".tos-container").textContent,
+      ' from any and all claims, demands, suits, judgments, damages, actions and liabilities ' +
+      'of every kind and nature whatsoever, that you may suffer at any time as a result of the Purpose.'
+    );
+    assert.include(
+       getEl(document, ".attention").textContent,
+       'By clicking Continue, I agree to above Terms and Conditions.'
     );
   });
 
