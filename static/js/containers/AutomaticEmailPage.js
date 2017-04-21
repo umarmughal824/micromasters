@@ -1,5 +1,6 @@
 // @flow
 /* global SETTINGS: false */
+import DocumentTitle from 'react-document-title';
 import React from 'react';
 import { connect } from 'react-redux';
 import R from 'ramda';
@@ -96,14 +97,16 @@ class AutomaticEmailPage extends React.Component {
     } = this.props;
 
     return (
-      <div className="single-column automatic-emails">
-        <EmailCampaignsCard
-          getEmails={this.getEmails}
-          toggleEmailActive={this.toggleEmailActive}
-          emailsInFlight={emailsInFlight}
-          openEmailComposer={openEmailComposer(AUTOMATIC_EMAIL_ADMIN_TYPE)}
-        />
-      </div>
+      <DocumentTitle title="Manage Email Campaigns | MITx MicroMasters">
+        <div className="single-column automatic-emails">
+          <EmailCampaignsCard
+            getEmails={this.getEmails}
+            toggleEmailActive={this.toggleEmailActive}
+            emailsInFlight={emailsInFlight}
+            openEmailComposer={openEmailComposer(AUTOMATIC_EMAIL_ADMIN_TYPE)}
+          />
+        </div>
+      </DocumentTitle>
     );
   }
 }

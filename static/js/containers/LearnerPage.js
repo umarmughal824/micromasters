@@ -4,6 +4,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Loader from '../components/Loader';
 import R from 'ramda';
+import DocumentTitle from 'react-document-title';
 
 import { FETCH_PROCESSING, FETCH_SUCCESS, FETCH_FAILURE } from '../actions';
 import { clearProfile } from '../actions/profile';
@@ -72,6 +73,21 @@ class LearnerPage extends React.Component<*, LearnerPageProps, *> {
     )(this.getFocusedDashboard());
   }
 
+  getDocumentTitle = () => {
+    const {
+      params: { username },
+      profiles,
+    } = this.props;
+    let profilePath = [username, 'profile'];
+
+    let first = R.pathOr('', profilePath.concat('preferred_name'), profiles);
+    let last = R.pathOr('', profilePath.concat('last_name'), profiles);
+
+    return `${first} ${last} | MITx MicroMasters Profile`
+      .trim()
+      .replace(/^\|\s/, '');
+  }
+
   render() {
     const {
       params: { username },
@@ -97,9 +113,13 @@ class LearnerPage extends React.Component<*, LearnerPageProps, *> {
       toRender = childrenWithProps(children, props);
     }
     const { errorInfo } = profile;
-    return <Loader loaded={loaded}>
-      {errorInfo && loaded ? <ErrorMessage errorInfo={errorInfo} /> : toRender }
-    </Loader>;
+    return (
+      <DocumentTitle title={this.getDocumentTitle()}>
+        <Loader loaded={loaded}>
+          {errorInfo && loaded ? <ErrorMessage errorInfo={errorInfo} /> : toRender }
+        </Loader>
+      </DocumentTitle>
+    );
   }
 }
 

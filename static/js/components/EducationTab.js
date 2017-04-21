@@ -1,5 +1,6 @@
 // @flow
 import React from 'react';
+import DocumentTitle from 'react-document-title';
 
 import ProfileProgressControls from './ProfileProgressControls';
 import EducationForm from './EducationForm';
@@ -26,18 +27,20 @@ class EducationTab extends React.Component {
 
   render() {
     return (
-      <div>
-        <EducationForm {...this.props} showSwitch={true} validator={educationValidation} />
-        <ProfileProgressControls
-          {...this.props}
-          prevUrl="/profile/personal"
-          nextUrl="/profile/professional"
-          nextBtnLabel="Next"
-          isLastTab={false}
-          programIdForEnrollment={null}
-          validator={educationValidation}
-        />
-      </div>
+      <DocumentTitle title="Education Profile | MITx MicroMasters">
+        <div>
+          <EducationForm {...this.props} showSwitch={true} validator={educationValidation} />
+          <ProfileProgressControls
+            {...this.props}
+            prevUrl="/profile/personal"
+            nextUrl="/profile/professional"
+            nextBtnLabel="Next"
+            isLastTab={false}
+            programIdForEnrollment={null}
+            validator={educationValidation}
+          />
+        </div>
+      </DocumentTitle>
     );
   }
 }

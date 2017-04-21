@@ -1,5 +1,6 @@
 // @flow
 import React from 'react';
+import DocumentTitle from 'react-document-title';
 
 import EmploymentForm from './EmploymentForm';
 import ProfileProgressControls from './ProfileProgressControls';
@@ -31,24 +32,26 @@ class EmploymentTab extends React.Component {
 
   render () {
     return (
-      <div>
-        <EmploymentForm {...this.props} showSwitch={true} validator={employmentValidation} />
-        <ProfileProgressControls
-          {...this.props}
-          nextBtnLabel="I'm Done!"
-          prevUrl="/profile/education"
-          nextUrl="/dashboard"
-          isLastTab={true}
-          programIdForEnrollment={null}
-          validator={
-            combineValidators(
-              personalValidation,
-              educationValidation,
-              employmentValidation
-            )
-          }
-        />
-      </div>
+      <DocumentTitle title="Professional Profile | MITx MicroMasters">
+        <div>
+          <EmploymentForm {...this.props} showSwitch={true} validator={employmentValidation} />
+          <ProfileProgressControls
+            {...this.props}
+            nextBtnLabel="I'm Done!"
+            prevUrl="/profile/education"
+            nextUrl="/dashboard"
+            isLastTab={true}
+            programIdForEnrollment={null}
+            validator={
+              combineValidators(
+                personalValidation,
+                educationValidation,
+                employmentValidation
+              )
+            }
+          />
+        </div>
+      </DocumentTitle>
     );
   }
 }

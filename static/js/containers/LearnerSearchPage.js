@@ -1,6 +1,7 @@
 // @flow
 /* global SETTINGS: false */
 import React from 'react';
+import DocumentTitle from 'react-document-title';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import type { Dispatch } from 'redux';
@@ -47,13 +48,15 @@ class LearnerSearchPage extends React.Component {
     }
 
     return (
-      <LearnerSearch
-        checkFilterVisibility={this.checkFilterVisibility}
-        setFilterVisibility={this.setFilterVisibility}
-        openSearchResultEmailComposer={openEmailComposer(SEARCH_EMAIL_TYPE)}
-        openLearnerEmailComposer={openEmailComposer(LEARNER_EMAIL_TYPE)}
-        currentProgramEnrollment={currentProgramEnrollment}
-      />
+      <DocumentTitle title="Search | MITx MicroMasters">
+        <LearnerSearch
+          checkFilterVisibility={this.checkFilterVisibility}
+          setFilterVisibility={this.setFilterVisibility}
+          openSearchResultEmailComposer={openEmailComposer(SEARCH_EMAIL_TYPE)}
+          openLearnerEmailComposer={openEmailComposer(LEARNER_EMAIL_TYPE)}
+          currentProgramEnrollment={currentProgramEnrollment}
+        />
+      </DocumentTitle>
     );
   }
 }
