@@ -146,7 +146,6 @@
     .filter-visibility-toggle, .final-grade-wrapper {
       display: flex;
       flex-direction: column;
-      margin-bottom: 10px;
 
       i {
         cursor: pointer;
@@ -159,12 +158,12 @@
       }
     }
 
-    .filter--final-grade {
-      margin-left: 30px;
+    .filter-visibility-toggle {
+      margin-bottom: 10px;
     }
 
-    .sk-panel.filter--final-grade {
-      padding-left: 0;
+    .filter--final-grade {
+      padding-bottom: 10px;
     }
 
     .filter--grade-average, .filter--final-grade {

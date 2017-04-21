@@ -282,103 +282,6 @@ export const ELASTICSEARCH_RESPONSE = deepFreeze({
       },
       "doc_count": 1
     },
-    "final-grade": {
-      "final-grade": {
-        "final-grade": {
-          "final-grade": {
-            "buckets": [
-              {
-                "doc_count": 0,
-                "key": 0
-              },
-              {
-                "doc_count": 0,
-                "key": 5
-              },
-              {
-                "doc_count": 0,
-                "key": 10
-              },
-              {
-                "doc_count": 0,
-                "key": 15
-              },
-              {
-                "doc_count": 0,
-                "key": 20
-              },
-              {
-                "doc_count": 0,
-                "key": 25
-              },
-              {
-                "doc_count": 0,
-                "key": 30
-              },
-              {
-                "doc_count": 0,
-                "key": 35
-              },
-              {
-                "doc_count": 0,
-                "key": 40
-              },
-              {
-                "doc_count": 0,
-                "key": 45
-              },
-              {
-                "doc_count": 0,
-                "key": 50
-              },
-              {
-                "doc_count": 0,
-                "key": 55
-              },
-              {
-                "doc_count": 0,
-                "key": 60
-              },
-              {
-                "doc_count": 0,
-                "key": 65
-              },
-              {
-                "doc_count": 0,
-                "key": 70
-              },
-              {
-                "doc_count": 0,
-                "key": 75
-              },
-              {
-                "doc_count": 0,
-                "key": 80
-              },
-              {
-                "doc_count": 0,
-                "key": 85
-              },
-              {
-                "doc_count": 0,
-                "key": 90
-              },
-              {
-                "doc_count": 0,
-                "key": 95
-              },
-              {
-                "doc_count": 0,
-                "key": 100
-              }
-            ]
-          },
-          "doc_count": 0
-        },
-        "doc_count": 0
-      },
-      "doc_count": 0
-    },
     "num-courses-passed": {
       "doc_count": 1,
       "num-courses-passed": {
@@ -401,7 +304,7 @@ export const ELASTICSEARCH_RESPONSE = deepFreeze({
         "value": 1
       }
     },
-    "profile.work_history.company_name13": {
+    "profile.work_history.company_name14": {
       "inner": {
         "doc_count": 2,
         "profile.work_history.company_name": {
@@ -442,7 +345,7 @@ export const ELASTICSEARCH_RESPONSE = deepFreeze({
       },
       "doc_count": 1
     },
-    "profile.education.degree_name11": {
+    "profile.education.degree_name12": {
       "inner": {
         "profile.education.degree_name": {
           "doc_count_error_upper_bound": 0,
@@ -487,7 +390,7 @@ export const ELASTICSEARCH_RESPONSE = deepFreeze({
       },
       "doc_count": 1
     },
-    // Adding aggregation response for an enrollment field, which is structured differently
+    // Adding aggregation responses for enrollments, which are structured differently
     // because of custom query building...
     //
     // This agg response is structured as if no filters were applied to enrollments
@@ -521,7 +424,7 @@ export const ELASTICSEARCH_RESPONSE = deepFreeze({
       }
     },
     // This agg response is structured as if one or more filters were applied to enrollments
-    "program.enrollments.payment_status4": {
+    "program.enrollments.payment_status5": {
       "doc_count": 20,
       "inner": {
         "doc_count": 50,
