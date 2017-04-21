@@ -34,6 +34,7 @@ import FilterVisibilityToggle from './search/FilterVisibilityToggle';
 import HitsCount from './search/HitsCount';
 import CustomNoHits from './search/CustomNoHits';
 import ModifiedSelectedFilter from './search/ModifiedSelectedFilter';
+import FinalGradeRangeFilter from './search/FinalGradeRangeFilter';
 import { wrapWithProps } from '../util/util';
 import type { Option } from '../flow/generalTypes';
 import type { AvailableProgram } from '../flow/enrollmentTypes';
@@ -199,6 +200,7 @@ export default class LearnerSearch extends SearchkitComponent {
           {...this.props}
           title="Course"
           filterName="courses"
+          stayVisibleIfFilterApplied="final-grade"
         >
           <NestedAggregatingMenuFilter
             field="program.enrollments.course_title"
@@ -207,6 +209,17 @@ export default class LearnerSearch extends SearchkitComponent {
             id="courses"
           />
         </FilterVisibilityToggle>
+        <div className="final-grade-wrapper">
+          <FinalGradeRangeFilter
+            field="program.enrollments.final_grade"
+            fieldOptions={{ type: 'nested', options: {path: 'program.enrollments'} }}
+            id="final-grade"
+            min={0}
+            max={100}
+            showHistogram={true}
+            title="Final Grade in Selected Course"
+          />
+        </div>
         <FilterVisibilityToggle
           {...this.props}
           filterName="payment_status"

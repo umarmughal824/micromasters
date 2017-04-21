@@ -3,6 +3,7 @@ import React from 'react';
 import R from 'ramda';
 import { SearchkitComponent } from 'searchkit';
 import Icon from 'react-mdl/lib/Icon';
+import { getAppliedFilterValue } from './util';
 
 export const FILTER_ID_ADJUST = {
   "birth_location": "profile.birth_country",
@@ -15,11 +16,12 @@ export const FILTER_ID_ADJUST = {
 
 export default class FilterVisibilityToggle extends SearchkitComponent {
   props: {
-    title:                  string,
-    filterName:             string,
-    checkFilterVisibility:  (filterName: string) => boolean,
-    setFilterVisibility:    (filterName: string, visibility: boolean) => void,
-    children:               React$Element<*>,
+    title:                      string,
+    filterName:                 string,
+    checkFilterVisibility:      (filterName: string) => boolean,
+    setFilterVisibility:        (filterName: string, visibility: boolean) => void,
+    stayVisibleIfFilterApplied: string,
+    children:                   React$Element<*>,
   };
 
   openClass = (): string => {
@@ -62,8 +64,15 @@ export default class FilterVisibilityToggle extends SearchkitComponent {
     return false;
   };
 
+  stayVisibleIfEmpty = (): boolean => {
+    const { stayVisibleIfFilterApplied } = this.props;
+    return this.searchkit.state &&
+      stayVisibleIfFilterApplied &&
+      getAppliedFilterValue(this.searchkit.state[stayVisibleIfFilterApplied]);
+  };
+
   renderFilterTitle = (children: React$Element<*>): React$Element<*>|null => {
-    if (!this.isInResults(children.props.id)) {
+    if (!this.isInResults(children.props.id) && !this.stayVisibleIfEmpty()) {
       return null;
     }
     const { title } = this.props;
