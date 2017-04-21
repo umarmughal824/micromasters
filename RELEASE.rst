@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.55.2
+--------------
+
+- Pin selenium container to a non-broken version
+- Fixed typos in terms of service (#3090)
+- Fixed bug with freeze grade management command not using the right value in a call
+
 Version 0.55.1
 --------------
 
