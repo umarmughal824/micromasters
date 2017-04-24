@@ -1,7 +1,7 @@
 // @flow
 import R from 'ramda';
 import Decimal from 'decimal.js-light';
-
+import moment from 'moment';
 import {
   COUPON_TYPE_STANDARD,
   STATUS_OFFERED,
@@ -28,6 +28,7 @@ import type {
   Course,
   CourseRun,
   Program,
+  ProctoredExamResult,
 } from '../flow/programTypes';
 
 const makeCounter = (): (() => number) => {
@@ -141,3 +142,18 @@ export const makeCoursePrice = (program: Program): CoursePrice => ({
 export const makeCoursePrices = (dashboard: Dashboard): CoursePrices => (
   dashboard.programs.map(makeCoursePrice)
 );
+
+export const makeProctoredExamResult = (): ProctoredExamResult => {
+  let passingScore = Math.random() * 100;
+  let score = Math.random() * 100;
+
+  return {
+    exam_date:               moment().format(),
+    passing_score:           passingScore,
+    score:                   score,
+    grade:                   score > passingScore ? 'Pass' : 'Fail',
+    client_authorization_id: 'asdfj3j3rj;lkjd',
+    passed:                  score > passingScore,
+    percentage_grade:        score / 100,
+  };
+};

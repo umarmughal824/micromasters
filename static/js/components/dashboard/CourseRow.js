@@ -102,7 +102,7 @@ export default class CourseRow extends React.Component {
     if (this.shouldDisplayGradeColumn(run)) {
       columns.push(
         <Cell col={3} key="2">
-          <CourseGrade courseRun={run} />
+          <CourseGrade courseRun={run} course={course} />
         </Cell>
       );
       lastColumnSize = 3;

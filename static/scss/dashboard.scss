@@ -200,6 +200,10 @@
         .caption {
           color: $darkgray;
           font-size: 9pt;
+
+          &:not(:last-child) {
+            padding-bottom: 10px;
+          }
         }
       }
 

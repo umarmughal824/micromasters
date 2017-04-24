@@ -84,7 +84,7 @@ describe('CourseRow', () => {
     assert.deepEqual(descriptionProps.courseRun, courseRun);
     assert.deepEqual(descriptionProps.courseTitle, courseTitle);
     assert.deepEqual(wrapper.find(CourseGrade).props(), {
-      courseRun,
+      courseRun, course,
     });
     let subRowProps = wrapper.find("CourseSubRow").props();
     for (const key of keys) {

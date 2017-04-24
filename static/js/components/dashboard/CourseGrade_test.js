@@ -6,13 +6,14 @@ import _ from 'lodash';
 
 import { EDX_LINK_BASE } from '../../constants';
 import CourseGrade from './CourseGrade';
+import { makeProctoredExamResult } from '../../factories/dashboard';
 
 import { findAndCloneCourse } from '../../util/test_utils';
 
 describe('CourseGrade', () => {
   let gradeTypes = {
-    current_grade: "Course Progress",
-    final_grade: "Final grade"
+    current_grade: "edX Progress",
+    final_grade: "edX grade"
   };
 
   _.forEach(gradeTypes, function(expectedLabel: string, gradeKey: string) {
@@ -31,5 +32,36 @@ describe('CourseGrade', () => {
       assert.equal(gradeView.text(), `${grade}%`);
       assert.equal(wrapper.find(".course-grade .caption").text(), expectedLabel);
     });
+  });
+
+  it('should show exam grades, if it is passed a course', () => {
+    let course = findAndCloneCourse(course => (
+      course !== null && course !== undefined && course.runs.length > 0
+    ));
+    let grade = 50;
+    course.runs[0].current_grade = grade;
+    let examGrade = makeProctoredExamResult();
+    course.proctorate_exams_grades = [examGrade];
+    const wrapper = shallow(<CourseGrade courseRun={course.runs[0]} course={course} />);
+
+    assert.equal(
+      wrapper.find(".course-grade .number").at(0).text(),
+      `${_.round(examGrade.percentage_grade * 100)}%`
+    );
+    assert.equal(
+      wrapper.find(".course-grade .caption").at(0).text(),
+      'Exam Grade'
+    );
+  });
+
+  it('should not show exam grades, if not passed a course', () => {
+    let course = findAndCloneCourse(course => (
+      course !== null && course !== undefined && course.runs.length > 0
+    ));
+    let grade = 50;
+    course.runs[0].current_grade = grade;
+    const wrapper = shallow(<CourseGrade courseRun={course.runs[0]} />);
+    assert.equal(wrapper.find('.course-grade .number').length, 1);
+    assert.equal(wrapper.find('.course-grade .caption').length, 1);
   });
 });

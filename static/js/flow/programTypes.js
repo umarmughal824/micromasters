@@ -29,22 +29,33 @@ export type FinancialAidUserInfo = {
 };
 
 export type Program = {
-  courses: Array<Course>,
-  id: number,
-  title: string,
+  courses:                    Array<Course>,
+  id:                         number,
+  title:                      string,
   financial_aid_availability: boolean,
-  financial_aid_user_info: FinancialAidUserInfo,
-  pearson_exam_status: string,
-  grade_average: ?number,
+  financial_aid_user_info:    FinancialAidUserInfo,
+  pearson_exam_status:        string,
+  grade_average:              ?number,
+};
+
+export type ProctoredExamResult = {
+  exam_date:               string,
+  passing_score:           number,
+  score:                   number,
+  grade:                   string,
+  client_authorization_id: string,
+  passed:                  boolean,
+  percentage_grade:        number
 };
 
 export type Course = {
-  runs: Array<CourseRun>,
-  title: string,
-  has_contact_email: boolean,
-  id: number,
-  position_in_program: number,
-  can_schedule_exam: boolean,
+  runs:                     Array<CourseRun>,
+  title:                    string,
+  has_contact_email:        boolean,
+  id:                       number,
+  position_in_program:      number,
+  can_schedule_exam:        boolean,
+  proctorate_exams_grades?: Array<ProctoredExamResult>,
 };
 
 export type ProgramPageCourse = {
@@ -56,21 +67,21 @@ export type ProgramPageCourse = {
 };
 
 export type CourseRun = {
-  id: number,
-  position: number,
-  current_grade?: number,
-  final_grade?: number,
-  course_id: string,
-  title: string,
+  id:                           number,
+  position:                     number,
+  current_grade?:               number,
+  final_grade?:                 number,
+  course_id:                    string,
+  title:                        string,
   fuzzy_enrollment_start_date?: string,
-  status: string,
-  enrollment_start_date?: string,
-  fuzzy_start_date?: string,
-  course_start_date?: string,
-  course_end_date?: string,
-  course_upgrade_deadline?: string,
-  price?: number,
-  enrollment_url?: ?string,
+  status:                       string,
+  enrollment_start_date?:       string,
+  fuzzy_start_date?:            string,
+  course_start_date?:           string,
+  course_end_date?:             string,
+  course_upgrade_deadline?:     string,
+  price?:                       number,
+  enrollment_url?:              ?string,
 };
 
 export type UserProgram = {
