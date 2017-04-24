@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.55.3
+--------------
+
+- Restored final grade histogram for selected courses in learner search
+- Fixed ProgramFactory price values (#3093)
+
 Version 0.55.2
 --------------
 
