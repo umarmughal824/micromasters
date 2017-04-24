@@ -3,12 +3,11 @@ Models for exams
 """
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models import Model
 
 from micromasters.models import TimestampedModel
 
 
-class ExamProfile(Model):
+class ExamProfile(models.Model):
     """
     Profile model to track syncing this data to the remote
 
@@ -42,6 +41,8 @@ class ExamProfile(Model):
         choices=PROFILE_STATUS_CHOICES,
         default=PROFILE_PENDING,
     )
+    created_on = models.DateTimeField(auto_now_add=True, null=True)  # UTC
+    updated_on = models.DateTimeField(auto_now=True, null=True)  # UTC
 
     def __str__(self):
         return 'Exam Profile "{0}" with status "{1}"'.format(self.id, self.status)
