@@ -207,9 +207,9 @@ class CDDWriterTest(TSVWriterTestCase, TestCase):
         field, and falls back on `first_name` field.
         """
         with mute_signals(post_save):
-            profile = ProfileFactory(
-                first_name=unromanized,
-                romanized_first_name=romanized,
+            profile = ExamProfileFactory(
+                profile__first_name=unromanized,
+                profile__romanized_first_name=romanized,
             )
         assert CDDWriter.first_name(profile) == expected
 
@@ -225,9 +225,9 @@ class CDDWriterTest(TSVWriterTestCase, TestCase):
         field, and falls back on `last_name` field.
         """
         with mute_signals(post_save):
-            profile = ProfileFactory(
-                last_name=unromanized,
-                romanized_last_name=romanized,
+            profile = ExamProfileFactory(
+                profile__last_name=unromanized,
+                profile__romanized_last_name=romanized,
             )
         assert CDDWriter.last_name(profile) == expected
 
@@ -240,9 +240,9 @@ class CDDWriterTest(TSVWriterTestCase, TestCase):
     def test_profile_state(self, country, state, expected):
         """Test that profile_state returns expected values"""
         with mute_signals(post_save):
-            profile = ProfileFactory(
-                country=country,
-                state_or_territory=state
+            profile = ExamProfileFactory(
+                profile__country=country,
+                profile__state_or_territory=state
             )
         assert CDDWriter.profile_state(profile) == expected
 
@@ -251,7 +251,7 @@ class CDDWriterTest(TSVWriterTestCase, TestCase):
         A profile with an invalid country code should raise an InvalidProfileDataException
         """
         with mute_signals(post_save):
-            profile = ProfileFactory(country='XXXX')
+            profile = ExamProfileFactory(profile__country='XXXX')
         with self.assertRaises(InvalidProfileDataException):
             CDDWriter.profile_country_to_alpha3(profile)
 
@@ -271,7 +271,7 @@ class CDDWriterTest(TSVWriterTestCase, TestCase):
         A profile with a valid phone number should be parsed correctly
         """
         with mute_signals(post_save):
-            profile = ProfileFactory(phone_number=input_number)
+            profile = ExamProfileFactory(profile__phone_number=input_number)
         assert CDDWriter.profile_phone_number_to_raw_number(profile) == expected_number
         assert CDDWriter.profile_phone_number_to_country_code(profile) == expected_country_code
 
@@ -288,7 +288,7 @@ class CDDWriterTest(TSVWriterTestCase, TestCase):
         It should raise exceptions for bad data
         """
         with mute_signals(post_save):
-            profile = ProfileFactory(phone_number=bad_number)
+            profile = ExamProfileFactory(profile__phone_number=bad_number)
         with self.assertRaises(InvalidProfileDataException):
             CDDWriter.profile_phone_number_to_raw_number(profile)
         with self.assertRaises(InvalidProfileDataException):
@@ -326,7 +326,7 @@ class CDDWriterTest(TSVWriterTestCase, TestCase):
 
         with mute_signals(post_save):
             exam_profiles = [ExamProfileFactory.create(**kwargs)]
-            exam_profiles[0].profile.updated_on = FIXED_DATETIME
+            exam_profiles[0].updated_on = FIXED_DATETIME
 
         self.cdd_writer.write(self.tsv_file, exam_profiles)
 

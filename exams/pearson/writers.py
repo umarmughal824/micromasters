@@ -134,60 +134,60 @@ class CDDWriter(BaseTSVWriter):
         Initializes a new CDD writer
         """
         super().__init__([
-            ('ClientCandidateID', 'student_id'),
+            ('ClientCandidateID', 'profile.student_id'),
             ('FirstName', self.first_name),
             ('LastName', self.last_name),
-            ('Email', 'user.email'),
-            ('Address1', 'address1'),
-            ('Address2', 'address2'),
-            ('Address3', 'address3'),
-            ('City', 'city'),
+            ('Email', 'profile.user.email'),
+            ('Address1', 'profile.address1'),
+            ('Address2', 'profile.address2'),
+            ('Address3', 'profile.address3'),
+            ('City', 'profile.city'),
             ('State', self.profile_state),
-            ('PostalCode', 'postal_code'),
+            ('PostalCode', 'profile.postal_code'),
             ('Country', self.profile_country_to_alpha3),
             ('Phone', self.profile_phone_number_to_raw_number),
             ('PhoneCountryCode', self.profile_phone_number_to_country_code),
-            ('LastUpdate', lambda profile: self.format_datetime(profile.updated_on)),
-        ], field_prefix='profile')
+            ('LastUpdate', lambda exam_profile: self.format_datetime(exam_profile.updated_on)),
+        ])
 
     @classmethod
-    def first_name(cls, profile):
+    def first_name(cls, exam_profile):
         """
         Determines which first_name to use
 
         Args:
-            profile (profiles.models.Profile): the profile to get state data from
+            exam_profile (exams.models.ExamProfile): the ExamProfile being written
 
         Returns:
             str: romanized_first_name if we have it, first_name otherwise
         """
-        return profile.romanized_first_name or profile.first_name
+        return exam_profile.profile.romanized_first_name or exam_profile.profile.first_name
 
     @classmethod
-    def last_name(cls, profile):
+    def last_name(cls, exam_profile):
         """
         Determines which last_name to use
 
         Args:
-            profile (profiles.models.Profile): the profile to get state data from
+            exam_profile (exams.models.ExamProfile): the ExamProfile being written
 
         Returns:
             str: romanized_last_name if we have it, last_name otherwise
         """
-        return profile.romanized_last_name or profile.last_name
+        return exam_profile.profile.romanized_last_name or exam_profile.profile.last_name
 
     @classmethod
-    def profile_state(cls, profile):
+    def profile_state(cls, exam_profile):
         """
         Transforms the state into the format accepted by PEARSON
 
         Args:
-            profile (profiles.models.Profile): the profile to get state data from
+            exam_profile (exams.models.ExamProfile): the ExamProfile being written
 
         Returns:
             str: 2-character state representation if country is US/CA otherwise None
         """
-        country, state = profile.country_subdivision
+        country, state = exam_profile.profile.country_subdivision
 
         return state if country in PEARSON_STATE_SUPPORTED_COUNTRIES else ''
 
@@ -211,40 +211,40 @@ class CDDWriter(BaseTSVWriter):
         return phone_number
 
     @classmethod
-    def profile_phone_number_to_country_code(cls, profile):
+    def profile_phone_number_to_country_code(cls, exam_profile):
         """
         Get the country code for a profile's phone number
 
         Args:
-            profile (profiles.models.Profile): the profile to get state data from
+            exam_profile (exams.models.ExamProfile): the ExamProfile being written
 
         Returns:
             str: the country code
         """
-        phone_number = cls._parse_phone_number(profile.phone_number)
+        phone_number = cls._parse_phone_number(exam_profile.profile.phone_number)
         return str(phone_number.country_code)
 
     @classmethod
-    def profile_phone_number_to_raw_number(cls, profile):
+    def profile_phone_number_to_raw_number(cls, exam_profile):
         """
         Get just the number for a profile's phone number
 
         Args:
-            profile (profiles.models.Profile): the profile to get state data from
+            exam_profile (exams.models.ExamProfile): the ExamProfile being written
 
         Returns:
             str: full phone number minus the country code
         """
-        phone_number = cls._parse_phone_number(profile.phone_number)
+        phone_number = cls._parse_phone_number(exam_profile.profile.phone_number)
         return phonenumbers.national_significant_number(phone_number)
 
     @classmethod
-    def profile_country_to_alpha3(cls, profile):
+    def profile_country_to_alpha3(cls, exam_profile):
         """
         Returns the alpha3 code of a profile's country
 
         Arguments:
-            profile: the profile to extract the alpha3 country code from
+            exam_profile (exams.models.ExamProfile): the ExamProfile being written
 
         Returns:
             str:
@@ -252,7 +252,7 @@ class CDDWriter(BaseTSVWriter):
         """
         # Pearson requires ISO-3166 alpha3 codes, but we store as alpha2
         try:
-            country = pycountry.countries.get(alpha_2=profile.country)
+            country = pycountry.countries.get(alpha_2=exam_profile.profile.country)
         except KeyError as exc:
             raise InvalidProfileDataException() from exc
         return country.alpha_3
