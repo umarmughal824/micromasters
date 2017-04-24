@@ -374,7 +374,7 @@ class EADWriterTest(TSVWriterTestCase, TestCase):
 
         assert self.tsv_header == (
             "AuthorizationTransactionType\tClientAuthorizationID\t"
-            "ClientCandidateID\tExamSeriesCode\tModules\t"
+            "ClientCandidateID\tExamSeriesCode\t"
             "Accommodations\tEligibilityApptDateFirst\tEligibilityApptDateLast\t"
             "LastUpdate"
         )
@@ -386,10 +386,9 @@ class EADWriterTest(TSVWriterTestCase, TestCase):
         kwargs = {
             'id': 143,
             'operation': 'add',
-            'course__exam_module': 'x14.07',
-            'course__program__exam_series_code': 'MM-DEDP',
-            'date_first_eligible': date(2016, 5, 15),
-            'date_last_eligible': date(2016, 10, 15),
+            'exam_run__exam_series_code': 'MM-DEDP',
+            'exam_run__date_first_eligible': date(2016, 5, 15),
+            'exam_run__date_last_eligible': date(2016, 10, 15),
         }
 
         with mute_signals(post_save):
@@ -401,7 +400,7 @@ class EADWriterTest(TSVWriterTestCase, TestCase):
 
         assert self.tsv_rows[0] == (
             "add\t143\t"
-            "14879\tMM-DEDP\tx14.07\t"
+            "14879\tMM-DEDP\t"
             "\t2016/05/15\t2016/10/15\t"  # accommodation blank intentionally
             "2016/05/15 15:02:55"
         )

@@ -55,7 +55,7 @@ class ExamSignalsTest(MockedESTestCase):
             }
         )
         CachedCertificateFactory.create(user=cls.profile.user, course_run=cls.course_run)
-        ExamRunFactory.create(
+        cls.exam_run = ExamRunFactory.create(
             course=cls.course_run.course,
             date_first_schedulable=datetime.now(pytz.utc) - timedelta(days=1),
         )
@@ -157,11 +157,12 @@ class ExamSignalsTest(MockedESTestCase):
         CachedEnrollmentFactory.create(user=self.profile.user, course_run=self.course_run)
         assert ExamProfile.objects.filter(profile=self.profile).exists() is False
 
-    def test_update_exam_authorization_cached_enrollment_when_no_exam_on_course(self):
+    def test_update_exam_authorization_cached_enrollment_when_no_exam_run(self):
         """
-        Test no exam profile created when course has no `exam_module` setting.
+        Test no exam profile created when course has no ExamRun
         """
-        course = CourseFactory.create(program=self.program, exam_module=None)
+        self.exam_run.delete()
+        course = CourseFactory.create(program=self.program)
         course_run = CourseRunFactory.create(
             end_date=datetime.now(tz=pytz.UTC) - timedelta(days=100),
             enrollment_end=datetime.now(tz=pytz.UTC) + timedelta(hours=1),

@@ -271,10 +271,9 @@ class EADWriter(BaseTSVWriter):
             ('AuthorizationTransactionType', 'operation'),
             ('ClientAuthorizationID', 'id'),
             ('ClientCandidateID', 'user.profile.student_id'),
-            ('ExamSeriesCode', 'course.program.exam_series_code'),
-            ('Modules', 'course.exam_module'),
+            ('ExamSeriesCode', 'exam_run.exam_series_code'),
             ('Accommodations', lambda _: ''),
-            ('EligibilityApptDateFirst', lambda exam_auth: self.format_date(exam_auth.date_first_eligible)),
-            ('EligibilityApptDateLast', lambda exam_auth: self.format_date(exam_auth.date_last_eligible)),
+            ('EligibilityApptDateFirst', lambda exam_auth: self.format_date(exam_auth.exam_run.date_first_eligible)),
+            ('EligibilityApptDateLast', lambda exam_auth: self.format_date(exam_auth.exam_run.date_last_eligible)),
             ('LastUpdate', lambda exam_auth: self.format_datetime(exam_auth.updated_on)),
         ])

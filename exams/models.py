@@ -163,7 +163,7 @@ class ExamAuthorization(TimestampedModel):
 
     user = models.ForeignKey(User, related_name='exam_authorizations')
     course = models.ForeignKey('courses.Course', related_name='exam_authorizations')
-    exam_run = models.ForeignKey(ExamRun, related_name='exam_authorizations', null=True)
+    exam_run = models.ForeignKey(ExamRun, related_name='exam_authorizations')
 
     operation = models.CharField(
         max_length=30,

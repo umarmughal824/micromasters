@@ -42,7 +42,7 @@ class ExamRunAdmin(admin.ModelAdmin):
         Returns:
             bool: True if the run can be modified/deleted
         """
-        return exam_run is not None and not exam_run.has_authorizations
+        return exam_run is None or exam_run.id is None or not exam_run.has_authorizations
 
 
 admin.site.register(models.ExamRun, ExamRunAdmin)
