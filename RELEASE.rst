@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.56.0
+--------------
+
+- Added timestamp fields to ExamProfile (#3025)
+- Refactored course price frontend code (reducer and so on) to use redux-rest
+- Exams: Updated Pearson TOS text (#3098)
+- Added page titles all over the MM app (#3081)
+
 Version 0.55.3
 --------------
 
