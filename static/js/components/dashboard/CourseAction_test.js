@@ -4,7 +4,9 @@ import { shallow } from 'enzyme';
 import moment from 'moment';
 import { assert } from 'chai';
 import sinon from 'sinon';
+import Button from 'react-mdl/lib/Button';
 
+import SpinnerButton from '../SpinnerButton';
 import CourseAction from './CourseAction';
 import {
   COURSE_PRICES_RESPONSE,
@@ -12,26 +14,22 @@ import {
   FINANCIAL_AID_PARTIAL_RESPONSE,
 } from '../../test_constants';
 import {
-  DASHBOARD_FORMAT,
-  STATUS_PASSED,
-  STATUS_NOT_PASSED,
   STATUS_OFFERED,
   STATUS_CAN_UPGRADE,
-  STATUS_CURRENTLY_ENROLLED,
-  STATUS_WILL_ATTEND,
-  STATUS_MISSED_DEADLINE,
   STATUS_PENDING_ENROLLMENT,
   FA_PENDING_STATUSES,
   FA_TERMINAL_STATUSES,
   FA_ALL_STATUSES,
-  FA_STATUS_APPROVED,
-  STATUS_PAID_BUT_NOT_ENROLLED,
+  COURSE_ACTION_PAY,
+  COURSE_ACTION_ENROLL,
+  COURSE_ACTION_REENROLL,
 } from '../../constants';
 import {
   findCourse,
   alterFirstRun,
   findAndCloneCourse
 } from '../../util/test_utils';
+import { makeCourse } from '../../factories/dashboard';
 import { calculatePrices } from '../../lib/coupon';
 
 describe('CourseAction', () => {
@@ -43,6 +41,7 @@ describe('CourseAction', () => {
   let openFinancialAidCalculatorStub;
   let routerPushStub;
   let checkoutStub;
+  let course;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -52,46 +51,19 @@ describe('CourseAction', () => {
     openFinancialAidCalculatorStub = sandbox.stub();
     routerPushStub = sandbox.stub();
     checkoutStub = sandbox.spy();
+    course = makeCourse(0);
   });
 
   afterEach(() => {
     sandbox.restore();
   });
 
-  let getElements = (renderedComponent) => {
-    let button = renderedComponent.find(".enroll-button");
-    if (!button.length) {
-      button = renderedComponent.find(".pay-button");
-    }
-    let buttonText;
-    if (button.length > 0 && button.children().length > 0) {
-      buttonText = button.children().text();
-    }
-    let description = renderedComponent.find(".description");
-    let descriptionText = description.length === 1 ? description.text() : undefined;
-    let btnFooter = renderedComponent.find(".course-action-btn-footer");
-    let btnFooterText = btnFooter.length === 1 ? btnFooter.text() : undefined;
-    let payLaterLink = renderedComponent.find("SpinnerButton.course-action-btn-footer");
-    let payLaterLinkText = payLaterLink.length === 1 ? payLaterLink.children().text() : undefined;
-    return {
-      button: button,
-      buttonText: buttonText,
-      descriptionText: descriptionText,
-      btnFooterText: btnFooterText,
-      payLaterLink: payLaterLink,
-      payLaterLinkText: payLaterLinkText
-    };
-  };
-
   const assertCourseRunSelected = (courseRun) => {
     sinon.assert.calledWith(setEnrollSelectedCourseRunStub, courseRun);
   };
+
   const assertCourseEnrollDialogOpened = () => {
     sinon.assert.calledWith(setEnrollCourseDialogVisibilityStub, true);
-  };
-  const assertRedirectedToOrderSummary = (courseRun) => {
-    const url = `/order_summary/?course_key=${encodeURIComponent(courseRun.course_id)}`;
-    sinon.assert.calledWith(routerPushStub, url);
   };
 
   let renderCourseAction = (props = {}) => {
@@ -104,7 +76,7 @@ describe('CourseAction', () => {
         setEnrollSelectedCourseRun={setEnrollSelectedCourseRunStub}
         setEnrollCourseDialogVisibility={setEnrollCourseDialogVisibilityStub}
         now={now}
-        courseRun={null}
+        courseRun={course.runs[0]}
         prices={prices}
         checkout={checkoutStub}
         openFinancialAidCalculator={openFinancialAidCalculatorStub}
@@ -113,280 +85,30 @@ describe('CourseAction', () => {
     , {context: { router: { push: routerPushStub}}});
   };
 
-  it('shows passed for a passed course', () => {
-    let course = findCourse(course => (
-      course.runs.length > 0 &&
-      course.runs[0].status === STATUS_PASSED
-    ));
-    let firstRun = course.runs[0];
-    const wrapper = renderCourseAction({
-      courseRun: firstRun
+  describe('course enrollment', () => {
+    it('says Enroll for COURSE_ACTION_ENROLL', () => {
+      let wrapper = renderCourseAction({ actionType: COURSE_ACTION_ENROLL });
+      assert.equal(wrapper.find(SpinnerButton).props().children, 'Enroll');
+    });   
+
+    it('should handle a basic enrollment', () => {
+      let wrapper = renderCourseAction({ actionType: COURSE_ACTION_ENROLL });
+      wrapper.find(SpinnerButton).simulate('click');
+      assertCourseRunSelected(course.runs[0]);
+      assertCourseEnrollDialogOpened();     
     });
-    assert.equal(wrapper.find(".passed").text(), 'Passed');
-  });
 
-  it('shows grades pending for a passed FA course', () => {
-    let course = findCourse(course => (
-      course.runs.length > 0 &&
-      course.runs[0].status === STATUS_PASSED
-    ));
-    let firstRun = course.runs[0];
-    const wrapper = renderCourseAction({
-      courseRun: firstRun,
-      hasFinancialAid: true,
-    });
-    assert.equal(wrapper.find(".passed").text(), 'Final grade coming soon');
-  });
-
-  it('shows a message for a failed course', () => {
-    let course = findCourse(course => (
-      course.runs.length > 0 &&
-      course.runs[0].status === STATUS_NOT_PASSED
-    ));
-    let firstRun = course.runs[0];
-    const wrapper = renderCourseAction({
-      courseRun: firstRun
-    });
-    let elements = getElements(wrapper);
-
-    assert.equal(elements.descriptionText, 'Failed');
-  });
-
-  it('shows a message for a verified course', () => {
-    let course = findCourse(course => (
-      course.runs.length > 0 &&
-      course.runs[0].status === STATUS_CURRENTLY_ENROLLED
-    ));
-    let firstRun = course.runs[0];
-    const wrapper = renderCourseAction({
-      courseRun: firstRun
-    });
-    let elements = getElements(wrapper);
-
-    assert.equal(elements.descriptionText, 'In Progress');
-  });
-
-  it('shows a message for course user paid but not enrolled', () => {
-    let course = findCourse(course => (
-      course.runs.length > 0 &&
-      course.runs[0].status === STATUS_PAID_BUT_NOT_ENROLLED
-    ));
-    let firstRun = course.runs[0];
-    const wrapper = renderCourseAction({
-      courseRun: firstRun
-    });
-    let description = wrapper.find(".description");
-    let contactLink = description.find('a');
-
-    assert.equal(
-      description.text(),
-      'Something went wrong. You paid for this course but are not enrolled. Contact us for help.'
-    );
-    assert.isAbove(contactLink.props().href.length, 0);
-    assert.include(contactLink.props().href, SETTINGS.support_email);
-  });
-
-  it('shows a button to enroll, with no link text', () => {
-    let course = findCourse(course => (
-      course.runs.length > 0 &&
-      course.runs[0].status === STATUS_OFFERED
-    ));
-    let firstRun = course.runs[0];
-    const wrapper = renderCourseAction({
-      courseRun: firstRun
-    });
-    let elements = getElements(wrapper);
-
-    assert.isUndefined(elements.button.props().disabled);
-    assert.include(elements.buttonText, 'Enroll Now');
-    elements.button.simulate('click');
-    assertCourseRunSelected(firstRun);
-    assertCourseEnrollDialogOpened();
-  });
-
-  it('hides an invalid date with STATUS_OFFERED', () => {
-    let course = findAndCloneCourse(course => (
-      course.runs.length > 0 &&
-      course.runs[0].status === STATUS_OFFERED
-    ));
-    let firstRun = alterFirstRun(course, {enrollment_start_date: '1999-13-92'});
-    const wrapper = renderCourseAction({
-      courseRun: firstRun
-    });
-    let elements = getElements(wrapper);
-    assert.isUndefined(elements.descriptionText);
-  });
-
-  it('shows an enroll button if user is not enrolled and enrollment starts today or earlier', () => {
-    let course = findAndCloneCourse(course => (
-      course.runs.length > 0 &&
-      course.runs[0].status === STATUS_OFFERED &&
-      course.runs[0].enrollment_start_date !== undefined
-    ));
-    let nowString = now.toISOString();
-    let pastString = moment(now).add(-10, 'days').toISOString();
-
-    [nowString, pastString].forEach(dateString => {
-      let firstRun = alterFirstRun(course, {enrollment_start_date: dateString});
-      const wrapper = renderCourseAction({
-        courseRun: firstRun
-      });
-      let elements = getElements(wrapper);
-
-      assert.isUndefined(elements.button.props().disabled);
-      assert.include(elements.buttonText, 'Enroll Now');
-      elements.button.simulate('click');
-      assertCourseRunSelected(firstRun);
-      assertCourseEnrollDialogOpened();
+    it('says Re-Enroll for COURSE_ACTION_REENROLL', () => {
+      let wrapper = renderCourseAction({ actionType: COURSE_ACTION_REENROLL });
+      assert.equal(wrapper.find(SpinnerButton).props().children, 'Re-Enroll');
     });
   });
 
-  it('shows an upgrade button if user is not verified but is enrolled', () => {
-    let course = findCourse(course => (
-      course.runs.length > 0 &&
-      course.runs[0].status === STATUS_CAN_UPGRADE
-    ));
-    let firstRun = course.runs[0];
-    const wrapper = renderCourseAction({
-      financialAid: {
-        ...FINANCIAL_AID_PARTIAL_RESPONSE,
-        has_user_applied: true,
-        application_status: FA_STATUS_APPROVED,
-      },
-      courseRun: firstRun,
-      hasFinancialAid: true,
+  describe('course payment', () => {
+    it('says Pay for COURSE_ACTION_PAY', () => {
+      let wrapper = renderCourseAction({ actionType: COURSE_ACTION_PAY });
+      assert.equal(wrapper.find(Button).props().children, 'Pay Now');
     });
-    let elements = getElements(wrapper);
-    let formattedUpgradeDate = moment(firstRun.course_upgrade_deadline).format(DASHBOARD_FORMAT);
-
-    assert.isUndefined(elements.button.props().disabled);
-    assert.include(elements.buttonText, 'Pay Now');
-    assert.equal(elements.btnFooterText, `Payment due: ${formattedUpgradeDate}`);
-    elements.button.simulate('click');
-    assertRedirectedToOrderSummary(firstRun);
-  });
-
-  it('hides an invalid date if user is enrolled but is not verified', () => {
-    let course = findAndCloneCourse(course => (
-      course.runs.length > 0 &&
-      course.runs[0].status === STATUS_CAN_UPGRADE
-    ));
-    let firstRun = alterFirstRun(course, { course_upgrade_deadline: '1999-13-92' });
-    const wrapper = renderCourseAction({
-      courseRun: firstRun
-    });
-    let elements = getElements(wrapper);
-    assert.isUndefined(elements.descriptionText, 'Should not be any text');
-  });
-
-  it('shows a message if a user is not enrolled and the course has a future enrollment start date', () => {
-    let course = findAndCloneCourse(course => (
-      course.runs.length > 0 &&
-      course.runs[0].status === STATUS_OFFERED
-    ));
-    let enrollmentStartDate = moment(now).add(10, 'days').toISOString();
-    let firstRun = alterFirstRun(course, {enrollment_start_date: enrollmentStartDate});
-    const wrapper = renderCourseAction({
-      courseRun: firstRun
-    });
-    let elements = getElements(wrapper);
-
-    assert.equal(elements.button.length, 0);
-    let formattedDate = moment(firstRun.enrollment_start_date).format(DASHBOARD_FORMAT);
-    assert.equal(elements.descriptionText, `Enrollment begins ${formattedDate}`);
-  });
-
-  it('shows a message if a user is not enrolled and the course has a fuzzy enrollment date', () => {
-    let course = findAndCloneCourse(course => (
-      course.runs.length > 0 &&
-      course.runs[0].status === STATUS_OFFERED
-    ));
-    let firstRun = alterFirstRun(course, {
-      fuzzy_enrollment_start_date: 'whenever',
-      enrollment_start_date: null
-    });
-    const wrapper = renderCourseAction({
-      courseRun: firstRun
-    });
-    let elements = getElements(wrapper);
-
-    assert.equal(elements.button.length, 0);
-    assert.equal(elements.descriptionText, 'Enrollment begins whenever');
-  });
-
-  it('shows a message if a course run is offered with inadequate enrollment information', () => {
-    let course = findAndCloneCourse(course => (
-      course.runs.length > 0 &&
-      course.runs[0].status === STATUS_OFFERED
-    ));
-    let firstRun = alterFirstRun(course, {
-      fuzzy_enrollment_start_date: null,
-      enrollment_start_date: null
-    });
-    const wrapper = renderCourseAction({
-      courseRun: firstRun
-    });
-    let elements = getElements(wrapper);
-
-    assert.equal(elements.button.length, 0);
-    assert.equal(elements.descriptionText, 'Enrollment information unavailable');
-  });
-
-  it('shows a countdown message if the user is enrolled and the course starts in the future', () => {
-    let course = findAndCloneCourse(course => (
-      course.runs.length > 0 &&
-      course.runs[0].status === STATUS_WILL_ATTEND
-    ));
-    let startDate = moment(now).add(10, 'days');
-    let firstRun = alterFirstRun(course, {course_start_date: startDate.toISOString()});
-    const wrapper = renderCourseAction({
-      courseRun: firstRun
-    });
-    let elements = getElements(wrapper);
-
-    assert.include(elements.descriptionText, 'Course starts in 10 days');
-  });
-
-  it('ignores time of day when showing the number of days until a future course starts', () => {
-    let course = findAndCloneCourse(course => (
-      course.runs.length > 0 &&
-      course.runs[0].status === STATUS_WILL_ATTEND
-    ));
-
-    let currentDate = moment(now).set('hour', 12);
-    let startDate = moment(currentDate).add(10, 'days');
-
-    // Set the course to start in 10 days + 10 minutes
-    startDate.add(10, 'minutes');
-    let firstRun = alterFirstRun(course, {course_start_date: startDate.toISOString()});
-    let wrapper = renderCourseAction({
-      courseRun: firstRun
-    });
-    let elements = getElements(wrapper);
-    assert.include(elements.descriptionText, 'Course starts in 10 days');
-
-    // Set the course to start in 10 days - 10 minutes
-    startDate.add(-20, 'minutes');
-    firstRun = alterFirstRun(course, {course_start_date: startDate.toISOString()});
-    wrapper = renderCourseAction({
-      courseRun: firstRun
-    });
-    elements = getElements(wrapper);
-    assert.include(elements.descriptionText, 'Course starts in 10 days');
-  });
-
-  it('shows a message if the user has missed the upgrade deadline', () => {
-    let course = findAndCloneCourse(course => (
-      course.runs.length > 0 &&
-      course.runs[0].status === STATUS_MISSED_DEADLINE
-    ));
-    let firstRun = course.runs[0];
-    const wrapper = renderCourseAction({
-      courseRun: firstRun
-    });
-    let elements = getElements(wrapper);
-
-    assert.include(elements.descriptionText, 'You missed the payment deadline');
   });
 
   it('shows a pending disabled button if the user has status pending-enrollment', () => {
@@ -396,25 +118,10 @@ describe('CourseAction', () => {
     ));
     let firstRun = course.runs[0];
     const wrapper = renderCourseAction({
-      courseRun: firstRun
+      courseRun: firstRun, actionType: COURSE_ACTION_ENROLL
     });
-
-    assert.equal(wrapper.find(".course-action-btn-footer").text(), "Processing...");
     let buttonProps = wrapper.find("SpinnerButton").props();
     assert.isTrue(buttonProps.spinning);
-  });
-
-  it('hides an invalid date if the user is enrolled and the course has yet to start', () => {
-    let course = findAndCloneCourse(course => (
-      course.runs.length > 0 &&
-      course.runs[0].status === STATUS_WILL_ATTEND
-    ));
-    let firstRun = alterFirstRun(course, {course_start_date: "1999-13-92"});
-    const wrapper = renderCourseAction({
-      courseRun: firstRun
-    });
-    let elements = getElements(wrapper);
-    assert.isUndefined(elements.descriptionText, 'Should not be any text');
   });
 
   describe('with financial aid', () => {
@@ -439,11 +146,11 @@ describe('CourseAction', () => {
           has_user_applied: false
         },
         hasFinancialAid: true,
+        actionType: COURSE_ACTION_ENROLL,
       });
-      let elements = getElements(wrapper);
-
-      assert.isUndefined(elements.button.props().disabled);
-      assert.equal(elements.buttonText, 'Enroll Now');
+      let button = wrapper.find(SpinnerButton);
+      assert.isUndefined(button.props().disabled);
+      assert.equal(button.props().children, 'Enroll');
     });
 
     it('indicates that a user must calculate the course price to upgrade to paid', () => {
@@ -462,11 +169,12 @@ describe('CourseAction', () => {
           has_user_applied: false
         },
         hasFinancialAid: true,
+        actionType: COURSE_ACTION_PAY,
       });
-      let elements = getElements(wrapper);
 
-      assert.isTrue(elements.button.props().disabled);
-      assert.equal(elements.buttonText, 'Pay Now');
+      let button = wrapper.find(Button);
+      assert.isTrue(button.props().disabled);
+      assert.equal(button.props().children, 'Pay Now');
     });
 
     it('shows a disabled enroll button if and only if a user is pending approval', () => {
@@ -483,17 +191,18 @@ describe('CourseAction', () => {
             application_status: status,
           },
           hasFinancialAid: true,
+          actionType: COURSE_ACTION_ENROLL,
         });
-        let elements = getElements(wrapper);
+        let button = wrapper.find(SpinnerButton);
 
         if (FA_PENDING_STATUSES.includes(status)) {
-          assert.isTrue(elements.button.props().disabled);
+          assert.isTrue(button.props().disabled);
           // we don't show a spinner in this case, only for API loads or when waiting for Cybersource callback
-          assert.isFalse(elements.button.props().spinning);
+          assert.isFalse(button.props().spinning);
         } else {
-          assert.isUndefined(elements.button.props().disabled);
+          assert.isUndefined(button.props().disabled);
         }
-        assert.include(elements.buttonText, 'Enroll Now');
+        assert.include(button.props().children, 'Enroll');
       });
     });
 
@@ -512,8 +221,9 @@ describe('CourseAction', () => {
             application_status: status,
           },
           hasFinancialAid: true,
+          actionType: COURSE_ACTION_PAY,
         });
-        let payButton = wrapper.find(".pay-button");
+        let payButton = wrapper.find(Button);
 
         if (FA_TERMINAL_STATUSES.includes(status)) {
           assert.isUndefined(payButton.props().disabled);
@@ -532,6 +242,7 @@ describe('CourseAction', () => {
       const wrapper = renderCourseAction({
         courseRun: firstRun,
         hasFinancialAid: false,
+        actionType: COURSE_ACTION_PAY,
       });
       const payButton = wrapper.find('.pay-button');
       payButton.simulate('click');

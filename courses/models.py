@@ -86,6 +86,13 @@ class Course(models.Model):
         )
 
     @property
+    def has_exam(self):
+        """
+        Check if the course has any exam runs associated with it
+        """
+        return self.exam_runs.exists()
+
+    @property
     def enrollment_text(self):
         """
         Return text that contains start and enrollment
@@ -261,9 +268,9 @@ class CourseRun(models.Model):
         return freeze_status.status == FinalGradeStatus.COMPLETE
 
     @property
-    def has_exam(self):
+    def has_future_exam(self):
         """
-        Check if the user is authorized for an exam for a course run
+        Check if the course run has any future exam runs
         """
         return self.course.exam_runs.filter(date_last_eligible__gt=now_in_utc().date()).exists()
 

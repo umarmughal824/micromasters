@@ -71,6 +71,7 @@ describe('CourseListCard', () => {
             setEnrollCourseDialogVisibility={() => undefined}
             setEnrollSelectedCourseRun={() => undefined}
             checkout={() => undefined}
+            setShowExpandedCourseStatus={() => undefined}
             {...props}
           />
         </Provider>

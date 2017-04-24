@@ -14,9 +14,10 @@ import {
   STATUS_CAN_UPGRADE,
   DASHBOARD_FORMAT,
   DASHBOARD_MONTH_FORMAT,
+  COURSE_ACTION_PAY,
 } from '../../constants';
 
-export default class CourseSubRow extends React.Component {
+export default class GradeDetailPopup extends React.Component {
   props: {
     courseRun:                   CourseRun,
     now:                         moment$Moment,
@@ -139,6 +140,7 @@ export default class CourseSubRow extends React.Component {
     if (isCurrentlyEnrollable(enrollStartDate, now) || isUpgradable(upgradeDate, now)) {
       return <CourseAction
         courseRun={courseRun}
+        actionType={COURSE_ACTION_PAY}
         now={now}
         prices={prices}
         hasFinancialAid={hasFinancialAid}

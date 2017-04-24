@@ -211,7 +211,8 @@ def get_info_for_course(course, mmtrack):
         "runs": [],
         "proctorate_exams_grades": ProctoredExamGradeSerializer(
             mmtrack.get_course_proctorate_exam_results(course), many=True
-        ).data
+        ).data,
+        "has_exam": course.has_exam,
     }
 
     def _add_run(run, mmtrack_, status):

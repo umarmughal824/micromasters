@@ -5,7 +5,7 @@ import { assert } from 'chai';
 import { getDashboard, getOwnDashboard } from './util';
 import { DASHBOARD_RESPONSE } from '../test_constants';
 import { INITIAL_DASHBOARD_STATE } from './dashboard';
-import { assertIsJust, assertIsNothing } from '../lib/sanctuary_test';
+import { assertIsJust, assertIsNothing } from '../lib/test_utils';
 
 describe('reducer utilities', () => {
   describe('username selectors', () => {

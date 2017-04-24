@@ -36,7 +36,7 @@ def is_eligible_for_exam(mmtrack, course_run):
     Returns:
         bool: whether user is eligible or not
     """
-    return course_run.has_exam and mmtrack.has_paid(course_run.edx_course_key)
+    return course_run.has_future_exam and mmtrack.has_paid(course_run.edx_course_key)
 
 
 def _match_field(profile, field):

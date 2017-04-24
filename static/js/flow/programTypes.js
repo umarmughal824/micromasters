@@ -56,6 +56,7 @@ export type Course = {
   position_in_program:      number,
   can_schedule_exam:        boolean,
   proctorate_exams_grades?: Array<ProctoredExamResult>,
+  has_exam:                 boolean,
 };
 
 export type ProgramPageCourse = {
@@ -77,11 +78,12 @@ export type CourseRun = {
   status:                       string,
   enrollment_start_date?:       string,
   fuzzy_start_date?:            string,
-  course_start_date?:           string,
+  course_start_date?:           ?string,
   course_end_date?:             string,
   course_upgrade_deadline?:     string,
   price?:                       number,
   enrollment_url?:              ?string,
+  has_paid:                     boolean,
 };
 
 export type UserProgram = {

@@ -33,6 +33,7 @@ import {
   SET_NAV_DRAWER_OPEN,
   SET_LEARNER_CHIP_VISIBILITY,
   SHOW_ENROLL_PAY_LATER_SUCCESS,
+  SET_SHOW_EXPANDED_COURSE_STATUS,
 
   clearUI,
   updateDialogText,
@@ -68,6 +69,7 @@ import {
   setNavDrawerOpen,
   setLearnerChipVisibility,
   showEnrollPayLaterSuccess,
+  setShowExpandedCourseStatus,
 } from '../actions/ui';
 import { assertCreatedActionHelper } from './test_util';
 
@@ -108,6 +110,7 @@ describe('generated UI action helpers', () => {
       [setNavDrawerOpen, SET_NAV_DRAWER_OPEN],
       [setLearnerChipVisibility, SET_LEARNER_CHIP_VISIBILITY],
       [showEnrollPayLaterSuccess, SHOW_ENROLL_PAY_LATER_SUCCESS],
+      [setShowExpandedCourseStatus, SET_SHOW_EXPANDED_COURSE_STATUS],
     ].forEach(assertCreatedActionHelper);
   });
 });

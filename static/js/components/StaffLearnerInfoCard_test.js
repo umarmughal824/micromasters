@@ -12,7 +12,7 @@ import { DASHBOARD_RESPONSE } from '../test_constants';
 import { stringStrip } from '../util/test_utils';
 import { STATUS_OFFERED } from '../constants';
 import CourseDescription from '../components/dashboard/CourseDescription';
-import CourseGrade from '../components/dashboard/CourseGrade';
+import Progress from '../components/dashboard/courses/Progress';
 
 describe('StaffLearnerInfoCard', () => {
   let sandbox;
@@ -61,7 +61,7 @@ describe('StaffLearnerInfoCard', () => {
 
     let card = renderCard();
     assert.equal(card.find(CourseDescription).length, numRuns);
-    assert.equal(card.find(CourseGrade).length, numRuns);
+    assert.equal(card.find(Progress).length, numRuns);
   });
 
   it('should show average grade, if present', () => {

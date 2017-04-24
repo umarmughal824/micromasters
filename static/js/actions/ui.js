@@ -131,3 +131,6 @@ export const setLearnerChipVisibility = createAction(SET_LEARNER_CHIP_VISIBILITY
 
 export const SHOW_ENROLL_PAY_LATER_SUCCESS = "SHOW_ENROLL_PAY_LATER_SUCCESS";
 export const showEnrollPayLaterSuccess = createAction(SHOW_ENROLL_PAY_LATER_SUCCESS);
+
+export const SET_SHOW_EXPANDED_COURSE_STATUS = 'SET_SHOW_EXPANDED_COURSE_STATUS';
+export const setShowExpandedCourseStatus = createAction(SET_SHOW_EXPANDED_COURSE_STATUS);

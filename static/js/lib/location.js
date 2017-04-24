@@ -1,3 +1,4 @@
+// @flow
 import R from 'ramda';
 import iso3166 from 'iso-3166-2';
 

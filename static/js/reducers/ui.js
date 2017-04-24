@@ -49,6 +49,7 @@ import {
   SET_PROGRAM,
   SET_LEARNER_CHIP_VISIBILITY,
   SHOW_ENROLL_PAY_LATER_SUCCESS,
+  SET_SHOW_EXPANDED_COURSE_STATUS,
 } from '../actions/ui';
 import { EMAIL_COMPOSITION_DIALOG } from '../components/email/constants';
 import type { ToastMessage } from '../flow/generalTypes';
@@ -106,6 +107,7 @@ export type UIState = {
   learnerChipVisibility:               ?string,
   dialogVisibility:                    DialogVisibilityState,
   showEnrollPayLaterSuccess:           ?string,
+  expandedCourseStatuses:              Set<number>,
 };
 
 export const INITIAL_UI_STATE: UIState = {
@@ -146,6 +148,7 @@ export const INITIAL_UI_STATE: UIState = {
   learnerChipVisibility:               null,
   dialogVisibility:                    INITIAL_DIALOG_VISIBILITY_STATE,
   showEnrollPayLaterSuccess:           null,
+  expandedCourseStatuses:              new Set,
 };
 
 export const ui = (state: UIState = INITIAL_UI_STATE, action: Action<any, null>) => {
@@ -349,6 +352,8 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action<any, null>)
     return { ...state, navDrawerOpen: action.payload };
   case SET_LEARNER_CHIP_VISIBILITY:
     return { ...state, learnerChipVisibility: action.payload };
+  case SET_SHOW_EXPANDED_COURSE_STATUS:
+    return { ...state, expandedCourseStatuses: new Set(state.expandedCourseStatuses).add(action.payload) };
   default:
     return state;
   }

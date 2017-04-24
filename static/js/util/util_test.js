@@ -54,7 +54,7 @@ import {
   DASHBOARD_RESPONSE,
   CYBERSOURCE_CHECKOUT_RESPONSE,
 } from '../test_constants';
-import { assertMaybeEquality, assertIsNothing } from '../lib/sanctuary_test';
+import { assertMaybeEquality, assertIsNothing } from '../lib/test_utils';
 import { program } from '../components/ProgressWidget_test';
 import { makeRun, makeCourse, makeProgram } from '../factories/dashboard';
 

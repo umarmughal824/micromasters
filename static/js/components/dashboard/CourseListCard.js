@@ -31,17 +31,18 @@ const priceMessageClassName = "price-message";
 
 export default class CourseListCard extends React.Component {
   props: {
-    coupon?:                      Coupon,
-    program:                      Program,
-    coursePrice:                  CoursePrice,
-    prices:                       CalculatedPrices,
-    openFinancialAidCalculator?:  () => void,
-    now?:                         Object,
-    addCourseEnrollment:          (courseId: string) => Promise<*>,
-    openCourseContactDialog:      (course: Course, canContactCourseTeam: boolean) => void,
-    setEnrollSelectedCourseRun:   (r: CourseRun) => void,
-    setEnrollCourseDialogVisibility: (bool: boolean) => void,
-    ui:                           UIState,
+    coupon?:                         Coupon,
+    program:                         Program,
+    coursePrice:                     CoursePrice,
+    prices:                          CalculatedPrices,
+    openFinancialAidCalculator?:     () => void,
+    now?:                            Object,
+    addCourseEnrollment:             (courseId: string) => Promise<*>,
+    openCourseContactDialog:         (course:   Course, canContactCourseTeam: boolean) => void,
+    setEnrollSelectedCourseRun:      (r:        CourseRun) => void,
+    setEnrollCourseDialogVisibility: (bool:     boolean) => void,
+    setShowExpandedCourseStatus:     (n:        number) => void,
+    ui:                              UIState,
     checkout:                     (s: string) => void,
   };
 
@@ -71,21 +72,21 @@ export default class CourseListCard extends React.Component {
           Your price is <strong>${ price.toString() } USD per course,</strong> including
           both financial aid and your coupon.
           If you want to audit courses for FREE and upgrade later,
-          click Enroll Now then choose the audit option.
+          click Enroll then choose the audit option.
         </p>;
       } else {
         return <p className={priceMessageClassName}>
           Your Personal Course Price is{" "}
           <strong>${ price.toString() } USD per course.</strong> {" "}
           If you want to audit courses for FREE and upgrade later, click
-          Enroll Now then choose the audit option.
+          Enroll then choose the audit option.
         </p>;
       }
     } else {
       return <p className={priceMessageClassName}>
         You need to get your Personal Course Price before you can pay for courses.
         If you want to audit courses for FREE and upgrade later,
-        click Enroll Now then choose the audit option.
+        click Enroll then choose the audit option.
       </p>;
     }
   }
@@ -113,7 +114,7 @@ export default class CourseListCard extends React.Component {
     return <p className={priceMessageClassName}>
       {message}{makeCouponReason(coupon)}.
       If you want to audit courses for FREE and upgrade later,
-      click Enroll Now then choose the audit option.
+      click Enroll then choose the audit option.
     </p>;
   }
 
@@ -157,7 +158,7 @@ export default class CourseListCard extends React.Component {
     return <p className={priceMessageClassName}>
       Courses in this program cost <strong>${ price.toString() } USD each.</strong> {" "}
       If you want to audit courses for FREE and upgrade later,
-      click Enroll Now then choose the audit option.
+      click Enroll then choose the audit option.
     </p>;
   }
 
@@ -170,6 +171,7 @@ export default class CourseListCard extends React.Component {
       openCourseContactDialog,
       setEnrollSelectedCourseRun,
       setEnrollCourseDialogVisibility,
+      setShowExpandedCourseStatus,
       ui,
       checkout
     } = this.props;
@@ -193,6 +195,7 @@ export default class CourseListCard extends React.Component {
         setEnrollCourseDialogVisibility={setEnrollCourseDialogVisibility}
         ui={ui}
         checkout={checkout}
+        setShowExpandedCourseStatus={setShowExpandedCourseStatus}
         {...courseRowOptionalProps}
       />
     );

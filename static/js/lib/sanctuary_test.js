@@ -11,21 +11,14 @@ import {
   getm,
   parseJSON,
   filterE,
+  reduceM,
 } from './sanctuary';
-const { Maybe, Just, Nothing } = S;
-
-export const assertMaybeEquality = (m1: Maybe, m2: Maybe) => {
-  assert(S.equals(m1, m2), `expected ${m1.value} to equal ${m2.value}`);
-};
-
-export const assertIsNothing = (m: Maybe) => {
-  assert(m.isNothing, `should be nothing, is ${m}`);
-};
-
-export const assertIsJust = (m: Maybe, val: any) => {
-  assert(m.isJust, `should be Just(${val}), is ${m}`);
-  assert.deepEqual(m.value, val);
-};
+const { Just, Nothing } = S;
+import {
+  assertMaybeEquality,
+  assertIsNothing,
+  assertIsJust,
+} from './test_utils';
 
 const assertIsLeft = (e, val) => {
   assert(e.isLeft, "should be left");
@@ -162,6 +155,22 @@ describe('sanctuary util functions', () => {
     it('returns a Right if predicate(right.value) === true', () => {
       assertIsRight(filterE(x => x === 4, right), 4);
       assertIsRight(filterE(x => x % 2 === 0, right), 4);
+    });
+  });
+
+  describe('reduceM', () => {
+    it('returns fn(val) where maybe is Just(val)', () => {
+      assert.equal(
+        reduceM("default", str => `${str} value`, S.Just("maybe")),
+        "maybe value"
+      );
+    });
+
+    it('returns fn(default) where maybe is Nothing', () => {
+      assert.equal(
+        reduceM("default", str => `${str} value`, S.Nothing),
+        "default value"
+      );
     });
   });
 });

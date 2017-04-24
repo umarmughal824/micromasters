@@ -71,6 +71,7 @@ export const makeRun = (position: number): CourseRun => {
     title: `Run ${runId}`,
     position: position,
     status: STATUS_OFFERED,
+    has_paid: false,
   };
 };
 
@@ -84,6 +85,7 @@ export const makeCourse = (positionInProgram: number): Course => {
     position_in_program: positionInProgram,
     title: `Title for course ${courseId}`,
     can_schedule_exam: false,
+    has_exam: false,
   };
 };
 

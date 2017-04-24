@@ -15,7 +15,7 @@ import {
   validateNearFutureYear,
 } from './date';
 import { YEAR_VALIDATION_CUTOFF } from '../../constants';
-import { assertMaybeEquality, assertIsNothing } from '../sanctuary_test';
+import { assertMaybeEquality, assertIsNothing } from '../test_utils';
 
 describe('Date validation', () => {
   describe('helper functions', () => {

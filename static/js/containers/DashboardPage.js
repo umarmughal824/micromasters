@@ -49,6 +49,7 @@ import {
   setEnrollSelectedCourseRun,
   showDialog,
   hideDialog,
+  setShowExpandedCourseStatus,
 } from '../actions/ui';
 import { showEnrollPayLaterSuccessMessage } from '../actions/course_enrollments';
 import { findCourseRun } from '../util/util';
@@ -497,6 +498,11 @@ class DashboardPage extends React.Component {
     }
   }
 
+  setShowExpandedCourseStatus = (courseId: number) => {
+    const { dispatch } = this.props;
+    dispatch(setShowExpandedCourseStatus(courseId));
+  };
+
   renderCouponDialog() {
     const {
       programs,
@@ -723,6 +729,7 @@ class DashboardPage extends React.Component {
               openCourseContactDialog={this.openCourseContactDialog}
               setEnrollSelectedCourseRun={this.setEnrollSelectedCourseRun}
               setEnrollCourseDialogVisibility={this.setEnrollCourseDialogVisibility}
+              setShowExpandedCourseStatus={this.setShowExpandedCourseStatus}
               {...courseListCardOptionalProps}
             />
           </div>

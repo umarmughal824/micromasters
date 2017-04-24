@@ -61,3 +61,14 @@ export const filterE = R.curry((predicate, either) => S.either(
   right => predicate(right) ? S.Right(right) : S.Left(right),
   either
 ));
+
+// reduceM :: forall a b. b -> (a -> b) -> Maybe a -> b
+// this is how I think Sanctuary's `reduce` should handle a maybe
+// pass a default value, a function, and a maybe
+// if Nothing, return the function called with the default value
+// if Just, return the function called with the value in the Just
+export const reduceM = R.curry((def, fn, maybe) => S.maybe_(
+  () => fn(def),
+  fn,
+  maybe
+));

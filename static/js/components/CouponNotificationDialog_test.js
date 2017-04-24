@@ -69,6 +69,7 @@ const COURSE: Course = {
   position_in_program: 1,
   runs: [],
   can_schedule_exam: false,
+  has_exam: false,
 };
 
 const PROGRAM: AvailableProgram = {

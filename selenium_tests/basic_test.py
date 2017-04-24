@@ -46,7 +46,7 @@ class BasicTests(SeleniumTestsBase):
 
         # Assert that the purchase went through fine but enrolling in edX failed
         # Which makes sense since there is no edX for these tests
-        assert self.selenium.find_element_by_css_selector(".course-action .description").text == (
+        assert self.selenium.find_element_by_css_selector(".course-status-messages .status-message .message").text == (
             "Something went wrong. You paid for this course but are not enrolled. Contact us for help."
         )
         self.assert_console_logs()

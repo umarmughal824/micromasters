@@ -3,12 +3,13 @@ import React from 'react';
 import Grid, { Cell } from 'react-mdl/lib/Grid';
 import R from 'ramda';
 import Icon from 'react-mdl/lib/Icon';
+import Spinner from 'react-mdl/lib/Spinner';
 
 import CouponMessage from './CouponMessage';
 import CourseAction from './CourseAction';
-import CourseGrade from './CourseGrade';
-import CourseDescription from './CourseDescription';
-import CourseSubRow from './CourseSubRow';
+import Grades from './courses/Grades';
+import ProgressMessage from './courses/ProgressMessage';
+import StatusMessages from './courses/StatusMessages';
 import type { Course, CourseRun, FinancialAidUserInfo } from '../../flow/programTypes';
 import type { UIState } from '../../reducers/ui';
 import type {
@@ -17,49 +18,39 @@ import type {
 } from '../../flow/couponTypes';
 import {
   COUPON_CONTENT_TYPE_COURSE,
-  STATUS_MISSED_DEADLINE,
-  STATUS_NOT_PASSED,
   STATUS_OFFERED,
+  STATUS_PENDING_ENROLLMENT,
+  COURSE_ACTION_ENROLL,
 } from '../../constants';
-import { pickExistingProps } from '../../util/util';
+import {
+  courseStartDateMessage,
+  userIsEnrolled,
+  hasPaidForAnyCourseRun,
+} from './courses/util';
+import { isEnrollableRun } from './courses/util';
 
 export default class CourseRow extends React.Component {
   props: {
-    coupon?: Coupon,
-    course: Course,
-    now: moment$Moment,
-    prices: CalculatedPrices,
-    financialAid: FinancialAidUserInfo,
-    hasFinancialAid: boolean,
-    openFinancialAidCalculator: () => void,
-    addCourseEnrollment: (courseId: string) => void,
-    openCourseContactDialog: (course: Course, canContactCourseTeam: boolean) => void,
-    setEnrollSelectedCourseRun: (r: CourseRun) => void,
+    coupon?:                         Coupon,
+    course:                          Course,
+    now:                             moment$Moment,
+    prices:                          CalculatedPrices,
+    financialAid:                    FinancialAidUserInfo,
+    hasFinancialAid:                 boolean,
+    openFinancialAidCalculator:      () => void,
+    addCourseEnrollment:             (courseId: string) => void,
+    openCourseContactDialog:         (course: Course, canContactCourseTeam: boolean) => void,
+    setEnrollSelectedCourseRun:      (r: CourseRun) => void,
     setEnrollCourseDialogVisibility: (b: boolean) => void,
-    ui: UIState,
-    checkout: (s: string) => void,
+    ui:                              UIState,
+    checkout:                        (s: string) => void,
+    setShowExpandedCourseStatus:     (n: number) => void,
   };
 
-  shouldDisplayGradeColumn = (run: CourseRun): boolean => (
-    run.status !== STATUS_MISSED_DEADLINE
-  );
-
-  needsToEnrollAgain = (run: CourseRun): boolean => (
-    run.status === STATUS_MISSED_DEADLINE || run.status === STATUS_NOT_PASSED
-  );
-
-  futureEnrollableRun = (course: Course): CourseRun|null => (
-    (course.runs.length > 1 && course.runs[1].status === STATUS_OFFERED) ? course.runs[1] : null
-  );
-
   pastCourseRuns = (course: Course): Array<CourseRun> => (
-    (course.runs.length > 1) ?
-      R.drop(1, course.runs).filter(run => run.status !== STATUS_OFFERED) :
-      []
-  );
-
-  hasPaidForAnyCourseRun = (course: Course): boolean => (
-    R.any(R.propEq('has_paid', true), course.runs)
+    (course.runs.length > 1)
+      ? R.drop(1, course.runs).filter(run => run.status !== STATUS_OFFERED) 
+      : []
   );
 
   // $FlowFixMe: CourseRun is sometimes an empty object
@@ -72,73 +63,8 @@ export default class CourseRow extends React.Component {
     return firstRun;
   }
 
-  renderRowColumns(run: CourseRun): Array<React$Element<*>> {
+  courseAction = (run: CourseRun, actionType: string): React$Element<*>|null => {
     const {
-      course,
-      now,
-      prices,
-      financialAid,
-      hasFinancialAid,
-      openFinancialAidCalculator,
-      addCourseEnrollment,
-      openCourseContactDialog,
-      setEnrollSelectedCourseRun,
-      setEnrollCourseDialogVisibility,
-      checkout
-    } = this.props;
-
-    let lastColumnSize, lastColumnClass;
-    let columns = [
-      <Cell col={6} key="1">
-        <CourseDescription
-          courseRun={run}
-          courseTitle={course.title}
-          hasContactEmail={course.has_contact_email}
-          openCourseContactDialog={
-            R.partial(openCourseContactDialog, [course, this.hasPaidForAnyCourseRun(course)])
-          }
-        />
-      </Cell>
-    ];
-
-    if (this.shouldDisplayGradeColumn(run)) {
-      columns.push(
-        <Cell col={3} key="2">
-          <CourseGrade courseRun={run} course={course} />
-        </Cell>
-      );
-      lastColumnSize = 3;
-    } else {
-      lastColumnSize = 6;
-      lastColumnClass = 'long-description';
-    }
-
-    const optionalProps = pickExistingProps(['coupon'], this.props);
-
-    columns.push(
-      // $FlowFixMe: I have no idea why, but Flow complains about <Cell />
-      <Cell col={lastColumnSize} className={lastColumnClass} key="3">
-        <CourseAction
-          courseRun={run}
-          now={now}
-          prices={prices}
-          hasFinancialAid={hasFinancialAid}
-          checkout={checkout}
-          financialAid={financialAid}
-          openFinancialAidCalculator={openFinancialAidCalculator}
-          addCourseEnrollment={addCourseEnrollment}
-          setEnrollSelectedCourseRun={setEnrollSelectedCourseRun}
-          setEnrollCourseDialogVisibility={setEnrollCourseDialogVisibility}
-          {...optionalProps}
-        />
-      </Cell>
-    );
-    return columns;
-  }
-
-  renderSubRows(): Array<React$Element<*>> {
-    const {
-      course,
       now,
       prices,
       financialAid,
@@ -148,39 +74,30 @@ export default class CourseRow extends React.Component {
       setEnrollSelectedCourseRun,
       setEnrollCourseDialogVisibility,
       checkout,
+      coupon,
     } = this.props;
 
-    let firstRun = this.getFirstRun();
-    let subRows = [];
-    let subRowRuns = [];
-
-    if (this.needsToEnrollAgain(firstRun)) {
-      subRowRuns.push(this.futureEnrollableRun(course));
+    if (actionType === COURSE_ACTION_ENROLL && !isEnrollableRun(run)) {
+      return null;
     }
 
-    subRowRuns = subRowRuns.concat(this.pastCourseRuns(course));
-
-    for (let [i, subRowRun] of Object.entries(subRowRuns)) {
-      subRows.push(
-        // $FlowFixMe: Flow thinks subRowRun is mixed even though it's CourseRun|null
-        <CourseSubRow
-          courseRun={subRowRun}
-          now={now}
-          prices={prices}
-          hasFinancialAid={hasFinancialAid}
-          financialAid={financialAid}
-          openFinancialAidCalculator={openFinancialAidCalculator}
-          addCourseEnrollment={addCourseEnrollment}
-          key={i}
-          checkout={checkout}
-          setEnrollSelectedCourseRun={setEnrollSelectedCourseRun}
-          setEnrollCourseDialogVisibility={setEnrollCourseDialogVisibility}
-        />
-      );
-    }
-
-    return subRows;
-  }
+    return (
+      <CourseAction
+        courseRun={run}
+        actionType={actionType}
+        now={now}
+        prices={prices}
+        hasFinancialAid={hasFinancialAid}
+        checkout={checkout}
+        financialAid={financialAid}
+        openFinancialAidCalculator={openFinancialAidCalculator}
+        addCourseEnrollment={addCourseEnrollment}
+        setEnrollSelectedCourseRun={setEnrollSelectedCourseRun}
+        setEnrollCourseDialogVisibility={setEnrollCourseDialogVisibility}
+        coupon={coupon}
+      />
+    );
+  };
 
   renderCouponMessage = () => {
     const { coupon, course } = this.props;
@@ -206,23 +123,88 @@ export default class CourseRow extends React.Component {
     );
   }
 
-  renderColumns = (firstRun: CourseRun): React$Element<*> => (
-    <Grid className="course-row" key="0">
-      { this.renderRowColumns(firstRun) }
-    </Grid>
-  )
+  renderInProgressCourseInfo = (run: CourseRun) => {
+    const {
+      course,
+      openCourseContactDialog,
+      ui,
+      setShowExpandedCourseStatus,
+      coupon,
+    } = this.props;
+
+    return (
+      <div className="enrolled-course-info">
+        <Grades course={course} />
+        <ProgressMessage
+          courseRun={run}
+          course={course}
+          openCourseContactDialog={
+            R.partial(openCourseContactDialog, [course, hasPaidForAnyCourseRun(course)])
+          }
+        />
+        <StatusMessages
+          course={course}
+          firstRun={run}
+          courseAction={this.courseAction}
+          expandedStatuses={ui.expandedCourseStatuses}
+          setShowExpandedCourseStatus={setShowExpandedCourseStatus}
+          coupon={coupon}
+        />
+      </div>
+    );
+  }
+
+  renderEnrollableCourseInfo = (run: CourseRun) => {
+    const { course } = this.props;
+
+    return <div className="enrollable-course-info">
+        <div className="cols">
+        <div className="first-col">
+          { courseStartDateMessage(run) }
+        </div>
+        <div className="second-col">
+          { run.status === STATUS_PENDING_ENROLLMENT
+              ? <Spinner singleColor/>
+              : this.courseAction(run, COURSE_ACTION_ENROLL)
+          }
+          { run.status === STATUS_PENDING_ENROLLMENT ? "Processing..." : null }
+        </div>
+      </div>
+      { !isEnrollableRun(run)
+          ? <StatusMessages
+            course={course}
+            firstRun={run}
+            />
+          : null }
+    </div>;
+  };
+
+  renderCourseInfo = (run: CourseRun) => {
+    const { course } = this.props;
+
+    return (
+      <div className="course-info">
+        <div className="course-title">
+          { course.title }
+        </div>
+        { R.any(userIsEnrolled, course.runs)
+            ? this.renderInProgressCourseInfo(run)
+            : this.renderEnrollableCourseInfo(run)
+        }
+      </div>
+    );
+  };
 
   render() {
     const { ui } = this.props;
+
     let firstRun = this.getFirstRun();
     const showEnrollPayLaterSuccess =  (
       ui.showEnrollPayLaterSuccess && ui.showEnrollPayLaterSuccess === firstRun.course_id
     );
 
-    return <div className="course-container">
-      { showEnrollPayLaterSuccess ? this.renderEnrollmentSuccess() : this.renderColumns(firstRun) }
-      {this.renderCouponMessage()}
-      { this.renderSubRows() }
+    return <div className="course-container course-row">
+      { showEnrollPayLaterSuccess ? this.renderEnrollmentSuccess() : this.renderCourseInfo(firstRun) }
     </div>;
   }
 }

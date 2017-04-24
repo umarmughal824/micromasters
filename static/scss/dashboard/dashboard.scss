@@ -1,3 +1,9 @@
+@import "course-progress";
+@import "course-progress-message";
+@import "grades";
+@import "course-row";
+@import "course-status-messages";
+
 .validation-error-text-large {
   color: #da0000;
   font-size: large;
@@ -183,26 +189,6 @@
 
           .no-runs {
             color: #868686;
-          }
-        }
-      }
-
-      .course-grade {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-
-        .number {
-          font-size: 18pt;
-          font-weight: 500;
-        }
-
-        .caption {
-          color: $darkgray;
-          font-size: 9pt;
-
-          &:not(:last-child) {
-            padding-bottom: 10px;
           }
         }
       }

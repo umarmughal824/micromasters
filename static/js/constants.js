@@ -10,6 +10,7 @@ export const DOCTORATE = 'p';
 export const ISO_8601_FORMAT = 'YYYY-MM-DD';
 export const DASHBOARD_FORMAT = 'MMM D, Y';
 export const DASHBOARD_MONTH_FORMAT = 'MM[/]YYYY';
+export const COURSE_CARD_FORMAT = 'MM/DD/YYYY';
 
 export const CP1252_REGEX = /^[\u0020-\u00FF]*$/;
 // greater-than, comma, quotation-mark
@@ -142,3 +143,7 @@ export const PEARSON_PROFILE_SCHEDULABLE = 'schedulable';
 export const GET = 'GET';
 export const PATCH = 'PATCH';
 export const POST = 'POST';
+
+export const COURSE_ACTION_PAY = 'PAY';
+export const COURSE_ACTION_ENROLL = 'ENROLL';
+export const COURSE_ACTION_REENROLL = 'REENROLL';

@@ -8,7 +8,8 @@ import { circularProgressWidget } from './ProgressWidget';
 import { programCourseInfo, classify } from '../util/util';
 import type { Program } from '../flow/programTypes';
 import CourseDescription from '../components/dashboard/CourseDescription';
-import CourseGrade from '../components/dashboard/CourseGrade';
+import Progress from '../components/dashboard/courses/Progress';
+import Grades from '../components/dashboard/courses/Grades';
 import { STATUS_OFFERED } from '../constants';
 import { S, getm } from '../lib/sanctuary';
 
@@ -22,12 +23,18 @@ const formatCourseRun = R.curry((title, run) => ({
   hasContactEmail: false,
 }));
 
-const formatCourseRuns = course => (
-  course
+const formatCourseInfo = course => (
+  [course
     .runs
     .filter(R.propSatisfies(s => s !== STATUS_OFFERED, 'status'))
-    .map(formatCourseRun(course.title))
+    .map(formatCourseRun(course.title)),
+    course,
+  ]
 );
+
+const pruneUnenrolledCourses = R.filter(([runs]) => (
+  !R.isEmpty(runs)
+));
 
 const renderCourseRuns = R.addIndex(R.map)((props, index) => (
   <div className="course-container" key={index}>
@@ -36,7 +43,18 @@ const renderCourseRuns = R.addIndex(R.map)((props, index) => (
         <CourseDescription {...props} index={index} />
       </Cell>
       <Cell col={6} key='2'>
-        <CourseGrade {...props} />
+        <Progress {...props} />
+      </Cell>
+    </Grid>
+  </div>
+));
+
+const renderCourseInfo = R.addIndex(R.map)(([formattedRuns, course], index) => (
+  <div key={index}>
+    { renderCourseRuns(formattedRuns) }
+    <Grid>
+      <Cell col={6}>
+        <Grades course={course} />
       </Cell>
     </Grid>
   </div>
@@ -54,7 +72,7 @@ const programInfoBadge = (title, text) => (
 );
 
 const displayCourseRuns = R.compose(
-  renderCourseRuns, R.flatten, R.map(formatCourseRuns), R.prop('courses')
+  renderCourseInfo, pruneUnenrolledCourses, R.map(formatCourseInfo), R.prop('courses')
 );
 
 // getProgramProp :: String -> Program -> Either String Number

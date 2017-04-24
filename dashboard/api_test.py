@@ -790,7 +790,14 @@ class InfoCourseTest(CourseTests):
         # default behavior for some mmtrack mocked methods
         self.mmtrack.get_course_proctorate_exam_results.return_value = []
 
-    def assert_course_equal(self, course, course_data_from_call, can_schedule_exam=False, proct_exams=None):
+    def assert_course_equal(
+            self,
+            course,
+            course_data_from_call,
+            can_schedule_exam=False,
+            has_exam=False,
+            proct_exams=None
+    ):
         """Helper to format the course info"""
         proct_exams = proct_exams or []
         expected_data = {
@@ -802,6 +809,7 @@ class InfoCourseTest(CourseTests):
             "has_contact_email": bool(course.contact_email),
             "can_schedule_exam": can_schedule_exam,
             "proctorate_exams_grades": proct_exams,
+            "has_exam": has_exam,
         }
         # remove the runs part: assumed checked with the mock assertion
         del course_data_from_call['runs']
@@ -852,6 +860,22 @@ class InfoCourseTest(CourseTests):
         mock_schedulable.return_value = boolean
         course_info = api.get_info_for_course(course, self.mmtrack)
         assert course_info['can_schedule_exam'] == boolean
+
+    @patch('dashboard.api.is_exam_schedulable', return_value=False)
+    def test_info_returns_has_exam(self, mock_schedulable):
+        """test that get_info_for_course returns whether the course has an exam module or not"""
+        course = CourseFactory.create(contact_email=None)
+        self.assert_course_equal(
+            course,
+            api.get_info_for_course(course, self.mmtrack)
+        )
+        ExamRunFactory.create(course=course)
+        self.assert_course_equal(
+            course,
+            api.get_info_for_course(course, self.mmtrack),
+            has_exam=True
+        )
+        assert mock_schedulable.call_count == 2
 
     @patch('dashboard.api.format_courserun_for_dashboard', autospec=True)
     @patch('dashboard.api.is_exam_schedulable', return_value=False)

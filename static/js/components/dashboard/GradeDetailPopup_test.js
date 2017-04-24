@@ -6,7 +6,7 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 import _ from 'lodash';
 
-import CourseSubRow from './CourseSubRow';
+import GradeDetailPopup from './GradeDetailPopup';
 import {
   DASHBOARD_RESPONSE,
   COURSE_PRICES_RESPONSE,
@@ -17,10 +17,9 @@ import {
   STATUS_NOT_PASSED,
   STATUS_PASSED,
   STATUS_OFFERED,
-  STATUS_CAN_UPGRADE,
 } from '../../constants';
 
-describe('CourseSubRow', () => {
+describe('GradeDetailPopup', () => {
   let sandbox, courseRun, now, openFinancialAidCalculator, addCourseEnrollment;
 
   beforeEach(() => {
@@ -38,7 +37,7 @@ describe('CourseSubRow', () => {
   let renderSubRow = (props = {hasFinancialAid: true}, isShallow = true) => {
     let render = isShallow ? shallow : mount;
     return render(
-      <CourseSubRow
+      <GradeDetailPopup
         financialAid={FINANCIAL_AID_PARTIAL_RESPONSE}
         coursePrice={COURSE_PRICES_RESPONSE[0]}
         openFinancialAidCalculator={openFinancialAidCalculator}
@@ -73,21 +72,6 @@ describe('CourseSubRow', () => {
     });
     let subRowHTML = wrapper.html();
     assert.include(subRowHTML, 'You can re-take this course!');
-  });
-
-  it('indicates open enrollment and presents an enrollment button if the course run is offered and current', () => {
-    Object.assign(courseRun, {
-      status: STATUS_OFFERED,
-      enrollment_start_date: moment().add(-1, 'days'),
-      enrollment_end_date: moment().add(1, 'days')
-    });
-    const wrapper = renderSubRow({
-      courseRun: courseRun,
-    }, false);
-    assert.include(wrapper.find(".course-description").html(), "Enrollment open");
-    assert.equal(wrapper.find(".course-grade").text().trim(), "");
-    let actionCell = wrapper.find(".course-action");
-    assert.equal(actionCell.find("button.enroll-button").text(), "Enroll Now");
   });
 
   it('indicates future enrollment and if a future course run is offered', () => {
@@ -209,21 +193,5 @@ describe('CourseSubRow', () => {
       courseRun: courseRun,
     });
     assert.equal(wrapper.find(".course-description").text(), courseRun.fuzzy_start_date);
-  });
-
-  it('shows a final grade and a payment button with a past course run that was passed and still upgradable', () => {
-    Object.assign(courseRun, {
-      status: STATUS_CAN_UPGRADE,
-      course_end_date: moment().add(-1, 'months'),
-      course_upgrade_deadline: moment().add(1, 'months'),
-      final_grade: 75
-    });
-    const wrapper = renderSubRow({
-      courseRun: courseRun,
-    }, false);
-    assert.equal(wrapper.find(".course-grade").text(), "75%");
-    let courseAction = wrapper.find(".course-action");
-    assert.isAbove(courseAction.find(".pay-button").length, 0);
-    assert.include(courseAction.find(".course-action-btn-footer").text(), "Payment due");
   });
 });

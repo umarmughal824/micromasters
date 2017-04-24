@@ -2,10 +2,7 @@
 // @flow
 import React from 'react';
 import PropTypes from 'prop-types';
-import moment from 'moment';
 import Button from 'react-mdl/lib/Button';
-import R from 'ramda';
-import _ from 'lodash';
 
 import SpinnerButton from '../SpinnerButton';
 import type { Coupon, CalculatedPrices } from '../../flow/couponTypes';
@@ -13,19 +10,13 @@ import type { CourseRun, FinancialAidUserInfo } from '../../flow/programTypes';
 import {
   STATUS_NOT_PASSED,
   STATUS_PASSED,
-  STATUS_CAN_UPGRADE,
-  STATUS_MISSED_DEADLINE,
-  STATUS_CURRENTLY_ENROLLED,
-  STATUS_WILL_ATTEND,
-  STATUS_OFFERED,
   STATUS_PENDING_ENROLLMENT,
-  STATUS_PAID_BUT_NOT_ENROLLED,
-  DASHBOARD_FORMAT,
   FA_PENDING_STATUSES,
   FA_TERMINAL_STATUSES,
+  COURSE_ACTION_PAY,
+  COURSE_ACTION_ENROLL,
+  COURSE_ACTION_REENROLL,
 } from '../../constants';
-import { isCurrentlyEnrollable } from './util';
-import { ifValidDate } from '../../util/date';
 import { isFreeCoupon } from '../../lib/coupon';
 
 export default class CourseAction extends React.Component {
@@ -34,17 +25,18 @@ export default class CourseAction extends React.Component {
   };
 
   props: {
-    courseRun: CourseRun,
-    now: moment$Moment,
-    prices: CalculatedPrices,
-    financialAid: FinancialAidUserInfo,
-    hasFinancialAid: boolean,
-    openFinancialAidCalculator: () => void,
-    addCourseEnrollment: (courseId: string) => void,
-    setEnrollSelectedCourseRun: (r: CourseRun) => void,
-    setEnrollCourseDialogVisibility: (b: boolean) => void,
-    coupon?: Coupon,
-    checkout: (s: string) => void,
+    courseRun:                       CourseRun,
+    now:                             moment$Moment,
+    prices:                          CalculatedPrices,
+    financialAid:                    FinancialAidUserInfo,
+    hasFinancialAid:                 boolean,
+    openFinancialAidCalculator:      () => void,
+    addCourseEnrollment:             (courseId: string) => void,
+    setEnrollSelectedCourseRun:      (r:        CourseRun) => void,
+    setEnrollCourseDialogVisibility: (b:        boolean) => void,
+    coupon?:                         Coupon,
+    actionType:                      string,
+    checkout:                        (s: string) => void,
   };
 
   statusDescriptionClasses = {
@@ -88,7 +80,7 @@ export default class CourseAction extends React.Component {
     }
   }
 
-  renderEnrollButton(run: CourseRun): React$Element<*> {
+  renderEnrollButton(run: CourseRun, actionType: string): React$Element<*> {
     let buttonProps = {};
 
     if (this.hasPendingFinancialAid()) {
@@ -96,16 +88,17 @@ export default class CourseAction extends React.Component {
     }
 
     return (
-      <SpinnerButton
-        className="dashboard-button enroll-button"
-        key="1"
-        component={Button}
-        spinning={run.status === STATUS_PENDING_ENROLLMENT}
-        onClick={() => this.handleEnrollButtonClick(run)}
-        {...buttonProps}
-      >
-        Enroll Now
-      </SpinnerButton>
+      <div className="course-action">
+        <SpinnerButton
+          className="dashboard-button enroll-button"
+          component={Button}
+          spinning={run.status === STATUS_PENDING_ENROLLMENT}
+          onClick={() => this.handleEnrollButtonClick(run)}
+          {...buttonProps}
+        >
+          { actionType === COURSE_ACTION_REENROLL ? 'Re-Enroll' : 'Enroll' }
+        </SpinnerButton>
+      </div>
     );
   }
 
@@ -117,110 +110,26 @@ export default class CourseAction extends React.Component {
       props = {onClick: () => this.redirectToOrderSummary(run)};
     }
     return (
-      <Button
-        className="dashboard-button pay-button"
-        key="1"
-        {...props}
-      >
-        Pay Now
-      </Button>
+      <div className="course-action">
+        <Button
+          className="dashboard-button pay-button"
+          key="1"
+          {...props}
+        >
+          Pay Now
+        </Button>
+      </div>
     );
   }
 
-  renderDescription = R.curry(
-    (className: string, runStatus: ?string, text: ?string): React$Element<*>|null => {
-      let classDefinition = className;
-      if (runStatus && this.statusDescriptionClasses[runStatus]) {
-        classDefinition = `${classDefinition} ${this.statusDescriptionClasses[runStatus]}`;
-      }
-      return text && text.length > 0 ? <div className={classDefinition} key="2">{text}</div> : null;
+  render () {
+    const { courseRun, actionType } = this.props;
+
+    if (actionType === COURSE_ACTION_ENROLL || actionType === COURSE_ACTION_REENROLL) {
+      return this.renderEnrollButton(courseRun, actionType);
+    } else if (actionType === COURSE_ACTION_PAY) {
+      return this.renderPayButton(courseRun);
     }
-  );
-
-  renderTextDescription = this.renderDescription('description', null);
-
-  renderActionBtnDescription = this.renderDescription('course-action-btn-footer', null);
-
-  renderBoxedDescription = this.renderDescription('boxed description', null);
-
-  renderStatusDescription = this.renderDescription('boxed description');
-
-  renderContents(run: CourseRun) {
-    const { now, hasFinancialAid } = this.props;
-
-    let action, description;
-
-    switch (run.status) {
-    case STATUS_PASSED:
-      description = this.renderStatusDescription(run.status, hasFinancialAid ? 'Final grade coming soon' : 'Passed');
-      break;
-    case STATUS_NOT_PASSED:
-      description = this.renderStatusDescription(run.status, 'Failed');
-      break;
-    case STATUS_CURRENTLY_ENROLLED: {
-      description = this.renderBoxedDescription('In Progress');
-      break;
-    }
-    case STATUS_WILL_ATTEND: {
-      let startDate = moment(run.course_start_date).startOf('day');
-      let nowDate = moment(now).startOf('day');
-      let text = ifValidDate('', date => `Course starts in ${date.diff(nowDate, 'days')} days`, startDate);
-      description = this.renderBoxedDescription(text);
-      break;
-    }
-    case STATUS_CAN_UPGRADE: {
-      action = this.renderPayButton(run);
-      const date = moment(run.course_upgrade_deadline);
-      const text = ifValidDate('', date => `Payment due: ${date.format(DASHBOARD_FORMAT)}`, date);
-      description = this.renderActionBtnDescription(text);
-      break;
-    }
-    case STATUS_OFFERED: {
-      let enrollmentStartDate = run.enrollment_start_date ? moment(run.enrollment_start_date) : null;
-      if (isCurrentlyEnrollable(enrollmentStartDate, now)) {
-        action = this.renderEnrollButton(run);
-      } else {
-        let text;
-        if (enrollmentStartDate) {
-          text = ifValidDate('', date => `Enrollment begins ${date.format(DASHBOARD_FORMAT)}`, enrollmentStartDate);
-        } else if (run.fuzzy_enrollment_start_date) {
-          text = `Enrollment begins ${run.fuzzy_enrollment_start_date}`;
-        } else {
-          text = 'Enrollment information unavailable';
-        }
-        description = this.renderTextDescription(text);
-      }
-      break;
-    }
-    case STATUS_MISSED_DEADLINE:
-      description = this.renderTextDescription(
-        'You missed the payment deadline and will not receive MicroMasters credit for this course.'
-      );
-      break;
-    case STATUS_PENDING_ENROLLMENT:
-      action = this.renderEnrollButton(run);
-      description = this.renderActionBtnDescription('Processing...');
-      break;
-    case STATUS_PAID_BUT_NOT_ENROLLED: {
-      const contactText = 'Contact us for help.';
-      const contactHref = `mailto:${SETTINGS.support_email}`;
-      const descriptionText = 'Something went wrong. You paid for this course but are not enrolled.';
-      description = (
-        <div className="description" key="2">
-          {descriptionText} <a href={contactHref}>{contactText}</a>
-        </div>
-      );
-      break;
-    }}
-
-    return _.compact([action, description]);
-  }
-
-  render() {
-    const { courseRun } = this.props;
-
-    return <div className="course-action">
-      { this.renderContents(courseRun) }
-    </div>;
+    return null;
   }
 }

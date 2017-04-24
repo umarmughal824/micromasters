@@ -4,42 +4,35 @@ import { shallow, mount } from 'enzyme';
 import moment from 'moment';
 import { assert } from 'chai';
 import sinon from 'sinon';
-import _ from 'lodash';
 
 import { makeDashboard, makeCourse } from '../../factories/dashboard';
 import CourseRow from './CourseRow';
 import CourseAction from './CourseAction';
-import CourseDescription from './CourseDescription';
-import CourseGrade from './CourseGrade';
-import {
-  DASHBOARD_RESPONSE,
-  FINANCIAL_AID_PARTIAL_RESPONSE,
-} from '../../test_constants';
-import {
-  STATUS_NOT_PASSED,
-  STATUS_OFFERED,
-  STATUS_MISSED_DEADLINE,
-} from '../../constants';
-import { generateCourseFromExisting } from '../../util/test_utils';
+import ProgressMessage from './courses/ProgressMessage';
+import StatusMessages from './courses/StatusMessages';
+import { FINANCIAL_AID_PARTIAL_RESPONSE } from '../../test_constants';
+import { STATUS_NOT_PASSED } from '../../constants';
 import { INITIAL_UI_STATE } from '../../reducers/ui';
+import { makeRunCurrent, makeRunPast } from './courses/test_util';
 
 describe('CourseRow', () => {
-  let sandbox;
-  const defaultCourseRowProps = () => ({
-    hasFinancialAid: true,
-    financialAid: FINANCIAL_AID_PARTIAL_RESPONSE,
-    prices: new Map([[345, 456]]),
-    openFinancialAidCalculator: sandbox.stub(),
-    now: moment(),
-    addCourseEnrollment: sandbox.stub(),
-    course: null,
-    openCourseContactDialog: sandbox.stub(),
-    ui: INITIAL_UI_STATE,
-    checkout: () => undefined
-  });
+  let sandbox, defaultCourseRowProps, openCourseContactDialogStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    openCourseContactDialogStub = sandbox.stub();
+    defaultCourseRowProps = {
+      hasFinancialAid: true,
+      financialAid: FINANCIAL_AID_PARTIAL_RESPONSE,
+      prices: new Map([[345, 456]]),
+      openFinancialAidCalculator: sandbox.stub(),
+      now: moment(),
+      addCourseEnrollment: sandbox.stub(),
+      course: null,
+      openCourseContactDialog: openCourseContactDialogStub,
+      ui: INITIAL_UI_STATE,
+      checkout: () => undefined
+    };
   });
 
   afterEach(() => {
@@ -50,7 +43,7 @@ describe('CourseRow', () => {
     let render = isShallow ? shallow : mount;
     return render(
       <CourseRow
-        {...defaultCourseRowProps()}
+        {...defaultCourseRowProps}
         {...props}
       />,
       {
@@ -63,14 +56,10 @@ describe('CourseRow', () => {
     );
   };
 
-  it('forwards the appropriate props', () => {
+  it('displays relevant things for enrollable course', () => {
     const { programs } = makeDashboard();
     const course = programs[0].courses[0];
-    // change this so there's something to show in CourseSubRow
-    course.runs[1].status = STATUS_NOT_PASSED;
-    const courseRun = course.runs[0];
-    const courseTitle = course.title;
-
+    makeRunCurrent(course.runs[0]);
     const wrapper = renderRow({
       course: course
     }, true);
@@ -82,97 +71,46 @@ describe('CourseRow', () => {
     for (const key of keys) {
       assert.deepEqual(actionProps[key], courseRowProps[key]);
     }
-    let descriptionProps = wrapper.find(CourseDescription).props();
-    assert.deepEqual(descriptionProps.courseRun, courseRun);
-    assert.deepEqual(descriptionProps.courseTitle, courseTitle);
-    assert.deepEqual(wrapper.find(CourseGrade).props(), {
-      courseRun, course,
-    });
-    let subRowProps = wrapper.find("CourseSubRow").props();
-    for (const key of keys) {
-      assert.deepEqual(subRowProps[key], courseRowProps[key]);
-    }
+    assert.deepEqual(wrapper.find('.course-title').text(), course.title);
   });
 
-  describe('with failed/missed-upgrade-deadline runs', () => {
-    let courseToClone = DASHBOARD_RESPONSE.programs[1].courses[0];
-
-    it('shows two-column view when the upgrade deadline was missed', () => {
-      let pastCourseRunCount = 1;
-      let course = generateCourseFromExisting(courseToClone, pastCourseRunCount);
-      course.runs[0].status = STATUS_MISSED_DEADLINE;
-
-      const wrapper = renderRow({
-        course: course
-      });
-      assert.lengthOf(wrapper.find('.course-container').children(), 2);
-    });
-
-    it('shows subrows when a course has been taken multiple times', () => {
-      let courseRunCount = 3;
-      let course = generateCourseFromExisting(courseToClone, courseRunCount);
-      course.runs.forEach(run => {
-        run.status = STATUS_NOT_PASSED;
-      });
-
-      const wrapper = renderRow({
-        course: course
-      });
-      assert.lengthOf(
-        wrapper.find('.course-container .course-sub-row'),
-        courseRunCount,
-        `Should have ${courseRunCount - 1} subrows for past runs & 1 subrow indicating future run status`
-      );
-    });
-
-    it('shows a subrow when a course was failed with no past runs and no available future runs', () => {
-      let pastCourseRunCount = 1;
-      let course = generateCourseFromExisting(courseToClone, pastCourseRunCount);
-      course.runs[0].status = STATUS_NOT_PASSED;
-
-      const wrapper = renderRow({
-        course: course
-      });
-      assert.lengthOf(wrapper.find('.course-container .course-sub-row'), 1);
-    });
-
-    it('shows a subrow when a course was failed and a future run is available', () => {
-      let pastCourseRunCount = 1;
-      let course = generateCourseFromExisting(courseToClone, pastCourseRunCount);
-      let offeredCourseRun = _.cloneDeep(course.runs[0]);
-      course.runs[0].status = STATUS_NOT_PASSED;
-      offeredCourseRun.status = STATUS_OFFERED;
-      course.runs.push(offeredCourseRun);
-
-      const wrapper = renderRow({
-        course: course
-      });
-      assert.lengthOf(wrapper.find('.course-container .course-sub-row'), 1);
-    });
+  it('should not display an "enroll" button if the run is not enrollable', () => {
+    const { programs } = makeDashboard();
+    const course = programs[0].courses[0];
+    makeRunPast(course.runs[0]);
+    const wrapper = renderRow({
+      course: course
+    }, true);
+    assert.equal(0, wrapper.find(CourseAction).length);
   });
 
-  it('passes the correct prop value based on the course having a contact email', () => {
-    for (let hasContactEmail of [true, false]) {
-      let course = makeCourse();
-      course.has_contact_email = hasContactEmail;
+  it('displays relevant things for an enrolled course', () => {
+    const { programs } = makeDashboard();
+    const course = programs[0].courses[0];
+    const courseRun = course.runs[0];
+    course.runs[1].status = STATUS_NOT_PASSED;
+    const wrapper = renderRow({
+      course: course
+    }, true);
+    let progressProps = wrapper.find(ProgressMessage).props();
+    assert.deepEqual(progressProps.course, course);
+    assert.deepEqual(progressProps.courseRun, courseRun);
+    progressProps.openCourseContactDialog('hey!');
+    assert(openCourseContactDialogStub.called);
 
-      const wrapper = shallow(
-        <CourseRow
-          {...defaultCourseRowProps()}
-          course={course}
-        />
-      );
-      assert.equal(wrapper.find('CourseDescription').props().hasContactEmail, hasContactEmail);
-    }
+    let statusProps = wrapper.find(StatusMessages).props();
+    assert.deepEqual(statusProps.course, course);
+    assert.deepEqual(statusProps.firstRun, courseRun);
+
+    assert.deepEqual(wrapper.find('.course-title').text(), course.title);
   });
 
   it('when enroll pay later selected', () => {
-    let props = defaultCourseRowProps();
     let course = makeCourse();
-    props.ui.showEnrollPayLaterSuccess = course.runs[0].course_id;
+    defaultCourseRowProps.ui.showEnrollPayLaterSuccess = course.runs[0].course_id;
     const wrapper = shallow(
       <CourseRow
-        {...props}
+        {...defaultCourseRowProps}
         course={course}
       />
     );

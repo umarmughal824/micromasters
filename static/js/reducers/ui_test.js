@@ -35,6 +35,7 @@ import {
   setNavDrawerOpen,
   setLearnerChipVisibility,
   showEnrollPayLaterSuccess,
+  setShowExpandedCourseStatus,
 
   SHOW_ENROLL_PAY_LATER_SUCCESS,
 } from '../actions/ui';
@@ -243,5 +244,19 @@ describe('ui reducers', () => {
 
   it('should let you set the user chip visibility', () => {
     assertReducerResultState(setLearnerChipVisibility, ui => ui.learnerChipVisibility, null);
+  });
+
+  describe('expanded course status visibility', () => {
+    it('should let you add a course ID', () => {
+      store.dispatch(setShowExpandedCourseStatus(1));
+      assert.isTrue(store.getState().ui.expandedCourseStatuses.has(1));
+    });
+
+    it('should no-op if the same ID is added twice', () => {
+      store.dispatch(setShowExpandedCourseStatus(1));
+      assert.isTrue(store.getState().ui.expandedCourseStatuses.has(1));
+      store.dispatch(setShowExpandedCourseStatus(1));
+      assert.isTrue(store.getState().ui.expandedCourseStatuses.has(1));
+    });
   });
 });

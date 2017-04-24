@@ -120,9 +120,8 @@ export default class CourseDescription extends React.Component {
         key={'view-edx-link'}
         className={'view-edx-link'}
         href={url}
-        target="_blank"
         rel="noopener noreferrer"
-      >
+        target="_blank">
         View on edX
       </a>
       : null;

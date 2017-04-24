@@ -97,6 +97,7 @@ import {
 } from './test_util';
 import { actions } from '../lib/redux_rest';
 import EmailCompositionDialog from '../components/email/EmailCompositionDialog';
+import { makeRunEnrolled } from '../components/dashboard/courses/test_util';
 
 describe('DashboardPage', () => {
   let renderComponent, helper, listenForActions;
@@ -266,7 +267,7 @@ describe('DashboardPage', () => {
         calculatePricesStub.returns(calculatedPrices);
 
         return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
-          assert.include(wrapper.text(), 'Enroll Now');
+          assert.include(wrapper.text(), 'Enroll');
           sinon.assert.calledWith(calculatePricesStub, dashboard.programs, coursePrices, []);
         });
       });
@@ -498,6 +499,7 @@ describe('DashboardPage', () => {
       let course = makeCourse();
       course.has_contact_email = true;
       course.runs[0].has_paid = true;
+      makeRunEnrolled(course.runs[0]);
       dashboardResponse.programs[0].courses = [course];
       helper.dashboardStub.returns(Promise.resolve(dashboardResponse));
 
@@ -539,6 +541,7 @@ describe('DashboardPage', () => {
         course.has_contact_email = true;
         // Set all course runs to unpaid
         course.runs = R.chain(R.set(R.lensProp('has_paid'), false), course.runs);
+        makeRunEnrolled(course.runs[0]);
         dashboardResponse.programs[0].courses = [course];
         dashboardResponse.programs[0].financial_aid_availability = faExpectedObj.hasFA;
         if (faExpectedObj.hasFA) {
@@ -646,7 +649,7 @@ describe('DashboardPage', () => {
         position: 1,
         has_paid: false,
         status: STATUS_CAN_UPGRADE,
-        course_end_date: moment().add(-1, 'months'),
+        course_end_date: moment().add(1, 'months'),
         course_upgrade_deadline: moment().add(1, 'months'),
         final_grade: 75
       }];
@@ -657,6 +660,7 @@ describe('DashboardPage', () => {
       helper.dashboardStub.returns(Promise.resolve(dashboardResponse));
       helper.programsGetStub.returns(Promise.resolve(availablePrograms));
       helper.coursePricesStub.returns(Promise.resolve(coursePrices));
+
       return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
         wrapper.find('.pay-button').props().onClick();
 

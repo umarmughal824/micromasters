@@ -288,6 +288,12 @@ class CourseTests(CourseModelTests):  # pylint: disable=too-many-public-methods
         )
         assert course_run.course.url == expected
 
+    def test_has_exam(self):
+        """test that creating an exam run makes has_exam == true"""
+        assert self.course.has_exam is False
+        ExamRunFactory.create(course=self.course)
+        assert self.course.has_exam is True
+
 
 @ddt
 class CourseRunTests(CourseModelTests):
@@ -454,26 +460,26 @@ class CourseRunTests(CourseModelTests):
         for run in course_runs[1:]:
             assert run.pk not in freeze_run_ids
 
-    def test_has_exam(self):
+    def test_has_future_exam(self):
         """Test course has exam"""
         course_run = self.create_run()
 
-        assert course_run.has_exam is False
+        assert course_run.has_future_exam is False
         exam_run = ExamRunFactory.create(course=course_run.course)
-        assert course_run.has_exam is True
+        assert course_run.has_future_exam is True
         exam_run.delete()
 
-        assert course_run.has_exam is False
+        assert course_run.has_future_exam is False
         exam_run = ExamRunFactory.create(
             course=course_run.course,
             date_last_eligible=now_in_utc().date(),
         )
-        assert course_run.has_exam is False
+        assert course_run.has_future_exam is False
         exam_run.delete()
 
-        assert course_run.has_exam is False
+        assert course_run.has_future_exam is False
         ExamRunFactory.create(
             course=course_run.course,
             date_last_eligible=(now_in_utc() - timedelta(days=1)).date(),
         )
-        assert course_run.has_exam is False
+        assert course_run.has_future_exam is False

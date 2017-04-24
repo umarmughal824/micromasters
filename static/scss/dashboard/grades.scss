@@ -1,0 +1,48 @@
+.course-grades {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin: 17px 0;
+
+  .grades {
+    justify-content: flex-start;
+    flex-direction: row;
+    display: flex;
+  }
+
+  .passed-course {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: $bg-med-green;
+
+    .check-mark-surround {
+      display: flex;
+      background-color: $bg-med-green;
+      border-radius: 50%;
+      height: 40px;
+      width: 40px;
+      margin-bottom: 4px;
+
+      i {
+        color: white;
+        margin: auto;
+      }
+    }
+  }
+
+  .grade-display {
+    display: flex;
+    border: 1px solid $border-color;
+    padding: 10px 15px;
+    border-radius: 3px;
+    margin-right: 8px;
+    font-size: 13px;
+    color: $meddarkgray;
+
+    .number {
+      margin-right: 18px;
+    }
+  }
+}
