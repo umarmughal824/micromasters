@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.56.1
+--------------
+
+- Populate ExamProfile timestamp values and set not null (#3025)
+
 Version 0.56.0
 --------------
 
