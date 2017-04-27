@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.56.2
+--------------
+
+- Added max height and scroll to Current residence (#3076)
+- Implemented basic HTML capabilities for the email composer
+
 Version 0.56.1
 --------------
 
