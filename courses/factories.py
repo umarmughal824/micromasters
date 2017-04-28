@@ -17,7 +17,6 @@ class ProgramFactory(DjangoModelFactory):
     title = fuzzy.FuzzyText(prefix="Program ")
     live = factory.Faker('boolean')
     description = fuzzy.FuzzyText()
-    exam_series_code = factory.Faker('lexify', text="????_MicroMasters")
     price = fuzzy.FuzzyDecimal(low=100, high=12345)
 
     class Meta:
@@ -56,7 +55,6 @@ class CourseFactory(DjangoModelFactory):
 
     description = fuzzy.FuzzyText()
     prerequisites = fuzzy.FuzzyText(prefix="Course requires ")
-    exam_module = factory.Faker('numerify', text="##.##x")
 
     class Meta:
         model = Course

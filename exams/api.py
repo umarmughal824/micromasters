@@ -98,10 +98,6 @@ def authorize_for_exam_run(mmtrack, course_run, exam_run):
         user=mmtrack.user,
         course=course_run.course,
         exam_run=exam_run,
-        defaults={  # write these out even though they're deprecated as putting nulls in here forfeits a db rollback
-            'date_first_eligible': exam_run.date_first_eligible,
-            'date_last_eligible': exam_run.date_last_eligible,
-        }
     )
     log.info(
         '[Exam authorization] user "%s" is authorized for the exam for course id "%s"',

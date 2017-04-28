@@ -179,9 +179,6 @@ class ExamAuthorization(TimestampedModel):
     )
     exam_taken = models.BooleanField(default=False)
 
-    date_first_eligible = models.DateField(null=True)
-    date_last_eligible = models.DateField(null=True)
-
     def __str__(self):
         return 'Exam Authorization "{0}" with status "{1}" for user {2}'.format(
             self.id,

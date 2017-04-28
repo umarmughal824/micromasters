@@ -90,12 +90,6 @@ class ExamAuthorizationFactory(DjangoModelFactory):
     status = FuzzyChoice(
         [value[0] for value in ExamAuthorization.STATUS_CHOICES]
     )
-    date_first_eligible = factory.LazyFunction(
-        lambda: FAKE.date_time_this_year(before_now=False, after_now=True, tzinfo=pytz.utc).date()
-    )
-    date_last_eligible = factory.LazyAttribute(
-        lambda exam_auth: exam_auth.date_first_eligible + timedelta(days=365)
-    )
 
     exam_run = SubFactory(ExamRunFactory)
 
