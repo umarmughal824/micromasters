@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.57.0
+--------------
+
+- Mail: Filter recipient variables (#3115)
+- Fixed mobile view of FA calculator (#3116)
+- Shown public_to_mm profiles when requesting user is enrolled in one of the programs where profile user is enrolled (#3102)
+- some small tweaks to visual styles (#3119)
+- Switched off is_public flag from financial_aid footer (#3121)
+
 Version 0.56.2
 --------------
 
