@@ -21,6 +21,11 @@ from financialaid.constants import (
 
 log = logging.getLogger(__name__)
 
+RECIPIENT_VARIABLE_NAMES = {
+    'PreferredName': 'preferred_name',
+    'Email': 'email',
+}
+
 
 def generate_financial_aid_email(financial_aid):
     """
@@ -85,3 +90,18 @@ def generate_mailgun_response_json(response):
             "message": response.reason
         }
     return response_json
+
+
+def filter_recipient_variables(text):
+    """
+    Filter out recipient variables, like [PreferredName], and substitute it with %recipient.preferred_name%
+    Args:
+        text (string): subject or body of the email
+    Returns:
+        string: with replaced correct recipient variables
+    """
+
+    for key, value in RECIPIENT_VARIABLE_NAMES.items():
+        text = text.replace('[{}]'.format(key), '%recipient.{}%'.format(value))
+
+    return text
