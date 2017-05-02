@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.57.1
+--------------
+
+- Added ExamRun model and updated logic (#3085)
+- Center align toast message (#3120)
+
 Version 0.57.0
 --------------
 
