@@ -229,9 +229,18 @@ class ExamAuthorizationApiTests(TestCase):
             status=ExamAuthorization.STATUS_SUCCESS,
             operation=ExamAuthorization.OPERATION_ADD,
         )
-        active_auths = []
-        for status in [key for key, _ in ExamAuthorization.STATUS_CHOICES]:
-            active_auths.append(ExamAuthorizationFactory.create(exam_run=exam_run, status=status))
+        pending_auth = ExamAuthorizationFactory.create(
+            exam_run=exam_run,
+            status=ExamAuthorization.STATUS_PENDING,
+            operation=ExamAuthorization.OPERATION_ADD,
+        )
+        nonpending_auths = []
+        for status in [
+                ExamAuthorization.STATUS_IN_PROGRESS,
+                ExamAuthorization.STATUS_FAILED,
+                ExamAuthorization.STATUS_SUCCESS,
+        ]:
+            nonpending_auths.append(ExamAuthorizationFactory.create(exam_run=exam_run, status=status))
 
         update_authorizations_for_exam_run(exam_run)
 
@@ -239,7 +248,11 @@ class ExamAuthorizationApiTests(TestCase):
         assert taken_auth.status == ExamAuthorization.STATUS_SUCCESS
         assert taken_auth.operation == ExamAuthorization.OPERATION_ADD
 
-        for auth in active_auths:
+        pending_auth.refresh_from_db()
+        assert pending_auth.status == ExamAuthorization.STATUS_PENDING
+        assert pending_auth.operation == ExamAuthorization.OPERATION_ADD
+
+        for auth in nonpending_auths:
             auth.refresh_from_db()
             assert auth.status == ExamAuthorization.STATUS_PENDING
             assert auth.operation == ExamAuthorization.OPERATION_UPDATE

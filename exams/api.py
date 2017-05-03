@@ -8,6 +8,7 @@ from datetime import datetime
 import pytz
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.db.models import Q
 
 from dashboard.models import (
     CachedEnrollment,
@@ -161,7 +162,9 @@ def update_authorizations_for_exam_run(exam_run):
         exam_run(exams.models.ExamRun): the ExamRun that updated
     """
     # Update all existing auths to pending
-    ExamAuthorization.objects.filter(exam_run=exam_run).exclude(exam_taken=True).update(
+    ExamAuthorization.objects.filter(exam_run=exam_run).exclude(
+        Q(status=ExamAuthorization.STATUS_PENDING) | Q(exam_taken=True)
+    ).update(
         status=ExamAuthorization.STATUS_PENDING,
         operation=ExamAuthorization.OPERATION_UPDATE,
         updated_on=datetime.now(pytz.utc)
