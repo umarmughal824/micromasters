@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.57.2
+--------------
+
+- Populate ExamRun and update ExamAuth writers (#3085)
+- Fix sending mails with automatic checked (#3126)
+- Don&#39;t prompt for confirmation when running migrations locally (#3129)
+- Firefox fixed email type radios (#3127)
+
 Version 0.57.1
 --------------
 
