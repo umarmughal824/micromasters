@@ -126,8 +126,12 @@
       font-size: 15px;
     }
 
-    > div:first-child {
-      max-width: 35%;
+    > div {
+      display: flex !important;
+
+      &:first-child {
+        max-width: 35%;
+      }
     }
   }
 
