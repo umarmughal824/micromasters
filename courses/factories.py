@@ -1,6 +1,4 @@
 """Factories for making test data"""
-from random import randint
-
 import faker
 import pytz
 import factory
@@ -67,8 +65,8 @@ class CourseRunFactory(DjangoModelFactory):
     )
     course = factory.SubFactory(CourseFactory)
     # Try to make sure we escape this correctly
-    edx_course_key = factory.LazyAttribute(
-        lambda x: "course:/v{}/{}".format(randint(1, 100), FAKE.slug())
+    edx_course_key = factory.Sequence(
+        lambda number: "course:/v{}/{}".format(number, FAKE.slug())
     )
     enrollment_start = factory.Faker(
         'date_time_this_month', before_now=True, after_now=False, tzinfo=pytz.utc
