@@ -272,6 +272,7 @@ class EADWriter(BaseTSVWriter):
             ('ClientAuthorizationID', 'id'),
             ('ClientCandidateID', 'user.profile.student_id'),
             ('ExamSeriesCode', 'exam_run.exam_series_code'),
+            ('Modules', lambda _: ''),
             ('Accommodations', lambda _: ''),
             ('EligibilityApptDateFirst', lambda exam_auth: self.format_date(exam_auth.exam_run.date_first_eligible)),
             ('EligibilityApptDateLast', lambda exam_auth: self.format_date(exam_auth.exam_run.date_last_eligible)),

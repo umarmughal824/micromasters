@@ -374,7 +374,7 @@ class EADWriterTest(TSVWriterTestCase, TestCase):
 
         assert self.tsv_header == (
             "AuthorizationTransactionType\tClientAuthorizationID\t"
-            "ClientCandidateID\tExamSeriesCode\t"
+            "ClientCandidateID\tExamSeriesCode\tModules\t"
             "Accommodations\tEligibilityApptDateFirst\tEligibilityApptDateLast\t"
             "LastUpdate"
         )
@@ -400,7 +400,7 @@ class EADWriterTest(TSVWriterTestCase, TestCase):
 
         assert self.tsv_rows[0] == (
             "add\t143\t"
-            "14879\tMM-DEDP\t"
+            "14879\tMM-DEDP\t\t"
             "\t2016/05/15\t2016/10/15\t"  # accommodation blank intentionally
             "2016/05/15 15:02:55"
         )
