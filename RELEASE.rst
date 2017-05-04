@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.57.3
+--------------
+
+- Fixed exam auth operation on exam run update (#3133)
+- Removed unused fields (#3085)
+
 Version 0.57.2
 --------------
 
