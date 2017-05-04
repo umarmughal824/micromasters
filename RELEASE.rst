@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.57.4
+--------------
+
+- Fixed missing module column in exam auth export (#3142)
+- Pass through code coverage environment variables (#3140)
+- Fixed CourseRunFactory.edx_course_key against collisions (#3113)
+
 Version 0.57.3
 --------------
 
