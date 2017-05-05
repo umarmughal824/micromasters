@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.57.5
+--------------
+
+- Fixed an issue with old ExamAuthorizations updating (#3146)
+
 Version 0.57.4
 --------------
 
