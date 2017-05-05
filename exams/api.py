@@ -161,6 +161,9 @@ def update_authorizations_for_exam_run(exam_run):
     Args:
         exam_run(exams.models.ExamRun): the ExamRun that updated
     """
+    if not exam_run.is_schedulable:
+        return
+
     # Update all existing auths to pending
     ExamAuthorization.objects.filter(exam_run=exam_run).exclude(
         Q(status=ExamAuthorization.STATUS_PENDING) | Q(exam_taken=True)

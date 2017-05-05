@@ -3,6 +3,7 @@ Tests for exams API
 """
 from unittest.mock import patch
 
+import ddt
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models.signals import post_save
 from django.test import (
@@ -82,6 +83,7 @@ class SSODigestTests(SimpleTestCase):
             sso_digest(123, 1486069731, 1800)
 
 
+@ddt.ddt
 class ExamAuthorizationApiTests(TestCase):
     """Tests for exam api"""
     @classmethod
@@ -220,9 +222,15 @@ class ExamAuthorizationApiTests(TestCase):
                 course=self.course_run.course
             ).exists() is False
 
-    def test_update_authorizations_for_exam_run(self):
+    @ddt.data(
+        (False, False),
+        (True, False),
+        (False, True),
+    )
+    @ddt.unpack
+    def test_update_authorizations_for_exam_run(self, is_future, is_past):
         """Tests update_authorizations_for_exam_run()"""
-        exam_run = ExamRunFactory.create()
+        exam_run = ExamRunFactory.create(scheduling_future=is_future, scheduling_past=is_past)
         taken_auth = ExamAuthorizationFactory.create(
             exam_run=exam_run,
             exam_taken=True,
@@ -240,7 +248,11 @@ class ExamAuthorizationApiTests(TestCase):
                 ExamAuthorization.STATUS_FAILED,
                 ExamAuthorization.STATUS_SUCCESS,
         ]:
-            nonpending_auths.append(ExamAuthorizationFactory.create(exam_run=exam_run, status=status))
+            nonpending_auths.append(ExamAuthorizationFactory.create(
+                exam_run=exam_run,
+                status=status,
+                operation=ExamAuthorization.OPERATION_ADD,
+            ))
 
         update_authorizations_for_exam_run(exam_run)
 
@@ -254,8 +266,12 @@ class ExamAuthorizationApiTests(TestCase):
 
         for auth in nonpending_auths:
             auth.refresh_from_db()
-            assert auth.status == ExamAuthorization.STATUS_PENDING
-            assert auth.operation == ExamAuthorization.OPERATION_UPDATE
+            if is_past or is_future:
+                assert auth.status != ExamAuthorization.STATUS_PENDING
+                assert auth.operation == ExamAuthorization.OPERATION_ADD
+            else:
+                assert auth.status == ExamAuthorization.STATUS_PENDING
+                assert auth.operation == ExamAuthorization.OPERATION_UPDATE
 
 
 class ExamBulkAuthorizationApiTests(TestCase):
