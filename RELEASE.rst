@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.57.6
+--------------
+
+- Fixed is_exam_schedulable to check schedule dates (#3150)
+
 Version 0.57.5
 --------------
 
