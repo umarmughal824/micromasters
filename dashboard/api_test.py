@@ -28,6 +28,7 @@ from dashboard.api_edx_cache import CachedEdxDataApi
 from dashboard.factories import CachedEnrollmentFactory, CachedCurrentGradeFactory, UserCacheRefreshTimeFactory
 from dashboard.utils import MMTrack
 from exams.models import ExamProfile
+from exams.factories import ExamRunFactory, ExamAuthorizationFactory
 from grades.constants import FinalGradeStatus
 from grades.exceptions import FreezeGradeFailedException
 from grades.factories import ProctoredExamGradeFactory
@@ -1472,3 +1473,20 @@ class InfoProgramTest(MockedESTestCase):
             "grade_average": 91,
         }
         self.assertEqual(res, expected_data)
+
+
+@ddt.ddt
+class ExamSchedulableTests(MockedESTestCase):
+    """Tests exam schedulable"""
+    @ddt.data(
+        (False, False),
+        (False, True),
+        (True, False),
+    )
+    @ddt.unpack
+    def test_is_exam_schedulable(self, is_past, is_future):
+        """Test that is_exam_schedule is correct"""
+        exam_run = ExamRunFactory.create(scheduling_past=is_past, scheduling_future=is_future)
+        exam_auth = ExamAuthorizationFactory.create(exam_run=exam_run, course=exam_run.course)
+
+        assert api.is_exam_schedulable(exam_auth.user, exam_auth.course) is (not is_past and not is_future)

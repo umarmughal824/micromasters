@@ -16,7 +16,7 @@ from financialaid.serializers import FinancialAidDashboardSerializer
 from grades import api
 from grades.models import FinalGrade
 from grades.serializers import ProctoredExamGradeSerializer
-from exams.models import ExamAuthorization
+from exams.models import ExamAuthorization, ExamRun
 
 log = logging.getLogger(__name__)
 
@@ -426,4 +426,5 @@ def is_exam_schedulable(user, course):
     """
     Check if a course is ready to schedule an exam or not
     """
-    return ExamAuthorization.objects.filter(course=course, user=user).exists()
+    schedulable_exam_runs = ExamRun.get_currently_schedulable(course)
+    return ExamAuthorization.objects.filter(user=user, exam_run__in=schedulable_exam_runs).exists()
