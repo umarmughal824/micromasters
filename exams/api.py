@@ -19,6 +19,7 @@ from exams.exceptions import ExamAuthorizationException
 from exams.models import (
     ExamAuthorization,
     ExamProfile,
+    ExamRun,
 )
 
 MESSAGE_NOT_PASSED_OR_EXIST_TEMPLATE = (
@@ -152,6 +153,28 @@ def bulk_authorize_for_exam_run(exam_run):
         )
 
         authorize_for_latest_passed_course(mmtrack, exam_run)
+
+
+def authorize_user_for_schedulable_exam_runs(user, course_run):
+    """
+    Authorizes a user for all schedulable ExamRuns for a CourseRun
+
+    Args:
+        user (django.contib.auth.models.User): the user to authorize
+        course_run (courses.models.CourseRun): the course run to check
+    """
+    mmtrack = get_mmtrack(user, course_run.course.program)
+
+    # for each ExamRun for this course that is currently schedulable, attempt to authorize the user
+    for exam_run in ExamRun.get_currently_schedulable(course_run.course):
+        try:
+            authorize_for_exam_run(mmtrack, course_run, exam_run)
+        except ExamAuthorizationException:
+            log.debug(
+                'Unable to authorize user: %s for exam on course_id: %s',
+                user.username,
+                course_run.course.id
+            )
 
 
 def update_authorizations_for_exam_run(exam_run):

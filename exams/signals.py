@@ -7,10 +7,11 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
+from courses.models import CourseRun
 from dashboard.models import CachedEnrollment
 from dashboard.utils import get_mmtrack
-from exams.api import authorize_for_exam_run
-from exams.exceptions import ExamAuthorizationException
+from ecommerce.models import Order
+from exams.api import authorize_user_for_schedulable_exam_runs
 from exams.models import (
     ExamProfile,
     ExamRun,
@@ -45,18 +46,23 @@ def update_exam_authorization_final_grade(sender, instance, **kwargs):  # pylint
     """
     Signal handler to trigger an exam profile and authorization for FinalGrade creation.
     """
-    mmtrack = get_mmtrack(instance.user, instance.course_run.course.program)
+    authorize_user_for_schedulable_exam_runs(instance.user, instance.course_run)
 
-    # for each ExamRun for this course that is currently schedulable, attempt to authorize the user
-    for exam_run in ExamRun.get_currently_schedulable(instance.course_run.course):
-        try:
-            authorize_for_exam_run(mmtrack, instance.course_run, exam_run)
-        except ExamAuthorizationException:
-            log.debug(
-                'Unable to authorize user: %s for exam on course_id: %s',
-                instance.user.username,
-                instance.course_run.course.id
-            )
+
+@receiver(post_save, sender=Order, dispatch_uid="authorize_exams_order")
+def update_exam_authorization_order(sender, instance, **kwargs):  # pylint: disable=unused-argument
+    """
+    Signal handler to trigger an exam profile and authorization for Order fulfillment.
+    """
+    if instance.status != Order.FULFILLED:
+        return
+
+    paid_edx_course_keys = instance.line_set.values_list('course_key', flat=True)
+
+    for course_run in CourseRun.objects.filter(
+            edx_course_key__in=paid_edx_course_keys
+    ).select_related('course__program'):
+        authorize_user_for_schedulable_exam_runs(instance.user, course_run)
 
 
 @receiver(post_save, sender=CachedEnrollment, dispatch_uid="update_exam_authorization_cached_enrollment")

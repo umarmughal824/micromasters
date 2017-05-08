@@ -3,10 +3,10 @@ Tests for exam signals
 """
 from datetime import datetime, timedelta
 
-from unittest.mock import patch
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from factory.django import mute_signals
+import ddt
 import pytz
 
 from courses.factories import (
@@ -18,6 +18,11 @@ from dashboard.factories import (
     CachedCurrentGradeFactory,
     CachedEnrollmentFactory,
 )
+from ecommerce.factories import (
+    LineFactory,
+    OrderFactory,
+)
+from ecommerce.models import Order
 from exams.factories import ExamRunFactory
 from exams.api_test import create_order
 from exams.models import (
@@ -32,6 +37,7 @@ from search.base import MockedESTestCase
 
 # pylint: disable=no-self-use
 
+@ddt.ddt
 class ExamSignalsTest(MockedESTestCase):
     """
     Tests for exam signals
@@ -107,6 +113,41 @@ class ExamSignalsTest(MockedESTestCase):
             course=self.course_run.course
         ).exists() is True
 
+    def test_update_exam_authorization_order(self):
+        """
+        Verify that update_exam_authorization_final_grade is called when a fulfilled Order saves
+        """
+        with mute_signals(post_save):
+            # muted because enrollment also trigger signal for profile creation. right now we are just
+            # looking final grades
+            CachedEnrollmentFactory.create(user=self.profile.user, course_run=self.course_run)
+
+        FinalGradeFactory.create(
+            user=self.profile.user,
+            course_run=self.course_run,
+            passed=True,
+        )
+
+        order = OrderFactory.create(user=self.profile.user, fulfilled=False)
+        LineFactory.create(course_key=self.course_run.edx_course_key, order=order)
+
+        # There is no ExamProfile or ExamAuthorization before creating the FinalGrade.
+        assert ExamProfile.objects.filter(profile=self.profile).exists() is False
+        assert ExamAuthorization.objects.filter(
+            user=self.profile.user,
+            course=self.course_run.course
+        ).exists() is False
+
+        order.status = Order.FULFILLED
+        order.save()
+
+        # assert Exam Authorization and profile created.
+        assert ExamProfile.objects.filter(profile=self.profile).exists() is True
+        assert ExamAuthorization.objects.filter(
+            user=self.profile.user,
+            course=self.course_run.course
+        ).exists() is True
+
     def test_update_exam_authorization_final_grade_when_user_not_paid(self):
         """
         Verify that update_exam_authorization_final_grade is called and log exception when
@@ -117,20 +158,20 @@ class ExamSignalsTest(MockedESTestCase):
             # signal, we want to see behaviour of FinalGrade here
             CachedEnrollmentFactory.create(user=self.profile.user, course_run=self.course_run)
 
-        with patch("exams.signals.log") as log:
-            FinalGradeFactory.create(
-                user=self.profile.user,
-                course_run=self.course_run,
-                passed=True,
-                course_run_paid_on_edx=False,
-            )
+        assert ExamProfile.objects.filter(profile=self.profile).exists() is False
+        assert ExamAuthorization.objects.filter(
+            user=self.profile.user,
+            course=self.course_run.course
+        ).exists() is False
 
-        log.debug.assert_called_with(
-            'Unable to authorize user: %s for exam on course_id: %s',
-            self.profile.user.username,
-            self.course_run.course.id
+        FinalGradeFactory.create(
+            user=self.profile.user,
+            course_run=self.course_run,
+            passed=True,
+            course_run_paid_on_edx=False,
         )
-        # assert Exam Authorization and profile created.
+
+        # assert Exam Authorization and profile not created.
         assert ExamProfile.objects.filter(profile=self.profile).exists() is False
         assert ExamAuthorization.objects.filter(
             user=self.profile.user,
