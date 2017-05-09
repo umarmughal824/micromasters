@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.57.7
+--------------
+
+- Added signal to authorize for exams on order fulfillment (#3161)
+- Bypassed order summary for non FA courses and redirect users to edX course enrollment page (#3135)
+- small css change to headers on tab pages (#3149)
+
 Version 0.57.6
 --------------
 
