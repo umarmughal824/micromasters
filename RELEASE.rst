@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.57.8
+--------------
+
+- Implemented basic display for the exam grade
+
 Version 0.57.7
 --------------
 
