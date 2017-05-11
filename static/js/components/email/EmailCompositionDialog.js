@@ -4,9 +4,10 @@ import Dialog from 'material-ui/Dialog';
 import R from 'ramda';
 import { Editor } from 'react-draft-wysiwyg';
 // $FlowFixMe: Flow thinks this module isn't present for some reason
-import { EditorState, ContentState, convertFromHTML } from 'draft-js';
+import { EditorState, ContentState, convertFromHTML, Modifier } from 'draft-js';
 
 import AutomaticEmailOptions from './AutomaticEmailOptions';
+import RecipientVariableButton from './RecipientVariableButton';
 import { FETCH_PROCESSING } from '../../actions';
 import { dialogActions } from '../inputs/util';
 import { isNilOrBlank } from '../../util/util';
@@ -32,7 +33,7 @@ const convertHTMLToEditorState = (html: string): Object => {
 // Otherwise, we set our state to be a blank object, which will cause the
 // <Editor /> component to create a blank EditorState of its own accord.
 const editorStateFromProps = R.compose(
-  S.maybe({}, R.objOf('editorState')),
+  S.maybe({editorState: EditorState.createEmpty()}, R.objOf('editorState')),
   S.map(convertHTMLToEditorState),
   S.filter(R.compose(R.not, R.isEmpty)),
   getm('body'),
@@ -70,7 +71,7 @@ type EmailDialogProps = {
 
 export default class EmailCompositionDialog extends React.Component {
   state: {
-    editorState: ?Object,
+    editorState: Object,
   };
 
   props: EmailDialogProps;
@@ -85,6 +86,40 @@ export default class EmailCompositionDialog extends React.Component {
       this.setState(editorStateFromProps(nextProps));
     }
   }
+
+  insertRecipientVariable = (variableName: string) => {
+
+    const {editorState} = this.state;
+    let selection = editorState.getSelection();
+    const entityKey = editorState
+      .getCurrentContent()
+      .createEntity('MENTION', 'IMMUTABLE', {})
+      .getLastCreatedEntityKey();
+
+    let contentState = Modifier.replaceText(
+      editorState.getCurrentContent(),
+      selection,
+      `${variableName}`,
+      editorState.getCurrentInlineStyle(),
+      entityKey,
+    );
+    let newEditorState = EditorState.push(editorState, contentState, 'insert-characters');
+    // insert a blank space after the variable
+    selection = newEditorState.getSelection().merge({
+      anchorOffset: selection.get('anchorOffset') + variableName.length,
+      focusOffset: selection.get('anchorOffset') + variableName.length,
+    });
+    newEditorState = EditorState.acceptSelection(newEditorState, selection);
+    contentState = Modifier.insertText(
+      newEditorState.getCurrentContent(),
+      selection,
+      ' ',
+      newEditorState.getCurrentInlineStyle(),
+      undefined,
+    );
+    this.onEditorStateChange(EditorState.push(newEditorState, contentState, 'insert-characters'));
+
+  };
 
   showValidationError = (fieldName: string): ?React$Element<*> => {
     const { activeEmail: { validationErrors } } = this.props;
@@ -133,7 +168,7 @@ export default class EmailCompositionDialog extends React.Component {
   };
 
   clearEditorState = () => {
-    this.setState({ editorState: null });
+    this.setState({ editorState: EditorState.createEmpty() });
   };
 
   closeEmailComposerAndSend = () => {
@@ -146,6 +181,15 @@ export default class EmailCompositionDialog extends React.Component {
     closeAndClearEmailComposer();
     this.clearEditorState();
   };
+
+  makeCustomToolbarButtons = R.map((variableName: string) => {
+    return <RecipientVariableButton
+      value={variableName}
+      key={variableName}
+      onClick={()=>(this.insertRecipientVariable(`[${variableName}]`))}
+    />;
+  });
+
 
   render() {
     if (!this.props.activeEmail) return null;
@@ -193,6 +237,10 @@ export default class EmailCompositionDialog extends React.Component {
           onEditorStateChange={this.onEditorStateChange}
           toolbar={draftWysiwygToolbar}
         />
+        <div className="toolbar-below">
+          <div className="insert" >Insert:</div>
+          {this.makeCustomToolbarButtons(['PreferredName', 'Email'])}
+        </div>
         { this.showValidationError('body') }
       </div>
     </Dialog>;
