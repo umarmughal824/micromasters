@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.57.9
+--------------
+
+- Added temporary message for FA final grades (#3176)
+- CMS: Link ProgramCourse to Course (#3165)
+- Prevent course run coupons from being created (#3171)
+- Mail: Add Recipient Variables Toolbar (#3145)
+- Use official selenium images (#3170)
+- small css change (#3168)
+
 Version 0.57.8
 --------------
 
