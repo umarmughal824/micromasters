@@ -62,10 +62,11 @@ export default class CourseSubRow extends React.Component {
   );
 
   courseRunStatus = (courseRun: CourseRun) => {
+    const { hasFinancialAid } = this.props;
     if (courseRun.status === STATUS_NOT_PASSED) {
       return 'Failed';
     } else if (courseRun.status === STATUS_PASSED) {
-      return 'Passed';
+      return hasFinancialAid ? 'Final grade coming soon' : 'Passed';
     }
   };
 

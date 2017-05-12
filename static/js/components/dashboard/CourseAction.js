@@ -139,13 +139,13 @@ export default class CourseAction extends React.Component {
   renderStatusDescription = this.renderDescription('boxed description');
 
   renderContents(run: CourseRun) {
-    const { now } = this.props;
+    const { now, hasFinancialAid } = this.props;
 
     let action, description;
 
     switch (run.status) {
     case STATUS_PASSED:
-      description = this.renderStatusDescription(run.status, 'Passed');
+      description = this.renderStatusDescription(run.status, hasFinancialAid ? 'Final grade coming soon' : 'Passed');
       break;
     case STATUS_NOT_PASSED:
       description = this.renderStatusDescription(run.status, 'Failed');

@@ -121,6 +121,19 @@ describe('CourseAction', () => {
     assert.equal(wrapper.find(".passed").text(), 'Passed');
   });
 
+  it('shows grades pending for a passed FA course', () => {
+    let course = findCourse(course => (
+      course.runs.length > 0 &&
+      course.runs[0].status === STATUS_PASSED
+    ));
+    let firstRun = course.runs[0];
+    const wrapper = renderCourseAction({
+      courseRun: firstRun,
+      hasFinancialAid: true,
+    });
+    assert.equal(wrapper.find(".passed").text(), 'Final grade coming soon');
+  });
+
   it('shows a message for a failed course', () => {
     let course = findCourse(course => (
       course.runs.length > 0 &&

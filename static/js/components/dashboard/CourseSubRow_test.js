@@ -34,11 +34,10 @@ describe('CourseSubRow', () => {
     sandbox.restore();
   });
 
-  let renderSubRow = (props = {}, isShallow = true) => {
+  let renderSubRow = (props = {hasFinancialAid: true}, isShallow = true) => {
     let render = isShallow ? shallow : mount;
     return render(
       <CourseSubRow
-        hasFinancialAid={true}
         financialAid={FINANCIAL_AID_PARTIAL_RESPONSE}
         coursePrice={COURSE_PRICES_RESPONSE[0]}
         openFinancialAidCalculator={openFinancialAidCalculator}
@@ -136,6 +135,7 @@ describe('CourseSubRow', () => {
     });
     const wrapper = renderSubRow({
       courseRun: courseRun,
+      hasFinancialAid: false,
     });
     assert.equal(wrapper.find(".course-grade").text(), "50%");
     assert.equal(wrapper.find(".course-action").text(), "Failed");
@@ -149,11 +149,25 @@ describe('CourseSubRow', () => {
     };
     const wrapper = renderSubRow({
       courseRun: courseRun,
+      hasFinancialAid: false,
     });
     assert.equal(wrapper.find(".course-grade").text(), "100%");
     assert.equal(wrapper.find(".course-action").text(), "Passed");
   });
 
+  it('should display grade pending if a course was passed with financial aid', () => {
+    let courseRun = {
+      ...courseRun,
+      status: STATUS_PASSED,
+      final_grade: 100
+    };
+    const wrapper = renderSubRow({
+      courseRun: courseRun,
+      hasFinancialAid: true,
+    });
+    assert.equal(wrapper.find(".course-grade").text(), "100%");
+    assert.equal(wrapper.find(".course-action").text(), "Final grade coming soon");
+  });
 
   it('shows a course date range for a failed course run', () => {
     Object.assign(courseRun, {
