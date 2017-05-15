@@ -82,7 +82,7 @@ export default class EmailCompositionDialog extends React.Component {
   }
 
   componentWillReceiveProps (nextProps: EmailDialogProps) {
-    if (R.isNil(this.state.editorState)) {
+    if (!this.state.editorState.getCurrentContent().hasText()) {
       this.setState(editorStateFromProps(nextProps));
     }
   }
