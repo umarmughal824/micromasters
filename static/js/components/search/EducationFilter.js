@@ -9,6 +9,7 @@ import {
   SearchkitComponent,
   TermsBucket,
 } from 'searchkit';
+import R from 'ramda';
 
 import { EDUCATION_LEVELS } from '../../constants';
 import PatchedMenuFilter from './PatchedMenuFilter';
@@ -58,7 +59,7 @@ export default class EducationFilter extends SearchkitComponent {
 
   bucketsTransform = (buckets: Array<Object>) => (
     buckets.map(bucket => ({
-      doc_count: bucket.school_name_count.doc_count,
+      doc_count: R.pathOr(0, ['school_name_count', 'doc_count'], bucket),
       key: bucket.key,
     }))
   );
