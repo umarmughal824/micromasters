@@ -10,7 +10,6 @@ import {
   HitsStats,
   Pagination,
   ResetFilters,
-  RangeFilter,
   SearchBox,
   SortingSelector,
   MultiMatchQuery,
@@ -35,6 +34,7 @@ import HitsCount from './search/HitsCount';
 import CustomNoHits from './search/CustomNoHits';
 import ModifiedSelectedFilter from './search/ModifiedSelectedFilter';
 import FinalGradeRangeFilter from './search/FinalGradeRangeFilter';
+import EnabledSelectionRangeFilter from './search/EnabledSelectionRangeFilter';
 import { wrapWithProps } from '../util/util';
 import type { Option } from '../flow/generalTypes';
 import type { AvailableProgram } from '../flow/enrollmentTypes';
@@ -258,7 +258,7 @@ export default class LearnerSearch extends SearchkitComponent {
           filterName="num-courses-passed"
           title="# of Courses Passed"
         >
-          <RangeFilter
+          <EnabledSelectionRangeFilter
             field="program.num_courses_passed"
             id="num-courses-passed"
             min={0}
@@ -271,7 +271,7 @@ export default class LearnerSearch extends SearchkitComponent {
           filterName="grade-average"
           title="Average Grade in Program"
         >
-          <RangeFilter
+          <EnabledSelectionRangeFilter
             field="program.grade_average"
             id="grade-average"
             min={0}

@@ -1,13 +1,14 @@
 import {
-  RangeFilter, RangeAccessor, RangeQuery,
+  RangeFilter, RangeQuery,
   HistogramBucket, FilterBucket, CardinalityMetric
 } from "searchkit";
 import _ from 'lodash';
 import { NestedAccessorMixin } from './util';
+import { EnabledSelectionRangeAccessor } from './EnabledSelectionRangeFilter';
 
 const REQUIRED_FILTER_ID = 'courses';
 
-class FinalGradeRangeAccessor extends NestedAccessorMixin(RangeAccessor) {
+class FinalGradeRangeAccessor extends NestedAccessorMixin(EnabledSelectionRangeAccessor) {
   /**
    * Overrides buildOwnQuery in RangeAccessor
    * By default, Searchkit does this by creating an aggs bucket that applies all filters

@@ -64,15 +64,19 @@ export default class FilterVisibilityToggle extends SearchkitComponent {
     return false;
   };
 
+  isFilterSelected = (id: string): boolean => {
+    return this.searchkit.state && id && getAppliedFilterValue(this.searchkit.state[id]);
+  };
+
   stayVisibleIfEmpty = (): boolean => {
     const { stayVisibleIfFilterApplied } = this.props;
-    return this.searchkit.state &&
-      stayVisibleIfFilterApplied &&
-      getAppliedFilterValue(this.searchkit.state[stayVisibleIfFilterApplied]);
+    return this.isFilterSelected(stayVisibleIfFilterApplied);
   };
 
   renderFilterTitle = (children: React$Element<*>): React$Element<*>|null => {
-    if (!this.isInResults(children.props.id) && !this.stayVisibleIfEmpty()) {
+    if (!this.isInResults(children.props.id) &&
+        !this.isFilterSelected(children.props.id) &&
+        !this.stayVisibleIfEmpty()) {
       return null;
     }
     const { title } = this.props;

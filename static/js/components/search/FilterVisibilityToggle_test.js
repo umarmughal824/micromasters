@@ -78,6 +78,21 @@ describe('FilterVisibilityToggle', () => {
     assert.lengthOf(icon, 0);
   });
 
+  it('shows title when doc_count is 0 but filter selected', () => {
+    sandbox.stub(FilterVisibilityToggle.prototype, 'getResults').returns({
+      aggregations: {
+        test: {
+          doc_count: 0
+        }
+      }
+    });
+    searchKit.state = {
+      test: 'value',
+    };
+    const wrapper = renderWrappedToggle(props, <div id="test">Test Text</div>);
+    assert.lengthOf(wrapper.find(".title-row"), 1);
+  });
+
   it('hides toggle icon with a nested field that has an inner doc_count of 0', () => {
     sandbox.stub(FilterVisibilityToggle.prototype, 'getResults').returns({
       aggregations: {
