@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.58.0
+--------------
+
+- Fixed email composiition dialog body loading
+- Added learner-learner search page (#2512)
+- Added label for num courses passed (#3095)
+
 Version 0.57.9
 --------------
 
