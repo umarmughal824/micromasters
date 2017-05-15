@@ -77,6 +77,7 @@ class ProgramSerializerTests(MockedESTestCase):
             'title': self.program.title,
             'programpage_url': None,
             'enrolled': False,
+            'total_courses': 0,
         }
 
     def test_program_with_programpage(self):
@@ -92,6 +93,7 @@ class ProgramSerializerTests(MockedESTestCase):
             'title': self.program.title,
             'programpage_url': programpage.url,
             'enrolled': False,
+            'total_courses': 0,
         }
         assert len(programpage.url) > 0
 
@@ -112,6 +114,7 @@ class ProgramSerializerTests(MockedESTestCase):
             'title': self.program.title,
             'programpage_url': url,
             'enrolled': False,
+            'total_courses': 0,
         }
         assert programpage.url != url
 
@@ -126,4 +129,19 @@ class ProgramSerializerTests(MockedESTestCase):
             'title': self.program.title,
             'programpage_url': None,
             'enrolled': True,
+            'total_courses': 0,
+        }
+
+    def test_program_courses(self):
+        """
+        Test ProgramSerializer with multiple courses
+        """
+        CourseFactory.create_batch(5, program=self.program)
+        data = ProgramSerializer(self.program, context=self.context).data
+        assert data == {
+            'id': self.program.id,
+            'title': self.program.title,
+            'programpage_url': None,
+            'enrolled': False,
+            'total_courses': 5,
         }

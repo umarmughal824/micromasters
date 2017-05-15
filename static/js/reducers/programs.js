@@ -64,10 +64,8 @@ export const currentProgramEnrollment = (state: any = null, action: Action<any, 
       let enrollment = enrollments.find(enrollment => (
         enrollment.id === state.id
       ));
-      if (enrollment === undefined) {
-        // current enrollment not found in list
-        state = null;
-      }
+
+      state = _.isNil(enrollment) ? null : enrollment;
     }
     if (_.isNil(state) && enrollments.length > 0) {
       // no current enrollment selected, pick first from list if there are any

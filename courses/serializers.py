@@ -11,6 +11,7 @@ class ProgramSerializer(serializers.ModelSerializer):
     """Serializer for Program objects"""
     programpage_url = serializers.SerializerMethodField()
     enrolled = serializers.SerializerMethodField()
+    total_courses = serializers.SerializerMethodField()
 
     def get_programpage_url(self, program):
         """
@@ -38,6 +39,12 @@ class ProgramSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         return ProgramEnrollment.objects.filter(user=user, program=program).exists()
 
+    def get_total_courses(self, program):
+        """
+        Returns the number of courses in the program
+        """
+        return program.course_set.count()
+
     class Meta:
         model = Program
         fields = (
@@ -45,6 +52,7 @@ class ProgramSerializer(serializers.ModelSerializer):
             'title',
             'programpage_url',
             'enrolled',
+            'total_courses',
         )
 
 

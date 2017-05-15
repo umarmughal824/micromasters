@@ -59,6 +59,7 @@ export const makeAvailablePrograms = (dashboard: Dashboard): AvailablePrograms =
     id: program.id,
     programpage_url: `/page/${program.id}`,
     title: `AvailableProgram for ${program.id}`,
+    total_courses: 1,
   }));
 };
 

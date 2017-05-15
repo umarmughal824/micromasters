@@ -76,6 +76,7 @@ const PROGRAM: AvailableProgram = {
   title: "Awesomesauce",
   enrolled: true,
   programpage_url: null,
+  total_courses: 0,
 };
 
 

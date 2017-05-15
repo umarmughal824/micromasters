@@ -6,6 +6,7 @@ export type AvailableProgram = {
   title: string,
   programpage_url: ?string,
   enrolled: boolean,
+  total_courses: ?number,
 };
 
 export type AvailablePrograms = Array<AvailableProgram>;

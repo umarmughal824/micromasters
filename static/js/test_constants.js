@@ -941,7 +941,8 @@ export const PROGRAMS: AvailablePrograms = deepFreeze(DASHBOARD_RESPONSE.program
   id: program.id,
   title: program.title,
   programpage_url: `/program${program.id}/`,
-  enrolled: true
+  enrolled: true,
+  total_courses: 1,
 })));
 
 export const FINANCIAL_AID_PARTIAL_RESPONSE: FinancialAidUserInfo = deepFreeze({

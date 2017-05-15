@@ -135,7 +135,8 @@ export default class LearnerSearch extends SearchkitComponent {
   }
 
   getNumberOfCoursesInProgram = (): number => {
-    return R.pathOr(0, ['hits', 'hits', 0, '_source', 'program', 'total_courses'], this.getResults());
+    const { currentProgramEnrollment } = this.props;
+    return R.pathOr(0, ['total_courses'], currentProgramEnrollment);
   };
 
   renderSearchHeader = (): React$Element<*>|null => {
