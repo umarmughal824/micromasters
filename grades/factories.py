@@ -18,6 +18,7 @@ from courses.factories import (
     CourseFactory,
     CourseRunFactory,
 )
+from exams.factories import ExamRunFactory
 from grades.constants import FinalGradeStatus
 from grades.models import (
     FinalGrade,
@@ -43,6 +44,7 @@ class ProctoredExamGradeFactory(DjangoModelFactory):
     """Factory for ProctoredExamGrade"""
     user = SubFactory(UserFactory)
     course = SubFactory(CourseFactory)
+    exam_run = SubFactory(ExamRunFactory)
     exam_date = FuzzyDateTime(datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(weeks=4))
     # this assumes that the max score is 100
     passing_score = 60.0

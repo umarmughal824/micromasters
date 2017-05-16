@@ -3,13 +3,18 @@ Tests for grades models
 """
 from django.core.exceptions import ValidationError
 
-from courses.factories import CourseRunFactory
+from courses.factories import (
+    CourseFactory,
+    CourseRunFactory,
+)
 from grades.models import (
     CourseRunGradingAlreadyCompleteError,
     CourseRunGradingStatus,
     FinalGrade,
 )
 from grades.constants import FinalGradeStatus
+from grades.factories import ProctoredExamGradeFactory
+from grades.models import ProctoredExamGrade
 from micromasters.factories import UserFactory
 from search.base import MockedESTestCase
 
@@ -110,3 +115,27 @@ class CourseRunGradingStatusTests(MockedESTestCase):
 
         with self.assertRaises(CourseRunGradingAlreadyCompleteError):
             CourseRunGradingStatus.create_pending(self.course_run_complete)
+
+
+class ProctoredExamGradeTests(MockedESTestCase):
+    """Tests for ProctoredExamGrade"""
+
+    def test_for_user_course(self):
+        """Tests that for_user_course() does not return unavailable grades"""
+        user = UserFactory.create()
+        course = CourseFactory.create()
+        available_grade = ProctoredExamGradeFactory.create(
+            user=user,
+            course=course,
+            exam_run__course=course,
+            exam_run__eligibility_past=True
+        )
+        ProctoredExamGradeFactory.create(
+            user=user,
+            course=course,
+            exam_run__course=course,
+            exam_run__eligibility_future=True
+        )
+        grades = ProctoredExamGrade.for_user_course(user, course)
+
+        assert list(grades) == [available_grade]

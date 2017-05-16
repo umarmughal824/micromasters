@@ -1,16 +1,19 @@
 """
 Models for the grades app
 """
+from datetime import datetime
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.utils import IntegrityError
+import pytz
 
 from courses.models import (
     Course,
     CourseRun,
 )
+from exams.models import ExamRun
 from grades.constants import FinalGradeStatus
 from micromasters.models import (
     AuditableModel,
@@ -199,6 +202,7 @@ class ProctoredExamGrade(TimestampedModel, AuditableModel):
     # relationship to other models
     user = models.ForeignKey(User, null=False)
     course = models.ForeignKey(Course, null=False)
+    exam_run = models.ForeignKey(ExamRun, null=True)
 
     # fields from proctorate exam results
     exam_date = models.DateTimeField()
@@ -223,7 +227,8 @@ class ProctoredExamGrade(TimestampedModel, AuditableModel):
         """
         Returns a queryset of the exam result for an user in a course of a program
         """
-        return cls.objects.filter(user=user, course=course)
+        now = datetime.now(pytz.utc)
+        return cls.objects.filter(user=user, course=course, exam_run__date_grades_available__lte=now)
 
     def to_dict(self):
         return serialize_model_object(self)

@@ -21,6 +21,8 @@ class ExamRun(TimestampedModel):
     date_first_eligible = models.DateField()
     date_last_eligible = models.DateField()
 
+    date_grades_available = models.DateTimeField()
+
     authorized = models.BooleanField(default=False)
 
     @classmethod
