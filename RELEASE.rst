@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.58.1
+--------------
+
+- Fixed # of Courses Passed facet disappearing (#3095)
+- On pay now redirected users to checkout page instead of order summary for non FA programs (#3178)
+- Fixed error with bucket reference (#3183)
+
 Version 0.58.0
 --------------
 
