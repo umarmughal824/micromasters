@@ -554,3 +554,10 @@ export const mapObj = R.curry((fn, obj) => R.compose(
   R.map(fn),
   R.toPairs
 )(obj));
+
+/**
+ * Returns a promise which resolves after a number of milliseconds have elapsed
+ */
+export const wait = (millis: number): Promise<void> => (
+  new Promise(resolve => setTimeout(resolve, millis))
+);
