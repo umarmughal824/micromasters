@@ -40,9 +40,58 @@
           height: auto;
           border: 1px solid $border-color;
           border-radius: 2px;
+          max-height: 50vh;
 
           .public-DraftEditor-content {
             padding-left: 10px;
+            color: black;
+            font-weight: normal;
+            font-family: arial;
+
+            // this is an attempt at a hacky default-ish display for hX tags
+            h1 {
+              font-size: 2em;
+              margin-top: 0.67em;
+              margin-bottom: 0.67em;
+            }
+
+            h2 {
+              font-size: 1.5em;
+              margin-top: 0.83em;
+              margin-bottom: 0.83em;
+            }
+
+            h3 {
+              font-size: 1.17em;
+              margin-top: 1em;
+              margin-bottom: 1em;
+            }
+
+            h4 {
+              font-size: 1em;
+              margin-top: 1.33em;
+              margin-bottom: 1.33em;
+            }
+
+            h5 {
+              font-size: .83em;
+              margin-top: 1.67em;
+              margin-bottom: 1.67em;
+            }
+
+            h6 {
+              font-size: .67em;
+              margin-top: 2.33em;
+              margin-bottom: 2.33em;
+            }
+
+            h1, h2, h3, h4, h5, h6 {
+              padding: 0;
+              margin-right: 0;
+              margin-left: 0;
+              font-weight: bold;
+              display: block;
+            }
           }
         }
       }
