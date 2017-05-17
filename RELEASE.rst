@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.58.2
+--------------
+
+- Fixed email composition styling
+- Add test for filters being displayed when there are zero hits (#3204)
+- Added test for filter titles (#3196)
+- Added wait function (#3195)
+- Update readme for selenium tests (#3201)
+- Update edX cache only for active users (#3191)
+
 Version 0.58.1
 --------------
 
