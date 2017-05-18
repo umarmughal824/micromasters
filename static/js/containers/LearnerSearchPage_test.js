@@ -92,7 +92,7 @@ describe('LearnerSearchPage', function () {
 
   it('uses total_courses for num courses passed max', () => {
     return renderSearch().then(([wrapper]) => {
-      assert.equal(wrapper.find("RangeFilter").at(0).props().max, 1);
+      assert.equal(wrapper.find("EnabledSelectionRangeFilter").at(0).props().max, 1);
     });
   });
 
