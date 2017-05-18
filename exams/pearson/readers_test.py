@@ -9,12 +9,15 @@ from unittest import TestCase as UnitTestCase
 
 import pytz
 
+from django.conf import settings
 from exams.pearson.readers import (
     BaseTSVReader,
     EACReader,
     EACResult,
     VCDCReader,
     VCDCResult,
+    EXAMReader,
+    EXAMResult,
 )
 from exams.pearson.exceptions import InvalidTsvRowException
 
@@ -171,3 +174,17 @@ class EACReaderTest(UnitTestCase):
                 message='Invalid profile'
             )
         ], [])
+
+
+class EXAMReaderTest(UnitTestCase):
+    """Tests for EXAMReader"""
+    def test_exam_read_no_shows(self):
+        """Test that a typical no-show result from Perason does not result in any errors"""
+        test_file_path = '{}/exams/pearson/test_resources/noshow.dat'.format(settings.BASE_DIR)
+
+        reader = EXAMReader()
+        with open(test_file_path, 'r') as test_file:
+            results = reader.read(test_file)
+
+        # Assert that there are no error messages in the results tuple
+        assert len(results[1]) == 0

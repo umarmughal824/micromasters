@@ -41,9 +41,15 @@ def parse_or_default(parser, default):
         """Inner function that performs the safe parsing"""
         try:
             return parser(value)
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, UnparsableRowException):
             return default
     return inner
+
+
+parse_int_or_none = parse_or_default(int, None)
+
+
+parse_float_or_none = parse_or_default(float, None)
 
 
 def parse_datetime(dt):

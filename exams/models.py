@@ -180,6 +180,7 @@ class ExamAuthorization(TimestampedModel):
         default=STATUS_PENDING,
     )
     exam_taken = models.BooleanField(default=False)
+    exam_no_show = models.BooleanField(default=False)
 
     def __str__(self):
         return 'Exam Authorization "{0}" with status "{1}" for user {2}'.format(
