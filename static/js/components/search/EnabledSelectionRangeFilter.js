@@ -1,3 +1,4 @@
+// @flow
 import { RangeFilter, RangeAccessor } from "searchkit";
 
 export class EnabledSelectionRangeAccessor extends RangeAccessor {
