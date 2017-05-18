@@ -306,7 +306,7 @@ class ArchivedResponseProcessor:
                 ))
                 continue
 
-            if result.grade.lower() not in EXAM_GRADES:
+            if not result.no_show and result.grade.lower() not in EXAM_GRADES:
                 messages.append(format_and_log_error(
                     'Unexpected grade value:',
                     client_authorization_id=result.client_authorization_id,
