@@ -49,7 +49,20 @@ class EXAMResultFactory(factory.Factory):
     class Params:  # pylint: disable=missing-docstring
         passed = factory.Trait(
             grade='pass',
+            no_show=False,
         )
         failed = factory.Trait(
             grade='fail',
+            no_show=False,
+        )
+        noshow = factory.Trait(
+            no_show=True,
+            attempt=None,
+            passing_score=None,
+            score=None,
+            nda_refused=None,
+            correct=None,
+            incorrect=None,
+            skipped=None,
+            unscored=None,
         )

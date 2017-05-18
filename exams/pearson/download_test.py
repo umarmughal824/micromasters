@@ -565,6 +565,7 @@ class EXAMDownloadTest(MockedESTestCase):
 
         for auth in auths:
             auth.refresh_from_db()
+            assert auth.exam_no_show is False
             assert auth.exam_taken is True
 
         sorted_exam_results = sorted(exam_results, key=lambda result: result.client_authorization_id)
@@ -582,3 +583,21 @@ class EXAMDownloadTest(MockedESTestCase):
             expected_data = dict(exam_result._asdict())  # _asdict() returns an OrderedDict
             expected_data['exam_date'] = expected_data['exam_date'].isoformat()
             assert grade.row_data == expected_data
+
+    def test_process_result_exam_no_show(self):
+        """Test process_exam_file against no-show rows"""
+        exam_auth = ExamAuthorizationFactory.create(course=self.course)
+        exam_result = EXAMResultFactory.create(
+            noshow=True,
+            client_candidate_id=exam_auth.user.profile.student_id,
+            client_authorization_id=exam_auth.id,
+        )
+
+        with patch('exams.pearson.download.EXAMReader.read', return_value=([exam_result], [])):
+            assert self.processor.process_exam_file("/tmp/file.ext") == (True, [])
+
+        exam_auth.refresh_from_db()
+        assert exam_auth.exam_no_show is True
+        assert exam_auth.exam_taken is True
+
+        assert not ProctoredExamGrade.objects.filter(course=self.course).exists()

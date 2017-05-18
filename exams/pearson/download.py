@@ -306,7 +306,7 @@ class ArchivedResponseProcessor:
                 ))
                 continue
 
-            if result.grade.lower() not in EXAM_GRADES:
+            if not result.no_show and result.grade.lower() not in EXAM_GRADES:
                 messages.append(format_and_log_error(
                     'Unexpected grade value:',
                     client_authorization_id=result.client_authorization_id,
@@ -325,20 +325,22 @@ class ArchivedResponseProcessor:
                 'passing_score': result.passing_score,
                 'score': result.score,
                 'grade': result.grade,
-                'percentage_grade': result.score / 100.0,
+                'percentage_grade': result.score / 100.0 if result.score else 0,
                 'client_authorization_id': result.client_authorization_id,
                 'passed': result.grade.lower() == EXAM_GRADE_PASS,
                 'row_data': row_data,
             }
 
-            # create the grade or update it
-            ProctoredExamGrade.objects.update_or_create(
-                user=exam_authorization.user,
-                course=exam_authorization.course,
-                client_authorization_id=result.client_authorization_id,
-                defaults=defaults
-            )
+            if not result.no_show:
+                # create the grade or update it
+                ProctoredExamGrade.objects.update_or_create(
+                    user=exam_authorization.user,
+                    course=exam_authorization.course,
+                    client_authorization_id=result.client_authorization_id,
+                    defaults=defaults
+                )
 
+            exam_authorization.exam_no_show = result.no_show or False
             exam_authorization.exam_taken = True
             exam_authorization.save()
 
