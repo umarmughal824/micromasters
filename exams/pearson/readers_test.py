@@ -17,7 +17,6 @@ from exams.pearson.readers import (
     VCDCReader,
     VCDCResult,
     EXAMReader,
-    EXAMResult,
 )
 from exams.pearson.exceptions import InvalidTsvRowException
 

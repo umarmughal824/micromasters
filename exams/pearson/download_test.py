@@ -585,6 +585,7 @@ class EXAMDownloadTest(MockedESTestCase):
             assert grade.row_data == expected_data
 
     def test_process_result_exam_no_show(self):
+        """Test process_exam_file against no-show rows"""
         exam_auth = ExamAuthorizationFactory.create(course=self.course)
         exam_result = EXAMResultFactory.create(
             noshow=True,
