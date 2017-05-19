@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.58.3
+--------------
+
+- Fix migration and bug
+- Fix lints
+- Fixed bug involving exam no-shows
+- Added missed flow flag
+
 Version 0.58.2
 --------------
 
