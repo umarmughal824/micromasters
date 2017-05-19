@@ -16,9 +16,7 @@ const _createSettings = () => ({
   es_page_size: 40,
   EXAMS_SSO_CLIENT_CODE: 'foobarcode',
   EXAMS_SSO_URL: 'http://foo.bar/baz',
-  FEATURES: {
-    EXAMS: true,
-  },
+  FEATURES: {}, // placeholder
   get username() {
     throw new Error("username was removed");
   }

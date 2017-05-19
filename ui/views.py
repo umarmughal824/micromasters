@@ -22,7 +22,6 @@ from profiles.permissions import CanSeeIfNotPrivate
 from roles.models import Instructor, Staff
 from ui.decorators import require_mandatory_urls
 from ui.templatetags.render_bundle import public_path
-from ui.utils import FeatureFlag
 
 log = logging.getLogger(__name__)
 
@@ -62,12 +61,7 @@ class ReactView(View):  # pylint: disable=unused-argument
             "public_path": public_path(request),
             "EXAMS_SSO_CLIENT_CODE": settings.EXAMS_SSO_CLIENT_CODE,
             "EXAMS_SSO_URL": settings.EXAMS_SSO_URL,
-            "FEATURES": {
-                "EXAMS": (
-                    settings.FEATURES.get('EXAMS_CARD_ENABLED', False) or
-                    FeatureFlag.EXAMS in getattr(request, 'mm_feature_flags', [])
-                ),
-            },
+            "FEATURES": {},  # placeholder
         }
 
         return render(

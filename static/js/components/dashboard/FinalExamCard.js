@@ -236,10 +236,6 @@ export default class FinalExamCard extends React.Component<void, Props, void> {
       showPearsonTOSDialog
     } = this.props;
 
-    if (!SETTINGS.FEATURES.EXAMS) {
-      return null;
-    }
-
     switch (program.pearson_exam_status) {
     case PEARSON_PROFILE_ABSENT:
       return absentCard();

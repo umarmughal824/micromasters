@@ -270,7 +270,6 @@ class DashboardTests(ViewsTests):
     """
     Tests for dashboard views
     """
-    @override_settings(FEATURES={"EXAMS_CARD_ENABLED": False})
     def test_dashboard_settings(self):
         """
         Assert settings we pass to dashboard
@@ -329,9 +328,7 @@ class DashboardTests(ViewsTests):
                 'public_path': '/static/bundles/',
                 'EXAMS_SSO_CLIENT_CODE': 'itsacode',
                 'EXAMS_SSO_URL': 'url',
-                'FEATURES': {
-                    'EXAMS': False,
-                },
+                'FEATURES': {},
             }
             assert resp.context['is_public'] is False
             assert resp.context['has_zendesk_widget'] is True
@@ -668,7 +665,6 @@ class TestUsersPage(ViewsTests):
     Tests for user page
     """
 
-    @override_settings(FEATURES={"EXAMS_CARD_ENABLED": False})
     def test_users_logged_in(self):
         """
         Assert settings we pass to dashboard
@@ -728,9 +724,7 @@ class TestUsersPage(ViewsTests):
                     'public_path': '/static/bundles/',
                     'EXAMS_SSO_CLIENT_CODE': 'itsacode',
                     'EXAMS_SSO_URL': 'url',
-                    'FEATURES': {
-                        'EXAMS': False,
-                    },
+                    'FEATURES': {},
                 }
                 assert has_permission.called
 
@@ -743,7 +737,6 @@ class TestUsersPage(ViewsTests):
                     'zendesk_widget',
                 }
 
-    @override_settings(FEATURES={"EXAMS_CARD_ENABLED": False})
     def test_users_anonymous(self):
         """
         Assert settings we pass to dashboard
@@ -798,9 +791,7 @@ class TestUsersPage(ViewsTests):
                     'public_path': '/static/bundles/',
                     'EXAMS_SSO_CLIENT_CODE': 'itsacode',
                     'EXAMS_SSO_URL': 'url',
-                    'FEATURES': {
-                        'EXAMS': False,
-                    },
+                    'FEATURES': {},
                 }
                 assert has_permission.called
 
