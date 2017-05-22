@@ -2,7 +2,7 @@
 Signals for user profiles
 """
 from django.db import transaction
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
 from dashboard.models import ProgramEnrollment
@@ -17,9 +17,10 @@ def handle_create_programenrollment(sender, instance, created, **kwargs):  # pyl
     transaction.on_commit(lambda: index_program_enrolled_users.delay([instance.id]))
 
 
-@receiver(post_delete, sender=ProgramEnrollment, dispatch_uid="programenrollment_post_delete")
+@receiver(pre_delete, sender=ProgramEnrollment, dispatch_uid="programenrollment_pre_delete")
 def handle_delete_programenrollment(sender, instance, **kwargs):  # pylint: disable=unused-argument
     """
     When a ProgramEnrollment model is deleted, update index.
     """
-    transaction.on_commit(lambda: remove_program_enrolled_user.delay(instance.id))
+    enrollment_id = instance.id  # this is modified in-place on delete, so store it on a local
+    transaction.on_commit(lambda: remove_program_enrolled_user.delay(enrollment_id))
