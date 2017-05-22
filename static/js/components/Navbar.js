@@ -84,9 +84,14 @@ export default class Navbar extends React.Component {
     <span className="mdl-layout-title profile-header" key="header-text">MITx MicroMasters</span>
   ]);
 
-  renderNormalHeader = (link: string) => ([
+  renderAuthenticatedHeader = (link: string) => ([
     <Link to={link} key="header-logo-link"><img src="/static/images/mit-logo-transparent.svg" alt="MIT" /></Link>,
     <span className="mdl-layout-title" key="header-text-link"><Link to={link}>MITx MicroMasters</Link></span>
+  ]);
+
+  renderUnauthenticatedHeader = (link: string) => ([
+    <a href={link} key="header-logo-link"><img src="/static/images/mit-logo-transparent.svg" alt="MIT" /></a>,
+    <span className="mdl-layout-title" key="header-text-link"><a href={link}>MITx MicroMasters</a></span>
   ]);
 
   programSelector = (): React$Element<*> => {
@@ -182,9 +187,19 @@ export default class Navbar extends React.Component {
       pathname
     } = this.props;
 
-    let link = '/dashboard';
+    let link = '/';
+    if (SETTINGS.user) {
+      link = '/dashboard';
+    }
     if (hasAnyStaffRole(SETTINGS.roles)) {
       link = '/learners';
+    }
+
+    let header = null;
+    if (PROFILE_REGEX.test(pathname)) {
+      header = this.renderProfileHeader();
+    } else {
+      header = SETTINGS.user ? this.renderAuthenticatedHeader(link) : this.renderUnauthenticatedHeader(link);
     }
 
     let drawerClass = `nav-drawer ${navDrawerOpen ? 'open' : 'closed'}`;
@@ -197,7 +212,7 @@ export default class Navbar extends React.Component {
           <HeaderRow className="micromasters-header">
             <div className="micromasters-title">
               { this.renderMenu(setNavDrawerOpen) }
-              { PROFILE_REGEX.test(pathname) ? this.renderProfileHeader() : this.renderNormalHeader(link) }
+              { header }
             </div>
             <div className="desktop-visible">
               { this.programSelector() }

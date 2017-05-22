@@ -134,6 +134,12 @@ describe("LearnerPage", function() {
       gmaps.cleanup();
     });
 
+    it('should render home links to /dashboard', () => {
+      const username = USER_PROFILE_RESPONSE.username;
+      return renderComponent(`/learner/${username}`, userActions).then(([wrapper]) => {
+        assert.equal(2, wrapper.find('.micromasters-nav').find("a[href='/dashboard']").length);
+      });
+    });
 
     it('should have a logout link', () => {
       const username = SETTINGS.user.username;
@@ -1042,6 +1048,13 @@ describe("LearnerPage", function() {
       helper.cleanup();
     });
 
+    it('should render home links to /', () => {
+      const username = USER_PROFILE_RESPONSE.username;
+      return renderComponent(`/learner/${username}`, anonymousUserActions).then(([wrapper]) => {
+        assert.equal(2, wrapper.find('.micromasters-nav').find("a[href='/']").length);
+      });
+    });
+
     it('should hide all edit, delete icons', () => {
       const username = USER_PROFILE_RESPONSE.username;
       return renderComponent(`/learner/${username}`, anonymousUserActions).then(([, div]) => {
@@ -1051,9 +1064,11 @@ describe("LearnerPage", function() {
 
     it('should show sign in button with valid link', () => {
       const username = USER_PROFILE_RESPONSE.username;
-      return renderComponent(`/learner/${username}`, anonymousUserActions).then(([, div]) => {
-        let button = div.querySelector("a[href='/login/edxorg/']");
-        assert.equal(button.textContent.trim(), "Sign in with edX.org");
+      return renderComponent(`/learner/${username}`, anonymousUserActions).then(([wrapper]) => {
+        assert.equal(wrapper.find('.button-login').text(), "Log In");
+        assert.equal(wrapper.find('.button-login').prop('href'), "/login/edxorg/");
+        assert.equal(wrapper.find('.button-signup').text(), "Sign Up");
+        assert.equal(wrapper.find('.button-signup').prop('href'), "/login/edxorg/");
       });
     });
   });

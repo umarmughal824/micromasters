@@ -99,7 +99,10 @@ export default class ProgramSelector extends React.Component {
 
     if (! SETTINGS.user) {
       return <div className="user-menu no-auth">
-        <a href="/login/edxorg/">Sign in with edX.org</a>
+          <a href="/login/edxorg/" className="mdl-button button-login open-signup-dialog">Log In</a>
+          <a href="/login/edxorg/" className="mdl-button button-signup open-signup-dialog">
+            Sign Up
+          </a>
       </div>;
     } else {
       if (programs.length === 0 || selectorVisibility === false) {
