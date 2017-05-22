@@ -17,6 +17,12 @@ import {
   TEST_EMAIL_CONFIG,
   INITIAL_TEST_EMAIL_STATE
 } from './test_constants';
+import {
+  AUTOMATIC_EMAIL_ADMIN_TYPE,
+  LEARNER_EMAIL_TYPE,
+  COURSE_EMAIL_TYPE,
+  SEARCH_EMAIL_TYPE
+} from './constants';
 
 describe('EmailCompositionDialog', () => {
   let sandbox, sendStub, closeStub, updateStub;
@@ -93,6 +99,24 @@ describe('EmailCompositionDialog', () => {
     TestUtils.Simulate.click(getDialog().querySelector('.save-button'));
     assert.isTrue(sendStub.called, "called send handler");
   });
+
+  it('should show a "Save" label when the dialog is being used to edit an email', () => {
+    renderDialog(
+      {inputs: {subject: 'abc', body: 'abc'}},
+      {dialogType: AUTOMATIC_EMAIL_ADMIN_TYPE}
+    );
+    assert.equal(getDialog().querySelector('.save-button').textContent, "Save Changes");
+  });
+
+  for (let dialogType of [LEARNER_EMAIL_TYPE, COURSE_EMAIL_TYPE, SEARCH_EMAIL_TYPE]) {
+    it('should show a "Send" label when the dialog is being used to send an email', () => {
+      renderDialog(
+        {inputs: {subject: 'abc', body: 'abc'}},
+        {dialogType: dialogType}
+      );
+      assert.equal(getDialog().querySelector('.save-button').textContent, "Send");
+    });
+  }
 
   it('should fire the close handler when the "cancel" button is clicked', () => {
     renderDialog();
