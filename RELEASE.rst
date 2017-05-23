@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.59.0
+--------------
+
+- Remove coupon course run code in frontend (#3225)
+- styling on the Send Email form (#3207)
+- Fixed anonymous user navigation issues (#3221, #3218)
+- Fixed errant enrollment delete signal (#3211)
+- Removed EXAMS_CARD_ENABLED logic so card always shows (#3002)
+- Shown Coupons without code on order summary page (#3210)
+- Renamed send button to Save Changes on automatic email edit button (#3219)
+
 Version 0.58.3
 --------------
 
