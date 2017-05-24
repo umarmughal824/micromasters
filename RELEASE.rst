@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.59.1
+--------------
+
+- Add fake_user field to Profile (#3214)
+
 Version 0.59.0
 --------------
 
