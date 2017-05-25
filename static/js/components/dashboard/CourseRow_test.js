@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { shallow, mount } from 'enzyme';
 import moment from 'moment';
 import { assert } from 'chai';
@@ -57,7 +58,7 @@ describe('CourseRow', () => {
           router: {}
         },
         childContextTypes: {
-          router:   React.PropTypes.object.isRequired}
+          router:   PropTypes.object.isRequired}
       }
     );
   };

@@ -1,10 +1,11 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { mount } from 'enzyme';
 import { assert } from 'chai';
 import sinon from 'sinon';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import TestUtils from 'react-addons-test-utils';
+import ReactTestUtils from 'react-dom/test-utils';
 
 import * as inputUtil from '../components/inputs/util';
 import { FETCH_PROCESSING } from '../actions';
@@ -44,7 +45,7 @@ describe('LearnerPageAboutMeDialog', () => {
       </MuiThemeProvider>,
       {
         context: { router: {}},
-        childContextTypes: { router: React.PropTypes.object }
+        childContextTypes: { router: PropTypes.object }
       }
     )
   );
@@ -78,13 +79,13 @@ describe('LearnerPageAboutMeDialog', () => {
 
   it('clearProfileEdit called in cancel', () => {
     renderDialog();
-    TestUtils.Simulate.click(getDialog().querySelector(".cancel-button"));
+    ReactTestUtils.Simulate.click(getDialog().querySelector(".cancel-button"));
     assert.equal(clearProfileEdit.callCount, 1);
   });
 
   it('saveProfile called in save', () => {
     renderDialog();
-    TestUtils.Simulate.click(getDialog().querySelector(".save-button"));
+    ReactTestUtils.Simulate.click(getDialog().querySelector(".save-button"));
     assert.equal(saveProfile.callCount, 1);
   });
 

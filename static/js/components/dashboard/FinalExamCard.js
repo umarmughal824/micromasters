@@ -36,7 +36,7 @@ const cardWrapper = (...children) => (
         <p>
           {`You must take a proctored exam for each course. Exams may be taken
             at any `}
-          <a href="http://www.pearsonvue.com/mitx/locate/" target="_blank">
+          <a href="http://www.pearsonvue.com/mitx/locate/" target="_blank" rel="noopener noreferrer">
             authorized Pearson test center
           </a>
           {`. Before you can take an exam, you have to pay for the course and
@@ -156,7 +156,7 @@ const renderPearsonTOSDialog = (open, show, submitPearsonSSO, pearson) => (
         <p>
           You acknowledge that by clicking Continue, you will be leaving the MITx MicroMasters website
           and going to a third-party website over which MIT’s MITx does not have control, and that you
-          accept the Pearson VUE Business Group’s <a target="_blank"
+          accept the Pearson VUE Business Group’s <a target="_blank" rel="noopener noreferrer"
             href="https://home.pearsonvue.com/Legal/Privacy-and-cookies-policy.aspx">Terms of Service</a>.
           MIT is not responsible for the content of third-party sites hyper-linked from the Pearson
           VUE website, nor does MIT guarantee or endorse the information, recommendations,

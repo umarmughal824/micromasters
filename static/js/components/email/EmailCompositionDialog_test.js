@@ -5,7 +5,7 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import TestUtils from 'react-addons-test-utils';
+import ReactTestUtils from 'react-dom/test-utils';
 
 import { SEARCH_RESULT_EMAIL_CONFIG } from './lib';
 import * as inputUtil from '../inputs/util';
@@ -96,7 +96,7 @@ describe('EmailCompositionDialog', () => {
     renderDialog(
       {inputs: {subject: 'abc', body: 'abc'}}
     );
-    TestUtils.Simulate.click(getDialog().querySelector('.save-button'));
+    ReactTestUtils.Simulate.click(getDialog().querySelector('.save-button'));
     assert.isTrue(sendStub.called, "called send handler");
   });
 
@@ -120,7 +120,7 @@ describe('EmailCompositionDialog', () => {
 
   it('should fire the close handler when the "cancel" button is clicked', () => {
     renderDialog();
-    TestUtils.Simulate.click(getDialog().querySelector('.cancel-button'));
+    ReactTestUtils.Simulate.click(getDialog().querySelector('.cancel-button'));
     assert.isTrue(closeStub.called, "called send handler");
   });
 
@@ -217,7 +217,7 @@ describe('EmailCompositionDialog', () => {
 
     it('should insert recipient variables', () => {
       renderDialog();
-      TestUtils.Simulate.click(getDialog().querySelector('.button-Email'));
+      ReactTestUtils.Simulate.click(getDialog().querySelector('.button-Email'));
       assert.include(getEditorContents().textContent, '[Email]');
 
     });

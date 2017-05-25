@@ -5,7 +5,7 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import TestUtils from 'react-addons-test-utils';
+import ReactTestUtils from 'react-dom/test-utils';
 
 import SkipFinancialAidDialog from './SkipFinancialAidDialog';
 
@@ -44,12 +44,12 @@ describe('SkipFinancialAidDialog', () => {
   });
 
   it('should have a confirm button', () => {
-    TestUtils.Simulate.click(renderDialog().querySelector('.save-button'));
+    ReactTestUtils.Simulate.click(renderDialog().querySelector('.save-button'));
     assert.ok(skipStub.called, 'skip function should have been called');
   });
 
   it('should have a cancel button', () => {
-    TestUtils.Simulate.click(renderDialog().querySelector('.cancel-button'));
+    ReactTestUtils.Simulate.click(renderDialog().querySelector('.cancel-button'));
     assert.ok(cancelStub.called, 'cancel function should have been called');
   });
 });

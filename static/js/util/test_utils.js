@@ -2,7 +2,7 @@
 // @flow
 import React from 'react';
 import { Route, IndexRedirect } from 'react-router';
-import TestUtils from 'react-addons-test-utils';
+import ReactTestUtils from 'react-dom/test-utils';
 import { assert } from 'chai';
 import sinon from 'sinon';
 import _ from 'lodash';
@@ -88,22 +88,22 @@ export function generateCourseFromExisting(courseToClone: Course, desiredRuns: n
 
 export const modifyTextArea = (field: HTMLTextAreaElement, text: string): void => {
   field.value = text;
-  TestUtils.Simulate.change(field);
-  TestUtils.Simulate.keyDown(field, {key: "Enter", keyCode: 13, which: 13});
+  ReactTestUtils.Simulate.change(field);
+  ReactTestUtils.Simulate.keyDown(field, {key: "Enter", keyCode: 13, which: 13});
 };
 
 export const modifyTextField = (field: HTMLInputElement, text: string): void => {
   field.value = text;
-  TestUtils.Simulate.change(field);
-  TestUtils.Simulate.keyDown(field, {key: "Enter", keyCode: 13, which: 13});
+  ReactTestUtils.Simulate.change(field);
+  ReactTestUtils.Simulate.keyDown(field, {key: "Enter", keyCode: 13, which: 13});
 };
 
 export const modifySelectField = (field: HTMLElement, text: string): void => {
   // let input = field.querySelector('.Select-input').querySelector('input');
   let input = getEl(getEl(field, '.Select-input'), 'input');
-  TestUtils.Simulate.focus(input);
-  TestUtils.Simulate.change(input, { target: { value: text } });
-  TestUtils.Simulate.keyDown(input, { keyCode: 9, key: 'Tab' });
+  ReactTestUtils.Simulate.focus(input);
+  ReactTestUtils.Simulate.change(input, { target: { value: text } });
+  ReactTestUtils.Simulate.keyDown(input, { keyCode: 9, key: 'Tab' });
 };
 
 export const modifyWrapperSelectField = (wrapper: Object, text: string): void => {
@@ -116,9 +116,9 @@ export const modifyWrapperSelectField = (wrapper: Object, text: string): void =>
 export const clearSelectField = (field: HTMLElement): void => {
   // let input = field.querySelector('.Select-input').querySelector('input');
   let input = getEl(getEl(field, '.Select-input'), 'input');
-  TestUtils.Simulate.focus(input);
-  TestUtils.Simulate.keyDown(input, { keyCode: 8, key: 'Backspace' });
-  TestUtils.Simulate.keyDown(input, { keyCode: 9, key: 'Tab' });
+  ReactTestUtils.Simulate.focus(input);
+  ReactTestUtils.Simulate.keyDown(input, { keyCode: 8, key: 'Backspace' });
+  ReactTestUtils.Simulate.keyDown(input, { keyCode: 9, key: 'Tab' });
 };
 
 

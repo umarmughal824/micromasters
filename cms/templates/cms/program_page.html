@@ -115,7 +115,7 @@
             <div class="contact-links">
               {% if page.program_home_page_url %}
                 <p>
-                  <a target="_blank" href="{{ page.program_home_page_url }}">
+                  <a target="_blank" href="{{ page.program_home_page_url }}" rel="noopener noreferrer">
                   {% if page.title_program_home_page_url %}
                     {{ page.title_program_home_page_url|richtext }}
                   {% else %}
@@ -127,7 +127,7 @@
               {% if page.info_links.exists %}
                 {% for link in page.info_links.all %}
                   <p>
-                    <a target="_blank" href="{{ link.url }}">
+                    <a target="_blank" href="{{ link.url }}" rel="noopener noreferrer">
                       {{ link.title_url }}
                     </a>
                   </p>

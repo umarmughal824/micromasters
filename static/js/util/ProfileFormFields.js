@@ -1,5 +1,6 @@
 // @flow
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import {
   boundDateField,
@@ -43,20 +44,20 @@ export default class ProfileFormFields extends React.Component {
   };
 
   static contextTypes = {
-    router: React.PropTypes.object.isRequired
+    router: PropTypes.object.isRequired
   };
 
   static propTypes = {
-    profile:                      React.PropTypes.object,
-    updateProfile:                React.PropTypes.func,
-    saveProfile:                  React.PropTypes.func,
-    errors:                       React.PropTypes.object,
-    setDeletionIndex:             React.PropTypes.func,
-    setShowWorkDeleteDialog:      React.PropTypes.func,
-    setShowEducationDeleteDialog: React.PropTypes.func,
-    showSwitch:                   React.PropTypes.bool,
-    validator:                    React.PropTypes.func,
-    updateValidationVisibility:   React.PropTypes.func,
+    profile:                      PropTypes.object,
+    updateProfile:                PropTypes.func,
+    saveProfile:                  PropTypes.func,
+    errors:                       PropTypes.object,
+    setDeletionIndex:             PropTypes.func,
+    setShowWorkDeleteDialog:      PropTypes.func,
+    setShowEducationDeleteDialog: PropTypes.func,
+    showSwitch:                   PropTypes.bool,
+    validator:                    PropTypes.func,
+    updateValidationVisibility:   PropTypes.func,
   };
 
   closeConfirmDeleteDialog = (): void => {

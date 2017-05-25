@@ -1,6 +1,6 @@
 /* global SETTINGS: false */
 import React from 'react';
-import TestUtils from 'react-addons-test-utils';
+import ReactTestUtils from 'react-dom/test-utils';
 import { mount } from 'enzyme';
 import { assert } from 'chai';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
@@ -153,7 +153,7 @@ describe('ProfileImage', () => {
         let saveButton = dialog.querySelector('.save-button');
         assert.isFalse(saveButton.className.includes('disabled'));
         assert.isNull(dialog.querySelector('.mdl-spinner'));
-        TestUtils.Simulate.click(saveButton);
+        ReactTestUtils.Simulate.click(saveButton);
         assert.isTrue(updateProfileImageStub.called);
       });
 
@@ -166,7 +166,7 @@ describe('ProfileImage', () => {
         let saveButton = dialog.querySelector('.save-button');
         assert.isTrue(saveButton.disabled);
         assert.isFalse(saveButton.innerHTML.includes("mdl-spinner"));
-        TestUtils.Simulate.click(saveButton);
+        ReactTestUtils.Simulate.click(saveButton);
         assert.isFalse(updateProfileImageStub.called);
         assert.isNull(dialog.querySelector('.mdl-spinner'));
       });
@@ -193,7 +193,7 @@ describe('ProfileImage', () => {
         let saveButton = dialog.querySelector('.save-button');
         assert.isTrue(saveButton.disabled);
         assert.isFalse(saveButton.innerHTML.includes("mdl-spinner"));
-        TestUtils.Simulate.click(saveButton);
+        ReactTestUtils.Simulate.click(saveButton);
         assert.isFalse(updateProfileImageStub.called);
       });
     });

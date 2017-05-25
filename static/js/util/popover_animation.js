@@ -1,5 +1,6 @@
 // @flow
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Paper from 'material-ui/Paper';
 import propTypes from 'material-ui/utils/propTypes';
 
@@ -22,15 +23,15 @@ function getStyles(props, context, state) {
 
 export default class PopoverNullAnimation extends Component {
   static propTypes = {
-    children: PropTypes.node,
-    className: PropTypes.string,
-    open: PropTypes.bool.isRequired,
+    children:     PropTypes.node,
+    className:    PropTypes.string,
+    open:         PropTypes.bool.isRequired,
     /**
      * Override the inline-styles of the root element.
      */
-    style: PropTypes.object,
+    style:        PropTypes.object,
     targetOrigin: propTypes.origin.isRequired,
-    zDepth: propTypes.zDepth,
+    zDepth:       propTypes.zDepth,
   };
 
   static defaultProps = {

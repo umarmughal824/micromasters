@@ -2,7 +2,7 @@
 /* global require:false, module:false */
 import { compose, createStore, applyMiddleware } from 'redux';
 import thunkMiddleware from 'redux-thunk';
-import createLogger from 'redux-logger';
+import { createLogger } from 'redux-logger';
 import persistState, { mergePersistedState }  from 'redux-localstorage';
 import filter from 'redux-localstorage-filter';
 import adapter from 'redux-localstorage/lib/adapters/localStorage';

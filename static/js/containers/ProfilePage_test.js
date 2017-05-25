@@ -1,6 +1,6 @@
 /* global SETTINGS: false */
 
-import TestUtils from 'react-addons-test-utils';
+import ReactTestUtils from 'react-dom/test-utils';
 import { assert } from 'chai';
 import _ from 'lodash';
 
@@ -100,7 +100,7 @@ describe("ProfilePage", function() {
     ].concat(additionalActions);
 
     return listenForActions(actions, () => {
-      TestUtils.Simulate.click(button);
+      ReactTestUtils.Simulate.click(button);
     });
   };
 
@@ -121,7 +121,7 @@ describe("ProfilePage", function() {
     it('should launch a dialog to add an entry when an education switch is set to Yes', () => {
       let dialogTest = ([, div]) => {
         let toggle = radioToggles(div, '.profile-radio-switch');
-        TestUtils.Simulate.change(toggle[0]);
+        ReactTestUtils.Simulate.change(toggle[0]);
         activeDialog('education-dialog-wrapper');
       };
       return renderComponent('/profile/education', SUCCESS_ACTIONS).then(dialogTest);
@@ -130,7 +130,7 @@ describe("ProfilePage", function() {
     it('should launch a dialog to add an entry when an employment switch is set to Yes', () => {
       let dialogTest = ([, div]) => {
         let toggle = radioToggles(div, '.profile-radio-switch');
-        TestUtils.Simulate.change(toggle[0]);
+        ReactTestUtils.Simulate.change(toggle[0]);
         activeDialog('employment-dialog-wrapper');
       };
       return renderComponent('/profile/professional', SUCCESS_ACTIONS).then(dialogTest);
@@ -167,7 +167,7 @@ describe("ProfilePage", function() {
     return renderComponent('/profile/education', SUCCESS_ACTIONS).then(([, div]) => {
       let button = div.querySelector(prevButtonSelector);
       assert.equal(getStep(), EDUCATION_STEP);
-      TestUtils.Simulate.click(button);
+      ReactTestUtils.Simulate.click(button);
       assert.equal(getStep(), PERSONAL_STEP);
     });
   });

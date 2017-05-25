@@ -41,7 +41,7 @@ export default class CourseGrade extends React.Component {
   };
 
   renderCourseProgressLink = (courseRun: CourseRun, grade: number|string|null): React$Element<*>|null => (
-    <a href={`${EDX_LINK_BASE}${courseRun.course_id}/progress`} target="_blank">
+    <a href={`${EDX_LINK_BASE}${courseRun.course_id}/progress`} target="_blank" rel="noopener noreferrer">
       {formatGrade(grade)}
     </a>
   );

@@ -1,6 +1,7 @@
 // @flow
 /* global SETTINGS: false */
 import React from 'react';
+import PropTypes from 'prop-types';
 import Icon from 'react-mdl/lib/Icon';
 import { connect } from 'react-redux';
 import type { Dispatch } from 'redux';
@@ -62,7 +63,7 @@ class App extends React.Component {
   };
 
   static contextTypes = {
-    router:   React.PropTypes.object.isRequired
+    router:   PropTypes.object.isRequired
   };
 
   updateRequirements() {

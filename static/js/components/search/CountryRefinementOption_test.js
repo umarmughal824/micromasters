@@ -4,7 +4,7 @@ import React from 'react';
 import { assert } from 'chai';
 import _ from 'lodash';
 import sinon from 'sinon';
-import TestUtils from 'react-addons-test-utils';
+import ReactTestUtils from 'react-dom/test-utils';
 
 import CountryRefinementOption from './CountryRefinementOption';
 import { makeStrippedHtml } from '../../util/util';
@@ -23,7 +23,7 @@ describe('CountryRefinementOption', () => {
   };
 
   let renderFullCountryOption = props => (
-    TestUtils.renderIntoDocument(<CountryRefinementOption {...props} />)
+    ReactTestUtils.renderIntoDocument(<CountryRefinementOption {...props} />)
   );
 
   it('should render a country name, given a country code', () => {
@@ -45,10 +45,10 @@ describe('CountryRefinementOption', () => {
 
   it('should bind an onClick handler', () => {
     let componentTree = renderFullCountryOption(props);
-    let clickableDiv = TestUtils.findAllInRenderedTree(
+    let clickableDiv = ReactTestUtils.findAllInRenderedTree(
       componentTree, () => true
     )[1];
-    TestUtils.Simulate.click(clickableDiv);
+    ReactTestUtils.Simulate.click(clickableDiv);
     assert(onClick.called, "onClick handler wasn't called");
   });
 

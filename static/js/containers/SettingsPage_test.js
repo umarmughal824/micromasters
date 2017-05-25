@@ -1,5 +1,5 @@
 /* global SETTINGS: false */
-import TestUtils from 'react-addons-test-utils';
+import ReactTestUtils from 'react-dom/test-utils';
 import { assert } from 'chai';
 import _ from 'lodash';
 
@@ -77,7 +77,7 @@ describe("SettingsPage", function() {
       UPDATE_PROFILE_VALIDATION
     );
     return listenForActions(actions, () => {
-      TestUtils.Simulate.click(button);
+      ReactTestUtils.Simulate.click(button);
     });
   };
 

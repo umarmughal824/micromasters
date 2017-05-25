@@ -1,5 +1,5 @@
 /* global SETTINGS: false */
-import TestUtils from 'react-addons-test-utils';
+import ReactTestUtils from 'react-dom/test-utils';
 import { assert } from 'chai';
 import _ from 'lodash';
 import moment from 'moment';
@@ -96,7 +96,7 @@ describe("LearnerPage", function() {
     );
 
     return listenForActions(editActions, () => {
-      TestUtils.Simulate.click(editButton);
+      ReactTestUtils.Simulate.click(editButton);
     }).then(() => {
       state = helper.store.getState();
       let stateIndex = state.ui[dialogIndexProperty];
@@ -171,7 +171,7 @@ describe("LearnerPage", function() {
         const username = SETTINGS.user.username;
         return renderComponent(`/learner/${username}`, userActions).then(([, div]) => {
           return listenForActions(actions, () => {
-            TestUtils.Simulate.click(getEditPersonalButton(div));
+            ReactTestUtils.Simulate.click(getEditPersonalButton(div));
 
             let input;
             // run the 'getInput' function if 'removeErrorValue' is also a function (radio buttons)
@@ -183,7 +183,7 @@ describe("LearnerPage", function() {
             }
 
             // check that validation error has propagated
-            TestUtils.Simulate.click(getSave());
+            ReactTestUtils.Simulate.click(getSave());
             let state = helper.store.getState();
             assert.deepEqual(state.profiles.jane.edit.errors, validationExpectation);
 
@@ -205,14 +205,14 @@ describe("LearnerPage", function() {
         const username = SETTINGS.user.username;
         return renderComponent(`/learner/${username}`, userActions).then(([, div]) => {
           return listenForActions(actions, () => {
-            TestUtils.Simulate.click(getEditPersonalButton(div));
+            ReactTestUtils.Simulate.click(getEditPersonalButton(div));
 
             let input = getInput(getDialog());
 
             if (!selectField) {
               modifyTextField(input, "");
             }
-            TestUtils.Simulate.click(getSave());
+            ReactTestUtils.Simulate.click(getSave());
           }).then(() => {
             // ensure that the DOM update after clicking 'save' has finished
             return wait(100).then(() => {
@@ -416,10 +416,10 @@ describe("LearnerPage", function() {
             SET_SHOW_WORK_DELETE_DIALOG,
             SET_DELETION_INDEX
           ], () => {
-            TestUtils.Simulate.click(button);
+            ReactTestUtils.Simulate.click(button);
             let dialog = activeDeleteDialog();
             let cancelButton = dialog.getElementsByClassName('cancel-button')[0];
-            TestUtils.Simulate.click(cancelButton);
+            ReactTestUtils.Simulate.click(cancelButton);
           });
         });
       });
@@ -452,10 +452,10 @@ describe("LearnerPage", function() {
             UPDATE_VALIDATION_VISIBILITY,
             CLEAR_PROFILE_EDIT,
           ], () => {
-            TestUtils.Simulate.click(firstEducationDeleteButton);
+            ReactTestUtils.Simulate.click(firstEducationDeleteButton);
             let dialog = activeDeleteDialog();
             let confirmButton = dialog.getElementsByClassName('delete-button')[0];
-            TestUtils.Simulate.click(confirmButton);
+            ReactTestUtils.Simulate.click(confirmButton);
           });
         });
       });
@@ -489,7 +489,7 @@ describe("LearnerPage", function() {
             SET_EDUCATION_DIALOG_VISIBILITY,
             SET_EDUCATION_DEGREE_LEVEL,
           ], () => {
-            TestUtils.Simulate.click(editButton);
+            ReactTestUtils.Simulate.click(editButton);
 
             assert.equal(document.querySelector(".profile-form-title").innerHTML, "Edit Education");
           });
@@ -545,7 +545,7 @@ describe("LearnerPage", function() {
           }
 
           return listenForActions(expectedActions, () => {
-            TestUtils.Simulate.click(addButton);
+            ReactTestUtils.Simulate.click(addButton);
 
             assert.equal(document.querySelector(".profile-form-title").innerHTML, "Add Education");
 
@@ -573,7 +573,7 @@ describe("LearnerPage", function() {
             modifyEducationSelect('.state', "Balkh");
             modifyTextField(inputs[6], "FoobarVille");
             let save = dialog.querySelector('.save-button');
-            TestUtils.Simulate.click(save);
+            ReactTestUtils.Simulate.click(save);
           });
         });
       });
@@ -639,10 +639,10 @@ describe("LearnerPage", function() {
             SET_SHOW_EDUCATION_DELETE_DIALOG,
             SET_DELETION_INDEX,
           ], () => {
-            TestUtils.Simulate.click(button);
+            ReactTestUtils.Simulate.click(button);
             let dialog = activeDeleteDialog();
             let cancelButton = dialog.getElementsByClassName('cancel-button')[0];
-            TestUtils.Simulate.click(cancelButton);
+            ReactTestUtils.Simulate.click(cancelButton);
           });
         });
       });
@@ -684,10 +684,10 @@ describe("LearnerPage", function() {
             RECEIVE_PATCH_USER_PROFILE_SUCCESS,
             CLEAR_PROFILE_EDIT,
           ], () => {
-            TestUtils.Simulate.click(deleteButton);
+            ReactTestUtils.Simulate.click(deleteButton);
             let dialog = activeDeleteDialog();
             let button = dialog.getElementsByClassName('delete-button')[0];
-            TestUtils.Simulate.click(button);
+            ReactTestUtils.Simulate.click(button);
           });
         });
       });
@@ -720,7 +720,7 @@ describe("LearnerPage", function() {
             SET_WORK_DIALOG_INDEX,
             SET_WORK_DIALOG_VISIBILITY
           ], () => {
-            TestUtils.Simulate.click(editButton);
+            ReactTestUtils.Simulate.click(editButton);
 
             assert.equal(document.querySelector(".profile-form-title").innerHTML, "Edit Employment");
           });
@@ -780,7 +780,7 @@ describe("LearnerPage", function() {
           }
 
           return listenForActions(expectedActions, () => {
-            TestUtils.Simulate.click(addButton);
+            ReactTestUtils.Simulate.click(addButton);
 
             assert.equal(document.querySelector(".profile-form-title").innerHTML, "Add Employment");
             let dialog = document.querySelector('.employment-dialog');
@@ -815,7 +815,7 @@ describe("LearnerPage", function() {
             modifyTextField(inputs[9], "2002");
 
             let button = dialog.querySelector(".save-button");
-            TestUtils.Simulate.click(button);
+            ReactTestUtils.Simulate.click(button);
           });
         });
       });
@@ -902,7 +902,7 @@ describe("LearnerPage", function() {
                 UPDATE_VALIDATION_VISIBILITY,
                 UPDATE_PROFILE_VALIDATION,
               ], () => {
-                TestUtils.Simulate.click(dialog.querySelector('.save-button'));
+                ReactTestUtils.Simulate.click(dialog.querySelector('.save-button'));
               }).then(state => {
                 assert.deepEqual(state.profiles[username].profile, expectedProfile);
               });
@@ -929,7 +929,7 @@ describe("LearnerPage", function() {
             SET_LEARNER_PAGE_ABOUT_ME_DIALOG_VISIBILITY,
             START_PROFILE_EDIT,
           ], () => {
-            TestUtils.Simulate.click(aboutMEBtn);
+            ReactTestUtils.Simulate.click(aboutMEBtn);
           }).then(() => {
             let dialog = document.querySelector('.about-me-dialog');
             let textarea = dialog.querySelector('textarea:not([readonly])');
@@ -947,7 +947,7 @@ describe("LearnerPage", function() {
                 UPDATE_VALIDATION_VISIBILITY,
                 UPDATE_PROFILE_VALIDATION,
               ], () => {
-                TestUtils.Simulate.click(dialog.querySelector(".save-button"));
+                ReactTestUtils.Simulate.click(dialog.querySelector(".save-button"));
               }).then(state => {
                 assert.deepEqual(state.profiles[username].profile, expectedProfile);
               });

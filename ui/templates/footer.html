@@ -3,17 +3,19 @@
   <div class="container">
     <div class="row">
       <div class="col-md-8">
-        <a href="http://www.mit.edu" target="_blank"><img src="{% static 'images/mit-logo-ltgray-white@72x38.svg' %}" alt="MIT" width="72" height="38"></a>
+        <a href="http://www.mit.edu" target="_blank" rel="noopener noreferrer">
+          <img src="{% static 'images/mit-logo-ltgray-white@72x38.svg' %}" alt="MIT" width="72" height="38">
+        </a>
         {% if is_public %}
           <div class="footer-button footer-cta-left">
-            <a href="https://giving.mit.edu/explore/campus-student-life/digital-learning" target="_blank"
+            <a href="https://giving.mit.edu/explore/campus-student-life/digital-learning" target="_blank" rel="noopener noreferrer"
               class="mdl-button footer-button">Give to MIT
             </a>
           </div>
         {% endif %}
         <div class="footer-links">
-          <a href="https://www.edx.org/" target="_blank">edX</a>
-          <a href="https://odl.mit.edu/" target="_blank">Office of Digital Learning</a>
+          <a href="https://www.edx.org/" target="_blank" rel="noopener noreferrer">edX</a>
+          <a href="https://odl.mit.edu/" target="_blank" rel="noopener noreferrer">Office of Digital Learning</a>
         </div>
         <address class="footer-address">
           Massachusetts Institute of Technology<br/> Cambridge, MA 02139
@@ -24,7 +26,7 @@
           {% include "social_buttons.html" %}
         {% else %}
           <div class="footer-button footer-cta non-marketing-pages">
-            <a href="https://giving.mit.edu/explore/campus-student-life/digital-learning" target="_blank"
+            <a href="https://giving.mit.edu/explore/campus-student-life/digital-learning" target="_blank" rel="noopener noreferrer"
               class="mdl-button footer-button no-float">Give to MIT
             </a>
           </div>

@@ -1,10 +1,11 @@
 // @flow
 import React from 'react';
+import PropTypes from 'prop-types';
 import Decimal from 'decimal.js-light';
 import { mount } from 'enzyme';
 import { assert } from 'chai';
 import sinon from 'sinon';
-import TestUtils from 'react-addons-test-utils';
+import ReactTestUtils from 'react-dom/test-utils';
 
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
@@ -50,7 +51,7 @@ describe("CourseEnrollmentDialog", () => {
       {
         context: { router: { push: routerPushStub}},
         childContextTypes: {
-          router:   React.PropTypes.object.isRequired
+          router:   PropTypes.object.isRequired
         }
       },
     );
@@ -80,7 +81,7 @@ describe("CourseEnrollmentDialog", () => {
   it('has a disabled pay button by default', () => {
     const wrapper = renderDialog();
     const payButton = wrapper.querySelector('.pay-button');
-    TestUtils.Simulate.click(payButton);
+    ReactTestUtils.Simulate.click(payButton);
     sinon.assert.notCalled(setVisibilityStub);
     sinon.assert.notCalled(routerPushStub);
   });
@@ -90,7 +91,7 @@ describe("CourseEnrollmentDialog", () => {
     const courseRun = makeRun(1);
     const wrapper = renderDialog(price, courseRun);
     const payButton = wrapper.querySelector('.pay-button');
-    TestUtils.Simulate.click(payButton);
+    ReactTestUtils.Simulate.click(payButton);
     sinon.assert.calledWith(setVisibilityStub, false);
     const url = `/order_summary/?course_key=${encodeURIComponent(courseRun.course_id)}`;
     sinon.assert.calledWith(routerPushStub, url);
@@ -101,7 +102,7 @@ describe("CourseEnrollmentDialog", () => {
     const courseRun = makeRun(1);
     const wrapper = renderDialog(price, courseRun);
     const auditButton = wrapper.querySelector('.audit-button');
-    TestUtils.Simulate.click(auditButton);
+    ReactTestUtils.Simulate.click(auditButton);
     sinon.assert.calledWith(setVisibilityStub, false);
     sinon.assert.calledWith(addCourseEnrollmentStub, courseRun.course_id);
   });
@@ -113,7 +114,7 @@ describe("CourseEnrollmentDialog", () => {
       price, courseRun, makeCourse(1), true, false
     );
     const payButton = wrapper.querySelector('.pay-button');
-    TestUtils.Simulate.click(payButton);
+    ReactTestUtils.Simulate.click(payButton);
     assert.equal(
       checkoutStub.calledWith(courseRun.course_id),
       true

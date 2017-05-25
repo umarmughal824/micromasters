@@ -1,6 +1,7 @@
 /* global SETTINGS: false */
 // @flow
 import React from 'react';
+import PropTypes from 'prop-types';
 import moment from 'moment';
 import Button from 'react-mdl/lib/Button';
 import R from 'ramda';
@@ -29,7 +30,7 @@ import { isFreeCoupon } from '../../lib/coupon';
 
 export default class CourseAction extends React.Component {
   static contextTypes = {
-    router:   React.PropTypes.object.isRequired
+    router:   PropTypes.object.isRequired
   };
 
   props: {

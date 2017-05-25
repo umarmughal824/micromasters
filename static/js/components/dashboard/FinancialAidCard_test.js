@@ -7,6 +7,7 @@ import sinon from 'sinon';
 import moment from 'moment';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
+import DatePicker from 'react-datepicker';
 
 import { FETCH_PROCESSING } from '../../actions';
 import FinancialAidCard from './FinancialAidCard';
@@ -157,7 +158,7 @@ describe("FinancialAidCard", () => {
 
         let setDocumentSentDate = sandbox.stub();
         let wrapper = renderCard({ program, setDocumentSentDate });
-        let props = wrapper.find("DatePicker").props();
+        let props = wrapper.find(DatePicker).props();
 
         assert.equal(props.selected.format(ISO_8601_FORMAT), '2011-11-11');
         props.onChange(moment("1999-01-01"));

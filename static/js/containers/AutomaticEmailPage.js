@@ -2,6 +2,7 @@
 /* global SETTINGS: false */
 import DocumentTitle from 'react-document-title';
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import R from 'ramda';
 import type { Dispatch } from 'redux';
@@ -45,7 +46,7 @@ class AutomaticEmailPage extends React.Component {
   };
 
   static contextTypes = {
-    router: React.PropTypes.object.isRequired
+    router: PropTypes.object.isRequired
   };
 
   componentWillMount () {

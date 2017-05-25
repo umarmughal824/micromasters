@@ -1,6 +1,7 @@
 // @flow
 /* global SETTINGS:false */
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import SpinnerButton from './SpinnerButton';
 import { saveProfileStep } from '../util/profile_edit';
@@ -80,6 +81,6 @@ export default class ProfileProgressControls extends React.Component {
   }
 
   static contextTypes = {
-    router: React.PropTypes.object.isRequired
+    router: PropTypes.object.isRequired
   };
 }

@@ -2,7 +2,7 @@
 import React from 'react';
 import { assert } from 'chai';
 import _ from 'lodash';
-import TestUtils from 'react-addons-test-utils';
+import ReactTestUtils from 'react-dom/test-utils';
 import { render } from 'enzyme';
 import { Provider } from 'react-redux';
 import sinon from 'sinon';
@@ -73,7 +73,7 @@ describe('FinancialAidCalculator', () => {
       assert.equal(helper.store.getState().ui.calculatorDialogVisibility, true);
       let calculator = document.querySelector('.financial-aid-calculator');
 
-      TestUtils.Simulate.click(calculator.querySelector('.cancel-button'));
+      ReactTestUtils.Simulate.click(calculator.querySelector('.cancel-button'));
       assert.equal(helper.store.getState().ui.calculatorDialogVisibility, false);
     });
   });
@@ -99,9 +99,9 @@ describe('FinancialAidCalculator', () => {
         wrapper.find('.pricing-actions').find('.calculate-cost-button').simulate('click');
         assert.equal(helper.store.getState().ui.calculatorDialogVisibility, true);
         let calculator = document.querySelector('.financial-aid-calculator-wrapper');
-        TestUtils.Simulate.click(calculator.querySelector('.full-price'));
+        ReactTestUtils.Simulate.click(calculator.querySelector('.full-price'));
         let confirmDialog = document.querySelector('.skip-financial-aid-dialog-wrapper');
-        TestUtils.Simulate.click(confirmDialog.querySelector('.skip-button'));
+        ReactTestUtils.Simulate.click(confirmDialog.querySelector('.skip-button'));
       }).then(() => {
         assert(
           helper.skipFinancialAidStub.calledWith(program.id),
@@ -139,7 +139,7 @@ describe('FinancialAidCalculator', () => {
       assert.isFalse(skipButton.className.includes('disabled-with-spinner'));
       assert.isTrue(skipButton.disabled);
       assert.equal(skipButton.innerHTML, 'Pay Full Price');
-      TestUtils.Simulate.click(skipButton);
+      ReactTestUtils.Simulate.click(skipButton);
       assert.isFalse(helper.skipFinancialAidStub.calledWith(program.id));
     });
   });
@@ -190,7 +190,7 @@ describe('FinancialAidCalculator', () => {
       ], () => {
         wrapper.find('.pricing-actions').find('.calculate-cost-button').simulate('click');
         clearSelectField(document.querySelector('.currency'));
-        TestUtils.Simulate.click(document.querySelector('.financial-aid-calculator .save-button'));
+        ReactTestUtils.Simulate.click(document.querySelector('.financial-aid-calculator .save-button'));
       }).then(() => {
         let state = helper.store.getState().financialAid;
         assert.deepEqual(state.validation, {
@@ -278,11 +278,11 @@ describe('FinancialAidCalculator', () => {
       ], () => {
         wrapper.find('.pricing-actions').find('.calculate-cost-button').simulate('click');
         let calculator = document.querySelector('.financial-aid-calculator');
-        TestUtils.Simulate.change(calculator.querySelector('.mdl-checkbox__input'));
+        ReactTestUtils.Simulate.change(calculator.querySelector('.mdl-checkbox__input'));
         modifyTextField(document.querySelector('#user-salary-input'), '1000');
-        TestUtils.Simulate.click(calculator.querySelector('.save-button'));
+        ReactTestUtils.Simulate.click(calculator.querySelector('.save-button'));
         let confirmDialog = document.querySelector('.confirm-dialog');
-        TestUtils.Simulate.click(confirmDialog.querySelector('.save-button'));
+        ReactTestUtils.Simulate.click(confirmDialog.querySelector('.save-button'));
       }).then(() => {
         assert(
           helper.addFinancialAidStub.calledWith('1000', 'USD', program.id),
@@ -313,7 +313,7 @@ describe('FinancialAidCalculator', () => {
     return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
       wrapper.find('.pricing-actions').find('.dashboard-button').simulate('click');
       let calculator = document.querySelector('.financial-aid-calculator');
-      TestUtils.Simulate.change(calculator.querySelector('.mdl-checkbox__input'));
+      ReactTestUtils.Simulate.change(calculator.querySelector('.mdl-checkbox__input'));
       modifyTextField(document.querySelector('#user-salary-input'), '1000');
 
       let saveButton = calculator.querySelector('.save-button');
@@ -321,7 +321,7 @@ describe('FinancialAidCalculator', () => {
       assert.equal(saveButton.innerHTML, 'Submit');
       assert.isTrue(saveButton.disabled);
 
-      TestUtils.Simulate.click(saveButton);
+      ReactTestUtils.Simulate.click(saveButton);
     }).then(() => {
       assert.isFalse(helper.addFinancialAidStub.calledWith('1000', 'USD', program.id));
     });
@@ -348,11 +348,11 @@ describe('FinancialAidCalculator', () => {
       ], () => {
         wrapper.find('.pricing-actions').find('.calculate-cost-button').simulate('click');
         let calculator = document.querySelector('.financial-aid-calculator');
-        TestUtils.Simulate.change(calculator.querySelector('.mdl-checkbox__input'));
+        ReactTestUtils.Simulate.change(calculator.querySelector('.mdl-checkbox__input'));
         modifyTextField(document.querySelector('#user-salary-input'), '1000');
-        TestUtils.Simulate.click(calculator.querySelector('.save-button'));
+        ReactTestUtils.Simulate.click(calculator.querySelector('.save-button'));
         let confirmDialog = document.querySelector('.confirm-dialog');
-        TestUtils.Simulate.click(confirmDialog.querySelector('.save-button'));
+        ReactTestUtils.Simulate.click(confirmDialog.querySelector('.save-button'));
       }).then(() => {
         assert(
           helper.addFinancialAidStub.calledWith('1000', 'USD', program.id),

@@ -1,6 +1,7 @@
 // @flow
 /* global SETTINGS */
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import R from 'ramda';
 
@@ -27,7 +28,7 @@ class ProfilePage extends React.Component<*, ProfileContainerProps, *> {
   }
 
   static contextTypes = {
-    router: React.PropTypes.object.isRequired
+    router: PropTypes.object.isRequired
   };
 
   componentDidUpdate() {

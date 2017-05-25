@@ -93,7 +93,7 @@ class OrderSummary extends React.Component {
           {this.getExplanationText()}
         </Card>
         <p className="terms-of-service-text">
-          By clicking below, you agree to the <a href="/terms_of_service" target="_blank">
+          By clicking below, you agree to the <a href="/terms_of_service" target="_blank" rel="noopener noreferrer">
           MITx MicroMasters Terms of Service.
           </a>
         </p>

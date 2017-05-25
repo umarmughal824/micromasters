@@ -115,8 +115,16 @@ export default class CourseDescription extends React.Component {
       url = courseRun.enrollment_url;
     }
 
-    return url && !hasAnyStaffRole(SETTINGS.roles) ?
-      <a key={'view-edx-link'} className={'view-edx-link'} href={url} target="_blank">View on edX</a>
+    return url && !hasAnyStaffRole(SETTINGS.roles)
+      ? <a
+        key={'view-edx-link'}
+        className={'view-edx-link'}
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        View on edX
+      </a>
       : null;
   };
 

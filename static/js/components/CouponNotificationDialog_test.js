@@ -4,7 +4,7 @@ import Decimal from 'decimal.js-light';
 import { mount } from 'enzyme';
 import { assert } from 'chai';
 import sinon from 'sinon';
-import TestUtils from 'react-addons-test-utils';
+import ReactTestUtils from 'react-dom/test-utils';
 
 import {
   COUPON_CONTENT_TYPE_COURSE,
@@ -183,7 +183,7 @@ describe("CouponNotificationDialog", () => {
     const div = renderDialog(COUPON_PERCENT, PROGRAM, null, true, callback);
     const buttonEl = getEl(div, "button.primary-button");
     assert.equal(buttonEl.textContent, "OK");
-    TestUtils.Simulate.click(buttonEl);
+    ReactTestUtils.Simulate.click(buttonEl);
     assert.isTrue(callback.calledWith(false));
   });
 });

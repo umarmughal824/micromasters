@@ -1,6 +1,6 @@
 /* global SETTINGS: false */
 import React from 'react';
-import TestUtils from 'react-addons-test-utils';
+import ReactTestUtils from 'react-dom/test-utils';
 import { assert } from 'chai';
 import _ from 'lodash';
 
@@ -242,10 +242,10 @@ describe("ErrorMessage", () => {
             SET_LEARNER_PAGE_DIALOG_VISIBILITY,
             CLEAR_PROFILE_EDIT,
           ], () => {
-            TestUtils.Simulate.click(editButton);
+            ReactTestUtils.Simulate.click(editButton);
             let dialog = document.querySelector('.personal-dialog');
             let save = dialog.querySelector('.save-button');
-            TestUtils.Simulate.click(save);
+            ReactTestUtils.Simulate.click(save);
           }).then(() => {
             confirmErrorMessage(div, `500 ${errorString}`);
           });

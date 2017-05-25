@@ -7,7 +7,7 @@ import sinon from 'sinon';
 import IconButton from 'react-mdl/lib/IconButton';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import TestUtils from 'react-addons-test-utils';
+import ReactTestUtils from 'react-dom/test-utils';
 
 import FinalExamCard from './FinalExamCard';
 import {
@@ -182,7 +182,7 @@ pay for the course and pass the online work.`;
     props.ui.dialogVisibility = { 'pearsonTOSDialogVisible': true };
     props.program.pearson_exam_status = PEARSON_PROFILE_SCHEDULABLE;
     renderCard(props);
-    TestUtils.Simulate.click(getEl(getDialog(), ".cancel-button"));
+    ReactTestUtils.Simulate.click(getEl(getDialog(), ".cancel-button"));
     assert.equal(showPearsonTOSDialogStub.callCount, 1);
   });
 
@@ -192,7 +192,7 @@ pay for the course and pass the online work.`;
     renderCard(props);
     let btnContinue = getEl(getDialog(), ".save-button");
     assert.equal(btnContinue.textContent, "CONTINUE");
-    TestUtils.Simulate.click(btnContinue);
+    ReactTestUtils.Simulate.click(btnContinue);
     assert.equal(submitPearsonSSOStub.callCount, 1);
   });
 });

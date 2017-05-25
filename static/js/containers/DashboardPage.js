@@ -2,6 +2,7 @@
 /* global SETTINGS: false */
 import DocumentTitle from 'react-document-title';
 import React from 'react';
+import PropTypes from 'prop-types';
 import type { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import _ from 'lodash';
@@ -112,7 +113,7 @@ const PEARSON_TOS_DIALOG = "pearsonTOSDialogVisible";
 
 class DashboardPage extends React.Component {
   static contextTypes = {
-    router:   React.PropTypes.object.isRequired
+    router:   PropTypes.object.isRequired
   };
 
   props: {
