@@ -1,14 +1,13 @@
 """
 Tests for the dashboard views
 """
-from datetime import datetime, timedelta
+from datetime import timedelta
 from unittest.mock import (
     MagicMock,
     patch,
 )
 
 import ddt
-import pytz
 from django.core.urlresolvers import reverse
 from requests.exceptions import HTTPError
 from rest_framework import status
@@ -22,6 +21,7 @@ from dashboard.factories import UserCacheRefreshTimeFactory
 from dashboard.models import ProgramEnrollment, CachedEnrollment
 from micromasters.exceptions import PossiblyImproperlyConfigured
 from micromasters.factories import UserFactory
+from micromasters.utils import now_in_utc
 from search.base import MockedESTestCase
 from roles.models import Role
 from roles.roles import (
@@ -50,9 +50,9 @@ class DashboardTest(MockedESTestCase, APITestCase):
         )
         UserCacheRefreshTimeFactory(
             user=cls.user,
-            enrollment=datetime.now(tz=pytz.utc) + timedelta(minutes=10),
-            certificate=datetime.now(tz=pytz.utc) + timedelta(minutes=10),
-            current_grade=datetime.now(tz=pytz.utc) + timedelta(minutes=10),
+            enrollment=now_in_utc() + timedelta(minutes=10),
+            certificate=now_in_utc() + timedelta(minutes=10),
+            current_grade=now_in_utc() + timedelta(minutes=10),
         )
 
         # create the programs
@@ -161,7 +161,7 @@ class DashboardTokensTest(MockedESTestCase, APITestCase):
     def setUp(self):
         super(DashboardTokensTest, self).setUp()
         self.client.force_login(self.user)
-        self.now = datetime.now(pytz.utc)
+        self.now = now_in_utc()
 
     def update_social_extra_data(self, data):
         """Helper function to update the python social auth extra data"""

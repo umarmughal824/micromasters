@@ -2,7 +2,6 @@
 Test for ecommerce functions
 """
 from base64 import b64encode
-from datetime import datetime
 from decimal import Decimal
 import hashlib
 import hmac
@@ -17,7 +16,6 @@ import ddt
 from django.core.exceptions import ImproperlyConfigured
 from django.http.response import Http404
 from django.test import override_settings
-import pytz
 from rest_framework.exceptions import ValidationError
 from edx_api.enrollments import Enrollment
 
@@ -66,7 +64,10 @@ from financialaid.api import get_formatted_course_price
 from financialaid.factories import FinancialAidFactory, TierProgramFactory
 from financialaid.models import FinancialAidStatus, TierProgram
 from micromasters.factories import UserFactory
-from micromasters.utils import serialize_model_object
+from micromasters.utils import (
+    now_in_utc,
+    serialize_model_object,
+)
 from search.base import MockedESTestCase
 
 
@@ -341,11 +342,10 @@ class CybersourceTests(MockedESTestCase):
         username = 'username'
         transaction_uuid = 'hex'
 
-        now = datetime.now(tz=pytz.UTC)
-        now_mock = MagicMock(return_value=now)
+        now = now_in_utc()
 
         with patch('ecommerce.api.get_social_username', autospec=True, return_value=username):
-            with patch('ecommerce.api.datetime', autospec=True, now=now_mock):
+            with patch('ecommerce.api.now_in_utc', autospec=True, return_value=now) as now_mock:
                 with patch('ecommerce.api.uuid.uuid4', autospec=True, return_value=MagicMock(hex=transaction_uuid)):
                     payload = generate_cybersource_sa_payload(order, 'dashboard_url')
         signature = payload.pop('signature')
@@ -380,7 +380,7 @@ class CybersourceTests(MockedESTestCase):
             'merchant_defined_data2': '{}'.format(course_run.title),
             'merchant_defined_data3': '{}'.format(course_run.edx_course_key),
         }
-        now_mock.assert_called_with(tz=pytz.UTC)
+        assert now_mock.called
 
 
 @override_settings(CYBERSOURCE_REFERENCE_PREFIX=CYBERSOURCE_REFERENCE_PREFIX)
