@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.59.2
+--------------
+
+- Fix flaky selenium tests (#3234)
+- Add function to calculate current time in UTC (#3229)
+
 Version 0.59.1
 --------------
 
