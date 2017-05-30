@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.60.0
+--------------
+
+- Upgrade to python 3.6.1 (#3236)
+- Mail search now skips users without a profile (#3240)
+- Upgrade pylint, treat warnings as errors, fix related errors (#3235)
+
 Version 0.59.2
 --------------
 
