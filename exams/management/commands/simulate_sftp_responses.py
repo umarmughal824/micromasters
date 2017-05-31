@@ -10,7 +10,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from exams.pearson.constants import (
-    PEARSON_DATETIME_FORMAT,
+    PEARSON_DEFAULT_DATETIME_FORMAT,
     PEARSON_FILE_TYPES,
 )
 from exams.pearson import sftp
@@ -116,7 +116,7 @@ class Command(BaseCommand):
                     'ClientAuthorizationID': aid,
                     'ClientCandidateID': cid,
                     'Status': status,
-                    'Date': now.strftime(PEARSON_DATETIME_FORMAT),
+                    'Date': now.strftime(PEARSON_DEFAULT_DATETIME_FORMAT),
                     'Message': 'Invalid ExamSeriesCode' if error else '',
                 })
 
@@ -150,7 +150,7 @@ class Command(BaseCommand):
                 writer.writerow({
                     'ClientCandidateID': cid,
                     'Status': 'Error' if error else 'Accepted',
-                    'Date': now.strftime(PEARSON_DATETIME_FORMAT),
+                    'Date': now.strftime(PEARSON_DEFAULT_DATETIME_FORMAT),
                     'Message': 'Invalid Address' if error else '',
                 })
 
