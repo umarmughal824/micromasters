@@ -67,18 +67,14 @@ const formatRequest = R.compose(
 
 const formatJSONRequest = R.compose(formatRequest, jsonHeaders);
 
-const _fetchWithCSRF = (path: string, init: Object = {}): Promise<*> => {
-  return fetch(path, formatRequest(init)).then(response => {
-    let text = response.text();
+const _fetchWithCSRF = async (path: string, init: Object = {}): Promise<*> => {
+  let response = await fetch(path, formatRequest(init));
+  let text = await response.text();
 
-    if (response.status < 200 || response.status >= 300) {
-      return text.then(text => {
-        return Promise.reject([text, response.status]);
-      });
-    }
-
-    return text;
-  });
+  if (response.status < 200 || response.status >= 300) {
+    return Promise.reject([text, response.status]);
+  }
+  return text;
 };
 
 // allow mocking in tests
@@ -106,34 +102,36 @@ const handleEmptyJSON = json => (
  *  - non 2xx status codes will reject the promise returned
  *  - response JSON is returned in place of response
  */
-const _fetchJSONWithCSRF = (input: string, init: Object = {}, loginOnError: boolean = false): Promise<*> => {
-  return fetch(input, formatJSONRequest(init)).then(response => {
-    // For 400 and 401 errors, force login
-    // the 400 error comes from edX in case there are problems with the refresh
-    // token because the data stored locally is wrong and the solution is only
-    // to force a new login
-    if (loginOnError === true && (response.status === 400 || response.status === 401)) {
-      const relativePath = window.location.pathname + window.location.search;
-      const loginRedirect = `/login/edxorg/?next=${encodeURIComponent(relativePath)}`;
-      window.location = `/logout?next=${encodeURIComponent(loginRedirect)}`;
-    }
+const _fetchJSONWithCSRF = async (input: string, init: Object = {}, loginOnError: boolean = false): Promise<*> => {
+  let response = await fetch(input, formatJSONRequest(init));
+  // For 400 and 401 errors, force login
+  // the 400 error comes from edX in case there are problems with the refresh
+  // token because the data stored locally is wrong and the solution is only
+  // to force a new login
+  if (loginOnError === true && (response.status === 400 || response.status === 401)) {
+    const relativePath = window.location.pathname + window.location.search;
+    const loginRedirect = `/login/edxorg/?next=${encodeURIComponent(relativePath)}`;
+    window.location = `/logout?next=${encodeURIComponent(loginRedirect)}`;
+  }
 
-    // Here in the .then callback we use the `parseJSON` function, which returns an Either.
-    // Left records an error parsing the JSON, and Right success. `filterE` will turn a Right
-    // into a Left based on a boolean function (similar to filtering a Maybe), and we use `bimap`
-    // to merge an error code into a Left. The `resolveEither` function above will resolve a Right
-    // and reject a Left.
-    return response.text().then(R.compose(
-      resolveEither,
-      S.bimap(
-        R.merge({ errorStatusCode: response.status }),
-        R.identity,
-      ),
-      filterE(() => response.ok),
-      parseJSON,
-      handleEmptyJSON,
-    ));
-  });
+  // we pull the text out of the response
+  let text = await response.text();
+
+  // Here we use the `parseJSON` function, which returns an Either.
+  // Left records an error parsing the JSON, and Right success. `filterE` will turn a Right
+  // into a Left based on a boolean function (similar to filtering a Maybe), and we use `bimap`
+  // to merge an error code into a Left. The `resolveEither` function above will resolve a Right
+  // and reject a Left.
+  return R.compose(
+    resolveEither,
+    S.bimap(
+      R.merge({ errorStatusCode: response.status }),
+      R.identity,
+    ),
+    filterE(() => response.ok),
+    parseJSON,
+    handleEmptyJSON,
+  )(text);
 };
 
 // allow mocking in tests
