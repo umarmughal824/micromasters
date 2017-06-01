@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.60.1
+--------------
+
+- Fix selenium tests dev script to run all tests (#3256)
+- Add script to use webpack dev server to serve javascript bundles (#3250)
+- Added management command to take screenshots of dashboard states (#3242)
+
 Version 0.60.0
 --------------
 
