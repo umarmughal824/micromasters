@@ -18,6 +18,8 @@ import {
   LEARNER_EMAIL_CONFIG,
   AUTOMATIC_EMAIL_ADMIN_CONFIG,
   convertEmailEdit,
+  getFilters,
+  findFilters,
 } from './lib';
 import {
   START_EMAIL_EDIT,
@@ -75,6 +77,28 @@ describe('Specific email config', () => {
       </MuiThemeProvider>
     );
   };
+
+  const queryFilters = `{
+    "bool": {
+      "must":[
+        { 
+          "nested": {
+            "path": "program.enrollments",
+            "filter": {
+              "term": {
+                "program.enrollments.payment_status": "Paid"
+              }
+            }
+          }
+        },
+        {
+          "term": {
+            "program.id":1
+          }
+        }
+      ]
+    }
+  }`;
 
   describe('for the learner email', () => {
     let wrapper,
@@ -226,6 +250,202 @@ describe('Specific email config', () => {
           { other_field: 'yea...' },
         ].forEach(obj => {
           assert.deepEqual(convertEmailEdit(convertEmailEdit(obj)), obj);
+        });
+      });
+
+      it('should return filters', () => {
+        let filters = getFilters(JSON.parse(queryFilters));
+        assert.deepEqual(filters, [{
+          "id": "program.enrollments.payment_status",
+          "name": "program.enrollments.payment_status",
+          "value": "Paid"
+        }]);
+      });
+
+      describe('getFilters', () => {
+        it('should return filters', () => {
+          let filters = getFilters(JSON.parse(queryFilters));
+          assert.deepEqual(filters, [{
+            "id": "program.enrollments.payment_status",
+            "name": "program.enrollments.payment_status",
+            "value": "Paid"
+          }]);
+        });
+      });
+
+      describe('findFilters', () => {
+        it('should return an empty list if passed an empty object', () => {
+          let filters = findFilters({});
+          assert.deepEqual(filters, []);
+        });
+
+        it('should return an empty list if passed an object without any "term" and "range" key on it', () => {
+          const query = `{
+            "bool": {
+              "must":[
+                {
+                  "program.id":1
+                }
+              ]
+            }
+          }`;
+          let filters = findFilters(JSON.parse(query));
+          assert.deepEqual(filters, []);
+        });
+
+        it('should return a list of filters defined at the top-level', () => {
+          const query = `{
+            "bool": {
+              "must":[
+                {
+                  "range": {
+                    "program.grade_average": {
+                      "gte": 0,
+                      "lte": 81
+                    }
+                  }
+                },
+                {
+                  "term": {
+                    "profile.birth_country": "US"
+                  }
+                },
+                {
+                  "term": {
+                    "profile.country": "US"
+                  }
+                }
+              ]
+            }
+          }`;
+          let filters = findFilters(JSON.parse(query));
+          assert.deepEqual(filters, [
+            { "program.grade_average": { "gte": 0, "lte": 81 } },
+            { "profile.birth_country": "US" },
+            { "profile.country": "US" },
+          ]);
+        });
+
+        it('should return a list of filters which are nested in the object', () => {
+          const query = `{
+            "bool": {
+              "must": [
+                {
+                  "nested": {
+                    "path": "program.enrollments",
+                    "filter": {
+                      "bool": {
+                        "must": [
+                          {
+                            "term": {
+                              "program.enrollments.course_title": "Digital Learning 100"
+                            }
+                          },
+                          {
+                            "range": {
+                              "program.enrollments.final_grade": {
+                                "gte": 0,
+                                "lte": 89
+                              }
+                            }
+                          },
+                          {
+                            "term": {
+                              "program.enrollments.payment_status": "Paid"
+                            }
+                          },
+                          {
+                            "term": {
+                              "program.enrollments.semester": "2016 - Summer"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }`;
+          let filters = findFilters(JSON.parse(query));
+          assert.deepEqual(filters, [
+            { "program.enrollments.course_title": "Digital Learning 100" },
+            { "program.enrollments.final_grade": { "gte": 0, "lte": 89 } },
+            { "program.enrollments.payment_status": "Paid" },
+            { "program.enrollments.semester": "2016 - Summer" },
+          ]);
+        });
+
+        it('should return a list of filters which are nested at different levels', () => {
+          let query = `{
+            "bool": {
+              "must": [
+                {
+                  "nested": {
+                    "path": "program.enrollments",
+                    "filter": {
+                      "bool": {
+                        "must": [
+                          {
+                            "term": {
+                              "program.enrollments.course_title": "Digital Learning 100"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "nested": {
+                    "path": "profile.education",
+                    "filter": {
+                      "term": {
+                        "profile.education.degree_name": "b"
+                      }
+                    }
+                  }
+                },
+                {
+                  "nested": {
+                    "path": "profile.work_history",
+                    "filter": {
+                      "term": {
+                        "profile.work_history.company_name": "Volvo"
+                      }
+                    }
+                  }
+                },
+                {
+                  "term": {
+                    "program.id": 1
+                  }
+                }
+              ]
+            }
+          }`;
+          let filters = findFilters(JSON.parse(query));
+          assert.deepEqual(filters, [
+            { "program.enrollments.course_title": "Digital Learning 100" },
+            { "profile.education.degree_name": "b" },
+            { "profile.work_history.company_name": "Volvo" },
+          ]);
+        });
+
+        it('should ignore program.id', () => {
+          const query = `{
+            "bool": {
+              "must":[
+                {
+                  "term": {
+                    "program.id":1
+                  }
+                }
+              ]
+            }
+          }`;
+          let filters = findFilters(JSON.parse(query));
+          assert.deepEqual(filters, []);
         });
       });
     });
