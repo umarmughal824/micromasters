@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.60.2
+--------------
+
+- Show recipients on email edit box (#3238)
+- Rewrote two functions in lib/api.js to use async/await syntax
+- Handle reuse_db option (#3247)
+
 Version 0.60.1
 --------------
 
