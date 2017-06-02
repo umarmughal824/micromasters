@@ -237,6 +237,13 @@ const nestedValidator = R.curry((key: string, findErrors: Function, profile: Pro
   return { [key]: errors };
 });
 
+const mergeListOfArgs = R.compose(R.mergeAll, Array);
+
+const extraErrorCheck = R.curry((key, msg, predicate, entry, errors) => (
+  predicate(entry) ? R.merge(errors, { [key]: msg }) : errors
+));
+
+
 /*
  * Education Validation
  */
@@ -245,10 +252,7 @@ const educationMessages: ErrorMessages = {
   'graduation_date': 'Please enter a valid graduation date',
   'field_of_study': 'Field of study is required',
   'online_degree': 'Online Degree is required',
-  'school_name': 'School name is required',
-  'school_city': 'City is required',
-  'school_state_or_territory': 'State is required',
-  'school_country': 'Country is required'
+  'school_name': 'School name is required'
 };
 
 const isHighSchool: (e: EducationEntry) => boolean = R.compose(
@@ -263,8 +267,16 @@ const educationKeys: (e: EducationEntry) => string[] = R.ifElse(
   isHighSchool, R.compose(excludeFieldOfStudy, R.keys), R.keys
 );
 
-const educationErrors: (es: EducationEntry[]) => ValidationErrors[] = R.map(entry => (
-  findErrors(entry, educationKeys(entry), educationMessages)
+const schoolLocationIsValid = extraErrorCheck('location', 'Location must contain city, state, country', entry => (
+  isNilOrEmptyString(entry.school_city) ||
+  isNilOrEmptyString(entry.school_state_or_territory) ||
+  isNilOrEmptyString(entry.school_country)
+));
+
+const additionalSchoolValidation = R.converge(mergeListOfArgs, [schoolLocationIsValid]);
+
+const educationErrors: (xs: EducationEntry[]) => ValidationErrors[] = R.map(entry => (
+  additionalSchoolValidation(entry, findErrors(entry, educationKeys(entry), educationMessages))
 ));
 
 export const educationValidation = nestedValidator('education', educationErrors);
@@ -277,9 +289,6 @@ const workMessages: ErrorMessages = {
   'industry': 'Industry is required',
   'company_name': 'Name of Employer is required',
   'start_date': 'Please enter a valid start date',
-  'city': 'City is required',
-  'country': 'Country is required',
-  'state_or_territory': 'State or Territory is required',
 };
 
 // functions to perform extra checks
@@ -288,19 +297,20 @@ const workMessages: ErrorMessages = {
 // and errors is the output of workHistoryErrors
 // and returning errors ∪ newErrors
 
-const extraWorkCheck = R.curry((key, msg, predicate, entry, errors) => (
-  predicate(entry) ? R.merge(errors, { [key]: msg }) : errors
-));
 
-const endDateNotBeforeStart = extraWorkCheck('end_date', "End date cannot be before start date", entry => (
+const endDateNotBeforeStart = extraErrorCheck('end_date', "End date cannot be before start date", entry => (
   !isNilOrEmptyString(entry.end_date) && moment(entry.end_date).isBefore(entry.start_date, 'month')
 ));
 
-const endDateNotInFuture = extraWorkCheck('end_date', 'End date cannot be in the future', entry => (
+const endDateNotInFuture = extraErrorCheck('end_date', 'End date cannot be in the future', entry => (
   moment(entry.end_date).isAfter(moment(), 'month')
 ));
 
-const dateIsValid = extraWorkCheck('end_date', "Please enter a valid end date or leave it blank", entry => {
+const workLocationIsValid = extraErrorCheck('location', 'Location must contain city, state, country', entry => (
+  isNilOrEmptyString(entry.city) || isNilOrEmptyString(entry.state_or_territory) || isNilOrEmptyString(entry.country)
+));
+
+const dateIsValid = extraErrorCheck('end_date', "Please enter a valid end date or leave it blank", entry => {
   let editIsEmpty = _.isEmpty(entry.end_date_edit) || (
     entry.end_date_edit !== undefined &&
     isNilOrEmptyString(entry.end_date_edit.year) &&
@@ -309,12 +319,11 @@ const dateIsValid = extraWorkCheck('end_date', "Please enter a valid end date or
   return isNilOrEmptyString(entry.end_date) && !editIsEmpty;
 });
 
-const mergeListOfArgs = R.compose(R.mergeAll, (...errors) => [...errors]);
-
 const additionalWorkValidation = R.converge(mergeListOfArgs, [
   endDateNotBeforeStart,
   endDateNotInFuture,
-  dateIsValid
+  dateIsValid,
+  workLocationIsValid
 ]);
 
 const workHistoryErrors: (xs: WorkHistoryEntry[]) => ValidationErrors[] = R.map(entry => (

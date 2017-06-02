@@ -606,10 +606,10 @@ describe('Profile Editing utility functions', () => {
 
     it('renders default content', () => {
       that.props.profile.city = "Cambridge";
-      that.props.profile.state_or_territory = "Massachusetts";
-      that.props.profile.country = "USA";
+      that.props.profile.state_or_territory = "US-MA";
+      that.props.profile.country = "US";
       const wrapper = renderGeosuggest();
-      assert.equal(wrapper.find('input').node.value, "Cambridge, Massachusetts, USA");
+      assert.equal(wrapper.find('input').node.value, "Cambridge, Massachusetts, United States");
     });
 
     it('calls Google API after typing', () => {
@@ -618,26 +618,76 @@ describe('Profile Editing utility functions', () => {
       assert.ok(gmaps.getPlacePredictions.calledWith({input: "Tech"}));
     });
 
-    it('populates profile info on select', () => {
-      gmaps.autocompleteSuggestions = [{
-        description: "123 Main St, Anytown, RS, United States",
-        gmaps: {
-          address_components: [
-            {long_name: "123 Main Street", short_name: "123 Main St", types: ["street_address"]},
-            {long_name: "Anytown", short_name: "Anytown", types: ["locality"]},
-            {long_name: "RandoState", short_name: "RS", types: ["administrative_area_level_1"]},
-            {long_name: "United States", short_name: "USA", types: ["country"]},
-          ]
+    it('populates profile info on geosuggest select', () => {
+      gmaps.geocodeResults = [{
+        address_components: [
+          {long_name: "Golden", short_name: "Golden", types: ["locality"]},
+          {long_name: "Colorado", short_name: "Colorado", types: ["administrative_area_level_1"]},
+          {long_name: "United States", short_name: "US", types: ["country"]},
+        ],
+        geometry: {
+          location: {
+            lat: () => 48.859,
+            lng: () => 2.207,
+          }
         }
       }];
-      gmaps.geocodeResults[0].gmaps = gmaps.autocompleteSuggestions[0].gmaps;
+      gmaps.geocode = gmaps.sandbox.stub().callsArgWith(1, gmaps.geocodeResults, 'OK');
       const wrapper = renderGeosuggest();
-      typeText(wrapper, "123 Main");
+      typeText(wrapper, "Golden");
+      const item = wrapper.find("li.geosuggest__item").first();
+      item.simulate('click');
+      assert.equal(that.props.profile.city, "Golden");
+      assert.equal(that.props.profile.state_or_territory, "US-CO");
+      assert.equal(that.props.profile.country, "US");
+    });
+
+    it('populates statecode via fuzzy match on geosuggest select', () => {
+      gmaps.geocodeResults = [{
+        address_components: [
+          {long_name: "Anytown", short_name: "Anytown", types: ["locality"]},
+          {long_name: "Lääne-Viru County", short_name: "Lääne-Viru County", types: ["administrative_area_level_1"]},
+          {long_name: "Estonia", short_name: "EE", types: ["country"]},
+        ],
+        geometry: {
+          location: {
+            lat: () => 48.859,
+            lng: () => 2.207,
+          }
+        }
+      }];
+      gmaps.geocode = gmaps.sandbox.stub().callsArgWith(1, gmaps.geocodeResults, 'OK');
+      const wrapper = renderGeosuggest();
+      typeText(wrapper, "Anyt");
       const item = wrapper.find("li.geosuggest__item").first();
       item.simulate('click');
       assert.equal(that.props.profile.city, "Anytown");
-      assert.equal(that.props.profile.state_or_territory, "RandoState");
-      assert.equal(that.props.profile.country, "United States");
+      assert.equal(that.props.profile.state_or_territory, "EE-59");
+      assert.equal(that.props.profile.country, "EE");
+    });
+
+    it('populates statecode with "Not Available" if all matching attempts fail', () => {
+      gmaps.geocodeResults = [{
+        address_components: [
+          {long_name: "Someplace", short_name: "Someplace", types: ["locality"]},
+          {long_name: "djkfsldkfjdslfjsl", short_name: "djkfsldkfjdslfjsl", types: ["administrative_area_level_1"]},
+          {long_name: "United States", short_name: "US", types: ["country"]},
+        ],
+        geometry: {
+          location: {
+            lat: () => 48.859,
+            lng: () => 2.207,
+          }
+        }
+      }];
+      gmaps.geocode = gmaps.sandbox.stub().callsArgWith(1, gmaps.geocodeResults, 'OK');
+      const wrapper = renderGeosuggest();
+      typeText(wrapper, "123 Main Street");
+      const item = wrapper.find("li.geosuggest__item").first();
+      item.simulate('click');
+      assert.equal(that.props.profile.city, "Someplace");
+      assert.equal(that.props.profile.state_or_territory, 'Not Available');
+      assert.equal(that.props.profile.country, "US");
     });
 
     it('removes profile info on empty', () => {

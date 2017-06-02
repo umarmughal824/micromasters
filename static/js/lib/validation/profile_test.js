@@ -420,7 +420,7 @@ describe('Profile validation functions', () => {
       assert.deepEqual(educationValidation(clone), {
         education: [{
           school_name: 'School name is required',
-          school_city: 'City is required'
+          location: 'Location must contain city, state, country'
         }, {}]
       });
     });
@@ -450,7 +450,7 @@ describe('Profile validation functions', () => {
       clone.work_history[0].city = '';
       assert.deepEqual(employmentValidation(clone), {
         work_history: [{
-          city: 'City is required',
+          location: 'Location must contain city, state, country',
           company_name: 'Name of Employer is required'
         },{}]
       });
@@ -589,7 +589,7 @@ describe('Profile validation functions', () => {
       profile = _.cloneDeep(USER_PROFILE_RESPONSE);
       _.set(profile, ['work_history', 0, 'country'], '');
       let expectation = [false, EMPLOYMENT_STEP, {
-        work_history: [{country: "Country is required"}, {}]
+        work_history: [{location: "Location must contain city, state, country"}, {}]
       }];
       assert.deepEqual(validateProfileComplete(profile), expectation);
     });

@@ -18,8 +18,6 @@ import {
 import ProfileFormFields from '../util/ProfileFormFields';
 import ConfirmDeletion from './ConfirmDeletion';
 import SelectField from './inputs/SelectField';
-import CountrySelectField from './inputs/CountrySelectField';
-import StateSelectField from './inputs/StateSelectField';
 import { educationEntriesByDate } from '../util/sorting';
 import { dialogActions } from './inputs/util';
 import {
@@ -326,6 +324,12 @@ class EducationForm extends ProfileFormFields {
       }
     };
 
+    const schoolAddressMapping = {
+      locality: keySet("school_city"),
+      administrative_area_level_1: keySet("school_state_or_territory"),
+      country: keySet("school_country")
+    };
+
     return <Grid className="profile-tab-grid">
       <Cell col={12} className="profile-form-title">
         {title}
@@ -338,26 +342,13 @@ class EducationForm extends ProfileFormFields {
       <Cell col={12}>
         {this.boundDateField(keySet('graduation_date'), 'Graduation Date', true, true)}
       </Cell>
-      <Cell col={4}>
-        <CountrySelectField
-          stateKeySet={keySet('school_state_or_territory')}
-          countryKeySet={keySet('school_country')}
-          label='Country'
-          topMenu={true}
-          {...this.defaultInputComponentProps()}
-        />
-      </Cell>
-      <Cell col={4}>
-        <StateSelectField
-          stateKeySet={keySet('school_state_or_territory')}
-          countryKeySet={keySet('school_country')}
-          label='State'
-          topMenu={true}
-          {...this.defaultInputComponentProps()}
-        />
-      </Cell>
-      <Cell col={4} key="school_city">
-        {this.boundTextField(keySet('school_city'), 'City')}
+      <Cell col={12}>
+        {this.boundGeosuggest(schoolAddressMapping, keySet('location'), "School Location",
+          {
+            placeholder: "Anytown, Massachusetts, United States",
+            types: ["geocode"]
+          }
+        )}
       </Cell>
     </Grid>;
   };
