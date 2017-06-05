@@ -33,8 +33,7 @@ export default class LearnerInfoCard extends React.Component {
 
     return profile.email_optin &&
       !isNilOrBlank(profile.email) &&
-      !this.isOwnProfilePage() &&
-      hasAnyStaffRole(SETTINGS.roles);
+      !this.isOwnProfilePage();
   };
 
   renderAboutMeSection = (

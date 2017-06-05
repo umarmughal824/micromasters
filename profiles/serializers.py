@@ -254,7 +254,9 @@ class ProfileLimitedSerializer(ProfileBaseSerializer):
             'about_me',
             'image_medium',
             'romanized_first_name',
-            'romanized_last_name'
+            'romanized_last_name',
+            'email_optin',
+            'email',
         )
         read_only_fields = (
             'edx_level_of_education',
