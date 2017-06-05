@@ -20,6 +20,7 @@ import iso3166 from 'iso-3166-2';
 import R from 'ramda';
 import _ from 'lodash';
 
+import Loader from './Loader';
 import ProgramFilter from './ProgramFilter';
 import LearnerResult from './search/LearnerResult';
 import CountryRefinementOption from './search/CountryRefinementOption';
@@ -329,27 +330,29 @@ export default class LearnerSearch extends SearchkitComponent {
     const { currentProgramEnrollment } = this.props;
 
     return (
-      <div className="learners-search">
-        <ProgramFilter
-          currentProgramEnrollment={currentProgramEnrollment}
-        />
-        <Grid className="search-grid">
-          <Cell col={3} className="search-sidebar">
-            { this.renderFacets(currentProgramEnrollment) }
-          </Cell>
-          <Cell col={9}>
-            <Card className="fullwidth results-padding" shadow={1}>
-              { this.renderSearchHeader() }
-              <Hits
-                className="learner-results"
-                hitsPerPage={SETTINGS.es_page_size}
-                itemComponent={this.WrappedLearnerResult}
-              />
-              <CustomNoHits />
-            </Card>
-          </Cell>
-        </Grid>
-      </div>
+      <Loader loaded={!this.isInitialLoading()} shouldRenderAll={true}>
+        <div className="learners-search">
+          <ProgramFilter
+            currentProgramEnrollment={currentProgramEnrollment}
+          />
+          <Grid className="search-grid">
+            <Cell col={3} className="search-sidebar">
+              { this.renderFacets(currentProgramEnrollment) }
+            </Cell>
+            <Cell col={9}>
+              <Card className="fullwidth results-padding" shadow={1}>
+                { this.renderSearchHeader() }
+                <Hits
+                  className="learner-results"
+                  hitsPerPage={SETTINGS.es_page_size}
+                  itemComponent={this.WrappedLearnerResult}
+                />
+                <CustomNoHits />
+              </Card>
+            </Cell>
+          </Grid>
+        </div>
+      </Loader>
     );
   }
 }

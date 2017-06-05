@@ -54,6 +54,16 @@ describe('LearnerSearchPage', function () {
     mockAxios.restore();
   });
 
+  it('spinner works', () => {
+    return renderComponent('/learners').then(([wrapper, div]) => {
+      assert.equal(div.querySelector(".loader").style.display, 'block');
+      let searchkit = wrapper.find("SearchkitProvider").props().searchkit;
+      searchkit.registrationCompleted.then(() => Promise.resolve([wrapper, div])).then((wrapper, div) => {
+        assert.equal(div.querySelector(".loader").style.display, 'none');
+      });
+    });
+  });
+
   const renderSearch = () => {
     return renderComponent('/learners').then(([wrapper]) => {
       let searchkit = wrapper.find("SearchkitProvider").props().searchkit;
