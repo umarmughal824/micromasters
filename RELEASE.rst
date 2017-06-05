@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.61.0
+--------------
+
+- Upgraded some JS dependencies
+- Added loader to learners search page (#3101)
+
 Version 0.60.2
 --------------
 
