@@ -180,6 +180,11 @@ class ExamAuthorization(TimestampedModel):
     exam_taken = models.BooleanField(default=False)
     exam_no_show = models.BooleanField(default=False)
 
+    @classmethod
+    def taken_exams(cls):
+        """Returns a QuerySet for taken exams"""
+        return cls.objects.filter(exam_taken=True)
+
     def __str__(self):
         return 'Exam Authorization "{0}" with status "{1}" for user {2}'.format(
             self.id,

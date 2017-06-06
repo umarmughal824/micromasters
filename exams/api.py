@@ -29,6 +29,12 @@ MESSAGE_NOT_ELIGIBLE_TEMPLATE = (
     '[Exam authorization] Unable to authorize user "{user}" for exam, '
     'course id is "{course_id}". User does not match the criteria.'
 )
+MESSAGE_NO_ATTEMPTS_TEMPLATE = (
+    '[Exam authorization] Unable to authorize user "{user}" for exam, '
+    'course id is "{course_id}". No attempts remaining.'
+)
+
+ATTEMPTS_PER_PAID_RUN = 2
 
 log = logging.getLogger(__name__)
 
@@ -90,6 +96,15 @@ def authorize_for_exam_run(mmtrack, course_run, exam_run):
     # if they didn't pass, they don't get authorized
     if not mmtrack.has_passed_course(course_run.edx_course_key):
         errors_message = MESSAGE_NOT_PASSED_OR_EXIST_TEMPLATE.format(
+            user=mmtrack.user.username,
+            course_id=course_run.edx_course_key
+        )
+        raise ExamAuthorizationException(errors_message)
+
+    # if they have run out of attempt, they don't get authorizaed
+    attempt_limit = mmtrack.get_course_paid_count(course_run.edx_course_key) * ATTEMPTS_PER_PAID_RUN
+    if ExamAuthorization.taken_exams().count() >= attempt_limit:
+        errors_message = MESSAGE_NO_ATTEMPTS_TEMPLATE.format(
             user=mmtrack.user.username,
             course_id=course_run.edx_course_key
         )

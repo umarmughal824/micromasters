@@ -206,6 +206,19 @@ class MMTrack:
             return self.has_final_grade_paid_on_edx(edx_course_key)
         return self.has_verified_enrollment(edx_course_key)
 
+    def get_course_paid_count(self, course_key):
+        """
+        Gets the count of paid course runs for the course
+
+        Args:
+            edx_course_key (str): an edX course run key
+        Returns:
+            int: count of paid course runs
+        """
+        return Line.objects.filter(
+            order__status=Order.FULFILLED, order__user=self.user, course_key=course_key
+        ).values('order_id').distinct().count()
+
     def has_paid_for_any_in_program(self):
         """
         Returns true if a user has paid for any course run in the program

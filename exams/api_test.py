@@ -27,6 +27,7 @@ from exams.api import (
     sso_digest,
     MESSAGE_NOT_ELIGIBLE_TEMPLATE,
     MESSAGE_NOT_PASSED_OR_EXIST_TEMPLATE,
+    ATTEMPTS_PER_PAID_RUN,
 )
 from exams.exceptions import ExamAuthorizationException
 from exams.factories import (
@@ -129,6 +130,37 @@ class ExamAuthorizationApiTests(TestCase):
             user=mmtrack.user,
             course=self.course_run.course
         ).exists() is True
+
+    def test_exam_authorization_attempts_consumed(self):
+        """
+        test exam_authorization when user passed and paid, but used all their attempts
+        """
+        create_order(self.user, self.course_run)
+        mmtrack = get_mmtrack(self.user, self.program)
+        self.assertTrue(mmtrack.has_paid(self.course_run.edx_course_key))
+        self.assertTrue(mmtrack.has_passed_course(self.course_run.edx_course_key))
+        old_run = ExamRunFactory.create(course=self.course_run.course)
+        ExamAuthorizationFactory.create_batch(
+            ATTEMPTS_PER_PAID_RUN,
+            exam_run=old_run,
+            user=mmtrack.user,
+            course=self.course_run.course,
+            exam_taken=True,
+        )
+
+        assert ExamAuthorization.objects.filter(
+            user=mmtrack.user,
+            course=self.course_run.course
+        ).count() == 2
+
+        with self.assertRaises(ExamAuthorizationException):
+            authorize_for_exam_run(mmtrack, self.course_run, self.exam_run)
+
+        # assert no new authorizations got created
+        assert ExamAuthorization.objects.filter(
+            user=mmtrack.user,
+            course=self.course_run.course
+        ).count() == 2
 
     def test_exam_authorization_course_mismatch(self):
         """
