@@ -7,7 +7,7 @@ from django.core.exceptions import ImproperlyConfigured
 import pytz
 
 from exams.pearson.exceptions import UnparsableRowException
-from exams.pearson.constants import PEARSON_DATETIME_FORMAT
+from exams.pearson.constants import PEARSON_DATETIME_FORMATS
 
 from mail import api as mail_api
 
@@ -52,17 +52,27 @@ parse_int_or_none = parse_or_default(int, None)
 parse_float_or_none = parse_or_default(float, None)
 
 
-def parse_datetime(dt):
+def parse_datetime(dt_string):
     """
-    Parses a datetime from Pearson's format
+    Attempts to parse a datetime string with any one of the datetime formats that we
+    expect from Pearson
 
     Args:
-        dt (str): datetime string to be parsed
+        dt_string (str): datetime string to be parsed
 
     Returns:
         datetime.datetime: parsed datetime
+
+    Raises:
+        UnparsableRowException:
+            Thrown if the datetime string cannot be parsed with any of the accepted formats
     """
-    return datetime.strptime(dt, PEARSON_DATETIME_FORMAT).replace(tzinfo=pytz.UTC)
+    for dt_format in PEARSON_DATETIME_FORMATS:
+        try:
+            return datetime.strptime(dt_string, dt_format).replace(tzinfo=pytz.UTC)
+        except ValueError:
+            pass
+    raise UnparsableRowException('Unparsable datetime: {}'.format(dt_string))
 
 
 def parse_bool(value):
@@ -74,6 +84,10 @@ def parse_bool(value):
 
     Returns:
         bool: parsed boolean value
+
+    Raises:
+        UnparsableRowException:
+            Thrown if the value cannot be parsed as a boolean
     """
     value = value.lower()
     if value == 'true':

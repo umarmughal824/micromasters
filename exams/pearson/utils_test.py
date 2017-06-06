@@ -21,11 +21,22 @@ class PearsonUtilsTest(SimpleTestCase):
         assert utils.is_zip_file('file.not') is False
         assert utils.is_zip_file('file') is False
 
-    def test_parse_datetime(self):
+    def test_parse_datetime_valid(self):
         """
         Tests that datetimes format correctly according to Pearson spec
         """
-        assert utils.parse_datetime('2016/05/15 15:02:55') == FIXED_DATETIME
+        parsed_datetimes = map(
+            utils.parse_datetime,
+            ['2016/05/15 15:02:55', '05/15/2016 15:02:55']
+        )
+        assert all(parsed_datetime == FIXED_DATETIME for parsed_datetime in parsed_datetimes)
+
+    def test_parse_datetime_invalid(self):
+        """
+        Tests that an improperly-formatted datetime will result in an exception
+        """
+        with self.assertRaises(UnparsableRowException):
+            utils.parse_datetime('bad/date/format')
 
     @ddt.data(
         ('true', True),

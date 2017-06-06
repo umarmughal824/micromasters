@@ -10,8 +10,8 @@ import phonenumbers
 import pycountry
 
 from exams.pearson.constants import (
-    PEARSON_DATE_FORMAT,
-    PEARSON_DATETIME_FORMAT,
+    PEARSON_DEFAULT_DATE_FORMAT,
+    PEARSON_DEFAULT_DATETIME_FORMAT,
     PEARSON_DIALECT_OPTIONS,
     PEARSON_STATE_SUPPORTED_COUNTRIES,
 )
@@ -52,14 +52,14 @@ class BaseTSVWriter(object):
         """
         Formats a date to Pearson's required format
         """
-        return date.strftime(PEARSON_DATE_FORMAT)
+        return date.strftime(PEARSON_DEFAULT_DATE_FORMAT)
 
     @classmethod
     def format_datetime(cls, dt):
         """
         Formats a datetime to Pearson's required format
         """
-        return dt.strftime(PEARSON_DATETIME_FORMAT)
+        return dt.strftime(PEARSON_DEFAULT_DATETIME_FORMAT)
 
     @classmethod
     def get_field_mapper(cls, field):

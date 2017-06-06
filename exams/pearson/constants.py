@@ -2,8 +2,12 @@
 from types import SimpleNamespace
 
 # Pearson TSV constants
-PEARSON_DATE_FORMAT = "%Y/%m/%d"
-PEARSON_DATETIME_FORMAT = "%Y/%m/%d %H:%M:%S"
+PEARSON_DATETIME_FORMATS = [
+    "%Y/%m/%d %H:%M:%S",
+    "%m/%d/%Y %H:%M:%S"
+]
+PEARSON_DEFAULT_DATETIME_FORMAT = PEARSON_DATETIME_FORMATS[0]
+PEARSON_DEFAULT_DATE_FORMAT = PEARSON_DEFAULT_DATETIME_FORMAT.split(' ')[0]
 
 PEARSON_FILE_TYPES = SimpleNamespace(
     EAC='eac',
