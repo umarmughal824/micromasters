@@ -193,7 +193,7 @@ class EdxPipelineApiTest(MockedESTestCase):
             ('edx_name', mocked_content['name']),
             ('first_name', first_name),
             ('last_name', last_name),
-            ('preferred_name', first_name),
+            ('preferred_name', mocked_content['name']),
             ('edx_bio', mocked_content['bio']),
             ('country', mocked_content['country']),
             ('edx_requires_parental_consent', mocked_content['requires_parental_consent']),

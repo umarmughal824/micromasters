@@ -112,7 +112,7 @@ class ProfileImage extends React.Component {
           )}
           <img
             src={imageUrl}
-            alt={`Profile image for ${getPreferredName(profile, false)}`}
+            alt={`Profile image for ${getPreferredName(profile)}`}
             className={`rounded-profile-image ${imageSizeClass}`}
           />
           { userPrivilegeCheck(profile, this.cameraIcon) }

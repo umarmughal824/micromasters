@@ -12,9 +12,9 @@ import { canAdvanceSearchProgram } from '../../lib/roles';
 import ProfileImage from '../../containers/ProfileImage';
 import LearnerChip from '../LearnerChip';
 import {
-  getUserDisplayName,
   getLocation,
   highlight,
+  getPreferredName,
 } from '../../util/util';
 import { SearchkitComponent } from 'searchkit';
 import type { SearchResult } from '../../flow/searchTypes';
@@ -64,7 +64,7 @@ class LearnerResult extends SearchkitComponent {
           onMouseEnter={() => setLearnerChipVisibility(profile.username)}
         >
           <span className="display-name">
-            { highlight(getUserDisplayName(profile), this.searchkit.state.q) }
+            { highlight(getPreferredName(profile), this.searchkit.state.q) }
           </span>
           <span className="user-name">
             { highlight(profile.username, this.searchkit.state.q) }

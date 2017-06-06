@@ -263,11 +263,12 @@ export function makeProfileImageUrl(profile: Profile, useSmall: ?boolean): strin
 }
 
 /**
- * Returns the preferred name or else the username
+ * Returns the preferred name, else first last, or else the username
  */
-export function getPreferredName(profile: Profile, last: boolean = true): string {
-  let first = profile.preferred_name || profile.first_name || profile.username;
-  return last && profile.last_name && !profile.preferred_name ? `${first} ${profile.last_name}` : first;
+export function getPreferredName(profile: Profile): string {
+  return profile.preferred_name || (profile.first_name && profile.last_name
+    ? `${profile.first_name} ${profile.last_name}` 
+    : profile.username);
 }
 
 export const getRomanizedName = (profile: Profile): string => (

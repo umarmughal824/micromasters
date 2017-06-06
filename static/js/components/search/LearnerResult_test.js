@@ -22,7 +22,7 @@ import {
 } from '../../actions/ui';
 import IntegrationTestHelper from '../../util/integration_test_helper';
 import {
-  getUserDisplayName,
+  getPreferredName,
 } from '../../util/util';
 import {
   USER_PROFILE_RESPONSE,
@@ -72,9 +72,9 @@ describe('LearnerResult', () => {
     props
   );
 
-  it("should include the user's name", () => {
+  it("should include the user's preferred name", () => {
     let result = renderLearnerResult().find(".learner-name").find(".display-name");
-    assert.equal(result.text(), getUserDisplayName(USER_PROFILE_RESPONSE));
+    assert.equal(result.text(), getPreferredName(USER_PROFILE_RESPONSE));
   });
 
   it("should include the username", () => {
@@ -227,8 +227,6 @@ describe('LearnerResult', () => {
       }
     );
     assert.deepEqual(result.find(".display-name .highlight").map(node => node.text()), [
-      'query',
-      'qÜery',
       'Query',
     ]);
     assert.equal(result.find(".user-name .highlight").text(), "query");

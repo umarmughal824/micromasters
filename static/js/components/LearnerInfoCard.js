@@ -16,11 +16,17 @@ import {
 import { mstr } from '../lib/sanctuary';
 import type { Profile } from '../flow/profileTypes';
 
+const showLegalNameIfStaff = profile => {
+  return hasAnyStaffRole(SETTINGS.roles)
+    ? <div className="legal-name">{`(Legal name: ${profile.first_name} ${profile.last_name})`}</div>
+    : null;
+};
+
 export default class LearnerInfoCard extends React.Component {
   props: {
-    profile: Profile,
+    profile:                  Profile,
     toggleShowPersonalDialog: () => void,
-    toggleShowAboutMeDialog: () => void,
+    toggleShowAboutMeDialog:  () => void,
     openLearnerEmailComposer: () => void,
   };
 
@@ -122,6 +128,7 @@ export default class LearnerInfoCard extends React.Component {
           <ProfileImage profile={profile} editable={true} />
           <div className="col user-info">
             <div className="profile-title">{getPreferredName(profile)}</div>
+            { showLegalNameIfStaff(profile) }
             <div className="profile-company-name">{mstr(getEmployer(profile))}</div>
             {this.renderEmailLink()}
           </div>

@@ -98,6 +98,27 @@ describe('LearnerInfoCard', () => {
     );
   });
 
+  it('should not show legal name if the user is not staff', () => {
+    let wrapper = renderInfoCard();
+    assert.equal(wrapper.find('.legal-name').length, 0);
+  });
+
+  it('should show legal name if the user is staff', () => {
+    SETTINGS.user.username = "My user";
+    SETTINGS.roles = [{
+      "role": "staff",
+      "program": 1
+    }];
+    let wrapper = renderInfoCard({
+      profile: {
+        ...USER_PROFILE_RESPONSE,
+        first_name: 'FIRST',
+        last_name: 'LAST'
+      }
+    });
+    assert.equal(wrapper.find('.legal-name').text(), '(Legal name: FIRST LAST)');
+  });
+
   describe('email link', () => {
     let originalUsername = SETTINGS.user.username;
 

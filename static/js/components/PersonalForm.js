@@ -80,8 +80,7 @@ export default class PersonalForm extends ProfileFormFields {
       <section>
         <h2 className="sr-only">Personal Information</h2>
         <p className="alert-info" role="alert">
-          Please fill out this form using your legal name
-          and truthful information.
+          Please provide your legal name, and truthful information.
         </p>
         <Grid className="profile-form-grid">
           <Cell col={6}>
@@ -91,6 +90,9 @@ export default class PersonalForm extends ProfileFormFields {
             {this.boundTextField(["last_name"], "Family name")}
           </Cell>
           {this.showRomanizedFields()}
+          <p className="alert-info" role="alert">
+            Do you prefer to use a name different that your legal name entered above? If so enter it below.
+          </p>
           <Cell col={12}>
             {this.boundTextField(["preferred_name"], "Nickname / Preferred name")}
           </Cell>

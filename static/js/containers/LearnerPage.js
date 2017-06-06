@@ -80,10 +80,9 @@ class LearnerPage extends React.Component<*, LearnerPageProps, *> {
     } = this.props;
     let profilePath = [username, 'profile'];
 
-    let first = R.pathOr('', profilePath.concat('preferred_name'), profiles);
-    let last = R.pathOr('', profilePath.concat('last_name'), profiles);
+    let name = R.pathOr('', profilePath.concat('preferred_name'), profiles);
 
-    return `${first} ${last} | MITx MicroMasters Profile`
+    return `${name} | MITx MicroMasters Profile`
       .trim()
       .replace(/^\|\s/, '');
   }

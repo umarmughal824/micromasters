@@ -138,38 +138,23 @@ describe('utility functions', () => {
       assert.equal('jane preferred', getPreferredName(profile));
     });
 
-    it('uses first_name if preferred_name is not available', () => {
+    it('uses ${first_name} ${last_name} if preferred_name is not available', () => {
       profile.preferred_name = undefined;
       assert.equal('jane doe', getPreferredName(profile));
     });
 
-    it('uses the username if first_name and preferred_name are not available', () => {
+    it('uses the username if preferred_name and first_name are not available', () => {
       profile.preferred_name = undefined;
       profile.first_name = undefined;
-      assert.equal('jane_username doe', getPreferredName(profile));
+      assert.equal('jane_username', getPreferredName(profile));
     });
 
-    it('shows the last name by default', () => {
-      assert.equal('First Last', getPreferredName({
-        first_name: 'First',
-        last_name: 'Last'
-      }));
-    });
-
-    it('does not show the last name if `last === false`', () => {
-      assert.equal('First', getPreferredName({
-        preferred_name: 'First',
-        last_name: 'Last',
-      }, false));
-    });
-
-    [true, false].forEach(bool => {
-      it(`shows just the first name if 'last === ${bool}' and 'profile.last_name === undefined'`, () => {
-        assert.equal('First', getPreferredName({preferred_name: 'First'}, bool));
-      });
+    it('uses the username if preferred_name and last_name are not available', () => {
+      profile.preferred_name = undefined;
+      profile.last_name = undefined;
+      assert.equal('jane_username', getPreferredName(profile));
     });
   });
-
 
   describe('getRomanizedName', () => {
     it('returns romanized First Last', () => {
