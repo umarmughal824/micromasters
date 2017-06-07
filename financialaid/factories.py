@@ -43,12 +43,51 @@ class TierProgramFactory(DjangoModelFactory):
     """
     program = SubFactory(ProgramFactory)
     tier = SubFactory(TierFactory)
-    discount_amount = FuzzyInteger(low=1, high=12345)
+    discount_amount = FuzzyInteger(low=50, high=200)
     current = Faker('boolean')
-    income_threshold = FuzzyInteger(low=1, high=10000)
+    income_threshold = FuzzyInteger(low=50, high=200)
 
     class Meta:
         model = TierProgram
+
+    @classmethod
+    def create_properly_configured_batch(cls, num_to_create, tier_size=5000, discount_threshold_pct=80, **kwargs):
+        """
+        Creates a batch of TierPrograms that obey a few constraints:
+        (1) Discount amounts decrease as income increases
+        (2) Discount amounts will not exceed the program price
+        (3) One TierProgram in the batch will have a 0 discount amount, and one will have a 0 income threshold
+        """
+        if num_to_create < 1:
+            raise ValueError('Number of tiers to create must be greater than 0')
+
+        program = kwargs.pop('program', None)
+        if not program:
+            program = ProgramFactory.create()
+        # Set a value to increment the discount amount for each successive TierProgram. This value
+        # is set relative to the program price and the number of tiers being created so we don't end
+        # up with discount amounts that are greater than the price.
+        discount_increment = int(
+            (float(program.price) * (discount_threshold_pct / 100)) /
+            num_to_create - 1 or 1
+        )
+        tier_programs = []
+        # Create TierPrograms in such a way that higher incomes result in lower discount amounts,
+        # and guarantee that there will be a TierProgram that has discount_amount=0, and another that
+        # has income_threshold=0
+        for i in range(num_to_create):
+            discount_multiplier = num_to_create - (i + 1)
+            discount_amount = discount_increment * discount_multiplier
+            income_threshold = tier_size * i
+            tier_programs.append(
+                cls.create(
+                    program=program,
+                    discount_amount=discount_amount,
+                    income_threshold=income_threshold,
+                    current=True
+                )
+            )
+        return tier_programs
 
 
 class FinancialAidFactory(DjangoModelFactory):
