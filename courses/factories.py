@@ -15,7 +15,7 @@ class ProgramFactory(DjangoModelFactory):
     title = fuzzy.FuzzyText(prefix="Program ")
     live = factory.Faker('boolean')
     description = fuzzy.FuzzyText()
-    price = fuzzy.FuzzyDecimal(low=100, high=12345)
+    price = fuzzy.FuzzyDecimal(low=500, high=2000)
 
     class Meta:
         model = Program

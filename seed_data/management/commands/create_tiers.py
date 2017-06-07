@@ -12,28 +12,34 @@ def create_tiers(programs, num_tiers):
     tiers_created = 0
     programs_with_tiers_created = 0
     for program in programs:
-        # Create TierPrograms
-        tiers_to_create_count = num_tiers - program.tier_programs.count()
-        if tiers_to_create_count <= 0:
-            # Program already has or has more than the specified number of TierPrograms to create
-            continue
+        existing_tier_count = program.tier_programs.count()
+        if not existing_tier_count:
+            TierProgramFactory.create_properly_configured_batch(
+                num_tiers,
+                program=program
+            )
+            tiers_created += num_tiers
+        else:
+            num_tiers_to_add = num_tiers - existing_tier_count
+            if num_tiers_to_add <= 0:
+                # Program already has or has more than the specified number of TierPrograms to create
+                continue
+            created_tier_programs = TierProgramFactory.create_batch(num_tiers_to_add, program=program)
+            tiers_created += num_tiers_to_add
+
+            # There must be at least one TierProgram with discount_amount=0 and one with income_threshold=0
+            least_income_threshold = min(
+                created_tier_programs, key=lambda tier_program: tier_program.income_threshold
+            )
+            least_income_threshold.income_threshold = 0
+            least_income_threshold.save()
+
+            least_discount = min(
+                created_tier_programs, key=lambda tier_program: tier_program.discount_amount
+            )
+            least_discount.discount_amount = 0
+            least_discount.save()
         programs_with_tiers_created += 1
-        created_tier_programs = TierProgramFactory.create_batch(tiers_to_create_count, program=program)
-        tiers_created += len(created_tier_programs)
-
-        # there must be at least one TierProgram with discount_amount=0 and one with income_threshold=0
-        least_income_threshold = min(
-            created_tier_programs, key=lambda tier_program: tier_program.income_threshold
-        )
-        least_income_threshold.income_threshold = 0
-        least_income_threshold.save()
-
-        least_discount = min(
-            created_tier_programs, key=lambda tier_program: tier_program.discount_amount
-        )
-        least_discount.discount_amount = 0
-        least_discount.save()
-
     return programs_with_tiers_created, tiers_created
 
 
