@@ -24,6 +24,8 @@ import { withEmailDialog } from '../components/email/hoc';
 import type { ProfileContainerProps } from './ProfileFormContainer';
 import type { DashboardsState } from '../flow/dashboardTypes';
 import type { AllEmailsState } from '../flow/emailTypes';
+import { showDialog, hideDialog } from '../actions/ui';
+import { GRADE_DETAIL_DIALOG } from '../constants';
 
 const notFetchingOrFetched = R.compose(
   R.not, R.contains(R.__, [FETCH_PROCESSING, FETCH_SUCCESS, FETCH_FAILURE])
@@ -87,6 +89,15 @@ class LearnerPage extends React.Component<*, LearnerPageProps, *> {
       .replace(/^\|\s/, '');
   }
 
+  setShowGradeDetailDialog = (open: boolean, courseTitle: string) => {
+    const { dispatch } = this.props;
+    if (open) {
+      dispatch(showDialog(`${GRADE_DETAIL_DIALOG}${courseTitle}`));
+    } else {
+      dispatch(hideDialog(`${GRADE_DETAIL_DIALOG}${courseTitle}`));
+    }
+  };
+
   render() {
     const {
       params: { username },
@@ -107,6 +118,7 @@ class LearnerPage extends React.Component<*, LearnerPageProps, *> {
         dashboard: S.maybe({}, R.identity, this.getFocusedDashboard()),
         email: email,
         openLearnerEmailComposer: R.partial(openEmailComposer(LEARNER_EMAIL_TYPE), [profile.profile]),
+        setShowGradeDetailDialog: this.setShowGradeDetailDialog,
         ...profileProps(profile)
       };
       toRender = childrenWithProps(children, props);

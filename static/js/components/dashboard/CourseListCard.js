@@ -38,12 +38,13 @@ export default class CourseListCard extends React.Component {
     openFinancialAidCalculator?:     () => void,
     now?:                            Object,
     addCourseEnrollment:             (courseId: string) => Promise<*>,
-    openCourseContactDialog:         (course:   Course, canContactCourseTeam: boolean) => void,
-    setEnrollSelectedCourseRun:      (r:        CourseRun) => void,
-    setEnrollCourseDialogVisibility: (bool:     boolean) => void,
-    setShowExpandedCourseStatus:     (n:        number) => void,
+    openCourseContactDialog:         (course: Course, canContactCourseTeam: boolean) => void,
+    setEnrollSelectedCourseRun:      (r: CourseRun) => void,
+    setEnrollCourseDialogVisibility: (bool: boolean) => void,
+    setShowExpandedCourseStatus:     (n: number) => void,
+    setShowGradeDetailDialog:        (b: boolean, title: string) => void,
     ui:                              UIState,
-    checkout:                     (s: string) => void,
+    checkout:                        (s: string) => void,
   };
 
   renderFinancialAidPriceMessage(): ?React$Element<*> {
@@ -172,6 +173,7 @@ export default class CourseListCard extends React.Component {
       setEnrollSelectedCourseRun,
       setEnrollCourseDialogVisibility,
       setShowExpandedCourseStatus,
+      setShowGradeDetailDialog,
       ui,
       checkout
     } = this.props;
@@ -196,6 +198,7 @@ export default class CourseListCard extends React.Component {
         ui={ui}
         checkout={checkout}
         setShowExpandedCourseStatus={setShowExpandedCourseStatus}
+        setShowGradeDetailDialog={setShowGradeDetailDialog}
         {...courseRowOptionalProps}
       />
     );

@@ -45,6 +45,7 @@ export default class CourseRow extends React.Component {
     ui:                              UIState,
     checkout:                        (s: string) => void,
     setShowExpandedCourseStatus:     (n: number) => void,
+    setShowGradeDetailDialog:        (b: boolean) => void,
   };
 
   pastCourseRuns = (course: Course): Array<CourseRun> => (
@@ -130,11 +131,16 @@ export default class CourseRow extends React.Component {
       ui,
       setShowExpandedCourseStatus,
       coupon,
+      setShowGradeDetailDialog,
     } = this.props;
 
     return (
       <div className="enrolled-course-info">
-        <Grades course={course} />
+        <Grades
+          course={course}
+          setShowGradeDetailDialog={setShowGradeDetailDialog}
+          dialogVisibility={ui.dialogVisibility}
+        />
         <ProgressMessage
           courseRun={run}
           course={course}

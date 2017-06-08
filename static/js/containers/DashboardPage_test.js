@@ -5,6 +5,7 @@ import moment from 'moment';
 import ReactDOM from 'react-dom';
 import Decimal from 'decimal.js-light';
 import R from 'ramda';
+import Dialog from 'material-ui/Dialog';
 
 import {
   makeAvailablePrograms,
@@ -33,6 +34,7 @@ import {
   SET_ENROLL_COURSE_DIALOG_VISIBILITY,
   SET_ENROLL_SELECTED_COURSE_RUN,
   setToastMessage,
+  showDialog,
 } from '../actions/ui';
 import {
   INITIATE_SEND_EMAIL,
@@ -85,6 +87,7 @@ import {
   TOAST_FAILURE,
   TOAST_SUCCESS,
   STATUS_CAN_UPGRADE,
+  GRADE_DETAIL_DIALOG,
 } from '../constants';
 import type { Program } from '../flow/programTypes';
 import {
@@ -98,6 +101,7 @@ import {
 import { actions } from '../lib/redux_rest';
 import EmailCompositionDialog from '../components/email/EmailCompositionDialog';
 import { makeRunEnrolled } from '../components/dashboard/courses/test_util';
+import Grades from '../components/dashboard/courses/Grades';
 
 describe('DashboardPage', () => {
   let renderComponent, helper, listenForActions;
@@ -130,6 +134,25 @@ describe('DashboardPage', () => {
       assert.lengthOf(wrapper.find(".dashboard-user-card"), 1);
       assert.lengthOf(wrapper.find(".course-list"), 1);
       assert.lengthOf(wrapper.find(".progress-widget"), 1);
+    });
+  });
+
+  it('should show a <Grades /> component, and open the dialog when clicked', () => {
+    return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
+      wrapper.find(Grades).find('.grades').simulate('click');
+      let state = helper.store.getState().ui;
+      let key = `${GRADE_DETAIL_DIALOG}${DASHBOARD_RESPONSE.programs[0].courses[0].title}`;
+      assert.isTrue(state.dialogVisibility[key]);
+    });
+  });
+
+  it('should close the <Grades /> dialog if you click outside', () => {
+    let key = `${GRADE_DETAIL_DIALOG}${DASHBOARD_RESPONSE.programs[0].courses[0].title}`;
+    helper.store.dispatch(showDialog(key));
+    return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
+      wrapper.find(Grades).find(Dialog).props().onRequestClose();
+      let state = helper.store.getState().ui;
+      assert.isFalse(state.dialogVisibility[key]);
     });
   });
 

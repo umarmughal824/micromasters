@@ -14,6 +14,9 @@ import {
   passedCourse,
 } from '../../../lib/grades';
 import { hasPearsonExam } from './util';
+import GradeDetailPopup from './GradeDetailPopup';
+import type { DialogVisibilityState } from '../../../reducers/ui';
+import { GRADE_DETAIL_DIALOG } from '../../../constants';
 
 const renderGrade = R.curry((caption, grade) => (
   <div className={`grade-display ${classify(caption)}`}>
@@ -66,18 +69,34 @@ const renderPassed = (course: Course) => {
 };
 
 type CourseGradeProps = {
-  course: Course,
+  course:                   Course,
+  setShowGradeDetailDialog: (b: boolean, t: string) => void,
+  dialogVisibility:         DialogVisibilityState,
 }
 
-const Grades = ({ course }: CourseGradeProps) => (
-  <div className="course-grades">
-    <div className="grades">
+const Grades = (props: CourseGradeProps) => {
+  const {
+    course,
+    setShowGradeDetailDialog,
+    dialogVisibility,
+  } = props;
+
+  return <div className="course-grades">
+    <GradeDetailPopup
+      course={course}
+      setShowGradeDetailDialog={setShowGradeDetailDialog}
+      dialogVisibility={dialogVisibility[`${GRADE_DETAIL_DIALOG}${course.title}`] === true}
+    />
+    <div
+      className="grades"
+      onClick={() => setShowGradeDetailDialog(true, course.title)}
+    >
       { renderEdXGrade(course) }
       { renderExamGrade(course) }
       { renderFinalGrade(course) }
     </div>
     { renderPassed(course) }
-  </div>
-);
+  </div>;
+};
 
 export default Grades;

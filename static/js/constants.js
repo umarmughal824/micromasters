@@ -147,3 +147,5 @@ export const POST = 'POST';
 export const COURSE_ACTION_PAY = 'PAY';
 export const COURSE_ACTION_ENROLL = 'ENROLL';
 export const COURSE_ACTION_REENROLL = 'REENROLL';
+
+export const GRADE_DETAIL_DIALOG = 'GRADE_DETAIL_DIALOG';

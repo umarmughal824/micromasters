@@ -37,6 +37,7 @@ import {
   STATUS_PASSED,
   STATUS_CURRENTLY_ENROLLED,
   STATUS_PAID_BUT_NOT_ENROLLED,
+  GRADE_DETAIL_DIALOG,
 } from '../constants';
 import {
   setToastMessage,
@@ -498,6 +499,15 @@ class DashboardPage extends React.Component {
     }
   }
 
+  setShowGradeDetailDialog = (open: boolean, courseTitle: string) => {
+    const { dispatch } = this.props;
+    if (open) {
+      dispatch(showDialog(`${GRADE_DETAIL_DIALOG}${courseTitle}`));
+    } else {
+      dispatch(hideDialog(`${GRADE_DETAIL_DIALOG}${courseTitle}`));
+    }
+  };
+
   setShowExpandedCourseStatus = (courseId: number) => {
     const { dispatch } = this.props;
     dispatch(setShowExpandedCourseStatus(courseId));
@@ -730,6 +740,7 @@ class DashboardPage extends React.Component {
               setEnrollSelectedCourseRun={this.setEnrollSelectedCourseRun}
               setEnrollCourseDialogVisibility={this.setEnrollCourseDialogVisibility}
               setShowExpandedCourseStatus={this.setShowExpandedCourseStatus}
+              setShowGradeDetailDialog={this.setShowGradeDetailDialog}
               {...courseListCardOptionalProps}
             />
           </div>

@@ -31,6 +31,8 @@ describe('StaffLearnerInfoCard', () => {
       <MuiThemeProvider muiTheme={getMuiTheme()}>
         <StaffLearnerInfoCard
           program={program}
+          setShowGradeDetailDialog={() => undefined}
+          dialogVisibility={{}}
         />
       </MuiThemeProvider>
     )

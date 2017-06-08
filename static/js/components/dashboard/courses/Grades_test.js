@@ -3,6 +3,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { assert } from 'chai';
 import _ from 'lodash';
+import sinon from 'sinon';
 
 import Grades from './Grades';
 import { makeCourse, makeProctoredExamResult } from '../../../factories/dashboard';
@@ -13,15 +14,20 @@ import {
 import { STATUS_PASSED, STATUS_OFFERED, } from '../../../constants';
 
 describe('Course Grades', () => {
-  let course;
+  let course, setShowGradeDetailDialogStub;
 
   beforeEach(() => {
     course = makeCourse(1);
     course.has_exam = true;
+    setShowGradeDetailDialogStub = sinon.stub();
   });
 
   const renderGrades = () => shallow(
-    <Grades course={course} />
+    <Grades
+      course={course}
+      setShowGradeDetailDialog={setShowGradeDetailDialogStub}
+      dialogVisibility={{}}
+    />
   );
 
   it('should display placeholders if no grades are present', () => {
@@ -122,5 +128,11 @@ describe('Course Grades', () => {
   it('should not display passed if a user did not pass (non-exam course)', () => {
     course.has_exam = false;
     assert.equal(renderGrades().find('.passed-course').length, 0);
+  });
+
+  it('should call setShowGradeDetailDialog onClick', () => {
+    let grades = renderGrades();
+    grades.find('.grades').simulate('click');
+    assert.ok(setShowGradeDetailDialogStub.calledWith(true));
   });
 });

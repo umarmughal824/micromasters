@@ -12,9 +12,12 @@ import Progress from '../components/dashboard/courses/Progress';
 import Grades from '../components/dashboard/courses/Grades';
 import { STATUS_OFFERED } from '../constants';
 import { S, getm } from '../lib/sanctuary';
+import type { DialogVisibilityState } from '../reducers/ui';
 
 type StaffLearnerCardProps = {
   program: Program,
+  setShowGradeDetailDialog: (b: boolean, t: string) => void,
+  dialogVisibility:         DialogVisibilityState,
 };
 
 const formatCourseRun = R.curry((title, run) => ({
@@ -49,12 +52,16 @@ const renderCourseRuns = R.addIndex(R.map)((props, index) => (
   </div>
 ));
 
-const renderCourseInfo = R.addIndex(R.map)(([formattedRuns, course], index) => (
+const renderCourseInfo = R.curry((setShowGradeDetailDialog, dialogVisibility, [formattedRuns, course], index) => (
   <div key={index}>
     { renderCourseRuns(formattedRuns) }
     <Grid>
       <Cell col={6}>
-        <Grades course={course} />
+        <Grades
+          course={course}
+          setShowGradeDetailDialog={setShowGradeDetailDialog}
+          dialogVisibility={dialogVisibility}
+        />
       </Cell>
     </Grid>
   </div>
@@ -71,9 +78,14 @@ const programInfoBadge = (title, text) => (
   </div>
 );
 
-const displayCourseRuns = R.compose(
-  renderCourseInfo, pruneUnenrolledCourses, R.map(formatCourseInfo), R.prop('courses')
-);
+const displayCourseRuns = (setShowGradeDetailDialog, dialogVisibility, program) => {
+  return R.compose(
+    R.addIndex(R.map)(renderCourseInfo(setShowGradeDetailDialog, dialogVisibility)),
+    pruneUnenrolledCourses,
+    R.map(formatCourseInfo),
+    R.prop('courses')
+  )(program);
+};
 
 // getProgramProp :: String -> Program -> Either String Number
 const getProgramProp = R.curry((prop, program) => (
@@ -88,7 +100,7 @@ const formatCourseGrade = R.compose(
 );
 
 const StaffLearnerInfoCard = (props: StaffLearnerCardProps) => {
-  const { program } = props;
+  const { program, dialogVisibility, setShowGradeDetailDialog } = props;
   const { totalPassedCourses, totalCourses } = programCourseInfo(program);
 
   return (
@@ -104,7 +116,7 @@ const StaffLearnerInfoCard = (props: StaffLearnerCardProps) => {
           { programInfoBadge('Average program grade', formatCourseGrade(program)) }
           { programInfoBadge('Course Price', '--') }
         </div>
-        { displayCourseRuns(program) }
+        { displayCourseRuns(setShowGradeDetailDialog, dialogVisibility, program) }
       </div>
     </Card>
   );
