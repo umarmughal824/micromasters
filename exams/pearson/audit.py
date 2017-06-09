@@ -11,6 +11,7 @@ from boto.s3 import (
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 import gnupg
+import gnupg._util
 
 from micromasters import utils
 
@@ -21,6 +22,10 @@ REQUIRED_SETTINGS = [
 ]
 
 log = logging.getLogger(__name__)
+
+# monkey patch gnupg so it doesn't utf-8 encode our files
+# see: https://github.com/isislovecruft/python-gnupg/issues/169
+gnupg._util.binary = lambda data: data  # pylint: disable=protected-access
 
 
 class S3AuditStorage:
@@ -182,30 +187,39 @@ class ExamDataAuditor:
 
         self.configured = True
 
+    def encrypt(self, filename, encrypted_filename):
+        """
+        Encrypts the local file with GPG
+
+        Args:
+            filename (str): absolute path to the local file
+            encrypted_filename (str): absolute path to the local encrypted file
+        """
+        log.debug('Encrypting file %s to %s', filename, encrypted_filename)
+
+        with open(filename, 'rb') as source_file:
+            self.gpg.encrypt(
+                source_file,
+                self.fingerprint,
+                armor=False,
+                symmetric=False,
+                output=encrypted_filename
+            )
+
     def upload_encrypted_file(self, filename, file_type):
         """
         Uploads the file to S3
 
         Args:
-            filename: absolute path to the local file
+            filename (str): absolute path to the local file
             file_type (str): the type of file, either RESPONSE or REQUEST
 
         Returns:
-            str: absolute path to the local encrypted file
+            str: path to the stored file
         """
         encrypted_filename = '{}.gpg'.format(filename)
-
-        log.debug('Encrypting file %s to %s', filename, encrypted_filename)
-
         try:
-            with open(filename) as source_file:
-                self.gpg.encrypt(
-                    source_file,
-                    self.fingerprint,
-                    armor=False,
-                    symmetric=False,
-                    output=encrypted_filename
-                )
+            self.encrypt(filename, encrypted_filename)
 
             return self.store.upload(encrypted_filename, file_type)
         finally:
