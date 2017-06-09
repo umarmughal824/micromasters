@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.61.1
+--------------
+
+- Fixed travis node-sass install issue
+- Fixed bug involving poorly configured TierPrograms used for testing
+- Fixed Pearson exam date parsing bug
+- Use test database when running snapshot_dashboard_states (#3257)
+- Added redirect of mm.mit.edu to micromasters.mit.edu (#3268)
+
 Version 0.61.0
 --------------
 
