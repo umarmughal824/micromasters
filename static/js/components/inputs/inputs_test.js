@@ -172,7 +172,7 @@ describe('Profile inputs', () => {
       assert.deepEqual(selectField.state(), {
         customOptions: [ expectedCustomOption ]
       });
-      assert.include(selectField.find(VirtualizedSelect).props().options, expectedCustomOption);
+      assert.deepInclude(selectField.find(VirtualizedSelect).props().options, expectedCustomOption);
     });
 
     it('should send a form field event to Google Analytics when onBlur is called', () => {
