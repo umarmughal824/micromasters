@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.61.2
+--------------
+
+- Fixed mail dialog rich text editor jumbling up letters (#3290)
+- Use is_passing in MMTrack (#3283)
+- Implemented dashboard redesign
+- Fixed preferred name behavior
+
 Version 0.61.1
 --------------
 
