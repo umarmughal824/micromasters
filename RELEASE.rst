@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.62.0
+--------------
+
+- Use database templates for faster database restore during selenium tests (#3278)
+- Use override_settings to use test index for management command (#3286)
+
 Version 0.61.2
 --------------
 
