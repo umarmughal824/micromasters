@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.62.1
+--------------
+
+- Fixed encoding issue for binary audit files
+- Take screenshots of financial aid (#3289)
+- Added check for exam attempts (#2286)
+- Use UserInfo in edx_api to get user data (#3304)
+
 Version 0.62.0
 --------------
 
