@@ -367,8 +367,8 @@ describe("LearnerPage", function() {
           "field_of_study": "Philosophy",
           "school_name": "Harvard",
           "school_city": "Cambridge",
-          "school_state_or_territory": "US-MA",
-          "school_country": "US",
+          "school_state_or_territory": "AF-KAN",
+          "school_country": "AF",
           "online_degree": false
         });
         helper.profileGetStub.
@@ -512,8 +512,8 @@ describe("LearnerPage", function() {
             },
             school_name: "A School",
             school_country: "AF",
-            school_state_or_territory: "AF-BAL",
-            school_city: "FoobarVille"
+            school_state_or_territory: "AF-KAN",
+            school_city: "Anytown"
           };
           expectedProfile.education.push(entry);
 
@@ -526,18 +526,15 @@ describe("LearnerPage", function() {
             START_PROFILE_EDIT,
             SET_EDUCATION_DIALOG_INDEX,
             SET_EDUCATION_DIALOG_VISIBILITY,
-            SET_EDUCATION_DIALOG_VISIBILITY,
             SET_EDUCATION_DEGREE_LEVEL,
-            SET_EDUCATION_DEGREE_LEVEL,
-            UPDATE_PROFILE_VALIDATION,
             REQUEST_PATCH_USER_PROFILE,
             RECEIVE_PATCH_USER_PROFILE_SUCCESS,
-            CLEAR_PROFILE_EDIT,
+            CLEAR_PROFILE_EDIT
           ];
-          for (let i = 0; i < 8; i++) {
+          for (let i = 0; i < 6; i++) {
             expectedActions.push(UPDATE_PROFILE);
           }
-          for (let i = 0; i < 7; i++) {
+          for (let i = 0; i < 6; i++) {
             expectedActions.push(UPDATE_PROFILE_VALIDATION);
           }
           for (let i = 0; i < 3; i++) {
@@ -569,9 +566,7 @@ describe("LearnerPage", function() {
             modifyTextField(inputs[3], "1999");
 
             // set country, state, and city
-            modifyEducationSelect('.country', "Afghanistan");
-            modifyEducationSelect('.state', "Balkh");
-            modifyTextField(inputs[6], "FoobarVille");
+            modifyTextField(inputs[4], "Anytown, Qandahar, Afghanistan");
             let save = dialog.querySelector('.save-button');
             ReactTestUtils.Simulate.click(save);
           });
@@ -751,9 +746,9 @@ describe("LearnerPage", function() {
               month: "01",
               day: undefined
             },
-            city: "FoobarVille",
+            city: "Anytown",
             country: "AF",
-            state_or_territory: "AF-BAL",
+            state_or_territory: "AF-KAN",
           };
           updatedProfile.work_history.push(entry);
 
@@ -764,14 +759,12 @@ describe("LearnerPage", function() {
 
           let expectedActions = [
             START_PROFILE_EDIT,
-            UPDATE_PROFILE,
             SET_WORK_DIALOG_INDEX,
             SET_WORK_DIALOG_VISIBILITY,
-            UPDATE_PROFILE_VALIDATION,
             REQUEST_PATCH_USER_PROFILE,
             RECEIVE_PATCH_USER_PROFILE_SUCCESS
           ];
-          for (let i = 0; i < 10; i++) {
+          for (let i = 0; i < 9; i++) {
             expectedActions.push(UPDATE_PROFILE);
             expectedActions.push(UPDATE_PROFILE_VALIDATION);
           }
@@ -797,22 +790,19 @@ describe("LearnerPage", function() {
             // company name
             modifyTextField(inputs[0], "FoobarCorp");
 
-            // country, state, city
-            modifyWorkSelect('.country', "Afghanistan");
-            modifyWorkSelect('.state-or-territory', "Balkh");
-            modifyTextField(inputs[3], "FoobarVille");
-
             // industry
             modifyWorkSelect('.industry', "Accounting");
 
             // position
-            modifyTextField(inputs[5], "Assistant Foobar");
+            modifyTextField(inputs[2], "Assistant Foobar");
 
             // start date, end date
-            modifyTextField(inputs[6], "12");
-            modifyTextField(inputs[7], "2001");
-            modifyTextField(inputs[8], "01");
-            modifyTextField(inputs[9], "2002");
+            modifyTextField(inputs[3], "12");
+            modifyTextField(inputs[4], "2001");
+            modifyTextField(inputs[5], "01");
+            modifyTextField(inputs[6], "2002");
+            // country, state, city
+            modifyTextField(inputs[7], "Anytown, Kandahar, Afghanistan");
 
             let button = dialog.querySelector(".save-button");
             ReactTestUtils.Simulate.click(button);

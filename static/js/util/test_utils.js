@@ -200,8 +200,8 @@ export class GoogleMapsStub {
     address_components: [
       {long_name: "123 Main Street", short_name: "123 Main St", types: ["street_address"]},
       {long_name: "Anytown", short_name: "Anytown", types: ["locality"]},
-      {long_name: "RandoState", short_name: "RS", types: ["administrative_area_level_1"]},
-      {long_name: "United States", short_name: "USA", types: ["country"]},
+      {long_name: "Kandahar", short_name: "Kandahar", types: ["administrative_area_level_1"]},
+      {long_name: "Afghanistan", short_name: "AF", types: ["country"]},
     ],
     geometry: {
       location: {

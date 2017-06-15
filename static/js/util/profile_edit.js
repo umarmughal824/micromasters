@@ -9,6 +9,7 @@ import R from 'ramda';
 import ReactTelInput from 'react-telephone-input';
 
 import DateField from '../components/inputs/DateField';
+import {codeToCountryName, codeToStateName, nameToCountryCode, nameToStateCode} from '../lib/location';
 import { validationErrorSelector, classify } from './util';
 import { sendFormFieldEvent } from '../lib/google_analytics';
 import type { Validator, UIValidator } from '../lib/validation/profile';
@@ -240,10 +241,27 @@ const getComponentForType = (components: GoogleMapsAddressComponent[], type: str
 
 const profileFields = (addressMapping: AddressComponentKeyMapping, components: GoogleMapsAddressComponent[]) => {
   let profile = {};
+  let stateKey = [];
+  let countryCode = null;
   _.forOwn(addressMapping, (keySet, gmapType) => {
     const component = getComponentForType(components, gmapType);
-    _.set(profile, keySet, component.long_name);
+    if (component !== undefined) {
+      _.set(profile, keySet, component.long_name);
+      if (gmapType === 'administrative_area_level_1') {
+        stateKey = [keySet, component.long_name];
+      } else if (gmapType === 'country') {
+        // Save country code instead of country name
+        countryCode = nameToCountryCode(component.long_name);
+        _.set(profile, keySet, countryCode);
+      }
+    }
   });
+  // Modify state code to be '<country code>-<state code>
+  if (countryCode !== null && stateKey !== []) {
+    _.set(profile, stateKey[0], nameToStateCode(countryCode, stateKey[1]));
+  }
+
+
   return profile;
 };
 
@@ -255,17 +273,17 @@ const allPathsHaveValue = (addressMapping) => (
 
 export function boundGeosuggest(
   addressMapping: AddressComponentKeyMapping,
-  id: string,
+  id: string[],
   label: string|React$Element<*>,
   { placeholder, types }: { placeholder: string, types: string[] } = {}
 ): React$Element<*> {
-  const keySet = [id];
+  const keySet = id;
   const {
     profile,
     errors,
     updateProfile,
     validator,
-    updateValidationVisibility,
+    updateValidationVisibility
   } = this.props;
 
   const hasAllAddressProps = allPathsHaveValue(addressMapping);
@@ -275,16 +293,17 @@ export function boundGeosuggest(
       return;
     }
 
-    const newProfile = R.merge(
+    const newProfile = _.merge(
       R.clone(profile),
       profileFields(addressMapping, suggest.gmaps.address_components)
     );
+
     updateValidationVisibility(keySet);
     updateProfile(newProfile, validator);
   };
 
   const onBlur = (value) => {
-    if (!value) {
+    if (!value || value !== formatInitialAddress(profile)) {
       let clone = _.cloneDeep(profile);
       _.forOwn(addressMapping, (addressKeySet, gmapType) => {  // eslint-disable-line no-unused-vars
         _.set(clone, addressKeySet, null);
@@ -299,9 +318,22 @@ export function boundGeosuggest(
     R.unary(hasAllAddressProps),
   ]);
 
+
+  // Get all the values of a location (city, state, country) as an array.
+  // Convert state and country elements to ISO3166 codes
+  const getLocationElements = () => {
+    let elements = R.map(R.path(R.__, profile), R.values(addressMapping));
+    elements[2] = codeToCountryName(elements[2]);
+    elements[1] = codeToStateName(elements[1]);
+    return elements;
+  };
+
+  // Join the elements of a location array into a formatted string.
+  const getLocationName = R.compose(R.join(", "), getLocationElements);
+
   const formatInitialAddress = R.ifElse(
     hasExistingAddress,
-    R.compose(R.join(", "), R.props(R.values(addressMapping))),
+    getLocationName,
     R.always(""),
   );
 
