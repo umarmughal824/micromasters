@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.62.2
+--------------
+
+- Upgraded chai and chai-as-promised
+- Replaced state and country dropdowns with Geosuggest React component for profile education and employment forms.
+
 Version 0.62.1
 --------------
 
