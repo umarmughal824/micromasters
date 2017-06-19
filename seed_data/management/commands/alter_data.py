@@ -34,6 +34,7 @@ from seed_data.lib import (
     clear_dashboard_data,
     is_fake_program_course_run,
     update_fake_course_run_edx_key,
+    ensure_cached_data_freshness,
 )
 
 
@@ -365,10 +366,12 @@ ADDITIONAL_PARAMS = {
 
 class Command(BaseCommand):
     """
-    Fine-tune course/program data (and associated enrollments/grades/etc) for a user.
+    Fine-tune course/program data (and associated enrollments/grades/etc) for a user, and set their
+    cached edX data to be considered 'fresh'.
     """
     help = """
-    Fine-tune course/program data (and associated enrollments/grades/etc) for a user.
+    Fine-tune course/program data (and associated enrollments/grades/etc) for a user, and set their
+    cached edX data to be considered 'fresh'.
     For detailed usage examples, run the command with '{0}' (ie: 'manage.py alter_data {0}')
     """.format(EXAMPLE_USAGE_COMMAND_NAME)
 
@@ -437,3 +440,5 @@ class Command(BaseCommand):
                 self.stdout.write(json.dumps(result, indent=2))
             elif result:
                 self.stdout.write(result)
+            # Ensure that the given user's edX data will be considered 'fresh'
+            ensure_cached_data_freshness(user=action_params['user'])

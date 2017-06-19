@@ -328,7 +328,6 @@ def set_course_run_past(course_run, end_date=None, upgradeable=False, save=True,
 def set_course_run_current(course_run, enrollable_now=True,  # pylint: disable=too-many-arguments
                            enrollable_past=False, upgradeable=True, save=True, now=None):
     """Sets relevant CourseRun dates to be current relative to now"""
-    course_run.end_date = None
     if enrollable_now:
         course_run.enrollment_start, course_run.enrollment_end = \
             create_active_date_range(started_days_ago=10, days_until_end=5)
@@ -338,6 +337,7 @@ def set_course_run_current(course_run, enrollable_now=True,  # pylint: disable=t
     else:
         course_run.enrollment_start, course_run.enrollment_end = create_future_date_range()
     course_run.start_date = course_run.enrollment_start + timedelta(days=5)
+    course_run.end_date = course_run.start_date + timedelta(days=30)
     if enrollable_now and not upgradeable:
         course_run.upgrade_deadline = now - timedelta(days=1)
     else:
