@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.62.3
+--------------
+
+- Fixed bug with weird grades coming from edx
+- Fixed alter_data enrolled status and edX data freshness
+- Upgraded Wagtail to 1.10.1
+- Upgraded requirements and fixed some tests
+- Implemented past course run display
+- Upgrade to Celery 4.0 (#3245)
+
 Version 0.62.2
 --------------
 
