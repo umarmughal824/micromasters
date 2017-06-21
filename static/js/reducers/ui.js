@@ -5,10 +5,6 @@ import {
   SHOW_DIALOG,
   HIDE_DIALOG,
 
-  UPDATE_DIALOG_TEXT,
-  UPDATE_DIALOG_TITLE,
-  SET_DIALOG_VISIBILITY,
-
   SET_WORK_HISTORY_EDIT,
   SET_WORK_DIALOG_VISIBILITY,
   SET_WORK_DIALOG_INDEX,
@@ -39,10 +35,7 @@ import {
   SET_ENROLL_SELECTED_PROGRAM,
   SET_ENROLL_SELECTED_COURSE_RUN,
 
-  SET_PHOTO_DIALOG_VISIBILITY,
-  SET_CALCULATOR_DIALOG_VISIBILITY,
   SET_CONFIRM_SKIP_DIALOG_VISIBILITY,
-  SET_CONFIRM_INCOME_DIALOG_VISIBILITY,
   SET_DOCS_INSTRUCTIONS_VISIBILITY,
   SET_COUPON_NOTIFICATION_VISIBILITY,
   SET_NAV_DRAWER_OPEN,
@@ -95,8 +88,6 @@ export type UIState = {
   toastMessage:                        ?ToastMessage,
   enrollSelectedProgram:               ?number,
   enrollSelectedCourseRun:             ?CourseRun,
-  photoDialogVisibility:               boolean,
-  calculatorDialogVisibility:          boolean,
   confirmIncomeDialogVisibility:       boolean,
   documentSentDate:                    Object,
   selectedProgram:                     ?AvailableProgram,
@@ -136,8 +127,6 @@ export const INITIAL_UI_STATE: UIState = {
   toastMessage:                        null,
   enrollSelectedProgram:               null,
   enrollSelectedCourseRun:             null,
-  photoDialogVisibility:               false,
-  calculatorDialogVisibility:          false,
   confirmIncomeDialogVisibility:       false,
   documentSentDate:                    {},
   selectedProgram:                     null,
@@ -167,30 +156,6 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action<any, null>)
       dialogVisibility: {
         ...state.dialogVisibility,
         [action.payload]: false
-      },
-    };
-  case UPDATE_DIALOG_TEXT:
-    return {
-      ...state,
-      dialog: {
-        ...state.dialog,
-        text: action.payload,
-      },
-    };
-  case UPDATE_DIALOG_TITLE:
-    return {
-      ...state,
-      dialog: {
-        ...state.dialog,
-        title: action.payload,
-      },
-    };
-  case SET_DIALOG_VISIBILITY:
-    return {
-      ...state,
-      dialog: {
-        ...state.dialog,
-        visible: action.payload,
       },
     };
   case SET_PROGRAM:
@@ -336,14 +301,8 @@ export const ui = (state: UIState = INITIAL_UI_STATE, action: Action<any, null>)
       showEnrollPayLaterSuccess: action.payload
     };
   }
-  case SET_PHOTO_DIALOG_VISIBILITY:
-    return { ...state, photoDialogVisibility: action.payload };
-  case SET_CALCULATOR_DIALOG_VISIBILITY:
-    return { ...state, calculatorDialogVisibility: action.payload };
   case SET_CONFIRM_SKIP_DIALOG_VISIBILITY:
     return { ...state, skipDialogVisibility: action.payload };
-  case SET_CONFIRM_INCOME_DIALOG_VISIBILITY:
-    return { ...state, confirmIncomeDialogVisibility: action.payload };
   case SET_DOCS_INSTRUCTIONS_VISIBILITY:
     return { ...state, docsInstructionsVisibility: action.payload };
   case SET_COUPON_NOTIFICATION_VISIBILITY:

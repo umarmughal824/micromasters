@@ -16,9 +16,9 @@ import {
   updateCalculatorValidation,
 } from '../actions/financial_aid';
 import {
-  setCalculatorDialogVisibility,
   setConfirmSkipDialogVisibility,
-  setConfirmIncomeDialogVisibility,
+  showDialog,
+  hideDialog,
 } from '../actions/ui';
 import { createSimpleActionHelpers } from '../lib/redux';
 import { currencyOptions } from '../lib/currency';
@@ -33,6 +33,10 @@ import type { Program } from '../flow/programTypes';
 import { formatPrice } from '../util/util';
 import { dialogActions } from '../components/inputs/util';
 import { getOwnDashboard } from '../reducers/util';
+
+export const CALCULATOR_DIALOG = 'CALCULATOR_DIALOG';
+
+export const INCOME_DIALOG = 'INCOME_DIALOG';
 
 const updateCurrency = R.curry((update, financialAid, selection) => {
   let _financialAid = R.clone(financialAid);
@@ -132,18 +136,18 @@ const apiError = ({ message, code }: FetchError) => (
 );
 
 type CalculatorProps = {
-  calculatorDialogVisibility: boolean,
+  calculatorDialogVisibility:    boolean,
   confirmIncomeDialogVisibility: boolean,
-  closeDialogAndCancel:       () => void,
-  closeConfirmDialogAndCancel:() => void,
-  financialAid:               FinancialAidState,
-  validation:                 FinancialAidValidation,
-  saveFinancialAid:           (f: FinancialAidState) => void,
-  submitFinancialAid:         (f: FinancialAidState) => void,
-  updateCalculatorEdit:       (f: FinancialAidState) => void,
-  currentProgramEnrollment:   AvailableProgram,
-  openConfirmSkipDialog:      () => void,
-  programs:                   Array<Program>,
+  closeDialogAndCancel:          () => void,
+  closeConfirmDialogAndCancel:   () => void,
+  financialAid:                  FinancialAidState,
+  validation:                    FinancialAidValidation,
+  saveFinancialAid:              (f: FinancialAidState) => void,
+  submitFinancialAid:            (f: FinancialAidState) => void,
+  updateCalculatorEdit:          (f: FinancialAidState) => void,
+  currentProgramEnrollment:      AvailableProgram,
+  openConfirmSkipDialog:         () => void,
+  programs:                      Array<Program>,
 };
 
 const FinancialAidCalculator = ({
@@ -250,14 +254,14 @@ const FinancialAidCalculator = ({
 
 const closeDialogAndCancel = dispatch => (
   () => {
-    dispatch(setCalculatorDialogVisibility(false));
+    dispatch(hideDialog(CALCULATOR_DIALOG));
     dispatch(clearCalculatorEdit());
   }
 );
 
 const closeConfirmDialogAndCancel = dispatch => (
   () => {
-    dispatch(setConfirmIncomeDialogVisibility(false));
+    dispatch(hideDialog(INCOME_DIALOG));
     dispatch(clearCalculatorEdit());
   }
 );
@@ -275,8 +279,8 @@ const saveFinancialAid = R.curry((dispatch, current) => {
   let clone = _.cloneDeep(current);
   delete clone.validation;
   if (valid) {
-    dispatch(setCalculatorDialogVisibility(false));
-    dispatch(setConfirmIncomeDialogVisibility(true));
+    dispatch(hideDialog(CALCULATOR_DIALOG));
+    dispatch(showDialog(INCOME_DIALOG));
   }
 });
 
@@ -284,7 +288,7 @@ const submitFinancialAid = R.curry((dispatch, current) => {
   const { income, currency, programId } = current;
   dispatch(addFinancialAid(income, currency, programId)).then(() => {
     dispatch(clearCalculatorEdit());
-    dispatch(setConfirmIncomeDialogVisibility(false));
+    dispatch(showDialog(INCOME_DIALOG));
   });
 });
 
@@ -302,15 +306,15 @@ const openConfirmSkipDialogHelper = dispatch => () => {
 
 const mapStateToProps = state => {
   const {
-    ui: { calculatorDialogVisibility, confirmIncomeDialogVisibility },
+    ui,
     financialAid,
     currentProgramEnrollment,
   } = state;
   const { programs } = getOwnDashboard(state);
 
   return {
-    calculatorDialogVisibility,
-    confirmIncomeDialogVisibility,
+    calculatorDialogVisibility: ui.dialogVisibility[CALCULATOR_DIALOG] || false,
+    confirmIncomeDialogVisibility: ui.dialogVisibility[INCOME_DIALOG] || false,
     financialAid,
     currentProgramEnrollment,
     programs,

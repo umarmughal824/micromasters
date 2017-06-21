@@ -34,7 +34,6 @@ import {
   setEnrollSelectedProgram,
   setNavDrawerOpen,
   clearUI,
-  setPhotoDialogVisibility,
 } from '../actions/ui';
 import { validateProfileComplete } from '../lib/validation/profile';
 import { currentOrFirstIncompleteStep } from '../util/util';
@@ -175,11 +174,6 @@ class App extends React.Component {
     dispatch(setNavDrawerOpen(bool));
   }
 
-  setPhotoDialogVisibility = (bool: boolean): void => {
-    const { dispatch } = this.props;
-    dispatch(setPhotoDialogVisibility(bool));
-  };
-
   renderToast() {
     const {
       ui: { toastMessage }
@@ -260,7 +254,6 @@ class App extends React.Component {
         setNavDrawerOpen={this.setNavDrawerOpen}
         navDrawerOpen={navDrawerOpen}
         profile={profile}
-        setPhotoDialogVisibility={this.setPhotoDialogVisibility}
       />
       {this.renderToast()}
       <div className="page-content">

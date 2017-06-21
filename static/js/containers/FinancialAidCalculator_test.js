@@ -8,7 +8,7 @@ import { Provider } from 'react-redux';
 import sinon from 'sinon';
 
 import * as inputUtil from '../components/inputs/util';
-import FinancialAidCalculator from '../containers/FinancialAidCalculator';
+import FinancialAidCalculator, { CALCULATOR_DIALOG } from '../containers/FinancialAidCalculator';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import { modifyTextField, modifySelectField, clearSelectField } from '../util/test_utils';
 import { DASHBOARD_RESPONSE, FINANCIAL_AID_PARTIAL_RESPONSE, PROGRAMS } from '../test_constants';
@@ -32,8 +32,8 @@ import {
 } from '../actions/programs';
 import {
   setConfirmSkipDialogVisibility,
-  SET_CALCULATOR_DIALOG_VISIBILITY,
-  SET_CONFIRM_INCOME_DIALOG_VISIBILITY,
+  SHOW_DIALOG,
+  HIDE_DIALOG,
   SET_CONFIRM_SKIP_DIALOG_VISIBILITY,
 } from '../actions/ui';
 import {
@@ -70,11 +70,11 @@ describe('FinancialAidCalculator', () => {
   it('should let you open and close the financial aid calculator', () => {
     return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
       wrapper.find('.pricing-actions').find('.calculate-cost-button').simulate('click');
-      assert.equal(helper.store.getState().ui.calculatorDialogVisibility, true);
+      assert.equal(helper.store.getState().ui.dialogVisibility[CALCULATOR_DIALOG], true);
       let calculator = document.querySelector('.financial-aid-calculator');
 
       ReactTestUtils.Simulate.click(calculator.querySelector('.cancel-button'));
-      assert.equal(helper.store.getState().ui.calculatorDialogVisibility, false);
+      assert.equal(helper.store.getState().ui.dialogVisibility[CALCULATOR_DIALOG], false);
     });
   });
 
@@ -84,8 +84,8 @@ describe('FinancialAidCalculator', () => {
       return listenForActions([
         START_CALCULATOR_EDIT,
         UPDATE_CALCULATOR_EDIT,
-        SET_CALCULATOR_DIALOG_VISIBILITY,
-        SET_CALCULATOR_DIALOG_VISIBILITY,
+        SHOW_DIALOG,
+        HIDE_DIALOG,
         CLEAR_CALCULATOR_EDIT,
         SET_CONFIRM_SKIP_DIALOG_VISIBILITY,
         REQUEST_SKIP_FINANCIAL_AID,
@@ -97,7 +97,7 @@ describe('FinancialAidCalculator', () => {
         SET_CONFIRM_SKIP_DIALOG_VISIBILITY,
       ], () => {
         wrapper.find('.pricing-actions').find('.calculate-cost-button').simulate('click');
-        assert.equal(helper.store.getState().ui.calculatorDialogVisibility, true);
+        assert.equal(helper.store.getState().ui.dialogVisibility[CALCULATOR_DIALOG], true);
         let calculator = document.querySelector('.financial-aid-calculator-wrapper');
         ReactTestUtils.Simulate.click(calculator.querySelector('.full-price'));
         let confirmDialog = document.querySelector('.skip-financial-aid-dialog-wrapper');
@@ -149,7 +149,7 @@ describe('FinancialAidCalculator', () => {
       return listenForActions([
         START_CALCULATOR_EDIT,
         UPDATE_CALCULATOR_EDIT,
-        SET_CALCULATOR_DIALOG_VISIBILITY,
+        SHOW_DIALOG,
         UPDATE_CALCULATOR_VALIDATION,
         UPDATE_CALCULATOR_EDIT
       ], () => {
@@ -184,7 +184,7 @@ describe('FinancialAidCalculator', () => {
       return listenForActions([
         START_CALCULATOR_EDIT,
         UPDATE_CALCULATOR_EDIT,
-        SET_CALCULATOR_DIALOG_VISIBILITY,
+        SHOW_DIALOG,
         UPDATE_CALCULATOR_VALIDATION,
         UPDATE_CALCULATOR_EDIT,
       ], () => {
@@ -211,7 +211,7 @@ describe('FinancialAidCalculator', () => {
         return listenForActions([
           START_CALCULATOR_EDIT,
           UPDATE_CALCULATOR_EDIT,
-          SET_CALCULATOR_DIALOG_VISIBILITY,
+          SHOW_DIALOG,
           UPDATE_CALCULATOR_VALIDATION,
           UPDATE_CALCULATOR_EDIT
         ], () => {
@@ -230,7 +230,7 @@ describe('FinancialAidCalculator', () => {
       return listenForActions([
         START_CALCULATOR_EDIT,
         UPDATE_CALCULATOR_EDIT,
-        SET_CALCULATOR_DIALOG_VISIBILITY,
+        SHOW_DIALOG,
         UPDATE_CALCULATOR_VALIDATION,
         UPDATE_CALCULATOR_EDIT,
       ], () => {
@@ -261,13 +261,13 @@ describe('FinancialAidCalculator', () => {
       return listenForActions([
         START_CALCULATOR_EDIT,
         UPDATE_CALCULATOR_EDIT,
-        SET_CALCULATOR_DIALOG_VISIBILITY,
+        SHOW_DIALOG,
         UPDATE_CALCULATOR_VALIDATION,
         UPDATE_CALCULATOR_VALIDATION,
         UPDATE_CALCULATOR_EDIT,
         UPDATE_CALCULATOR_EDIT,
-        SET_CALCULATOR_DIALOG_VISIBILITY,
-        SET_CONFIRM_INCOME_DIALOG_VISIBILITY,
+        HIDE_DIALOG,
+        SHOW_DIALOG,
         REQUEST_ADD_FINANCIAL_AID,
         RECEIVE_ADD_FINANCIAL_AID_SUCCESS,
         actions.prices.get.requestType,
@@ -336,13 +336,13 @@ describe('FinancialAidCalculator', () => {
       return listenForActions([
         START_CALCULATOR_EDIT,
         UPDATE_CALCULATOR_EDIT,
-        SET_CALCULATOR_DIALOG_VISIBILITY,
+        SHOW_DIALOG,
         UPDATE_CALCULATOR_VALIDATION,
         UPDATE_CALCULATOR_VALIDATION,
         UPDATE_CALCULATOR_EDIT,
         UPDATE_CALCULATOR_EDIT,
-        SET_CALCULATOR_DIALOG_VISIBILITY,
-        SET_CONFIRM_INCOME_DIALOG_VISIBILITY,
+        HIDE_DIALOG,
+        SHOW_DIALOG,
         REQUEST_ADD_FINANCIAL_AID,
         RECEIVE_ADD_FINANCIAL_AID_FAILURE,
       ], () => {

@@ -12,15 +12,6 @@ export const showDialog = createAction(SHOW_DIALOG);
 export const HIDE_DIALOG = 'HIDE_DIALOG';
 export const hideDialog = createAction(HIDE_DIALOG);
 
-export const UPDATE_DIALOG_TEXT = 'UPDATE_DIALOG_TEXT';
-export const updateDialogText = createAction(UPDATE_DIALOG_TEXT);
-
-export const UPDATE_DIALOG_TITLE = 'UPDATE_DIALOG_TITLE';
-export const updateDialogTitle = createAction(UPDATE_DIALOG_TITLE);
-
-export const SET_DIALOG_VISIBILITY = 'SET_DIALOG_VISIBILITY';
-export const setDialogVisibility = createAction(SET_DIALOG_VISIBILITY);
-
 // work history actions
 export const SET_WORK_HISTORY_EDIT = 'SET_WORK_HISTORY_EDIT';
 export const setWorkHistoryEdit = (bool: boolean): Dispatcher<void> => {
@@ -62,7 +53,6 @@ export const setLearnerPageDialogVisibility = createAction(SET_LEARNER_PAGE_DIAL
 export const SET_LEARNER_PAGE_ABOUT_ME_DIALOG_VISIBILITY = 'SET_LEARNER_PAGE_ABOUT_ME_DIALOG_VISIBILITY';
 export const setLearnerPageAboutMeDialogVisibility = createAction(SET_LEARNER_PAGE_ABOUT_ME_DIALOG_VISIBILITY);
 
-
 export const SET_SHOW_EDUCATION_DELETE_DIALOG = 'SET_SHOW_EDUCATION_DELETE_DIALOG';
 export const setShowEducationDeleteDialog = createAction(SET_SHOW_EDUCATION_DELETE_DIALOG);
 
@@ -102,20 +92,11 @@ export const setEnrollSelectedProgram = createAction(SET_ENROLL_SELECTED_PROGRAM
 export const SET_ENROLL_SELECTED_COURSE_RUN = 'SET_ENROLL_SELECTED_COURSE_RUN';
 export const setEnrollSelectedCourseRun = createAction(SET_ENROLL_SELECTED_COURSE_RUN);
 
-export const SET_PHOTO_DIALOG_VISIBILITY = 'SET_PHOTO_DIALOG_VISIBILITY';
-export const setPhotoDialogVisibility = createAction(SET_PHOTO_DIALOG_VISIBILITY);
-
-export const SET_CALCULATOR_DIALOG_VISIBILITY = 'SET_CALCULATOR_DIALOG_VISIBILITY';
-export const setCalculatorDialogVisibility = createAction(SET_CALCULATOR_DIALOG_VISIBILITY);
-
 export const SET_PROGRAM = 'SET_PROGRAM';
 export const setProgram = createAction(SET_PROGRAM);
 
 export const SET_CONFIRM_SKIP_DIALOG_VISIBILITY = 'SET_CONFIRM_SKIP_DIALOG_VISIBILITY';
 export const setConfirmSkipDialogVisibility = createAction(SET_CONFIRM_SKIP_DIALOG_VISIBILITY);
-
-export const SET_CONFIRM_INCOME_DIALOG_VISIBILITY = 'SET_CONFIRM_INCOME_DIALOG_VISIBILITY';
-export const setConfirmIncomeDialogVisibility = createAction(SET_CONFIRM_INCOME_DIALOG_VISIBILITY);
 
 export const SET_DOCS_INSTRUCTIONS_VISIBILITY = 'SET_DOCS_INSTRUCTIONS_VISIBILITY';
 export const setDocsInstructionsVisibility = createAction(SET_DOCS_INSTRUCTIONS_VISIBILITY);
