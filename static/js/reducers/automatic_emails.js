@@ -1,5 +1,6 @@
 // @flow
 import R from 'ramda';
+import { fetchJSONWithCSRF } from 'redux-hammock/django_csrf_fetch';
 
 import { GET, PATCH } from '../constants';
 import type { Endpoint } from '../flow/restTypes';
@@ -14,6 +15,7 @@ export const automaticEmailsEndpoint: Endpoint = {
   verbs: [GET, PATCH],
   getUrl: '/api/v0/mail/automatic_email/',
   patchUrl: email => `/api/v0/mail/automatic_email/${email.id}/`,
+  fetchFunc: fetchJSONWithCSRF,
   patchOptions: emailRecord => ({
     method: PATCH,
     body: JSON.stringify(emailRecord)

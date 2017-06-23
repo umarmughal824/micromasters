@@ -2,6 +2,7 @@
 /* global SETTINGS: false */
 import { assert } from 'chai';
 import ReactTestUtils from 'react-dom/test-utils';
+import fetchMock from 'fetch-mock';
 
 import IntegrationTestHelper from '../util/integration_test_helper';
 import { actions } from '../lib/redux_rest.js';
@@ -84,7 +85,10 @@ describe('AutomaticEmailPage', () => {
   });
 
   it('shows a placeholder if there is no data', () => {
-    helper.getEmailsStub.returns(Promise.resolve([]));
+    fetchMock.restore();
+    fetchMock.mock('/api/v0/mail/automatic_email/', () => (
+      { body: JSON.stringify([]) }
+    ));
 
     return renderComponent('/automaticemails', successActions).then(([wrapper]) => {
       let cardText = wrapper.find(".empty-message").text();
@@ -93,18 +97,15 @@ describe('AutomaticEmailPage', () => {
   });
 
   it('should let you save an email', () => {
-    helper.fetchJSONWithCSRFStub.withArgs(
-      `/api/v0/mail/automatic_email/${GET_AUTOMATIC_EMAILS_RESPONSE[0].id}/`,
-      {
-        method: 'PATCH',
-        body: JSON.stringify({
-          email_subject: GET_AUTOMATIC_EMAILS_RESPONSE[0].email_subject,
-          email_body: GET_AUTOMATIC_EMAILS_RESPONSE[0].email_body,
-          sendAutomaticEmails: true,
-          id: GET_AUTOMATIC_EMAILS_RESPONSE[0].id
-        })
-      }
-    ).returns(Promise.resolve(GET_AUTOMATIC_EMAILS_RESPONSE[0]));
+    fetchMock.mock(`/api/v0/mail/automatic_email/${GET_AUTOMATIC_EMAILS_RESPONSE[0].id}/`, (url, opts) => {
+      assert.equal(opts.body, JSON.stringify({
+        email_subject: GET_AUTOMATIC_EMAILS_RESPONSE[0].email_subject,
+        email_body: GET_AUTOMATIC_EMAILS_RESPONSE[0].email_body,
+        sendAutomaticEmails: true,
+        id: GET_AUTOMATIC_EMAILS_RESPONSE[0].id
+      }));
+      return { body: JSON.stringify(GET_AUTOMATIC_EMAILS_RESPONSE[0]) };
+    });
 
     return renderComponent('/automaticemails', successActions).then(([wrapper]) => {
       let editButton = wrapper.find(".email-campaigns-card")

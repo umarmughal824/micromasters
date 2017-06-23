@@ -5,6 +5,7 @@ import { mount } from 'enzyme';
 import { assert } from 'chai';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
+import fetchMock from 'fetch-mock';
 
 import IntegrationTestHelper from '../../util/integration_test_helper';
 import { USER_PROFILE_RESPONSE } from '../../test_constants';
@@ -187,8 +188,9 @@ describe('Specific email config', () => {
     it('shouldnt use the sendMail email action, if the email config specifies differently', () => {
       let automaticEmailState = _.clone(filledOutEmailState);
       automaticEmailState.inputs.id = 1;
-      helper.fetchJSONWithCSRFStub.withArgs('/api/v0/mail/automatic_email/1/').
-        returns(Promise.resolve());
+      fetchMock.mock('/api/v0/mail/automatic_email/1/', () => (
+        {}
+      ));
 
       let wrapped = wrapContainerComponent(
         TestContainerPage,

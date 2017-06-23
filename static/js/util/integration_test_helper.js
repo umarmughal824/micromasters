@@ -5,8 +5,10 @@ import sinon from 'sinon';
 import { createMemoryHistory } from 'react-router';
 import { mergePersistedState }  from 'redux-localstorage';
 import { compose } from 'redux';
+import fetchMock from 'fetch-mock';
 
 import * as api from '../lib/api';
+import * as djangoFetch from 'redux-hammock/django_csrf_fetch';
 import {
   DASHBOARD_RESPONSE,
   COURSE_PRICES_RESPONSE,
@@ -39,6 +41,7 @@ export default class IntegrationTestHelper {
   browserHistory: History;
 
   constructor() {
+    fetchMock.restore();
     this.sandbox = sinon.sandbox.create();
     this.store = configureMainTestStore((...args) => {
       // uncomment to listen on dispatched actions
@@ -53,7 +56,7 @@ export default class IntegrationTestHelper {
     // to directly mock out the fetch call because at module load time the
     // endpoint object already holds a reference to the unmocked API function
     // (e.g. getCoupons) which Sinon doesn't seem to be able to deal with.
-    this.fetchJSONWithCSRFStub = this.sandbox.stub(api, 'fetchJSONWithCSRF');
+    this.fetchJSONWithCSRFStub = this.sandbox.stub(djangoFetch, 'fetchJSONWithCSRF');
 
     this.listenForActions = this.store.createListenForActions();
     this.dispatchThen = this.store.createDispatchThen();
@@ -64,10 +67,10 @@ export default class IntegrationTestHelper {
       `/api/v0/course_prices/${SETTINGS.user.username}/`
     );
     this.coursePricesStub.returns(Promise.resolve(COURSE_PRICES_RESPONSE));
-    this.getEmailsStub = this.fetchJSONWithCSRFStub.withArgs(
-      '/api/v0/mail/automatic_email/'
-    );
-    this.getEmailsStub.returns(Promise.resolve(GET_AUTOMATIC_EMAILS_RESPONSE));
+
+    fetchMock.mock('/api/v0/mail/automatic_email/', () => {
+      return { body: JSON.stringify(GET_AUTOMATIC_EMAILS_RESPONSE) };
+    });
     this.couponsStub = this.sandbox.stub(api, 'getCoupons');
     this.couponsStub.returns(Promise.resolve([]));
     this.profileGetStub = this.sandbox.stub(api, 'getUserProfile');

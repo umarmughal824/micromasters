@@ -1,6 +1,5 @@
 /* global SETTINGS: false */
 import { assert } from 'chai';
-import fetchMock from 'fetch-mock/src/server';
 import sinon from 'sinon';
 import Decimal from 'decimal.js-light';
 import R from 'ramda';
@@ -10,10 +9,6 @@ import {
   patchUserProfile,
   getDashboard,
   getCoursePrices,
-  getCookie,
-  fetchJSONWithCSRF,
-  fetchWithCSRF,
-  csrfSafeMethod,
   checkout,
   sendSearchResultMail,
   sendCourseTeamMail,
@@ -29,7 +24,7 @@ import {
   attachCoupon,
   getPearsonSSO,
 } from './api';
-import * as api from './api';
+import * as fetchFuncs from 'redux-hammock/django_csrf_fetch';
 import {
   COUPON_AMOUNT_TYPE_PERCENT_DISCOUNT,
   COUPON_CONTENT_TYPE_PROGRAM,
@@ -64,8 +59,8 @@ describe('api', function() {
     let fetchJSONStub;
     let fetchStub;
     beforeEach(() => {
-      fetchJSONStub = sandbox.stub(api, 'fetchJSONWithCSRF');
-      fetchStub = sandbox.stub(api, 'fetchWithCSRF');
+      fetchJSONStub = sandbox.stub(fetchFuncs, 'fetchJSONWithCSRF');
+      fetchStub = sandbox.stub(fetchFuncs, 'fetchWithCSRF');
     });
 
     it('gets user profile', () => {
@@ -137,20 +132,35 @@ describe('api', function() {
       });
     });
 
-    it('gets the dashboard', () => {
-      fetchJSONStub.returns(Promise.resolve(DASHBOARD_RESPONSE));
-      return getDashboard('beep').then(dashboard => {
-        assert.ok(fetchJSONStub.calledWith('/api/v0/dashboard/beep/', {}, true));
-        assert.deepEqual(dashboard, DASHBOARD_RESPONSE);
+    describe('dashboard API', () => {
+      it('gets the dashboard', () => {
+        fetchJSONStub.returns(Promise.resolve(DASHBOARD_RESPONSE));
+        return getDashboard('beep').then(dashboard => {
+          assert.ok(fetchJSONStub.calledWith('/api/v0/dashboard/beep/'));
+          assert.deepEqual(dashboard, DASHBOARD_RESPONSE);
+        });
       });
-    });
 
-    it('fails to get the dashboard', () => {
-      fetchJSONStub.returns(Promise.reject());
+      it('fails to get the dashboard', () => {
+        fetchJSONStub.returns(Promise.reject());
 
-      return assert.isRejected(getDashboard('user')).then(() => {
-        assert.ok(fetchJSONStub.calledWith('/api/v0/dashboard/user/', {}, true));
+        return assert.isRejected(getDashboard('user')).then(() => {
+          assert.ok(fetchJSONStub.calledWith('/api/v0/dashboard/user/'));
+        });
       });
+
+      for (let statusCode of [400, 401]) {
+        it(`redirects to login if status = ${statusCode}`, () => {
+          fetchJSONStub.returns(Promise.reject(
+            {errorStatusCode: statusCode}
+          ));
+
+          return getDashboard().then(() => {
+            const redirectUrl = `/logout?next=${encodeURIComponent('/login/edxorg/')}`;
+            assert.include(window.location.toString(), redirectUrl);
+          });
+        });
+      }
     });
 
     it('gets course prices', () => {
@@ -246,7 +256,7 @@ describe('api', function() {
       it('fetches program enrollments successfully', () => {
         fetchJSONStub.returns(Promise.resolve(PROGRAMS));
         return getPrograms().then(enrollments => {
-          assert.ok(fetchJSONStub.calledWith('/api/v0/programs/', {}, true));
+          assert.ok(fetchJSONStub.calledWith('/api/v0/programs/'));
           assert.deepEqual(enrollments, PROGRAMS);
         });
       });
@@ -255,9 +265,22 @@ describe('api', function() {
         fetchJSONStub.returns(Promise.reject());
 
         return assert.isRejected(getPrograms()).then(() => {
-          assert.ok(fetchJSONStub.calledWith('/api/v0/programs/', {}, true));
+          assert.ok(fetchJSONStub.calledWith('/api/v0/programs/'));
         });
       });
+
+      for (let statusCode of [400, 401]) {
+        it(`redirects to login if status = ${statusCode}`, () => {
+          fetchJSONStub.returns(Promise.reject(
+            {errorStatusCode: statusCode}
+          ));
+
+          return getPrograms().then(() => {
+            const redirectUrl = `/logout?next=${encodeURIComponent('/login/edxorg/')}`;
+            assert.include(window.location.toString(), redirectUrl);
+          });
+        });
+      }
 
       it('adds a program enrollment successfully', () => {
         let enrollment = PROGRAMS[0];
@@ -282,6 +305,7 @@ describe('api', function() {
           }));
         });
       });
+
     });
 
     describe('for adding financial aid', () => {
@@ -522,202 +546,6 @@ describe('api', function() {
           });
         });
       });
-    });
-  });
-
-  describe('fetch functions', () => {
-    const CSRF_TOKEN = 'asdf';
-
-    afterEach(() => {
-      fetchMock.restore();
-    });
-
-    describe('fetchWithCSRF', () => {
-      beforeEach(() => {
-        document.cookie = `csrftoken=${CSRF_TOKEN}`;
-      });
-
-      it('fetches and populates appropriate headers for GET', () => {
-        let body = "body";
-
-        fetchMock.mock('/url', (url, opts) => {
-          assert.deepEqual(opts, {
-            credentials: "same-origin",
-            headers: {},
-            body: body,
-            method: 'GET'
-          });
-
-          return {
-            status: 200,
-            body: "Some text"
-          };
-        });
-
-        return fetchWithCSRF('/url', {
-          body: body
-        }).then(responseBody => {
-          assert.equal(responseBody, "Some text");
-        });
-      });
-
-      for (let method of ['PATCH', 'PUT', 'POST']) {
-        it(`fetches and populates appropriate headers for ${method}`, () => {
-          let body = "body";
-
-          fetchMock.mock('/url', (url, opts) => {
-            assert.deepEqual(opts, {
-              credentials: "same-origin",
-              headers: {
-                'X-CSRFToken': CSRF_TOKEN
-              },
-              body: body,
-              method: method
-            });
-
-            return {
-              status: 200,
-              body: "Some text"
-            };
-          });
-
-          return fetchWithCSRF('/url', {
-            body,
-            method,
-          }).then(responseBody => {
-            assert.equal(responseBody, 'Some text');
-          });
-        });
-      }
-
-      for (let statusCode of [300, 400, 500]) {
-        it(`rejects the promise if the status code is ${statusCode}`, () => {
-          fetchMock.get('/url', statusCode);
-          return assert.isRejected(fetchWithCSRF('/url'));
-        });
-      }
-    });
-
-    describe('fetchJSONWithCSRF', () => {
-      it('fetches and populates appropriate headers for JSON', () => {
-        document.cookie = `csrftoken=${CSRF_TOKEN}`;
-        let expectedJSON = {data: true};
-
-        fetchMock.mock('/url', (url, opts) => {
-          assert.deepEqual(opts, {
-            credentials: "same-origin",
-            headers: {
-              "Accept": "application/json",
-              "Content-Type": "application/json",
-              "X-CSRFToken": CSRF_TOKEN
-            },
-            body: JSON.stringify(expectedJSON),
-            method: "PATCH"
-          });
-          return {
-            status: 200,
-            body: '{"json": "here"}'
-          };
-        });
-
-        return fetchJSONWithCSRF('/url', {
-          method: 'PATCH',
-          body: JSON.stringify(expectedJSON)
-        }).then(responseBody => {
-          assert.deepEqual(responseBody, {
-            "json": "here"
-          });
-        });
-      });
-
-      it('handles responses with no data', () => {
-        document.cookie = `csrftoken=${CSRF_TOKEN}`;
-        let expectedJSON = {data: true};
-
-        fetchMock.mock('/url', (url, opts) => {
-          assert.deepEqual(opts, {
-            credentials: "same-origin",
-            headers: {
-              "Accept": "application/json",
-              "Content-Type": "application/json",
-              "X-CSRFToken": CSRF_TOKEN
-            },
-            body: JSON.stringify(expectedJSON),
-            method: "PATCH"
-          });
-          return {
-            status: 200,
-          };
-        });
-
-        return fetchJSONWithCSRF('/url', {
-          method: 'PATCH',
-          body: JSON.stringify(expectedJSON)
-        }).then(responseBody => {
-          assert.deepEqual(responseBody, {});
-        });
-      });
-
-      for (let statusCode of [300, 400, 500]) {
-        it(`rejects the promise if the status code is ${statusCode}`, () => {
-          fetchMock.mock('/url', {
-            status: statusCode,
-            body: JSON.stringify({
-              error: "an error"
-            })
-          });
-
-          return assert.isRejected(fetchJSONWithCSRF('/url')).then(responseBody => {
-            assert.deepEqual(responseBody, {
-              error: "an error",
-              errorStatusCode: statusCode
-            });
-          });
-        });
-      }
-
-      for (let statusCode of [400, 401]) {
-        it(`redirects to login if we set loginOnError and status = ${statusCode}`, () => {
-          fetchMock.mock('/url', () => {
-            return {status: statusCode};
-          });
-
-          return assert.isRejected(fetchJSONWithCSRF('/url', {}, true)).then(() => {
-            const redirectUrl = `/logout?next=${encodeURIComponent('/login/edxorg/')}`;
-            assert.include(window.location.toString(), redirectUrl);
-          });
-        });
-      }
-    });
-  });
-
-  describe('getCookie', () => {
-    it('gets a cookie', () => {
-      document.cookie = 'key=cookie';
-      assert.equal('cookie', getCookie('key'));
-    });
-
-    it('handles multiple cookies correctly', () => {
-      document.cookie = 'key1=cookie1';
-      document.cookie = 'key2=cookie2';
-      assert.equal('cookie1', getCookie('key1'));
-      assert.equal('cookie2', getCookie('key2'));
-    });
-    it('returns null if cookie not found', () => {
-      assert.equal(null, getCookie('unknown'));
-    });
-  });
-
-  describe('csrfSafeMethod', () => {
-    it('knows safe methods', () => {
-      for (let method of ['GET', 'HEAD', 'OPTIONS', 'TRACE']) {
-        assert.ok(csrfSafeMethod(method));
-      }
-    });
-    it('knows unsafe methods', () => {
-      for (let method of ['PATCH', 'PUT', 'DELETE', 'POST']) {
-        assert.ok(!csrfSafeMethod(method));
-      }
     });
   });
 });

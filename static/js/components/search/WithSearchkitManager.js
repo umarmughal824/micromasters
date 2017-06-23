@@ -4,7 +4,7 @@ import React from 'react';
 import { SearchkitManager, SearchkitProvider } from 'searchkit';
 
 import { getDisplayName } from '../../util/util';
-import { getCookie } from '../../lib/api';
+import { getCookie } from 'redux-hammock/django_csrf_fetch';
 
 const withSearchkitManager = (WrappedComponent: ReactClass<*>) => {
   class WithSearchkitManager extends React.Component {
