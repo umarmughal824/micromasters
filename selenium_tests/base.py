@@ -1,6 +1,7 @@
 """Basic selenium tests for MicroMasters"""
 from base64 import b64encode
 from datetime import timedelta
+import json
 import logging
 import os
 import socket
@@ -23,6 +24,7 @@ from django.db import connection
 from django.db.models.signals import post_save
 from factory.django import mute_signals
 import pytest
+import requests
 from selenium.common.exceptions import (
     ElementNotVisibleException,
     StaleElementReferenceException,
@@ -61,7 +63,8 @@ log = logging.getLogger(__name__)
 
 def _make_absolute_url(relative_url, absolute_base):
     """
-    Create an absolute URL for selenium testing given a relative URL
+    Create an absolute URL for selenium testing given a relative URL. This will also replace the host of absolute_base
+    with the host IP of this instance.
 
     Args:
         relative_url (str): A relative URL
@@ -344,9 +347,13 @@ class SeleniumTestsBase(StaticLiveServerTestCase):
         """Helper function for WebDriverWait"""
         return CustomWebDriverWait(driver=self.selenium, timeout=5)
 
+    def make_absolute_url(self, relative_url):
+        """Make an absolute URL appropriate for selenium testing"""
+        return _make_absolute_url(relative_url, self.live_server_url)
+
     def get(self, relative_url):
         """Use self.live_server_url with a URL which will work for external services"""
-        new_url = _make_absolute_url(relative_url, self.live_server_url)
+        new_url = self.make_absolute_url(relative_url)
         self.selenium.get(new_url)
         self.wait().until(lambda driver: driver.find_element_by_tag_name("body"))
         self.assert_console_logs()
@@ -392,6 +399,26 @@ class SeleniumTestsBase(StaticLiveServerTestCase):
             # Can be useful for travis where we don't have access to build artifacts
             with open(filename, 'rb') as f:
                 print("Screenshot as base64: {}".format(b64encode(f.read())))
+
+    def store_api_results(self, name=None):
+        """Helper method to save certain GET REST API responses"""
+        if name is None:
+            name = self._testMethodName
+
+        # Get the API results and store them alongside the screenshots
+        sessionid = self.selenium.get_cookie('sessionid')['value']
+        for api_url, api_name in [
+                ("/api/v0/dashboard/{}/".format(self.edx_username), 'dashboard'),
+                ("/api/v0/coupons/", 'coupons'),
+                ("/api/v0/course_prices/{}/".format(self.edx_username), 'course_prices'),
+        ]:
+            absolute_url = self.make_absolute_url(api_url)
+            api_json = requests.get(absolute_url, cookies={'sessionid': sessionid}).json()
+            with open("{filename}.{api_name}.json".format(
+                filename=name,
+                api_name=api_name,
+            ), 'w') as f:
+                json.dump(api_json, f, indent="    ")
 
     def assert_console_logs(self):
         """Assert that console logs don't contain anything unexpected"""

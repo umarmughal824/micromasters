@@ -40,6 +40,8 @@ RUNNING_DASHBOARD_STATES = False
 # pytest is used to invoke the tests, we don't have a good way to pass options to it directly.
 DASHBOARD_STATES_OPTIONS = None
 
+DUMP_DIRECTORY = "dashboard_states_output"
+
 
 def make_scenario(command):
     """Make lambda from ExampleCommand"""
@@ -184,10 +186,13 @@ class DashboardStates(SeleniumTestsBase):
     @classmethod
     def _make_filename(cls, num, name, use_mobile=False):
         """Format the filename without extension for dashboard states"""
-        return "dashboard_state_{num:03d}_{command}{mobile}".format(
-            num=num,
-            command=name,
-            mobile="_mobile" if use_mobile else "",
+        return os.path.join(
+            DUMP_DIRECTORY,
+            "dashboard_state_{num:03d}_{command}{mobile}".format(
+                num=num,
+                command=name,
+                mobile="_mobile" if use_mobile else "",
+            )
         )
 
     def _make_scenarios(self):
@@ -260,6 +265,11 @@ class DashboardStates(SeleniumTestsBase):
 
     def test_dashboard_states(self):
         """Iterate through all possible dashboard states and take screenshots of each one"""
+        try:
+            os.mkdir(DUMP_DIRECTORY)
+        except FileExistsError:
+            pass
+
         use_mobile = DASHBOARD_STATES_OPTIONS.get('mobile')
         if use_mobile:
             self.selenium.set_window_size(480, 854)
@@ -292,10 +302,7 @@ class DashboardStates(SeleniumTestsBase):
 
             filename = self._make_filename(num, name, use_mobile=use_mobile)
             self.take_screenshot(filename)
-            self.get("/api/v0/dashboard/{}/".format(self.edx_username))
-            text = self.selenium.execute_script('return document.querySelector(".response-info pre").innerText')
-            with open("{}.txt".format(filename), 'w') as f:
-                f.write(text)
+            self.store_api_results(filename)
 
 
 class Command(BaseCommand):
@@ -338,6 +345,11 @@ class Command(BaseCommand):
             # This should only happen if the user is running in an environment without Docker, which isn't allowed
             # for this command.
             raise Exception('Missing environment variable WEBPACK_DEV_SERVER_HOST.')
+
+        if os.environ.get('RUNNING_SELENIUM') != 'true':
+            raise Exception(
+                "This management command must be run with ./scripts/tests/run_snapshot_dashboard_states.sh"
+            )
 
         # We need to use pytest here instead of invoking the tests directly so that the test database
         # is used. Using override_settings(DATABASE...) causes a warning message and is not reliable.
