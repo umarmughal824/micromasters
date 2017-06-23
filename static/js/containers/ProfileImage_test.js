@@ -7,10 +7,10 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import { Provider } from 'react-redux';
 
-import ProfileImage from './ProfileImage';
+import ProfileImage, { PROFILE_IMAGE_DIALOG } from './ProfileImage';
 import IntegrationTestHelper from '../util/integration_test_helper';
 import ProfileImageUploader from '../components/ProfileImageUploader';
-import { setPhotoDialogVisibility } from '../actions/ui';
+import { showDialog } from '../actions/ui';
 import * as api from '../lib/api';
 import {
   startPhotoEdit,
@@ -109,7 +109,7 @@ describe('ProfileImage', () => {
       assert.equal(link.text(), 'some link text');
       link.simulate('click');
       assert.ok(
-        helper.store.getState().ui.photoDialogVisibility,
+        helper.store.getState().ui.dialogVisibility[PROFILE_IMAGE_DIALOG],
         'should be open now'
       );
     });
@@ -148,7 +148,7 @@ describe('ProfileImage', () => {
           editable: true
         });
         helper.store.dispatch(startPhotoEdit({name: 'a name'}));
-        helper.store.dispatch(setPhotoDialogVisibility(true));
+        helper.store.dispatch(showDialog(PROFILE_IMAGE_DIALOG));
         let dialog = document.querySelector(".photo-upload-dialog");
         let saveButton = dialog.querySelector('.save-button');
         assert.isFalse(saveButton.className.includes('disabled'));
@@ -161,7 +161,7 @@ describe('ProfileImage', () => {
         renderProfileImage({
           editable: true
         });
-        helper.store.dispatch(setPhotoDialogVisibility(true));
+        helper.store.dispatch(showDialog(PROFILE_IMAGE_DIALOG));
         let dialog = document.querySelector(".photo-upload-dialog");
         let saveButton = dialog.querySelector('.save-button');
         assert.isTrue(saveButton.disabled);
@@ -176,7 +176,7 @@ describe('ProfileImage', () => {
           editable: true
         });
         helper.store.dispatch(startPhotoEdit({name: 'a name'}));
-        helper.store.dispatch(setPhotoDialogVisibility(true));
+        helper.store.dispatch(showDialog(PROFILE_IMAGE_DIALOG));
         helper.store.dispatch(requestPatchUserPhoto(SETTINGS.user.username));
         let dialog = document.querySelector(".photo-upload-dialog");
         assert.isNotNull(dialog.querySelector('.mdl-spinner'));
@@ -187,7 +187,7 @@ describe('ProfileImage', () => {
           editable: true
         });
         helper.store.dispatch(startPhotoEdit({name: 'a name'}));
-        helper.store.dispatch(setPhotoDialogVisibility(true));
+        helper.store.dispatch(showDialog(PROFILE_IMAGE_DIALOG));
         helper.store.dispatch(requestPatchUserPhoto(SETTINGS.user.username));
         let dialog = document.querySelector(".photo-upload-dialog");
         let saveButton = dialog.querySelector('.save-button');

@@ -1,11 +1,13 @@
 """Factories for making test data"""
 from datetime import date, datetime, timezone
 import uuid
+from django.db.models.signals import post_save
 
 from factory import SubFactory, LazyFunction, Faker, lazy_attribute
 from factory.django import (
     DjangoModelFactory,
-    ImageField
+    ImageField,
+    mute_signals
 )
 from factory.fuzzy import (
     FuzzyChoice,
@@ -89,6 +91,14 @@ class ProfileFactory(DjangoModelFactory):
 
     class Meta:
         model = Profile
+
+    @classmethod
+    def create_batch(cls, *args, **kwargs):
+        """
+        Ensure that signals are muted before running the base create_batch method
+        """
+        with mute_signals(post_save):
+            return super().create_batch(*args, **kwargs)
 
 
 class EmploymentFactory(DjangoModelFactory):

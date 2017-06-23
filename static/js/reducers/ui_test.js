@@ -4,9 +4,6 @@ import {
   SET_WORK_HISTORY_EDIT,
 
   clearUI,
-  updateDialogText,
-  updateDialogTitle,
-  setDialogVisibility,
   setWorkHistoryEdit,
   setWorkDialogVisibility,
   setWorkDialogIndex,
@@ -28,8 +25,6 @@ import {
   setToastMessage,
   setEnrollSelectedProgram,
   setEnrollSelectedCourseRun,
-  setPhotoDialogVisibility,
-  setCalculatorDialogVisibility,
   setConfirmSkipDialogVisibility,
   setDocsInstructionsVisibility,
   setNavDrawerOpen,
@@ -66,20 +61,6 @@ describe('ui reducers', () => {
   it('should clear the ui', () => {
     store.dispatch(clearUI());
     assert.deepEqual(store.getState().ui, INITIAL_UI_STATE);
-  });
-
-  describe('dialog reducers', () => {
-    it('should set a dialog title', () => {
-      assertReducerResultState(updateDialogTitle, ui => ui.dialog.title, undefined);
-    });
-
-    it('should set dialog text', () => {
-      assertReducerResultState(updateDialogText, ui => ui.dialog.text, undefined);
-    });
-
-    it('should set dialog visibility', () => {
-      assertReducerResultState(setDialogVisibility, ui => ui.dialog.visible, undefined);
-    });
   });
 
   describe('work_history reducers', () => {
@@ -164,12 +145,6 @@ describe('ui reducers', () => {
     });
   });
 
-  describe('Photo dialog visibility', () => {
-    it(`should let you set photo dialog visibility`, () => {
-      assertReducerResultState(setPhotoDialogVisibility, ui => ui.photoDialogVisibility, false);
-    });
-  });
-
   describe('Program enrollment', () => {
     it('sets the enrollment message', () => {
       assertReducerResultState(setToastMessage, ui => ui.toastMessage, null);
@@ -195,12 +170,6 @@ describe('ui reducers', () => {
 
     it('sets the enrollment dialog currently selected course run', () => {
       assertReducerResultState(setEnrollSelectedCourseRun, ui => ui.enrollSelectedCourseRun, null);
-    });
-  });
-
-  describe('Calculator visibility', () => {
-    it('should let you set calculator visibility', () => {
-      assertReducerResultState(setCalculatorDialogVisibility, ui => ui.calculatorDialogVisibility, false);
     });
   });
 

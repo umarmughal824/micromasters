@@ -13,7 +13,6 @@ import {
 import type { Profile, ProfileFetchResponse } from '../flow/profileTypes';
 import ProfileImageUploader from '../components/ProfileImageUploader';
 import { createActionHelper } from '../lib/redux';
-import { setPhotoDialogVisibility } from '../actions/ui';
 import {
   startPhotoEdit,
   clearPhotoEdit,
@@ -22,6 +21,9 @@ import {
   updateUserPhoto,
 } from '../actions/image_upload';
 import { fetchUserProfile } from '../actions/profile';
+import { showDialog, hideDialog } from '../actions/ui';
+
+export const PROFILE_IMAGE_DIALOG = 'PROFILE_IMAGE_DIALOG';
 
 const formatPhotoName = photo => (
   `${photo.name.replace(/\.\w*$/, '')}.jpg`
@@ -37,7 +39,6 @@ class ProfileImage extends React.Component {
     linkText:             string,
     photoDialogOpen:      boolean,
     profile:              Profile,
-    setDialogVisibility:  (b: boolean) => void,
     setPhotoError:        (s: string) => void,
     showLink:             boolean,
     startPhotoEdit:       (p: File) => void,
@@ -55,13 +56,12 @@ class ProfileImage extends React.Component {
       imageUpload: { edit, photo },
       dispatch,
       clearPhotoEdit,
-      setDialogVisibility,
       afterImageUpload,
     } = this.props;
 
     return dispatch(updateUserPhoto(username, edit, formatPhotoName(photo))).then(() => {
       clearPhotoEdit();
-      setDialogVisibility(false);
+      this.setDialogVisibility(false);
       return this.fetchUserProfile().then(resp => {
         if (afterImageUpload) {
           afterImageUpload(resp);
@@ -70,16 +70,25 @@ class ProfileImage extends React.Component {
     });
   };
 
+  setDialogVisibility = (visibility: boolean) => {
+    const { dispatch } = this.props;
+    if (visibility) {
+      dispatch(showDialog(PROFILE_IMAGE_DIALOG));
+    } else {
+      dispatch(hideDialog(PROFILE_IMAGE_DIALOG));
+    }
+  };
+
   fetchUserProfile = () => {
     const { dispatch } = this.props;
     return dispatch(fetchUserProfile(SETTINGS.user.username));
   };
 
   cameraIcon = (): React$Element<*>|null => {
-    const { setDialogVisibility, editable } = this.props;
+    const { editable } = this.props;
     if (editable) {
       return (
-        <button className="open-photo-dialog" onClick={() => setDialogVisibility(true)}>
+        <button className="open-photo-dialog" onClick={() => this.setDialogVisibility(true)}>
           <Icon name="camera_alt" aria-hidden="true" />
           <span className="sr-only">Update user photo</span>
         </button>
@@ -90,8 +99,8 @@ class ProfileImage extends React.Component {
   }
 
   openDialogLink = (): React$Element<*> => {
-    const { linkText, setDialogVisibility } = this.props;
-    return <a onClick={() => setDialogVisibility(true)}>
+    const { linkText } = this.props;
+    return <a onClick={() => this.setDialogVisibility(true)}>
       { linkText }
     </a>;
   };
@@ -108,6 +117,7 @@ class ProfileImage extends React.Component {
             <ProfileImageUploader
               {...this.props}
               updateUserPhoto={this.updateUserPhoto}
+              setDialogVisibility={this.setDialogVisibility}
             />
           )}
           <img
@@ -124,12 +134,11 @@ class ProfileImage extends React.Component {
 }
 
 const mapStateToProps = state => ({
-  photoDialogOpen: state.ui.photoDialogVisibility,
+  photoDialogOpen: state.ui.dialogVisibility[PROFILE_IMAGE_DIALOG] || false,
   imageUpload: state.imageUpload,
 });
 
 const mapDispatchToProps = dispatch => ({
-  setDialogVisibility: createActionHelper(dispatch, setPhotoDialogVisibility),
   startPhotoEdit: createActionHelper(dispatch, startPhotoEdit),
   clearPhotoEdit: createActionHelper(dispatch, clearPhotoEdit),
   updatePhotoEdit: createActionHelper(dispatch, updatePhotoEdit),

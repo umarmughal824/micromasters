@@ -44,7 +44,6 @@ import {
   setConfirmSkipDialogVisibility,
   setDocsInstructionsVisibility,
   setCouponNotificationVisibility,
-  setCalculatorDialogVisibility,
   setPaymentTeaserDialogVisibility,
   setEnrollCourseDialogVisibility,
   setEnrollSelectedCourseRun,
@@ -109,6 +108,7 @@ import type { RestState } from '../flow/restTypes';
 import { getOwnDashboard, getOwnCoursePrices } from '../reducers/util';
 import { actions } from '../lib/redux_rest';
 import { wait } from '../util/util';
+import { CALCULATOR_DIALOG } from './FinancialAidCalculator';
 
 const isProcessing = R.equals(FETCH_PROCESSING);
 const PEARSON_TOS_DIALOG = "pearsonTOSDialogVisible";
@@ -382,7 +382,7 @@ class DashboardPage extends React.Component {
       let currencyPrediction = currencyForCountry(country);
       dispatch(updateCalculatorEdit({ currency: currencyPrediction }));
     }
-    dispatch(setCalculatorDialogVisibility(true));
+    dispatch(showDialog(CALCULATOR_DIALOG));
   };
 
   setDocumentSentDate = (newDate: string): void => {
