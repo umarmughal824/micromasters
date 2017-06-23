@@ -1,16 +1,12 @@
 """
 Tests for financialaid view
 """
-import datetime
 from decimal import Decimal
-import json
 from unittest.mock import Mock, patch
 
 from backends.edxorg import EdxOrgOAuth2
 import ddt
 from django.core.urlresolvers import reverse
-from django.db.models import Q
-from django.test import override_settings
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.test import APIClient
@@ -45,10 +41,7 @@ from financialaid.models import (
 from mail.utils import generate_financial_aid_email
 from mail.views_test import mocked_json
 from micromasters.utils import is_near_now
-from roles.models import (
-    Staff,
-    Role,
-)
+from roles.models import Role
 
 
 # pylint: disable=too-many-lines
@@ -168,218 +161,6 @@ class RequestAPITests(FinancialAidBaseTestCase, APIClient):
         self.data["original_currency"] = "DEF"
         resp = self.client.post(self.request_url, self.data, format='json')
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
-
-
-class ReviewTests(FinancialAidBaseTestCase, APIClient):
-    """Tests for the review app"""
-
-    def setUp(self):
-        super().setUp()
-        self.review_url = reverse("review_financial_aid", kwargs={"program_id": self.program.id})
-        self.review_url_with_filter = reverse(
-            "review_financial_aid",
-            kwargs={
-                "program_id": self.program.id,
-                "status": FinancialAidStatus.AUTO_APPROVED
-            }
-        )
-        self.client.force_login(self.staff_user_profile.user)
-
-    def test_not_staff(self):
-        """
-        Not allowed for default logged-in user
-        """
-        self.client.force_login(self.profile.user)
-        self.make_http_request(self.client.get, self.review_url, status.HTTP_403_FORBIDDEN)
-
-    def test_staff_of_different_program(self):
-        """Not allowed for staff of different program"""
-        program, _ = create_program()
-        staff_user = create_enrolled_profile(program, role=Staff.ROLE_ID).user
-        self.client.force_login(staff_user)
-        self.make_http_request(self.client.get, self.review_url, status.HTTP_403_FORBIDDEN)
-
-    def test_instructor(self):
-        """Not allowed for instructors"""
-        self.client.force_login(self.instructor_user_profile.user)
-        self.make_http_request(self.client.get, self.review_url, status.HTTP_403_FORBIDDEN)
-
-    def test_anonymous(self):
-        """Not allowed for not logged in users"""
-        self.client.logout()
-        self.make_http_request(self.client.get, self.review_url, status.HTTP_403_FORBIDDEN)
-
-    def test_unavailable_financial_aid(self):
-        """
-        Not allowed if program doesn't have financial aid
-        """
-        self.program.financial_aid_availability = False
-        self.program.save()
-        self.make_http_request(self.client.get, self.review_url, status.HTTP_404_NOT_FOUND)
-
-    def test_not_live(self):
-        """
-        Not allowed if program is not live
-        """
-        self.program.live = False
-        self.program.save()
-        self.make_http_request(self.client.get, self.review_url, status.HTTP_404_NOT_FOUND)
-
-    def test_review_financial_aid_view_allowed(self):
-        """
-        Tests ReviewFinancialAidView that are allowed
-        """
-        # Allowed for staff of program
-        self.make_http_request(self.client.get, self.review_url, status.HTTP_200_OK)
-
-    def test_context(self):
-        """
-        Test context information for financial aid review page
-        """
-        ga_tracking_id = 'track'
-        react_ga_debug = True
-        base_url = 'edx_base_url'
-        with override_settings(
-            GA_TRACKING_ID=ga_tracking_id,
-            REACT_GA_DEBUG=react_ga_debug,
-            EDXORG_BASE_URL=base_url,
-        ), patch('ui.templatetags.render_bundle._get_bundle') as get_bundle:
-            response = self.client.get(self.review_url)
-
-            bundles = [bundle[0][1] for bundle in get_bundle.call_args_list]
-            assert set(bundles) == {
-                'common',
-                'financial_aid',
-                'sentry_client',
-                'style',
-                'zendesk_widget',
-            }
-
-            assert response.context['has_zendesk_widget'] is True
-            assert response.context['is_public'] is False
-            assert response.context['is_staff'] is True
-            assert json.loads(response.context['js_settings_json']) == {
-                'gaTrackingID': ga_tracking_id,
-                'reactGaDebug': react_ga_debug,
-                'authenticated': True,
-                'edx_base_url': base_url,
-            }
-
-    def test_filter(self):
-        """
-        Tests ReviewFinancialAidView with filters and sorting
-        """
-        for _ in range(100):
-            FinancialAidFactory.create(
-                tier_program=self.tier_programs["0k"],
-                status=FinancialAidStatus.AUTO_APPROVED
-            )
-        # Should work with a filter
-        resp = self.make_http_request(self.client.get, self.review_url_with_filter, status.HTTP_200_OK)
-        resp_obj_id_list = resp.context_data["financial_aid_objects"].values_list("id", flat=True)
-        expected_obj_id_list = FinancialAid.objects.filter(
-            tier_program__program_id=self.program.id,
-            status=FinancialAidStatus.AUTO_APPROVED
-        ).order_by("user__profile__last_name").values_list("id", flat=True)[:50]  # Default sort field
-        self.assertListEqual(list(resp_obj_id_list), list(expected_obj_id_list))
-
-    def test_sorting(self):
-        """Should work with sorting"""
-        for _ in range(100):
-            FinancialAidFactory.create(
-                tier_program=self.tier_programs["0k"],
-                status=FinancialAidStatus.AUTO_APPROVED
-            )
-        url_with_sorting = "{url}?sort_by=-last_name".format(url=self.review_url)
-        resp = self.make_http_request(self.client.get, url_with_sorting, status.HTTP_200_OK)
-        resp_obj_id_list = resp.context_data["financial_aid_objects"].values_list("id", flat=True)
-        expected_obj_id_list = FinancialAid.objects.filter(
-            tier_program__program_id=self.program.id,
-            status=FinancialAidStatus.PENDING_MANUAL_APPROVAL  # Default filter field
-        ).order_by("-user__profile__last_name").values_list("id", flat=True)[:50]
-        self.assertListEqual(list(resp_obj_id_list), list(expected_obj_id_list))
-
-    def test_filter_and_sorting(self):
-        """Should work with filters and sorting"""
-        for _ in range(100):
-            FinancialAidFactory.create(
-                tier_program=self.tier_programs["0k"],
-                status=FinancialAidStatus.AUTO_APPROVED
-            )
-        url_with_filter_and_sorting = "{url}?sort_by=-last_name".format(url=self.review_url_with_filter)
-        resp = self.make_http_request(self.client.get, url_with_filter_and_sorting, status.HTTP_200_OK)
-        resp_obj_id_list = resp.context_data["financial_aid_objects"].values_list("id", flat=True)
-        expected_obj_id_list = FinancialAid.objects.filter(
-            tier_program__program_id=self.program.id,
-            status=FinancialAidStatus.AUTO_APPROVED
-        ).order_by("-user__profile__last_name").values_list("id", flat=True)[:50]  # Default sort field
-        self.assertListEqual(list(resp_obj_id_list), list(expected_obj_id_list))
-
-    def test_invalid_sorting(self):
-        """
-        Shouldn't break with invalid sort field
-        """
-        FinancialAidFactory.create(tier_program=self.tier_programs["0k"])
-        url_with_bad_sort_field = "{url}?sort_by=-askjdf".format(url=self.review_url_with_filter)
-        self.make_http_request(self.client.get, url_with_bad_sort_field, status.HTTP_200_OK)
-
-    def test_invalid_filter(self):
-        """
-        Shouldn't break with invalid filter field
-        """
-        FinancialAidFactory.create(tier_program=self.tier_programs["0k"])
-        url_with_bad_filter = reverse(
-            "review_financial_aid",
-            kwargs={
-                "program_id": self.program.id,
-                "status": "aksdjfk"
-            }
-        )
-        self.make_http_request(self.client.get, url_with_bad_filter, status.HTTP_200_OK)
-
-    def test_invalid_sorting_and_filter(self):
-        """
-        Shouldn't break with invalid sorting and filter
-        """
-        FinancialAidFactory.create(tier_program=self.tier_programs["0k"])
-        url_with_bad_filter = reverse(
-            "review_financial_aid",
-            kwargs={
-                "program_id": self.program.id,
-                "status": "aksdjfk"
-            }
-        )
-        url_with_bad_filter_and_bad_sorting = "{url}?sort_by=-askjdf".format(url=url_with_bad_filter)
-        self.make_http_request(self.client.get, url_with_bad_filter_and_bad_sorting, status.HTTP_200_OK)
-
-    def test_review_financial_aid_view_with_search(self):
-        """
-        Tests that ReviewFinancialAidView returns the expected results with search
-        """
-        financial_aid = FinancialAidFactory.create(
-            tier_program=self.tier_programs["0k"],
-            status=FinancialAidStatus.AUTO_APPROVED
-        )
-        for _ in range(99):
-            FinancialAidFactory.create(
-                tier_program=self.tier_programs["0k"],
-                status=FinancialAidStatus.AUTO_APPROVED
-            )
-
-        # Works with search and filter
-        search_query = financial_aid.user.profile.first_name
-        search_url = "{path}?search_query={search_query}".format(
-            path=self.review_url_with_filter,
-            search_query=search_query
-        )
-        resp = self.make_http_request(self.client.get, search_url, status.HTTP_200_OK)
-        resp_obj_id_list = resp.context_data["financial_aid_objects"].values_list("id", flat=True)
-        expected_obj_id_list = FinancialAid.objects.filter(
-            Q(user__profile__first_name__icontains=search_query) | Q(user__profile__last_name__icontains=search_query),
-            tier_program__program_id=self.program.id,
-            status=FinancialAidStatus.AUTO_APPROVED
-        ).order_by("user__profile__last_name").values_list("id", flat=True)  # Default sort field
-        self.assertListEqual(list(resp_obj_id_list), list(expected_obj_id_list))
 
 
 @ddt.ddt
@@ -696,77 +477,6 @@ class FinancialAidActionTests(FinancialAidBaseTestCase, APIClient):
         financial_aid_email = generate_financial_aid_email(self.financialaid)
         assert called_kwargs["subject"] == financial_aid_email["subject"]
         assert called_kwargs["body"] == financial_aid_email["body"]
-
-
-@ddt.ddt
-class FinancialAidDetailViewTests(FinancialAidBaseTestCase, APIClient):
-    """
-    Tests for FinancialAidDetailView
-    """
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
-        cls.financialaid_pending_docs = FinancialAidFactory.create(
-            user=cls.profile.user,
-            tier_program=cls.tier_programs["25k"],
-            status=FinancialAidStatus.PENDING_DOCS
-        )
-        cls.docs_sent_url = reverse(
-            "financial_aid",
-            kwargs={"financial_aid_id": cls.financialaid_pending_docs.id}
-        )
-        cls.data = {
-            "financial_aid_id": cls.financialaid_pending_docs.id,
-            "date_documents_sent": datetime.date(2016, 9, 25).strftime("%Y-%m-%d")
-        }
-
-    def setUp(self):
-        super().setUp()
-        self.client.force_login(self.profile.user)
-
-    def test_learner_can_indicate_documents_sent(self):
-        """
-        Tests FinancialAidDetailView for user editing their own financial aid document status
-        """
-        self.make_http_request(self.client.patch, self.docs_sent_url, status.HTTP_200_OK, data=self.data)
-        self.financialaid_pending_docs.refresh_from_db()
-        assert self.financialaid_pending_docs.status == FinancialAidStatus.DOCS_SENT
-        assert self.financialaid_pending_docs.date_documents_sent == datetime.date(2016, 9, 25)
-
-    def test_user_does_not_have_permission_to_indicate_documents_sent(self):
-        """
-        Tests FinancialAidDetailView for user without permission to edit document status
-        """
-        unpermitted_users_to_test = [
-            self.instructor_user_profile.user,
-            self.staff_user_profile.user,
-            create_enrolled_profile(self.program).user,
-        ]
-        for unpermitted_user in unpermitted_users_to_test:
-            self.client.force_login(unpermitted_user)
-            self.make_http_request(self.client.patch, self.docs_sent_url, status.HTTP_403_FORBIDDEN, data=self.data)
-
-    def test_anonymous(self):
-        """
-        Anonymous users can't update status for docs sent
-        """
-        self.client.logout()
-        self.make_http_request(self.client.patch, self.docs_sent_url, status.HTTP_403_FORBIDDEN, data=self.data)
-
-    @ddt.data(
-        *([
-            [status] for status in FinancialAidStatus.ALL_STATUSES
-            if status != FinancialAidStatus.PENDING_DOCS
-        ])
-    )
-    @ddt.unpack
-    def test_correct_status_change_on_indicating_documents_sent(self, financial_aid_status):
-        """
-        Tests FinancialAidDetailView to ensure status change is always pending-docs to docs-sent
-        """
-        self.financialaid_pending_docs.status = financial_aid_status
-        self.financialaid_pending_docs.save()
-        self.make_http_request(self.client.patch, self.docs_sent_url, status.HTTP_400_BAD_REQUEST, data=self.data)
 
 
 @ddt.ddt
