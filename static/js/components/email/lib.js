@@ -190,6 +190,7 @@ export const AUTOMATIC_EMAIL_ADMIN_CONFIG: EmailConfig = {
       subject: emailOpenParams.email_subject,
       body: emailOpenParams.email_body,
       sendAutomaticEmails: emailOpenParams.enabled,
+      id: emailOpenParams.id,
     },
     filters: getFilters(emailOpenParams.query.original_query.post_filter)
   }),

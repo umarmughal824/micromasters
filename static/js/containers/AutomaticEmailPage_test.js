@@ -1,6 +1,7 @@
 // @flow
 /* global SETTINGS: false */
 import { assert } from 'chai';
+import ReactTestUtils from 'react-dom/test-utils';
 
 import IntegrationTestHelper from '../util/integration_test_helper';
 import { actions } from '../lib/redux_rest.js';
@@ -15,6 +16,8 @@ import {
   RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
 } from '../actions/programs';
 import Spinner from 'react-mdl/lib/Spinner';
+import { UPDATE_EMAIL_VALIDATION, CLEAR_EMAIL_EDIT } from '../actions/email';
+import { HIDE_DIALOG } from '../actions/ui';
 
 describe('AutomaticEmailPage', () => {
   let renderComponent, helper;
@@ -86,6 +89,42 @@ describe('AutomaticEmailPage', () => {
     return renderComponent('/automaticemails', successActions).then(([wrapper]) => {
       let cardText = wrapper.find(".empty-message").text();
       assert.equal(cardText, "You haven't created any Email Campaigns yet.");
+    });
+  });
+
+  it('should let you save an email', () => {
+    helper.fetchJSONWithCSRFStub.withArgs(
+      `/api/v0/mail/automatic_email/${GET_AUTOMATIC_EMAILS_RESPONSE[0].id}/`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({
+          email_subject: GET_AUTOMATIC_EMAILS_RESPONSE[0].email_subject,
+          email_body: GET_AUTOMATIC_EMAILS_RESPONSE[0].email_body,
+          sendAutomaticEmails: true,
+          id: GET_AUTOMATIC_EMAILS_RESPONSE[0].id
+        })
+      }
+    ).returns(Promise.resolve(GET_AUTOMATIC_EMAILS_RESPONSE[0]));
+
+    return renderComponent('/automaticemails', successActions).then(([wrapper]) => {
+      let editButton = wrapper.find(".email-campaigns-card")
+        .find('.email-row')
+        .at(0)
+        .find('a');
+      editButton.simulate('click');
+      // $FlowFixMe:
+      let dialogSave = document.querySelector('.email-composition-dialog')
+        .querySelector('.save-button');
+
+      return  helper.listenForActions([
+        UPDATE_EMAIL_VALIDATION,
+        actions.automaticEmails.patch.requestType,
+        actions.automaticEmails.patch.successType,
+        CLEAR_EMAIL_EDIT,
+        HIDE_DIALOG,
+      ], () => {
+        ReactTestUtils.Simulate.click(dialogSave);
+      });
     });
   });
 });
