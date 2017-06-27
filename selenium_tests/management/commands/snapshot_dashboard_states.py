@@ -134,8 +134,10 @@ class DashboardStates(SeleniumTestsBase):
 
     def with_coupon(self, amount_type, is_program, is_free):
         """Add a course-level coupon"""
-        call_command("alter_data", 'set_to_offered', '--username', 'staff', '--course-title', 'Analog Learning 200')
-        course = Course.objects.get(title='Analog Learning 200')
+        # Set up financial aid and use Digital Learning since coupons are only allowed for financial aid programs
+        self.with_financial_aid(FinancialAidStatus.AUTO_APPROVED, True)
+
+        course = Course.objects.get(title='Digital Learning 200')
         if is_program:
             content_object = course.program
         else:
@@ -153,6 +155,16 @@ class DashboardStates(SeleniumTestsBase):
             content_object=content_object, coupon_type=Coupon.STANDARD, amount_type=amount_type, amount=amount,
         )
         UserCoupon.objects.create(user=self.user, coupon=coupon)
+
+    def with_coupon_no_financial_aid_application(self):
+        """Coupon without a financial aid application"""
+        self.with_coupon(Coupon.PERCENT_DISCOUNT, True, False)
+        self.user.financialaid_set.update(status=FinancialAidStatus.RESET)
+
+    def with_coupon_pending_financial_aid(self):
+        """Coupon with a non-terminal financial aid application"""
+        self.with_coupon(Coupon.PERCENT_DISCOUNT, True, False)
+        self.user.financialaid_set.update(status=FinancialAidStatus.PENDING_MANUAL_APPROVAL)
 
     def with_financial_aid(self, status, is_enrolled):
         """Set the status of user's financial aid"""
@@ -173,6 +185,7 @@ class DashboardStates(SeleniumTestsBase):
             user=self.user,
             status=status,
             tier_program__program=program,
+            tier_program__discount_amount=50,
         )
 
     @classmethod
@@ -248,6 +261,8 @@ class DashboardStates(SeleniumTestsBase):
         )
 
         # Other misc scenarios
+        yield (self.with_coupon_no_financial_aid_application, 'with_coupon_no_financial_aid_application')
+        yield (self.with_coupon_pending_financial_aid, 'with_coupon_pending_financial_aid')
         yield (self.pending_enrollment, 'pending_enrollment')
         yield (self.contact_course, 'contact_course')
         yield (self.missed_payment_can_reenroll, 'missed_payment_can_reenroll')
@@ -279,12 +294,12 @@ class DashboardStates(SeleniumTestsBase):
         scenarios = self._make_scenarios()
         scenarios_with_numbers = enumerate(scenarios)
 
-        suffix = DASHBOARD_STATES_OPTIONS.get('suffix')
-        if suffix is not None:
+        match = DASHBOARD_STATES_OPTIONS.get('match')
+        if match is not None:
             scenarios_with_numbers = (
                 (num, (run_scenario, name))
                 for (num, (run_scenario, name)) in scenarios_with_numbers
-                if self._make_filename(num, name).endswith(suffix)
+                if match in self._make_filename(num, name)
             )
 
         for num, (run_scenario, name) in scenarios_with_numbers:
@@ -313,9 +328,9 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--suffix",
-            dest="suffix",
-            help="Runs only scenarios matching the given suffix",
+            "--match",
+            dest="match",
+            help="Runs only scenarios matching the given string",
             required=False,
         )
         parser.add_argument(
