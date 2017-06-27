@@ -580,6 +580,89 @@ describe("LearnerPage", function() {
         });
       });
 
+      it('should use state & country dropdowns if google maps is unavailable', () => {
+        const username = SETTINGS.user.username;
+        window.google = null;
+        return renderComponent(`/learner/${username}`, userActions).then(([, div]) => {
+          let addButton = div.querySelector('.add-education-button');
+          let expectedProfile = _.cloneDeep(userProfile);
+          let entry = {
+            ...generateNewEducation(HIGH_SCHOOL),
+            graduation_date: "1999-12-01",
+            graduation_date_edit: {
+              year: '1999',
+              month: '12',
+              day: undefined
+            },
+            school_name: "A School",
+            school_country: "AF",
+            school_state_or_territory: "AF-KAN",
+            school_city: "Anytown"
+          };
+          expectedProfile.education.push(entry);
+
+          patchUserProfileStub.throws("Invalid arguments");
+          patchUserProfileStub.withArgs(expectedProfile.username, expectedProfile).returns(
+            Promise.resolve(expectedProfile));
+
+          let expectedActions = [
+            START_PROFILE_EDIT,
+            SET_EDUCATION_DIALOG_INDEX,
+            SET_EDUCATION_DIALOG_VISIBILITY,
+            SET_EDUCATION_DIALOG_VISIBILITY,
+            SET_EDUCATION_DEGREE_LEVEL,
+            SET_EDUCATION_DEGREE_LEVEL,
+            UPDATE_PROFILE_VALIDATION,
+            REQUEST_PATCH_USER_PROFILE,
+            RECEIVE_PATCH_USER_PROFILE_SUCCESS,
+            CLEAR_PROFILE_EDIT,
+          ];
+          for (let i = 0; i < 8; i++) {
+            expectedActions.push(UPDATE_PROFILE);
+          }
+          for (let i = 0; i < 7; i++) {
+            expectedActions.push(UPDATE_PROFILE_VALIDATION);
+          }
+          for (let i = 0; i < 3; i++) {
+            expectedActions.push(UPDATE_VALIDATION_VISIBILITY);
+          }
+          if (window.google) {
+            window.google = null;
+          }
+          return listenForActions(expectedActions, () => {
+            ReactTestUtils.Simulate.click(addButton);
+
+            assert.equal(document.querySelector(".profile-form-title").innerHTML, "Add Education");
+
+            let dialog = document.querySelector('.education-dialog');
+            let grid = dialog.getElementsByClassName('profile-tab-grid')[0];
+            let inputs = grid.getElementsByTagName('input');
+
+            const modifyEducationSelect = (label, value) => {
+              modifySelectField(
+                dialog.querySelector(`.select-field${label}`),
+                value
+              );
+            };
+
+            // set the degree type
+            modifyEducationSelect('.degree-type', 'High School');
+
+            // fill out graduation date, school name
+            modifyTextField(inputs[1], "A School");
+            modifyTextField(inputs[2], "12");
+            modifyTextField(inputs[3], "1999");
+
+            // set country, state, and city
+            modifyEducationSelect('.country', "AF");
+            modifyEducationSelect('.state', "AF-KAN");
+            modifyTextField(inputs[6], "Anytown");
+            let save = dialog.querySelector('.save-button');
+            ReactTestUtils.Simulate.click(save);
+          });
+        });
+      });
+
       for (const activity of [true, false]) {
         it(`should have proper save button state when activity=${activity}`, () => {
           const username = SETTINGS.user.username;
@@ -816,6 +899,100 @@ describe("LearnerPage", function() {
           });
         });
       });
+
+      it('should use state/country dropdowns if google maps api is unavailable', () => {
+        const username = SETTINGS.user.username;
+        window.google = null;
+        return renderComponent(`/learner/${username}`, userActions).then(([, div]) => {
+          let addButton = div.getElementsByClassName('profile-form')[2].querySelector('.mm-minor-action');
+
+          let updatedProfile = _.cloneDeep(USER_PROFILE_RESPONSE);
+          updatedProfile.username = SETTINGS.user.username;
+          let entry = {
+            ...generateNewWorkHistory(),
+            position: "Assistant Foobar",
+            industry: "Accounting",
+            company_name: "FoobarCorp",
+            start_date: "2001-12-01",
+            start_date_edit: {
+              year: "2001",
+              month: "12",
+              day: undefined
+            },
+            end_date: "2002-01-01",
+            end_date_edit: {
+              year: "2002",
+              month: "01",
+              day: undefined
+            },
+            city: "Anytown",
+            country: "AF",
+            state_or_territory: "AF-KAN",
+          };
+          updatedProfile.work_history.push(entry);
+
+          patchUserProfileStub.throws("Invalid arguments");
+          patchUserProfileStub.withArgs(SETTINGS.user.username, updatedProfile).returns(
+            Promise.resolve(updatedProfile)
+          );
+
+          let expectedActions = [
+            START_PROFILE_EDIT,
+            UPDATE_PROFILE,
+            SET_WORK_DIALOG_INDEX,
+            SET_WORK_DIALOG_VISIBILITY,
+            UPDATE_PROFILE_VALIDATION,
+            REQUEST_PATCH_USER_PROFILE,
+            RECEIVE_PATCH_USER_PROFILE_SUCCESS
+          ];
+          for (let i = 0; i < 10; i++) {
+            expectedActions.push(UPDATE_PROFILE);
+            expectedActions.push(UPDATE_PROFILE_VALIDATION);
+          }
+          for (let i = 0; i < 4; i++) {
+            expectedActions.push(UPDATE_VALIDATION_VISIBILITY);
+          }
+
+          return listenForActions(expectedActions, () => {
+            ReactTestUtils.Simulate.click(addButton);
+
+            assert.equal(document.querySelector(".profile-form-title").innerHTML, "Add Employment");
+            let dialog = document.querySelector('.employment-dialog');
+            let grid = dialog.querySelector('.profile-tab-grid');
+            let inputs = grid.getElementsByTagName('input');
+
+            const modifyWorkSelect = (label, value) => {
+              modifySelectField(
+                dialog.querySelector(`.select-field${label}`),
+                value
+              );
+            };
+
+            // company name
+            modifyTextField(inputs[0], "FoobarCorp");
+
+            // industry
+            modifyWorkSelect('.industry', "Accounting");
+
+            // position
+            modifyTextField(inputs[2], "Assistant Foobar");
+
+            // start date, end date
+            modifyTextField(inputs[3], "12");
+            modifyTextField(inputs[4], "2001");
+            modifyTextField(inputs[5], "01");
+            modifyTextField(inputs[6], "2002");
+            // country, state, city
+            modifyWorkSelect('.country', "Afghanistan");
+            modifyWorkSelect('.state-or-territory', "AF-KAN");
+            modifyTextField(inputs[9], "Anytown");
+
+            let button = dialog.querySelector(".save-button");
+            ReactTestUtils.Simulate.click(button);
+          });
+        });
+      });
+
 
       for (let activity of [true, false]) {
         it(`should have proper save button spinner state when activity=${activity}`, () => {

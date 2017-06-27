@@ -252,8 +252,12 @@ const educationMessages: ErrorMessages = {
   'graduation_date': 'Please enter a valid graduation date',
   'field_of_study': 'Field of study is required',
   'online_degree': 'Online Degree is required',
-  'school_name': 'School name is required'
+  'school_name': 'School name is required',
+  'school_city': 'City is required',
+  'school_state_or_territory': 'State is required',
+  'school_country': 'Country is required'
 };
+
 
 const isHighSchool: (e: EducationEntry) => boolean = R.compose(
   R.equals(HIGH_SCHOOL), R.prop('degree_name')
@@ -289,6 +293,9 @@ const workMessages: ErrorMessages = {
   'industry': 'Industry is required',
   'company_name': 'Name of Employer is required',
   'start_date': 'Please enter a valid start date',
+  'city': 'City is required',
+  'country': 'Country is required',
+  'state_or_territory': 'State or Territory is required',
 };
 
 // functions to perform extra checks
