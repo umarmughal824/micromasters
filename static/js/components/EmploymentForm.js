@@ -18,6 +18,8 @@ import ProfileFormFields from '../util/ProfileFormFields';
 import { dialogActions } from './inputs/util';
 import ConfirmDeletion from './ConfirmDeletion';
 import SelectField from './inputs/SelectField';
+import CountrySelectField from './inputs/CountrySelectField';
+import StateSelectField from './inputs/StateSelectField';
 import INDUSTRIES from '../data/industries';
 import { formatMonthDate } from '../util/date';
 import type { Option } from '../flow/generalTypes';
@@ -134,6 +136,42 @@ class EmploymentForm extends ProfileFormFields {
       country: keySet("country")
     };
 
+    let addressForm = () => {
+      // Use the Geosuggest component only if Google Maps API is loaded.
+      if (window.google && window.google.maps) {
+        return <Cell col={12}>
+                {this.boundGeosuggest(employerAddressMapping, keySet('location'), "Employer Location",
+                  {
+                    placeholder: "Anytown, Massachusetts, United States",
+                    types: ["(cities)"]
+                  }
+                )}
+              </Cell>;
+      } else {
+        return <Grid style={{padding:'0px', margin:'0px', width: '100%'}}>
+                <Cell col={4}>
+                  <CountrySelectField
+                    stateKeySet={keySet('state_or_territory')}
+                    countryKeySet={keySet('country')}
+                    label='Country'
+                    {...this.defaultInputComponentProps()}
+                  />
+                </Cell>
+                <Cell col={4}>
+                  <StateSelectField
+                    stateKeySet={keySet('state_or_territory')}
+                    countryKeySet={keySet('country')}
+                    label='State or Territory'
+                    {...this.defaultInputComponentProps()}
+                  />
+                </Cell>
+                <Cell col={4}>
+                  {this.boundTextField(keySet('city'), 'City')}
+                </Cell>
+               </Grid>;
+      }
+    };
+
     return (
       <Grid className="profile-tab-grid">
         <Cell col={12} className="profile-form-title">
@@ -163,14 +201,7 @@ class EmploymentForm extends ProfileFormFields {
             Leave blank if this is a current position
           </span>
         </Cell>
-        <Cell col={12}>
-          {this.boundGeosuggest(employerAddressMapping, keySet('location'), "Employer Location",
-            {
-              placeholder: "Anytown, Massachusetts, United States",
-              types: ["geocode"]
-            }
-          )}
-        </Cell>
+        {addressForm()}
       </Grid>
     );
   }

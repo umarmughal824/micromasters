@@ -39,11 +39,13 @@ export const codeToStateName = R.compose(
  * Get a list of subregion objects for a country, each with a 'code' and 'name' property.
  * @param country Country code
  */
-export const getSubcodes = (country:string) => (
-  R.map(function(key) {
-    return {"code": key, "name": iso3166.data[country]["sub"][key]["name"]};
-  }, Object.keys(iso3166.data[country]["sub"]))
-);
+export const getSubcodes = (country:string) => {
+  if (country in iso3166.data && "sub" in iso3166.data[country]) {
+    return R.map(function (key) {
+      return {"code": key, "name": iso3166.data[country]["sub"][key]["name"]};
+    }, Object.keys(iso3166.data[country]["sub"]));
+  } else return [];
+};
 
 /**
  * Gets the ISO3166 code for a state/territory given a country and state name.
