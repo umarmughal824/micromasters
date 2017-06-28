@@ -1,6 +1,26 @@
 Release Notes
 =============
 
+Version 0.63.0
+--------------
+
+- Revert &#34;Fixed message for course-level coupon (#3281)&#34; (#3357)
+- Fixed automatic email editing
+- - If google maps api isn&#39;t loaded, use traditional select dropdowns for state and country. - Use &#39;(cities)&#39; instead of &#39;geocode&#39; with the Geosuggest component to filter out anything except actual cities/towns.
+- Add No Calls massage to FA card (#3354)
+- Prevent users from creating coupons on non-financial aid programs (#3347)
+- Fix coupon selenium screenshots (#3343)
+- Added selenium test for financial aid review page (#3334)
+- Bumped yarn version to the latest pre-release
+- Output vars for easier debugging (#3317)
+- Updated logging level for Sentry client in Celery (#3338)
+- Fixed message for course-level coupon (#3281)
+- Add JSON output for course price and coupons API (#3323)
+- Refactored some financial aid view tests to pytest style
+- Moved over a few dialogs to `showDialog`, `hideDialog`
+- Layout and style tweaks to the course card layout (#3328)
+- Update the README for changes in selenium tests (#3333)
+
 Version 0.62.3
 --------------
 
