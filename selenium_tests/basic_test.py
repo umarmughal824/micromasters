@@ -1,10 +1,21 @@
 """Basic selenium tests for MicroMasters"""
 from django.conf import settings
 from django.db.models.signals import post_save
+from factory import Iterator
 from factory.django import mute_signals
 from selenium.webdriver.common.keys import Keys
 
-from courses.factories import ProgramFactory
+from cms.factories import (
+    FacultyFactory,
+    InfoLinksFactory,
+    ProgramCourseFactory,
+    ProgramPageFactory,
+    SemesterDateFactory,
+)
+from courses.factories import (
+    CourseFactory,
+    ProgramFactory,
+)
 from dashboard.models import ProgramEnrollment
 from financialaid.constants import FinancialAidStatus
 from financialaid.factories import FinancialAidFactory
@@ -223,3 +234,34 @@ class ReviewFinancialAidTests(SeleniumTestsBase):
             financial_aid = FinancialAid.objects.first()
             return financial_aid.status == FinancialAidStatus.PENDING_MANUAL_APPROVAL
         self.wait().until(is_now_pending)
+
+
+class ProgramPageTests(SeleniumTestsBase):
+    """Look at the program page"""
+
+    def test_program_page(self):  # pylint: disable=too-many-locals
+        """Test viewing the program page"""
+        self.login_via_admin(self.user)
+
+        CourseFactory.create_batch(2, program=self.program)
+
+        page = ProgramPageFactory.create(program=self.program, title="A Program Title")
+        faculty = FacultyFactory.create_batch(3, program_page=page)
+        info_links = InfoLinksFactory.create_batch(3, program_page=page)
+        semester_dates = SemesterDateFactory.create_batch(3, program_page=page)
+        courses = self.program.course_set.all()
+        program_courses = ProgramCourseFactory.create_batch(len(courses), program_page=page, course=Iterator(courses))
+
+        self.get("/a-program-title/")
+
+        faculty_elements = self.selenium.find_elements_by_css_selector(".faculty-tile")
+        assert len(faculty) == len(faculty_elements)
+
+        info_elements = self.selenium.find_elements_by_css_selector(".program-contact-link")
+        assert len(info_links) == len(info_elements)
+
+        semester_elements = self.selenium.find_elements_by_css_selector(".semester-date")
+        assert len(semester_dates) == len(semester_elements)
+
+        program_course_elements = self.selenium.find_elements_by_css_selector(".program-course .title")
+        assert len(program_courses) == len(program_course_elements)
