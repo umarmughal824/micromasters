@@ -5,6 +5,12 @@
     font-size: 14px;
     color: $meddarkgray;
     margin-left: 2px;
+    display: flex;
+    align-items: center;
+
+    span {
+      margin-right: 5px;
+    }
 
     .course-links {
       font-size: 14px;

@@ -13,6 +13,8 @@ import {
   courseUpcomingOrCurrent,
   hasFailedCourseRun,
   futureEnrollableRun,
+  hasEnrolledInAnyRun,
+  hasPassedCourseRun,
 } from './util';
 import {
   STATUS_PASSED,
@@ -227,6 +229,23 @@ describe('dashboard course utilities', () => {
     });
   });
 
+  describe('hasPassedCourseRun', () => {
+    let course;
+
+    beforeEach(() => {
+      course = makeCourse(0);
+    });
+
+    it('should return true if there is a passed course run', () => {
+      course.runs[0].status = STATUS_PASSED;
+      assert.isTrue(hasPassedCourseRun(course));
+    });
+
+    it('should return false otherwise', () => {
+      assert.isFalse(hasPassedCourseRun(course));
+    });
+  });
+
   describe('futureEnrollableRun', () => {
     let course;
     beforeEach(() => {
@@ -245,6 +264,37 @@ describe('dashboard course utilities', () => {
 
     it('returns Just(run) if the future run is offerred', () => {
       assertIsJust(futureEnrollableRun(course), course.runs[1]);
+    });
+  });
+
+  describe('hasEnrolledInAnyRun', () => {
+    let course;
+
+    beforeEach(() => {
+      course = makeCourse(0);
+    });
+
+    it('should return true if the user has enrolled in any course run', () => {
+      [
+        STATUS_PASSED,
+        STATUS_NOT_PASSED,
+        STATUS_CAN_UPGRADE,
+        STATUS_CURRENTLY_ENROLLED,
+        STATUS_WILL_ATTEND,
+        STATUS_MISSED_DEADLINE,
+      ].forEach(status => {
+        course.runs[1].status = status;
+        assert.isTrue(hasEnrolledInAnyRun(course));
+      });
+    });
+
+    it('should return false if there are no course run', () => {
+      course.runs = [];
+      assert.isFalse(hasEnrolledInAnyRun(course));
+    });
+
+    it('should return false if the user has never enrolled', () => {
+      assert.isFalse(hasEnrolledInAnyRun(course));
     });
   });
 });

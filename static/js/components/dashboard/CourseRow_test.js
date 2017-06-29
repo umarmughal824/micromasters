@@ -77,6 +77,27 @@ describe('CourseRow', () => {
     assert.deepEqual(wrapper.find('.course-title').text(), course.title);
   });
 
+  it('displays a CourseAction if the showStaffView prop is not set', () => {
+    const { programs } = makeDashboard();
+    const course = programs[0].courses[0];
+    makeRunCurrent(course.runs[0]);
+    const wrapper = renderRow({
+      course: course,
+    });
+    assert.lengthOf(wrapper.find(CourseAction), 1);
+  });
+
+  it('does not display a button if the showStaffView prop is set', () => {
+    const { programs } = makeDashboard();
+    const course = programs[0].courses[0];
+    makeRunCurrent(course.runs[0]);
+    const wrapper = renderRow({
+      course: course,
+      showStaffView: true
+    });
+    assert.lengthOf(wrapper.find(CourseAction), 0);
+  });
+
   it('should not display an "enroll" button if the run is not enrollable', () => {
     const { programs } = makeDashboard();
     const course = programs[0].courses[0];

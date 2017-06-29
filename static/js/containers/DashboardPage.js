@@ -754,6 +754,7 @@ class DashboardPage extends React.Component {
               setEnrollCourseDialogVisibility={this.setEnrollCourseDialogVisibility}
               setShowExpandedCourseStatus={this.setShowExpandedCourseStatus}
               setShowGradeDetailDialog={this.setShowGradeDetailDialog}
+              showStaffView={false}
             />
           </div>
           <div className="second-column">

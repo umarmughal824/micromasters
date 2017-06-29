@@ -13,12 +13,22 @@ import {
   STATUS_CAN_UPGRADE,
   STATUS_MISSED_DEADLINE,
   STATUS_CURRENTLY_ENROLLED,
+  STATUS_PAID_BUT_NOT_ENROLLED,
   EDX_LINK_BASE,
+  COURSE_CARD_FORMAT,
 } from '../../../constants';
 import { renderSeparatedComponents } from '../../../util/util';
 import { hasAnyStaffRole } from '../../../lib/roles';
 import Progress from './Progress';
-import { courseStartDateMessage, courseCurrentlyInProgress } from './util';
+import {
+  courseStartDateMessage,
+  courseCurrentlyInProgress,
+  hasEnrolledInAnyRun,
+  courseUpcomingOrCurrent,
+  hasPaidForAnyCourseRun,
+  hasPassedCourseRun,
+} from './util';
+import { hasPassingExamGrade } from '../../../lib/grades';
 
 // ProgressMessage is ONLY displayed for users who are already enrolled
 
@@ -26,13 +36,52 @@ const courseHasStarted = (courseRun: CourseRun): boolean => (
   moment(courseRun.course_start_date).isBefore(moment())
 );
 
+const addKeys = R.addIndex(R.map)((el, idx) => <span key={`element${idx}`}>{ el }</span>);
+
 const courseMessage = (courseRun: CourseRun) => {
   if (courseHasStarted(courseRun) && !courseCurrentlyInProgress(courseRun)) {
-    return "";
+    return null;
   }
   return courseHasStarted(courseRun)
     ? "Course in progress"
     : courseStartDateMessage(courseRun);
+};
+
+export const staffCourseInfo = (courseRun: CourseRun, course: Course) => {
+  if (!hasEnrolledInAnyRun(course) && courseRun.status !== STATUS_PAID_BUT_NOT_ENROLLED) {
+    return null;
+  }
+  if (courseUpcomingOrCurrent(courseRun)) {
+    if (hasPaidForAnyCourseRun(course)) {
+      return "Paid";
+    }
+    if (courseRun.status === STATUS_CAN_UPGRADE) {
+      if (courseCurrentlyInProgress(courseRun)) {
+        return `Auditing (Upgrade deadline ${moment(courseRun.course_end_date).format(COURSE_CARD_FORMAT)})`;
+      }
+      return "Auditing";
+    }
+    if (courseRun.status === STATUS_MISSED_DEADLINE) {
+      return "Missed payment deadline";
+    }
+    if (courseRun.status === STATUS_PAID_BUT_NOT_ENROLLED) {
+      return "Paid but not enrolled";
+    }
+  } else {
+    if (hasPassedCourseRun(course)) {
+      if (course.has_exam && !hasPassingExamGrade(course)) {
+        return "Passed edX course, did not pass exam";
+      }
+      return "Passed";
+    }
+    if (courseRun.status === STATUS_NOT_PASSED) {
+      if (hasPaidForAnyCourseRun(course)) {
+        return "Paid, did not pass";
+      } else {
+        return "Audited, did not pass";
+      }
+    }
+  }
 };
 
 export default class ProgressMessage extends React.Component {
@@ -40,6 +89,7 @@ export default class ProgressMessage extends React.Component {
     course:                  Course,
     courseRun:               CourseRun,
     openCourseContactDialog: () => void,
+    showStaffView:           boolean,
   };
 
   isCurrentOrPastEnrolled = (courseRun: CourseRun): boolean => {
@@ -80,7 +130,7 @@ export default class ProgressMessage extends React.Component {
 
   renderCourseContactLink = (): React$Element<*>|null => {
     const { course, openCourseContactDialog } = this.props;
-    return course.has_contact_email 
+    return course.has_contact_email && !hasAnyStaffRole(SETTINGS.roles)
       ? <a key={'contact-link'} className={'contact-link'} onClick={openCourseContactDialog}>
           Contact Course Team
         </a>
@@ -103,13 +153,19 @@ export default class ProgressMessage extends React.Component {
   };
 
   render() {
-    const { courseRun } = this.props;
+    const { showStaffView, courseRun, course } = this.props;
 
     return (
       <div className="course-progress-message cols">
         <div className="details first-col">
-          { courseMessage(courseRun) }
-          { this.renderCourseLinks() }
+          { renderSeparatedComponents(
+            addKeys(
+              R.reject(R.isNil, [
+                courseMessage(courseRun),
+                this.renderCourseLinks(),
+                showStaffView ? staffCourseInfo(courseRun, course) : null
+              ])
+            ), ' - ') }
         </div>
         <Progress courseRun={courseRun} className="second-col" />
       </div>

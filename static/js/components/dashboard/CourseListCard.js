@@ -33,14 +33,15 @@ export default class CourseListCard extends React.Component {
     couponPrices:                    CouponPrices,
     openFinancialAidCalculator?:     () => void,
     now?:                            Object,
-    addCourseEnrollment:             (courseId: string) => Promise<*>,
+    addCourseEnrollment?:            (courseId: string) => Promise<*>,
     openCourseContactDialog:         (course: Course, canContactCourseTeam: boolean) => void,
-    setEnrollSelectedCourseRun:      (r: CourseRun) => void,
-    setEnrollCourseDialogVisibility: (bool: boolean) => void,
-    setShowExpandedCourseStatus:     (n: number) => void,
+    setEnrollSelectedCourseRun?:     (r: CourseRun) => void,
+    setEnrollCourseDialogVisibility?:(bool: boolean) => void,
+    setShowExpandedCourseStatus?:    (n: number) => void,
     setShowGradeDetailDialog:        (b: boolean, t: GradeType, title: string) => void,
     ui:                              UIState,
-    checkout:                        (s: string) => void,
+    checkout?:                       (s: string) => void,
+    showStaffView:                   boolean,
   };
 
   getProgramCouponPrice = (): CouponPrice => {
@@ -119,7 +120,8 @@ export default class CourseListCard extends React.Component {
       setShowExpandedCourseStatus,
       setShowGradeDetailDialog,
       ui,
-      checkout
+      checkout,
+      showStaffView,
     } = this.props;
     const now = this.props.now || moment();
 
@@ -141,13 +143,16 @@ export default class CourseListCard extends React.Component {
         checkout={checkout}
         setShowExpandedCourseStatus={setShowExpandedCourseStatus}
         setShowGradeDetailDialog={setShowGradeDetailDialog}
+        showStaffView={showStaffView}
       />
     );
 
     return <Card shadow={0} className="course-list">
       <FinancialAidCalculator />
-      <CardTitle>Required Courses</CardTitle>
-      { this.renderPriceMessage() }
+      <CardTitle>
+        { showStaffView ? `Courses - ${program.title}` : "Required Courses" }
+      </CardTitle>
+      { showStaffView ? null : this.renderPriceMessage() }
       { courseRows }
     </Card>;
   }

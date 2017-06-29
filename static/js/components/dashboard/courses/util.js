@@ -47,6 +47,11 @@ export const userIsEnrolled = R.compose(
   R.prop('status')
 );
 
+export const hasEnrolledInAnyRun = R.compose(
+  R.any(userIsEnrolled),
+  R.prop('runs')
+);
+
 export const courseCurrentlyInProgress = (courseRun: CourseRun) => {
   let startDate = moment(courseRun.course_start_date);
   let endDate = moment(courseRun.course_end_date);
@@ -70,6 +75,11 @@ export const isPassedOrMissedDeadline = R.compose(
 
 export const hasFailedCourseRun = R.compose(
   R.any(R.propEq('status', STATUS_NOT_PASSED)),
+  R.prop('runs')
+);
+
+export const hasPassedCourseRun = R.compose(
+  R.any(R.propEq('status', STATUS_PASSED)),
   R.prop('runs')
 );
 

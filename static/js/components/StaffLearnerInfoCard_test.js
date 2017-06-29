@@ -10,9 +10,6 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import StaffLearnerInfoCard from './StaffLearnerInfoCard';
 import { DASHBOARD_RESPONSE } from '../test_constants';
 import { stringStrip } from '../util/test_utils';
-import { STATUS_OFFERED } from '../constants';
-import CourseDescription from '../components/dashboard/CourseDescription';
-import Progress from '../components/dashboard/courses/Progress';
 import { calculatePrices } from '../lib/coupon';
 
 describe('StaffLearnerInfoCard', () => {
@@ -78,18 +75,6 @@ describe('StaffLearnerInfoCard', () => {
       stringStrip(card.text()),
       "1 4 Courses complete"
     );
-  });
-
-  it('should show information for course runs the user is enrolled in', () => {
-    let numRuns = DASHBOARD_RESPONSE.programs[0]
-      .courses
-      .reduce((acc, course) => acc.concat(course.runs), [])
-      .filter(run => run.status !== STATUS_OFFERED)
-      .length;
-
-    let card = renderCard();
-    assert.equal(card.find(CourseDescription).length, numRuns);
-    assert.equal(card.find(Progress).length, numRuns);
   });
 
   it('should show average grade, if present', () => {

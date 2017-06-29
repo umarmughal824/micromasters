@@ -43,6 +43,7 @@ export default class CourseRow extends React.Component {
     checkout:                        (s: string) => void,
     setShowExpandedCourseStatus:     (n: number) => void,
     setShowGradeDetailDialog:        (b: boolean, t: GradeType, title: string) => void,
+    showStaffView:                   boolean,
   };
 
   // $FlowFixMe: CourseRun is sometimes an empty object
@@ -75,7 +76,12 @@ export default class CourseRow extends React.Component {
       setEnrollSelectedCourseRun,
       setEnrollCourseDialogVisibility,
       checkout,
+      showStaffView,
     } = this.props;
+
+    if (showStaffView) {
+      return null;
+    }
 
     if (actionType === COURSE_ACTION_ENROLL && !isEnrollableRun(run)) {
       return null;
@@ -120,6 +126,7 @@ export default class CourseRow extends React.Component {
       ui,
       setShowExpandedCourseStatus,
       setShowGradeDetailDialog,
+      showStaffView,
     } = this.props;
 
     const coupon = this.getCourseCoupon();
@@ -137,21 +144,24 @@ export default class CourseRow extends React.Component {
           openCourseContactDialog={
             R.partial(openCourseContactDialog, [course, hasPaidForAnyCourseRun(course)])
           }
+          showStaffView={showStaffView}
         />
-        <StatusMessages
-          course={course}
-          firstRun={run}
-          courseAction={this.courseAction}
-          expandedStatuses={ui.expandedCourseStatuses}
-          setShowExpandedCourseStatus={setShowExpandedCourseStatus}
-          coupon={coupon}
-        />
+        { showStaffView
+            ? null
+            : <StatusMessages
+              course={course}
+              firstRun={run}
+              courseAction={this.courseAction}
+              expandedStatuses={ui.expandedCourseStatuses}
+              setShowExpandedCourseStatus={setShowExpandedCourseStatus}
+              coupon={coupon}
+            /> }
       </div>
     );
   }
 
   renderEnrollableCourseInfo = (run: CourseRun) => {
-    const { course } = this.props;
+    const { course, showStaffView } = this.props;
 
     return <div className="enrollable-course-info">
         <div className="cols">
@@ -166,7 +176,7 @@ export default class CourseRow extends React.Component {
           { run.status === STATUS_PENDING_ENROLLMENT ? "Processing..." : null }
         </div>
       </div>
-      { !isEnrollableRun(run)
+      { (!isEnrollableRun(run) && !showStaffView)
           ? <StatusMessages
             course={course}
             firstRun={run}

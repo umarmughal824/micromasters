@@ -4,16 +4,26 @@ import { shallow } from 'enzyme';
 import { assert } from 'chai';
 import sinon from 'sinon';
 import urljoin from 'url-join';
+import moment from 'moment';
 
-import ProgressMessage from './ProgressMessage';
+import ProgressMessage, { staffCourseInfo } from './ProgressMessage';
 import Progress from './Progress';
 import { makeCourse } from '../../../factories/dashboard';
 import {
   makeRunCurrent,
   makeRunEnrolled,
   makeRunFuture,
+  makeRunPast,
 } from './test_util';
-import { EDX_LINK_BASE } from '../../../constants';
+import {
+  EDX_LINK_BASE, 
+  STATUS_CAN_UPGRADE,
+  COURSE_CARD_FORMAT,
+  STATUS_MISSED_DEADLINE,
+  STATUS_PAID_BUT_NOT_ENROLLED,
+  STATUS_PASSED,
+  STATUS_NOT_PASSED,
+} from '../../../constants';
 import { courseStartDateMessage } from './util';
 
 describe('Course ProgressMessage', () => {
@@ -25,17 +35,22 @@ describe('Course ProgressMessage', () => {
     course = makeCourse();
   });
 
-  let renderCourseDescription = courseRun => shallow(
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  let renderCourseDescription = (props = {}) => shallow(
     <ProgressMessage
-      courseRun={courseRun}
       course={course}
       openCourseContactDialog={openCourseContactDialogStub}
+      courseRun={course.runs[0]}
+      {...props}
     />
   );
 
   it('displays information for an in-progress course run', () => {
     makeRunCurrent(course.runs[0]);
-    let wrapper = renderCourseDescription(course.runs[0]);
+    let wrapper = renderCourseDescription();
     assert.equal(wrapper.find(".details").text(), "Course in progress");
   });
 
@@ -43,7 +58,7 @@ describe('Course ProgressMessage', () => {
     makeRunEnrolled(course.runs[0]);
     makeRunCurrent(course.runs[0]);
     course.has_contact_email = true;
-    let wrapper = renderCourseDescription(course.runs[0]);
+    let wrapper = renderCourseDescription();
     let [edxLink, contactLink] = wrapper.find('a');
     assert.equal(edxLink.props.href, urljoin(EDX_LINK_BASE, course.runs[0].course_id));
     assert.equal(edxLink.props.target, '_blank');
@@ -52,20 +67,111 @@ describe('Course ProgressMessage', () => {
     assert.equal(contactLink.props.children, "Contact Course Team");
   });
 
+  it('does not display contact course team or view on edX if staff user', () => {
+    SETTINGS.roles.push({ role: 'staff', permissions: [] });
+    makeRunEnrolled(course.runs[0]);
+    makeRunCurrent(course.runs[0]);
+    course.has_contact_email = true;
+    let wrapper = renderCourseDescription();
+    assert.lengthOf(wrapper.find('a'), 0);
+  });
+
   it('does not display a view on edX link, if there no course key', () => {
     course.runs[0].course_id = undefined;
-    let wrapper = renderCourseDescription(course.runs[0]);
+    let wrapper = renderCourseDescription();
     assert.equal(wrapper.find('a').length, 0);
   });
 
   it('displays information for a future course run', () => {
     makeRunFuture(course.runs[0]);
-    let wrapper = renderCourseDescription(course.runs[0]);
+    let wrapper = renderCourseDescription();
     assert.include(wrapper.text(), courseStartDateMessage(course.runs[0]));
   });
 
   it('includes the <Progress /> component', () => {
-    let wrapper = renderCourseDescription(course.runs[0]);
+    let wrapper = renderCourseDescription();
     assert.lengthOf(wrapper.find(Progress), 1);
+  });
+
+  it('should only call staffCourseInfo if showStaffView is true', () => {
+    makeRunCurrent(course.runs[0]);
+    makeRunEnrolled(course.runs[0]);
+    course.runs[0].has_paid = true;
+    let wrapper = renderCourseDescription({showStaffView: true});
+    assert.include(wrapper.text(), "Paid");
+    wrapper = renderCourseDescription({showStaffView: false});
+    assert.notInclude(wrapper.text(), "Paid");
+  });
+
+  describe('staffCourseInfo', () => {
+    it('should return nothing if the user is not enrolled', () => {
+      makeRunCurrent(course.runs[0]);
+      assert.isNull(staffCourseInfo(course.runs[0], course));
+    });
+
+    it('should return paid if course current and user has paid', () => {
+      makeRunCurrent(course.runs[0]);
+      makeRunEnrolled(course.runs[0]);
+      course.runs[0].has_paid = true;
+      assert.equal("Paid", staffCourseInfo(course.runs[0], course));
+    });
+
+    it('should return auditing and upgrade date, if course in progress', () => {
+      makeRunCurrent(course.runs[0]);
+      course.runs[0].status = STATUS_CAN_UPGRADE;
+      assert.equal(
+        staffCourseInfo(course.runs[0], course),
+        `Auditing (Upgrade deadline ${moment(course.runs[0].course_end_date).format(COURSE_CARD_FORMAT)})`
+      );
+    });
+
+    it('should return auditing, if course upcoming', () => {
+      makeRunFuture(course.runs[0]);
+      course.runs[0].status = STATUS_CAN_UPGRADE;
+      assert.equal(
+        staffCourseInfo(course.runs[0], course), 'Auditing'
+      );
+    });
+
+    it('should show missed deadline', () => {
+      makeRunCurrent(course.runs[0]);
+      course.runs[0].status = STATUS_MISSED_DEADLINE;
+      assert.equal(staffCourseInfo(course.runs[0], course), 'Missed payment deadline');
+    });
+
+    it('should return paid but not enrolled', () => {
+      makeRunCurrent(course.runs[0]);
+      course.runs[0].status = STATUS_PAID_BUT_NOT_ENROLLED;
+      assert.equal(staffCourseInfo(course.runs[0], course), 'Paid but not enrolled');
+    });
+
+    it('should return passed', () => {
+      makeRunPast(course.runs[0]);
+      course.runs[0].status = STATUS_PASSED;
+      assert.equal(staffCourseInfo(course.runs[0], course), "Passed");
+    });
+
+    it('should describe passing the edX course but not the exam', () => {
+      makeRunPast(course.runs[0]);
+      course.runs[0].status = STATUS_PASSED;
+      course.has_exam = true;
+      assert.equal(
+        staffCourseInfo(course.runs[0], course),
+        "Passed edX course, did not pass exam"
+      );
+    });
+
+    it('should return did not pass, if paid', () => {
+      makeRunPast(course.runs[0]);
+      course.runs[0].status = STATUS_NOT_PASSED;
+      course.runs[0].has_paid = true;
+      assert.equal(staffCourseInfo(course.runs[0], course), "Paid, did not pass");
+    });
+
+    it('should return audited, did not pass, if not paid', () => {
+      makeRunPast(course.runs[0]);
+      course.runs[0].status = STATUS_NOT_PASSED;
+      assert.equal(staffCourseInfo(course.runs[0], course), "Audited, did not pass");
+    });
   });
 });

@@ -7,6 +7,7 @@ import moment from 'moment';
 import { assert } from 'chai';
 import _ from 'lodash';
 import sinon from 'sinon';
+import { CardTitle } from 'react-mdl/lib/Card';
 
 import { calculatePrices } from '../../lib/coupon';
 import CourseListCard from './CourseListCard';
@@ -89,6 +90,7 @@ describe('CourseListCard', () => {
             checkout={() => undefined}
             setShowExpandedCourseStatus={() => undefined}
             setShowGradeDetailDialog={() => undefined}
+            showStaffView={false}
             {...props}
           />
         </Provider>
@@ -252,5 +254,19 @@ describe('CourseListCard', () => {
     program.financial_aid_availability = false;
     const wrapper = renderCourseListCard();
     assert.equal(wrapper.find('.personalized-pricing').length, 0);
+  });
+
+  describe('staff view mode', () => {
+    it('should have the program title in the card title', () => {
+      const wrapper = renderCourseListCard({ showStaffView: true });
+      assert.equal(wrapper.find(CardTitle).text(), `Courses - ${program.title}`);
+    });
+
+    it('should pass the showStaffView to relevant child components', () => {
+      const wrapper = renderCourseListCard({ showStaffView: true });
+      wrapper.find(CourseRow).forEach(row => {
+        assert.isTrue(row.props().showStaffView);
+      });
+    });
   });
 });

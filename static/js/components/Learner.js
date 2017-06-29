@@ -20,6 +20,7 @@ import type { CoursePrices, DashboardState } from '../flow/dashboardTypes';
 import type { RestState } from '../flow/restTypes';
 import type { CouponsState } from '../reducers/coupons';
 import { calculatePrices } from '../lib/coupon';
+import CourseListCard from './dashboard/CourseListCard';
 
 export default class Learner extends React.Component {
   props: {
@@ -57,7 +58,6 @@ export default class Learner extends React.Component {
     setLearnerPageAboutMeDialogVisibility(!learnerPageAboutMeDialogVisibility);
     startProfileEdit();
   };
-
   showStaffInfo = () => {
     const {
       dashboard,
@@ -70,13 +70,22 @@ export default class Learner extends React.Component {
     if (!R.isEmpty(dashboard) && coupons && !R.isEmpty(prices)) {
       let calculatedPrices = calculatePrices(dashboard.programs, prices.data || [], coupons.coupons);
       return dashboard.programs.map(program => (
-        <StaffLearnerInfoCard
-          prices={calculatedPrices}
-          program={program}
-          key={program.title}
-          setShowGradeDetailDialog={setShowGradeDetailDialog}
-          dialogVisibility={ui.dialogVisibility}
-        />
+        <div key={program.id}>
+          <CourseListCard
+            program={program}
+            ui={ui}
+            showStaffView={true}
+            openCourseContactDialog={() => undefined}
+            setShowGradeDetailDialog={setShowGradeDetailDialog}
+            couponPrices={calculatedPrices}
+          />
+          <StaffLearnerInfoCard
+            prices={calculatedPrices}
+            program={program}
+            setShowGradeDetailDialog={setShowGradeDetailDialog}
+            dialogVisibility={ui.dialogVisibility}
+          />
+        </div>
       ));
     }
     return null;
