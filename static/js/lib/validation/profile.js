@@ -361,7 +361,7 @@ let emailMessages: ErrorMessages = {
 
 const emailBodyValid = R.ifElse(
   R.test(/<a.*>.*<\/a>/),
-  R.compose(R.not, R.test(/<a\s.*href=("|')(?!http|https)/)),
+  R.compose(R.not, R.test(/<a\s.*href=("|')(?!http|https|mailto:)/)),
   R.T,
 );
 
@@ -369,7 +369,7 @@ export const emailValidation = (emailInputs: EmailInputs): ValidationErrors => {
   let errors = findErrors(emailInputs, R.keys(emailMessages), emailMessages);
 
   if (!R.has('body', errors) && !emailBodyValid(emailInputs.body)) {
-    errors['body'] = "All link URLs must start with 'http' or 'https'";
+    errors['body'] = "All link URLs must start with 'http', 'https', or 'mailto:'";
   }
   return errors;
 };

@@ -665,12 +665,13 @@ describe('Email validation', () => {
       ['<a href="foo.bar">my bad link :(</a>', true],
       ['<a href="http://foo.bar">my good link :)</a>', false],
       ['<a href="https://foo.bar">my better link :D</a>', false],
+      ['<a href="mailto:me@example.com">EMAIL ME!!!!</a>', false],
     ].forEach(([bodyText, shouldFail]) => {
       let inputs = _.clone(email);
       inputs.body = bodyText;
       assert.deepEqual(
         emailValidation(inputs),
-        shouldFail ? { body: "All link URLs must start with 'http' or 'https'" } : {}
+        shouldFail ? { body: "All link URLs must start with 'http', 'https', or 'mailto:'" } : {}
       );
     });
   });
