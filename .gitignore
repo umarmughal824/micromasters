@@ -111,4 +111,4 @@ celerybeat-schedule
 recreate_index_*.profile
 
 # Selenium
-dashboard_states_output/
+output/

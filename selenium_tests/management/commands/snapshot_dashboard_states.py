@@ -40,7 +40,7 @@ RUNNING_DASHBOARD_STATES = False
 # pytest is used to invoke the tests, we don't have a good way to pass options to it directly.
 DASHBOARD_STATES_OPTIONS = None
 
-DUMP_DIRECTORY = "dashboard_states_output"
+DUMP_DIRECTORY = "output/dashboard_states"
 
 
 def make_scenario(command):
@@ -197,10 +197,10 @@ class DashboardStates(SeleniumTestsBase):
         call_command("seed_db")
 
     @classmethod
-    def _make_filename(cls, num, name, use_mobile=False):
+    def _make_filename(cls, num, name, output_directory, use_mobile=False):
         """Format the filename without extension for dashboard states"""
         return os.path.join(
-            DUMP_DIRECTORY,
+            output_directory,
             "dashboard_state_{num:03d}_{command}{mobile}".format(
                 num=num,
                 command=name,
@@ -280,10 +280,8 @@ class DashboardStates(SeleniumTestsBase):
 
     def test_dashboard_states(self):
         """Iterate through all possible dashboard states and take screenshots of each one"""
-        try:
-            os.mkdir(DUMP_DIRECTORY)
-        except FileExistsError:
-            pass
+        output_directory = DASHBOARD_STATES_OPTIONS.get('output_directory')
+        os.makedirs(output_directory, exist_ok=True)
 
         use_mobile = DASHBOARD_STATES_OPTIONS.get('mobile')
         if use_mobile:
@@ -299,7 +297,7 @@ class DashboardStates(SeleniumTestsBase):
             scenarios_with_numbers = (
                 (num, (run_scenario, name))
                 for (num, (run_scenario, name)) in scenarios_with_numbers
-                if match in self._make_filename(num, name)
+                if match in self._make_filename(num, name, '')
             )
 
         for num, (run_scenario, name) in scenarios_with_numbers:
@@ -315,7 +313,7 @@ class DashboardStates(SeleniumTestsBase):
             self.get(new_url)
             self.wait().until(lambda driver: driver.find_element_by_class_name('course-list'))
 
-            filename = self._make_filename(num, name, use_mobile=use_mobile)
+            filename = self._make_filename(num, name, output_directory, use_mobile=use_mobile)
             self.take_screenshot(filename)
             self.store_api_results(filename)
 
@@ -345,6 +343,13 @@ class Command(BaseCommand):
             dest="mobile",
             action='store_true',
             help="Take screenshots with a smaller width as if viewed with a mobile device",
+            required=False,
+        )
+        parser.add_argument(
+            "--output",
+            dest="output_directory",
+            default=DUMP_DIRECTORY,
+            help="The output directory to put the files in",
             required=False,
         )
 
