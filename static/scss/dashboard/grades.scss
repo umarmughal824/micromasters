@@ -9,7 +9,10 @@
     justify-content: flex-start;
     flex-direction: row;
     display: flex;
-    cursor: pointer;
+
+    .open-popup {
+      cursor: pointer;
+    }
   }
 
   .passed-course {

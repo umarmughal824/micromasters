@@ -83,7 +83,6 @@ describe('Grades library', () => {
       assertIsJust(
         calculateFinalGrade(course),
         (COURSE_GRADE_WEIGHT * ((course.runs[0].final_grade): any)) +
-        // $FlowFixMe: Flow doesn't like this
         (EXAM_GRADE_WEIGHT * (course.proctorate_exams_grades[0].percentage_grade * 100))
       );
     });

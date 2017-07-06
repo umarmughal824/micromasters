@@ -70,6 +70,7 @@ const COURSE: Course = {
   runs: [],
   can_schedule_exam: false,
   has_exam: false,
+  proctorate_exams_grades: [],
 };
 
 const PROGRAM: AvailableProgram = {

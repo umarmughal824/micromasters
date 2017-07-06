@@ -11,6 +11,7 @@ import ProgressMessage from './courses/ProgressMessage';
 import StatusMessages from './courses/StatusMessages';
 import type { Course, CourseRun, FinancialAidUserInfo } from '../../flow/programTypes';
 import type { UIState } from '../../reducers/ui';
+import type { GradeType } from '../../containers/DashboardPage';
 import type {
   CouponPrices,
   Coupon,
@@ -41,7 +42,7 @@ export default class CourseRow extends React.Component {
     ui:                              UIState,
     checkout:                        (s: string) => void,
     setShowExpandedCourseStatus:     (n: number) => void,
-    setShowGradeDetailDialog:        (b: boolean, title: string) => void,
+    setShowGradeDetailDialog:        (b: boolean, t: GradeType, title: string) => void,
   };
 
   // $FlowFixMe: CourseRun is sometimes an empty object

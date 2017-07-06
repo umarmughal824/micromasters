@@ -48,7 +48,6 @@ import { USER_PROFILE_RESPONSE, DASHBOARD_RESPONSE } from '../test_constants';
 import {
   HIGH_SCHOOL,
   DOCTORATE,
-  GRADE_DETAIL_DIALOG,
 } from '../constants';
 import {
   generateNewEducation,
@@ -76,7 +75,8 @@ import {
     RECEIVE_FETCH_COUPONS_SUCCESS,
     REQUEST_FETCH_COUPONS,
 } from '../actions/coupons';
-import Grades from '../components/dashboard/courses/Grades';
+import Grades, { gradeDetailPopupKey } from '../components/dashboard/courses/Grades';
+import { EDX_GRADE } from './DashboardPage';
 
 describe("LearnerPage", function() {
   this.timeout(10000);
@@ -1029,7 +1029,6 @@ describe("LearnerPage", function() {
       });
     });
 
-
     it('should show the staff learner info card, if the user has a staff role', () => {
       const smallDashboard = {"programs": DASHBOARD_RESPONSE.programs.slice(0,1), "isEdxDataFresh": true};
       helper.dashboardStub.returns(Promise.resolve(smallDashboard));
@@ -1046,9 +1045,9 @@ describe("LearnerPage", function() {
       SETTINGS.roles.push({ role: 'staff', permissions: [] });
       const actions = userActions.concat([REQUEST_DASHBOARD, RECEIVE_DASHBOARD_SUCCESS]);
       return renderComponent(`/learner/${username}`, actions).then(([wrapper]) => {
-        wrapper.find(Grades).find('.grades').at(0).simulate('click');
+        wrapper.find('.open-popup').at(0).simulate('click');
         let state = helper.store.getState().ui;
-        let key = `${GRADE_DETAIL_DIALOG}${DASHBOARD_RESPONSE.programs[0].courses[0].title}`;
+        let key = gradeDetailPopupKey(EDX_GRADE, DASHBOARD_RESPONSE.programs[0].courses[0].title);
         assert.isTrue(state.dialogVisibility[key]);
       });
     });
@@ -1056,11 +1055,11 @@ describe("LearnerPage", function() {
     it('should close the <Grades /> dialog if you click outside', () => {
       const username = SETTINGS.user.username;
       SETTINGS.roles.push({ role: 'staff', permissions: [] });
-      let key = `${GRADE_DETAIL_DIALOG}${DASHBOARD_RESPONSE.programs[0].courses[0].title}`;
+      let key = gradeDetailPopupKey(EDX_GRADE, DASHBOARD_RESPONSE.programs[0].courses[0].title);
       helper.store.dispatch(showDialog(key));
       const actions = userActions.concat([REQUEST_DASHBOARD, RECEIVE_DASHBOARD_SUCCESS]);
       return renderComponent(`/learner/${username}`, actions).then(([wrapper]) => {
-        wrapper.find(Grades).at(0).find(Dialog).props().onRequestClose();
+        wrapper.find(Grades).at(0).find(Dialog).at(0).props().onRequestClose();
         let state = helper.store.getState().ui;
         assert.isFalse(state.dialogVisibility[key]);
       });

@@ -12,6 +12,7 @@ import {
   EXAM_GRADE_WEIGHT,
 } from '../../../lib/grades';
 import { STATUS_PASSED, STATUS_OFFERED, } from '../../../constants';
+import { EXAM_GRADE, EDX_GRADE } from '../../../containers/DashboardPage';
 
 describe('Course Grades', () => {
   let course, setShowGradeDetailDialogStub;
@@ -64,7 +65,6 @@ describe('Course Grades', () => {
     let expectation = _.round(
       // $FlowFixMe: flow doesnt like this
       (COURSE_GRADE_WEIGHT * course.runs[0].final_grade) +
-      // $FlowFixMe: flow doesnt like this
       (EXAM_GRADE_WEIGHT * (course.proctorate_exams_grades[0].percentage_grade * 100))
     );
     assert.equal(
@@ -131,8 +131,13 @@ describe('Course Grades', () => {
   });
 
   it('should call setShowGradeDetailDialog onClick', () => {
+    let examGrade = makeProctoredExamResult();
+    examGrade.passed = true;
+    course.proctorate_exams_grades.push(examGrade);
     let grades = renderGrades();
-    grades.find('.grades').simulate('click');
-    assert.ok(setShowGradeDetailDialogStub.calledWith(true));
+    grades.find('.open-popup').first().simulate('click');
+    assert.ok(setShowGradeDetailDialogStub.calledWith(true, EDX_GRADE, course.title));
+    grades.find('.open-popup').at(1).simulate('click');
+    assert.ok(setShowGradeDetailDialogStub.calledWith(true, EXAM_GRADE, course.title));
   });
 });

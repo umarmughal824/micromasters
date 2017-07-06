@@ -23,6 +23,7 @@ import {
 import {
   formatPrice,
 } from '../../util/util';
+import type { GradeType } from '../../containers/DashboardPage';
 
 const priceMessageClassName = "price-message";
 
@@ -37,7 +38,7 @@ export default class CourseListCard extends React.Component {
     setEnrollSelectedCourseRun:      (r: CourseRun) => void,
     setEnrollCourseDialogVisibility: (bool: boolean) => void,
     setShowExpandedCourseStatus:     (n: number) => void,
-    setShowGradeDetailDialog:        (b: boolean, title: string) => void,
+    setShowGradeDetailDialog:        (b: boolean, t: GradeType, title: string) => void,
     ui:                              UIState,
     checkout:                        (s: string) => void,
   };

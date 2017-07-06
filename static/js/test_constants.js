@@ -583,11 +583,13 @@ export const DASHBOARD_RESPONSE: Dashboard = deepFreeze({
           "position_in_program": 0,
           "title": "Gio Course - failed, no grade",
           "description": "",
-          "id": 1
+          "id": 1,
+          "proctorate_exams_grades": []
         },
         {
           "prerequisites": "",
           "runs": [],
+          "proctorate_exams_grades": [],
           "position_in_program": 1,
           "title": "8.MechCx Advanced Introductory Classical Mechanics",
           "description": "",
@@ -599,7 +601,8 @@ export const DASHBOARD_RESPONSE: Dashboard = deepFreeze({
           "position_in_program": 2,
           "title": "EDX Demo course",
           "description": "",
-          "id": 3
+          "id": 3,
+          "proctorate_exams_grades": []
         },
         {
           "prerequisites": "",
@@ -607,7 +610,8 @@ export const DASHBOARD_RESPONSE: Dashboard = deepFreeze({
           "position_in_program": 3,
           "title": "Peter Course",
           "description": "",
-          "id": 4
+          "id": 4,
+          "proctorate_exams_grades": []
         }
       ],
       "financial_aid_availability": false,
@@ -635,7 +639,8 @@ export const DASHBOARD_RESPONSE: Dashboard = deepFreeze({
             }
           ],
           "description": null,
-          "prerequisites": null
+          "prerequisites": null,
+          "proctorate_exams_grades": []
         },
         {
           "id": 6,
@@ -656,7 +661,8 @@ export const DASHBOARD_RESPONSE: Dashboard = deepFreeze({
             }
           ],
           "description": "The demo course",
-          "prerequisites": ""
+          "prerequisites": "",
+          "proctorate_exams_grades": []
         },
         {
           "id": 7,
@@ -665,7 +671,8 @@ export const DASHBOARD_RESPONSE: Dashboard = deepFreeze({
           "runs": [
           ],
           "description": null,
-          "prerequisites": null
+          "prerequisites": null,
+          "proctorate_exams_grades": []
         },
         {
           "id": 6789,
@@ -686,7 +693,8 @@ export const DASHBOARD_RESPONSE: Dashboard = deepFreeze({
             }
           ],
           "description": "The demo course",
-          "prerequisites": ""
+          "prerequisites": "",
+          "proctorate_exams_grades": []
         },
         {
           "id": 8,
@@ -707,7 +715,8 @@ export const DASHBOARD_RESPONSE: Dashboard = deepFreeze({
             }
           ],
           "description": null,
-          "prerequisites": null
+          "prerequisites": null,
+          "proctorate_exams_grades": []
         },
         {
           "id": 10,
@@ -729,7 +738,8 @@ export const DASHBOARD_RESPONSE: Dashboard = deepFreeze({
             }
           ],
           "description": null,
-          "prerequisites": null
+          "prerequisites": null,
+          "proctorate_exams_grades": []
         },
         {
           "id": 1278,
@@ -771,7 +781,8 @@ export const DASHBOARD_RESPONSE: Dashboard = deepFreeze({
               "fuzzy_start_date": "Fall 2017",
               "course_end_date": "2016-09-09T10:20:10Z",
             }
-          ]
+          ],
+          "proctorate_exams_grades": []
         },
         {
           "id": 17,
@@ -789,7 +800,8 @@ export const DASHBOARD_RESPONSE: Dashboard = deepFreeze({
               "fuzzy_start_date": "Fall 2017",
               "course_end_date": "2016-09-09T10:20:10Z",
             }
-          ]
+          ],
+          "proctorate_exams_grades": []
         },
         {
           "id": 15,
@@ -806,7 +818,8 @@ export const DASHBOARD_RESPONSE: Dashboard = deepFreeze({
               "course_end_date": "2016-09-09T10:20:10Z",
               "course_id": "verified",
             }
-          ]
+          ],
+          "proctorate_exams_grades": []
         },
         {
           "id": 11,
@@ -827,7 +840,8 @@ export const DASHBOARD_RESPONSE: Dashboard = deepFreeze({
             }
           ],
           "description": null,
-          "prerequisites": null
+          "prerequisites": null,
+          "proctorate_exams_grades": []
         },
         {
           "id": 16,
@@ -844,7 +858,8 @@ export const DASHBOARD_RESPONSE: Dashboard = deepFreeze({
               "course_end_date": "2018-09-09T10:20:10Z",
               "enrollment_start_date": "2016-03-04T01:00:00Z",
             }
-          ]
+          ],
+          "proctorate_exams_grades": []
         }
       ],
       "title": "Master Program",
@@ -870,7 +885,8 @@ export const DASHBOARD_RESPONSE: Dashboard = deepFreeze({
           "position": 0,
           "course_start_date": "2016-01-01",
           "course_end_date": "2016-09-09T10:20:10Z",
-        }]
+        }],
+        "proctorate_exams_grades": []
       }],
       "id": 5
     },
@@ -904,7 +920,8 @@ export const DASHBOARD_RESPONSE: Dashboard = deepFreeze({
             }
           ],
           "description": "Course for Last program",
-          "prerequisites": ""
+          "prerequisites": "",
+          "proctorate_exams_grades": []
         },
       ],
       "financial_aid_availability": false,
@@ -929,8 +946,9 @@ export const DASHBOARD_RESPONSE: Dashboard = deepFreeze({
           "fuzzy_start_date": "",
           "current_grade": null,
           "title": "Digital Learning 100 - January 2015",
-          "status": STATUS_PAID_BUT_NOT_ENROLLED
-        }]
+          "status": STATUS_PAID_BUT_NOT_ENROLLED,
+        }],
+        "proctorate_exams_grades": []
       }],
       "financial_aid_availability": true,
       "id": 7

@@ -17,6 +17,13 @@ import { hasPearsonExam } from './util';
 import GradeDetailPopup from './GradeDetailPopup';
 import type { DialogVisibilityState } from '../../../reducers/ui';
 import { GRADE_DETAIL_DIALOG } from '../../../constants';
+import type { GradeType } from '../../../containers/DashboardPage';
+import { EXAM_GRADE, EDX_GRADE } from '../../../containers/DashboardPage';
+
+export const gradeDetailPopupKey = (gradeType: GradeType, courseTitle: string) => (
+  `${GRADE_DETAIL_DIALOG}${gradeType}${courseTitle}`
+);
+
 
 const renderGrade = R.curry((caption, grade) => (
   <div className={`grade-display ${classify(caption)}`}>
@@ -70,7 +77,7 @@ const renderPassed = (course: Course) => {
 
 type CourseGradeProps = {
   course:                   Course,
-  setShowGradeDetailDialog: (b: boolean, t: string) => void,
+  setShowGradeDetailDialog: (b: boolean, g: GradeType, t: string) => void,
   dialogVisibility:         DialogVisibilityState,
 }
 
@@ -85,14 +92,28 @@ const Grades = (props: CourseGradeProps) => {
     <GradeDetailPopup
       course={course}
       setShowGradeDetailDialog={setShowGradeDetailDialog}
-      dialogVisibility={dialogVisibility[`${GRADE_DETAIL_DIALOG}${course.title}`] === true}
+      dialogVisibility={dialogVisibility[gradeDetailPopupKey(EDX_GRADE, course.title)] === true}
+      gradeType={EDX_GRADE}
     />
-    <div
-      className="grades"
-      onClick={() => setShowGradeDetailDialog(true, course.title)}
-    >
-      { renderEdXGrade(course) }
-      { renderExamGrade(course) }
+    <GradeDetailPopup
+      course={course}
+      setShowGradeDetailDialog={setShowGradeDetailDialog}
+      dialogVisibility={dialogVisibility[gradeDetailPopupKey(EXAM_GRADE, course.title)] === true}
+      gradeType={EXAM_GRADE}
+    />
+    <div className="grades">
+      <div
+        className="open-popup"
+        onClick={() => setShowGradeDetailDialog(true, EDX_GRADE, course.title)}
+      >
+        { renderEdXGrade(course) }
+      </div>
+      <div
+        className="open-popup"
+        onClick={() => setShowGradeDetailDialog(true, EXAM_GRADE, course.title)}
+      >
+        { renderExamGrade(course) }
+      </div>
       { renderFinalGrade(course) }
     </div>
     { renderPassed(course) }

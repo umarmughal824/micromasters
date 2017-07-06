@@ -87,7 +87,6 @@ import {
   TOAST_FAILURE,
   TOAST_SUCCESS,
   STATUS_CAN_UPGRADE,
-  GRADE_DETAIL_DIALOG,
 } from '../constants';
 import type { Program } from '../flow/programTypes';
 import {
@@ -101,7 +100,8 @@ import {
 import { actions } from '../lib/redux_rest';
 import EmailCompositionDialog from '../components/email/EmailCompositionDialog';
 import { makeRunEnrolled } from '../components/dashboard/courses/test_util';
-import Grades from '../components/dashboard/courses/Grades';
+import Grades, { gradeDetailPopupKey } from '../components/dashboard/courses/Grades';
+import { EDX_GRADE } from './DashboardPage';
 
 describe('DashboardPage', () => {
   let renderComponent, helper, listenForActions;
@@ -151,18 +151,19 @@ describe('DashboardPage', () => {
 
   it('should show a <Grades /> component, and open the dialog when clicked', () => {
     return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
-      wrapper.find(Grades).find('.grades').simulate('click');
+      wrapper.find(Grades).find('.open-popup').first().simulate('click');
       let state = helper.store.getState().ui;
-      let key = `${GRADE_DETAIL_DIALOG}${DASHBOARD_RESPONSE.programs[0].courses[0].title}`;
+      let key = gradeDetailPopupKey(EDX_GRADE, DASHBOARD_RESPONSE.programs[0].courses[0].title);
       assert.isTrue(state.dialogVisibility[key]);
     });
   });
 
   it('should close the <Grades /> dialog if you click outside', () => {
-    let key = `${GRADE_DETAIL_DIALOG}${DASHBOARD_RESPONSE.programs[0].courses[0].title}`;
+    let key = gradeDetailPopupKey(EDX_GRADE, DASHBOARD_RESPONSE.programs[0].courses[0].title);
+
     helper.store.dispatch(showDialog(key));
     return renderComponent('/dashboard', DASHBOARD_SUCCESS_ACTIONS).then(([wrapper]) => {
-      wrapper.find(Grades).find(Dialog).props().onRequestClose();
+      wrapper.find(Grades).find(Dialog).first().props().onRequestClose();
       let state = helper.store.getState().ui;
       assert.isFalse(state.dialogVisibility[key]);
     });

@@ -37,7 +37,6 @@ import {
   STATUS_PASSED,
   STATUS_CURRENTLY_ENROLLED,
   STATUS_PAID_BUT_NOT_ENROLLED,
-  GRADE_DETAIL_DIALOG,
 } from '../constants';
 import {
   setToastMessage,
@@ -110,9 +109,14 @@ import { getOwnDashboard, getOwnCoursePrices } from '../reducers/util';
 import { actions } from '../lib/redux_rest';
 import { wait } from '../util/util';
 import { CALCULATOR_DIALOG } from './FinancialAidCalculator';
+import { gradeDetailPopupKey } from '../components/dashboard/courses/Grades';
 
 const isFinishedProcessing = R.contains(R.__, [FETCH_SUCCESS, FETCH_FAILURE]);
 const PEARSON_TOS_DIALOG = "pearsonTOSDialogVisible";
+
+export type GradeType = 'EDX_GRADE' | 'EXAM_GRADE';
+export const EDX_GRADE: GradeType = 'EDX_GRADE';
+export const EXAM_GRADE: GradeType = 'EXAM_GRADE';
 
 class DashboardPage extends React.Component {
   static contextTypes = {
@@ -514,12 +518,12 @@ class DashboardPage extends React.Component {
     }
   }
 
-  setShowGradeDetailDialog = (open: boolean, courseTitle: string) => {
+  setShowGradeDetailDialog = (open: boolean, gradeType: GradeType, courseTitle: string) => {
     const { dispatch } = this.props;
     if (open) {
-      dispatch(showDialog(`${GRADE_DETAIL_DIALOG}${courseTitle}`));
+      dispatch(showDialog(gradeDetailPopupKey(gradeType, courseTitle)));
     } else {
-      dispatch(hideDialog(`${GRADE_DETAIL_DIALOG}${courseTitle}`));
+      dispatch(hideDialog(gradeDetailPopupKey(gradeType, courseTitle)));
     }
   };
 

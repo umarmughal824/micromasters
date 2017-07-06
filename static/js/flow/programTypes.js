@@ -55,7 +55,7 @@ export type Course = {
   id:                       number,
   position_in_program:      number,
   can_schedule_exam:        boolean,
-  proctorate_exams_grades?: Array<ProctoredExamResult>,
+  proctorate_exams_grades:  Array<ProctoredExamResult>,
   has_exam:                 boolean,
 };
 

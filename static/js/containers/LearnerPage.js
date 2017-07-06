@@ -31,8 +31,9 @@ import type { ProfileContainerProps } from './ProfileFormContainer';
 import type { CoursePrices, DashboardsState } from '../flow/dashboardTypes';
 import type { AllEmailsState } from '../flow/emailTypes';
 import { showDialog, hideDialog } from '../actions/ui';
-import { GRADE_DETAIL_DIALOG } from '../constants';
 import type { RestState } from '../flow/restTypes';
+import type { GradeType } from './DashboardPage';
+import { gradeDetailPopupKey } from '../components/dashboard/courses/Grades';
 
 const notFetchingOrFetched = R.compose(
   R.not, R.contains(R.__, [FETCH_PROCESSING, FETCH_SUCCESS, FETCH_FAILURE])
@@ -132,14 +133,15 @@ class LearnerPage extends React.Component<*, LearnerPageProps, *> {
       .replace(/^\|\s/, '');
   }
 
-  setShowGradeDetailDialog = (open: boolean, courseTitle: string) => {
+  setShowGradeDetailDialog = (open: boolean, gradeType: GradeType, courseTitle: string) => {
     const { dispatch } = this.props;
     if (open) {
-      dispatch(showDialog(`${GRADE_DETAIL_DIALOG}${courseTitle}`));
+      dispatch(showDialog(gradeDetailPopupKey(gradeType, courseTitle)));
     } else {
-      dispatch(hideDialog(`${GRADE_DETAIL_DIALOG}${courseTitle}`));
+      dispatch(hideDialog(gradeDetailPopupKey(gradeType, courseTitle)));
     }
   };
+
 
   render() {
     const {
