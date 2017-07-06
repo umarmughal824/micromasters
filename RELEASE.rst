@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.64.0
+--------------
+
+- Remove accidentially commited file (#3377)
+- Added command to diff dashboard_states screenshots
+- Fixed email validation to deal with &#39;mailto:&#39;
+- Clean up frontend code touching coupons (#3367)
+- Integrated redux-hammock
+- Populate exam_run for ProctoredExamGrades (#3361)
+- Updateed the mailing address (#3362)
+- Added selenium test for program page, refactored ProgramPageFactory (#3337)
+
 Version 0.63.0
 --------------
 
