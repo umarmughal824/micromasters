@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.65.0
+--------------
+
+- Add selenium test for login redirect behavior (#3381)
+- Use local patches in selenium tests (#3379)
+- - Extended Geosuggest to override the onInputBlur function &amp; geocode the input text. - Changed the location validation error message to &#39;City, state/territory, and country are required.&#39;
+- Use specific hash seed (#3346)
+- Fix course coupon program messages (#3345)
+
 Version 0.64.0
 --------------
 
