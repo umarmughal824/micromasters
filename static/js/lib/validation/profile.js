@@ -271,7 +271,7 @@ const educationKeys: (e: EducationEntry) => string[] = R.ifElse(
   isHighSchool, R.compose(excludeFieldOfStudy, R.keys), R.keys
 );
 
-const schoolLocationIsValid = extraErrorCheck('location', 'Location must contain city, state, country', entry => (
+const schoolLocationIsValid = extraErrorCheck('location', 'City, state/territory, and country are required.', entry => (
   isNilOrEmptyString(entry.school_city) ||
   isNilOrEmptyString(entry.school_state_or_territory) ||
   isNilOrEmptyString(entry.school_country)
@@ -313,7 +313,7 @@ const endDateNotInFuture = extraErrorCheck('end_date', 'End date cannot be in th
   moment(entry.end_date).isAfter(moment(), 'month')
 ));
 
-const workLocationIsValid = extraErrorCheck('location', 'Location must contain city, state, country', entry => (
+const workLocationIsValid = extraErrorCheck('location', 'City, state/territory, and country are required.', entry => (
   isNilOrEmptyString(entry.city) || isNilOrEmptyString(entry.state_or_territory) || isNilOrEmptyString(entry.country)
 ));
 

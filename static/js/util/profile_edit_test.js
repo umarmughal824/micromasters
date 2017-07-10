@@ -642,6 +642,50 @@ describe('Profile Editing utility functions', () => {
       assert.equal(that.props.profile.country, "US");
     });
 
+    it('populates profile info on geosuggest select but without any state', () => {
+      gmaps.geocodeResults = [{
+        address_components: [
+          {long_name: "Golden", short_name: "Golden", types: ["locality"]},
+          {long_name: "United States", short_name: "US", types: ["country"]},
+        ],
+        geometry: {
+          location: {
+            lat: () => 48.859,
+            lng: () => 2.207,
+          }
+        }
+      }];
+      gmaps.geocode = gmaps.sandbox.stub().callsArgWith(1, gmaps.geocodeResults, 'OK');
+      const wrapper = renderGeosuggest();
+      typeText(wrapper, "Golden");
+      const item = wrapper.find("li.geosuggest__item").first();
+      item.simulate('click');
+      assert.equal(that.props.profile.city, "Golden");
+      assert.equal(that.props.profile.state_or_territory, "Not Available");
+      assert.equal(that.props.profile.country, "US");
+    });
+
+    it('populates geosuggest text with 1st autocomplete suggestion on blur', () => {
+      gmaps.autocompleteSuggestions = [{
+        "description": "Golden, Colorado, United States",
+        "id": "691b237b0322f28988f3ce03e321ff72a12167fd",
+        "matched_substrings": [{"length": 5, "offset": 0}],
+        "place_id": "ChIJD7fiBh9u5kcRYJSMaMOCCwQ",
+        "reference": "CjQlAAAA_KB6EEceSTfkteSSF6U0",
+        "terms": [
+          {offset: 0, value: "Golden"},
+          {offset: 8, value: "Colorado"},
+          {offset: 17, value: "United States"},
+        ],
+        "types": ["locality", "political", "geocode"]
+      }];
+      gmaps.getPlacePredictions = gmaps.sandbox.stub().callsArgWith(1, gmaps.autocompleteSuggestions);
+      const wrapper = renderGeosuggest();
+      typeText(wrapper, "Golden");
+      wrapper.find('input').simulate('blur');
+      assert.equal(wrapper.find('input').get(0).value, "Golden, Colorado, United States");
+    });
+
     it('populates statecode via fuzzy match on geosuggest select', () => {
       gmaps.geocodeResults = [{
         address_components: [
