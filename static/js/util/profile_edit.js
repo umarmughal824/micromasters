@@ -254,10 +254,15 @@ const profileFields = (addressMapping: AddressComponentKeyMapping, components: G
         countryCode = nameToCountryCode(component.long_name);
         _.set(profile, keySet, countryCode);
       }
+    } else {
+      _.set(profile, keySet, '');
+      if (gmapType === 'administrative_area_level_1') {
+        stateKey = [keySet, ''];
+      }
     }
   });
   // Modify state code to be '<country code>-<state code>
-  if (countryCode !== null && stateKey !== []) {
+  if (countryCode !== null && stateKey.length > 0) {
     _.set(profile, stateKey[0], nameToStateCode(countryCode, stateKey[1]));
   }
 
@@ -270,6 +275,16 @@ const pathHasValue = R.flip(R.pathSatisfies(hasValue, R.__));
 const allPathsHaveValue = (addressMapping) => (
   R.compose(R.all(R.__, R.values(addressMapping)), pathHasValue)
 );
+
+class MicroGeosuggest extends Geosuggest {
+  //Override the default onInputBlur behavior of Geosuggest
+  onInputBlur = () => {
+    this.selectSuggest(this.state.activeSuggest);
+    if (!this.state.ignoreBlur) {
+      this.hideSuggests();
+    }
+  };
+}
 
 export function boundGeosuggest(
   addressMapping: AddressComponentKeyMapping,
@@ -341,9 +356,9 @@ export function boundGeosuggest(
 
   return (
     <div className={`bound-geosuggest ${validationErrorSelector(errors, keySet)}`}>
-      <Geosuggest id={id}
+      <MicroGeosuggest id={id}
         initialValue={initial} label={label} placeholder={placeholder} types={types}
-        onSuggestSelect={onSuggestSelect} onBlur={onBlur}
+        onSuggestSelect={onSuggestSelect} autoActivateFirstSuggest={true} onBlur={onBlur}
       />
       <span className="validation-error-text">
         {_.get(errors, keySet)}
