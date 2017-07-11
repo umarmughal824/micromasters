@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.66.0
+--------------
+
+- Disable selenium test with intermittent failures (#3389)
+
 Version 0.65.0
 --------------
 
