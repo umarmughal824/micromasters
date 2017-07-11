@@ -235,7 +235,7 @@ class SeleniumTestsBase(StaticLiveServerTestCase):
     def tearDown(self):
         if self._outcome.errors:
             try:
-                self.take_screenshot()
+                self.take_screenshot(output_base64=True)
             except:  # pylint: disable=bare-except
                 log.exception("Unable to take selenium screenshot")
 
@@ -515,15 +515,3 @@ class SeleniumTestsBase(StaticLiveServerTestCase):
     def edx_username(self):
         """Get the edx username for self.user"""
         return self.user.social_auth.get(provider=EdxOrgOAuth2.name).uid
-
-    def wait_for_server_thread(self):
-        """
-        Make a request to the status page and block until the thread returns. Since the server thread
-        handles only one request at a time, this ensures that the server thread is done executing and the
-        test can start patches and do other things modifying global state.
-
-        Note that the browser might trigger other requests afterwards which may cause other concurrency problems. The
-        user should take care to handle this case separately.
-        """
-        absolute_url = self.make_absolute_url("static/hash.txt")
-        requests.get(absolute_url)

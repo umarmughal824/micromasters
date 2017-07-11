@@ -5,7 +5,6 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from factory import Iterator
 from factory.django import mute_signals
-import pytest
 from selenium.webdriver.common.keys import Keys
 
 from cms.factories import (
@@ -63,9 +62,8 @@ class BasicTests(SeleniumTestsBase):
         with patch('ecommerce.views.enroll_user_on_success', autospec=True):
             self.wait().click(lambda driver: driver.find_element_by_class_name("continue-payment"))
 
-            self.wait_for_server_thread()
-        self.assert_console_logs()
-        self.wait().until(lambda driver: driver.find_element_by_class_name("status-message"))
+            self.assert_console_logs()
+            self.wait().until(lambda driver: driver.find_element_by_class_name("status-message"))
 
         # Assert that the purchase went through fine but enrolling in edX failed
         # Which makes sense since there is no edX for these tests
@@ -198,7 +196,6 @@ class LearnerTests(SeleniumTestsBase):
         )
 
 
-@pytest.mark.skip("Intermittent failures regarding patch and alert dialog")
 class ReviewFinancialAidTests(SeleniumTestsBase):
     """Look at the financial aid review page"""
 
@@ -235,7 +232,7 @@ class ReviewFinancialAidTests(SeleniumTestsBase):
             alert = self.selenium.switch_to_alert()
             alert.accept()
 
-            self.wait_for_server_thread()
+            self.wait().until(lambda driver: driver.find_element_by_css_selector(".alert-success"))
 
         def is_now_pending(driver):  # pylint: disable=unused-argument
             """Wait until the change to the financial aid takes effect"""
