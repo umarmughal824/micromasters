@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.67.0
+--------------
+
+- Fixed management commands effected by celery upgrade
+- Learners in Program Card (#3335)
+- Remove fallback config code (#3386)
+- Fix selenium test (#3391)
+
 Version 0.66.0
 --------------
 
