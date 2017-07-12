@@ -12,6 +12,7 @@ import * as djangoFetch from 'redux-hammock/django_csrf_fetch';
 import {
   DASHBOARD_RESPONSE,
   COURSE_PRICES_RESPONSE,
+  PROGRAM_LEARNERS_RESPONSE,
   PROGRAMS,
   USER_PROFILE_RESPONSE,
   ATTACH_COUPON_RESPONSE,
@@ -71,6 +72,11 @@ export default class IntegrationTestHelper {
     fetchMock.mock('/api/v0/mail/automatic_email/', () => {
       return { body: JSON.stringify(GET_AUTOMATIC_EMAILS_RESPONSE) };
     });
+    this.programLearnersStub = this.fetchJSONWithCSRFStub.withArgs(
+      `/api/v0/programlearners/${PROGRAMS[0].id}/`
+    );
+    this.programLearnersStub.returns(Promise.resolve(PROGRAM_LEARNERS_RESPONSE));
+
     this.couponsStub = this.sandbox.stub(api, 'getCoupons');
     this.couponsStub.returns(Promise.resolve([]));
     this.profileGetStub = this.sandbox.stub(api, 'getUserProfile');

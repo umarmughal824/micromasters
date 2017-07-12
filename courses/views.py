@@ -4,6 +4,7 @@ from rest_framework import (
     viewsets,
     status,
 )
+from rest_framework.views import APIView
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.exceptions import (
     APIException,
@@ -17,6 +18,8 @@ from rest_framework.response import Response
 from courses.models import Program
 from courses.serializers import ProgramSerializer
 from dashboard.models import ProgramEnrollment
+from profiles.models import Profile
+from profiles.serializers import ProfileImageSerializer
 
 
 class ResourceConflict(APIException):
@@ -36,6 +39,46 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     )
     queryset = Program.objects.filter(live=True)
     serializer_class = ProgramSerializer
+
+
+class ProgramLearnersView(APIView):
+    """API for Learners enrolled in the Program"""
+
+    authentication_classes = (
+        SessionAuthentication,
+        TokenAuthentication,
+    )
+    permission_classes = (
+        IsAuthenticated,
+    )
+    serializer_class = ProfileImageSerializer
+
+    def get(self, request, *args, **kargs):
+        """
+        Get eight random learners with images and
+        the total count of visible learners in the program
+        """
+        program_id = self.kwargs["program_id"]
+        users = ProgramEnrollment.objects.filter(
+            program_id=program_id
+        ).values_list('user', flat=True)
+
+        queryset = Profile.objects.exclude(
+            image_small__exact=''
+        ).filter(user__in=users).exclude(
+            account_privacy='private'
+        ).exclude(
+            user=request.user
+        ).order_by('?')
+
+        learners_result = {
+            'learners_count': queryset.count(),
+            'learners': ProfileImageSerializer(queryset[:8], many=True).data
+        }
+        return Response(
+            status=status.HTTP_200_OK,
+            data=learners_result
+        )
 
 
 class ProgramEnrollmentListView(CreateAPIView):
