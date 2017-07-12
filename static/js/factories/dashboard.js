@@ -73,6 +73,7 @@ export const makeRun = (position: number): CourseRun => {
     course_id: `course-v1:${runId}`,
     title: `Run ${runId}`,
     position: position,
+    course_end_date: moment().subtract(1, 'day').format(),
     status: STATUS_OFFERED,
     has_paid: false,
   };
