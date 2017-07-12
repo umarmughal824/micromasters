@@ -50,7 +50,7 @@ if [[ $(
     grep -v 'ignored, nothing could be mapped' |
     grep -v "This browser doesn't support the \`onScroll\` event" |
     grep -v "Warning: Accessing PropTypes via the main React package is deprecated" |
-    grep -v "Warning: ReactTelephoneInput: React.createClass is deprecated" |
+    grep -v "Warning: A Component: React.createClass is deprecated" |
     wc -l |
     awk '{print $1}'
     ) -ne 0 ]]  # is file empty?
