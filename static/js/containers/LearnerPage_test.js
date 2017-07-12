@@ -42,6 +42,8 @@ import {
   SET_SHOW_EDUCATION_DELETE_DIALOG,
   showDialog,
 } from '../actions/ui';
+import { actions } from '../lib/redux_rest';
+
 import { USER_PROFILE_RESPONSE, DASHBOARD_RESPONSE } from '../test_constants';
 import {
   HIGH_SCHOOL,
@@ -71,6 +73,10 @@ import {
   RECEIVE_DASHBOARD_SUCCESS,
   RECEIVE_DASHBOARD_FAILURE,
 } from '../actions/dashboard';
+import {
+    RECEIVE_FETCH_COUPONS_SUCCESS,
+    REQUEST_FETCH_COUPONS,
+} from '../actions/coupons';
 import Grades from '../components/dashboard/courses/Grades';
 
 describe("LearnerPage", function() {
@@ -84,6 +90,9 @@ describe("LearnerPage", function() {
     RECEIVE_GET_USER_PROFILE_SUCCESS,
     REQUEST_GET_USER_PROFILE,
     RECEIVE_GET_USER_PROFILE_SUCCESS,
+    RECEIVE_FETCH_COUPONS_SUCCESS,
+    REQUEST_FETCH_COUPONS,
+    actions.prices.get.requestType
   ];
 
   const confirmResumeOrder = (
@@ -1164,7 +1173,17 @@ describe("LearnerPage", function() {
         username: 'other'
       };
       helper.profileGetStub.withArgs('other').returns(Promise.resolve(otherProfile));
-      return renderComponent(`/learner/other`, userActions).then(([, div]) => {
+      const actions = [
+        REQUEST_GET_PROGRAM_ENROLLMENTS,
+        RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
+        REQUEST_GET_USER_PROFILE,
+        RECEIVE_GET_USER_PROFILE_SUCCESS,
+        REQUEST_GET_USER_PROFILE,
+        RECEIVE_GET_USER_PROFILE_SUCCESS,
+        RECEIVE_FETCH_COUPONS_SUCCESS,
+        REQUEST_FETCH_COUPONS,
+      ];
+      return renderComponent(`/learner/other`, actions).then(([, div]) => {
         let count = div
           .querySelector('.page-content')
           .getElementsByClassName('mdl-button--icon')
@@ -1232,6 +1251,8 @@ describe("LearnerPage", function() {
     let anonymousUserActions = [
       REQUEST_GET_USER_PROFILE,
       RECEIVE_GET_USER_PROFILE_SUCCESS,
+      RECEIVE_FETCH_COUPONS_SUCCESS,
+      REQUEST_FETCH_COUPONS
     ];
     beforeEach(() => {
       helper = new IntegrationTestHelper();

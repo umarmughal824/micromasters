@@ -15,23 +15,32 @@ import {
 } from './ProfileFormContainer';
 import ErrorMessage from '../components/ErrorMessage';
 import { fetchDashboard } from '../actions/dashboard';
+import {
+  clearCoupons,
+  fetchCoupons,
+} from '../actions/coupons';
+import { actions } from '../lib/redux_rest';
 import { hasAnyStaffRole } from '../lib/roles';
-import { getDashboard } from '../reducers/util';
+import { getDashboard, getCoursePrices } from '../reducers/util';
+import type { CouponsState } from '../reducers/coupons';
 import { S } from '../lib/sanctuary';
 import { LEARNER_EMAIL_TYPE } from '../components/email/constants';
 import { LEARNER_EMAIL_CONFIG } from '../components/email/lib';
 import { withEmailDialog } from '../components/email/hoc';
 import type { ProfileContainerProps } from './ProfileFormContainer';
-import type { DashboardsState } from '../flow/dashboardTypes';
+import type { CoursePrices, DashboardsState } from '../flow/dashboardTypes';
 import type { AllEmailsState } from '../flow/emailTypes';
 import { showDialog, hideDialog } from '../actions/ui';
 import { GRADE_DETAIL_DIALOG } from '../constants';
+import type { RestState } from '../flow/restTypes';
 
 const notFetchingOrFetched = R.compose(
   R.not, R.contains(R.__, [FETCH_PROCESSING, FETCH_SUCCESS, FETCH_FAILURE])
 );
 
 type LearnerPageProps = ProfileContainerProps & {
+  prices: RestState<CoursePrices>,
+  coupons:  CouponsState,
   dashboard: DashboardsState,
   email: AllEmailsState,
   openEmailComposer: (emailType: string, emailOpenParams: any) => void,
@@ -42,6 +51,8 @@ class LearnerPage extends React.Component<*, LearnerPageProps, *> {
     const { params: { username }, fetchProfile } = this.props;
     fetchProfile(username);
     this.fetchDashboard();
+    this.fetchCoursePrices();
+    this.fetchCoupons();
   }
 
   componentDidUpdate() {
@@ -56,6 +67,8 @@ class LearnerPage extends React.Component<*, LearnerPageProps, *> {
       // don't erase the user's own profile from the state
       dispatch(clearProfile(username));
     }
+    dispatch(actions.prices.clear(username));
+    dispatch(clearCoupons());
   }
 
   getFocusedDashboard() {
@@ -74,6 +87,36 @@ class LearnerPage extends React.Component<*, LearnerPageProps, *> {
       S.filter(R.propSatisfies(notFetchingOrFetched, 'fetchStatus'))
     )(this.getFocusedDashboard());
   }
+
+  getFocusedPrices() {
+    const { prices, params: { username }} = this.props;
+    return S.filter(
+      () => this.isPrivileged(username),
+      getCoursePrices(username, prices)
+    );
+  }
+
+  fetchCoursePrices() {
+    const { dispatch, params: { username } } = this.props;
+    R.compose(
+      S.map(() => dispatch(actions.prices.get(username))),
+      S.filter(R.propSatisfies(notFetchingOrFetched, 'getStatus'))
+    )(this.getFocusedPrices());
+  }
+
+  fetchCoupons() {
+    const { coupons, dispatch } = this.props;
+    if (coupons.fetchGetStatus === undefined) {
+      dispatch(fetchCoupons());
+    }
+  }
+
+  isPrivileged = (username: string): boolean => (
+    R.or(
+      hasAnyStaffRole(SETTINGS.roles),
+      R.isNil(SETTINGS.user) ? R.F() : R.equals(R.prop('username', SETTINGS.user), username)
+    )
+  )
 
   getDocumentTitle = () => {
     const {
@@ -105,18 +148,27 @@ class LearnerPage extends React.Component<*, LearnerPageProps, *> {
       children,
       profileProps,
       email,
-      openEmailComposer
+      openEmailComposer,
+      coupons,
     } = this.props;
 
     let profile = {};
     let toRender = null;
     let loaded = false;
+    let couponsLoaded = false;
+    let profileLoaded = false;
+
     if (profiles[username] !== undefined) {
       profile = profiles[username];
-      loaded = profiles[username].getStatus !== FETCH_PROCESSING;
+      profileLoaded = profiles[username].getStatus !== FETCH_PROCESSING;
+      couponsLoaded = !R.isEmpty(coupons) && coupons.fetchGetStatus !== FETCH_PROCESSING;
+      loaded = R.all(R.equals(true))([profileLoaded, couponsLoaded]);
+
       let props = {
         dashboard: S.maybe({}, R.identity, this.getFocusedDashboard()),
         email: email,
+        prices: S.maybe({}, R.identity, this.getFocusedPrices()),
+        coupons: coupons,
         openLearnerEmailComposer: R.partial(openEmailComposer(LEARNER_EMAIL_TYPE), [profile.profile]),
         setShowGradeDetailDialog: this.setShowGradeDetailDialog,
         ...profileProps(profile)
@@ -137,6 +189,8 @@ class LearnerPage extends React.Component<*, LearnerPageProps, *> {
 const mapStateToProps = state => {
   return {
     dashboard: state.dashboard,
+    prices: state.prices,
+    coupons: state.coupons,
     email: state.email,
     ...mapStateToProfileProps(state),
   };

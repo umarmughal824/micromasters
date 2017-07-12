@@ -34,6 +34,11 @@ import {
   DASHBOARD_SUCCESS_NO_LEARNERS_ACTIONS,
 } from '../containers/test_util';
 import ErrorMessage from './ErrorMessage';
+import {
+    RECEIVE_FETCH_COUPONS_SUCCESS,
+    REQUEST_FETCH_COUPONS,
+} from '../actions/coupons';
+import { actions } from '../lib/redux_rest';
 
 describe("ErrorMessage", () => {
   let errorString = `Sorry, we were unable to load the data necessary
@@ -204,15 +209,18 @@ describe("ErrorMessage", () => {
         helper.profileGetStub.
           withArgs(SETTINGS.user.username).
           returns(Promise.reject(fourOhFour));
-        let actions = [
+        let userPageActions = [
           REQUEST_GET_USER_PROFILE,
           REQUEST_GET_USER_PROFILE,
           RECEIVE_GET_USER_PROFILE_FAILURE,
           RECEIVE_GET_USER_PROFILE_FAILURE,
           REQUEST_GET_PROGRAM_ENROLLMENTS,
           RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
+          RECEIVE_FETCH_COUPONS_SUCCESS,
+          REQUEST_FETCH_COUPONS,
+          actions.prices.get.requestType
         ];
-        return renderComponent(`/learner/${SETTINGS.user.username}`, actions).then(([, div]) => {
+        return renderComponent(`/learner/${SETTINGS.user.username}`, userPageActions).then(([, div]) => {
           confirmErrorMessage(
             div,
             `404 ${errorString}`,
@@ -230,6 +238,9 @@ describe("ErrorMessage", () => {
           REQUEST_GET_USER_PROFILE,
           RECEIVE_GET_USER_PROFILE_SUCCESS,
           RECEIVE_GET_USER_PROFILE_SUCCESS,
+          RECEIVE_FETCH_COUPONS_SUCCESS,
+          REQUEST_FETCH_COUPONS,
+          actions.prices.get.requestType
         ];
         return renderComponent(`/learner/${SETTINGS.user.username}`, learnerPageActions).then(([, div]) => {
           let editButton = div.querySelector('.mdl-card').querySelector('.mdl-button--icon');
