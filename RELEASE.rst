@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.67.1
+--------------
+
+- Bumped react-telephone-input version
+- Made status text consistent with acceptance of faxed FA documents. (#3393)
+- Specify course_end_date for makeRun
+- Replace get_var with more specific variants (#3387)
+- Displayed course price in staff view of learner&#39;s profile page (#3374)
+
 Version 0.67.0
 --------------
 
