@@ -19,6 +19,7 @@ import {
 import IntegrationTestHelper from '../util/integration_test_helper';
 import {
   REQUEST_DASHBOARD,
+  RECEIVE_DASHBOARD_SUCCESS,
   UPDATE_COURSE_STATUS,
   CLEAR_DASHBOARD,
 } from '../actions/dashboard';
@@ -173,6 +174,15 @@ describe('DashboardPage', () => {
       SET_TIMEOUT_ACTIVE,
       UPDATE_COURSE_STATUS,
     ]);
+    let waitResolve, waitPromise, waitStub;
+    beforeEach(() => {
+      waitPromise = new Promise(resolve => {
+        // Note that most tests here won't call waitResolve at all so the promise won't resolve. The only tests
+        // that should are tests testing the order receipt 3 second timeout functionality.
+        waitResolve = resolve;
+      });
+      waitStub = helper.sandbox.stub(util, 'wait').returns(waitPromise);
+    });
 
     it('shows the order status toast when the query param is set for a cancellation', () => {
       return renderComponent('/dashboard?status=cancel', SUCCESS_WITH_TOAST_ACTIONS).then(() => {
@@ -323,8 +333,15 @@ describe('DashboardPage', () => {
             it(`only if status is ${status}`, () => {
               program.financial_aid_user_info.application_status = status;
               let expectedSkip = !FA_TERMINAL_STATUSES.includes(status);
-              let actions = expectedSkip ? expectedActions : DASHBOARD_SUCCESS_ACTIONS;
-              return renderComponent('/dashboard', actions).then(() => {
+              // Extra actions dispatched to refresh the dashboard
+              let expectedActionsWithDashboardRequest = expectedActions.concat([
+                REQUEST_DASHBOARD,
+                RECEIVE_DASHBOARD_SUCCESS,
+                actions.prices.get.requestType,
+                actions.prices.get.successType,
+              ]);
+              let _actions = expectedSkip ? expectedActionsWithDashboardRequest : DASHBOARD_SUCCESS_ACTIONS;
+              return renderComponent('/dashboard', _actions).then(() => {
                 let aid = helper.store.getState().financialAid;
                 if (expectedSkip) {
                   assert.equal(aid.fetchSkipStatus, storeActions.FETCH_SUCCESS);
@@ -357,14 +374,6 @@ describe('DashboardPage', () => {
     });
 
     describe('fake timer tests', function() {
-      let waitStub, waitResolve, waitPromise;
-      beforeEach(() => {
-        waitPromise = new Promise(resolve => {
-          waitResolve = resolve;
-        });
-        waitStub = helper.sandbox.stub(util, 'wait').returns(waitPromise);
-      });
-
       it('refetches the dashboard after 3 seconds if 2 minutes has not passed', () => {
         let course = findCourse(course =>
           course.runs.length > 0 &&
