@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.68.0
+--------------
+
+- Fixed jumbled text when entering text in search mail dialog in chrome (#3372)
+- Some style tweaks on the marketing site  (#3408)
+- Fix JS race condition in tests (#3403)
+
 Version 0.67.1
 --------------
 
