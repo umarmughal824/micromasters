@@ -84,8 +84,11 @@ export default class EmailCompositionDialog extends React.Component {
   }
 
   componentWillReceiveProps (nextProps: EmailDialogProps) {
-    if (!this.state.editorState.getCurrentContent().hasText()) {
-      this.setState(editorStateFromProps(nextProps));
+    let newState = editorStateFromProps(nextProps);
+    let newStateHasText = newState.editorState.getCurrentContent().hasText();
+
+    if (!this.state.editorState.getCurrentContent().hasText() && newStateHasText) {
+      this.setState(newState);
     }
   }
 
@@ -165,8 +168,9 @@ export default class EmailCompositionDialog extends React.Component {
 
   onEditorStateChange = (editorState: EditorState) => {
     const { updateEmailBody } = this.props;
-    updateEmailBody(editorState);
-    this.setState({ editorState });
+    this.setState({ editorState }, () => {
+      updateEmailBody(editorState);
+    });
   };
 
   clearEditorState = () => {
