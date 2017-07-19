@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.68.2
+--------------
+
+- Added exam grade detail display
+
 Version 0.68.1
 --------------
 
