@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.68.1
+--------------
+
+- Fixed financial aid income dialog that was showing up twice (#3414)
+- Remove geosuggest component, revert to dropdowns
+
 Version 0.68.0
 --------------
 
