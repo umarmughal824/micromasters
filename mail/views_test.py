@@ -16,7 +16,6 @@ from courses.factories import ProgramFactory, CourseFactory, CourseRunFactory
 from dashboard.factories import (
     ProgramEnrollmentFactory,
     CachedEnrollmentFactory,
-    CachedEnrollmentVerifiedFactory
 )
 from dashboard.models import ProgramEnrollment, CachedEnrollment
 from financialaid.api_test import (
@@ -557,7 +556,7 @@ class LearnerMailViewTests(APITestCase, MockedESTestCase):
         url = reverse(self.url_name, kwargs={'student_id': self.recipient_user.profile.student_id})
         resp_post = self.client.post(url, data=self.request_data, format='json')
         assert resp_post.status_code == status.HTTP_403_FORBIDDEN
-        CachedEnrollmentVerifiedFactory.create(user=learner_user, course_run__course__program=self.program)
+        CachedEnrollmentFactory.create(user=learner_user, course_run__course__program=self.program, verified=True)
         resp_post = self.client.post(url, data=self.request_data, format='json')
         assert resp_post.status_code == status.HTTP_200_OK
 

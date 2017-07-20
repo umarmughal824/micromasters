@@ -16,7 +16,6 @@ from dashboard.tasks import (
 )
 from dashboard.factories import UserCacheRefreshTimeFactory
 from micromasters.factories import UserFactory
-from micromasters.utils import now_in_utc
 from search.base import MockedESTestCase
 
 
@@ -60,13 +59,7 @@ class TasksTest(MockedESTestCase):
         for user in self.all_working_users:
             user.is_active = False
             user.save()
-        now = now_in_utc()
-        UserCacheRefreshTimeFactory.create(
-            user=self.user2,
-            enrollment=now,
-            certificate=now,
-            current_grade=now,
-        )
+        UserCacheRefreshTimeFactory.create(user=self.user2, unexpired=True)
         batch_update_user_data.delay()
         mocked_subtasks.assert_called_with([self.user_no_social_auth.id])
 

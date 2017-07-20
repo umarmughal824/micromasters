@@ -19,8 +19,6 @@ from dashboard.factories import (
     CachedCertificateFactory,
     CachedCurrentGradeFactory,
     CachedEnrollmentFactory,
-    CachedEnrollmentVerifiedFactory,
-    CachedEnrollmentUnverifiedFactory
 )
 from dashboard.models import ProgramEnrollment
 from dashboard.serializers import UserProgramSearchSerializer
@@ -287,12 +285,12 @@ class UserProgramSerializerEnrollmentsTests(MockedESTestCase):
     @classmethod
     def verified_enroll(cls, user, course_run):
         """Helper method to create a verified enrollment for the test user in a course run"""
-        return CachedEnrollmentVerifiedFactory.create(user=user, course_run=course_run)
+        return CachedEnrollmentFactory.create(user=user, course_run=course_run, verified=True)
 
     @classmethod
     def unverified_enroll(cls, user, course_run):
         """Helper method to create an unverified enrollment for the test user in a course run"""
-        return CachedEnrollmentUnverifiedFactory.create(user=user, course_run=course_run)
+        return CachedEnrollmentFactory.create(user=user, course_run=course_run, unverified=True)
 
     @classmethod
     def setUpTestData(cls):
@@ -426,7 +424,7 @@ class UserProgramSerializerSemesterTests(MockedESTestCase):
         courses = CourseFactory.create_batch(num_courses, program=self.program)
         course_runs = [CourseRunFactory.create(course=course) for course in courses]
         for course_run in course_runs:
-            CachedEnrollmentVerifiedFactory.create(user=self.user, course_run=course_run)
+            CachedEnrollmentFactory.create(user=self.user, course_run=course_run, verified=True)
         with patch(
             'dashboard.serializers.get_year_season_from_course_run', autospec=True, return_value=(2017, 'Spring')
         ) as get_year_season_patch:

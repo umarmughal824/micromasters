@@ -20,29 +20,18 @@ class ProgramFactory(DjangoModelFactory):
     class Meta:
         model = Program
 
-    @classmethod
-    def _create(cls, model_class, *args, **kwargs):
-        full_create = kwargs.pop('full', False)
-        program = model_class(*args, **kwargs)
-        program.save()
-        if full_create:
-            course = CourseFactory.create(program=program)
-            CourseRunFactory.create(course=course)
-            if program.financial_aid_availability:
+
+class FullProgramFactory(ProgramFactory):
+    """Factory for Programs that also creates some related objects that we care about"""
+    @factory.post_generation
+    def post_gen(self, created, *args, **kwargs):  # pylint: disable=unused-argument
+        """Post-object generation hook"""
+        if created:
+            CourseRunFactory.create(course__program=self)
+            if self.financial_aid_availability:
                 from financialaid.factories import TierProgramFactory
-                TierProgramFactory.create(
-                    program=program,
-                    current=True,
-                    discount_amount=0,
-                    income_threshold=1000
-                )
-                TierProgramFactory.create(
-                    program=program,
-                    current=True,
-                    discount_amount=int(program.price / 10),
-                    income_threshold=0
-                )
-        return program
+                TierProgramFactory.create_properly_configured_batch(2, program=self)
+            return self
 
 
 class CourseFactory(DjangoModelFactory):

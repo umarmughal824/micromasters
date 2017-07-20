@@ -18,6 +18,7 @@ from courses.factories import (
     CourseFactory,
     CourseRunFactory,
     ProgramFactory,
+    FullProgramFactory,
 )
 from dashboard import (
     api,
@@ -1284,9 +1285,9 @@ class UserProgramInfoIntegrationTest(MockedESTestCase):
         super(UserProgramInfoIntegrationTest, cls).setUpTestData()
         cls.user = UserFactory()
         # create the programs
-        cls.program_non_fin_aid = ProgramFactory.create(full=True, live=True)
-        cls.program_fin_aid = ProgramFactory.create(full=True, live=True, financial_aid_availability=True)
-        cls.program_unenrolled = ProgramFactory.create(full=True, live=True)
+        cls.program_non_fin_aid = FullProgramFactory.create(live=True)
+        cls.program_fin_aid = FullProgramFactory.create(live=True, financial_aid_availability=True)
+        cls.program_unenrolled = FullProgramFactory.create(live=True)
         cls.program_not_live = ProgramFactory.create(live=False)
         for program in [cls.program_non_fin_aid, cls.program_fin_aid, cls.program_not_live]:
             models.ProgramEnrollment.objects.create(user=cls.user, program=program)
@@ -1373,12 +1374,7 @@ class UserProgramInfoIntegrationTest(MockedESTestCase):
         )
 
         # set the last access for the cache
-        UserCacheRefreshTimeFactory.create(
-            user=self.user,
-            enrollment=now,
-            certificate=now,
-            current_grade=now,
-        )
+        UserCacheRefreshTimeFactory.create(user=self.user, unexpired=True)
 
         result = api.get_user_program_info(self.user, self.edx_client)
         # extract the right program from the result
