@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.68.3
+--------------
+
+- Allow user to enroll in a course if FA pending (#3419)
+- Add no-sequences eslint rule (#3423)
+- Dashboard API: displayed final grade if user has it and he missed the deadline. (#3417)
+
 Version 0.68.2
 --------------
 
