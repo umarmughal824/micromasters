@@ -19,5 +19,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(set_default_homepage_text),
+        migrations.RunPython(set_default_homepage_text, reverse_code=migrations.RunPython.noop),
     ]
