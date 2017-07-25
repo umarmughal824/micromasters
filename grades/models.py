@@ -12,6 +12,7 @@ from courses.models import (
     CourseRun,
 )
 from exams.models import ExamRun
+from exams.pearson.constants import EXAM_GRADE_PASS, EXAM_GRADE_FAIL
 from grades.constants import FinalGradeStatus
 from micromasters.models import (
     AuditableModel,
@@ -230,6 +231,18 @@ class ProctoredExamGrade(TimestampedModel, AuditableModel):
         """
         now = now_in_utc()
         return cls.objects.filter(user=user, course=course, exam_run__date_grades_available__lte=now)
+
+    def set_score(self, new_score):
+        """
+        Sets a value for the score field, then sets related fields based on that value
+
+        Args:
+            new_score (float): The new score value
+        """
+        self.score = new_score
+        self.percentage_grade = self.score / 100.0
+        self.passed = self.score >= self.passing_score
+        self.grade = EXAM_GRADE_PASS if self.passed else EXAM_GRADE_FAIL
 
     def to_dict(self):
         return serialize_model_object(self)
