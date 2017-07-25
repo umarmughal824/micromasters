@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.69.0
+--------------
+
+- Created management command to make exam grade adjustments
+- Cleared filters of learner page on learner page link refresh (#3422)
+- Fixed broken cms migrations
+
 Version 0.68.3
 --------------
 
