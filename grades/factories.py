@@ -18,6 +18,7 @@ from courses.factories import (
     CourseRunFactory,
 )
 from exams.factories import ExamRunFactory
+from exams.pearson.constants import EXAM_GRADE_PASS, EXAM_GRADE_FAIL
 from grades.constants import FinalGradeStatus
 from grades.models import (
     FinalGrade,
@@ -49,7 +50,7 @@ class ProctoredExamGradeFactory(DjangoModelFactory):
     # this assumes that the max score is 100
     passing_score = 60.0
     score = LazyAttribute(lambda x: x.percentage_grade * 100)
-    grade = LazyAttribute(lambda x: 'Pass' if x.passed else 'Fail')
+    grade = LazyAttribute(lambda x: EXAM_GRADE_PASS if x.passed else EXAM_GRADE_FAIL)
     client_authorization_id = FuzzyText()
     row_data = {"From factory": True}
     passed = Faker('boolean')

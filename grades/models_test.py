@@ -2,11 +2,13 @@
 Tests for grades models
 """
 from django.core.exceptions import ValidationError
+import ddt
 
 from courses.factories import (
     CourseFactory,
     CourseRunFactory,
 )
+from exams.pearson.constants import EXAM_GRADE_PASS, EXAM_GRADE_FAIL
 from grades.models import (
     CourseRunGradingAlreadyCompleteError,
     CourseRunGradingStatus,
@@ -117,6 +119,7 @@ class CourseRunGradingStatusTests(MockedESTestCase):
             CourseRunGradingStatus.create_pending(self.course_run_complete)
 
 
+@ddt.ddt
 class ProctoredExamGradeTests(MockedESTestCase):
     """Tests for ProctoredExamGrade"""
 
@@ -139,3 +142,30 @@ class ProctoredExamGradeTests(MockedESTestCase):
         grades = ProctoredExamGrade.for_user_course(user, course)
 
         assert list(grades) == [available_grade]
+
+    @ddt.data(
+        (5.0, True, EXAM_GRADE_PASS),
+        (0.0, True, EXAM_GRADE_PASS),
+        (-5.0, False, EXAM_GRADE_FAIL),
+    )
+    @ddt.unpack
+    def test_set_score(self, grade_adjust, expected_passed_value, expected_grade_str):
+        """Tests that the set_score helper method sets score-related fields appropriately"""
+        passing_score = 60.0
+        grade = ProctoredExamGradeFactory.build(
+            passing_score=passing_score,
+            score=None,
+            percentage_grade=None,
+            passed=None,
+        )
+        grade.set_score(passing_score + grade_adjust)
+        assert grade.score == passing_score + grade_adjust
+        assert grade.percentage_grade == grade.score / 100.0
+        assert grade.passed == expected_passed_value
+        assert grade.grade == expected_grade_str
+
+    def test_set_score_none(self):
+        """Tests that set_score fails if the provided score is None"""
+        grade = ProctoredExamGradeFactory.build()
+        with self.assertRaises(TypeError):
+            grade.set_score(None)
