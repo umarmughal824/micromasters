@@ -21,4 +21,5 @@ docker-compose run \
    -e ELASTICSEARCH_INDEX=testindex \
    -e USE_WEBPACK_DEV_SERVER=True \
    -e WEBPACK_DEV_SERVER_HOST="$WEBPACK_SELENIUM_DEV_SERVER_HOST" \
+   -e ELASTICSEARCH_DEFAULT_PAGE_SIZE=5 \
    selenium py.test ${@-./selenium_tests}

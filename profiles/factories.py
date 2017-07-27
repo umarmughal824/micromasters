@@ -3,7 +3,13 @@ from datetime import date, datetime, timezone
 import uuid
 from django.db.models.signals import post_save
 
-from factory import SubFactory, LazyFunction, Faker, lazy_attribute
+from factory import (
+    SubFactory,
+    LazyFunction,
+    Faker,
+    lazy_attribute,
+    Trait,
+)
 from factory.django import (
     DjangoModelFactory,
     ImageField,
@@ -91,6 +97,16 @@ class ProfileFactory(DjangoModelFactory):
 
     class Meta:
         model = Profile
+
+    class Params:
+        validated = Trait(
+            filled_out=True,
+            phone_number='+1-800-888-8888',
+            country='US',
+            state_or_territory='US-MA',
+            postal_code='02142',
+            agreed_to_terms_of_service=True,
+        )
 
     @classmethod
     def create_batch(cls, *args, **kwargs):
