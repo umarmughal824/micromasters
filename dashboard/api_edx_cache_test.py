@@ -13,7 +13,11 @@ from requests.exceptions import HTTPError
 
 from backends.edxorg import EdxOrgOAuth2
 from backends.exceptions import InvalidCredentialStored
-from courses.factories import ProgramFactory, CourseFactory, CourseRunFactory
+from courses.factories import (
+    FullProgramFactory,
+    CourseFactory,
+    CourseRunFactory,
+)
 from dashboard import models
 from dashboard.api_edx_cache import (
     CachedEdxUserData,
@@ -50,7 +54,7 @@ class CachedEdxUserDataTests(MockedESTestCase):
         cls.p1_course_run_keys = ['p1_course_run']
         cls.p2_course_run_keys = ['p2_course_run_1', 'p2_course_run_2']
         cls.p1_course_run = CourseRunFactory.create(edx_course_key=cls.p1_course_run_keys[0])
-        p2 = ProgramFactory.create(full=True)
+        p2 = FullProgramFactory.create()
         first_course = p2.course_set.first()
         extra_course = CourseFactory.create(program=p2)
         cls.p2_course_run_1 = CourseRunFactory.create(course=first_course, edx_course_key=cls.p2_course_run_keys[0])

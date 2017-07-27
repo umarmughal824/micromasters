@@ -20,7 +20,10 @@ from rest_framework.exceptions import ValidationError
 from edx_api.enrollments import Enrollment
 
 from backends.pipeline_api import EdxOrgOAuth2
-from courses.factories import CourseRunFactory, ProgramFactory
+from courses.factories import (
+    CourseRunFactory,
+    FullProgramFactory,
+)
 from dashboard.factories import CachedEnrollmentFactory
 from dashboard.models import (
     CachedEnrollment,
@@ -854,7 +857,7 @@ class ValidatePricesTests(MockedESTestCase):
     def setUpTestData(cls):
         """Set up some coupons"""
         super().setUpTestData()
-        cls.program = ProgramFactory.create(live=True, financial_aid_availability=True, full=True)
+        cls.program = FullProgramFactory.create(live=True, financial_aid_availability=True)
 
     def setUp(self):
         super().setUp()

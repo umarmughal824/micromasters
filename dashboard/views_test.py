@@ -54,12 +54,7 @@ class DashboardTest(MockedESTestCase, APITestCase):
             uid=cls.username,
             extra_data={"access_token": "fooooootoken"}
         )
-        UserCacheRefreshTimeFactory(
-            user=cls.user,
-            enrollment=now_in_utc() + timedelta(minutes=10),
-            certificate=now_in_utc() + timedelta(minutes=10),
-            current_grade=now_in_utc() + timedelta(minutes=10),
-        )
+        UserCacheRefreshTimeFactory(user=cls.user, unexpired=True)
 
         # create the programs
         cls.program_1 = ProgramFactory.create(live=True)

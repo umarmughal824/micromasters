@@ -5,8 +5,11 @@ from datetime import timedelta
 from random import randint
 
 import faker
-import factory
-from factory import SubFactory, LazyAttribute
+from factory import (
+    SubFactory,
+    LazyAttribute,
+    Trait,
+)
 from factory.django import DjangoModelFactory
 from factory.fuzzy import (
     FuzzyDateTime,
@@ -80,29 +83,32 @@ class CachedEnrollmentFactory(DjangoModelFactory):
     class Meta:
         model = CachedEnrollment
 
+    class Params:
+        verified = False
+        unverified = Trait(
+            data=LazyAttribute(lambda x: {
+                "is_active": True,
+                "mode": "audit",
+                "user": x.user.username,
+                "course_details": {
+                    "course_id": x.course_run.edx_course_key,
+                }
+            })
+        )
 
-class CachedEnrollmentVerifiedFactory(CachedEnrollmentFactory):
-    """Factory for verified enrollments"""
-    @factory.post_generation
-    def post_gen(self, create, extracted, **kwargs):  # pylint: disable=unused-argument
-        """Function that is called automatically after the factory creates a new object"""
-        if not create:
-            return
-        program = self.course_run.course.program
-        if program.financial_aid_availability:
-            LineFactory.create(course_key=self.course_run.edx_course_key, order__status=Order.FULFILLED)
-
-
-class CachedEnrollmentUnverifiedFactory(CachedEnrollmentFactory):
-    """Factory for unverified enrollments"""
-    data = LazyAttribute(lambda x: {
-        "is_active": True,
-        "mode": "audit",
-        "user": x.user.username,
-        "course_details": {
-            "course_id": x.course_run.edx_course_key,
-        }
-    })
+    @classmethod
+    def create(cls, **kwargs):
+        """
+        Overrides the default .create() method. Creates an Order/Line for an FA course if the client
+        asked for a 'verified' enrollment specifically
+        """
+        created_obj = super().create(**kwargs)
+        if kwargs.get('verified') is True:
+            course_run = created_obj.course_run
+            program = course_run.course.program
+            if program.financial_aid_availability:
+                LineFactory.create(course_key=course_run.edx_course_key, order__status=Order.FULFILLED)
+        return created_obj
 
 
 class UserCacheRefreshTimeFactory(DjangoModelFactory):
@@ -117,6 +123,18 @@ class UserCacheRefreshTimeFactory(DjangoModelFactory):
 
     class Meta:
         model = UserCacheRefreshTime
+
+    class Params:
+        unexpired = Trait(
+            enrollment=now_in_utc() + timedelta(days=1),
+            certificate=now_in_utc() + timedelta(days=1),
+            current_grade=now_in_utc() + timedelta(days=1),
+        )
+        expired = Trait(
+            enrollment=now_in_utc() - timedelta(days=1),
+            certificate=now_in_utc() - timedelta(days=1),
+            current_grade=now_in_utc() - timedelta(days=1),
+        )
 
 
 class ProgramEnrollmentFactory(DjangoModelFactory):
