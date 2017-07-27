@@ -1,11 +1,16 @@
 """Test for redirect on 401 behavior"""
-from unittest.mock import patch
+# pylint: disable=redefined-outer-name,unused-argument
+import pytest
 
 from django.conf.urls import url
 from django.http.response import HttpResponse
 
 from micromasters.urls import urlpatterns
-from selenium_tests.base import SeleniumTestsBase
+
+
+pytestmark = [
+    pytest.mark.django_db,
+]
 
 
 FAKE_RESPONSE = 'Custom response message for selenium test'
@@ -16,19 +21,12 @@ urlpatterns = [
 ]
 
 
-class RedirectTest(SeleniumTestsBase):
-    """
-    If the dashboard API returns a 401 it should handle it properly
-    """
-
-    def test_redirect(self):
-        """Test the redirect behavior"""
-        self.login_via_admin(self.user)
-        with self.settings(
-            ROOT_URLCONF=__name__,
-        ), patch(
-            'dashboard.views.UserDashboard.get', return_value=HttpResponse(status=401)
-        ) as mocked_get:
-            self.get("/dashboard", ignore_errors=True)
-        assert FAKE_RESPONSE in self.selenium.find_element_by_css_selector("body").text
-        assert mocked_get.called
+def test_redirect(browser, logged_in_staff, mocker, settings):
+    """Test the redirect behavior. If the dashboard API returns a 401 it should handle it properly."""
+    # Set ROOT_URLCONF to this modules path. This will cause the app to use the 'urlpatterns' value defined above
+    # at the module level.
+    settings.ROOT_URLCONF = __name__
+    dashboard_patch = mocker.patch('dashboard.views.UserDashboard.get', return_value=HttpResponse(status=401))
+    browser.get("/dashboard", ignore_errors=True)
+    assert FAKE_RESPONSE in browser.driver.find_element_by_css_selector("body").text
+    assert dashboard_patch.called

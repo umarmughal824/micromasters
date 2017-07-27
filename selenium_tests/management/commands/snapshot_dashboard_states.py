@@ -1,16 +1,20 @@
-"""Management command to attach avatars to profiles"""
+"""Management command to take screenshots and save API results for dashboard states"""
+# pylint: disable=redefined-outer-name,unused-argument
 import itertools
 import os
 import sys
 from urllib.parse import quote_plus
+from selenium.webdriver.common.by import By
+from faker.generator import random
+import pytest
 
 from django.core.management import (
     BaseCommand,
     call_command,
 )
+from django.db import connection
 from django.test import override_settings
-from faker.generator import random
-import pytest
+from django.contrib.auth.models import User
 
 from courses.factories import CourseRunFactory
 from courses.models import (
@@ -27,8 +31,16 @@ from exams.factories import ExamRunFactory
 from financialaid.factories import FinancialAidFactory
 from financialaid.models import FinancialAidStatus
 from grades.factories import ProctoredExamGradeFactory
+from profiles.api import get_social_username
 from seed_data.management.commands.alter_data import EXAMPLE_COMMANDS
-from selenium_tests.base import SeleniumTestsBase
+from selenium_tests.data_util import create_user_for_login
+from selenium_tests.util import (
+    DEFAULT_PASSWORD,
+    DatabaseLoader,
+    terminate_db_connections,
+    should_load_from_existing_db,
+)
+from selenium_tests.page import LoginPage
 
 
 # We need to have pytest skip DashboardStates when collecting tests to run, but we also want to run it as a test
@@ -42,10 +54,11 @@ RUNNING_DASHBOARD_STATES = False
 DASHBOARD_STATES_OPTIONS = None
 
 DUMP_DIRECTORY = "output/dashboard_states"
+SEEDED_BACKUP_DB_NAME = "backup_selenium_seeded_db"
 
 
-def make_scenario(command):
-    """Make lambda from ExampleCommand"""
+def generate_alter_data_call(command):
+    """Generates a function that will execute an alter_data command with certain arguments"""
     return lambda: call_command("alter_data", command.command, *command.args)
 
 
@@ -54,12 +67,14 @@ def bind_args(func, *args, **kwargs):
     return lambda: func(*args, **kwargs)
 
 
-@pytest.mark.skipif(
-    'not RUNNING_DASHBOARD_STATES',
-    reason='DashboardStates test suite is only meant to be run via management command',
-)
-class DashboardStates(SeleniumTestsBase):
+class DashboardStates:
     """Runs through each dashboard state taking a snapshot"""
+    def __init__(self, user=None):
+        """
+        Args:
+            user (User): A User
+        """
+        self.user = user
 
     def create_exams(self, edx_passed, exam_passed, new_offering):
         """Create an exam and mark it and the related course as passed or not passed"""
@@ -189,29 +204,9 @@ class DashboardStates(SeleniumTestsBase):
             tier_program__discount_amount=50,
         )
 
-    @classmethod
-    def setUpTestData(cls):
+    def __iter__(self):
         """
-        Set up default user and run seed_db
-        """
-        cls.user = cls.create_user('staff')
-        call_command("seed_db")
-
-    @classmethod
-    def _make_filename(cls, num, name, output_directory, use_mobile=False):
-        """Format the filename without extension for dashboard states"""
-        return os.path.join(
-            output_directory,
-            "dashboard_state_{num:03d}_{command}{mobile}".format(
-                num=num,
-                command=name,
-                mobile="_mobile" if use_mobile else "",
-            )
-        )
-
-    def _make_scenarios(self):
-        """
-        Make generator of all scenarios supported by this command.
+        Iterator over all dashboard states supported by this command.
 
         Yields:
             tuple of scenario_func, name:
@@ -220,9 +215,10 @@ class DashboardStates(SeleniumTestsBase):
         """
         # Generate scenarios from all alter_data example commands
         yield from (
-            (make_scenario(command), command.command) for command in EXAMPLE_COMMANDS
+            (generate_alter_data_call(command), command.command) for command in EXAMPLE_COMMANDS
             # Complicated to handle, and this is the same as the previous command anyway
-            if "--course-run-key" not in command.args
+            if "--course-run-key" not in command.args and
+            command.command not in ['course_info', 'clear_user_dashboard_data']
         )
 
         # Add scenarios for every combination of passed/failed course and exam
@@ -279,57 +275,119 @@ class DashboardStates(SeleniumTestsBase):
                     )
                 )
 
-    def test_dashboard_states(self):
-        """Iterate through all possible dashboard states and take screenshots of each one"""
-        output_directory = DASHBOARD_STATES_OPTIONS.get('output_directory')
-        os.makedirs(output_directory, exist_ok=True)
 
-        use_mobile = DASHBOARD_STATES_OPTIONS.get('mobile')
-        if use_mobile:
-            self.selenium.set_window_size(480, 854)
+def make_filename(num, name, output_directory='', use_mobile=False):
+    """Format the filename without extension for dashboard states"""
+    return os.path.join(
+        output_directory,
+        "dashboard_state_{num:03d}_{command}{mobile}".format(
+            num=num,
+            command=name,
+            mobile="_mobile" if use_mobile else "",
+        )
+    )
 
-        self.login_via_admin(self.user)
 
-        scenarios = self._make_scenarios()
-        scenarios_with_numbers = enumerate(scenarios)
+@pytest.fixture(scope="session")
+def seeded_database_loader():
+    """
+    Fixture for a DatabaseLoader object. Using a different object than the fixture defined
+    in selenium_tests/conftest.py because we don't want to overwrite the backup database used
+    in the actual Selenium test suite.
+    """
+    return DatabaseLoader(db_backup_name=SEEDED_BACKUP_DB_NAME)
 
-        match = DASHBOARD_STATES_OPTIONS.get('match')
-        if match is not None:
-            scenarios_with_numbers = (
-                (num, (run_scenario, name))
-                for (num, (run_scenario, name)) in scenarios_with_numbers
-                if match in self._make_filename(num, name, '')
-            )
 
-        for num, (run_scenario, name) in scenarios_with_numbers:
-            self.restore_db(self._get_data_backup())
-            # Close Django Debug Toolbar
-            self.selenium.execute_script("djdt.close()")
+@pytest.fixture(scope="session")
+def test_data(django_db_blocker, seeded_database_loader):
+    """
+    Fixture that creates a login-enabled test user and backs up a seeded database to be
+    loaded in between dashboard states and cleaned up at the end of the test run.
+    """
+    user = None
+    with django_db_blocker.unblock():
+        with connection.cursor() as cur:
+            load_from_existing_db = should_load_from_existing_db(seeded_database_loader, cur)
+            if not load_from_existing_db:
+                user = create_user_for_login(is_staff=True, username='staff')
+                call_command("seed_db")
+                # Analog Learning program enrollment is being created here because
+                # no programs are enrolled in the initial data snapshot. Setting this enrollment
+                # ensures that the user will see the Analog Learning program in the dashboard.
+                # Right now we manually delete this enrollment in scenarios where we want the user
+                # to see the Digital Learning dashboard.
+                ProgramEnrollment.objects.create(
+                    user=user,
+                    program=Program.objects.get(title='Analog Learning')
+                )
+                seeded_database_loader.create_backup(db_cursor=cur)
+    if load_from_existing_db:
+        with django_db_blocker.unblock():
+            terminate_db_connections()
+        seeded_database_loader.load_backup()
+        user = User.objects.get(username='staff')
+    yield dict(user=user)
 
-            ProgramEnrollment.objects.create(user=self.user, program=Program.objects.get(title='Analog Learning'))
 
+@pytest.mark.skipif(
+    'not RUNNING_DASHBOARD_STATES',
+    reason='DashboardStates test suite is only meant to be run via management command',
+)
+def test_dashboard_states(browser, seeded_database_loader, django_db_blocker, test_data):
+    """Iterate through all possible dashboard states and save screenshots/API results of each one"""
+    output_directory = DASHBOARD_STATES_OPTIONS.get('output_directory')
+    os.makedirs(output_directory, exist_ok=True)
+    use_mobile = DASHBOARD_STATES_OPTIONS.get('mobile')
+    if use_mobile:
+        browser.driver.set_window_size(480, 854)
+
+    dashboard_states = DashboardStates(test_data['user'])
+    dashboard_state_iter = enumerate(dashboard_states)
+    match = DASHBOARD_STATES_OPTIONS.get('match')
+    if match is not None:
+        dashboard_state_iter = filter(
+            lambda scenario: match in make_filename(scenario[0], scenario[1][1]),
+            dashboard_state_iter
+        )
+
+    LoginPage(browser).log_in_via_admin(dashboard_states.user, DEFAULT_PASSWORD)
+    for num, (run_scenario, name) in dashboard_state_iter:
+        with django_db_blocker.unblock():
+            dashboard_states.user.refresh_from_db()
             new_url = run_scenario()
             if new_url is None:
                 new_url = '/dashboard'
-            self.get(new_url)
-            self.wait().until(lambda driver: driver.find_element_by_class_name('course-list'))
-
-            filename = self._make_filename(num, name, output_directory, use_mobile=use_mobile)
-            self.take_screenshot(filename)
-            self.store_api_results(filename)
+            browser.get(new_url)
+            browser.wait_until_loaded(By.CLASS_NAME, 'course-list')
+            filename = make_filename(num, name, output_directory=output_directory, use_mobile=use_mobile)
+            browser.take_screenshot(filename=filename)
+            browser.store_api_results(
+                get_social_username(dashboard_states.user),
+                filename=filename
+            )
+        with django_db_blocker.unblock():
+            terminate_db_connections()
+        seeded_database_loader.load_backup()
 
 
 class Command(BaseCommand):
     """
-    Take screenshots of dashboard states
+    Take screenshots and save API results for dashboard states
     """
-    help = "Create snapshots of dashboard states"
+    help = "Take screenshots and save API results for dashboard states"
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--match",
             dest="match",
             help="Runs only scenarios matching the given string",
+            required=False,
+        )
+        parser.add_argument(
+            "--create-db",
+            dest="create_db",
+            action='store_true',
+            help="Passes the --create-db flag to py.test, guaranteeing a fresh database",
             required=False,
         )
         parser.add_argument(
@@ -358,7 +416,7 @@ class Command(BaseCommand):
         random.seed(12345)
         if options.get('list_scenarios'):
             self.stdout.write('Scenarios:\n')
-            for num, (_, name) in enumerate(DashboardStates()._make_scenarios()):  # pylint: disable=protected-access
+            for num, (_, name) in enumerate(DashboardStates()):
                 self.stdout.write("  {:03}_{}\n".format(num, name))
             return
 
@@ -370,7 +428,7 @@ class Command(BaseCommand):
 
         if os.environ.get('RUNNING_SELENIUM') != 'true':
             raise Exception(
-                "This management command must be run with ./scripts/tests/run_snapshot_dashboard_states.sh"
+                "This management command must be run with ./scripts/test/run_snapshot_dashboard_states.sh"
             )
 
         # We need to use pytest here instead of invoking the tests directly so that the test database
@@ -383,4 +441,7 @@ class Command(BaseCommand):
         with override_settings(
             ELASTICSEARCH_INDEX='testindex',
         ):
-            sys.exit(pytest.main(args=["{}::DashboardStates".format(__file__), "-s"]))
+            pytest_args = ["{}::test_dashboard_states".format(__file__), "-s"]
+            if options.get('create_db'):
+                pytest_args.append('--create-db')
+            sys.exit(pytest.main(args=pytest_args))

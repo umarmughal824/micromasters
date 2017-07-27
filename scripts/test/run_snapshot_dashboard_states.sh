@@ -18,5 +18,6 @@ fi
 
 docker-compose run \
    -e RUNNING_SELENIUM=true \
+   -e DEBUG=false \
    -e WEBPACK_DEV_SERVER_HOST="$WEBPACK_SELENIUM_DEV_SERVER_HOST" \
    selenium ./manage.py snapshot_dashboard_states $@

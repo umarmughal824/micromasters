@@ -595,3 +595,6 @@ if DEBUG:
         return not excluded
 
     DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": show_toolbar, }
+
+# Travis
+IS_CI_ENV = get_bool('CI', False)
