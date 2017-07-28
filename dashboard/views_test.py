@@ -17,7 +17,10 @@ from edx_api.enrollments.models import Enrollments, Enrollment
 from backends.edxorg import EdxOrgOAuth2
 from backends.utils import InvalidCredentialStored
 from courses.factories import ProgramFactory, CourseRunFactory
-from dashboard.factories import UserCacheRefreshTimeFactory
+from dashboard.factories import (
+    UserCacheRefreshTimeFactory,
+    CachedEnrollmentFactory,
+)
 from dashboard.models import ProgramEnrollment, CachedEnrollment
 from micromasters.exceptions import PossiblyImproperlyConfigured
 from micromasters.factories import UserFactory
@@ -344,3 +347,45 @@ class UserCourseEnrollmentTest(MockedESTestCase, APITestCase):
         cache_enr = CachedEnrollment.objects.filter(
             user=self.user, course_run__edx_course_key=self.course_id).first()
         assert cache_enr is not None
+
+
+class UserPaymentStatusTest(MockedESTestCase, APITestCase):
+    """
+    Tests for the UserCourseEnrollment REST API
+    """
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        # create an user
+        cls.user = UserFactory.create()
+        cls.program = ProgramFactory.create()
+        cls.url = reverse('user_program_payment')
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.user)
+
+    def test_enrolled_and_paid_user(self):
+        """Enrolled and paid in any course will get True"""
+        ProgramEnrollment.objects.create(user=self.user, program=self.program)
+        CachedEnrollmentFactory.create(
+            user=self.user,
+            course_run__course__program=self.program,
+            verified=True
+        )
+
+        resp = self.client.get(self.url, format='json')
+        assert len(resp.data) == 1
+        assert resp.data[0][str(self.program.id)] is True
+
+    def test_not_enrolled_and_paid_user(self):
+        """when user is enrolled in program but not in any course"""
+        ProgramEnrollment.objects.create(user=self.user, program=self.program)
+        resp = self.client.get(self.url, format='json')
+        assert len(resp.data) == 1
+        assert resp.data[0][str(self.program.id)] is False
+
+    def test_not_enrolled_in_program(self):
+        """when user is not enrolled"""
+        resp = self.client.get(self.url, format='json')
+        assert len(resp.data) == 0

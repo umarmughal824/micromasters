@@ -22,6 +22,8 @@ from backends.edxorg import EdxOrgOAuth2
 from dashboard.permissions import CanReadIfStaffOrSelf
 from dashboard.api import get_user_program_info
 from dashboard.api_edx_cache import CachedEdxDataApi
+from dashboard.models import ProgramEnrollment
+from dashboard.utils import get_mmtrack
 from micromasters.exceptions import PossiblyImproperlyConfigured
 from profiles.api import get_social_username, get_social_auth
 
@@ -149,4 +151,37 @@ class UserCourseEnrollment(APIView):
         CachedEdxDataApi.update_cached_enrollment(request.user, enrollment, enrollment.course_id, index_user=True)
         return Response(
             data=enrollment.json
+        )
+
+class UserPaymentStatus(APIView):
+    """
+    returns list of program id and status weather user has paid for atleast one course in selected program.
+    """
+    authentication_classes = (
+        authentication.SessionAuthentication,
+        authentication.TokenAuthentication,
+    )
+    permission_classes = (permissions.IsAuthenticated, )
+
+    def get(self, request):
+        data = []
+        for program_enrollment in ProgramEnrollment.objects.filter(
+                user=request.user
+        ).iterator():
+            mmtrack = get_mmtrack(
+                program_enrollment.user,
+                program_enrollment.program
+            )
+
+            has_paid_for_course = []
+            for edx_course_key in mmtrack.edx_course_keys:
+                has_paid_for_course.append(mmtrack.is_enrolled_mmtrack(edx_course_key))
+
+            data.append({
+                str(program_enrollment.program.id): any(has_paid_for_course)
+            })
+
+        return Response(
+            status=status.HTTP_200_OK,
+            data=data
         )
