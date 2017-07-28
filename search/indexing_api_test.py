@@ -522,6 +522,7 @@ class SerializerTests(ESTestCase):
                 'city': profile.city,
                 'birth_country': profile.birth_country,
                 'work_history': serialized['profile']['work_history'],
+                'email_optin': profile.email_optin,
             },
             'program': {
                 'id': program_enrollment.program.id,

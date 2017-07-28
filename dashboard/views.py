@@ -153,9 +153,10 @@ class UserCourseEnrollment(APIView):
             data=enrollment.json
         )
 
+
 class UserPaymentStatus(APIView):
     """
-    returns list of program id and status weather user has paid for atleast one course in selected program.
+    API view for determining whether a user has paid for any course run in their enrolled programs
     """
     authentication_classes = (
         authentication.SessionAuthentication,
@@ -164,21 +165,18 @@ class UserPaymentStatus(APIView):
     permission_classes = (permissions.IsAuthenticated, )
 
     def get(self, request):
+        """
+        list down all user's programs with status True if she paid for any course.
+        """
         data = []
-        for program_enrollment in ProgramEnrollment.objects.filter(
-                user=request.user
-        ).iterator():
+        program_enrollment_q = ProgramEnrollment.objects.filter(user=request.user).select_related('user', 'program')
+        for program_enrollment in program_enrollment_q.iterator():
             mmtrack = get_mmtrack(
                 program_enrollment.user,
                 program_enrollment.program
             )
-
-            has_paid_for_course = []
-            for edx_course_key in mmtrack.edx_course_keys:
-                has_paid_for_course.append(mmtrack.is_enrolled_mmtrack(edx_course_key))
-
             data.append({
-                str(program_enrollment.program.id): any(has_paid_for_course)
+                str(program_enrollment.program.id): mmtrack.has_paid_for_any_in_program()
             })
 
         return Response(

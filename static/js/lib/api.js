@@ -7,7 +7,7 @@ import Decimal from 'decimal.js-light';
 import type { Profile, ProfileGetResult, ProfilePatchResult } from '../flow/profileTypes';
 import type { CheckoutResponse } from '../flow/checkoutTypes';
 import type { Coupons, AttachCouponResponse } from '../flow/couponTypes';
-import type { Dashboard, CoursePrices, ProgramLearners } from '../flow/dashboardTypes';
+import type { Dashboard, CoursePrices, ProgramLearners, ProgramPayment } from '../flow/dashboardTypes';
 import type { AvailableProgram, AvailablePrograms } from '../flow/enrollmentTypes';
 import type { EmailSendResponse } from '../flow/emailTypes';
 import type { PearsonSSOParameters } from '../flow/pearsonTypes';
@@ -187,4 +187,8 @@ export function attachCoupon(couponCode: string): Promise<AttachCouponResponse> 
   }).then(response => (
     R.evolve({coupon: {amount: Decimal}}, response)
   ));
+}
+
+export function getProgramPayment(): Promise<Array<ProgramPayment>> {
+  return fetchJSONWithCSRF('/api/v0/program_payments/');
 }

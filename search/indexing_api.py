@@ -158,7 +158,7 @@ def serialize_public_enrolled_user(serialized_enrolled_user):
             'image', 'image_small', 'image_medium',
             'username', 'filled_out', 'account_privacy',
             'country', 'state_or_territory', 'city',
-            'birth_country', 'work_history',
+            'birth_country', 'work_history', 'email_optin'
         ]
     )
     return {
@@ -380,6 +380,7 @@ def public_program_enrolled_user_mapping():
         'last_name': FOLDED_SEARCHABLE_STRING_TYPE,
         'preferred_name': FOLDED_SEARCHABLE_STRING_TYPE,
         'username': FOLDED_SEARCHABLE_STRING_TYPE,
+        'email_optin': BOOL_TYPE,
         'work_history': {'type': 'nested', 'properties': {
             'city': NOT_ANALYZED_STRING_TYPE,
             'company_name': NOT_ANALYZED_STRING_TYPE,

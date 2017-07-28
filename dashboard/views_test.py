@@ -18,8 +18,8 @@ from backends.edxorg import EdxOrgOAuth2
 from backends.utils import InvalidCredentialStored
 from courses.factories import ProgramFactory, CourseRunFactory
 from dashboard.factories import (
-    UserCacheRefreshTimeFactory,
-    CachedEnrollmentFactory,
+    ProgramEnrollmentFactory,
+    UserCacheRefreshTimeFactory
 )
 from dashboard.models import ProgramEnrollment, CachedEnrollment
 from micromasters.exceptions import PossiblyImproperlyConfigured
@@ -351,7 +351,7 @@ class UserCourseEnrollmentTest(MockedESTestCase, APITestCase):
 
 class UserPaymentStatusTest(MockedESTestCase, APITestCase):
     """
-    Tests for the UserCourseEnrollment REST API
+    Tests for the UserPaymentStatus REST API
     """
     @classmethod
     def setUpTestData(cls):
@@ -367,13 +367,7 @@ class UserPaymentStatusTest(MockedESTestCase, APITestCase):
 
     def test_enrolled_and_paid_user(self):
         """Enrolled and paid in any course will get True"""
-        ProgramEnrollment.objects.create(user=self.user, program=self.program)
-        CachedEnrollmentFactory.create(
-            user=self.user,
-            course_run__course__program=self.program,
-            verified=True
-        )
-
+        ProgramEnrollmentFactory.create(user=self.user, program=self.program)
         resp = self.client.get(self.url, format='json')
         assert len(resp.data) == 1
         assert resp.data[0][str(self.program.id)] is True

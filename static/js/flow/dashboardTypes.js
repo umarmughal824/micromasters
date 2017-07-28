@@ -50,3 +50,7 @@ export type ProgramLearners = {
   learners: Array<ProgramLearner>,
   learners_count: number,
 };
+
+export type ProgramPayment = {
+  payment?: string
+}
