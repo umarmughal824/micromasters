@@ -125,6 +125,7 @@ class ProfileTests(MockedESTestCase):
             'about_me': profile.about_me,
             'romanized_first_name': profile.romanized_first_name,
             'romanized_last_name': profile.romanized_last_name,
+            'email_optin': profile.email_optin
         }
 
     def test_add_education(self):
