@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.69.1
+--------------
+
+- Rewrote selenium suite in pytest style
+- Refactored various factory classes and usages
+
 Version 0.69.0
 --------------
 
