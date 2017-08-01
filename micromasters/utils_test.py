@@ -41,6 +41,8 @@ from micromasters.utils import (
     remove_falsey_values,
     safely_remove_file,
     serialize_model_object,
+    pop_keys_from_dict,
+    pop_matching_keys_from_dict,
 )
 from search.base import MockedESTestCase
 
@@ -309,3 +311,28 @@ def test_now_in_utc():
     now = now_in_utc()
     assert is_near_now(now)
     assert now.tzinfo == pytz.UTC
+
+
+def test_pop_keys_from_dict():
+    """pop_keys_from_dict should remove keys from a source dict and return a dict of removed key-values"""
+    orig_dict = dict(a=1, b=2, c=3, d=4)
+    new_dict = pop_keys_from_dict(orig_dict, ['a', 'd'])
+    assert new_dict == dict(a=1, d=4)
+    assert orig_dict == dict(b=2, c=3)
+    new_dict = pop_keys_from_dict(orig_dict, ['non-existent key'])
+    assert new_dict == {}
+    assert orig_dict == dict(b=2, c=3)
+
+
+def test_pop_matching_keys_from_dict():
+    """
+    test_pop_matching_keys_from_dict should remove matching keys from a source dict and return a dict
+    of removed key-values
+    """
+    orig_dict = dict(a=1, b=2, c=3, d=4)
+    new_dict = pop_matching_keys_from_dict(orig_dict, lambda k: k in ['a', 'd'])
+    assert new_dict == dict(a=1, d=4)
+    assert orig_dict == dict(b=2, c=3)
+    new_dict = pop_matching_keys_from_dict(orig_dict, lambda k: k == 'non-existent key')
+    assert new_dict == {}
+    assert orig_dict == dict(b=2, c=3)

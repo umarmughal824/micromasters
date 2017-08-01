@@ -22,7 +22,7 @@ from factory.fuzzy import (
     FuzzyText,
 )
 import faker
-from micromasters.factories import UserFactory
+from micromasters.factories import UserFactory, SocialUserFactory
 from profiles.models import Employment, Profile, Education
 
 
@@ -115,6 +115,19 @@ class ProfileFactory(DjangoModelFactory):
         """
         with mute_signals(post_save):
             return super().create_batch(*args, **kwargs)
+
+
+class SocialProfileFactory(ProfileFactory):
+    """Factory for Profiles which should also have a social_auth object created for them"""
+    user = SubFactory(SocialUserFactory)
+
+    @classmethod
+    def create(cls, *args, **kwargs):
+        """
+        Overrides the default .create() method to turn off save signals
+        """
+        with mute_signals(post_save):
+            return super().create(*args, **kwargs)
 
 
 class EmploymentFactory(DjangoModelFactory):

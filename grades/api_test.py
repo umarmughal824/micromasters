@@ -7,7 +7,6 @@ from unittest.mock import patch, MagicMock
 import ddt
 from django.core.exceptions import ImproperlyConfigured
 
-from backends.edxorg import EdxOrgOAuth2
 from courses.factories import CourseRunFactory
 from dashboard.api_edx_cache import CachedEdxUserData, UserCachedRunData
 from dashboard.factories import (
@@ -23,7 +22,7 @@ from financialaid.factories import (
 from grades import api
 from grades.exceptions import FreezeGradeFailedException
 from grades.models import FinalGrade, FinalGradeStatus
-from micromasters.factories import UserFactory
+from micromasters.factories import SocialUserFactory, UserFactory
 from micromasters.utils import now_in_utc
 from search.base import MockedESTestCase
 
@@ -39,12 +38,7 @@ class GradeAPITests(MockedESTestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.user = UserFactory.create()
-        cls.user.social_auth.create(
-            provider=EdxOrgOAuth2.name,
-            uid="{}_edx".format(cls.user.username),
-            extra_data={"access_token": "fooooootoken"}
-        )
+        cls.user = SocialUserFactory.create()
 
         cls.run_fa = CourseRunFactory.create(
             freeze_grade_date=now_in_utc()-timedelta(days=1),

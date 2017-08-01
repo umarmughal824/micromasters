@@ -14,13 +14,12 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from edx_api.enrollments.models import Enrollments, Enrollment
 
-from backends.edxorg import EdxOrgOAuth2
 from backends.utils import InvalidCredentialStored
 from courses.factories import ProgramFactory, CourseRunFactory
 from dashboard.factories import UserCacheRefreshTimeFactory
 from dashboard.models import ProgramEnrollment, CachedEnrollment
 from micromasters.exceptions import PossiblyImproperlyConfigured
-from micromasters.factories import UserFactory
+from micromasters.factories import UserFactory, SocialUserFactory
 from micromasters.utils import now_in_utc
 from search.base import MockedESTestCase
 from roles.models import Role
@@ -45,15 +44,8 @@ class DashboardTest(MockedESTestCase, APITestCase):
     @classmethod
     def setUpTestData(cls):
         super(DashboardTest, cls).setUpTestData()
-        # create an user
-        cls.user = UserFactory.create()
-        # create a social auth for the user
-        cls.username = "{}_edx".format(cls.user.username)
-        cls.user.social_auth.create(
-            provider=EdxOrgOAuth2.name,
-            uid=cls.username,
-            extra_data={"access_token": "fooooootoken"}
-        )
+        # create a user
+        cls.user = SocialUserFactory.create()
         UserCacheRefreshTimeFactory(user=cls.user, unexpired=True)
 
         # create the programs
@@ -70,7 +62,7 @@ class DashboardTest(MockedESTestCase, APITestCase):
             )
 
         # url for the dashboard
-        cls.url = reverse('dashboard_api', args=[cls.username])
+        cls.url = reverse('dashboard_api', args=[cls.user.social_auth.first().uid])
 
     def setUp(self):
         super(DashboardTest, self).setUp()
@@ -141,20 +133,13 @@ class DashboardTokensTest(MockedESTestCase, APITestCase):
     @classmethod
     def setUpTestData(cls):
         super(DashboardTokensTest, cls).setUpTestData()
-        # create an user
-        cls.user = UserFactory.create()
-        # create a social auth for the user
-        cls.username = "{}_edx".format(cls.user.username)
-        cls.user.social_auth.create(
-            provider=EdxOrgOAuth2.name,
-            uid=cls.username,
-            extra_data=social_extra_data
-        )
-
+        # create a user
+        cls.user = SocialUserFactory.create(social_auth__extra_data=social_extra_data)
+        cls.social_auth = cls.user.social_auth.first()
         cls.enrollments = Enrollments([])
 
         # url for the dashboard
-        cls.url = reverse('dashboard_api', args=[cls.username])
+        cls.url = reverse('dashboard_api', args=[cls.social_auth.uid])
 
     def setUp(self):
         super(DashboardTokensTest, self).setUp()
@@ -163,9 +148,8 @@ class DashboardTokensTest(MockedESTestCase, APITestCase):
 
     def update_social_extra_data(self, data):
         """Helper function to update the python social auth extra data"""
-        social_user = self.user.social_auth.get(provider=EdxOrgOAuth2.name)
-        social_user.extra_data.update(data)
-        social_user.save()
+        self.social_auth.extra_data.update(data)
+        self.social_auth.save()
 
     def get_with_mocked_enrollments(self):
         """Helper function to make requests with mocked enrollment endpoint"""
@@ -229,14 +213,8 @@ class UserCourseEnrollmentTest(MockedESTestCase, APITestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        # create an user
-        cls.user = UserFactory.create()
-        # create a social auth for the user
-        cls.user.social_auth.create(
-            provider=EdxOrgOAuth2.name,
-            uid="{}_edx".format(cls.user.username),
-            extra_data={"access_token": "fooooootoken"}
-        )
+        # create a user
+        cls.user = SocialUserFactory.create()
 
         # create the course run
         cls.course_id = "edx+fake+key"

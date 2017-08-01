@@ -12,7 +12,6 @@ from factory.django import mute_signals
 import faker
 import rest_framework.status as status
 
-from backends.edxorg import EdxOrgOAuth2
 from courses.factories import CourseRunFactory
 from ecommerce.api import (
     create_unfulfilled_order,
@@ -32,10 +31,10 @@ from ecommerce.models import (
     UserCouponAudit,
 )
 from ecommerce.serializers import CouponSerializer
-from micromasters.factories import UserFactory
+from micromasters.factories import UserFactory, UserSocialAuthFactory
 from micromasters.utils import serialize_model_object
 from profiles.api import get_social_username
-from profiles.factories import ProfileFactory
+from profiles.factories import ProfileFactory, SocialProfileFactory
 from search.base import MockedESTestCase
 
 
@@ -469,17 +468,8 @@ class CouponTests(MockedESTestCase):
         Create user, run, and coupons for testing
         """
         super().setUpTestData()
-        with mute_signals(post_save):
-            profile = ProfileFactory.create()
-        cls.user = profile.user
-        cls.user.social_auth.create(
-            provider='not_edx',
-        )
-        cls.social_username = "{}_edx".format(cls.user.username)
-        cls.user.social_auth.create(
-            provider=EdxOrgOAuth2.name,
-            uid='user',
-        )
+        cls.user = SocialProfileFactory.create().user
+        UserSocialAuthFactory.create(user=cls.user, provider='not_edx')
         run = CourseRunFactory.create(course__program__financial_aid_availability=True)
         cls.coupon = CouponFactory.create(content_object=run.course.program)
         UserCoupon.objects.create(coupon=cls.coupon, user=cls.user)
