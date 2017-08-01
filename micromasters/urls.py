@@ -18,7 +18,7 @@ if settings.DEBUG:
     ]
 
 urlpatterns += [
-    url('', include('social_django.urls', namespace='social')),
+    url(r'', include('backends.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url('', include('courses.urls')),
     url('', include('dashboard.urls')),
