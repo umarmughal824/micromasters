@@ -25,6 +25,7 @@ type LearnerResultProps = {
   setLearnerChipVisibility: (username: ?string) => void,
   learnerChipVisibility: ?string,
   openLearnerEmailComposer: (profile: Profile) => void,
+  hasPayment: boolean
 };
 
 class LearnerResult extends SearchkitComponent {
@@ -39,7 +40,8 @@ class LearnerResult extends SearchkitComponent {
       result: { _source: { profile, program } },
       setLearnerChipVisibility,
       learnerChipVisibility,
-      openLearnerEmailComposer
+      openLearnerEmailComposer,
+      hasPayment
     } = this.props;
 
     const showGrade = program && canAdvanceSearchProgram(program, SETTINGS.roles);
@@ -48,6 +50,7 @@ class LearnerResult extends SearchkitComponent {
     if (profile.username === learnerChipVisibility) {
       renderedLearnerChip = <LearnerChip
         profile={profile}
+        hasPayment={hasPayment}
         openLearnerEmailComposer={R.partial(openLearnerEmailComposer, [profile])}
       />;
     }

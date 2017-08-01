@@ -118,6 +118,7 @@ export default class LearnerSearch extends SearchkitComponent {
     openLearnerEmailComposer:       (profile: Profile) => void,
     children:                       React$Element<*>[],
     currentProgramEnrollment:       AvailableProgram,
+    hasPayment:                     boolean
   };
 
   dropdownOptions: Option[] = [
@@ -130,7 +131,10 @@ export default class LearnerSearch extends SearchkitComponent {
   constructor(props: Object) {
     super(props);
     this.WrappedLearnerResult = wrapWithProps(
-      {openLearnerEmailComposer: this.props.openLearnerEmailComposer},
+      {
+        openLearnerEmailComposer: this.props.openLearnerEmailComposer,
+        hasPayment: this.props.hasPayment
+      },
       LearnerResult
     );
   }

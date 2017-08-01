@@ -10,13 +10,20 @@ import R from 'ramda';
 import LearnerSearch from '../components/LearnerSearch';
 import withSearchkitManager from '../components/search/WithSearchkitManager';
 import { setSearchFilterVisibility } from '../actions/ui';
+import { fetchHasPayments } from '../actions/payment';
 import type { UIState } from '../reducers/ui';
 import { SEARCH_EMAIL_TYPE, LEARNER_EMAIL_TYPE } from '../components/email/constants';
 import { SEARCH_RESULT_EMAIL_CONFIG, LEARNER_EMAIL_CONFIG } from '../components/email/lib';
 import { withEmailDialog } from '../components/email/hoc';
 import type { AllEmailsState } from '../flow/emailTypes';
 import type { AvailableProgram } from '../flow/enrollmentTypes';
+import type { ProgramPaymentState } from '../flow/dashboardTypes';
 import { SEARCH_FILTER_DEFAULT_VISIBILITY } from '../constants';
+import { FETCH_PROCESSING } from '../actions';
+
+const isProcessing = (getStatus: ?string): boolean => (
+  getStatus === undefined || getStatus === FETCH_PROCESSING
+);
 
 class LearnerSearchPage extends React.Component {
   props: {
@@ -24,8 +31,34 @@ class LearnerSearchPage extends React.Component {
     dispatch:                 Dispatch,
     email:                    AllEmailsState,
     ui:                       UIState,
-    openEmailComposer:        (emailType: string, emailOpenParams: any) => void
+    openEmailComposer:        (emailType: string, emailOpenParams: any) => void,
+    paymentState:             ProgramPaymentState
   };
+
+  componentDidMount() {
+    this.fetchPayment();
+  }
+
+  componentDidUpdate() {
+    this.fetchPayment();
+  }
+
+  fetchPayment() {
+    const { paymentState, dispatch } = this.props;
+    if (paymentState === undefined || paymentState.getStatus === undefined) {
+      dispatch(fetchHasPayments());
+    }
+  }
+
+  getPaymentStatus = (programId: number, paymentState: ProgramPaymentState) => {
+    if (paymentState && !isProcessing(paymentState.getStatus) && !R.isEmpty(paymentState.payments)) {
+      let hasPayment = _.find(paymentState.payments, payment => {
+        return R.equals(R.keys(payment)[0], programId.toString());
+      });
+      return hasPayment;
+    }
+    return false;
+  }
 
   checkFilterVisibility = (filterName: string): boolean => {
     const { ui: { searchFilterVisibility } } = this.props;
@@ -41,7 +74,7 @@ class LearnerSearchPage extends React.Component {
   };
 
   render () {
-    const { currentProgramEnrollment, openEmailComposer } = this.props;
+    const { currentProgramEnrollment, openEmailComposer, paymentState } = this.props;
 
     if (_.isNil(currentProgramEnrollment)) {
       return null;
@@ -55,6 +88,7 @@ class LearnerSearchPage extends React.Component {
           openSearchResultEmailComposer={openEmailComposer(SEARCH_EMAIL_TYPE)}
           openLearnerEmailComposer={openEmailComposer(LEARNER_EMAIL_TYPE)}
           currentProgramEnrollment={currentProgramEnrollment}
+          hasPayment={this.getPaymentStatus(currentProgramEnrollment.id, paymentState)}
         />
       </DocumentTitle>
     );
@@ -69,6 +103,7 @@ const mapStateToProps = (state, props) => {
   }
   return {
     ui:                       state.ui,
+    paymentState:             state.paymentState,
     email:                    email,
     currentProgramEnrollment: state.currentProgramEnrollment,
   };

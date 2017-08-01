@@ -54,3 +54,8 @@ export type ProgramLearners = {
 export type ProgramPayment = {
   payment?: string
 }
+
+export type ProgramPaymentState = {
+  payments: Array<ProgramPayment|null>,
+  getStatus?: string,
+}

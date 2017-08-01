@@ -8,11 +8,17 @@ import ProfileImage from '../containers/ProfileImage';
 import { mstr } from '../lib/sanctuary';
 import type { Profile } from '../flow/profileTypes';
 
-const LearnerChip = (props: {profile: Profile, openLearnerEmailComposer: () => void}): React$Element<*> => {
-  const { profile, openLearnerEmailComposer } = props;
+type LearnerChipProps = {
+  profile: Profile,
+  hasPayment: boolean,
+  openLearnerEmailComposer: () => void
+};
+
+const LearnerChip = (props: LearnerChipProps): React$Element<*> => {
+  const { profile, openLearnerEmailComposer, hasPayment } = props;
 
   let emailLink;
-  if (profile.email_optin) {
+  if (profile.email_optin && hasPayment) {
     emailLink = (
       <button onClick={openLearnerEmailComposer} className="icon-button-link">
         <Icon name="email" aria-hidden="true" />
