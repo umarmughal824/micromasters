@@ -17,7 +17,6 @@ from rolepermissions.shortcuts import available_perm_status
 from wagtail.wagtailimages.models import Image
 from wagtail.wagtailimages.tests.utils import get_test_image_file
 
-from backends.edxorg import EdxOrgOAuth2
 from cms.factories import (
     FacultyFactory,
     InfoLinksFactory,
@@ -28,8 +27,9 @@ from cms.models import HomePage, ProgramPage
 from cms.serializers import ProgramPageSerializer
 from courses.factories import ProgramFactory, CourseFactory
 from micromasters.serializers import serialize_maybe_user
+from micromasters.factories import UserSocialAuthFactory
 from profiles.api import get_social_username
-from profiles.factories import ProfileFactory
+from profiles.factories import ProfileFactory, SocialProfileFactory
 from roles.models import Role
 from search.base import MockedESTestCase
 from ui.url_utils import DASHBOARD_URL, TERMS_OF_SERVICE_URL
@@ -43,18 +43,11 @@ class ViewsTests(MockedESTestCase):
         """
         Create and login a user
         """
-        with mute_signals(post_save):
-            profile = ProfileFactory.create(
-                agreed_to_terms_of_service=True,
-                filled_out=True,
-            )
-        profile.user.social_auth.create(
-            provider='not_edx',
+        profile = SocialProfileFactory.create(
+            agreed_to_terms_of_service=True,
+            filled_out=True,
         )
-        profile.user.social_auth.create(
-            provider=EdxOrgOAuth2.name,
-            uid="{}_edx".format(profile.user.username),
-        )
+        UserSocialAuthFactory.create(user=profile.user, provider='not_edx')
         self.client.force_login(profile.user)
         return profile
 

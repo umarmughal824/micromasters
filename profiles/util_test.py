@@ -5,16 +5,13 @@ from io import BytesIO
 from unittest import TestCase
 from unittest.mock import patch
 
-from django.db.models.signals import post_save
 from django.test import TestCase as DjangoTestCase
-from factory.django import mute_signals
 
 from factory.fuzzy import FuzzyInteger
 from PIL import Image
 
-from backends.edxorg import EdxOrgOAuth2
 from profiles import util
-from profiles.factories import ProfileFactory
+from profiles.factories import SocialProfileFactory
 
 
 class SplitNameTests(TestCase):
@@ -149,18 +146,6 @@ class FullNameTests(DjangoTestCase):
     """
     Tests for profile full name function.
     """
-    def create_profile(self, **kwargs):
-        """
-        Create a profile and social auth
-        """
-        with mute_signals(post_save):
-            profile = ProfileFactory.create(**kwargs)
-            profile.user.social_auth.create(
-                provider=EdxOrgOAuth2.name,
-                uid="{}_edx".format(profile.user.username)
-            )
-            return profile
-
     def test_full_name_no_profile(self):
         """
         test full name of user when no profile.
@@ -173,7 +158,7 @@ class FullNameTests(DjangoTestCase):
         """
         first = "Tester"
         last = "KK"
-        profile = self.create_profile(first_name=first, last_name=last)
+        profile = SocialProfileFactory.create(first_name=first, last_name=last)
         assert util.full_name(profile.user) == "{} {}".format(first, last)
 
     def test_full_name_when_last_name_empty(self):
@@ -182,7 +167,7 @@ class FullNameTests(DjangoTestCase):
         """
         first = "Tester"
         last = ""
-        profile = self.create_profile(first_name=first, last_name=last)
+        profile = SocialProfileFactory.create(first_name=first, last_name=last)
         assert util.full_name(profile.user) == "{name} ".format(name=first)
 
     def test_full_name_when_first_name_empty(self):
@@ -191,5 +176,5 @@ class FullNameTests(DjangoTestCase):
         """
         first = ""
         last = "Tester"
-        profile = self.create_profile(first_name=first, last_name=last)
+        profile = SocialProfileFactory.create(first_name=first, last_name=last)
         assert util.full_name(profile.user) == "{} {}".format(profile.user.username, last)

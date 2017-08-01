@@ -15,7 +15,7 @@ from dashboard.tasks import (
     batch_update_user_data_subtasks
 )
 from dashboard.factories import UserCacheRefreshTimeFactory
-from micromasters.factories import UserFactory
+from micromasters.factories import UserFactory, SocialUserFactory
 from search.base import MockedESTestCase
 
 
@@ -27,22 +27,10 @@ class TasksTest(MockedESTestCase):
     @classmethod
     def setUpTestData(cls):
         super(TasksTest, cls).setUpTestData()
-        # create an user
-        cls.user1 = UserFactory.create()
-        cls.user2 = UserFactory.create()
 
-        cls.all_working_users = [cls.user1, cls.user2]
+        cls.all_working_users = SocialUserFactory.create_batch(2)
+        cls.user1, cls.user2 = cls.all_working_users
         cls.students = [user.id for user in cls.all_working_users]
-
-        # create a social auth for the user
-        cls.social_infos = {"access_token": "fooooootoken"}
-        for user in cls.all_working_users:
-            user.social_auth.create(
-                provider=EdxOrgOAuth2.name,
-                uid="{}_edx".format(user.username),
-                extra_data=cls.social_infos
-            )
-
         cls.user_no_social_auth = UserFactory.create()
 
     def test_celery_task_works(self):
@@ -78,24 +66,6 @@ class TasksTest(MockedESTestCase):
 
     @mock.patch('dashboard.api_edx_cache.CachedEdxDataApi.update_cache_if_expired', new_callable=mock.MagicMock)
     @mock.patch('backends.utils.refresh_user_token', autospec=True)
-    def test_student_enrollments_called_task_when_multiple_social(self, mocked_refresh, mocked_refresh_cache):
-        """
-        Assert get_student_enrollments is actually called in happy path when user
-        has more the one social auth objects
-        """
-        self.user1.social_auth.create(
-            provider=EdxOrgOAuth2.name,
-            uid="{}_edx1".format(self.user1.username),
-            extra_data=self.social_infos
-        )
-        batch_update_user_data_subtasks.s([self.students[0]]).apply(args=()).get()
-        assert mocked_refresh.call_count == 1
-        for user, cache_type in product([self.user1], CachedEdxDataApi.SUPPORTED_CACHES):
-            mocked_refresh_cache.assert_any_call(user, mock.ANY, cache_type)
-            mocked_refresh.assert_any_call(user.social_auth.filter(provider=EdxOrgOAuth2.name).latest('id'))
-
-    @mock.patch('dashboard.api_edx_cache.CachedEdxDataApi.update_cache_if_expired', new_callable=mock.MagicMock)
-    @mock.patch('backends.utils.refresh_user_token', autospec=True)
     def test_subtask_user_does_not_exist(self, mocked_refresh, mocked_refresh_cache):
         """
         Test if the user has been deleted between the select and the run of the task,
@@ -122,12 +92,7 @@ class TasksTest(MockedESTestCase):
         """
         Test if the user has a wrong social auth the task still completes
         """
-        user_wrong_social_auth = UserFactory.create()
-        user_wrong_social_auth.social_auth.create(
-            provider='foo_provider',
-            uid="{}_edx".format(user_wrong_social_auth.username),
-            extra_data={"access_token": "fooooootoken"}
-        )
+        user_wrong_social_auth = SocialUserFactory.create(social_auth__provider='foo_provider')
         batch_update_user_data_subtasks.s([user_wrong_social_auth]).apply(args=()).get()
         assert mocked_refresh.called is False
         assert mocked_refresh_cache.called is False
@@ -155,8 +120,9 @@ class TasksTest(MockedESTestCase):
         batch_update_user_data_subtasks.s(self.students).apply(args=()).get()
         assert mocked_refresh_cache.called is False
         for user in self.all_working_users:
-            mocked_refresh.assert_any_call(user.social_auth.get(provider=EdxOrgOAuth2.name))
-            mock_api.assert_any_call(mock.ANY, self.social_infos, settings.EDXORG_BASE_URL)
+            social_auth = user.social_auth.get(provider=EdxOrgOAuth2.name)
+            mocked_refresh.assert_any_call(social_auth)
+            mock_api.assert_any_call(mock.ANY, social_auth.extra_data, settings.EDXORG_BASE_URL)
 
     @mock.patch('dashboard.api_edx_cache.CachedEdxDataApi.update_cache_if_expired', new_callable=mock.MagicMock)
     @mock.patch('backends.utils.refresh_user_token', autospec=True)

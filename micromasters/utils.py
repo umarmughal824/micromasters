@@ -48,6 +48,40 @@ def dict_with_keys(dictionary, keys):
     return {key: dictionary[key] for key in keys}
 
 
+def pop_keys_from_dict(dict_to_pop, keys):
+    """
+    Removes a set of keys from a dict and returns a dict of all the removed key-value pairs.
+    Ex. usage:
+        pop_keys_from_dict({'a': 1, 'b': 2, 'c': 3}, ['a', 'c'])
+        #> {'a': 1, 'c': 3}
+
+    Args:
+        dict_to_pop (dict): A dictionary
+        keys (list(str)): List of keys to remove and return
+
+    Returns:
+        dict: The key-value pairs removed from the dict
+    """
+    return {key: dict_to_pop.pop(key) for key in keys if key in dict_to_pop}
+
+
+def pop_matching_keys_from_dict(dict_to_pop, filter_func):
+    """
+    Removes keys from a dict that pass some filter function, and returns a dict of all the removed key-value pairs.
+    Ex. usage:
+        pop_matching_keys_from_dict({'a': 1, 'b': 2, 'c': 3}, lambda k: k in ['a','b'])
+        #> {'a': 1, 'b': 2}
+
+    Args:
+        dict_to_pop (dict): A dictionary
+        filter_func (callable): A filter function that will be applied to each key
+
+    Returns:
+        dict: The key-value pairs removed from the dict
+    """
+    return pop_keys_from_dict(dict_to_pop, filter(filter_func, dict_to_pop.copy()))
+
+
 def load_json_from_file(project_rel_filepath):
     """
     Loads JSON data from a file

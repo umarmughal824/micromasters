@@ -3,13 +3,11 @@ Tests for profile functions
 """
 
 from unittest.mock import Mock
-
-from django.db.models.signals import post_save
-from factory.django import mute_signals
-
 from backends.edxorg import EdxOrgOAuth2
-from profiles.api import get_social_username
-from profiles.factories import ProfileFactory
+
+from profiles.api import get_social_username, get_social_auth
+from profiles.factories import SocialProfileFactory
+from micromasters.factories import UserSocialAuthFactory
 from search.base import MockedESTestCase
 
 
@@ -24,20 +22,12 @@ class SocialTests(MockedESTestCase):
         """
         super(SocialTests, self).setUp()
 
-        with mute_signals(post_save):
-            profile = ProfileFactory.create(
-                agreed_to_terms_of_service=True,
-                filled_out=True,
-            )
+        profile = SocialProfileFactory.create(
+            agreed_to_terms_of_service=True,
+            filled_out=True,
+        )
         self.user = profile.user
-        self.user.social_auth.create(
-            provider='not_edx',
-        )
-        self.social_username = "{}_edx".format(self.user.username)
-        self.user.social_auth.create(
-            provider=EdxOrgOAuth2.name,
-            uid=self.social_username,
-        )
+        UserSocialAuthFactory.create(user=self.user, provider='not_edx')
 
     def test_anonymous_user(self):
         """
@@ -59,16 +49,21 @@ class SocialTests(MockedESTestCase):
         """
         get_social_username should return the social username, not the Django username
         """
-        assert get_social_username(self.user) == self.social_username
+        assert get_social_username(self.user) == self.user.social_auth.first().uid
 
     def test_two_social(self):
         """
         get_social_username should return latest social user name if
         there are two social edX accounts for a user
         """
-        social_username = 'other name'
-        self.user.social_auth.create(
-            provider=EdxOrgOAuth2.name,
-            uid=social_username,
-        )
-        assert get_social_username(self.user) == social_username
+        new_social_auth = UserSocialAuthFactory.create(user=self.user, uid='other name')
+        assert get_social_username(self.user) == new_social_auth.uid
+
+    def test_get_social_auth(self):
+        """
+        Tests that get_social_auth returns a user's edX social auth object, and if multiple edX social auth objects
+        exists, it returns the most recently created
+        """
+        assert get_social_auth(self.user) == self.user.social_auth.get(provider=EdxOrgOAuth2.name)
+        new_social_auth = UserSocialAuthFactory.create(user=self.user, uid='other name')
+        assert get_social_auth(self.user) == new_social_auth
