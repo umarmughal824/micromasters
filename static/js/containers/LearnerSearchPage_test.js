@@ -26,10 +26,30 @@ import {
 import { EMAIL_COMPOSITION_DIALOG } from '../components/email/constants';
 import { modifyTextField } from '../util/test_utils';
 import EmailCompositionDialog from '../components/email/EmailCompositionDialog';
+import {
+  REQUEST_GET_USER_PROFILE,
+  RECEIVE_GET_USER_PROFILE_SUCCESS,
+} from '../actions/profile';
+import {
+  REQUEST_GET_PROGRAM_ENROLLMENTS,
+  RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
+} from '../actions/programs';
+import {
+  REQUEST_GET_HAS_PAYMENTS,
+  RECEIVE_GET_HAS_PAYMENTS_SUCCESS
+} from '../actions/payment';
 
 describe('LearnerSearchPage', function () {
   const EMAIL_LINK_SELECTOR = '#email-selected';
   let renderComponent, listenForActions, helper, mockAxios, replySpy;
+  const SEARCH_SUCCESS_ACTIONS = [
+    REQUEST_GET_HAS_PAYMENTS,
+    RECEIVE_GET_HAS_PAYMENTS_SUCCESS,
+    RECEIVE_GET_USER_PROFILE_SUCCESS,
+    REQUEST_GET_USER_PROFILE,
+    REQUEST_GET_PROGRAM_ENROLLMENTS,
+    RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS
+  ];
 
   beforeEach(() => {
     // reset Searchkit's guid counter so that it matches our expected data for each test
@@ -55,7 +75,7 @@ describe('LearnerSearchPage', function () {
   });
 
   it('spinner works', () => {
-    return renderComponent('/learners').then(([wrapper, div]) => {
+    return renderComponent('/learners', SEARCH_SUCCESS_ACTIONS).then(([wrapper, div]) => {
       assert.equal(div.querySelector(".loader").style.display, 'block');
       let searchkit = wrapper.find("SearchkitProvider").props().searchkit;
       searchkit.registrationCompleted.then(() => Promise.resolve([wrapper, div])).then((wrapper, div) => {
@@ -65,7 +85,7 @@ describe('LearnerSearchPage', function () {
   });
 
   const renderSearch = () => {
-    return renderComponent('/learners').then(([wrapper]) => {
+    return renderComponent('/learners', SEARCH_SUCCESS_ACTIONS).then(([wrapper]) => {
       let searchkit = wrapper.find("SearchkitProvider").props().searchkit;
       return searchkit.registrationCompleted.then(() => Promise.resolve([wrapper]));
     });
@@ -134,7 +154,7 @@ describe('LearnerSearchPage', function () {
       SHOW_DIALOG
     ];
 
-    return renderComponent('/learners').then(([wrapper]) => {
+    return renderComponent('/learners', SEARCH_SUCCESS_ACTIONS).then(([wrapper]) => {
       let emailLink = wrapper.find(EMAIL_LINK_SELECTOR).at(0);
 
       return listenForActions(EMAIL_DIALOG_ACTIONS, () => {
@@ -177,7 +197,7 @@ describe('LearnerSearchPage', function () {
   it('does not render the email link for learner users', () => {
     SETTINGS.roles = [];
 
-    return renderComponent('/learners').then(([wrapper]) => {
+    return renderComponent('/learners', SEARCH_SUCCESS_ACTIONS).then(([wrapper]) => {
       assert.isFalse(wrapper.find(EMAIL_LINK_SELECTOR).exists());
     });
   });
@@ -190,7 +210,7 @@ describe('LearnerSearchPage', function () {
     for (let selector of STAFF_ONLY_FILTERS) {
       it(`.filter--${selector}`, () => {
         SETTINGS.roles = [];
-        return renderComponent('/learners').then(([wrapper]) => {
+        return renderComponent('/learners', SEARCH_SUCCESS_ACTIONS).then(([wrapper]) => {
           assert.isFalse(wrapper.find(`.filter--${selector}`).exists());
         });
       });
@@ -198,7 +218,7 @@ describe('LearnerSearchPage', function () {
     it('.final-grade-wrapper', () => {
       // special case for final grade since it is handled differently
       SETTINGS.roles = [];
-      return renderComponent('/learners').then(([wrapper]) => {
+      return renderComponent('/learners', SEARCH_SUCCESS_ACTIONS).then(([wrapper]) => {
         assert.isFalse(wrapper.find('.final-grade-wrapper').exists());
       });
     });
@@ -207,14 +227,14 @@ describe('LearnerSearchPage', function () {
   describe('does render staff filters for staff users', () => {
     for (let selector of STAFF_ONLY_FILTERS) {
       it(`.filter--${selector}`, () => {
-        return renderComponent('/learners').then(([wrapper]) => {
+        return renderComponent('/learners', SEARCH_SUCCESS_ACTIONS).then(([wrapper]) => {
           assert.isTrue(wrapper.find(`.filter--${selector}`).exists());
         });
       });
     }
     it('.final-grade-wrapper', () => {
       // special case for final grade since it is handled differently
-      return renderComponent('/learners').then(([wrapper]) => {
+      return renderComponent('/learners', SEARCH_SUCCESS_ACTIONS).then(([wrapper]) => {
         assert.isTrue(wrapper.find('.final-grade-wrapper').exists());
       });
     });

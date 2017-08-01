@@ -76,6 +76,8 @@ export default class IntegrationTestHelper {
     );
     this.programLearnersStub.returns(Promise.resolve(PROGRAM_LEARNERS_RESPONSE));
 
+    this.programPaymentStub = this.sandbox.stub(api, 'getProgramPayment');
+    this.programPaymentStub.returns(Promise.resolve([]));
     this.couponsStub = this.sandbox.stub(api, 'getCoupons');
     this.couponsStub.returns(Promise.resolve([]));
     this.profileGetStub = this.sandbox.stub(api, 'getUserProfile');

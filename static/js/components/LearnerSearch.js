@@ -320,7 +320,7 @@ export default class LearnerSearch extends SearchkitComponent {
   };
 
   render () {
-    const { currentProgramEnrollment, openLearnerEmailComposer, hasPayment } = this.props;
+    const { currentProgramEnrollment, openLearnerEmailComposer, hasPayment = false } = this.props;
     let WrappedLearnerResult = wrapWithProps(
       {
         openLearnerEmailComposer: openLearnerEmailComposer,

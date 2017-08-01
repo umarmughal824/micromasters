@@ -41,16 +41,15 @@ class LearnerResult extends SearchkitComponent {
       setLearnerChipVisibility,
       learnerChipVisibility,
       openLearnerEmailComposer,
-      hasPayment
+      hasPayment = false
     } = this.props;
 
     const showGrade = program && canAdvanceSearchProgram(program, SETTINGS.roles);
-
     let renderedLearnerChip;
     if (profile.username === learnerChipVisibility) {
       renderedLearnerChip = <LearnerChip
         profile={profile}
-        hasPayment={hasPayment || canAdvanceSearchProgram(program, SETTINGS.roles)}
+        hasPayment={hasPayment || showGrade}
         openLearnerEmailComposer={R.partial(openLearnerEmailComposer, [profile])}
       />;
     }
@@ -98,6 +97,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = (dispatch: Dispatch, ownProps: LearnerResultProps) => {
   return {
+    hasPayment: ownProps.hasPayment,
     setLearnerChipVisibility: (username: ?string): void => {
       if (ownProps.learnerChipVisibility !== username) {
         dispatch(setLearnerChipVisibility(username));
