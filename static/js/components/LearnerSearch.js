@@ -128,17 +128,6 @@ export default class LearnerSearch extends SearchkitComponent {
 
   countryNameTranslations: Object = makeCountryNameTranslations();
 
-  constructor(props: Object) {
-    super(props);
-    this.WrappedLearnerResult = wrapWithProps(
-      {
-        openLearnerEmailComposer: this.props.openLearnerEmailComposer,
-        hasPayment: this.props.hasPayment
-      },
-      LearnerResult
-    );
-  }
-
   getNumberOfCoursesInProgram = (): number => {
     const { currentProgramEnrollment } = this.props;
     return R.pathOr(0, ['total_courses'], currentProgramEnrollment);
@@ -331,7 +320,14 @@ export default class LearnerSearch extends SearchkitComponent {
   };
 
   render () {
-    const { currentProgramEnrollment } = this.props;
+    const { currentProgramEnrollment, openLearnerEmailComposer, hasPayment } = this.props;
+    let WrappedLearnerResult = wrapWithProps(
+      {
+        openLearnerEmailComposer: openLearnerEmailComposer,
+        hasPayment: hasPayment
+      },
+      LearnerResult
+    );
 
     return (
       <Loader loaded={!this.isInitialLoading()} shouldRenderAll={true}>
@@ -349,7 +345,7 @@ export default class LearnerSearch extends SearchkitComponent {
                 <Hits
                   className="learner-results"
                   hitsPerPage={SETTINGS.es_page_size}
-                  itemComponent={this.WrappedLearnerResult}
+                  itemComponent={WrappedLearnerResult}
                 />
                 <CustomNoHits />
               </Card>

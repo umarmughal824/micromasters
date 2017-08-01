@@ -50,7 +50,7 @@ class LearnerResult extends SearchkitComponent {
     if (profile.username === learnerChipVisibility) {
       renderedLearnerChip = <LearnerChip
         profile={profile}
-        hasPayment={hasPayment}
+        hasPayment={hasPayment || canAdvanceSearchProgram(program, SETTINGS.roles)}
         openLearnerEmailComposer={R.partial(openLearnerEmailComposer, [profile])}
       />;
     }
@@ -92,6 +92,7 @@ class LearnerResult extends SearchkitComponent {
 const mapStateToProps = state => {
   return {
     learnerChipVisibility: state.ui.learnerChipVisibility,
+    hasPayment: state.hasPayment,
   };
 };
 

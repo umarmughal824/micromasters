@@ -32,7 +32,7 @@ class LearnerSearchPage extends React.Component {
     email:                    AllEmailsState,
     ui:                       UIState,
     openEmailComposer:        (emailType: string, emailOpenParams: any) => void,
-    paymentState:             ProgramPaymentState
+    programPayment:           ProgramPaymentState
   };
 
   componentDidMount() {
@@ -44,18 +44,18 @@ class LearnerSearchPage extends React.Component {
   }
 
   fetchPayment() {
-    const { paymentState, dispatch } = this.props;
-    if (paymentState === undefined || paymentState.getStatus === undefined) {
+    const { programPayment, dispatch } = this.props;
+    if (programPayment === undefined || programPayment.getStatus === undefined) {
       dispatch(fetchHasPayments());
     }
   }
 
-  getPaymentStatus = (programId: number, paymentState: ProgramPaymentState) => {
-    if (paymentState && !isProcessing(paymentState.getStatus) && !R.isEmpty(paymentState.payments)) {
-      let hasPayment = _.find(paymentState.payments, payment => {
+  getPaymentStatus = (programId: number, programPayment: ProgramPaymentState) => {
+    if (programPayment && !isProcessing(programPayment.getStatus) && !R.isEmpty(programPayment.payments)) {
+      let paymentStatus = _.find(programPayment.payments, payment => {
         return R.equals(R.keys(payment)[0], programId.toString());
       });
-      return hasPayment;
+      return R.pathOr(false, [programId.toString()], paymentStatus);
     }
     return false;
   }
@@ -74,12 +74,18 @@ class LearnerSearchPage extends React.Component {
   };
 
   render () {
-    const { currentProgramEnrollment, openEmailComposer, paymentState } = this.props;
+    const { currentProgramEnrollment, openEmailComposer, programPayment } = this.props;
+    let hasPayment = false;
 
     if (_.isNil(currentProgramEnrollment)) {
       return null;
     }
 
+    if (_.isNil(programPayment)) {
+      return null;
+    }
+
+    hasPayment = this.getPaymentStatus(currentProgramEnrollment.id, programPayment);
     return (
       <DocumentTitle title="Search | MITx MicroMasters">
         <LearnerSearch
@@ -88,7 +94,7 @@ class LearnerSearchPage extends React.Component {
           openSearchResultEmailComposer={openEmailComposer(SEARCH_EMAIL_TYPE)}
           openLearnerEmailComposer={openEmailComposer(LEARNER_EMAIL_TYPE)}
           currentProgramEnrollment={currentProgramEnrollment}
-          hasPayment={this.getPaymentStatus(currentProgramEnrollment.id, paymentState)}
+          hasPayment={hasPayment}
         />
       </DocumentTitle>
     );
@@ -103,7 +109,7 @@ const mapStateToProps = (state, props) => {
   }
   return {
     ui:                       state.ui,
-    paymentState:             state.paymentState,
+    programPayment:           state.programPayment,
     email:                    email,
     currentProgramEnrollment: state.currentProgramEnrollment,
   };

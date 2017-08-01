@@ -15,7 +15,7 @@ export const INITIAL_PAYMENT_STATE: ProgramPaymentState = {
   payments: []
 };
 
-export const payments = (state: ProgramPaymentState = INITIAL_PAYMENT_STATE, action: Action<any, null>) => {
+export const programPayment = (state: ProgramPaymentState = INITIAL_PAYMENT_STATE, action: Action<any, null>) => {
   switch (action.type) {
   case REQUEST_GET_HAS_PAYMENTS:
     return { ...state, getStatus: FETCH_PROCESSING };
@@ -23,7 +23,7 @@ export const payments = (state: ProgramPaymentState = INITIAL_PAYMENT_STATE, act
     return {
       ...state,
       getStatus: FETCH_SUCCESS,
-      payments: action.payload.payments,
+      payments: action.payload,
     };
   default:
     return state;
