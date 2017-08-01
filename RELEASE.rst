@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.70.1
+--------------
+
+- Fix duplicate social auth creation during log in (#3444)
+- Fix CORS issue with hot reloading (#3446)
+- Added factories to produce social auth for Users
+
 Version 0.70.0
 --------------
 
