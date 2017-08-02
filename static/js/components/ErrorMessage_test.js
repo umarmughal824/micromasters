@@ -38,6 +38,7 @@ import {
     REQUEST_FETCH_COUPONS,
 } from '../actions/coupons';
 import { actions } from '../lib/redux_rest';
+import { SEARCH_SUCCESS_ACTIONS } from '../containers/LearnerSearchPage_test';
 
 describe("ErrorMessage", () => {
   let errorString = `Sorry, we were unable to load the data necessary
@@ -258,7 +259,7 @@ describe("ErrorMessage", () => {
       it('shows nothing if there is no matching current program enrollment', () => {
         helper.programsGetStub.returns(Promise.resolve([]));
 
-        return renderComponent("/learners").then(([wrapper]) => {
+        return renderComponent("/learners", SEARCH_SUCCESS_ACTIONS).then(([wrapper]) => {
           let message = wrapper.find('.page-content').text();
           assert.equal(message, "");
         });

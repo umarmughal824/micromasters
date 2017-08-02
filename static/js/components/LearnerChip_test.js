@@ -12,8 +12,12 @@ import ProfileImage from '../containers/ProfileImage';
 describe('LearnerChip', () => {
   let profileClone, sandbox;
 
-  const renderChip = (profile, openLearnerEmailComposer) => (
-    shallow(<LearnerChip profile={profile} openLearnerEmailComposer={openLearnerEmailComposer} />)
+  const renderChip = (profile, openLearnerEmailComposer, hasPayment = true) => (
+    shallow(<LearnerChip
+      hasPayment={hasPayment}
+      profile={profile}
+      openLearnerEmailComposer={openLearnerEmailComposer} />
+    )
   );
 
   beforeEach(() => {
@@ -47,7 +51,19 @@ describe('LearnerChip', () => {
     assert.equal(url, `/learner/${profileClone.username}`);
   });
 
-  it('should provide a link to email the learner', () => {
+  [
+    [true, 'provide'],
+    [false, 'not provide']
+  ].forEach(([hasPayment, status]) => {
+    it(`should ${status} a link to email the learner`, () => {
+      let openLearnerEmailComposer = sandbox.stub();
+      profileClone.email_optin = true;
+      let chip = renderChip(profileClone, openLearnerEmailComposer, hasPayment);
+      assert.equal(chip.find('button.icon-button-link').exists(), hasPayment);
+    });
+  });
+
+  it('should open email composer on email button click', () => {
     let openLearnerEmailComposer = sandbox.stub();
     profileClone.email_optin = true;
     let chip = renderChip(profileClone, openLearnerEmailComposer);

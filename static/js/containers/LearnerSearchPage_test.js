@@ -39,17 +39,18 @@ import {
   RECEIVE_GET_HAS_PAYMENTS_SUCCESS
 } from '../actions/payment';
 
+export const SEARCH_SUCCESS_ACTIONS = [
+  REQUEST_GET_HAS_PAYMENTS,
+  RECEIVE_GET_HAS_PAYMENTS_SUCCESS,
+  RECEIVE_GET_USER_PROFILE_SUCCESS,
+  REQUEST_GET_USER_PROFILE,
+  REQUEST_GET_PROGRAM_ENROLLMENTS,
+  RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS
+];
+
 describe('LearnerSearchPage', function () {
   const EMAIL_LINK_SELECTOR = '#email-selected';
   let renderComponent, listenForActions, helper, mockAxios, replySpy;
-  const SEARCH_SUCCESS_ACTIONS = [
-    REQUEST_GET_HAS_PAYMENTS,
-    RECEIVE_GET_HAS_PAYMENTS_SUCCESS,
-    RECEIVE_GET_USER_PROFILE_SUCCESS,
-    REQUEST_GET_USER_PROFILE,
-    REQUEST_GET_PROGRAM_ENROLLMENTS,
-    RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS
-  ];
 
   beforeEach(() => {
     // reset Searchkit's guid counter so that it matches our expected data for each test
