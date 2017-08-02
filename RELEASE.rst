@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.70.2
+--------------
+
+- Raise an exception if there are two social auth objects (#3445)
+
 Version 0.70.1
 --------------
 
