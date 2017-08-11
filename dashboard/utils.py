@@ -208,7 +208,7 @@ class MMTrack:
 
     def get_course_paid_count(self, course_key):
         """
-        Gets the count of paid course runs for the course
+        Gets the count of payments for given course run
 
         Args:
             edx_course_key (str): an edX course run key
@@ -218,6 +218,19 @@ class MMTrack:
         return Line.objects.filter(
             order__status=Order.FULFILLED, order__user=self.user, course_key=course_key
         ).values('order_id').distinct().count()
+
+    def get_payments_count_for_course(self, course):
+        """
+        Get the total count of payments for given course
+        Args:
+            course (courses.models.Course): a course
+        Returns:
+            int: count of paid course runs
+        """
+        return sum([
+            self.get_course_paid_count(course_run.edx_course_key)
+            for course_run in course.courserun_set.only('edx_course_key')
+        ])
 
     def has_paid_for_any_in_program(self):
         """
