@@ -6,6 +6,7 @@ from itertools import islice
 import json
 import logging
 import os
+import hashlib
 
 import pytz
 from django.conf import settings
@@ -264,3 +265,18 @@ def now_in_utc():
         datetime.datetime: A datetime object for the current time
     """
     return datetime.datetime.now(tz=pytz.UTC)
+
+
+def generate_md5(unicode):
+    """
+    Generate an MD5 hash
+
+    Args:
+        unicode (bytes): Unicode bytes representing the string you want to be hashed
+
+    Returns:
+        str: An MD5 hash (hex characters)
+    """
+    hasher = hashlib.md5()
+    hasher.update(unicode)
+    return hasher.hexdigest()

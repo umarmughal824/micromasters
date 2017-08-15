@@ -23,9 +23,10 @@ from grades.constants import FinalGradeStatus
 from grades.models import (
     FinalGrade,
     ProctoredExamGrade,
+    MicromastersCourseCertificate,
 )
 from micromasters.factories import UserFactory
-from micromasters.utils import now_in_utc
+from micromasters.utils import now_in_utc, generate_md5
 
 
 class FinalGradeFactory(DjangoModelFactory):
@@ -58,3 +59,12 @@ class ProctoredExamGradeFactory(DjangoModelFactory):
 
     class Meta:  # pylint: disable=missing-docstring,no-init,too-few-public-methods,old-style-class
         model = ProctoredExamGrade
+
+
+class MicromastersCertificateFactory(DjangoModelFactory):
+    """Factory for MicromastersCertificate"""
+    final_grade = SubFactory(FinalGradeFactory)
+    hash = LazyAttribute(lambda cert: generate_md5(str(cert.final_grade).encode('utf-8')))
+
+    class Meta:  # pylint: disable=missing-docstring,no-init,too-few-public-methods,old-style-class
+        model = MicromastersCourseCertificate

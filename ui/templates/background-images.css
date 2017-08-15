@@ -20,3 +20,7 @@
 .sk-search-box form .sk-search-box__icon:before {
   background-image: url({% static "images/search-icon.svg" %});
 }
+
+.certificate .certificate-body.verified {
+  background-image: url({% static "images/verified-seal-grayscale.png" %});
+}

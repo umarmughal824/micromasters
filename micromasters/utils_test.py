@@ -43,6 +43,7 @@ from micromasters.utils import (
     serialize_model_object,
     pop_keys_from_dict,
     pop_matching_keys_from_dict,
+    generate_md5,
 )
 from search.base import MockedESTestCase
 
@@ -336,3 +337,13 @@ def test_pop_matching_keys_from_dict():
     new_dict = pop_matching_keys_from_dict(orig_dict, lambda k: k == 'non-existent key')
     assert new_dict == {}
     assert orig_dict == dict(b=2, c=3)
+
+
+def test_generate_md5():
+    """Test that generate_md5 generates an MD5 hash"""
+    bytes_to_hash = 'abc'.encode('utf-8')
+    md5_hash = generate_md5(bytes_to_hash)
+    assert isinstance(md5_hash, str)
+    assert len(md5_hash) == 32
+    repeat_md5_hash = generate_md5(bytes_to_hash)
+    assert md5_hash == repeat_md5_hash
