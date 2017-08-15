@@ -1,0 +1,137 @@
+.certificate {
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 20px 0;
+  color: #4d4b4b;
+  font-size: 1rem;
+  font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased; // sass-lint:disable-line no-vendor-prefixes
+
+  .certificate-body {
+    border: 1px solid #cdd7db;
+    background: #fcfcfc;
+    box-shadow: 0 1px 2px 1px rgba(167,164,164,.25);
+    padding: 35px 50px;
+
+    &.verified {
+      background-position: -325px -50px;
+      background-size: 100% auto;
+      background-color: #fff;
+      background-repeat: no-repeat;
+    }
+
+    .micromasters-logo {
+      padding-bottom: 40px;
+
+      img {
+        width: 435px;
+      }
+    }
+
+    .organization-logo img {
+      width: 160px;
+    }
+
+    .certificate-text {
+      color: #4d4b4b;
+      padding-bottom: 75px;
+      font-weight: 400;
+
+      p {
+        margin: 0;
+        padding-bottom: 15px;
+        font-size: 18px;
+      }
+
+      .name {
+        color: #000;
+        font-size: 40px;
+        font-weight: 600;
+        line-height: 44px;
+      }
+
+      .course-name {
+        color: #000;
+        font-size: 28px;
+        font-weight: 600;
+        line-height: 32px;
+      }
+    }
+
+    .certificate-stamps {
+      text-align: left;
+      font-size: 12px;
+
+      div {
+        padding: 0;
+      }
+
+      .certificate-date {
+        padding-left: 10px;
+      }
+
+      .edx-logo img {
+        width: 125px;
+      }
+
+      label {
+        display: block;
+        margin: 0;
+        color: #a7a4a4;
+        letter-spacing: 0.7px;
+        text-transform: uppercase;
+        font-weight: normal;
+      }
+
+      span {
+        color: #6b6969;
+        font-weight: 600;
+
+        a {
+          font-weight: 600;
+        }
+      }
+    }
+
+    .right-col {
+      text-align: right;
+    }
+
+    .organization-logo {
+      padding-bottom: 50px;
+    }
+
+    .signatory {
+      padding-bottom: 15px;
+
+      .name {
+        margin: 0;
+        padding: 0 0 5px;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.6;
+      }
+
+      ul {
+        margin: 0;
+        padding: 0 0 5px;
+        list-style: none;
+        text-indent: 0;
+        color: #6b6969;
+        font-size: 12px;
+
+        li {
+          line-height: 18px;
+        }
+      }
+
+      .organization {
+        color: #6b6969;
+        font-size: 12px;
+        font-style: italic;
+      }
+    }
+  }
+}
