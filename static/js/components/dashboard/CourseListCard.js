@@ -88,7 +88,7 @@ export default class CourseListCard extends React.Component {
 
   renderPriceMessage(): ?React$Element<*> {
     const { program } = this.props;
-    const { coupon, price } = this.getProgramCouponPrice();
+    const { coupon } = this.getProgramCouponPrice();
 
     // Special case: 100% off coupon
     if (coupon && isFreeCoupon(coupon) && coupon.content_type === COUPON_CONTENT_TYPE_PROGRAM) {
@@ -102,7 +102,7 @@ export default class CourseListCard extends React.Component {
     }
 
     return <p className={priceMessageClassName}>
-      Courses in this program cost <strong>{ formatPrice(price) } USD each.</strong> {" "}
+      To get credit for the courses in this program, you must pay for a verified certificate from edx.org.
       If you want to audit courses for FREE and upgrade later,
       click Enroll then choose the audit option.
     </p>;
