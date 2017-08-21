@@ -199,7 +199,8 @@ class PurchasableTests(MockedESTestCase):
         with self.assertRaises(Http404):
             create_unfulfilled_order(course_run.edx_course_key, user)
 
-    def test_already_purchased(self):
+    @patch('ecommerce.api.has_to_pay_for_exam', return_value=False)
+    def test_already_purchased(self, has_to_pay):
         """
         Purchasable course runs must not be already purchased
         """
@@ -215,6 +216,20 @@ class PurchasableTests(MockedESTestCase):
             get_purchasable_course_run(course_run.edx_course_key, user)
 
         assert ex.exception.args[0] == 'Course run {} is already purchased'.format(course_run.edx_course_key)
+        assert has_to_pay.call_count == 1
+
+    @patch('ecommerce.api.has_to_pay_for_exam', return_value=True)
+    def test_already_purchased_but_need_exam_attempts(self, has_to_pay):
+        """
+        Can purchase a course run again if failed all exam attempts
+        """
+        course_run, user = create_purchasable_course_run()
+        order = create_unfulfilled_order(course_run.edx_course_key, user)
+        order.status = Order.FULFILLED
+        order.save()
+
+        assert get_purchasable_course_run(course_run.edx_course_key, user) == course_run
+        assert has_to_pay.call_count == 1
 
     def test_less_or_equal_to_zero(self):
         """
