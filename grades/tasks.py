@@ -1,5 +1,5 @@
 """
-Tasks for the course app
+Tasks for the grades app
 """
 import logging
 
@@ -7,10 +7,16 @@ from celery import group
 from celery.result import GroupResult
 from django.contrib.auth.models import User
 from django.core.cache import caches
+from django.db.models import Count
 
 from courses.models import CourseRun
 from grades import api
-from grades.models import CourseRunGradingStatus
+from grades.models import (
+    FinalGrade,
+    ProctoredExamGrade,
+    MicromastersCourseCertificate,
+    CourseRunGradingStatus,
+)
 from micromasters.celery import app
 from micromasters.utils import chunks
 
@@ -19,6 +25,57 @@ CACHE_ID_BASE_STR = "freeze_grade_{0}"
 
 log = logging.getLogger(__name__)
 cache_redis = caches['redis']
+
+
+@app.task
+def generate_course_certificates_for_fa_students():
+    """
+    Task that finds users with a final grade that should have a certificate and creates
+    the certificate.
+    """
+    # Fetch FinalGrades in FA programs with no associated MicromastersCourseCertificate
+    final_grade_values = (
+        FinalGrade.objects
+        .filter(
+            course_run__course__program__financial_aid_availability=True,
+            passed=True,
+        )
+        .annotate(certificate_count=Count('micromasterscoursecertificate'))
+        .filter(certificate_count=0)
+        .annotate(exam_run_count=Count('course_run__course__exam_runs'))
+        .values(
+            'id',
+            'user__id',
+            'user__username',
+            'course_run__course__id',
+            'course_run__edx_course_key',
+            'exam_run_count',
+        )
+    )
+    # Filter the results for FinalGrades that should have a MicromastersCourseCertificate created.
+    # A FinalGrade should have a certificate if:
+    #   1. No exams were scheduled for the course, or
+    #   2. The course has a scheduled exam and the user has a passing ProctoredExamGrade in the course.
+    final_grades_to_certify = filter(
+        lambda final_grade_dict: (
+            final_grade_dict['exam_run_count'] == 0 or
+            ProctoredExamGrade.objects.filter(
+                user_id=final_grade_dict['user__id'],
+                course_id=final_grade_dict['course_run__course__id'],
+                passed=True
+            ).exists()
+        ),
+        final_grade_values
+    )
+    for final_grade_dict in final_grades_to_certify:
+        MicromastersCourseCertificate.objects.create(
+            final_grade_id=final_grade_dict['id']
+        )
+        log.info(
+            'Created MM course certificate for [%s] in course run [%s]',
+            final_grade_dict['user__username'],
+            final_grade_dict['course_run__edx_course_key']
+        )
 
 
 @app.task

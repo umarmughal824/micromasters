@@ -61,8 +61,8 @@ class ProctoredExamGradeFactory(DjangoModelFactory):
         model = ProctoredExamGrade
 
 
-class MicromastersCertificateFactory(DjangoModelFactory):
-    """Factory for MicromastersCertificate"""
+class MicromastersCourseCertificateFactory(DjangoModelFactory):
+    """Factory for MicromastersCourseCertificate"""
     final_grade = SubFactory(FinalGradeFactory)
     hash = LazyAttribute(lambda cert: generate_md5(str(cert.final_grade).encode('utf-8')))
 
