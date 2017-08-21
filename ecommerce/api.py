@@ -26,7 +26,8 @@ from dashboard.api_edx_cache import (
     CachedEdxUserData,
 )
 from dashboard.models import ProgramEnrollment
-from dashboard.utils import MMTrack
+from dashboard.utils import MMTrack, get_mmtrack
+from dashboard.api import has_to_pay_for_exam
 from ecommerce.exceptions import (
     EcommerceEdxApiException,
     EcommerceException,
@@ -96,8 +97,10 @@ def get_purchasable_course_run(course_key, user):
             order__user=user,
             course_key=course_run.edx_course_key,
     ).exists():
-        log.warning("Course run %s is already purchased by user %s", course_key, user)
-        raise ValidationError("Course run {} is already purchased".format(course_key))
+        mmtrack = get_mmtrack(user, course_run.course.program)
+        if not has_to_pay_for_exam(mmtrack, course_run.course):
+            log.warning("Course run %s is already purchased by user %s", course_key, user)
+            raise ValidationError("Course run {} is already purchased".format(course_key))
 
     return course_run
 
