@@ -1,6 +1,27 @@
 Release Notes
 =============
 
+Version 0.72.0
+--------------
+
+- Added task to generate course certificates
+- Release 0.71.0
+- upgrading iso-3166-2.js to 1.0.0 (#3491)
+- Allowed learners to pay for a course run again if no exam attempts remain
+- use our fork of iso-3166-2.js with English names for Israel&#39;s districts (#3487)
+- Use MIDDLEWARE instead of MIDDLEWARE_CLASSES (#3466)
+- Let user pay for a course if auditing (#3486)
+- Pdpinch/remove price (#3482)
+- Added MicroMasters-generated course certificates for FA courses
+- Upgrade yarn (#3469)
+- Fix occasional null reference error when running snapshot_dashboard_states (#3458)
+- Redesigned learner page
+- Remove unused watch link from nginx container (#3463)
+- Move collectstatic into docker-compose (#3462)
+- Allow learners to pay for exam attempts (#3457)
+- Added nginx configs to increase header and body buffer size to address Issue#3453
+- Added redux-asserts flow types (#3452)
+
 Version 0.70.2
 --------------
 
