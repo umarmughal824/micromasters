@@ -482,6 +482,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'exams.tasks.batch_process_pearson_zip_files',
         'schedule': crontab(minute=0, hour='*')
     },
+    'generate-mm-course-certificates-every-1-hrs': {
+        'task': 'grades.tasks.generate_course_certificates_for_fa_students',
+        'schedule': crontab(minute=0, hour='*')
+    },
 }
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
