@@ -75,8 +75,29 @@ class ProctoredExamGradeAuditAdmin(admin.ModelAdmin):
     def has_delete_permission(self, *args, **kwargs):  # pylint: disable=unused-argument, arguments-differ
         return False
 
+
+class MicromastersCourseCertificateAdmin(admin.ModelAdmin):
+    """Admin for MicromastersCourseCertificate"""
+    model = models.MicromastersCourseCertificate
+    list_display = ('id', 'final_grade_username', 'final_grade_course_run_key', 'hash')
+    list_filter = ('final_grade__course_run__course', )
+
+    def final_grade_username(self, obj):  # pylint: disable=missing-docstring
+        return obj.final_grade.user.username
+
+    def final_grade_course_run_key(self, obj):  # pylint: disable=missing-docstring
+        return obj.final_grade.course_run.edx_course_key
+
+    final_grade_username.short_description = 'User'
+    final_grade_course_run_key.short_description = 'Course Run'
+
+    def has_add_permission(self, *args, **kwargs):  # pylint: disable=unused-argument, arguments-differ
+        return False
+
+
 admin.site.register(models.FinalGrade, FinalGradeAdmin)
 admin.site.register(models.FinalGradeAudit, FinalGradeAuditAdmin)
 admin.site.register(models.CourseRunGradingStatus, CourseRunGradingStatusAdmin)
 admin.site.register(models.ProctoredExamGrade, ProctoredExamGradeAdmin)
 admin.site.register(models.ProctoredExamGradeAudit, ProctoredExamGradeAuditAdmin)
+admin.site.register(models.MicromastersCourseCertificate, MicromastersCourseCertificateAdmin)
