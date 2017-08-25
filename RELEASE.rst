@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.72.1
+--------------
+
+- Add link to view certificates for FA courses (#3497)
+- Added MicromastersCourseCertificate to django admin
+
 Version 0.72.0
 --------------
 
