@@ -121,7 +121,7 @@ describe('Course ProgressMessage', () => {
       course.runs[0].status = STATUS_CAN_UPGRADE;
       assert.equal(
         staffCourseInfo(course.runs[0], course),
-        `Auditing (Upgrade deadline ${moment(course.runs[0].course_end_date).format(COURSE_CARD_FORMAT)})`
+        `Auditing (Upgrade deadline ${moment(course.runs[0].course_upgrade_deadline).format(COURSE_CARD_FORMAT)})`
       );
     });
 

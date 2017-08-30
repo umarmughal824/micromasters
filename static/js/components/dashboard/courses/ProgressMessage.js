@@ -57,7 +57,7 @@ export const staffCourseInfo = (courseRun: CourseRun, course: Course) => {
     }
     if (courseRun.status === STATUS_CAN_UPGRADE) {
       if (courseCurrentlyInProgress(courseRun)) {
-        return `Auditing (Upgrade deadline ${moment(courseRun.course_end_date).format(COURSE_CARD_FORMAT)})`;
+        return `Auditing (Upgrade deadline ${moment(courseRun.course_upgrade_deadline).format(COURSE_CARD_FORMAT)})`;
       }
       return "Auditing";
     }
