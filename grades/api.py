@@ -6,6 +6,8 @@ from collections import namedtuple
 
 from django.contrib.auth.models import User
 
+from django_redis import get_redis_connection
+
 from dashboard.api_edx_cache import CachedEdxUserData, CachedEdxDataApi
 from dashboard.models import CachedEnrollment
 from grades.exceptions import FreezeGradeFailedException
@@ -14,6 +16,7 @@ from grades.models import (
     FinalGradeStatus,
 )
 
+CACHE_KEY_FAILED_USERS_BASE_STR = "failed_users_{0}"
 
 log = logging.getLogger(__name__)
 
@@ -165,6 +168,8 @@ def freeze_user_final_grade(user, course_run, raise_on_exception=False):
     try:
         CachedEdxDataApi.update_all_cached_grade_data(user)
     except Exception as ex:  # pylint: disable=broad-except
+        con = get_redis_connection("redis")
+        con.lpush(CACHE_KEY_FAILED_USERS_BASE_STR.format(course_run.edx_course_key), user.id)
         if not raise_on_exception:
             log.exception('Impossible to refresh the edX cache for user "%s"', user.username)
             return
