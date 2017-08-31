@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.73.0
+--------------
+
+- Complete freeze final grades task when cache refresh fails (#3488)
+- Fixed course upgrade deadline on learners page (#3501)
+
 Version 0.72.1
 --------------
 
