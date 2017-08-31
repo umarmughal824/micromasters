@@ -9,6 +9,14 @@ import pytest
 from search import tasks
 
 
+@pytest.fixture(autouse=True)
+def settings_defaults(settings):
+    """
+    Sets default settings to safe defaults
+    """
+    settings.FEATURES['OPEN_DISCUSSIONS_USER_SYNC'] = False
+
+
 @pytest.fixture(scope='module')
 def mocked_elasticsearch_module_patcher():
     """
