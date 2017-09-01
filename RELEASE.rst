@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.73.1
+--------------
+
+- Delete failed users when course run grading status is complete (#3506)
+
 Version 0.73.0
 --------------
 
