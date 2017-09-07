@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.74.0
+--------------
+
+- Filter on coupon id for automatic emails (#3509)
+
 Version 0.73.1
 --------------
 
