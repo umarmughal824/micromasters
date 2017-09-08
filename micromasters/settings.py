@@ -94,6 +94,7 @@ INSTALLED_APPS = (
     # other third party APPS
     'rolepermissions',
     'raven.contrib.django.raven_compat',
+    'corsheaders',
 
     # Our INSTALLED_APPS
     'backends',
@@ -122,6 +123,7 @@ if not DISABLE_WEBPACK_LOADER_STATS:
 MIDDLEWARE = (
     'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -399,6 +401,10 @@ RAVEN_CONFIG = {
     'release': VERSION
 }
 
+# CORS
+CORS_ORIGIN_WHITELIST = get_list_of_str("MICROMASTERS_CORS_ORIGIN_WHITELIST", [])
+CORS_ALLOW_CREDENTIALS = True
+
 # to run the app locally on mac you need to bypass syslog
 if get_bool('MICROMASTERS_BYPASS_SYSLOG', False):
     LOGGING['handlers'].pop('syslog')
@@ -558,7 +564,7 @@ EXAMS_AUDIT_AWS_SECRET_ACCESS_KEY = get_string('EXAMS_AUDIT_AWS_SECRET_ACCESS_KE
 OPEN_DISCUSSIONS_API_USERNAME = get_string('OPEN_DISCUSSIONS_API_USERNAME', None)
 OPEN_DISCUSSIONS_BASE_URL = get_string('OPEN_DISCUSSIONS_BASE_URL', None)
 OPEN_DISCUSSIONS_COOKIE_DOMAIN = get_string('OPEN_DISCUSSIONS_COOKIE_DOMAIN', None)
-OPEN_DISCUSSIONS_COOKIE_EXPIRES_DELTA = get_int('OPEN_DISCUSSIONS_COOKIE_EXPIRES_DELTA', 60*60)
+OPEN_DISCUSSIONS_JWT_EXPIRES_DELTA = get_int('OPEN_DISCUSSIONS_JWT_EXPIRES_DELTA', 60*60)
 OPEN_DISCUSSIONS_COOKIE_NAME = get_string('OPEN_DISCUSSIONS_COOKIE_NAME', 'open_discussions_jwt')
 OPEN_DISCUSSIONS_JWT_SECRET = get_string('OPEN_DISCUSSIONS_JWT_SECRET', None)
 OPEN_DISCUSSIONS_REDIRECT_URL = get_string('OPEN_DISCUSSIONS_REDIRECT_URL', None)

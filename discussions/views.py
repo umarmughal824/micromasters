@@ -12,7 +12,7 @@ from rest_framework.response import Response
 
 from discussions.permissions import CanCreateChannel
 from discussions.serializers import ChannelSerializer
-from discussions.utils import get_token_for_user
+from discussions.utils import get_token_for_request
 
 
 def _set_jwt_cookie(response, token):
@@ -27,8 +27,7 @@ def _set_jwt_cookie(response, token):
         settings.OPEN_DISCUSSIONS_COOKIE_NAME,
         token,
         domain=settings.OPEN_DISCUSSIONS_COOKIE_DOMAIN,
-        httponly=True,
-        max_age=settings.OPEN_DISCUSSIONS_COOKIE_EXPIRES_DELTA
+        httponly=True
     )
 
 
@@ -37,7 +36,7 @@ def discussions_token(request):
     """
     API view for setting discussions JWT token
     """
-    token = get_token_for_user(request.user)
+    token = get_token_for_request(request)
     if token is not None:
         response = Response({
             'has_token': True
@@ -55,7 +54,7 @@ def discussions_redirect(request):
     """
     View for setting discussions JWT token and redirecting to discussions
     """
-    token = get_token_for_user(request.user)
+    token = get_token_for_request(request)
     if token is not None:
         response = redirect(settings.OPEN_DISCUSSIONS_REDIRECT_URL)
         _set_jwt_cookie(response, token)

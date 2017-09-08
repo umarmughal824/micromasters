@@ -111,6 +111,10 @@
       "description": "E-mail to send 500 reports to.",
       "required": false
     },
+    "MICROMASTERS_CORS_ORIGIN_WHITELIST": {
+      "description": "List of origins to allow CORS requests from (e.g. ['otherhost.com', 'myhost.edu'])",
+      "required": false
+    },
     "MICROMASTERS_DB_CONN_MAX_AGE": {
       "required": true,
       "value": "0"
@@ -180,7 +184,7 @@
       "description": "The domain to set the JWT token cookie on",
       "required": false
     },
-    "OPEN_DISCUSSIONS_COOKIE_EXPIRES_DELTA": {
+    "OPEN_DISCUSSIONS_JWT_EXPIRES_DELTA": {
       "description": "How long the JWT cookie should live before expiration",
       "required": false
     },

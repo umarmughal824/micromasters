@@ -51,10 +51,19 @@ def test_get_token_for_user(settings, mocker):
         user = UserFactory.create()
 
     settings.OPEN_DISCUSSIONS_JWT_SECRET = 'secret'
-    settings.OPEN_DISCUSSIONS_COOKIE_EXPIRES_DELTA = 3600
+    settings.OPEN_DISCUSSIONS_JWT_EXPIRES_DELTA = 3600
 
     mock_get_token = mocker.patch('open_discussions_api.utils.get_token')
 
     DiscussionUser.objects.create(user=user, username='username')
     assert get_token_for_user(user) is not None
-    mock_get_token.assert_called_once_with('secret', 'username', [], expires_delta=3600)
+    mock_get_token.assert_called_once_with(
+        'secret',
+        'username',
+        [],
+        expires_delta=3600,
+        extra_payload={
+            'auth_url': None,
+            'session_url': None
+        }
+    )
