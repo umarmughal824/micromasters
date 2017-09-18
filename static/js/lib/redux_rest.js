@@ -6,6 +6,7 @@ import { courseEnrollmentsEndpoint } from "../reducers/course_enrollments"
 import { coursePricesEndpoint } from "../reducers/course_prices"
 import { programLearnersEndpoint } from "../reducers/program_learners"
 import { discussionsFrontpageEndpoint } from "../reducers/discussions_frontpage"
+import { channelsEndpoint } from "../reducers/channels"
 
 import type { Endpoint } from "../flow/restTypes"
 
@@ -14,7 +15,8 @@ export const endpoints: Array<Endpoint> = [
   courseEnrollmentsEndpoint,
   coursePricesEndpoint,
   programLearnersEndpoint,
-  discussionsFrontpageEndpoint
+  discussionsFrontpageEndpoint,
+  channelsEndpoint
 ]
 
 const reducers: Object = {}

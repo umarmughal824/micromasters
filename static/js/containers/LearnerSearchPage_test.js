@@ -17,8 +17,10 @@ import {
   UPDATE_EMAIL_VALIDATION,
   UPDATE_EMAIL_EDIT
 } from "../actions/email"
+import { START_CHANNEL_EDIT } from "../actions/channels"
 import { SHOW_DIALOG, HIDE_DIALOG } from "../actions/ui"
 import { EMAIL_COMPOSITION_DIALOG } from "../components/email/constants"
+import { CHANNEL_CREATE_DIALOG } from "../constants"
 import { modifyTextField } from "../util/test_utils"
 import EmailCompositionDialog from "../components/email/EmailCompositionDialog"
 
@@ -42,7 +44,7 @@ describe("LearnerSearchPage", function() {
       {
         role:        "staff",
         program:     PROGRAMS[0].id,
-        permissions: ["can_message_learners"]
+        permissions: ["can_message_learners", "can_create_forums"]
       }
     ]
   })
@@ -191,6 +193,37 @@ describe("LearnerSearchPage", function() {
 
     return renderComponent("/learners").then(([wrapper]) => {
       assert.isFalse(wrapper.find(EMAIL_LINK_SELECTOR).exists())
+    })
+  })
+
+  const CHANNEL_LINK_SELECTOR = "#create-channel-selected"
+
+  it("does not render the new channel link for learner users", () => {
+    SETTINGS.roles = []
+
+    return renderComponent("/learners").then(([wrapper]) => {
+      assert.isFalse(wrapper.find(CHANNEL_LINK_SELECTOR).exists())
+    })
+  })
+  it("does not render the new channel link if the feature is disabled", () => {
+    SETTINGS.FEATURES.DISCUSSIONS_CREATE_CHANNEL_UI = false
+
+    return renderComponent("/learners").then(([wrapper]) => {
+      assert.isFalse(wrapper.find(CHANNEL_LINK_SELECTOR).exists())
+    })
+  })
+
+  it("should show the new channel dialog", () => {
+    const CHANNEL_DIALOG_ACTIONS = [START_CHANNEL_EDIT, SHOW_DIALOG]
+
+    return renderSearch().then(([wrapper]) => {
+      const channelLink = wrapper.find(CHANNEL_LINK_SELECTOR).at(0)
+
+      return listenForActions(CHANNEL_DIALOG_ACTIONS, () => {
+        channelLink.simulate("click")
+      }).then(state => {
+        assert.isTrue(state.ui.dialogVisibility[CHANNEL_CREATE_DIALOG])
+      })
     })
   })
 

@@ -41,7 +41,11 @@ import type { Option } from "../flow/generalTypes"
 import type { AvailableProgram } from "../flow/enrollmentTypes"
 import type { SearchSortItem } from "../flow/searchTypes"
 import type { Profile } from "../flow/profileTypes"
-import { canMessageLearnersProgram, hasStaffForProgram } from "../lib/roles"
+import {
+  canCreateChannelProgram,
+  canMessageLearnersProgram,
+  hasStaffForProgram
+} from "../lib/roles"
 
 export const makeCountryNameTranslations: () => Object = () => {
   const translations = {}
@@ -126,6 +130,7 @@ export default class LearnerSearch extends SearchkitComponent {
     checkFilterVisibility: (s: string) => boolean,
     setFilterVisibility: (s: string, v: boolean) => void,
     openSearchResultEmailComposer: (searchkit: Object) => void,
+    openChannelCreateDialog: (searchkit: Object) => void,
     openLearnerEmailComposer: (profile: Profile) => void,
     children: React$Element<*>[],
     currentProgramEnrollment: AvailableProgram
@@ -154,12 +159,16 @@ export default class LearnerSearch extends SearchkitComponent {
   renderSearchHeader = (): React$Element<*> | null => {
     const {
       openSearchResultEmailComposer,
+      openChannelCreateDialog,
       currentProgramEnrollment
     } = this.props
     const canEmailLearners = canMessageLearnersProgram(
       currentProgramEnrollment,
       SETTINGS.roles
     )
+    const canCreateChannel =
+      SETTINGS.FEATURES.DISCUSSIONS_CREATE_CHANNEL_UI &&
+      canCreateChannelProgram(currentProgramEnrollment, SETTINGS.roles)
 
     if (_.isNull(this.getResults())) {
       return null
@@ -177,6 +186,15 @@ export default class LearnerSearch extends SearchkitComponent {
               ])}
             >
               Email These Learners
+            </button>
+          ) : null}
+          {canCreateChannel ? (
+            <button
+              id="create-channel-selected"
+              className="mdl-button minor-action"
+              onClick={R.partial(openChannelCreateDialog, [this.searchkit])}
+            >
+              Create a Discussion Channel
             </button>
           ) : null}
           <HitsStats component={HitsCount} />

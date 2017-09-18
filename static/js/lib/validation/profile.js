@@ -45,7 +45,7 @@ export const checkProp = R.curry((key, message, predicates, profile) => {
   return { [key]: message }
 })
 
-const checkIsNotNilOrEmpty = checkProp(
+export const checkIsNotNilOrEmpty = checkProp(
   R.__,
   R.__,
   R.complement(isNilOrEmptyString)

@@ -335,6 +335,7 @@ class DashboardTests(ViewsTests):
                 'FEATURES': {
                     'PROGRAM_LEARNERS': False,
                     'DISCUSSIONS_POST_UI': False,
+                    'DISCUSSIONS_CREATE_CHANNEL_UI': False,
                 },
                 'open_discussions_redirect_url': open_discussions_redirect_url
             }
@@ -775,6 +776,7 @@ class TestUsersPage(ViewsTests):
                     'FEATURES': {
                         'PROGRAM_LEARNERS': False,
                         'DISCUSSIONS_POST_UI': False,
+                        'DISCUSSIONS_CREATE_CHANNEL_UI': False,
                     },
                     'open_discussions_redirect_url': open_discussions_redirect_url
                 }
@@ -848,6 +850,7 @@ class TestUsersPage(ViewsTests):
                     'FEATURES': {
                         'PROGRAM_LEARNERS': False,
                         'DISCUSSIONS_POST_UI': False,
+                        'DISCUSSIONS_CREATE_CHANNEL_UI': False,
                     },
                     'open_discussions_redirect_url': open_discussions_redirect_url
                 }

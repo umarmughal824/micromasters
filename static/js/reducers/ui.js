@@ -37,6 +37,7 @@ import {
   SET_SHOW_EXPANDED_COURSE_STATUS
 } from "../actions/ui"
 import { EMAIL_COMPOSITION_DIALOG } from "../components/email/constants"
+import { CHANNEL_CREATE_DIALOG } from "../constants"
 import type { ToastMessage } from "../flow/generalTypes"
 import type { Action } from "../flow/reduxTypes"
 import type { AvailableProgram } from "../flow/enrollmentTypes"
@@ -51,7 +52,8 @@ export type UIDialog = {
 export type DialogVisibilityState = { [dialogName: string]: boolean }
 
 export const INITIAL_DIALOG_VISIBILITY_STATE = {
-  [EMAIL_COMPOSITION_DIALOG]: false
+  [EMAIL_COMPOSITION_DIALOG]: false,
+  [CHANNEL_CREATE_DIALOG]:    false
 }
 
 export type UIState = {

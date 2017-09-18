@@ -13,3 +13,41 @@ export type Post = {
   channel_name:  string,
   profile_image: string,
 }
+
+type ChannelType = "private" | "public";
+
+export type ChannelInputs = {
+  name:               string,
+  title:              string,
+  public_description: string,
+  channel_type:       ChannelType,
+};
+
+export type Filter = {
+  id:    string,
+  name?: string,
+  value: string
+};
+
+export type ChannelValidationErrors = {
+  name?:               string,
+  title?:              string,
+  public_description?: string,
+};
+
+export type ChannelState = {
+  inputs:               ChannelInputs,
+  validationErrors:     ChannelValidationErrors,
+  validationVisibility: { [string]: bool },
+  filters:              ?Array<Filter>,
+  searchkit:            Object,
+  fetchStatus:          string
+};
+
+export type CreateChannelResponse = {
+  name:               string,
+  title:              string,
+  public_description: string,
+  channel_type:       ChannelType,
+  query:              Object
+};

@@ -25,7 +25,7 @@ import { makeCountryNameTranslations } from "../LearnerSearch"
 // so that we can stub/mock the function that it returns (as we do in integration_test_helper.js)
 
 const countryNameTranslations: Object = makeCountryNameTranslations()
-const renderFilterOptions = R.map(filter => {
+export const renderFilterOptions = R.map(filter => {
   let labelKey, labelValue
   if (R.isEmpty(filter.name)) {
     labelKey = SEARCH_FACET_FIELD_LABEL_MAP[filter.id]

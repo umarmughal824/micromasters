@@ -63,7 +63,8 @@ class ReactView(View):  # pylint: disable=unused-argument
             "EXAMS_SSO_URL": settings.EXAMS_SSO_URL,
             "FEATURES": {
                 "PROGRAM_LEARNERS": settings.FEATURES.get('PROGRAM_LEARNERS_ENABLED', False),
-                "DISCUSSIONS_POST_UI": settings.FEATURES.get('OPEN_DISCUSSIONS_POST_UI', False)
+                "DISCUSSIONS_POST_UI": settings.FEATURES.get('OPEN_DISCUSSIONS_POST_UI', False),
+                "DISCUSSIONS_CREATE_CHANNEL_UI": settings.FEATURES.get('OPEN_DISCUSSIONS_CREATE_CHANNEL_UI', False)
             },
             "open_discussions_redirect_url": settings.OPEN_DISCUSSIONS_REDIRECT_URL,
         }
