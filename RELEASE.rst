@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.75.0
+--------------
+
+- Add npm script for running tests in watch mode
+- Added management command to backfill discussion users
+- Added auth and session urls to JWT
+- Add REST API to create channels (#3514)
+- Added DiscussionUser model and code to sync it (#3479)
+
 Version 0.74.0
 --------------
 
