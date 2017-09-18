@@ -332,6 +332,7 @@ class DashboardTests(ViewsTests):
                 'EXAMS_SSO_URL': 'url',
                 'FEATURES': {
                     'PROGRAM_LEARNERS': False,
+                    'DISCUSSIONS_POST_UI': False,
                 },
             }
             assert resp.context['is_public'] is False
@@ -768,6 +769,7 @@ class TestUsersPage(ViewsTests):
                     'EXAMS_SSO_URL': 'url',
                     'FEATURES': {
                         'PROGRAM_LEARNERS': False,
+                        'DISCUSSIONS_POST_UI': False,
                     },
                 }
                 assert has_permission.called
@@ -837,6 +839,7 @@ class TestUsersPage(ViewsTests):
                     'EXAMS_SSO_URL': 'url',
                     'FEATURES': {
                         'PROGRAM_LEARNERS': False,
+                        'DISCUSSIONS_POST_UI': False,
                     },
                 }
                 assert has_permission.called

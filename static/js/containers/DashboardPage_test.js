@@ -92,6 +92,7 @@ import Grades, {
   gradeDetailPopupKey
 } from "../components/dashboard/courses/Grades"
 import { EDX_GRADE } from "./DashboardPage"
+import DiscussionCard from "../components/DiscussionCard"
 
 describe("DashboardPage", () => {
   let renderComponent, helper, listenForActions
@@ -134,6 +135,23 @@ describe("DashboardPage", () => {
       assert.lengthOf(wrapper.find(".course-list"), 1)
       assert.lengthOf(wrapper.find(".progress-widget"), 1)
       assert.lengthOf(wrapper.find(".learners-card"), 1)
+    })
+  })
+  ;[true, false].forEach(showCard => {
+    it(`should ${showCard
+      ? "show"
+      : "not show"} discussions card when feature flag is ${showCard}`, () => {
+      SETTINGS.FEATURES.DISCUSSIONS_POST_UI = showCard
+      return renderComponent(
+        "/dashboard",
+        DASHBOARD_SUCCESS_ACTIONS
+      ).then(([wrapper]) => {
+        if (showCard) {
+          assert.lengthOf(wrapper.find(DiscussionCard), 1)
+        } else {
+          assert.lengthOf(wrapper.find(DiscussionCard), 0)
+        }
+      })
     })
   })
 

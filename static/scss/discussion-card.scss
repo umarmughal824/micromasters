@@ -1,0 +1,21 @@
+.discussion-card {
+  min-height: 0;
+
+  p {
+    margin-bottom: 0;
+  }
+
+  a {
+    margin: 6px 0;
+  }
+
+  .discussions-link {
+    display: flex;
+    align-items: center;
+
+    i {
+      margin-right: 5px;
+      color: $link-text;
+    }
+  }
+}

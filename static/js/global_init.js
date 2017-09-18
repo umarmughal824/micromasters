@@ -17,7 +17,8 @@ const _createSettings = () => ({
   EXAMS_SSO_CLIENT_CODE: "foobarcode",
   EXAMS_SSO_URL:         "http://foo.bar/baz",
   FEATURES:              {
-    PROGRAM_LEARNERS: true
+    PROGRAM_LEARNERS:    true,
+    DISCUSSIONS_POST_UI: true
   },
   get username() {
     throw new Error("username was removed")

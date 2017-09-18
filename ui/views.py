@@ -62,7 +62,8 @@ class ReactView(View):  # pylint: disable=unused-argument
             "EXAMS_SSO_CLIENT_CODE": settings.EXAMS_SSO_CLIENT_CODE,
             "EXAMS_SSO_URL": settings.EXAMS_SSO_URL,
             "FEATURES": {
-                "PROGRAM_LEARNERS": settings.FEATURES.get('PROGRAM_LEARNERS_ENABLED', False)
+                "PROGRAM_LEARNERS": settings.FEATURES.get('PROGRAM_LEARNERS_ENABLED', False),
+                "DISCUSSIONS_POST_UI": settings.FEATURES.get('OPEN_DISCUSSIONS_POST_UI', False)
             },
         }
 

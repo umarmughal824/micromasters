@@ -60,6 +60,7 @@ import FinalExamCard from "../components/dashboard/FinalExamCard"
 import ErrorMessage from "../components/ErrorMessage"
 import LearnersInProgramCard from "../components/LearnersInProgramCard"
 import ProgressWidget from "../components/ProgressWidget"
+import DiscussionCard from "../components/DiscussionCard"
 import { clearCoupons, fetchCoupons } from "../actions/coupons"
 import {
   setDocumentSentDate,
@@ -823,6 +824,9 @@ class DashboardPage extends React.Component {
           </div>
           <div className="second-column">
             <ProgressWidget program={program} />
+            {SETTINGS.FEATURES.DISCUSSIONS_POST_UI ? (
+              <DiscussionCard program={program} />
+            ) : null}
             {this.renderLearnersInProgramCard(program.id)}
           </div>
         </div>
