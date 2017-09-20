@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.75.2
+--------------
+
+- Add open discussions redirect URL to the SETTINGS object
+- Add a really simple link over to discussions, behind a feature flag
+
 Version 0.75.1
 --------------
 
