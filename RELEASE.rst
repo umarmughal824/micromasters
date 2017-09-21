@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.75.3
+--------------
+
+- Add template for MM Program certificate (#3528)
+- Add queryset for create channel API (#3534)
+
 Version 0.75.2
 --------------
 
