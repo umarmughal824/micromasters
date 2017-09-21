@@ -1,25 +1,81 @@
 // @flow
 import React from "react"
-import { shallow } from "enzyme"
+import { mount } from "enzyme"
 import { assert } from "chai"
 
 import DiscussionCard from "./DiscussionCard"
 
-import { DASHBOARD_RESPONSE } from "../test_constants"
+import { channelURL, postURL } from "../lib/discussions"
+import { makeFrontPageList } from "../factories/posts"
 
 describe("DiscussionCard", () => {
-  const program = DASHBOARD_RESPONSE.programs[0]
+  let postList
 
-  it("should render what we expect", () => {
-    const wrapper = shallow(<DiscussionCard program={program} />)
-    const linkProps = wrapper.find("a").props()
-    assert.equal(linkProps.href, "/discussions")
-    assert.equal(linkProps.children, "MicroMasters Discussion")
-    assert.equal(linkProps.target, "_blank")
-    const paraProps = wrapper.find("p").props()
+  beforeEach(() => {
+    postList = makeFrontPageList()
+  })
+
+  const renderCard = () => mount(<DiscussionCard frontpage={postList} />)
+
+  it("should render the first 5 posts only", () => {
+    const wrapper = renderCard()
+    assert.lengthOf(wrapper.find(".post"), 5)
+  })
+
+  it("should show information from and links to posts", () => {
+    const wrapper = renderCard()
+    const postDisplay = wrapper.find(".post").at(0)
+    const [post] = postList
+
+    assert.equal(postDisplay.find("img").props().src, post.profile_image)
+
     assert.equal(
-      paraProps.children.join(""),
-      `Discuss the ${program.title} MicroMasters with other learners.`
+      postDisplay
+        .find("a")
+        .at(0)
+        .props().href,
+      postURL(post.id, post.channel_name)
+    )
+
+    assert.equal(
+      postDisplay
+        .find("a")
+        .at(0)
+        .text(),
+      post.title
+    )
+  })
+
+  it("should link to the original channel", () => {
+    const wrapper = renderCard()
+    const postDisplay = wrapper.find(".post").at(0)
+    const [post] = postList
+
+    assert.equal(
+      postDisplay
+        .find("a")
+        .at(1)
+        .props().href,
+      channelURL(post.channel_name)
+    )
+
+    assert.equal(
+      postDisplay
+        .find("a")
+        .at(1)
+        .text(),
+      post.channel_name
+    )
+  })
+
+  it("should link to open discussions", () => {
+    const wrapper = renderCard()
+    assert.equal(
+      wrapper
+        .find("a")
+        .at(0)
+        .props().href,
+      "/discussions"
     )
   })
 })

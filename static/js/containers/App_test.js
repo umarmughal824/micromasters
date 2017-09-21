@@ -152,7 +152,8 @@ describe("App", function() {
         RECEIVE_DASHBOARD_SUCCESS,
         actions.prices.get.successType,
         RECEIVE_FETCH_COUPONS_SUCCESS,
-        RECEIVE_GET_USER_PROFILE_SUCCESS
+        RECEIVE_GET_USER_PROFILE_SUCCESS,
+        actions.discussionsFrontpage.get.requestType
       ]
       return renderComponent("/dashboard", types).then(([wrapper]) => {
         let text = wrapper.find(".page-content").text()

@@ -10,7 +10,7 @@ import {
   CYBERSOURCE_CHECKOUT_RESPONSE,
   EDX_CHECKOUT_RESPONSE
 } from "../test_constants"
-import { DASHBOARD_SUCCESS_NO_LEARNERS_ACTIONS } from "./test_util"
+import { DASHBOARD_SUCCESS_NO_FRONTPAGE_NO_LEARNER_ACTIONS } from "./test_util"
 import { findCourse } from "../util/test_utils"
 
 describe("OrderSummaryPage", () => {
@@ -34,7 +34,7 @@ describe("OrderSummaryPage", () => {
   it("shows a spinner when dashboard get is processing", () => {
     return renderComponent(
       url,
-      DASHBOARD_SUCCESS_NO_LEARNERS_ACTIONS
+      DASHBOARD_SUCCESS_NO_FRONTPAGE_NO_LEARNER_ACTIONS
     ).then(([, div]) => {
       assert.notOk(
         div.querySelector(".loader"),
@@ -59,7 +59,7 @@ describe("OrderSummaryPage", () => {
 
       return renderComponent(
         url,
-        DASHBOARD_SUCCESS_NO_LEARNERS_ACTIONS
+        DASHBOARD_SUCCESS_NO_FRONTPAGE_NO_LEARNER_ACTIONS
       ).then(([wrapper]) => {
         wrapper
           .find("SpinnerButton")
@@ -90,7 +90,7 @@ describe("OrderSummaryPage", () => {
 
       return renderComponent(
         url,
-        DASHBOARD_SUCCESS_NO_LEARNERS_ACTIONS
+        DASHBOARD_SUCCESS_NO_FRONTPAGE_NO_LEARNER_ACTIONS
       ).then(([wrapper]) => {
         wrapper
           .find("SpinnerButton")

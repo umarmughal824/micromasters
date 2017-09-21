@@ -164,10 +164,14 @@ describe("ErrorMessage", () => {
 
       it("shows nothing if there are no programs", () => {
         helper.dashboardStub.returns(Promise.resolve([]))
+        let expectedActions = DASHBOARD_SUCCESS_NO_LEARNERS_ACTIONS.filter(
+          actionType =>
+            actionType !== actions.discussionsFrontpage.get.successType
+        )
 
         return renderComponent(
           "/dashboard",
-          DASHBOARD_SUCCESS_NO_LEARNERS_ACTIONS
+          expectedActions
         ).then(([wrapper]) => {
           let message = wrapper.find(".page-content").text()
           assert.equal(message, "")
@@ -176,10 +180,14 @@ describe("ErrorMessage", () => {
 
       it("shows nothing if there is no matching current program enrollment", () => {
         helper.programsGetStub.returns(Promise.resolve([]))
+        let expectedActions = DASHBOARD_SUCCESS_NO_LEARNERS_ACTIONS.filter(
+          actionType =>
+            actionType !== actions.discussionsFrontpage.get.successType
+        )
 
         return renderComponent(
           "/dashboard",
-          DASHBOARD_SUCCESS_NO_LEARNERS_ACTIONS
+          expectedActions
         ).then(([wrapper]) => {
           let message = wrapper.find(".page-content").text()
           assert.equal(message, "")

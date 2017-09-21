@@ -1,16 +1,20 @@
 // @flow
-import type { Endpoint } from "../flow/restTypes"
+import { deriveReducers, deriveActions } from "redux-hammock"
+
 import { automaticEmailsEndpoint } from "../reducers/automatic_emails"
 import { courseEnrollmentsEndpoint } from "../reducers/course_enrollments"
 import { coursePricesEndpoint } from "../reducers/course_prices"
 import { programLearnersEndpoint } from "../reducers/program_learners"
-import { deriveReducers, deriveActions } from "redux-hammock"
+import { discussionsFrontpageEndpoint } from "../reducers/discussions_frontpage"
+
+import type { Endpoint } from "../flow/restTypes"
 
 export const endpoints: Array<Endpoint> = [
   automaticEmailsEndpoint,
   courseEnrollmentsEndpoint,
   coursePricesEndpoint,
-  programLearnersEndpoint
+  programLearnersEndpoint,
+  discussionsFrontpageEndpoint
 ]
 
 const reducers: Object = {}

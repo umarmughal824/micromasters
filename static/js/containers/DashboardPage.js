@@ -75,25 +75,7 @@ import { attachCoupon, setRecentlyAttachedCoupon } from "../actions/coupons"
 import { COURSE_EMAIL_TYPE } from "../components/email/constants"
 import { COURSE_TEAM_EMAIL_CONFIG } from "../components/email/lib"
 import { withEmailDialog } from "../components/email/hoc"
-import type { AllEmailsState } from "../flow/emailTypes"
 import { singleBtnDialogActions } from "../components/inputs/util"
-import type { UIState } from "../reducers/ui"
-import type { OrderReceiptState } from "../reducers/order_receipt"
-import type { DocumentsState } from "../reducers/documents"
-import type {
-  CoursePrices,
-  DashboardState,
-  ProgramLearners
-} from "../flow/dashboardTypes"
-import type {
-  AvailableProgram,
-  AvailableProgramsState
-} from "../flow/enrollmentTypes"
-import type { FinancialAidState } from "../reducers/financial_aid"
-import type { CouponsState } from "../reducers/coupons"
-import type { ProfileGetResult } from "../flow/profileTypes"
-import type { Course, CourseRun, Program } from "../flow/programTypes"
-import type { Coupon } from "../flow/couponTypes"
 import { skipFinancialAid } from "../actions/financial_aid"
 import { currencyForCountry } from "../lib/currency"
 import DocsInstructionsDialog from "../components/DocsInstructionsDialog"
@@ -107,13 +89,33 @@ import {
 } from "../actions/pearson"
 import { processCheckout } from "./OrderSummaryPage"
 import { generateSSOForm } from "../lib/pearson"
-import type { PearsonAPIState } from "../reducers/pearson"
-import type { RestState } from "../flow/restTypes"
 import { getOwnDashboard, getOwnCoursePrices } from "../reducers/util"
 import { actions } from "../lib/redux_rest"
 import { wait } from "../util/util"
 import { CALCULATOR_DIALOG } from "./FinancialAidCalculator"
 import { gradeDetailPopupKey } from "../components/dashboard/courses/Grades"
+
+import type { UIState } from "../reducers/ui"
+import type { OrderReceiptState } from "../reducers/order_receipt"
+import type { DocumentsState } from "../reducers/documents"
+import type {
+  CoursePrices,
+  DashboardState,
+  ProgramLearners
+} from "../flow/dashboardTypes"
+import type { AllEmailsState } from "../flow/emailTypes"
+import type {
+  AvailableProgram,
+  AvailableProgramsState
+} from "../flow/enrollmentTypes"
+import type { FinancialAidState } from "../reducers/financial_aid"
+import type { CouponsState } from "../reducers/coupons"
+import type { ProfileGetResult } from "../flow/profileTypes"
+import type { Course, CourseRun, Program } from "../flow/programTypes"
+import type { Coupon } from "../flow/couponTypes"
+import type { PearsonAPIState } from "../reducers/pearson"
+import type { RestState } from "../flow/restTypes"
+import type { Post } from "../flow/discussionTypes"
 
 const isFinishedProcessing = R.contains(R.__, [FETCH_SUCCESS, FETCH_FAILURE])
 const PEARSON_TOS_DIALOG = "pearsonTOSDialogVisible"
@@ -143,7 +145,8 @@ class DashboardPage extends React.Component {
     financialAid: FinancialAidState,
     location: Object,
     pearson: PearsonAPIState,
-    openEmailComposer: (emailType: string, emailOpenParams: any) => void
+    openEmailComposer: (emailType: string, emailOpenParams: any) => void,
+    discussionsFrontpage: RestState<Array<Post>>
   }
 
   componentDidMount() {
@@ -288,6 +291,7 @@ class DashboardPage extends React.Component {
     this.handleCoupon()
     this.fetchCoupons()
     this.handleOrderStatus()
+    this.fetchDiscussionsFrontpage()
   }
 
   fetchDashboard() {
@@ -358,6 +362,18 @@ class DashboardPage extends React.Component {
       }
     } else if (query.status === "cancel") {
       this.handleOrderCancellation()
+    }
+  }
+
+  fetchDiscussionsFrontpage() {
+    const { dispatch, discussionsFrontpage } = this.props
+    if (
+      SETTINGS.FEATURES.DISCUSSIONS_POST_UI &&
+      SETTINGS.open_discussions_redirect_url &&
+      !discussionsFrontpage.loaded &&
+      !discussionsFrontpage.processing
+    ) {
+      dispatch(actions.discussionsFrontpage.get())
     }
   }
 
@@ -750,7 +766,8 @@ class DashboardPage extends React.Component {
       ui,
       financialAid,
       coupons,
-      pearson
+      pearson,
+      discussionsFrontpage
     } = this.props
     const program = this.getCurrentlyEnrolledProgram()
     if (!program || !prices.data) {
@@ -824,9 +841,14 @@ class DashboardPage extends React.Component {
           </div>
           <div className="second-column">
             <ProgressWidget program={program} />
-            {SETTINGS.FEATURES.DISCUSSIONS_POST_UI ? (
-              <DiscussionCard program={program} />
-            ) : null}
+            {SETTINGS.FEATURES.DISCUSSIONS_POST_UI &&
+            SETTINGS.open_discussions_redirect_url ? (
+                <DiscussionCard
+                  program={program}
+                  frontpage={discussionsFrontpage.data || []}
+                  loaded={discussionsFrontpage.loaded}
+                />
+              ) : null}
             {this.renderLearnersInProgramCard(program.id)}
           </div>
         </div>
@@ -893,7 +915,8 @@ const mapStateToProps = state => {
     orderReceipt:             state.orderReceipt,
     financialAid:             state.financialAid,
     coupons:                  state.coupons,
-    pearson:                  state.pearson
+    pearson:                  state.pearson,
+    discussionsFrontpage:     state.discussionsFrontpage
   }
 }
 

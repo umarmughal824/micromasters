@@ -1,21 +1,41 @@
 .discussion-card {
   min-height: 0;
 
-  p {
-    margin-bottom: 0;
+  .header {
+    display: flex;
+    justify-content: space-between;
+
+    div {
+      font-weight: 500;
+    }
   }
 
-  a {
-    margin: 6px 0;
-  }
-
-  .discussions-link {
+  .post {
     display: flex;
     align-items: center;
 
-    i {
-      margin-right: 5px;
-      color: $link-text;
+    &:not(:last-child) {
+      margin: 26px 0;
+    }
+
+    img {
+      height: 60px;
+      border-radius: 100%;
+    }
+
+    .title-and-author {
+      margin-left: 10px;
+
+      .time-and-channel {
+        font-size: 13px;
+        font-weight: 300;
+        color: $darkergray;
+
+        a {
+          font-weight: 400;
+          color: $darkergray;
+        }
+      }
     }
   }
 }

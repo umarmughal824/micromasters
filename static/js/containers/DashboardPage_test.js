@@ -84,7 +84,11 @@ import {
 } from "../constants"
 import type { Program } from "../flow/programTypes"
 import { findCourse, modifyTextField } from "../util/test_utils"
-import { DASHBOARD_SUCCESS_ACTIONS, DASHBOARD_ERROR_ACTIONS } from "./test_util"
+import {
+  DASHBOARD_SUCCESS_ACTIONS,
+  DASHBOARD_SUCCESS_NO_FRONTPAGE_ACTIONS,
+  DASHBOARD_ERROR_ACTIONS
+} from "./test_util"
 import { actions } from "../lib/redux_rest"
 import EmailCompositionDialog from "../components/email/EmailCompositionDialog"
 import { makeRunEnrolled } from "../components/dashboard/courses/test_util"
@@ -137,6 +141,16 @@ describe("DashboardPage", () => {
       assert.lengthOf(wrapper.find(".learners-card"), 1)
     })
   })
+
+  it("should not load the discussions frontpage if the feature flag is false", async () => {
+    SETTINGS.FEATURES.DISCUSSIONS_POST_UI = false
+    await renderComponent("/dashboard", DASHBOARD_SUCCESS_NO_FRONTPAGE_ACTIONS)
+  })
+
+  it("should not load the discussions frontpage if the OD URL is not set", async () => {
+    SETTINGS.open_discussions_redirect_url = undefined
+    await renderComponent("/dashboard", DASHBOARD_SUCCESS_NO_FRONTPAGE_ACTIONS)
+  })
   ;[true, false].forEach(showCard => {
     it(`should ${showCard
       ? "show"
@@ -144,7 +158,9 @@ describe("DashboardPage", () => {
       SETTINGS.FEATURES.DISCUSSIONS_POST_UI = showCard
       return renderComponent(
         "/dashboard",
-        DASHBOARD_SUCCESS_ACTIONS
+        showCard
+          ? DASHBOARD_SUCCESS_ACTIONS
+          : DASHBOARD_SUCCESS_NO_FRONTPAGE_ACTIONS
       ).then(([wrapper]) => {
         if (showCard) {
           assert.lengthOf(wrapper.find(DiscussionCard), 1)

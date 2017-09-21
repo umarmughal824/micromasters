@@ -20,6 +20,7 @@ const _createSettings = () => ({
     PROGRAM_LEARNERS:    true,
     DISCUSSIONS_POST_UI: true
   },
+  open_discussions_redirect_url: "http://open.discussions",
   get username() {
     throw new Error("username was removed")
   }

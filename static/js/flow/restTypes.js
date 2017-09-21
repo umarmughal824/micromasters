@@ -1,17 +1,17 @@
 // @flow
 
 export type RestState<T> = {
-  data?: T,
-  error?: any,
+  data?:      T,
+  error?:     any,
   processing: boolean,
-  loaded: boolean,
+  loaded:     boolean,
   getStatus?: string,
 };
 
 export type Endpoint = {
   name:                  string,
-  namespaceOnUsername:   boolean,
-  checkNoSpinner:        boolean,
+  namespaceOnUsername?:  boolean,
+  checkNoSpinner?:       boolean,
   getUrl?:               string|(...args: any) => string,
   postUrl?:              string|(...args: any) => string,
   patchUrl?:             string|(...args: any) => string,
