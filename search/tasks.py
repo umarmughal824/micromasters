@@ -1,10 +1,13 @@
 """
 Celery tasks for search
 """
+import logging
 
+from django.conf import settings
 # The imports which are prefixed with _ are mocked to be ignored in MockedESTestCase
 
 from dashboard.models import ProgramEnrollment
+from discussions.api import sync_user_to_channels as _sync_user_to_channels
 from mail.api import send_automatic_emails as _send_automatic_emails
 from micromasters.celery import app
 from search.indexing_api import (
@@ -17,6 +20,29 @@ from search.indexing_api import (
     refresh_index as _refresh_index,
 )
 from search.models import PercolateQuery
+
+
+log = logging.getLogger(__name__)
+
+
+def post_indexing_handler(program_enrollment_ids):
+    """
+    Do the work which happens after a profile is reindexed
+
+    Args:
+        program_enrollment_ids (list of int): A list of ProgramEnrollment ids
+    """
+    feature_sync_user = settings.FEATURES.get('OPEN_DISCUSSIONS_USER_SYNC', False)
+
+    if not feature_sync_user:
+        log.error('OPEN_DISCUSSIONS_USER_SYNC is set to False (so disabled) in the settings')
+
+    _refresh_index(get_default_alias())
+    for program_enrollment in ProgramEnrollment.objects.filter(id__in=program_enrollment_ids):
+        _send_automatic_emails(program_enrollment)
+
+        if feature_sync_user:
+            _sync_user_to_channels(program_enrollment.user.id)
 
 
 @app.task
@@ -42,9 +68,7 @@ def index_program_enrolled_users(program_enrollment_ids):
     _index_program_enrolled_users(program_enrollments)
 
     # Send email for profiles that newly fit the search query for an automatic email
-    _refresh_index(get_default_alias())
-    for program_enrollment in program_enrollments:
-        _send_automatic_emails(program_enrollment)
+    post_indexing_handler(program_enrollment_ids)
 
 
 @app.task
@@ -58,9 +82,8 @@ def index_users(user_ids):
     _index_users(user_ids)
 
     # Send email for profiles that newly fit the search query for an automatic email
-    _refresh_index(get_default_alias())
-    for program_enrollment in ProgramEnrollment.objects.filter(user__in=user_ids):
-        _send_automatic_emails(program_enrollment)
+    enrollment_ids = list(ProgramEnrollment.objects.filter(user__in=user_ids).values_list("id", flat=True))
+    post_indexing_handler(enrollment_ids)
 
 
 @app.task

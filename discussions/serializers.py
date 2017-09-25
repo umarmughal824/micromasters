@@ -21,8 +21,10 @@ class ChannelSerializer(serializers.Serializer):
     query = serializers.JSONField()
 
     def create(self, validated_data):
+        user = self.context['request'].user
+        moderator_username = user.discussion_user.username
         search_obj = create_search_obj(
-            self.context['request'].user,
+            user,
             search_param_dict=validated_data['query']
         )
         title = validated_data['title']
@@ -35,6 +37,7 @@ class ChannelSerializer(serializers.Serializer):
             name=name,
             public_description=public_description,
             channel_type=channel_type,
+            moderator_username=moderator_username,
         )
         return {
             "title": title,

@@ -1,7 +1,6 @@
 """
 Tests for search API functionality
 """
-import math
 from unittest.mock import Mock, patch
 import ddt
 from elasticsearch_dsl import Search, Q
@@ -22,6 +21,7 @@ from search.api import (
     execute_search,
     get_all_query_matching_emails,
     prepare_and_execute_search,
+    search_for_field,
     search_percolate_queries,
 )
 from search.base import ESTestCase
@@ -35,29 +35,6 @@ from search.exceptions import (
     PercolateException,
 )
 from search.models import PercolateQuery
-
-
-class FakeEmailSearchHits:
-    """
-    Mocks an elasticsearch_dsl.result.Response object
-    """
-    total = 5
-    results = [
-        Mock(email=['a@example.com']),
-        Mock(email=['b@example.com']),
-        Mock(email=['c@example.com']),
-        Mock(email=['b@example.com'])
-    ]
-
-    def __iter__(self):
-        return iter(self.results)
-
-
-def create_fake_search_result(hits_cls):
-    """
-    Creates a fake elasticsearch_dsl.result.Response object
-    """
-    return Mock(hits=hits_cls())
 
 
 @ddt.ddt  # pylint: disable=missing-docstring
@@ -92,7 +69,7 @@ class SearchAPITests(ESTestCase):
         """
         Test that the execute_search method invokes the right method on the Search object
         """
-        search_obj = Search()
+        search_obj = Search(index="index")
         search_obj.execute = Mock(name='execute')
         with patch('search.api.get_conn', autospec=True) as mock_get_conn:
             execute_search(search_obj)
@@ -225,20 +202,25 @@ class SearchAPITests(ESTestCase):
         self.assertTrue(results[0].program.is_learner)
         self.assertTrue(results[0].profile.email_optin)
 
+    def test_search_for_field(self):
+        """
+        Test that a set of search results will yield an expected set of values
+        """
+        test_es_page_size = 2
+        search = create_search_obj(self.user)
+        user_ids = self.program.programenrollment_set.values_list("user__id", flat=True).order_by("-user__id")
+        results = search_for_field(search, 'user_id', page_size=test_es_page_size)
+        assert results == set(user_ids[:test_es_page_size])
+
     def test_all_query_matching_emails(self):
         """
         Test that a set of search results will yield an expected set of emails
         """
-        fake_search_result = create_fake_search_result(FakeEmailSearchHits)
-        mock_execute_search = Mock(spec=execute_search, return_value=fake_search_result)
         test_es_page_size = 2
-        with patch('search.api.execute_search', mock_execute_search):
-            results = get_all_query_matching_emails(Search(), page_size=test_es_page_size)
-            assert results == set([result.email[0] for result in fake_search_result.hits.results])
-            assert mock_execute_search.call_count == math.ceil(fake_search_result.hits.total/test_es_page_size)
-            # Assert that the Search object is limited to return only the email field
-            args, _ = mock_execute_search.call_args  # pylint: disable=unpacking-non-sequence
-            assert args[0].to_dict()['fields'] == 'email'
+        search = create_search_obj(self.user)
+        user_ids = self.program.programenrollment_set.values_list("user__email", flat=True).order_by("-user__id")
+        results = get_all_query_matching_emails(search, page_size=test_es_page_size)
+        assert results == set(user_ids[:test_es_page_size])
 
 
 # pylint: disable=unused-argument
