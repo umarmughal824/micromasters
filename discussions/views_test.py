@@ -8,6 +8,7 @@ from rest_framework.test import (
     APIClient,
 )
 
+from discussions.exceptions import UnableToAuthenticateDiscussionUserException
 from discussions.factories import ChannelFactory
 from micromasters.factories import UserFactory
 from roles.factories import RoleFactory
@@ -76,9 +77,8 @@ def test_logged_in_user_redirect_no_username(client, patched_users_api):
     user.discussion_user.save()
 
     client.force_login(user)
-    response = client.get(reverse('discussions'), follow=True)
-    assert response.status_code == 409
-    assert 'jwt_cookie' not in response.client.cookies
+    with pytest.raises(UnableToAuthenticateDiscussionUserException):
+        client.get(reverse('discussions'))
 
 
 CREATE_CHANNEL_INPUT = {

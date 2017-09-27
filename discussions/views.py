@@ -1,7 +1,6 @@
 """APIs for discussions"""
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
 from django.shortcuts import redirect
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
@@ -10,6 +9,7 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from discussions.exceptions import UnableToAuthenticateDiscussionUserException
 from discussions.permissions import CanCreateChannel
 from discussions.serializers import ChannelSerializer
 from discussions.utils import get_token_for_request
@@ -59,7 +59,7 @@ def discussions_redirect(request):
         response = redirect(settings.OPEN_DISCUSSIONS_REDIRECT_URL)
         _set_jwt_cookie(response, token)
     else:
-        response = HttpResponse('', status=status.HTTP_409_CONFLICT)
+        raise UnableToAuthenticateDiscussionUserException("Unable to generate a JWT token for user")
 
     return response
 

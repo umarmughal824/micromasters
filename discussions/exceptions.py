@@ -19,3 +19,7 @@ class SubscriberSyncException(Exception):
 
 class ModeratorSyncException(Exception):
     """Exception indicating a failure to add or remove a moderator"""
+
+
+class UnableToAuthenticateDiscussionUserException(Exception):
+    """Exception indicating we were unable to generate a valid JWT for a DiscussionUser"""
