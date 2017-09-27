@@ -40,7 +40,7 @@ describe("dashboard course utilities", () => {
 
     it("should show start date, if >10 days away", () => {
       [10, 11, 15].forEach(days => {
-        let inTheFuture = moment()
+        const inTheFuture = moment()
           .add(days, "days")
           .add(10, "minutes")
         run.course_start_date = inTheFuture.format()
@@ -52,7 +52,7 @@ describe("dashboard course utilities", () => {
     })
 
     it("should count down the days, if <10 days away", () => {
-      let aBitInTheFuture = moment().add(8, "days")
+      const aBitInTheFuture = moment().add(8, "days")
       run.course_start_date = aBitInTheFuture.format()
       assert.equal(courseStartDateMessage(run), "Course starts in 7 days")
     })
@@ -79,7 +79,7 @@ describe("dashboard course utilities", () => {
 
   describe("hasPearsonExam", () => {
     it("should check the has_exam property", () => {
-      let course = makeCourse(0)
+      const course = makeCourse(0)
       ;[true, false].forEach(bool => {
         course.has_exam = bool
         assert.equal(bool, hasPearsonExam(course))
@@ -89,7 +89,7 @@ describe("dashboard course utilities", () => {
 
   describe("userIsEnrolled", () => {
     it("should check if the course run is currently in progress", () => {
-      let run = makeRun(0)
+      const run = makeRun(0)
       ;[
         STATUS_OFFERED,
         STATUS_PENDING_ENROLLMENT,

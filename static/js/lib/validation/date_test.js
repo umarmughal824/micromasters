@@ -186,7 +186,7 @@ describe("Date validation", () => {
         })
 
         it(`returns a minimum of ${YEAR_VALIDATION_CUTOFF} years ago`, () => {
-          let cutoff = moment()
+          const cutoff = moment()
             .subtract(YEAR_VALIDATION_CUTOFF, "years")
             .year()
           assertMaybeEquality(Just(cutoff), func(`${cutoff - 5}`))
@@ -204,12 +204,12 @@ describe("Date validation", () => {
     })
 
     it("validateYear returns a maximum of the current year", () => {
-      let now = moment().year()
+      const now = moment().year()
       assertMaybeEquality(Just(now), validateYear(`${now + 3}`))
     })
 
     it("validateNearFutureYear returns a maximum of the current year + 10", () => {
-      let now = moment().year()
+      const now = moment().year()
       assertMaybeEquality(Just(now + 3), validateNearFutureYear(`${now + 3}`))
       assertMaybeEquality(Just(now + 10), validateNearFutureYear(`${now + 45}`))
     })

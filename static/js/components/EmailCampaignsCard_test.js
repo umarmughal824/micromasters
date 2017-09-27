@@ -35,7 +35,7 @@ describe("EmailCampaignsCard", () => {
   const headers = ["Email name / subject", "Start date", "Stop date", "Active"]
 
   it("should render all emails and header text, if Right", () => {
-    let cardText = renderCard().text()
+    const cardText = renderCard().text()
     GET_AUTOMATIC_EMAILS_RESPONSE.forEach(email => {
       assert.include(cardText, email.email_subject)
     })
@@ -46,7 +46,7 @@ describe("EmailCampaignsCard", () => {
 
   it("should render an error message and no header text, if Left", () => {
     emailCardProps.getEmails.returns(S.Left(<div>I'm a message</div>))
-    let cardText = renderCard().text()
+    const cardText = renderCard().text()
     assert.include(cardText, "I'm a message")
     headers.forEach(header => {
       assert.notInclude(cardText, header)
@@ -54,7 +54,7 @@ describe("EmailCampaignsCard", () => {
   })
 
   it("should render a switch, and call toggleEmailActive on click", () => {
-    let card = renderCard()
+    const card = renderCard()
     card
       .find(Switch)
       .first()
@@ -68,7 +68,7 @@ describe("EmailCampaignsCard", () => {
   })
 
   it('should render an "edit" button, and call openEmailComposer with the AutomaticEmail on click', () => {
-    let card = renderCard()
+    const card = renderCard()
     card
       .find("a")
       .first()
@@ -82,7 +82,7 @@ describe("EmailCampaignsCard", () => {
 
   it("should show a spinner when a request is in-flight", () => {
     emailCardProps.emailsInFlight.add(GET_AUTOMATIC_EMAILS_RESPONSE[0].id)
-    let card = renderCard()
+    const card = renderCard()
     assert.lengthOf(card.find(Spinner), 1)
   })
 })

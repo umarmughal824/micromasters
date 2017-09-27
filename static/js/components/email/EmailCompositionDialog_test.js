@@ -28,7 +28,7 @@ describe("EmailCompositionDialog", () => {
   let sandbox, sendStub, closeStub, updateStub
 
   const updateObject = (objectToUpdate = {}, updatedProps = {}) => {
-    let cloned = _.cloneDeep(objectToUpdate)
+    const cloned = _.cloneDeep(objectToUpdate)
     _.forEach(updatedProps, function(value, key) {
       cloned[key] = value
     })
@@ -50,7 +50,7 @@ describe("EmailCompositionDialog", () => {
   })
 
   const renderDialog = (updatedEmailState = {}, props = {}) => {
-    let emailState = updateObject(
+    const emailState = updateObject(
       INITIAL_TEST_EMAIL_STATE[TEST_EMAIL_TYPE],
       updatedEmailState
     )
@@ -112,7 +112,7 @@ describe("EmailCompositionDialog", () => {
     )
   })
 
-  for (let dialogType of [
+  for (const dialogType of [
     LEARNER_EMAIL_TYPE,
     COURSE_EMAIL_TYPE,
     SEARCH_EMAIL_TYPE
@@ -136,7 +136,7 @@ describe("EmailCompositionDialog", () => {
   })
 
   it("should show a disabled spinner button if email send is in progress", () => {
-    let dialogActionsSpy = sandbox.spy(inputUtil, "dialogActions")
+    const dialogActionsSpy = sandbox.spy(inputUtil, "dialogActions")
     renderDialog({ fetchStatus: FETCH_PROCESSING })
 
     // assert that inFlight is true
@@ -153,7 +153,7 @@ describe("EmailCompositionDialog", () => {
 
   it("should show a subheading when subheading text exists in the state", () => {
     renderDialog({ subheading: "this is a subheading" })
-    let subheading = document.querySelector(".test-subheading")
+    const subheading = document.querySelector(".test-subheading")
     assert.equal(subheading.tagName, "DIV")
     assert.equal(subheading.textContent, "this is a subheading")
   })
@@ -164,7 +164,7 @@ describe("EmailCompositionDialog", () => {
   })
 
   describe("editing subject", () => {
-    let getField = () => document.querySelector(".email-subject")
+    const getField = () => document.querySelector(".email-subject")
 
     it("should show placeholder text if the store value is empty", () => {
       renderDialog()
@@ -178,21 +178,21 @@ describe("EmailCompositionDialog", () => {
 
     it("should fire the updateEmailEdit callback on change", () => {
       renderDialog()
-      let fieldInput = getField()
+      const fieldInput = getField()
       modifyTextField(fieldInput, "HI")
       assert.isTrue(updateStub.called, "called update handler")
     })
 
     it("should show an error if an error for the field is passed in", () => {
-      let errorMessage = "error!"
+      const errorMessage = "error!"
       renderDialog({ validationErrors: { subject: errorMessage } })
-      let message = getDialog().querySelector(".validation-error").textContent
+      const message = getDialog().querySelector(".validation-error").textContent
       assert.equal(message, errorMessage)
     })
   })
 
   describe("editing email body", () => {
-    let getEditorContents = () =>
+    const getEditorContents = () =>
       document.querySelector(".public-DraftEditor-content")
 
     it("should be empty at first", () => {
@@ -223,7 +223,7 @@ describe("EmailCompositionDialog", () => {
           body: '<a href="https://en.wikipedia.org/wiki/Potato">A Link!</a>'
         }
       })
-      let link = getEditorContents().querySelector("a")
+      const link = getEditorContents().querySelector("a")
       assert.equal(link.textContent, "A Link!")
       assert.equal(link.href, "https://en.wikipedia.org/wiki/Potato")
     })

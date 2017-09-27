@@ -73,9 +73,11 @@ export const currentProgramEnrollment = (
   case SET_CURRENT_PROGRAM_ENROLLMENT:
     return action.payload
   case RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS: {
-    let enrollments = action.payload.filter(enrollment => enrollment.enrolled)
+    const enrollments = action.payload.filter(
+      enrollment => enrollment.enrolled
+    )
     if (!_.isNil(state)) {
-      let enrollment = enrollments.find(
+      const enrollment = enrollments.find(
         enrollment => enrollment.id === state.id
       )
 

@@ -57,7 +57,7 @@ describe("financial aid reducers", () => {
     return dispatchThen(startCalculatorEdit(1), [
       START_CALCULATOR_EDIT
     ]).then(state => {
-      let expectation = {
+      const expectation = {
         ...FINANCIAL_AID_EDIT,
         programId:       1,
         fetchAddStatus:  undefined,
@@ -82,7 +82,7 @@ describe("financial aid reducers", () => {
 
   it("should let you update an edit in progress", () => {
     store.dispatch(startCalculatorEdit(1))
-    let update = R.clone(store.getState().financialAid)
+    const update = R.clone(store.getState().financialAid)
     update.income = "1000000"
     return dispatchThen(updateCalculatorEdit(update), [
       UPDATE_CALCULATOR_EDIT
@@ -93,7 +93,7 @@ describe("financial aid reducers", () => {
 
   it("should let you update the validation", () => {
     store.dispatch(startCalculatorEdit(1))
-    let validation = { some: "error" }
+    const validation = { some: "error" }
     return dispatchThen(updateCalculatorValidation(validation), [
       UPDATE_CALCULATOR_VALIDATION
     ]).then(state => {
@@ -112,15 +112,15 @@ describe("financial aid reducers", () => {
 
   it("should let you add financial aid", () => {
     addFinancialAidStub.returns(Promise.resolve())
-    let income = 100000
-    let currency = "USD"
-    let programId = 1
+    const income = 100000
+    const currency = "USD"
+    const programId = 1
     store.dispatch(startCalculatorEdit(programId))
     return dispatchThen(addFinancialAid(income, currency, programId), [
       REQUEST_ADD_FINANCIAL_AID,
       RECEIVE_ADD_FINANCIAL_AID_SUCCESS
     ]).then(state => {
-      let expectation = {
+      const expectation = {
         ...FINANCIAL_AID_EDIT,
         programId:       programId,
         fetchAddStatus:  FETCH_SUCCESS,
@@ -133,17 +133,17 @@ describe("financial aid reducers", () => {
   })
 
   it("should fail to add a financial aid", () => {
-    let err = { "0": "an error message", errorStatusCode: 500 }
+    const err = { "0": "an error message", errorStatusCode: 500 }
     addFinancialAidStub.returns(Promise.reject(err))
-    let income = 100000
-    let currency = "USD"
-    let programId = 1
+    const income = 100000
+    const currency = "USD"
+    const programId = 1
     store.dispatch(startCalculatorEdit(programId))
     return dispatchThen(addFinancialAid(income, currency, programId), [
       REQUEST_ADD_FINANCIAL_AID,
       RECEIVE_ADD_FINANCIAL_AID_FAILURE
     ]).then(state => {
-      let expectation = {
+      const expectation = {
         ...FINANCIAL_AID_EDIT,
         programId:       programId,
         fetchAddStatus:  FETCH_FAILURE,

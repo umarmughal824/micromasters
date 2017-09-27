@@ -80,7 +80,7 @@ class AutomaticEmailPage extends React.Component {
     const { dispatch, automaticEmails: { emailsInFlight } } = this.props
 
     if (!emailsInFlight.has(email.id)) {
-      let updatedEmail = R.evolve(
+      const updatedEmail = R.evolve(
         { enabled: R.not, query: R.always(undefined) },
         email
       )

@@ -28,12 +28,12 @@ class SettingsPage extends React.Component<*, ProfileContainerProps, *> {
 
   render() {
     const { profiles, profileProps } = this.props
-    let props = profileProps(profiles[SETTINGS.user.username])
+    const props = profileProps(profiles[SETTINGS.user.username])
     let loaded = false
     const username = SETTINGS.user.username
 
     if (profiles[username] !== undefined) {
-      let profileFromStore = profiles[username]
+      const profileFromStore = profiles[username]
       loaded = profileFromStore.getStatus !== FETCH_PROCESSING
     }
 

@@ -32,7 +32,7 @@ export default class CourseDescription extends React.Component {
   }
 
   renderCourseDateMessage(label: string, dateString: string): string {
-    let date = moment(dateString)
+    const date = moment(dateString)
     return ifValidDate(
       "",
       date => `${label}: ${date.format(DASHBOARD_FORMAT)}`,
@@ -117,7 +117,7 @@ export default class CourseDescription extends React.Component {
       if (
         [STATUS_CAN_UPGRADE, STATUS_MISSED_DEADLINE].includes(courseRun.status)
       ) {
-        let now = moment()
+        const now = moment()
         return (
           !_.isNil(courseRun.course_start_date) &&
           moment(courseRun.course_start_date).isBefore(now)
@@ -170,7 +170,7 @@ export default class CourseDescription extends React.Component {
   renderCourseLinks = (): React$Element<*> | null => {
     const { courseRun } = this.props
 
-    let courseLinks = R.reject(R.isNil, [
+    const courseLinks = R.reject(R.isNil, [
       this.renderViewCourseEdxLink(courseRun),
       this.renderCourseContactLink()
     ])

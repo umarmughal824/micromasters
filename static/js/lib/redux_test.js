@@ -10,8 +10,8 @@ import {
 
 describe("redux helpers", () => {
   const MY_ACTION = "MY_ACTION"
-  let dispatch = sinon.spy()
-  let actionCreator = arg => ({
+  const dispatch = sinon.spy()
+  const actionCreator = arg => ({
     type:    MY_ACTION,
     payload: arg,
     meta:    null
@@ -45,7 +45,7 @@ describe("redux helpers", () => {
   })
 
   describe("createSimpleActionHelpers", () => {
-    let actionList = [["actionCreator", actionCreator]]
+    const actionList = [["actionCreator", actionCreator]]
 
     let actions
     beforeEach(() => {
@@ -54,12 +54,12 @@ describe("redux helpers", () => {
 
     it("should return an object containing functions", () => {
       assert.isObject(actions)
-      let actionCreator = actions.actionCreator
+      const actionCreator = actions.actionCreator
       assert.isFunction(actionCreator)
     })
 
     it("the functions returned should call dispatch with arguments", () => {
-      let actionCreator = actions.actionCreator
+      const actionCreator = actions.actionCreator
       actionCreator(3)
       assert(
         dispatch.calledWith({
@@ -73,15 +73,15 @@ describe("redux helpers", () => {
 
   describe("createAsyncActionHelpers", () => {
     const MY_ASYNC_ACTION = "MY_ASYNC_ACTION"
-    let asyncActionCreator = arg => dispatch =>
+    const asyncActionCreator = arg => dispatch =>
       dispatch({
         type:    MY_ASYNC_ACTION,
         payload: arg
       })
-    let actionList = [["asyncActionCreator", asyncActionCreator]]
+    const actionList = [["asyncActionCreator", asyncActionCreator]]
 
-    let dispatchSpy = sinon.stub().returns(Promise.resolve())
-    let asyncDispatch = createdActionFunc => {
+    const dispatchSpy = sinon.stub().returns(Promise.resolve())
+    const asyncDispatch = createdActionFunc => {
       if (typeof createdActionFunc === "function") {
         return createdActionFunc(dispatchSpy)
       }
@@ -94,13 +94,13 @@ describe("redux helpers", () => {
 
     it("should return an object containing functions", () => {
       assert.isObject(actions)
-      let { asyncActionCreator } = actions
+      const { asyncActionCreator } = actions
       assert.isFunction(asyncActionCreator)
     })
 
     it("should return an object full of asyncActionCreators", () => {
-      let { asyncActionCreator } = actions
-      let dispatched = asyncActionCreator(2)
+      const { asyncActionCreator } = actions
+      const dispatched = asyncActionCreator(2)
       assert.isFulfilled(dispatched)
       assert(
         dispatchSpy.calledWith({

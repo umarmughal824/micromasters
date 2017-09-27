@@ -6,7 +6,7 @@ import React from "react"
 import Loader from "./Loader"
 
 describe("Loader", () => {
-  let renderLoader = (props = {}) =>
+  const renderLoader = (props = {}) =>
     shallow(
       <Loader {...props}>
         <h1>Test</h1>
@@ -25,9 +25,9 @@ describe("Loader", () => {
     }
   ]
 
-  for (let data of dataSet) {
+  for (const data of dataSet) {
     it(`should ${data.expectedMessage}`, () => {
-      let wrapper = renderLoader({
+      const wrapper = renderLoader({
         loaded:          false,
         shouldRenderAll: data.shouldRenderAll
       })
@@ -37,7 +37,7 @@ describe("Loader", () => {
   }
 
   it("should hide spiner", () => {
-    let wrapper = renderLoader({ loaded: true })
+    const wrapper = renderLoader({ loaded: true })
     assert.equal(wrapper.find(".loader").exists(), false)
   })
 })

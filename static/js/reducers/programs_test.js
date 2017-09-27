@@ -182,7 +182,7 @@ describe("enrollments", () => {
     })
 
     it("should replace the current enrollment if it can't be found in the list of enrollments", () => {
-      let enrollment = { id: 999, title: "not an enrollment anymore" }
+      const enrollment = { id: 999, title: "not an enrollment anymore" }
       store.dispatch(setCurrentProgramEnrollment(enrollment))
       store.dispatch(
         receiveGetProgramEnrollmentsSuccess([enrollment].concat(PROGRAMS))
@@ -191,7 +191,7 @@ describe("enrollments", () => {
     })
 
     it("should clear the current enrollment if it can't be found in an empty list of enrollments", () => {
-      let enrollment = { id: 999, title: "not an enrollment anymore" }
+      const enrollment = { id: 999, title: "not an enrollment anymore" }
       store.dispatch(setCurrentProgramEnrollment(enrollment))
       store.dispatch(receiveGetProgramEnrollmentsSuccess([]))
       assert.deepEqual(store.getState().currentProgramEnrollment, null)

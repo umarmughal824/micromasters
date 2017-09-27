@@ -47,7 +47,7 @@ class ProfilePage extends React.Component<*, ProfileContainerProps, *> {
       const { profile } = profileProps(profileInfo)
 
       const [, step] = validateProfileComplete(profile)
-      let idealStep = currentOrFirstIncompleteStep(profileStep, step)
+      const idealStep = currentOrFirstIncompleteStep(profileStep, step)
       if (profileStep !== idealStep) {
         this.context.router.push(`/profile/${idealStep}`)
       }

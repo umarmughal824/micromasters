@@ -162,12 +162,12 @@ export default class FinancialAidCard extends React.Component {
       setDocsInstructionsVisibility
     } = this.props
 
-    let couponPrice = couponPrices.pricesInclCouponByProgram.get(program.id)
+    const couponPrice = couponPrices.pricesInclCouponByProgram.get(program.id)
     if (!couponPrice) {
       // shouldn't happen, at this point we should have prices for all programs
       throw `Unable to find price for program ${program.id}`
     }
-    let calculatedPrice = couponPrice.price
+    const calculatedPrice = couponPrice.price
 
     switch (program.financial_aid_user_info.application_status) {
     case FA_STATUS_APPROVED:

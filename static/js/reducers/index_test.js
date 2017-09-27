@@ -93,7 +93,7 @@ describe("reducers", () => {
     })
 
     it("should fail to fetch user profile", () => {
-      let errorInfo = {
+      const errorInfo = {
         errorStatusCode: 404,
         detail:          "not found"
       }
@@ -112,7 +112,7 @@ describe("reducers", () => {
     })
 
     it("should patch the profile successfully", () => {
-      let updatedProfile = {
+      const updatedProfile = {
         ...USER_PROFILE_RESPONSE,
         change: true
       }
@@ -134,7 +134,7 @@ describe("reducers", () => {
     })
 
     it("should fail to patch the profile", () => {
-      let errorInfo = { errorStatusCode: 500 }
+      const errorInfo = { errorStatusCode: 500 }
       patchUserProfileStub
         .withArgs(SETTINGS.user.username)
         .returns(Promise.reject(errorInfo))
@@ -165,7 +165,7 @@ describe("reducers", () => {
           visibility: []
         })
 
-        let newProfile = {
+        const newProfile = {
           ...USER_PROFILE_RESPONSE,
           newField: true
         }
@@ -196,7 +196,7 @@ describe("reducers", () => {
       store.dispatch(startProfileEdit("jane"))
       store.dispatch(updateValidationVisibility("jane", ALL_ERRORS_VISIBLE))
 
-      let errors = { error: "I am an error" }
+      const errors = { error: "I am an error" }
       return dispatchThen(updateProfileValidation("jane", errors), [
         UPDATE_PROFILE_VALIDATION
       ]).then(profileState => {
@@ -230,7 +230,7 @@ describe("reducers", () => {
       )
       store.dispatch(startProfileEdit("jane"))
       store.dispatch(updateValidationVisibility("jane", ALL_ERRORS_VISIBLE))
-      let errors = {
+      const errors = {
         first_name: "Given name is required"
       }
       return dispatchThen(updateProfileValidation("jane", errors), [
@@ -241,7 +241,7 @@ describe("reducers", () => {
     })
 
     it("should validate a profile with nested objects and errors", () => {
-      let errors = {
+      const errors = {
         work_history: [
           {
             position: "Position is required"

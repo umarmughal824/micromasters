@@ -44,10 +44,10 @@ import type { Profile } from "../flow/profileTypes"
 import { canMessageLearnersProgram, hasStaffForProgram } from "../lib/roles"
 
 export const makeCountryNameTranslations: () => Object = () => {
-  let translations = {}
-  for (let code of Object.keys(iso3166.data)) {
+  const translations = {}
+  for (const code of Object.keys(iso3166.data)) {
     translations[code] = iso3166.data[code].name
-    for (let stateCode of Object.keys(iso3166.data[code].sub)) {
+    for (const stateCode of Object.keys(iso3166.data[code].sub)) {
       translations[stateCode] = iso3166.data[code].sub[stateCode].name
     }
   }

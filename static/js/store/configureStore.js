@@ -15,7 +15,7 @@ import { INITIAL_SIGNUP_STATE } from "../reducers/signup_dialog"
 const notProd = () => process.env.NODE_ENV !== "production"
 
 const middleware = () => {
-  let ware = [thunkMiddleware]
+  const ware = [thunkMiddleware]
   if (notProd()) {
     ware.push(createLogger())
   }

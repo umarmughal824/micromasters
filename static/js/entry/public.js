@@ -58,7 +58,7 @@ const dialogDiv = document.querySelector("#signup-dialog")
 
 const openDialog = () => store.dispatch(setDialogVisibility(true))
 
-let nodes = [...document.querySelectorAll(".open-signup-dialog")]
+const nodes = [...document.querySelectorAll(".open-signup-dialog")]
 
 nodes.forEach(signUpButton => {
   signUpButton.onclick = openDialog

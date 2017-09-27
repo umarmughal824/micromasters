@@ -21,7 +21,7 @@ describe("Email higher-order component", () => {
 
   class TestContainerPage extends React.Component {
     render() {
-      let { openEmailComposer } = this.props
+      const { openEmailComposer } = this.props
 
       return (
         <div>
@@ -49,7 +49,7 @@ describe("Email higher-order component", () => {
     helper.cleanup()
   })
 
-  let renderTestComponentWithDialog = () =>
+  const renderTestComponentWithDialog = () =>
     mount(
       <MuiThemeProvider muiTheme={getMuiTheme()}>
         <WrappedTestContainerPage
@@ -61,12 +61,12 @@ describe("Email higher-order component", () => {
     )
 
   it("should render an email dialog when the wrapped component renders", () => {
-    let wrapper = renderTestComponentWithDialog()
+    const wrapper = renderTestComponentWithDialog()
     assert.isOk(wrapper.find("EmailCompositionDialog"))
   })
 
   it("should expose a function that lets the wrapped component launch the email dialog", () => {
-    let wrapper = renderTestComponentWithDialog()
+    const wrapper = renderTestComponentWithDialog()
     assert.isFalse(openEmailSpy.called)
     return listenForActions([START_EMAIL_EDIT, SHOW_DIALOG], () => {
       wrapper.find("button").simulate("click")
@@ -80,7 +80,7 @@ describe("Email higher-order component", () => {
   })
 
   it("should gracefully handle a currentlyActive email config that isn't present", () => {
-    let wrapper = mount(
+    const wrapper = mount(
       <MuiThemeProvider muiTheme={getMuiTheme()}>
         <WrappedTestContainerPage
           dispatch={helper.store.dispatch}

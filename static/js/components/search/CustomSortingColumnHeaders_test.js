@@ -54,10 +54,10 @@ describe("CustomSortingSelect", () => {
             permissions: ["can_advance_search"]
           }
         ]
-        let wrapper = renderSelect({
+        const wrapper = renderSelect({
           selectedItems: [key]
         })
-        let lookup = {
+        const lookup = {
           Name:            wrapper.find(".name"),
           Residence:       wrapper.find(".residence"),
           "Program grade": wrapper.find(".grade")
@@ -74,19 +74,19 @@ describe("CustomSortingSelect", () => {
   })
 
   it("should not show the grade column to learners", () => {
-    let wrapper = renderSelect()
+    const wrapper = renderSelect()
     SETTINGS.roles = []
     assert.isFalse(wrapper.find(".grade").exists())
   })
 
   it("chooses the first sorting key when the column is clicked", () => {
-    let wrapper = renderSelect()
+    const wrapper = renderSelect()
     wrapper.find(".name").simulate("click")
     assert.isTrue(setItemsStub.calledWith(["name_a_z"]))
   })
 
   it("chooses the second sorting key if the first sorting key is already selected", () => {
-    let wrapper = renderSelect({
+    const wrapper = renderSelect({
       selectedItems: ["name_a_z"]
     })
     wrapper.find(".name").simulate("click")

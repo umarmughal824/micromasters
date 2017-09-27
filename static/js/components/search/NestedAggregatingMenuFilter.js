@@ -28,7 +28,7 @@ const INNER_TERMS_AGG_KEY = "nested_terms"
  * }
  */
 function ReverseNestedTermsBucket(key, field, options) {
-  let reverseNestedAgg = AggsContainer(REVERSE_NESTED_AGG_KEY, {
+  const reverseNestedAgg = AggsContainer(REVERSE_NESTED_AGG_KEY, {
     reverse_nested: {}
   })
   return TermsBucket(key, field, options, reverseNestedAgg)
@@ -69,12 +69,12 @@ class NestedAggregatingFacetAccessor extends NestedAccessorMixin(
    * buckets/doc_count data at the altered path if it doesn't exist at the default path.
    */
   getRawBuckets() {
-    let baseAggsPath = [
+    const baseAggsPath = [
       this.uuid,
       this.fieldContext.getAggregationPath(),
       this.key
     ]
-    let aggs = this.getAggregations(baseAggsPath.concat(["buckets"]), [])
+    const aggs = this.getAggregations(baseAggsPath.concat(["buckets"]), [])
     if (aggs.length > 0) {
       return aggs
     } else {
@@ -102,11 +102,11 @@ class NestedAggregatingFacetAccessor extends NestedAccessorMixin(
    * Gets the appropriate terms bucket for this element's agg query.
    */
   getTermsBucket(query) {
-    let otherAppliedFiltersOnPath = this.createFilterForOtherElementsOnPath(
+    const otherAppliedFiltersOnPath = this.createFilterForOtherElementsOnPath(
       query
     )
-    let termsKey = otherAppliedFiltersOnPath ? INNER_TERMS_AGG_KEY : this.key
-    let termsBucket = ReverseNestedTermsBucket(
+    const termsKey = otherAppliedFiltersOnPath ? INNER_TERMS_AGG_KEY : this.key
+    const termsBucket = ReverseNestedTermsBucket(
       termsKey,
       this.key,
       _.omitBy(
@@ -149,7 +149,7 @@ export default class NestedAggregatingMenuFilter extends PatchedMenuFilter {
    * elements that match (which could be greater than the number of users).
    */
   getItems() {
-    let items = super.getItems()
+    const items = super.getItems()
     return items.map(item => ({
       ...item,
       doc_count: item[REVERSE_NESTED_AGG_KEY]

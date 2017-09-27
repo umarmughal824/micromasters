@@ -18,20 +18,20 @@ describe("SpinnerButton", () => {
   })
 
   it("passes through all props when spinning is false", () => {
-    let onClick = sandbox.stub()
-    let props = {
+    const onClick = sandbox.stub()
+    const props = {
       "data-x":  "y",
       onClick:   onClick,
       className: "class1 class2"
     }
-    let wrapper = shallow(
+    const wrapper = shallow(
       <SpinnerButton component="button" spinning={false} {...props}>
         childText
       </SpinnerButton>
     )
-    let button = wrapper.find("button")
-    let buttonProps = button.props()
-    for (let key of Object.keys(props)) {
+    const button = wrapper.find("button")
+    const buttonProps = button.props()
+    for (const key of Object.keys(props)) {
       if (key !== "onClick") {
         assert.deepEqual(buttonProps[key], props[key])
       }
@@ -41,11 +41,11 @@ describe("SpinnerButton", () => {
   })
 
   it("replaces children with a Spinner, disables onClick and updates className when spinning is true", () => {
-    let onClick = sandbox.stub()
-    let props = {
+    const onClick = sandbox.stub()
+    const props = {
       "data-x": "y"
     }
-    let wrapper = shallow(
+    const wrapper = shallow(
       <SpinnerButton
         component={Button}
         spinning={true}
@@ -59,9 +59,9 @@ describe("SpinnerButton", () => {
     wrapper.setState({
       recentlyClicked: true
     })
-    let button = wrapper.find("Button")
-    let buttonProps = button.props()
-    for (let key of Object.keys(props)) {
+    const button = wrapper.find("Button")
+    const buttonProps = button.props()
+    for (const key of Object.keys(props)) {
       assert.deepEqual(buttonProps[key], props[key])
     }
 
@@ -73,7 +73,7 @@ describe("SpinnerButton", () => {
   })
 
   it("shows the spinner is spinning is true, recentlyClicked is false, but ignoreRecentlyClicked is true", () => {
-    let wrapper = shallow(
+    const wrapper = shallow(
       <SpinnerButton
         component={Button}
         spinning={true}
@@ -85,12 +85,12 @@ describe("SpinnerButton", () => {
     wrapper.setState({
       recentlyClicked: false
     })
-    let button = wrapper.find("Button")
+    const button = wrapper.find("Button")
     assert.equal(button.children().text(), "<Spinner />")
   })
 
   it("does not show the spinner when it's disabled", () => {
-    let wrapper = shallow(
+    const wrapper = shallow(
       <SpinnerButton
         disabled={true}
         spinning={true}
@@ -100,7 +100,7 @@ describe("SpinnerButton", () => {
         text
       </SpinnerButton>
     )
-    let buttonProps = wrapper.find("button").props()
+    const buttonProps = wrapper.find("button").props()
 
     assert.equal(buttonProps.className, undefined)
     assert.isTrue(buttonProps.disabled)
@@ -109,25 +109,25 @@ describe("SpinnerButton", () => {
   })
 
   it("sets recentlyClicked to true when the button is clicked", () => {
-    let onClick = sandbox.stub()
-    let wrapper = shallow(
+    const onClick = sandbox.stub()
+    const wrapper = shallow(
       <SpinnerButton component="button" onClick={onClick} spinning={false} />
     )
     assert.isFalse(wrapper.state().recentlyClicked)
-    let buttonProps = wrapper.find("button").props()
+    const buttonProps = wrapper.find("button").props()
     buttonProps.onClick("args")
     assert.isTrue(onClick.calledWith("args"))
     assert.isTrue(wrapper.state().recentlyClicked)
   })
 
   it("does not show the spinner if spinning is true but recentlyClicked is false", () => {
-    let onClick = sandbox.stub()
-    let wrapper = shallow(
+    const onClick = sandbox.stub()
+    const wrapper = shallow(
       <SpinnerButton spinning={true} component="button" onClick={onClick}>
         text
       </SpinnerButton>
     )
-    let buttonProps = wrapper.find("button").props()
+    const buttonProps = wrapper.find("button").props()
     assert.equal(buttonProps.className, undefined)
     assert.isTrue(buttonProps.disabled)
     assert.equal(buttonProps.onClick, undefined)
@@ -135,7 +135,9 @@ describe("SpinnerButton", () => {
   })
 
   it("sets recentlyClicked back to false if the spinning prop changes back to false", () => {
-    let wrapper = shallow(<SpinnerButton component="button" spinning={true} />)
+    const wrapper = shallow(
+      <SpinnerButton component="button" spinning={true} />
+    )
     wrapper.setState({
       recentlyClicked: true
     })

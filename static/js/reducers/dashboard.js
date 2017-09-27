@@ -39,7 +39,7 @@ export const dashboard = (
         })
       )
     } else {
-      let newBaseState = R.dissoc(username, state)
+      const newBaseState = R.dissoc(username, state)
       return updateStateByUsername(
         newBaseState,
         username,
@@ -62,10 +62,10 @@ export const dashboard = (
     })
   case UPDATE_COURSE_STATUS: {
     const { courseId, status } = action.payload
-    let programs = _.cloneDeep(state[username].programs)
-    for (let program of programs) {
-      for (let course of program.courses) {
-        for (let courseRun of course.runs) {
+    const programs = _.cloneDeep(state[username].programs)
+    for (const program of programs) {
+      for (const course of program.courses) {
+        for (const courseRun of course.runs) {
           if (courseRun.course_id === courseId) {
             courseRun.status = status
           }

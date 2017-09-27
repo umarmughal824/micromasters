@@ -86,8 +86,8 @@ describe("image upload reducer", () => {
   })
 
   it("should let you update an edit in progress", () => {
-    let first = new Blob()
-    let second = new Blob()
+    const first = new Blob()
+    const second = new Blob()
     store.dispatch(startPhotoEdit(first))
 
     return dispatchThen(updatePhotoEdit(second), [
@@ -115,9 +115,9 @@ describe("image upload reducer", () => {
   })
 
   describe("PATCHING the photo", () => {
-    let user = "jane"
-    let photo = new Blob()
-    let filename = "a photo"
+    const user = "jane"
+    const photo = new Blob()
+    const filename = "a photo"
 
     it("should patch the profile image", () => {
       updateProfileImageStub
@@ -153,7 +153,7 @@ describe("image upload reducer", () => {
     })
 
     it("should set FETCH_PROCESSING while updating", () => {
-      let photo = new Blob()
+      const photo = new Blob()
       store.dispatch(startPhotoEdit(photo))
       return dispatchThen(requestPatchUserPhoto(), [
         REQUEST_PATCH_USER_PHOTO
@@ -168,10 +168,10 @@ describe("image upload reducer", () => {
     })
 
     it("should not clear the edit state if FETCH_PROCESSING", () => {
-      let photo = new Blob()
+      const photo = new Blob()
       store.dispatch(startPhotoEdit(photo))
       store.dispatch(requestPatchUserPhoto())
-      let expectation = {
+      const expectation = {
         edit:        null,
         error:       null,
         photo:       photo,

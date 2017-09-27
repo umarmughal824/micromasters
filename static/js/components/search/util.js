@@ -45,9 +45,9 @@ export const NestedAccessorMixin = BaseSearchkitAccessorClass =>
         return query
       }
       query = super.buildSharedQuery(query)
-      let appliedFilterValue = getAppliedFilterValue(this.state.getValue())
+      const appliedFilterValue = getAppliedFilterValue(this.state.getValue())
       if (appliedFilterValue) {
-        let newFilter = this.createQueryFilter(appliedFilterValue)
+        const newFilter = this.createQueryFilter(appliedFilterValue)
         query = this.amendSharedQueryForNestedDoc(query, newFilter)
       }
       return query
@@ -79,14 +79,14 @@ export const NestedAccessorMixin = BaseSearchkitAccessorClass =>
      * are being made in order to treat those filters as 'AND'.
      */
     amendSharedQueryForNestedDoc(query, filterToAdd) {
-      let groupedNestedFilter = this.createGroupedNestedFilter(
+      const groupedNestedFilter = this.createGroupedNestedFilter(
         query,
         filterToAdd
       )
       if (groupedNestedFilter) {
-        let nestedPath = this.getNestedPath()
+        const nestedPath = this.getNestedPath()
 
-        let filters = _.cloneDeep(query.index.filters)
+        const filters = _.cloneDeep(query.index.filters)
         // Find the element that Searchkit added to query.index.filters for this nested document and remove it
         _.remove(
           filters,
@@ -96,7 +96,7 @@ export const NestedAccessorMixin = BaseSearchkitAccessorClass =>
         filters.push(groupedNestedFilter)
         query = query.update({ filters: { $set: filters } })
 
-        let filtersMap = _.cloneDeep(query.index.filtersMap)
+        const filtersMap = _.cloneDeep(query.index.filtersMap)
         // Add the same 'AND' filter to query.index.filtersMap, with the nested path (not the uuid) as the key
         filtersMap[nestedPath] = groupedNestedFilter
         // If it exists, delete the key for this specific filter (since all filters on this path are grouped together).
@@ -122,13 +122,13 @@ export const NestedAccessorMixin = BaseSearchkitAccessorClass =>
      * }
      */
     createGroupedNestedFilter(query, filterToAdd) {
-      let nestedPath = this.getNestedPath()
-      let appliedFiltersOnPath = query.getFiltersWithKeys([nestedPath])
+      const nestedPath = this.getNestedPath()
+      const appliedFiltersOnPath = query.getFiltersWithKeys([nestedPath])
       if (_.isEmpty(appliedFiltersOnPath)) {
         return this.fieldContext.wrapFilter(filterToAdd)
       } else {
         let mustFilters = []
-        let nestedFilter = _.get(appliedFiltersOnPath, ["nested", "filter"])
+        const nestedFilter = _.get(appliedFiltersOnPath, ["nested", "filter"])
         if (nestedFilter.bool) {
           mustFilters = _.get(nestedFilter, ["bool", "must"])
         } else {
@@ -146,13 +146,13 @@ export const NestedAccessorMixin = BaseSearchkitAccessorClass =>
      * element.
      */
     createAggFilter(query) {
-      let filters = []
-      let nestedPath = this.getNestedPath()
-      let unrelatedFilters = query.getFiltersWithoutKeys(nestedPath)
+      const filters = []
+      const nestedPath = this.getNestedPath()
+      const unrelatedFilters = query.getFiltersWithoutKeys(nestedPath)
       if (unrelatedFilters) {
         filters.push(unrelatedFilters)
       }
-      let otherAppliedFiltersOnPath = this.createFilterForOtherElementsOnPath(
+      const otherAppliedFiltersOnPath = this.createFilterForOtherElementsOnPath(
         query
       )
       if (otherAppliedFiltersOnPath) {
@@ -171,9 +171,9 @@ export const NestedAccessorMixin = BaseSearchkitAccessorClass =>
      * ]
      */
     getAllFiltersOnPath(query) {
-      let nestedPath = this.getNestedPath()
-      let appliedNestedFilters = query.getFiltersWithKeys(nestedPath)
-      let filterElement = R.pathOr(
+      const nestedPath = this.getNestedPath()
+      const appliedNestedFilters = query.getFiltersWithKeys(nestedPath)
+      const filterElement = R.pathOr(
         {},
         ["nested", "filter"],
         appliedNestedFilters
@@ -201,7 +201,7 @@ export const NestedAccessorMixin = BaseSearchkitAccessorClass =>
      * }
      */
     createFilterForOtherElementsOnPath(query) {
-      let allFilters = this.getAllFiltersOnPath(query)
+      const allFilters = this.getAllFiltersOnPath(query)
       let otherFilters = []
       if (allFilters.length > 0) {
         // Only keep the filters for other elements on this nested path

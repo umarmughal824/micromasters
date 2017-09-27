@@ -95,7 +95,7 @@ describe("LearnerPageAboutMeDialog", () => {
   })
 
   it("disables the save button during profile update", () => {
-    let dialogActionsSpy = sandbox.spy(inputUtil, "dialogActions")
+    const dialogActionsSpy = sandbox.spy(inputUtil, "dialogActions")
     renderDialog({
       profilePatchStatus: FETCH_PROCESSING
     })

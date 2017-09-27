@@ -20,8 +20,8 @@ export const courseStartDateMessage = (courseRun: CourseRun) => {
     return ""
   }
 
-  let startDate = moment(courseRun.course_start_date)
-  let daysUntilStart = startDate.diff(moment(), "days")
+  const startDate = moment(courseRun.course_start_date)
+  const daysUntilStart = startDate.diff(moment(), "days")
   if (daysUntilStart === 0) {
     return "Course starts today"
   } else if (daysUntilStart < 0) {
@@ -53,9 +53,9 @@ export const hasEnrolledInAnyRun = R.compose(
 )
 
 export const courseCurrentlyInProgress = (courseRun: CourseRun) => {
-  let startDate = moment(courseRun.course_start_date)
-  let endDate = moment(courseRun.course_end_date)
-  let now = moment()
+  const startDate = moment(courseRun.course_start_date)
+  const endDate = moment(courseRun.course_end_date)
+  const now = moment()
   return now.isAfter(startDate) && now.isBefore(endDate)
 }
 

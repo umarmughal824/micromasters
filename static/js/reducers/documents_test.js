@@ -44,7 +44,7 @@ describe("documents reducers", () => {
 
   describe("UI", () => {
     it("should let you set the document date", () => {
-      let todayFormat = moment().format(ISO_8601_FORMAT)
+      const todayFormat = moment().format(ISO_8601_FORMAT)
       assertReducerResultState(
         setDocumentSentDate,
         documents => documents.documentSentDate,
@@ -66,8 +66,8 @@ describe("documents reducers", () => {
 
     it("should let you update the date documents were sent", () => {
       updateDocumentSentDateStub.returns(Promise.resolve())
-      let programId = 12
-      let sentDate = "2012-12-12"
+      const programId = 12
+      const sentDate = "2012-12-12"
       return dispatchThen(updateDocumentSentDate(programId, sentDate), [
         REQUEST_UPDATE_DOCUMENT_SENT_DATE,
         RECEIVE_UPDATE_DOCUMENT_SENT_DATE_SUCCESS
@@ -81,8 +81,8 @@ describe("documents reducers", () => {
 
     it("should fail to update documents sent", () => {
       updateDocumentSentDateStub.returns(Promise.reject())
-      let programId = 12
-      let sentDate = "2012-12-12"
+      const programId = 12
+      const sentDate = "2012-12-12"
       return dispatchThen(updateDocumentSentDate(programId, sentDate), [
         REQUEST_UPDATE_DOCUMENT_SENT_DATE,
         RECEIVE_UPDATE_DOCUMENT_SENT_DATE_FAILURE

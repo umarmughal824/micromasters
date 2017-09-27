@@ -14,8 +14,8 @@ export default class CountryRefinementOption extends React.Component {
 
   render() {
     const { active, onClick, count, label } = this.props
-    let activeClass = () => (active ? "is-active" : "")
-    let option = "sk-item-list-option"
+    const activeClass = () => (active ? "is-active" : "")
+    const option = "sk-item-list-option"
     return (
       <div
         className={`${option} sk-item-list__item ${activeClass()}`}

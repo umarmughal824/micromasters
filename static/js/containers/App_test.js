@@ -77,10 +77,10 @@ describe("App", function() {
   })
 
   describe("profile completeness", () => {
-    let checkStep = () => helper.store.getState().ui.profileStep
+    const checkStep = () => helper.store.getState().ui.profileStep
 
     it("redirects to /profile/personal if profile is not complete", () => {
-      let response = {
+      const response = {
         ...USER_PROFILE_RESPONSE,
         first_name: undefined
       }
@@ -95,7 +95,7 @@ describe("App", function() {
     })
 
     it("redirects to /profile/professional if profile is not filled out", () => {
-      let response = {
+      const response = {
         ...USER_PROFILE_RESPONSE,
         filled_out: false
       }
@@ -110,7 +110,7 @@ describe("App", function() {
     })
 
     it("redirects to /profile/professional if a field is missing there", () => {
-      let profile = _.cloneDeep(USER_PROFILE_RESPONSE)
+      const profile = _.cloneDeep(USER_PROFILE_RESPONSE)
       profile.work_history[1].city = ""
 
       helper.profileGetStub
@@ -123,7 +123,7 @@ describe("App", function() {
     })
 
     it("redirects to /profile/education if a field is missing there", () => {
-      let response = _.cloneDeep(USER_PROFILE_RESPONSE)
+      const response = _.cloneDeep(USER_PROFILE_RESPONSE)
       response.education[0].school_name = ""
       helper.profileGetStub
         .withArgs(SETTINGS.user.username)
@@ -139,7 +139,7 @@ describe("App", function() {
   describe("program enrollments", () => {
     it("shows an error message if the enrollments GET fetch fails", () => {
       helper.programsGetStub.returns(Promise.reject("error"))
-      let types = [
+      const types = [
         REQUEST_DASHBOARD,
         actions.prices.get.requestType,
         REQUEST_FETCH_COUPONS,
@@ -156,15 +156,15 @@ describe("App", function() {
         actions.discussionsFrontpage.get.requestType
       ]
       return renderComponent("/dashboard", types).then(([wrapper]) => {
-        let text = wrapper.find(".page-content").text()
+        const text = wrapper.find(".page-content").text()
         assert(text.includes("Sorry, we were unable to load the data"))
       })
     })
 
     it("setEnrollProgramDialogVisibility dispatches the value to the action with the same name", () => {
       return renderComponent("/").then(([wrapper]) => {
-        let props = wrapper.find(Navbar).props()
-        let stub = helper.sandbox.stub(
+        const props = wrapper.find(Navbar).props()
+        const stub = helper.sandbox.stub(
           uiActions,
           "setEnrollProgramDialogVisibility"
         )
@@ -176,8 +176,8 @@ describe("App", function() {
 
     it("setEnrollSelectedProgram dispatches the value to the action with the same name", () => {
       return renderComponent("/").then(([wrapper]) => {
-        let props = wrapper.find(Navbar).props()
-        let stub = helper.sandbox.stub(uiActions, "setEnrollSelectedProgram")
+        const props = wrapper.find(Navbar).props()
+        const stub = helper.sandbox.stub(uiActions, "setEnrollSelectedProgram")
         stub.returns({ type: "fake" })
         props.setEnrollSelectedProgram("value")
         assert(stub.calledWith("value"))
@@ -186,8 +186,8 @@ describe("App", function() {
 
     it("setCurrentProgramEnrollment dispatches the value to the action with the same name", () => {
       return renderComponent("/").then(([wrapper]) => {
-        let props = wrapper.find(Navbar).props()
-        let stub = helper.sandbox.stub(
+        const props = wrapper.find(Navbar).props()
+        const stub = helper.sandbox.stub(
           enrollmentActions,
           "setCurrentProgramEnrollment"
         )
@@ -207,7 +207,7 @@ describe("App", function() {
       it(`closes the drawer and changes the URL when ${title} is clicked`, () => {
         helper.store.dispatch(setNavDrawerOpen(true))
         return renderComponent("/").then(([wrapper]) => {
-          let node = wrapper
+          const node = wrapper
             .find(".nav-drawer")
             .find("Link")
             .filterWhere(x => x.text() === title)

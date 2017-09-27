@@ -58,7 +58,7 @@ describe("ProfileImage", () => {
 
   describe("upload button", () => {
     it("should be hidden if not editable", () => {
-      let image = renderProfileImage({
+      const image = renderProfileImage({
         editable: false
       })
 
@@ -70,7 +70,7 @@ describe("ProfileImage", () => {
     })
 
     it("should be visible if editable and is users own profile", () => {
-      let image = renderProfileImage({
+      const image = renderProfileImage({
         editable: true
       })
 
@@ -83,7 +83,7 @@ describe("ProfileImage", () => {
 
     it("should be hidden if editable and another users profile", () => {
       SETTINGS.user.username = "other"
-      let image = renderProfileImage({
+      const image = renderProfileImage({
         editable: true
       })
 
@@ -95,13 +95,13 @@ describe("ProfileImage", () => {
     })
 
     it("should display a 'open' link with the correct link text if passed the right props", () => {
-      let image = renderProfileImage({
+      const image = renderProfileImage({
         editable: true,
         showLink: true,
         linkText: "some link text"
       })
 
-      let link = image.find("a")
+      const link = image.find("a")
       assert.equal(link.text(), "some link text")
       link.simulate("click")
       assert.ok(
@@ -113,7 +113,7 @@ describe("ProfileImage", () => {
     it("should have a ProfileImageUploader only for the logged in user", () => {
       for (const loggedIn of [true, false]) {
         SETTINGS.user.username = loggedIn ? thatProfile.username : "other_user"
-        let image = renderProfileImage({
+        const image = renderProfileImage({
           editable: true
         })
 
@@ -128,8 +128,8 @@ describe("ProfileImage", () => {
         })
         helper.store.dispatch(startPhotoEdit({ name: "a name" }))
         helper.store.dispatch(showDialog(PROFILE_IMAGE_DIALOG))
-        let dialog = document.querySelector(".photo-upload-dialog")
-        let saveButton = dialog.querySelector(".save-button")
+        const dialog = document.querySelector(".photo-upload-dialog")
+        const saveButton = dialog.querySelector(".save-button")
         assert.isFalse(saveButton.className.includes("disabled"))
         assert.isNull(dialog.querySelector(".mdl-spinner"))
         ReactTestUtils.Simulate.click(saveButton)
@@ -141,8 +141,8 @@ describe("ProfileImage", () => {
           editable: true
         })
         helper.store.dispatch(showDialog(PROFILE_IMAGE_DIALOG))
-        let dialog = document.querySelector(".photo-upload-dialog")
-        let saveButton = dialog.querySelector(".save-button")
+        const dialog = document.querySelector(".photo-upload-dialog")
+        const saveButton = dialog.querySelector(".save-button")
         assert.isTrue(saveButton.disabled)
         assert.isFalse(saveButton.innerHTML.includes("mdl-spinner"))
         ReactTestUtils.Simulate.click(saveButton)
@@ -157,7 +157,7 @@ describe("ProfileImage", () => {
         helper.store.dispatch(startPhotoEdit({ name: "a name" }))
         helper.store.dispatch(showDialog(PROFILE_IMAGE_DIALOG))
         helper.store.dispatch(requestPatchUserPhoto(SETTINGS.user.username))
-        let dialog = document.querySelector(".photo-upload-dialog")
+        const dialog = document.querySelector(".photo-upload-dialog")
         assert.isNotNull(dialog.querySelector(".mdl-spinner"))
       })
 
@@ -168,8 +168,8 @@ describe("ProfileImage", () => {
         helper.store.dispatch(startPhotoEdit({ name: "a name" }))
         helper.store.dispatch(showDialog(PROFILE_IMAGE_DIALOG))
         helper.store.dispatch(requestPatchUserPhoto(SETTINGS.user.username))
-        let dialog = document.querySelector(".photo-upload-dialog")
-        let saveButton = dialog.querySelector(".save-button")
+        const dialog = document.querySelector(".photo-upload-dialog")
+        const saveButton = dialog.querySelector(".save-button")
         assert.isTrue(saveButton.disabled)
         assert.isFalse(saveButton.innerHTML.includes("mdl-spinner"))
         ReactTestUtils.Simulate.click(saveButton)

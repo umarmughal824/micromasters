@@ -28,7 +28,7 @@ import { codeToCountryName } from "../../lib/location"
 
 describe("LearnerResult", () => {
   let helper
-  let resultData = {
+  const resultData = {
     _source: {
       profile: USER_PROFILE_RESPONSE,
       program: USER_PROGRAM_RESPONSE
@@ -42,7 +42,7 @@ describe("LearnerResult", () => {
     helper.cleanup()
   })
 
-  let renderElasticSearchResult = (result, props = {}) => {
+  const renderElasticSearchResult = (result, props = {}) => {
     const manager = new SearchkitManager()
     manager.state = {
       q: "query"
@@ -64,25 +64,25 @@ describe("LearnerResult", () => {
     )
   }
 
-  let renderLearnerResult = (props = {}) =>
+  const renderLearnerResult = (props = {}) =>
     renderElasticSearchResult(resultData, props)
 
   it("should include the user's preferred name", () => {
-    let result = renderLearnerResult()
+    const result = renderLearnerResult()
       .find(".learner-name")
       .find(".display-name")
     assert.equal(result.text(), getPreferredName(USER_PROFILE_RESPONSE))
   })
 
   it("should include the username", () => {
-    let result = renderLearnerResult()
+    const result = renderLearnerResult()
       .find(".learner-name")
       .find(".user-name")
     assert.equal(result.text(), USER_PROFILE_RESPONSE.username)
   })
 
   it("should include the user's location for US residence", () => {
-    let result = renderLearnerResult()
+    const result = renderLearnerResult()
       .find(".learner-location")
       .find("span")
     assert.include(result.text(), USER_PROFILE_RESPONSE.city)
@@ -91,9 +91,9 @@ describe("LearnerResult", () => {
   })
 
   it("should include the user's location for non US residence", () => {
-    let profile = R.clone(USER_PROFILE_RESPONSE)
+    const profile = R.clone(USER_PROFILE_RESPONSE)
     profile["country"] = "PK"
-    let searchResults = renderElasticSearchResult(
+    const searchResults = renderElasticSearchResult(
       {
         _source: {
           profile: profile,
@@ -102,7 +102,7 @@ describe("LearnerResult", () => {
       },
       {}
     )
-    let result = searchResults.find(".learner-location").find("span")
+    const result = searchResults.find(".learner-location").find("span")
     assert.include(result.text(), profile.city)
     assert.include(result.text(), codeToCountryName(profile.country))
     assert.notInclude(result.text(), profile.state_or_territory)
@@ -116,7 +116,7 @@ describe("LearnerResult", () => {
         permissions: ["can_advance_search"]
       }
     ]
-    let result = renderLearnerResult().find(".learner-grade .percent")
+    const result = renderLearnerResult().find(".learner-grade .percent")
     assert.include(result.text(), `${USER_PROGRAM_RESPONSE.grade_average}%`)
   })
 
@@ -137,7 +137,7 @@ describe("LearnerResult", () => {
         permissions: ["can_advance_search"]
       }
     ]
-    let emptyGradeElasticHit = {
+    const emptyGradeElasticHit = {
       _source: {
         profile: USER_PROFILE_RESPONSE,
         program: {
@@ -158,7 +158,7 @@ describe("LearnerResult", () => {
   })
 
   it("should use the small avatar", () => {
-    let result = renderLearnerResult()
+    const result = renderLearnerResult()
     assert.isTrue(
       result
         .find(".learner-avatar")
@@ -172,7 +172,7 @@ describe("LearnerResult", () => {
       setLearnerChipVisibility(USER_PROFILE_RESPONSE.username)
     )
 
-    let result = renderLearnerResult()
+    const result = renderLearnerResult()
     assert.equal(result.find(".user-chip").length, 1)
   })
 
@@ -182,13 +182,13 @@ describe("LearnerResult", () => {
     )}`, () => {
       helper.store.dispatch(setLearnerChipVisibility(username))
 
-      let result = renderLearnerResult()
+      const result = renderLearnerResult()
       assert.equal(result.find(".user-chip").length, 0)
     })
   }
 
   it("should set user chip visibility if onMouseEnter is triggered", () => {
-    let result = renderLearnerResult()
+    const result = renderLearnerResult()
     return helper
       .listenForActions([SET_LEARNER_CHIP_VISIBILITY], () => {
         result
@@ -208,7 +208,7 @@ describe("LearnerResult", () => {
     helper.store.dispatch(
       setLearnerChipVisibility(USER_PROFILE_RESPONSE.username)
     )
-    let result = renderLearnerResult()
+    const result = renderLearnerResult()
     return helper
       .listenForActions([SET_LEARNER_CHIP_VISIBILITY], () => {
         result
@@ -225,9 +225,9 @@ describe("LearnerResult", () => {
     helper.store.dispatch(
       setLearnerChipVisibility(USER_PROFILE_RESPONSE.username)
     )
-    let openLearnerEmailComposerStub = helper.sandbox.stub()
+    const openLearnerEmailComposerStub = helper.sandbox.stub()
 
-    let result = renderLearnerResult({
+    const result = renderLearnerResult({
       openLearnerEmailComposer: openLearnerEmailComposerStub
     })
     return helper
@@ -252,7 +252,7 @@ describe("LearnerResult", () => {
 
   for (const [index, profile] of ELASTICSEARCH_RESPONSE.hits.hits.entries()) {
     it(`should render without error with ES profile result at index ${index}`, () => {
-      let esResult = _.cloneDeep(profile)
+      const esResult = _.cloneDeep(profile)
       esResult["program"] = USER_PROGRAM_RESPONSE
       assert.doesNotThrow(() => {
         renderElasticSearchResult(esResult)
@@ -261,12 +261,12 @@ describe("LearnerResult", () => {
   }
 
   it("should highlight the text in the result", () => {
-    let profile = Object.assign({}, USER_PROFILE_RESPONSE)
+    const profile = Object.assign({}, USER_PROFILE_RESPONSE)
     profile.first_name = "queryname"
     profile.last_name = "qÜeryson"
     profile.preferred_name = "Querypreferred"
     profile.username = "queryfake.username"
-    let result = renderElasticSearchResult({
+    const result = renderElasticSearchResult({
       _source: {
         profile: profile,
         program: USER_PROGRAM_RESPONSE

@@ -156,7 +156,7 @@ class DashboardPage extends React.Component {
   componentDidUpdate() {
     this.updateRequirements()
 
-    let program = this.getCurrentlyEnrolledProgram()
+    const program = this.getCurrentlyEnrolledProgram()
     if (this.shouldSkipFinancialAid() && program !== undefined) {
       this.skipFinancialAid(program.id)
     }
@@ -181,7 +181,7 @@ class DashboardPage extends React.Component {
         dispatch(pearsonSSOInProgress())
         const { session_timeout, sso_digest, timestamp, sso_redirect_url } = res
 
-        let form = generateSSOForm(
+        const form = generateSSOForm(
           profile.student_id,
           timestamp,
           session_timeout,
@@ -216,7 +216,7 @@ class DashboardPage extends React.Component {
 
   handleOrderSuccess = (course: Course): void => {
     const { dispatch, ui: { toastMessage } } = this.props
-    let firstRun: ?CourseRun = course.runs.length > 0 ? course.runs[0] : null
+    const firstRun: ?CourseRun = course.runs.length > 0 ? course.runs[0] : null
 
     if (_.isNil(toastMessage)) {
       if (firstRun && firstRun.status === STATUS_PAID_BUT_NOT_ENROLLED) {
@@ -267,8 +267,8 @@ class DashboardPage extends React.Component {
       wait(3000).then(() => {
         const { orderReceipt } = this.props
         dispatch(setTimeoutActive(false))
-        let deadline = moment(orderReceipt.initialTime).add(2, "minutes")
-        let now = moment()
+        const deadline = moment(orderReceipt.initialTime).add(2, "minutes")
+        const now = moment()
         if (now.isBefore(deadline)) {
           dispatch(fetchDashboard(SETTINGS.user.username, true))
         } else {
@@ -310,7 +310,7 @@ class DashboardPage extends React.Component {
 
   fetchProgramLearners() {
     const { programLearners, dispatch } = this.props
-    let program = this.getCurrentlyEnrolledProgram()
+    const program = this.getCurrentlyEnrolledProgram()
     if (
       program !== undefined &&
       R.pathEq([program.id, "getStatus"], undefined, programLearners)
@@ -334,7 +334,7 @@ class DashboardPage extends React.Component {
       return
     }
 
-    let courseKey = query.course_key
+    const courseKey = query.course_key
     if (query.status === "receipt") {
       const [courseRun, course] = findCourseRun(
         dashboard.programs,
@@ -442,7 +442,7 @@ class DashboardPage extends React.Component {
     } = this.props
     dispatch(startCalculatorEdit(currentProgramEnrollment.id))
     if (country) {
-      let currencyPrediction = currencyForCountry(country)
+      const currencyPrediction = currencyForCountry(country)
       dispatch(updateCalculatorEdit({ currency: currencyPrediction }))
     }
     dispatch(showDialog(CALCULATOR_DIALOG))
@@ -466,7 +466,7 @@ class DashboardPage extends React.Component {
   skipFinancialAid = programId => {
     const { dispatch, financialAid } = this.props
 
-    let program = this.getCurrentlyEnrolledProgram()
+    const program = this.getCurrentlyEnrolledProgram()
     if (
       program &&
       program.financial_aid_user_info &&
@@ -555,7 +555,7 @@ class DashboardPage extends React.Component {
 
   shouldSkipFinancialAid = (): boolean => {
     // If the user has a 100% off coupon for the program, there's no need for financial aid
-    let program = this.getCurrentlyEnrolledProgram()
+    const program = this.getCurrentlyEnrolledProgram()
 
     return R.compose(
       R.any(
@@ -628,7 +628,7 @@ class DashboardPage extends React.Component {
   renderCourseContactPaymentDialog() {
     const { ui } = this.props
     const program = this.getCurrentlyEnrolledProgram()
-    let messageTail =
+    const messageTail =
       program && program.financial_aid_availability
         ? "learners who have paid for the course"
         : "verified learners"
@@ -677,11 +677,11 @@ class DashboardPage extends React.Component {
     }
 
     // technically this is, has user applied or does it not matter if they didn't
-    let hasUserApplied =
+    const hasUserApplied =
       !program.financial_aid_availability ||
       this.shouldSkipFinancialAid() ||
       program.financial_aid_user_info.has_user_applied
-    let pendingFinancialAid =
+    const pendingFinancialAid =
       program.financial_aid_availability &&
       program.financial_aid_user_info.has_user_applied &&
       FA_PENDING_STATUSES.includes(

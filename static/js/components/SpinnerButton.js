@@ -45,6 +45,7 @@ export default class SpinnerButton extends React.Component {
   }
 
   render() {
+    /* eslint-disable prefer-const */
     let {
       component: ComponentVariable,
       spinning,
@@ -54,6 +55,7 @@ export default class SpinnerButton extends React.Component {
       ignoreRecentlyClicked,
       ...otherProps
     } = this.props
+    /* eslint-enable prefer-const */
     const { recentlyClicked } = this.state
 
     if (spinning && !disabled && (ignoreRecentlyClicked || recentlyClicked)) {

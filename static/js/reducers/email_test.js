@@ -26,10 +26,8 @@ import sinon from "sinon"
 import R from "ramda"
 
 describe("email reducers", () => {
-  let sandbox,
-    store,
-    dispatchThen,
-    emailType = SEARCH_EMAIL_TYPE
+  const emailType = SEARCH_EMAIL_TYPE
+  let sandbox, store, dispatchThen
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create()
@@ -41,7 +39,7 @@ describe("email reducers", () => {
     sandbox.restore()
   })
 
-  let initialExpectedEmailState = INITIAL_EMAIL_STATE
+  const initialExpectedEmailState = INITIAL_EMAIL_STATE
 
   it("should let you start editing an email", () => {
     return dispatchThen(startEmailEdit(emailType), [
@@ -56,7 +54,7 @@ describe("email reducers", () => {
 
   it("should let you update an email edit in progress", () => {
     store.dispatch(startEmailEdit(emailType))
-    let updatedInputs = R.clone(initialExpectedEmailState.inputs)
+    const updatedInputs = R.clone(initialExpectedEmailState.inputs)
     updatedInputs.body = "The body of my email"
     return dispatchThen(
       updateEmailEdit({ type: emailType, inputs: updatedInputs }),
@@ -82,7 +80,7 @@ describe("email reducers", () => {
 
   it("should let you update email validation", () => {
     store.dispatch(startEmailEdit(emailType))
-    let errors = { subject: "NO SUBJECT" }
+    const errors = { subject: "NO SUBJECT" }
     return dispatchThen(
       updateEmailValidation({ type: emailType, errors: errors }),
       [UPDATE_EMAIL_VALIDATION]
@@ -93,11 +91,10 @@ describe("email reducers", () => {
 })
 
 describe("email reducers for the sendMail action", () => {
-  let helper,
-    emailType,
-    MAIL_SUCCESS_RESPONSE: EmailSendResponse = { errorStatusCode: 200 },
+  let helper, emailType
+  const MAIL_SUCCESS_RESPONSE: EmailSendResponse = { errorStatusCode: 200 },
     searchRequest = { size: 50 }
-  let sendEmailArguments = ["subject", "body", searchRequest]
+  const sendEmailArguments = ["subject", "body", searchRequest]
 
   beforeEach(() => {
     helper = new IntegrationTestHelper()

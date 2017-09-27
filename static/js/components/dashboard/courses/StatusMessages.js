@@ -76,11 +76,11 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
     setShowExpandedCourseStatus
   } = props
 
-  let exams = course.has_exam
-  let paid = firstRun.has_paid
-  let passedExam = hasPassingExamGrade(course)
-  let failedExam = hasFailingExamGrade(course)
-  let paymentDueDate = moment(firstRun.course_upgrade_deadline)
+  const exams = course.has_exam
+  const paid = firstRun.has_paid
+  const passedExam = hasPassingExamGrade(course)
+  const failedExam = hasFailingExamGrade(course)
+  const paymentDueDate = moment(firstRun.course_upgrade_deadline)
   if (firstRun.status === STATUS_PAID_BUT_NOT_ENROLLED) {
     const contactHref = `mailto:${SETTINGS.support_email}`
     return S.Just([
@@ -111,7 +111,7 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
     return S.Nothing
   }
 
-  let messages = []
+  const messages = []
 
   if (
     coupon &&
@@ -244,8 +244,8 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
         firstRun.status === STATUS_MISSED_DEADLINE ||
         paymentDueDate.isBefore(moment())
       ) {
-        let date = run => formatDate(run.course_start_date)
-        let msg = run =>
+        const date = run => formatDate(run.course_start_date)
+        const msg = run =>
           `You missed the payment deadline, but you can re-enroll. Next course starts ${date(
             run
           )}`
@@ -264,7 +264,7 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
           )
         )
       } else {
-        let dueDate = paymentDueDate.format(COURSE_CARD_FORMAT)
+        const dueDate = paymentDueDate.format(COURSE_CARD_FORMAT)
         if (exams) {
           messages.push({
             message: `The edX course is complete, but you need to pass the exam. (Payment due on ${dueDate})`,
@@ -281,7 +281,7 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
     }
   } else {
     if (hasFailedCourseRun(course) && !hasPassedCourseRun(course)) {
-      let date = run => formatDate(run.course_start_date)
+      const date = run => formatDate(run.course_start_date)
       return S.Just(
         S.maybe(
           messages.concat({ message: "You did not pass the edX course." }),

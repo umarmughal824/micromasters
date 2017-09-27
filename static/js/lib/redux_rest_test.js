@@ -21,12 +21,12 @@ describe("redux REST", () => {
       sandbox.restore()
     })
 
-    let endpoints = [automaticEmailsEndpoint, courseEnrollmentsEndpoint]
+    const endpoints = [automaticEmailsEndpoint, courseEnrollmentsEndpoint]
 
     it("should include all reducers that we expect it to", () => {
-      let state = store.getState()
+      const state = store.getState()
       endpoints.forEach(endpoint => {
-        let expected = R.propOr(INITIAL_STATE, "initialState", endpoint)
+        const expected = R.propOr(INITIAL_STATE, "initialState", endpoint)
         assert.deepEqual(expected, state[endpoint.name])
       })
     })

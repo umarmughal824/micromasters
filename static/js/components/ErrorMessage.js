@@ -20,7 +20,7 @@ export default class ErrorMessage extends React.Component {
       }
     } = this.props
 
-    let errorCodeStr = () => {
+    const errorCodeStr = () => {
       if (errorCode !== undefined) {
         return `${errorCode} `
       }
@@ -30,7 +30,7 @@ export default class ErrorMessage extends React.Component {
       return ""
     }
 
-    let userMessageStr = () => {
+    const userMessageStr = () => {
       if (userMessage !== undefined) {
         return `Additional info: ${userMessage}`
       }
@@ -40,7 +40,7 @@ export default class ErrorMessage extends React.Component {
       return ""
     }
 
-    let email = SETTINGS.support_email
+    const email = SETTINGS.support_email
 
     return (
       <div className="alert-message">

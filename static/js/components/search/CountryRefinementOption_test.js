@@ -10,40 +10,40 @@ import CountryRefinementOption from "./CountryRefinementOption"
 import { makeStrippedHtml } from "../../util/util"
 
 describe("CountryRefinementOption", () => {
-  let renderCountryOption = props =>
+  const renderCountryOption = props =>
     makeStrippedHtml(<CountryRefinementOption {...props} />)
 
-  let onClick = sinon.stub()
-  let props = {
+  const onClick = sinon.stub()
+  const props = {
     label:   "AF",
     active:  false,
     onClick: onClick,
     count:   42
   }
 
-  let renderFullCountryOption = props =>
+  const renderFullCountryOption = props =>
     ReactTestUtils.renderIntoDocument(<CountryRefinementOption {...props} />)
 
   it("should render a country name, given a country code", () => {
-    let option = renderCountryOption(props)
+    const option = renderCountryOption(props)
     assert.include(option, "Afghanistan")
   })
 
   it("should render a country placeholder, given no country code", () => {
-    let newProps = _.cloneDeep(props)
+    const newProps = _.cloneDeep(props)
     _.set(newProps, "label", null)
-    let option = renderCountryOption(newProps)
+    const option = renderCountryOption(newProps)
     assert.include(option, "N/A")
   })
 
   it("should display the result count for the option", () => {
-    let option = renderCountryOption(props)
+    const option = renderCountryOption(props)
     assert.include(option, "42")
   })
 
   it("should bind an onClick handler", () => {
-    let componentTree = renderFullCountryOption(props)
-    let clickableDiv = ReactTestUtils.findAllInRenderedTree(
+    const componentTree = renderFullCountryOption(props)
+    const clickableDiv = ReactTestUtils.findAllInRenderedTree(
       componentTree,
       () => true
     )[1]

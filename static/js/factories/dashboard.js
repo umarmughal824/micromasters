@@ -31,7 +31,7 @@ import type {
 } from "../flow/programTypes"
 
 const makeCounter = (): (() => number) => {
-  let gen = (function*() {
+  const gen = (function*() {
     let i = 1
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -171,8 +171,8 @@ export const makeProgramLearners = (): ProgramLearners => ({
 })
 
 export const makeProctoredExamResult = (): ProctoredExamResult => {
-  let passingScore = Math.random() * 100
-  let score = Math.random() * 100
+  const passingScore = Math.random() * 100
+  const score = Math.random() * 100
 
   return {
     exam_date:               moment().format(),

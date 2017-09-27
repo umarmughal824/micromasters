@@ -244,7 +244,7 @@ export default class Navbar extends React.Component {
         : this.renderUnauthenticatedHeader(link)
     }
 
-    let drawerClass = `nav-drawer ${navDrawerOpen ? "open" : "closed"}`
+    const drawerClass = `nav-drawer ${navDrawerOpen ? "open" : "closed"}`
     return (
       <div className="micromasters-navbar">
         <div className="mobile-visible">{this.navDrawer(drawerClass)}</div>

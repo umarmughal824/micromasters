@@ -54,8 +54,8 @@ import { actions } from "../lib/redux_rest"
 
 describe("FinancialAidCalculator", () => {
   let listenForActions, renderComponent, helper
-  let financialAidDashboard = _.cloneDeep(DASHBOARD_RESPONSE)
-  let program = financialAidDashboard.programs.find(
+  const financialAidDashboard = _.cloneDeep(DASHBOARD_RESPONSE)
+  const program = financialAidDashboard.programs.find(
     program => program.title === "Not passed program"
   )
   program.financial_aid_availability = true
@@ -89,7 +89,7 @@ describe("FinancialAidCalculator", () => {
         helper.store.getState().ui.dialogVisibility[CALCULATOR_DIALOG],
         true
       )
-      let calculator = document.querySelector(".financial-aid-calculator")
+      const calculator = document.querySelector(".financial-aid-calculator")
 
       ReactTestUtils.Simulate.click(calculator.querySelector(".cancel-button"))
       assert.equal(
@@ -132,11 +132,11 @@ describe("FinancialAidCalculator", () => {
             helper.store.getState().ui.dialogVisibility[CALCULATOR_DIALOG],
             true
           )
-          let calculator = document.querySelector(
+          const calculator = document.querySelector(
             ".financial-aid-calculator-wrapper"
           )
           ReactTestUtils.Simulate.click(calculator.querySelector(".full-price"))
-          let confirmDialog = document.querySelector(
+          const confirmDialog = document.querySelector(
             ".skip-financial-aid-dialog-wrapper"
           )
           ReactTestUtils.Simulate.click(
@@ -152,9 +152,9 @@ describe("FinancialAidCalculator", () => {
     })
   })
 
-  for (let activity of [true, false]) {
+  for (const activity of [true, false]) {
     it(`has proper spinner state for the skip dialog save button for activity=${activity.toString()}`, () => {
-      let dialogActionsSpy = helper.sandbox.spy(inputUtil, "dialogActions")
+      const dialogActionsSpy = helper.sandbox.spy(inputUtil, "dialogActions")
       helper.skipFinancialAidStub.returns(
         Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE)
       )
@@ -188,10 +188,10 @@ describe("FinancialAidCalculator", () => {
     helper.store.dispatch(requestAddFinancialAid())
 
     return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(() => {
-      let confirmDialog = document.querySelector(
+      const confirmDialog = document.querySelector(
         ".skip-financial-aid-dialog-wrapper"
       )
-      let skipButton = confirmDialog.querySelector(".skip-button")
+      const skipButton = confirmDialog.querySelector(".skip-button")
 
       assert.isFalse(skipButton.className.includes("disabled-with-spinner"))
       assert.isTrue(skipButton.disabled)
@@ -240,8 +240,8 @@ describe("FinancialAidCalculator", () => {
 
   it("should show validation errors if the user doesnt fill out fields", () => {
     const checkInvalidInput = (selector, reqdAttr) => {
-      let calculator = document.querySelector(".financial-aid-calculator")
-      let input = calculator.querySelector(selector)
+      const calculator = document.querySelector(".financial-aid-calculator")
+      const input = calculator.querySelector(selector)
       assert.ok(
         input.attributes.getNamedItem("aria-invalid").value,
         "should be invalid"
@@ -272,7 +272,7 @@ describe("FinancialAidCalculator", () => {
           )
         }
       ).then(() => {
-        let state = helper.store.getState().financialAid
+        const state = helper.store.getState().financialAid
         assert.deepEqual(state.validation, {
           checkBox: "You must agree to these terms",
           income:   "Income is required",
@@ -285,7 +285,7 @@ describe("FinancialAidCalculator", () => {
     })
   })
 
-  for (let income of ["2000.00", "2000.50", "2Adb", "two thousand"]) {
+  for (const income of ["2000.00", "2000.50", "2Adb", "two thousand"]) {
     it(`should show validation errors if invalid income=${income}`, () => {
       return renderComponent(
         "/dashboard",
@@ -310,7 +310,7 @@ describe("FinancialAidCalculator", () => {
             )
           }
         ).then(() => {
-          let state = helper.store.getState().financialAid
+          const state = helper.store.getState().financialAid
           assert.equal(
             state.validation["income"],
             "Please only use whole numbers."
@@ -338,7 +338,7 @@ describe("FinancialAidCalculator", () => {
             .find(".pricing-actions")
             .find(".calculate-cost-button")
             .simulate("click")
-          let select = document.querySelector(".currency")
+          const select = document.querySelector(".currency")
           modifySelectField(select, "GBP")
         }
       ).then(() => {
@@ -392,7 +392,7 @@ describe("FinancialAidCalculator", () => {
             .find(".pricing-actions")
             .find(".calculate-cost-button")
             .simulate("click")
-          let calculator = document.querySelector(".financial-aid-calculator")
+          const calculator = document.querySelector(".financial-aid-calculator")
           ReactTestUtils.Simulate.change(
             calculator.querySelector(".mdl-checkbox__input")
           )
@@ -400,7 +400,7 @@ describe("FinancialAidCalculator", () => {
           ReactTestUtils.Simulate.click(
             calculator.querySelector(".save-button")
           )
-          let confirmDialog = document.querySelector(".confirm-dialog")
+          const confirmDialog = document.querySelector(".confirm-dialog")
           ReactTestUtils.Simulate.click(
             confirmDialog.querySelector(".save-button")
           )
@@ -414,9 +414,9 @@ describe("FinancialAidCalculator", () => {
     })
   })
 
-  for (let activity of [true, false]) {
+  for (const activity of [true, false]) {
     it(`has appropriate state for financial aid submit button, activity=${activity.toString()}`, () => {
-      let dialogActionsSpy = helper.sandbox.spy(inputUtil, "dialogActions")
+      const dialogActionsSpy = helper.sandbox.spy(inputUtil, "dialogActions")
 
       if (activity) {
         helper.store.dispatch(requestAddFinancialAid())
@@ -452,13 +452,13 @@ describe("FinancialAidCalculator", () => {
           .find(".pricing-actions")
           .find(".dashboard-button")
           .simulate("click")
-        let calculator = document.querySelector(".financial-aid-calculator")
+        const calculator = document.querySelector(".financial-aid-calculator")
         ReactTestUtils.Simulate.change(
           calculator.querySelector(".mdl-checkbox__input")
         )
         modifyTextField(document.querySelector("#user-salary-input"), "1000")
 
-        let saveButton = calculator.querySelector(".save-button")
+        const saveButton = calculator.querySelector(".save-button")
         assert.isFalse(saveButton.className.includes("disabled-with-spinner"))
         assert.equal(saveButton.innerHTML, "Submit")
         assert.isTrue(saveButton.disabled)
@@ -502,7 +502,7 @@ describe("FinancialAidCalculator", () => {
             .find(".pricing-actions")
             .find(".calculate-cost-button")
             .simulate("click")
-          let calculator = document.querySelector(".financial-aid-calculator")
+          const calculator = document.querySelector(".financial-aid-calculator")
           ReactTestUtils.Simulate.change(
             calculator.querySelector(".mdl-checkbox__input")
           )
@@ -510,7 +510,7 @@ describe("FinancialAidCalculator", () => {
           ReactTestUtils.Simulate.click(
             calculator.querySelector(".save-button")
           )
-          let confirmDialog = document.querySelector(".confirm-dialog")
+          const confirmDialog = document.querySelector(".confirm-dialog")
           ReactTestUtils.Simulate.click(
             confirmDialog.querySelector(".save-button")
           )
@@ -525,7 +525,7 @@ describe("FinancialAidCalculator", () => {
           `There was an error (Error 500: an error message). Please contact ${SETTINGS.support_email} \
 if you continue to have problems.`
         )
-        let state = helper.store.getState()
+        const state = helper.store.getState()
         assert.deepEqual(state.financialAid.fetchError, {
           message: "an error message",
           code:    500
@@ -542,7 +542,7 @@ if you continue to have problems.`
       })
     )
 
-    let wrapper = render(
+    const wrapper = render(
       <Provider store={helper.store}>
         <FinancialAidCalculator
           programs={[]}

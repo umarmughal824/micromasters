@@ -58,7 +58,7 @@ describe("CourseAction", () => {
     sinon.assert.calledWith(setEnrollCourseDialogVisibilityStub, true)
   }
 
-  let renderCourseAction = (props = {}) => {
+  const renderCourseAction = (props = {}) => {
     return shallow(
       <CourseAction
         hasFinancialAid={false}
@@ -78,42 +78,42 @@ describe("CourseAction", () => {
 
   describe("course enrollment", () => {
     it("says Enroll for COURSE_ACTION_ENROLL", () => {
-      let wrapper = renderCourseAction({ actionType: COURSE_ACTION_ENROLL })
+      const wrapper = renderCourseAction({ actionType: COURSE_ACTION_ENROLL })
       assert.equal(wrapper.find(SpinnerButton).props().children, "Enroll")
     })
 
     it("should handle a basic enrollment", () => {
-      let wrapper = renderCourseAction({ actionType: COURSE_ACTION_ENROLL })
+      const wrapper = renderCourseAction({ actionType: COURSE_ACTION_ENROLL })
       wrapper.find(SpinnerButton).simulate("click")
       assertCourseRunSelected(course.runs[0])
       assertCourseEnrollDialogOpened()
     })
 
     it("says Re-Enroll for COURSE_ACTION_REENROLL", () => {
-      let wrapper = renderCourseAction({ actionType: COURSE_ACTION_REENROLL })
+      const wrapper = renderCourseAction({ actionType: COURSE_ACTION_REENROLL })
       assert.equal(wrapper.find(SpinnerButton).props().children, "Re-Enroll")
     })
   })
 
   describe("course payment", () => {
     it("says Pay for COURSE_ACTION_PAY", () => {
-      let wrapper = renderCourseAction({ actionType: COURSE_ACTION_PAY })
+      const wrapper = renderCourseAction({ actionType: COURSE_ACTION_PAY })
       assert.equal(wrapper.find(Button).props().children, "Pay Now")
     })
   })
 
   it("shows a pending disabled button if the user has status pending-enrollment", () => {
-    let course = findCourse(
+    const course = findCourse(
       course =>
         course.runs.length > 0 &&
         course.runs[0].status === STATUS_PENDING_ENROLLMENT
     )
-    let firstRun = course.runs[0]
+    const firstRun = course.runs[0]
     const wrapper = renderCourseAction({
       courseRun:  firstRun,
       actionType: COURSE_ACTION_ENROLL
     })
-    let buttonProps = wrapper.find("SpinnerButton").props()
+    const buttonProps = wrapper.find("SpinnerButton").props()
     assert.isTrue(buttonProps.spinning)
   })
 
@@ -128,7 +128,7 @@ describe("CourseAction", () => {
     })
 
     it("allow user to click Enroll Now even without a calculated course price", () => {
-      let firstRun = alterFirstRun(course, {
+      const firstRun = alterFirstRun(course, {
         enrollment_start_date: now.toISOString()
       })
 
@@ -141,17 +141,17 @@ describe("CourseAction", () => {
         hasFinancialAid: true,
         actionType:      COURSE_ACTION_ENROLL
       })
-      let button = wrapper.find(SpinnerButton)
+      const button = wrapper.find(SpinnerButton)
       assert.isUndefined(button.props().disabled)
       assert.equal(button.props().children, "Enroll")
     })
 
     it("indicates that a user must calculate the course price to upgrade to paid", () => {
-      let course = findAndCloneCourse(
+      const course = findAndCloneCourse(
         course =>
           course.runs.length > 0 && course.runs[0].status === STATUS_CAN_UPGRADE
       )
-      let firstRun = alterFirstRun(course, {
+      const firstRun = alterFirstRun(course, {
         enrollment_start_date: now.toISOString()
       })
 
@@ -165,13 +165,13 @@ describe("CourseAction", () => {
         actionType:      COURSE_ACTION_PAY
       })
 
-      let button = wrapper.find(Button)
+      const button = wrapper.find(Button)
       assert.isTrue(button.props().disabled)
       assert.equal(button.props().children, "Pay Now")
     })
 
     it("pay button redirects to checkout", () => {
-      let firstRun = alterFirstRun(course, {
+      const firstRun = alterFirstRun(course, {
         enrollment_start_date: now.toISOString(),
         status:                STATUS_CAN_UPGRADE
       })

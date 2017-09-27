@@ -40,9 +40,9 @@ describe("ProfilePage", function() {
   let listenForActions, renderComponent, helper
   let addProgramEnrollmentStub, patchUserProfileStub
 
-  let profileSteps = [PERSONAL_STEP, EDUCATION_STEP, EMPLOYMENT_STEP]
-  let prevButtonSelector = ".prev"
-  let nextButtonSelector = ".next"
+  const profileSteps = [PERSONAL_STEP, EDUCATION_STEP, EMPLOYMENT_STEP]
+  const prevButtonSelector = ".prev"
+  const nextButtonSelector = ".next"
 
   const SUCCESS_ACTIONS = [
     REQUEST_GET_USER_PROFILE,
@@ -72,19 +72,20 @@ describe("ProfilePage", function() {
     helper.cleanup()
   })
 
-  let confirmSaveButtonBehavior = (
+  const confirmSaveButtonBehavior = (
     updatedProfile,
     pageElements,
     additionalActions = []
   ) => {
-    let { div, button } = pageElements
+    let { button } = pageElements
+    const { div } = pageElements
     button = button || div.querySelector(nextButtonSelector)
     patchUserProfileStub.throws("Invalid arguments")
     patchUserProfileStub
       .withArgs(SETTINGS.user.username, updatedProfile)
       .returns(Promise.resolve(updatedProfile))
 
-    let actions = [
+    const actions = [
       UPDATE_PROFILE_VALIDATION,
       UPDATE_VALIDATION_VISIBILITY,
       REQUEST_PATCH_USER_PROFILE,
@@ -98,12 +99,12 @@ describe("ProfilePage", function() {
     })
   }
 
-  let radioToggles = (div, selector) =>
+  const radioToggles = (div, selector) =>
     div.querySelector(selector).getElementsByTagName("input")
 
   describe("switch toggling behavior", () => {
     beforeEach(() => {
-      let userProfile = {
+      const userProfile = {
         ...USER_PROFILE_RESPONSE,
         education:    [],
         work_history: []
@@ -114,8 +115,8 @@ describe("ProfilePage", function() {
     })
 
     it("should launch a dialog to add an entry when an education switch is set to Yes", () => {
-      let dialogTest = ([, div]) => {
-        let toggle = radioToggles(div, ".profile-radio-switch")
+      const dialogTest = ([, div]) => {
+        const toggle = radioToggles(div, ".profile-radio-switch")
         ReactTestUtils.Simulate.change(toggle[0])
         activeDialog("education-dialog-wrapper")
       }
@@ -125,8 +126,8 @@ describe("ProfilePage", function() {
     })
 
     it("should launch a dialog to add an entry when an employment switch is set to Yes", () => {
-      let dialogTest = ([, div]) => {
-        let toggle = radioToggles(div, ".profile-radio-switch")
+      const dialogTest = ([, div]) => {
+        const toggle = radioToggles(div, ".profile-radio-switch")
         ReactTestUtils.Simulate.change(toggle[0])
         activeDialog("employment-dialog-wrapper")
       }
@@ -138,7 +139,7 @@ describe("ProfilePage", function() {
 
   describe("profile completeness", () => {
     it("redirects to /profile/personal if profile is not complete", () => {
-      let response = {
+      const response = {
         ...USER_PROFILE_RESPONSE,
         first_name: undefined
       }
@@ -156,7 +157,7 @@ describe("ProfilePage", function() {
     })
 
     it("redirects to /profile/education if a field is missing there", () => {
-      let response = _.cloneDeep(USER_PROFILE_RESPONSE)
+      const response = _.cloneDeep(USER_PROFILE_RESPONSE)
       response.education[0].school_name = ""
       helper.profileGetStub
         .withArgs(SETTINGS.user.username)
@@ -177,17 +178,17 @@ describe("ProfilePage", function() {
       "/profile/education",
       SUCCESS_ACTIONS
     ).then(([, div]) => {
-      let button = div.querySelector(prevButtonSelector)
+      const button = div.querySelector(prevButtonSelector)
       assert.equal(getStep(), EDUCATION_STEP)
       ReactTestUtils.Simulate.click(button)
       assert.equal(getStep(), PERSONAL_STEP)
     })
   })
 
-  for (let step of profileSteps.slice(0, 2)) {
-    for (let filledOutValue of [true, false]) {
+  for (const step of profileSteps.slice(0, 2)) {
+    for (const filledOutValue of [true, false]) {
       it(`respects the current value (${filledOutValue}) when saving on ${step}`, () => {
-        let updatedProfile = {
+        const updatedProfile = {
           ...USER_PROFILE_RESPONSE,
           filled_out:   filledOutValue,
           education:    [],
@@ -196,7 +197,7 @@ describe("ProfilePage", function() {
         helper.profileGetStub
           .withArgs(SETTINGS.user.username)
           .returns(Promise.resolve(updatedProfile))
-        let actions =
+        const actions =
           step === PERSONAL_STEP ? SUCCESS_SET_PROGRAM_ACTIONS : SUCCESS_ACTIONS
         return renderComponent(`/profile/${step}`, actions).then(([, div]) => {
           return confirmSaveButtonBehavior(
@@ -221,7 +222,7 @@ describe("ProfilePage", function() {
     })
   })
 
-  for (let activity of [true, false]) {
+  for (const activity of [true, false]) {
     it(`has proper button state when the profile patch is processing when activity=${String(
       activity
     )}`, () => {
@@ -232,14 +233,14 @@ describe("ProfilePage", function() {
         if (activity) {
           helper.store.dispatch(requestPatchUserProfile(SETTINGS.user.username))
         }
-        let next = wrapper.find("SpinnerButton")
+        const next = wrapper.find("SpinnerButton")
         assert.equal(activity, next.props().spinning)
       })
     })
   }
 
   it("should enroll the user when they go to the next page", () => {
-    let program = PROGRAMS[0]
+    const program = PROGRAMS[0]
     addProgramEnrollmentStub.returns(Promise.resolve(program))
 
     patchUserProfileStub.returns(Promise.resolve(USER_PROFILE_RESPONSE))
@@ -274,16 +275,16 @@ describe("ProfilePage", function() {
     })
   })
 
-  for (let [step, component] of [
+  for (const [step, component] of [
     [PERSONAL_STEP, "PersonalTab"],
     [EDUCATION_STEP, "EducationTab"],
     [EMPLOYMENT_STEP, "EmploymentTab"]
   ]) {
     it(`sends the right props to tab components for step ${step}`, () => {
-      let actions =
+      const actions =
         step === PERSONAL_STEP ? SUCCESS_SET_PROGRAM_ACTIONS : SUCCESS_ACTIONS
       return renderComponent(`/profile/${step}`, actions).then(([wrapper]) => {
-        let props = wrapper.find(component).props()
+        const props = wrapper.find(component).props()
         assert.deepEqual(props["ui"], helper.store.getState().ui)
         assert.deepEqual(
           props["programs"],

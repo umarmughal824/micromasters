@@ -21,20 +21,20 @@ export default class WorkHistoryFilter extends SearchkitComponent {
      *  at one company of the same user
      **/
 
-    let cardinality = CardinalityMetric("count", "user_id")
-    let aggsContainer = AggsContainer(
+    const cardinality = CardinalityMetric("count", "user_id")
+    const aggsContainer = AggsContainer(
       "company_name_count",
       { reverse_nested: {} },
       [cardinality]
     )
-    let termsBucket = TermsBucket(
+    const termsBucket = TermsBucket(
       "profile.work_history.company_name",
       "profile.work_history.company_name",
       { size: 20, order: { company_name_count: "desc" } },
       aggsContainer
     )
 
-    let nestedBucket = NestedBucket(
+    const nestedBucket = NestedBucket(
       "inner",
       "profile.work_history",
       termsBucket

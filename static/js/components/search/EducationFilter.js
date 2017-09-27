@@ -15,8 +15,8 @@ import { EDUCATION_LEVELS } from "../../constants"
 import PatchedMenuFilter from "./PatchedMenuFilter"
 
 const makeDegreeTranslations: () => Object = () => {
-  let translations = {}
-  for (let level of EDUCATION_LEVELS) {
+  const translations = {}
+  for (const level of EDUCATION_LEVELS) {
     translations[level.value] = level.label
   }
   return translations
@@ -33,13 +33,13 @@ export default class EducationFilter extends SearchkitComponent {
      *  for the same user
      **/
 
-    let cardinality = CardinalityMetric("count", "user_id")
-    let aggsContainer = AggsContainer(
+    const cardinality = CardinalityMetric("count", "user_id")
+    const aggsContainer = AggsContainer(
       "school_name_count",
       { reverse_nested: {} },
       [cardinality]
     )
-    let termsBucket = TermsBucket(
+    const termsBucket = TermsBucket(
       "profile.education.degree_name",
       "profile.education.degree_name",
       {},

@@ -7,8 +7,8 @@ import sinon from "sinon"
 import CustomPaginationDisplay from "./CustomPaginationDisplay"
 
 describe("CustomPaginationDisplay", () => {
-  let toggleItemStub = sinon.stub()
-  let props = {
+  const toggleItemStub = sinon.stub()
+  const props = {
     disabled:   false,
     toggleItem: toggleItemStub
   }
@@ -31,7 +31,7 @@ describe("CustomPaginationDisplay", () => {
   it("toggleItem called on previous option click", () => {
     const wrapper = shallow(<CustomPaginationDisplay {...props} />)
     const previousOption = wrapper.find('[data-key="previous"]')
-    let event = {
+    const event = {
       preventDefault: (): void => {},
       target:         {
         getAttribute: (): string => {
@@ -47,7 +47,7 @@ describe("CustomPaginationDisplay", () => {
   it("toggleItem called on next option click", () => {
     const wrapper = shallow(<CustomPaginationDisplay {...props} />)
     const nextOption = wrapper.find('[data-key="next"]')
-    let event = {
+    const event = {
       preventDefault: (): void => {},
       target:         {
         getAttribute: (): string => {

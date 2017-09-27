@@ -18,7 +18,7 @@ describe("CustomNoHits", () => {
     sandbox.restore()
   })
 
-  let renderCustomNoHits = () => makeStrippedHtml(<CustomNoHits />)
+  const renderCustomNoHits = () => makeStrippedHtml(<CustomNoHits />)
 
   const stubCommon = (): void => {
     sandbox.stub(CustomNoHits.prototype, "componentWillMount")
@@ -40,7 +40,7 @@ describe("CustomNoHits", () => {
     sandbox.stub(CustomNoHits.prototype, "hasHits").returns(false)
     sandbox.stub(CustomNoHits.prototype, "getError").returns(false)
 
-    let results = renderCustomNoHits()
+    const results = renderCustomNoHits()
     assert.equal(
       results,
       "There were no results found for this search. Please remove some filters or start over."
@@ -55,7 +55,7 @@ describe("CustomNoHits", () => {
     sandbox.stub(CustomNoHits.prototype, "hasHits").returns(true)
     sandbox.stub(CustomNoHits.prototype, "getError").returns(false)
 
-    let results = renderCustomNoHits()
+    const results = renderCustomNoHits()
     assert.isNotOk(results)
   })
 
@@ -71,7 +71,7 @@ describe("CustomNoHits", () => {
       }
     })
 
-    let results = renderCustomNoHits()
+    const results = renderCustomNoHits()
     assert.equal(results, "Error!!")
   })
 })

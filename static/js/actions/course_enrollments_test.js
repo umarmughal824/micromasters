@@ -22,8 +22,8 @@ describe("show and hide enroll pay later success alert", () => {
   })
 
   it("should set and reset enroll pay later dialog", () => {
-    let waitPromise = Promise.resolve()
-    let waitStub = sandbox.stub(util, "wait").returns(waitPromise)
+    const waitPromise = Promise.resolve()
+    const waitStub = sandbox.stub(util, "wait").returns(waitPromise)
 
     return dispatchThen(showEnrollPayLaterSuccessMessage("foo/bar/baz"), [
       SHOW_ENROLL_PAY_LATER_SUCCESS

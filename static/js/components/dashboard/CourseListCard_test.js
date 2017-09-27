@@ -70,13 +70,13 @@ describe("CourseListCard", () => {
     coursePrice.financial_aid_availability = true
   }
 
-  let renderCourseListCard = (props = {}) => {
+  const renderCourseListCard = (props = {}) => {
     helper.store.dispatch(
       receiveGetProgramEnrollmentsSuccess(DASHBOARD_RESPONSE.programs)
     )
     helper.store.dispatch(setCurrentProgramEnrollment(program))
 
-    let couponPrices = calculatePrices([program], [coursePrice], [])
+    const couponPrices = calculatePrices([program], [coursePrice], [])
     return mount(
       <MuiThemeProvider muiTheme={getMuiTheme()}>
         <Provider store={helper.store}>
@@ -238,7 +238,7 @@ describe("CourseListCard", () => {
       prices: prices
     })
     assert.equal(wrapper.find(CourseRow).length, program.courses.length)
-    let courses = _.sortBy(program.courses, "position_in_program")
+    const courses = _.sortBy(program.courses, "position_in_program")
     wrapper.find(CourseRow).forEach((courseRow, i) => {
       const props = courseRow.props()
       assert.equal(props.now, now)
@@ -249,9 +249,9 @@ describe("CourseListCard", () => {
 
   it("fills in now if it's missing in the props", () => {
     const wrapper = renderCourseListCard()
-    let nows = wrapper.find(CourseRow).map(courseRow => courseRow.props().now)
+    const nows = wrapper.find(CourseRow).map(courseRow => courseRow.props().now)
     assert.isAbove(nows.length, 0)
-    for (let now of nows) {
+    for (const now of nows) {
       // Each now must be exactly the same object
       assert.equal(now, nows[0])
     }

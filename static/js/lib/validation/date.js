@@ -61,7 +61,7 @@ export const validYearInput = R.curry((highCutoff, year) => {
 })
 
 export const checkYearRange = (highCutoff: number, year: number) => {
-  let now = moment().year()
+  const now = moment().year()
   return Just(R.max(now - YEAR_VALIDATION_CUTOFF, R.min(highCutoff, year)))
 }
 

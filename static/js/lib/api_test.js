@@ -49,8 +49,8 @@ describe("api", function() {
   afterEach(function() {
     sandbox.restore()
 
-    for (let cookie of document.cookie.split(";")) {
-      let key = cookie.split("=")[0].trim()
+    for (const cookie of document.cookie.split(";")) {
+      const key = cookie.split("=")[0].trim()
       document.cookie = `${key}=`
     }
   })
@@ -97,7 +97,7 @@ describe("api", function() {
       return assert
         .isRejected(patchUserProfile("jane", USER_PROFILE_RESPONSE))
         .then(() => {
-          let profileWithoutImage = { ...USER_PROFILE_RESPONSE }
+          const profileWithoutImage = { ...USER_PROFILE_RESPONSE }
           delete profileWithoutImage["image"]
           assert.ok(
             fetchJSONStub.calledWith("/api/v0/profiles/jane/", {
@@ -110,17 +110,17 @@ describe("api", function() {
 
     describe("updating profile image", () => {
       const checkArgs = () => {
-        let [url, obj] = fetchStub.args[0]
+        const [url, obj] = fetchStub.args[0]
         assert.equal(url, "/api/v0/profiles/jane/")
         assert.equal(obj.method, "PATCH")
-        let img = obj.body.get("image")
+        const img = obj.body.get("image")
         assert.equal(img.name, "a file name")
         assert.equal(img.constructor.name, "File")
       }
 
       it("updates a user profile image", () => {
-        let blob = new Blob()
-        let formData = new FormData()
+        const blob = new Blob()
+        const formData = new FormData()
         formData.append("image", blob, "a file name")
         fetchStub.returns(Promise.resolve("good response"))
         return updateProfileImage("jane", blob, "a file name").then(res => {
@@ -130,7 +130,7 @@ describe("api", function() {
       })
 
       it("fails to update a user profile image", () => {
-        let blob = new Blob()
+        const blob = new Blob()
         fetchStub.returns(Promise.reject())
         return assert
           .isRejected(updateProfileImage("jane", blob, "a file name"))
@@ -157,7 +157,7 @@ describe("api", function() {
         })
       })
 
-      for (let statusCode of [400, 401]) {
+      for (const statusCode of [400, 401]) {
         it(`redirects to login if status = ${statusCode}`, () => {
           fetchJSONStub.returns(Promise.reject({ errorStatusCode: statusCode }))
 
@@ -206,10 +206,10 @@ describe("api", function() {
     })
 
     describe("for email", () => {
-      let MAIL_RESPONSE = { errorStatusCode: 200 }
-      let searchRequest = { size: 50 }
-      let courseId = 123
-      let learnerStudentId = 123
+      const MAIL_RESPONSE = { errorStatusCode: 200 }
+      const searchRequest = { size: 50 }
+      const courseId = 123
+      const learnerStudentId = 123
 
       it("returns expected values when a POST to send a search result email succeeds", () => {
         fetchJSONStub.returns(Promise.resolve(MAIL_RESPONSE))
@@ -299,7 +299,7 @@ describe("api", function() {
         })
       })
 
-      for (let statusCode of [400, 401]) {
+      for (const statusCode of [400, 401]) {
         it(`redirects to login if status = ${statusCode}`, () => {
           fetchJSONStub.returns(Promise.reject({ errorStatusCode: statusCode }))
 
@@ -313,7 +313,7 @@ describe("api", function() {
       }
 
       it("adds a program enrollment successfully", () => {
-        let enrollment = PROGRAMS[0]
+        const enrollment = PROGRAMS[0]
         fetchJSONStub.returns(Promise.resolve(enrollment))
         return addProgramEnrollment(enrollment.id).then(enrollmentResponse => {
           assert.ok(
@@ -328,7 +328,7 @@ describe("api", function() {
 
       it("fails to add a program enrollment", () => {
         fetchJSONStub.returns(Promise.reject())
-        let enrollment = PROGRAMS[0]
+        const enrollment = PROGRAMS[0]
 
         return assert
           .isRejected(addProgramEnrollment(enrollment.id))
@@ -345,7 +345,7 @@ describe("api", function() {
 
     describe("for adding financial aid", () => {
       it("add financial aid successfully", () => {
-        let programId = PROGRAMS[0].id
+        const programId = PROGRAMS[0].id
         fetchJSONStub.returns(Promise.resolve())
 
         return addFinancialAid(10000, "USD", programId).then(() => {
@@ -365,7 +365,7 @@ describe("api", function() {
       it("fails to add financial aid", () => {
         fetchJSONStub.returns(Promise.reject())
 
-        let programId = PROGRAMS[0].id
+        const programId = PROGRAMS[0].id
 
         return assert
           .isRejected(addFinancialAid(10000, "USD", programId))
@@ -385,7 +385,7 @@ describe("api", function() {
     })
 
     describe("for skipping financial aid", () => {
-      let programId = 2
+      const programId = 2
       it("successfully skips financial aid", () => {
         fetchJSONStub.returns(Promise.resolve())
 
@@ -413,8 +413,8 @@ describe("api", function() {
 
     describe("for updating document sent date", () => {
       it("add updates the document sent date", () => {
-        let financialAidId = 123
-        let sentDate = "2012-12-12"
+        const financialAidId = 123
+        const sentDate = "2012-12-12"
         fetchJSONStub.returns(Promise.resolve())
 
         return updateDocumentSentDate(financialAidId, sentDate).then(() => {
@@ -435,8 +435,8 @@ describe("api", function() {
       it("fails to update the document sent date", () => {
         fetchJSONStub.returns(Promise.reject())
 
-        let financialAidId = 123
-        let sentDate = "2012-12-12"
+        const financialAidId = 123
+        const sentDate = "2012-12-12"
 
         return assert
           .isRejected(updateDocumentSentDate(financialAidId, sentDate))
@@ -460,7 +460,7 @@ describe("api", function() {
       it("adds a course enrollment", () => {
         fetchJSONStub.returns(Promise.resolve())
 
-        let courseId = "course_id"
+        const courseId = "course_id"
         return addCourseEnrollment(courseId).then(() => {
           assert.ok(
             fetchJSONStub.calledWith("/api/v0/course_enrollments/", {
@@ -476,7 +476,7 @@ describe("api", function() {
       it("fails to add a course enrollment", () => {
         fetchJSONStub.returns(Promise.reject())
 
-        let courseId = "course_id"
+        const courseId = "course_id"
         return assert.isRejected(addCourseEnrollment(courseId)).then(() => {
           assert.ok(
             fetchJSONStub.calledWith("/api/v0/course_enrollments/", {
@@ -535,7 +535,7 @@ describe("api", function() {
       it("attaches a coupon", () => {
         fetchJSONStub.returns(Promise.resolve())
 
-        let code = "a b"
+        const code = "a b"
         return attachCoupon(code).then(() => {
           assert.ok(
             fetchJSONStub.calledWith(
@@ -581,7 +581,7 @@ describe("api", function() {
       it("fails to attach a coupon", () => {
         fetchJSONStub.returns(Promise.reject())
 
-        let code = "a b"
+        const code = "a b"
         return assert.isRejected(attachCoupon(code)).then(() => {
           assert.ok(
             fetchJSONStub.calledWith(
@@ -601,7 +601,7 @@ describe("api", function() {
     describe("Pearson API functions", () => {
       describe("getPearsonSSO", () => {
         it("fetches the pearson sso parameters", () => {
-          let params = makeSSOParameters()
+          const params = makeSSOParameters()
           fetchJSONStub.returns(Promise.resolve(params))
 
           return getPearsonSSO().then(() => {

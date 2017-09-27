@@ -6,18 +6,18 @@ import { makeDashboard } from "./factories/dashboard"
 
 describe("constants", () => {
   const assertResponse = programs => {
-    let programIds: Set<number> = new Set()
-    let courseIds: Set<number> = new Set()
-    let runIds: Set<number> = new Set()
-    let courseKeys: Set<string> = new Set()
-    for (let program of programs) {
+    const programIds: Set<number> = new Set()
+    const courseIds: Set<number> = new Set()
+    const runIds: Set<number> = new Set()
+    const courseKeys: Set<string> = new Set()
+    for (const program of programs) {
       assert(!_.isNil(program.id), "Missing program id")
       assert(!programIds.has(program.id), `Duplicate program id ${program.id}`)
       programIds.add(program.id)
 
-      let positionInProgram: Set<number> = new Set()
+      const positionInProgram: Set<number> = new Set()
 
-      for (let course of program.courses) {
+      for (const course of program.courses) {
         assert(
           !_.isNil(course.id),
           `Missing course id for program ${program.id}`
@@ -35,8 +35,8 @@ describe("constants", () => {
         )
         positionInProgram.add(course.position_in_program)
 
-        let positionInCourse: Set<number> = new Set()
-        for (let run of course.runs) {
+        const positionInCourse: Set<number> = new Set()
+        for (const run of course.runs) {
           assert(!_.isNil(run.id), `Missing run id for course ${course.id}`)
           assert(!runIds.has(run.id), `Duplicate run id ${run.id}`)
           runIds.add(run.id)

@@ -39,12 +39,12 @@ class FinalGradeRangeAccessor extends NestedAccessorMixin(
    * buckets/doc_count data at the altered path if it doesn't exist at the default path.
    */
   getBuckets() {
-    let baseAggsPath = [
+    const baseAggsPath = [
       this.key,
       this.fieldContext.getAggregationPath(),
       this.key
     ]
-    let aggs = this.getAggregations(baseAggsPath.concat(["buckets"]), [])
+    const aggs = this.getAggregations(baseAggsPath.concat(["buckets"]), [])
     if (aggs.length > 0) {
       return aggs
     } else {
@@ -84,10 +84,10 @@ class FinalGradeRangeAccessor extends NestedAccessorMixin(
    * Gets the appropriate range bucket for this element's agg query.
    */
   getRangeBucket(query) {
-    let otherAppliedFiltersOnPath = this.createFilterForOtherElementsOnPath(
+    const otherAppliedFiltersOnPath = this.createFilterForOtherElementsOnPath(
       query
     )
-    let rangeBucket = this.createInnerRangeBucket()
+    const rangeBucket = this.createInnerRangeBucket()
     if (otherAppliedFiltersOnPath) {
       return FilterBucket(this.key, otherAppliedFiltersOnPath, rangeBucket)
     } else {
@@ -142,7 +142,7 @@ export default class FinalGradeRangeFilter extends RangeFilter {
   }
 
   render() {
-    let numFilters = _.get(this.searchkit.state, REQUIRED_FILTER_ID, [])
+    const numFilters = _.get(this.searchkit.state, REQUIRED_FILTER_ID, [])
     return numFilters.length > 0 ? super.render() : null
   }
 }

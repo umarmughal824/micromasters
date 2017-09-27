@@ -56,13 +56,13 @@ describe("coupon reducers", () => {
   })
 
   it("should let you attach a coupon", () => {
-    let code = "a b"
+    const code = "a b"
     attachCouponStub.returns(Promise.resolve())
     return dispatchThen(attachCoupon(code), [
       REQUEST_ATTACH_COUPON,
       RECEIVE_ATTACH_COUPON_SUCCESS
     ]).then(state => {
-      let expectation = {
+      const expectation = {
         fetchPostStatus:        FETCH_SUCCESS,
         coupons:                [],
         recentlyAttachedCoupon: null
@@ -74,12 +74,12 @@ describe("coupon reducers", () => {
 
   it("should fail to attach a coupon", () => {
     attachCouponStub.returns(Promise.reject())
-    let code = "a b"
+    const code = "a b"
     return dispatchThen(attachCoupon(code), [
       REQUEST_ATTACH_COUPON,
       RECEIVE_ATTACH_COUPON_FAILURE
     ]).then(state => {
-      let expectation = {
+      const expectation = {
         fetchPostStatus:        FETCH_FAILURE,
         coupons:                [],
         recentlyAttachedCoupon: null
@@ -90,7 +90,7 @@ describe("coupon reducers", () => {
   })
 
   it("should let you fetch coupons then clear coupon state", () => {
-    let coupons = ["some coupons"]
+    const coupons = ["some coupons"]
     getCouponsStub.returns(Promise.resolve(coupons))
     return dispatchThen(fetchCoupons(), [
       REQUEST_FETCH_COUPONS,

@@ -79,7 +79,7 @@ describe("LearnerPage", function() {
   this.timeout(10000)
 
   let listenForActions, renderComponent, helper, patchUserProfileStub
-  let userActions = [
+  const userActions = [
     REQUEST_GET_PROGRAM_ENROLLMENTS,
     RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
     REQUEST_GET_USER_PROFILE,
@@ -99,7 +99,7 @@ describe("LearnerPage", function() {
     dialogIndexProperty
   ) => {
     let state = helper.store.getState()
-    let sorted = sortFunc(
+    const sorted = sortFunc(
       state.profiles[SETTINGS.user.username].profile[profileProperty]
     )
 
@@ -113,8 +113,8 @@ describe("LearnerPage", function() {
       ReactTestUtils.Simulate.click(editButton)
     }).then(() => {
       state = helper.store.getState()
-      let stateIndex = state.ui[dialogIndexProperty]
-      let [sortIndex, sortEntry] = sorted[0]
+      const stateIndex = state.ui[dialogIndexProperty]
+      const [sortIndex, sortEntry] = sorted[0]
       // the dialog index dispatched to the store should be the same index
       // as the index (into the unsorted list) of the first element in our sorted list
       // since we clicked on the first entry in the UI
@@ -124,7 +124,7 @@ describe("LearnerPage", function() {
       assert.notEqual(stateIndex, 0)
       // the entry the index in the state points to should be the same element
       // in the unsorted array that we have in the sorted array
-      let entries =
+      const entries =
         state.profiles[SETTINGS.user.username].profile[profileProperty]
       assert.deepEqual(sortEntry, entries[stateIndex])
     })
@@ -166,7 +166,7 @@ describe("LearnerPage", function() {
         `/learner/${username}`,
         userActions
       ).then(([, div]) => {
-        let logout = [...div.getElementsByTagName("a")].find(
+        const logout = [...div.getElementsByTagName("a")].find(
           link => link.textContent === "Logout"
         )
         assert.ok(logout)
@@ -180,14 +180,14 @@ describe("LearnerPage", function() {
       const getDialog = () => document.querySelector(".personal-dialog")
       const getSave = () => getDialog().querySelector(".save-button")
 
-      let scrollActions = [
+      const scrollActions = [
         SET_LEARNER_PAGE_DIALOG_VISIBILITY,
         START_PROFILE_EDIT,
         UPDATE_PROFILE,
         UPDATE_PROFILE_VALIDATION
       ]
 
-      let userProfileActions = scrollActions.concat([
+      const userProfileActions = scrollActions.concat([
         UPDATE_PROFILE,
         UPDATE_PROFILE_VALIDATION
       ])
@@ -217,7 +217,7 @@ describe("LearnerPage", function() {
 
             // check that validation error has propagated
             ReactTestUtils.Simulate.click(getSave())
-            let state = helper.store.getState()
+            const state = helper.store.getState()
             assert.deepEqual(
               state.profiles.jane.edit.errors,
               validationExpectation
@@ -230,7 +230,7 @@ describe("LearnerPage", function() {
               modifyTextField(input, removeErrorValue)
             }
           }).then(() => {
-            let state = helper.store.getState()
+            const state = helper.store.getState()
             assert.deepEqual(state.profiles.jane.edit.errors, {})
           })
         })
@@ -245,7 +245,7 @@ describe("LearnerPage", function() {
           return listenForActions(actions, () => {
             ReactTestUtils.Simulate.click(getEditPersonalButton(div))
 
-            let input = getInput(getDialog())
+            const input = getInput(getDialog())
 
             if (!selectField) {
               modifyTextField(input, "")
@@ -317,12 +317,16 @@ describe("LearnerPage", function() {
 
       describe("select field", () => {
         const languageField = dialog => {
-          let select = dialog.querySelector(".select-field.preferred-language")
+          const select = dialog.querySelector(
+            ".select-field.preferred-language"
+          )
           clearSelectField(select)
         }
 
         const removeError = dialog => {
-          let select = dialog.querySelector(".select-field.preferred-language")
+          const select = dialog.querySelector(
+            ".select-field.preferred-language"
+          )
           modifySelectField(select, USER_PROFILE_RESPONSE.preferred_language)
         }
 
@@ -357,7 +361,7 @@ describe("LearnerPage", function() {
         it("should clearValidationErrors when filling out a required radio field", () => {
           const createValidationError = () => {
             helper.store.dispatch(startProfileEdit(SETTINGS.user.username))
-            let profile = _.cloneDeep(USER_PROFILE_RESPONSE)
+            const profile = _.cloneDeep(USER_PROFILE_RESPONSE)
             profile.gender = undefined
             helper.store.dispatch(
               updateProfile(SETTINGS.user.username, profile)
@@ -395,7 +399,7 @@ describe("LearnerPage", function() {
 
     describe("Education History", () => {
       let userProfile
-      let deleteButton = div => {
+      const deleteButton = div => {
         return div
           .getElementsByClassName("profile-form")[1]
           .getElementsByClassName("delete-button")[0]
@@ -425,7 +429,7 @@ describe("LearnerPage", function() {
           `/learner/${username}`,
           userActions
         ).then(([, div]) => {
-          let title = div.getElementsByClassName("profile-card-header")[0]
+          const title = div.getElementsByClassName("profile-card-header")[0]
           assert.equal(title.textContent, "Education")
         })
       })
@@ -436,7 +440,7 @@ describe("LearnerPage", function() {
           `/learner/${username}`,
           userActions
         ).then(([, div]) => {
-          let editButton = div
+          const editButton = div
             .querySelector("#education-card")
             .querySelector(".edit-button")
 
@@ -460,7 +464,7 @@ describe("LearnerPage", function() {
           `/learner/${username}`,
           userActions
         ).then(([, div]) => {
-          let button = deleteButton(div)
+          const button = deleteButton(div)
 
           return listenForActions(
             [
@@ -472,8 +476,8 @@ describe("LearnerPage", function() {
             ],
             () => {
               ReactTestUtils.Simulate.click(button)
-              let dialog = activeDeleteDialog()
-              let cancelButton = dialog.getElementsByClassName(
+              const dialog = activeDeleteDialog()
+              const cancelButton = dialog.getElementsByClassName(
                 "cancel-button"
               )[0]
               ReactTestUtils.Simulate.click(cancelButton)
@@ -488,11 +492,11 @@ describe("LearnerPage", function() {
           `/learner/${username}`,
           userActions
         ).then(([, div]) => {
-          let expectedProfile = _.cloneDeep(userProfile)
-          let sortedEducationEntries = educationEntriesByDate(
+          const expectedProfile = _.cloneDeep(userProfile)
+          const sortedEducationEntries = educationEntriesByDate(
             expectedProfile.education
           )
-          let indexOfFirstEntry = sortedEducationEntries[0][0]
+          const indexOfFirstEntry = sortedEducationEntries[0][0]
           expectedProfile.education.splice(indexOfFirstEntry, 1)
 
           patchUserProfileStub.throws("Invalid arguments")
@@ -500,7 +504,7 @@ describe("LearnerPage", function() {
             .withArgs(expectedProfile.username, expectedProfile)
             .returns(Promise.resolve(expectedProfile))
 
-          let firstEducationDeleteButton = deleteButton(div)
+          const firstEducationDeleteButton = deleteButton(div)
 
           return listenForActions(
             [
@@ -518,8 +522,8 @@ describe("LearnerPage", function() {
             ],
             () => {
               ReactTestUtils.Simulate.click(firstEducationDeleteButton)
-              let dialog = activeDeleteDialog()
-              let confirmButton = dialog.getElementsByClassName(
+              const dialog = activeDeleteDialog()
+              const confirmButton = dialog.getElementsByClassName(
                 "delete-button"
               )[0]
               ReactTestUtils.Simulate.click(confirmButton)
@@ -528,13 +532,16 @@ describe("LearnerPage", function() {
         })
       })
 
-      for (let activity of [true, false]) {
+      for (const activity of [true, false]) {
         it(`should have proper spinner state during deletion of education for activity=${activity}`, () => {
           const username = SETTINGS.user.username
           patchUserProfileStub.returns(Promise.resolve(USER_PROFILE_RESPONSE))
 
           helper.store.dispatch(setShowEducationDeleteDialog(true))
-          let dialogActionsSpy = helper.sandbox.spy(inputUtil, "dialogActions")
+          const dialogActionsSpy = helper.sandbox.spy(
+            inputUtil,
+            "dialogActions"
+          )
           return renderComponent(
             `/learner/${username}`,
             userActions
@@ -560,7 +567,7 @@ describe("LearnerPage", function() {
           `/learner/${username}`,
           userActions
         ).then(([, div]) => {
-          let editButton = div
+          const editButton = div
             .getElementsByClassName("profile-form")[1]
             .getElementsByClassName("profile-row-icons")[0]
             .getElementsByClassName("mdl-button")[0]
@@ -589,10 +596,10 @@ describe("LearnerPage", function() {
           `/learner/${username}`,
           userActions
         ).then(([, div]) => {
-          let addButton = div.querySelector(".add-education-button")
+          const addButton = div.querySelector(".add-education-button")
 
-          let expectedProfile = _.cloneDeep(userProfile)
-          let entry = {
+          const expectedProfile = _.cloneDeep(userProfile)
+          const entry = {
             ...generateNewEducation(HIGH_SCHOOL),
             graduation_date:      "1999-12-01",
             graduation_date_edit: {
@@ -612,7 +619,7 @@ describe("LearnerPage", function() {
             .withArgs(expectedProfile.username, expectedProfile)
             .returns(Promise.resolve(expectedProfile))
 
-          let expectedActions = [
+          const expectedActions = [
             START_PROFILE_EDIT,
             SET_EDUCATION_DIALOG_INDEX,
             SET_EDUCATION_DIALOG_VISIBILITY,
@@ -642,9 +649,9 @@ describe("LearnerPage", function() {
               "Add Education"
             )
 
-            let dialog = document.querySelector(".education-dialog")
-            let grid = dialog.getElementsByClassName("profile-tab-grid")[0]
-            let inputs = grid.getElementsByTagName("input")
+            const dialog = document.querySelector(".education-dialog")
+            const grid = dialog.getElementsByClassName("profile-tab-grid")[0]
+            const inputs = grid.getElementsByTagName("input")
 
             const modifyEducationSelect = (label, value) => {
               modifySelectField(
@@ -665,7 +672,7 @@ describe("LearnerPage", function() {
             modifyEducationSelect(".country", "Afghanistan")
             modifyEducationSelect(".state", "Balkh")
             modifyTextField(inputs[6], "FoobarVille")
-            let save = dialog.querySelector(".save-button")
+            const save = dialog.querySelector(".save-button")
             ReactTestUtils.Simulate.click(save)
           })
         })
@@ -674,7 +681,10 @@ describe("LearnerPage", function() {
       for (const activity of [true, false]) {
         it(`should have proper save button state when activity=${activity}`, () => {
           const username = SETTINGS.user.username
-          let dialogActionsSpy = helper.sandbox.spy(inputUtil, "dialogActions")
+          const dialogActionsSpy = helper.sandbox.spy(
+            inputUtil,
+            "dialogActions"
+          )
           return renderComponent(
             `/learner/${username}`,
             userActions
@@ -695,7 +705,7 @@ describe("LearnerPage", function() {
     })
 
     describe("Employment History", () => {
-      let deleteButton = div => {
+      const deleteButton = div => {
         return div
           .getElementsByClassName("profile-form")[2]
           .getElementsByClassName("profile-row-icons")[0]
@@ -708,7 +718,7 @@ describe("LearnerPage", function() {
           `/learner/${username}`,
           userActions
         ).then(([wrapper]) => {
-          let headerText = wrapper
+          const headerText = wrapper
             .find("#work-history-card")
             .find(".profile-card-header")
             .text()
@@ -722,7 +732,7 @@ describe("LearnerPage", function() {
           `/learner/${username}`,
           userActions
         ).then(([, div]) => {
-          let editButton = div
+          const editButton = div
             .getElementsByClassName("profile-form")[2]
             .getElementsByClassName("profile-row-icons")[0]
             .getElementsByClassName("mdl-button")[0]
@@ -743,7 +753,7 @@ describe("LearnerPage", function() {
           `/learner/${username}`,
           userActions
         ).then(([, div]) => {
-          let button = deleteButton(div)
+          const button = deleteButton(div)
 
           return listenForActions(
             [
@@ -755,8 +765,8 @@ describe("LearnerPage", function() {
             ],
             () => {
               ReactTestUtils.Simulate.click(button)
-              let dialog = activeDeleteDialog()
-              let cancelButton = dialog.getElementsByClassName(
+              const dialog = activeDeleteDialog()
+              const cancelButton = dialog.getElementsByClassName(
                 "cancel-button"
               )[0]
               ReactTestUtils.Simulate.click(cancelButton)
@@ -771,20 +781,20 @@ describe("LearnerPage", function() {
           `/learner/${username}`,
           userActions
         ).then(([, div]) => {
-          let updatedProfile = _.cloneDeep(USER_PROFILE_RESPONSE)
+          const updatedProfile = _.cloneDeep(USER_PROFILE_RESPONSE)
           updatedProfile.username = SETTINGS.user.username
 
-          let rowOfInterest = div
+          const rowOfInterest = div
             .querySelector("#work-history-card")
             .querySelectorAll(".profile-form-row")[1]
 
-          let deleteButton = rowOfInterest.querySelector(".delete-button")
+          const deleteButton = rowOfInterest.querySelector(".delete-button")
 
-          let employerName = rowOfInterest
+          const employerName = rowOfInterest
             .querySelector(".profile-row-name")
             .textContent.split(",")[0]
 
-          let indexToDelete = USER_PROFILE_RESPONSE.work_history.findIndex(
+          const indexToDelete = USER_PROFILE_RESPONSE.work_history.findIndex(
             entry => entry.company_name === employerName
           )
 
@@ -811,21 +821,24 @@ describe("LearnerPage", function() {
             ],
             () => {
               ReactTestUtils.Simulate.click(deleteButton)
-              let dialog = activeDeleteDialog()
-              let button = dialog.getElementsByClassName("delete-button")[0]
+              const dialog = activeDeleteDialog()
+              const button = dialog.getElementsByClassName("delete-button")[0]
               ReactTestUtils.Simulate.click(button)
             }
           )
         })
       })
 
-      for (let activity of [true, false]) {
+      for (const activity of [true, false]) {
         it(`should have proper spinner state during deletion of employment for activity=${activity}`, () => {
           const username = SETTINGS.user.username
           patchUserProfileStub.returns(Promise.resolve(USER_PROFILE_RESPONSE))
 
           helper.store.dispatch(setShowWorkDeleteDialog(true))
-          let dialogActionsSpy = helper.sandbox.spy(inputUtil, "dialogActions")
+          const dialogActionsSpy = helper.sandbox.spy(
+            inputUtil,
+            "dialogActions"
+          )
           return renderComponent(
             `/learner/${username}`,
             userActions
@@ -851,7 +864,7 @@ describe("LearnerPage", function() {
           `/learner/${username}`,
           userActions
         ).then(([, div]) => {
-          let editButton = div
+          const editButton = div
             .getElementsByClassName("profile-form")[2]
             .getElementsByClassName("profile-row-icons")[0]
             .getElementsByClassName("mdl-button")[0]
@@ -876,13 +889,13 @@ describe("LearnerPage", function() {
           `/learner/${username}`,
           userActions
         ).then(([, div]) => {
-          let addButton = div
+          const addButton = div
             .getElementsByClassName("profile-form")[2]
             .querySelector(".mm-minor-action")
 
-          let updatedProfile = _.cloneDeep(USER_PROFILE_RESPONSE)
+          const updatedProfile = _.cloneDeep(USER_PROFILE_RESPONSE)
           updatedProfile.username = SETTINGS.user.username
-          let entry = {
+          const entry = {
             ...generateNewWorkHistory(),
             position:        "Assistant Foobar",
             industry:        "Accounting",
@@ -910,7 +923,7 @@ describe("LearnerPage", function() {
             .withArgs(SETTINGS.user.username, updatedProfile)
             .returns(Promise.resolve(updatedProfile))
 
-          let expectedActions = [
+          const expectedActions = [
             START_PROFILE_EDIT,
             UPDATE_PROFILE,
             SET_WORK_DIALOG_INDEX,
@@ -934,9 +947,9 @@ describe("LearnerPage", function() {
               document.querySelector(".profile-form-title").innerHTML,
               "Add Employment"
             )
-            let dialog = document.querySelector(".employment-dialog")
-            let grid = dialog.querySelector(".profile-tab-grid")
-            let inputs = grid.getElementsByTagName("input")
+            const dialog = document.querySelector(".employment-dialog")
+            const grid = dialog.querySelector(".profile-tab-grid")
+            const inputs = grid.getElementsByTagName("input")
 
             const modifyWorkSelect = (label, value) => {
               modifySelectField(
@@ -965,16 +978,19 @@ describe("LearnerPage", function() {
             modifyTextField(inputs[8], "01")
             modifyTextField(inputs[9], "2002")
 
-            let button = dialog.querySelector(".save-button")
+            const button = dialog.querySelector(".save-button")
             ReactTestUtils.Simulate.click(button)
           })
         })
       })
 
-      for (let activity of [true, false]) {
+      for (const activity of [true, false]) {
         it(`should have proper save button spinner state when activity=${activity}`, () => {
           const username = SETTINGS.user.username
-          let dialogActionsSpy = helper.sandbox.spy(inputUtil, "dialogActions")
+          const dialogActionsSpy = helper.sandbox.spy(
+            inputUtil,
+            "dialogActions"
+          )
           return renderComponent(
             `/learner/${username}`,
             userActions
@@ -1001,7 +1017,8 @@ describe("LearnerPage", function() {
           `/learner/${username}`,
           userActions
         ).then(([, div]) => {
-          let name = div.getElementsByClassName("profile-title")[0].textContent
+          const name = div.getElementsByClassName("profile-title")[0]
+            .textContent
           assert.deepEqual(name, getPreferredName(USER_PROFILE_RESPONSE))
         })
       })
@@ -1036,7 +1053,7 @@ describe("LearnerPage", function() {
       it("should let you edit personal info", () => {
         const username = SETTINGS.user.username
         const newFirstName = "New name"
-        let expectedProfile = {
+        const expectedProfile = {
           ...USER_PROFILE_RESPONSE,
           first_name: newFirstName
         }
@@ -1048,7 +1065,7 @@ describe("LearnerPage", function() {
           `/learner/${username}`,
           userActions
         ).then(([wrapper]) => {
-          let personalButton = wrapper.find(".edit-personal-info-button")
+          const personalButton = wrapper.find(".edit-personal-info-button")
 
           return listenForActions(
             [SET_LEARNER_PAGE_DIALOG_VISIBILITY, START_PROFILE_EDIT],
@@ -1056,8 +1073,8 @@ describe("LearnerPage", function() {
               personalButton.simulate("click")
             }
           ).then(() => {
-            let dialog = document.querySelector(".personal-dialog")
-            let inputs = dialog.getElementsByTagName("input")
+            const dialog = document.querySelector(".personal-dialog")
+            const inputs = dialog.getElementsByTagName("input")
 
             return listenForActions(
               [
@@ -1107,7 +1124,7 @@ describe("LearnerPage", function() {
           `/learner/${username}`,
           userActions
         ).then(([, div]) => {
-          let aboutMEBtn = div.querySelector(".edit-about-me-button")
+          const aboutMEBtn = div.querySelector(".edit-about-me-button")
 
           return listenForActions(
             [SET_LEARNER_PAGE_ABOUT_ME_DIALOG_VISIBILITY, START_PROFILE_EDIT],
@@ -1115,8 +1132,8 @@ describe("LearnerPage", function() {
               ReactTestUtils.Simulate.click(aboutMEBtn)
             }
           ).then(() => {
-            let dialog = document.querySelector(".about-me-dialog")
-            let textarea = dialog.querySelector("textarea:not([readonly])")
+            const dialog = document.querySelector(".about-me-dialog")
+            const textarea = dialog.querySelector("textarea:not([readonly])")
 
             return listenForActions(
               [
@@ -1183,7 +1200,7 @@ describe("LearnerPage", function() {
         `/learner/${username}`,
         userActions
       ).then(([, div]) => {
-        let count = div
+        const count = div
           .querySelector(".page-content")
           .getElementsByClassName("mdl-button--icon").length
         // edit profile and edit about me represents hard coded 2 here.
@@ -1197,7 +1214,7 @@ describe("LearnerPage", function() {
     })
 
     it("should not show any edit, delete icons for other user pages", () => {
-      let otherProfile = {
+      const otherProfile = {
         ...USER_PROFILE_RESPONSE,
         username: "other"
       }
@@ -1215,7 +1232,7 @@ describe("LearnerPage", function() {
         REQUEST_FETCH_COUPONS
       ]
       return renderComponent(`/learner/other`, actions).then(([, div]) => {
-        let count = div
+        const count = div
           .querySelector(".page-content")
           .getElementsByClassName("mdl-button--icon").length
         assert.equal(count, 0)
@@ -1267,8 +1284,8 @@ describe("LearnerPage", function() {
           .find(".open-popup")
           .at(0)
           .simulate("click")
-        let state = helper.store.getState().ui
-        let key = gradeDetailPopupKey(
+        const state = helper.store.getState().ui
+        const key = gradeDetailPopupKey(
           EDX_GRADE,
           DASHBOARD_RESPONSE.programs[0].courses[0].title
         )
@@ -1279,7 +1296,7 @@ describe("LearnerPage", function() {
     it("should close the <Grades /> dialog if you click outside", () => {
       const username = SETTINGS.user.username
       SETTINGS.roles.push({ role: "staff", permissions: [] })
-      let key = gradeDetailPopupKey(
+      const key = gradeDetailPopupKey(
         EDX_GRADE,
         DASHBOARD_RESPONSE.programs[0].courses[0].title
       )
@@ -1299,7 +1316,7 @@ describe("LearnerPage", function() {
           .at(0)
           .props()
           .onRequestClose()
-        let state = helper.store.getState().ui
+        const state = helper.store.getState().ui
         assert.isFalse(state.dialogVisibility[key])
       })
     })
@@ -1322,7 +1339,7 @@ describe("LearnerPage", function() {
   })
 
   describe("Unauthenticated user page", () => {
-    let anonymousUserActions = [
+    const anonymousUserActions = [
       REQUEST_GET_USER_PROFILE,
       RECEIVE_GET_USER_PROFILE_SUCCESS,
       RECEIVE_FETCH_COUPONS_SUCCESS,

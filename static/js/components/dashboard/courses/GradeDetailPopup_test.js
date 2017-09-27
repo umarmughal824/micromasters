@@ -29,7 +29,7 @@ describe("GradeDetailPopup", () => {
     sandbox.restore()
   })
 
-  let renderDetailPopup = (props = {}) =>
+  const renderDetailPopup = (props = {}) =>
     shallow(
       <GradeDetailPopup
         course={course}
@@ -50,7 +50,7 @@ describe("GradeDetailPopup", () => {
 
   it("shows info for a passed course", () => {
     makeRunPassed(course.runs[0])
-    let wrapper = renderDetailPopup()
+    const wrapper = renderDetailPopup()
     assert.equal(
       wrapper
         .find(".course-run-row")
@@ -85,7 +85,7 @@ describe("GradeDetailPopup", () => {
   it("highlights the best edx grade", () => {
     course.runs[0].final_grade = 22
     course.runs[1].final_grade = 82
-    let wrapper = renderDetailPopup()
+    const wrapper = renderDetailPopup()
     assert.equal(
       wrapper
         .find(".course-run-row")
@@ -103,7 +103,7 @@ describe("GradeDetailPopup", () => {
   })
 
   it("includes helpful information", () => {
-    let wrapper = renderDetailPopup()
+    const wrapper = renderDetailPopup()
     assert.equal(
       wrapper.find(".explanation").text(),
       "Only your best passing grade counts toward your final grade"
@@ -111,19 +111,19 @@ describe("GradeDetailPopup", () => {
   })
 
   it("should show an appropriate title for the edx grades", () => {
-    let wrapper = renderDetailPopup({ gradeType: EDX_GRADE })
-    let title = wrapper.find(Dialog).props().title
+    const wrapper = renderDetailPopup({ gradeType: EDX_GRADE })
+    const title = wrapper.find(Dialog).props().title
     assert.include(title, "Completed edX Course Runs")
   })
 
   it("should show an appropriate title for the exam grades", () => {
-    let wrapper = renderDetailPopup({ gradeType: EXAM_GRADE })
-    let title = wrapper.find(Dialog).props().title
+    const wrapper = renderDetailPopup({ gradeType: EXAM_GRADE })
+    const title = wrapper.find(Dialog).props().title
     assert.include(title, "Completed Exams")
   })
 
   it("should display exam grades, if passed the right grade type", () => {
-    let wrapper = renderDetailPopup({ gradeType: EXAM_GRADE })
+    const wrapper = renderDetailPopup({ gradeType: EXAM_GRADE })
     assert.include(
       wrapper
         .find(".course-run-row")
@@ -135,7 +135,7 @@ describe("GradeDetailPopup", () => {
 
   it("should show a zero grade", () => {
     course.proctorate_exams_grades[0].percentage_grade = 0
-    let wrapper = renderDetailPopup({ gradeType: EXAM_GRADE })
+    const wrapper = renderDetailPopup({ gradeType: EXAM_GRADE })
     assert.include(
       wrapper
         .find(".course-run-row")
@@ -150,7 +150,7 @@ describe("GradeDetailPopup", () => {
     course.proctorate_exams_grades[0].percentage_grade = 0.2
     course.proctorate_exams_grades[1].percentage_grade = 0.8
     course.proctorate_exams_grades[1].passed = true
-    let wrapper = renderDetailPopup({ gradeType: EXAM_GRADE })
+    const wrapper = renderDetailPopup({ gradeType: EXAM_GRADE })
     assert.equal(
       wrapper
         .find(".course-run-row")

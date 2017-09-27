@@ -8,7 +8,7 @@ export default class FacultyCarousel extends React.Component {
     faculty: Array<Object>
   }
   render() {
-    let settings = {
+    const settings = {
       dots:           true,
       dotsClass:      "slick-dots",
       infinite:       false,

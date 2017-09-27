@@ -33,13 +33,13 @@ describe("Profile inputs", () => {
   describe("Select field", () => {
     let selectField, gaEvent
 
-    let genderOptions = [
+    const genderOptions = [
       { value: "m", label: "Male" },
       { value: "f", label: "Female" },
       { value: "o", label: "Other/Prefer not to say" }
     ]
 
-    let renderGenderSelectField = (props = {}) => {
+    const renderGenderSelectField = (props = {}) => {
       return renderTestSelectField({
         ...inputProps,
         keySet:        ["gender"],
@@ -74,7 +74,7 @@ describe("Profile inputs", () => {
 
     it("should set props correctly", () => {
       selectField = renderGenderSelectField().find(VirtualizedSelect)
-      let props = selectField.props()
+      const props = selectField.props()
       assert.deepEqual(props.options, genderOptions)
       assert.equal(props.label, "Gender")
     })
@@ -117,8 +117,8 @@ describe("Profile inputs", () => {
     })
 
     it("should set the correct className and id", () => {
-      let selectFieldWrapper = renderGenderSelectField({ allowCreate: true })
-      let wrapperDiv = selectFieldWrapper.find("div").first()
+      const selectFieldWrapper = renderGenderSelectField({ allowCreate: true })
+      const wrapperDiv = selectFieldWrapper.find("div").first()
       assert.ok(
         wrapperDiv.hasClass("select-field"),
         "should have the right class"
@@ -128,11 +128,11 @@ describe("Profile inputs", () => {
     })
 
     it("should enter the new option in the options list", () => {
-      let selectField = renderGenderSelectField({ allowCreate: true }).find(
+      const selectField = renderGenderSelectField({ allowCreate: true }).find(
         VirtualizedSelect
       )
       modifyWrapperSelectField(selectField, "genderqueer")
-      let newOption = selectField
+      const newOption = selectField
         .props()
         .options.find(option => option.value === "genderqueer")
       assert.deepEqual(newOption, {
@@ -154,7 +154,7 @@ describe("Profile inputs", () => {
 
     it("should properly add options to this.state", () => {
       inputProps.profile = {}
-      let props = {
+      const props = {
         allowCreate:   true,
         updateProfile: change
       }
@@ -177,7 +177,7 @@ describe("Profile inputs", () => {
         }
       })
       assert.include(selectField.text(), "agender")
-      let expectedCustomOption = {
+      const expectedCustomOption = {
         value: "agender",
         label: "agender"
       }
@@ -219,14 +219,14 @@ describe("Profile inputs", () => {
 
     it("lists no states when an invalid country is selected", () => {
       inputProps.profile.country_key = "MISSING"
-      let stateField = renderStateSelect()
+      const stateField = renderStateSelect()
       assert.lengthOf(stateField.find(SelectField).props().options, 0)
     })
 
     it("renders a select field with sorted states for the given country", () => {
       const country = "US"
       // Get a list of US state values (eg: 'US-MA') ordered by the state name
-      let orderedUSStateValues = _(iso3166.data[country].sub)
+      const orderedUSStateValues = _(iso3166.data[country].sub)
         .toPairs()
         .sortBy(keyValueList => {
           return keyValueList[1]["name"]
@@ -236,8 +236,8 @@ describe("Profile inputs", () => {
         })
         .value()
       inputProps.profile.country_key = country
-      let stateField = renderStateSelect()
-      let optionValueList = stateField
+      const stateField = renderStateSelect()
+      const optionValueList = stateField
         .find(SelectField)
         .props()
         .options.map(option => {
@@ -263,19 +263,19 @@ describe("Profile inputs", () => {
       mount(<CountrySelectField {...inputProps} />)
 
     const checkFieldText = text => {
-      let countryField = renderCountrySelect()
+      const countryField = renderCountrySelect()
       assert.include(countryField.text(), text)
     }
 
     it("shows a list of countries", () => {
       inputProps.profile.country_key = null
       inputProps.profile.country = null
-      let countryField = renderCountrySelect()
-      let props = countryField.find(SelectField).props()
+      const countryField = renderCountrySelect()
+      const props = countryField.find(SelectField).props()
       assert.lengthOf(props.options, _.keys(iso3166.data).length)
       // Check for a random list of country values that should exist as options in the select field
-      let countriesToFind = ["AF", "AL", "US", "IN", "NZ"]
-      let countriesInCommon = R.intersection(
+      const countriesToFind = ["AF", "AL", "US", "IN", "NZ"]
+      const countriesInCommon = R.intersection(
         R.map(R.prop("value"), props.options),
         countriesToFind
       )
@@ -285,7 +285,7 @@ describe("Profile inputs", () => {
     it("clears the state state when the country changes", () => {
       inputProps.profile.country_key = "US"
       inputProps.profile.state_key = "US-MA"
-      let countryField = renderCountrySelect()
+      const countryField = renderCountrySelect()
       countryField
         .find(SelectField)
         .props()

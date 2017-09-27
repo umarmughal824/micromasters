@@ -27,9 +27,9 @@ import { USER_PROFILE_RESPONSE } from "../test_constants"
 
 describe("SettingsPage", function() {
   this.timeout(5000)
-  let nextButtonSelector = ".next"
+  const nextButtonSelector = ".next"
   let listenForActions, renderComponent, helper, patchUserProfileStub
-  let userActions = [
+  const userActions = [
     REQUEST_GET_PROGRAM_ENROLLMENTS,
     RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
     REQUEST_GET_USER_PROFILE,
@@ -54,19 +54,20 @@ describe("SettingsPage", function() {
     helper.cleanup()
   })
 
-  let confirmSaveButtonBehavior = (
+  const confirmSaveButtonBehavior = (
     updatedProfile,
     pageElements,
     validationFailure = false
   ) => {
-    let { div, button } = pageElements
+    let { button } = pageElements
+    const { div } = pageElements
     button = button || div.querySelector(nextButtonSelector)
     patchUserProfileStub.throws("Invalid arguments")
     patchUserProfileStub
       .withArgs(SETTINGS.user.username, updatedProfile)
       .returns(Promise.resolve(updatedProfile))
 
-    let actions = []
+    const actions = []
     if (!validationFailure) {
       actions.push(
         REQUEST_PATCH_USER_PROFILE,
@@ -84,13 +85,13 @@ describe("SettingsPage", function() {
 
   it("shows the privacy form", () => {
     return renderComponent("/settings", userActions).then(([, div]) => {
-      let pageHeading = div.getElementsByClassName("privacy-form-heading")[0]
+      const pageHeading = div.getElementsByClassName("privacy-form-heading")[0]
       assert.equal(pageHeading.textContent, "Settings")
 
-      let question = div.getElementsByClassName("privacy-form-heading")[1]
+      const question = div.getElementsByClassName("privacy-form-heading")[1]
       assert.equal(question.textContent, "Who can see your profile?")
 
-      let emailPrefHeading = div.getElementsByClassName(
+      const emailPrefHeading = div.getElementsByClassName(
         "privacy-form-heading"
       )[2]
       assert.equal(emailPrefHeading.textContent, "Email Preferences")
@@ -100,8 +101,8 @@ describe("SettingsPage", function() {
   describe("save privacy form", () => {
     it("save privacy changes", () => {
       return renderComponent("/settings", userActions).then(([, div]) => {
-        let button = div.querySelector(nextButtonSelector)
-        let receivedProfile = {
+        const button = div.querySelector(nextButtonSelector)
+        const receivedProfile = {
           ...USER_PROFILE_RESPONSE,
           account_privacy: "public",
           email_optin:     true
@@ -111,7 +112,7 @@ describe("SettingsPage", function() {
         )
 
         assert(button.innerHTML.includes("Save"))
-        let updatedProfile = {
+        const updatedProfile = {
           ...receivedProfile,
           email_optin: true,
           filled_out:  true
@@ -120,7 +121,7 @@ describe("SettingsPage", function() {
       })
     })
 
-    for (let activity of [true, false]) {
+    for (const activity of [true, false]) {
       it(`has proper button state when when profile patch activity is ${String(
         activity
       )}`, () => {
@@ -131,7 +132,7 @@ describe("SettingsPage", function() {
             )
           }
 
-          let next = wrapper.find("SpinnerButton")
+          const next = wrapper.find("SpinnerButton")
           assert.equal(next.props().spinning, activity)
         })
       })

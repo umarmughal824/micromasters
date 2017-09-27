@@ -33,7 +33,7 @@ describe("Course Grades", () => {
     )
 
   it("should display placeholders if no grades are present", () => {
-    let grades = renderGrades()
+    const grades = renderGrades()
     grades.find(".number").forEach(wrapper => {
       assert.equal(wrapper.text(), "--")
     })
@@ -42,7 +42,7 @@ describe("Course Grades", () => {
   it("should display the highest edX grade", () => {
     course.runs[0].final_grade = 23
     course.runs[1].final_grade = 82
-    let grades = renderGrades()
+    const grades = renderGrades()
     assert.equal(grades.find(".ed-x-grade .number").text(), "82%")
   })
 
@@ -53,7 +53,7 @@ describe("Course Grades", () => {
       highest =
         grade.percentage_grade > highest ? grade.percentage_grade : highest
     })
-    let grades = renderGrades()
+    const grades = renderGrades()
     assert.equal(
       grades.find(".exam-grade .number").text(),
       `${_.round(highest * 100)}%`
@@ -63,8 +63,8 @@ describe("Course Grades", () => {
   it("should display a calculated final grade", () => {
     course.runs[0].final_grade = 82
     course.proctorate_exams_grades = [makeProctoredExamResult()]
-    let grades = renderGrades()
-    let expectation = _.round(
+    const grades = renderGrades()
+    const expectation = _.round(
       // $FlowFixMe: flow doesnt like this
       COURSE_GRADE_WEIGHT * course.runs[0].final_grade +
         EXAM_GRADE_WEIGHT *
@@ -76,7 +76,7 @@ describe("Course Grades", () => {
   it("should only display the edX grade if has_exam == false", () => {
     [[true, 3], [false, 1]].forEach(([hasExam, expectedGradeCount]) => {
       course.has_exam = hasExam
-      let grades = renderGrades()
+      const grades = renderGrades()
       assert.equal(
         grades.find(".course-grades").find(".grade-display").length,
         expectedGradeCount
@@ -88,7 +88,7 @@ describe("Course Grades", () => {
     course.runs[0].status = STATUS_PASSED
     course.proctorate_exams_grades = [makeProctoredExamResult()]
     course.proctorate_exams_grades[0].passed = true
-    let passedDisplay = renderGrades().find(".passed-course")
+    const passedDisplay = renderGrades().find(".passed-course")
     assert.equal(passedDisplay.length, 1)
     assert.include(passedDisplay.text(), "Passed")
   })
@@ -96,7 +96,7 @@ describe("Course Grades", () => {
   it("should display passed for a non-exam course, if the user passed course", () => {
     course.runs[0].status = STATUS_PASSED
     course.has_exam = false
-    let passedDisplay = renderGrades().find(".passed-course")
+    const passedDisplay = renderGrades().find(".passed-course")
     assert.equal(passedDisplay.length, 1)
     assert.include(passedDisplay.text(), "Passed")
   })
@@ -122,10 +122,10 @@ describe("Course Grades", () => {
   })
 
   it("should call setShowGradeDetailDialog onClick", () => {
-    let examGrade = makeProctoredExamResult()
+    const examGrade = makeProctoredExamResult()
     examGrade.passed = true
     course.proctorate_exams_grades.push(examGrade)
-    let grades = renderGrades()
+    const grades = renderGrades()
     grades
       .find(".open-popup")
       .first()

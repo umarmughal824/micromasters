@@ -50,7 +50,7 @@ describe("Course Status Messages", () => {
 
   describe("formatMessage", () => {
     it("should format a basic message", () => {
-      let renderedMessage = shallow(formatMessage(message))
+      const renderedMessage = shallow(formatMessage(message))
       assert.equal(renderedMessage.props().className, "status-message cols")
       assert.equal(
         renderedMessage.find(".message.first-col").text(),
@@ -59,15 +59,15 @@ describe("Course Status Messages", () => {
     })
 
     it("should format a message with an action", () => {
-      let msg = { action: <button>button!</button>, ...message }
-      let renderedMessage = shallow(formatMessage(msg))
+      const msg = { action: <button>button!</button>, ...message }
+      const renderedMessage = shallow(formatMessage(msg))
       assert.equal(renderedMessage.find(".second-col button").length, 1)
     })
   })
 
   describe("formatAction", () => {
     it("should just wrap an action in a div", () => {
-      let action = shallow(
+      const action = shallow(
         formatAction({ action: <button>button!</button>, message: "test" })
       )
       assert.equal(action.type(), "div")
@@ -99,8 +99,8 @@ describe("Course Status Messages", () => {
 
     it("should have a message for STATUS_PAID_BUT_NOT_ENROLLED", () => {
       course.runs[0].status = STATUS_PAID_BUT_NOT_ENROLLED
-      let [{ message }] = calculateMessages(calculateMessagesProps).value
-      let mounted = shallow(message)
+      const [{ message }] = calculateMessages(calculateMessagesProps).value
+      const mounted = shallow(message)
       assert.equal(
         mounted.text(),
         "Something went wrong. You paid for this course but are not enrolled. Contact us for help."
@@ -112,14 +112,14 @@ describe("Course Status Messages", () => {
     })
 
     it("should include information about a course coupon", () => {
-      let makeAmountMessageStub = sandbox
+      const makeAmountMessageStub = sandbox
         .stub(libCoupon, "makeAmountMessage")
         .returns("all of the money")
-      let makeCouponTargetMessageStub = sandbox
+      const makeCouponTargetMessageStub = sandbox
         .stub(libCoupon, "makeCouponReason")
         .returns(", because why not")
-      let program = makeProgram()
-      let coupon = makeCoupon(program)
+      const program = makeProgram()
+      const coupon = makeCoupon(program)
       coupon.content_type = COUPON_CONTENT_TYPE_COURSE
       coupon.object_id = program.courses[0].id
       calculateMessagesProps.course = program.courses[0]
@@ -267,8 +267,8 @@ describe("Course Status Messages", () => {
 
       it("should show un-expanded message", () => {
         // this component returns a react component as its message
-        let [{ message }] = calculateMessages(calculateMessagesProps).value
-        let mounted = shallow(message)
+        const [{ message }] = calculateMessages(calculateMessagesProps).value
+        const mounted = shallow(message)
         assert.equal(
           mounted.text().trim(),
           "The edX course is complete, but you need to pass the final exam. " +
@@ -284,7 +284,7 @@ describe("Course Status Messages", () => {
 
       it("should include an expanded message, if the expanded status set includes the course id", () => {
         calculateMessagesProps.expandedStatuses.add(course.id)
-        let messages = calculateMessages(calculateMessagesProps).value
+        const messages = calculateMessages(calculateMessagesProps).value
         assert.equal(messages.length, 2)
         assert.deepEqual(messages[1], {
           message: `Next course starts ${formatDate(
@@ -319,8 +319,8 @@ describe("Course Status Messages", () => {
         }
       ])
       course.certificate_url = "certificate_url"
-      let [{ message }] = calculateMessages(calculateMessagesProps).value
-      let mounted = shallow(message)
+      const [{ message }] = calculateMessages(calculateMessagesProps).value
+      const mounted = shallow(message)
       assert.equal(mounted.text(), "You passed this course! View Certificate")
       assert.equal(mounted.find("a").props().href, "certificate_url")
     })
@@ -330,7 +330,7 @@ describe("Course Status Messages", () => {
       makeRunPassed(course.runs[0])
       makeRunOverdue(course.runs[0])
       makeRunFuture(course.runs[1])
-      let date = formatDate(course.runs[1].course_start_date)
+      const date = formatDate(course.runs[1].course_start_date)
       assertIsJust(calculateMessages(calculateMessagesProps), [
         {
           message: `You missed the payment deadline, but you can re-enroll. Next course starts ${date}`,
@@ -363,7 +363,7 @@ describe("Course Status Messages", () => {
       makeRunPast(course.runs[0])
       makeRunPassed(course.runs[0])
       makeRunDueSoon(course.runs[0])
-      let date = moment(course.runs[0].course_upgrade_deadline).format(
+      const date = moment(course.runs[0].course_upgrade_deadline).format(
         COURSE_CARD_FORMAT
       )
       assertIsJust(calculateMessages(calculateMessagesProps), [
@@ -385,7 +385,7 @@ describe("Course Status Messages", () => {
       makeRunPassed(course.runs[0])
       makeRunDueSoon(course.runs[0])
       course.has_exam = true
-      let date = moment(course.runs[0].course_upgrade_deadline).format(
+      const date = moment(course.runs[0].course_upgrade_deadline).format(
         COURSE_CARD_FORMAT
       )
       assertIsJust(calculateMessages(calculateMessagesProps), [
@@ -406,7 +406,7 @@ describe("Course Status Messages", () => {
       makeRunPast(course.runs[0])
       makeRunFailed(course.runs[0])
       makeRunFuture(course.runs[1])
-      let date = moment(course.runs[1].course_start_date).format("MM/DD/YYYY")
+      const date = moment(course.runs[1].course_start_date).format("MM/DD/YYYY")
       assertIsJust(calculateMessages(calculateMessagesProps), [
         {
           message: `You did not pass the edX course, but you can re-enroll. Next course starts ${date}.`,

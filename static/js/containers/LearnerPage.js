@@ -120,9 +120,9 @@ class LearnerPage extends React.Component<*, LearnerPageProps, *> {
 
   getDocumentTitle = () => {
     const { params: { username }, profiles } = this.props
-    let profilePath = [username, "profile"]
+    const profilePath = [username, "profile"]
 
-    let name = R.pathOr("", profilePath.concat("preferred_name"), profiles)
+    const name = R.pathOr("", profilePath.concat("preferred_name"), profiles)
 
     return `${name} | MITx MicroMasters Profile`.trim().replace(/^\|\s/, "")
   }
@@ -164,7 +164,7 @@ class LearnerPage extends React.Component<*, LearnerPageProps, *> {
         !R.isEmpty(coupons) && coupons.fetchGetStatus !== FETCH_PROCESSING
       loaded = R.all(R.equals(true))([profileLoaded, couponsLoaded])
 
-      let props = {
+      const props = {
         dashboard:                S.maybe({}, R.identity, this.getFocusedDashboard()),
         email:                    email,
         prices:                   S.maybe({}, R.identity, this.getFocusedPrices()),

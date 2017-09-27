@@ -16,7 +16,7 @@ export default class DashboardUserCard extends React.Component {
 
   render() {
     const { profile, program } = this.props
-    let programTitle = program ? program.title : ""
+    const programTitle = program ? program.title : ""
 
     return (
       <Card className="dashboard-user-card" shadow={0}>

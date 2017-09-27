@@ -40,7 +40,7 @@ class OrderSummary extends React.Component {
   getExplanationText(): React$Element<*> {
     const { finalPrice, coursePrice } = this.props
     let text
-    let price =
+    const price =
       finalPrice !== undefined && finalPrice !== null
         ? finalPrice
         : coursePrice.price
@@ -75,7 +75,7 @@ class OrderSummary extends React.Component {
   }
 
   render() {
-    let {
+    const {
       course,
       courseRun,
       checkout,

@@ -39,7 +39,7 @@ describe("Course ProgressMessage", () => {
     sandbox.restore()
   })
 
-  let renderCourseDescription = (props = {}) =>
+  const renderCourseDescription = (props = {}) =>
     shallow(
       <ProgressMessage
         course={course}
@@ -51,7 +51,7 @@ describe("Course ProgressMessage", () => {
 
   it("displays information for an in-progress course run", () => {
     makeRunCurrent(course.runs[0])
-    let wrapper = renderCourseDescription()
+    const wrapper = renderCourseDescription()
     assert.equal(wrapper.find(".details").text(), "Course in progress")
   })
 
@@ -59,8 +59,8 @@ describe("Course ProgressMessage", () => {
     makeRunEnrolled(course.runs[0])
     makeRunCurrent(course.runs[0])
     course.has_contact_email = true
-    let wrapper = renderCourseDescription()
-    let [edxLink, contactLink] = wrapper.find("a")
+    const wrapper = renderCourseDescription()
+    const [edxLink, contactLink] = wrapper.find("a")
     assert.equal(
       edxLink.props.href,
       urljoin(EDX_LINK_BASE, course.runs[0].course_id)
@@ -76,24 +76,24 @@ describe("Course ProgressMessage", () => {
     makeRunEnrolled(course.runs[0])
     makeRunCurrent(course.runs[0])
     course.has_contact_email = true
-    let wrapper = renderCourseDescription()
+    const wrapper = renderCourseDescription()
     assert.lengthOf(wrapper.find("a"), 0)
   })
 
   it("does not display a view on edX link, if there no course key", () => {
     course.runs[0].course_id = undefined
-    let wrapper = renderCourseDescription()
+    const wrapper = renderCourseDescription()
     assert.equal(wrapper.find("a").length, 0)
   })
 
   it("displays information for a future course run", () => {
     makeRunFuture(course.runs[0])
-    let wrapper = renderCourseDescription()
+    const wrapper = renderCourseDescription()
     assert.include(wrapper.text(), courseStartDateMessage(course.runs[0]))
   })
 
   it("includes the <Progress /> component", () => {
-    let wrapper = renderCourseDescription()
+    const wrapper = renderCourseDescription()
     assert.lengthOf(wrapper.find(Progress), 1)
   })
 

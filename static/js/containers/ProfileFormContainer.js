@@ -103,7 +103,7 @@ export const profileFormContainer = (WrappedComponent: ReactClass<*>) => {
     ): void => {
       const username = SETTINGS.user.username
       const { dispatch, ui } = this.props
-      let errors = validator(profile, ui)
+      const errors = validator(profile, ui)
       dispatch(updateProfileValidation(username, errors))
     }
 
@@ -154,7 +154,7 @@ export const profileFormContainer = (WrappedComponent: ReactClass<*>) => {
         // Validation errors will only show up if we start the edit
         dispatch(startProfileEdit(username))
       }
-      let errors = validator(profile, ui)
+      const errors = validator(profile, ui)
       this.updateValidationVisibility(ALL_ERRORS_VISIBLE)
       dispatch(updateProfileValidation(username, errors))
       if (_.isEmpty(errors)) {
@@ -172,7 +172,7 @@ export const profileFormContainer = (WrappedComponent: ReactClass<*>) => {
       // the callback executes on the next re-render. A callback
       // passed to `setState` executes when the component next re-renders.
       this.setState({}, () => {
-        let invalidField = document.querySelector(".invalid-input")
+        const invalidField = document.querySelector(".invalid-input")
         if (invalidField !== null) {
           invalidField.scrollIntoView()
         }
@@ -219,7 +219,7 @@ export const profileFormContainer = (WrappedComponent: ReactClass<*>) => {
     }
 
     profileProps: Function = (profileFromStore: ProfileGetResult) => {
-      let { ui, programs, dispatch, currentProgramEnrollment } = this.props
+      const { ui, programs, dispatch, currentProgramEnrollment } = this.props
       let errors, isEdit, profile, uneditedProfile, patchStatus
 
       if (profileFromStore === undefined) {

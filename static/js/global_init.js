@@ -35,7 +35,7 @@ if (!Object.entries) {
 }
 
 import fetchMock from "fetch-mock"
-let localStorageMock = require("./util/test_utils").localStorageMock
+const localStorageMock = require("./util/test_utils").localStorageMock
 // eslint-disable-next-line mocha/no-top-level-hooks
 beforeEach(() => {
   window.localStorage = localStorageMock()
@@ -55,7 +55,7 @@ beforeEach(() => {
 // cleanup after each test run
 // eslint-disable-next-line mocha/no-top-level-hooks
 afterEach(function() {
-  let node = document.querySelector("#integration_test_div")
+  const node = document.querySelector("#integration_test_div")
   if (node) {
     ReactDOM.unmountComponentAtNode(node)
   }

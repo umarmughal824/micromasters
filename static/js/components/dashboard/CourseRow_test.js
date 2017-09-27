@@ -33,7 +33,7 @@ describe("CourseRow", () => {
   })
 
   const renderRow = (props = {}, isShallow = false) => {
-    let render = isShallow ? shallow : mount
+    const render = isShallow ? shallow : mount
     const dashboard = makeDashboard()
     const prices = makeCoursePrices(dashboard)
     const course =
@@ -74,11 +74,11 @@ describe("CourseRow", () => {
       },
       true
     )
-    let courseRowProps = wrapper.props()
-    let keys = Object.keys(courseRowProps).filter(
+    const courseRowProps = wrapper.props()
+    const keys = Object.keys(courseRowProps).filter(
       key => key !== "children" && key !== "className"
     )
-    let actionProps = wrapper.find(CourseAction).props()
+    const actionProps = wrapper.find(CourseAction).props()
     for (const key of keys) {
       assert.deepEqual(actionProps[key], courseRowProps[key])
     }
@@ -130,13 +130,13 @@ describe("CourseRow", () => {
       },
       true
     )
-    let progressProps = wrapper.find(ProgressMessage).props()
+    const progressProps = wrapper.find(ProgressMessage).props()
     assert.deepEqual(progressProps.course, course)
     assert.deepEqual(progressProps.courseRun, courseRun)
     progressProps.openCourseContactDialog("hey!")
     assert(openCourseContactDialogStub.called)
 
-    let statusProps = wrapper.find(StatusMessages).props()
+    const statusProps = wrapper.find(StatusMessages).props()
     assert.deepEqual(statusProps.course, course)
     assert.deepEqual(statusProps.firstRun, courseRun)
 
@@ -144,7 +144,7 @@ describe("CourseRow", () => {
   })
 
   it("when enroll pay later selected", () => {
-    let course = makeCourse()
+    const course = makeCourse()
     const wrapper = shallow(
       <CourseRow
         ui={{

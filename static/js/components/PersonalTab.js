@@ -80,7 +80,7 @@ export default class PersonalTab extends React.Component {
   onProgramSelect = (selection: Option): void => {
     const { programs, setProgram } = this.props
     if (selection && selection.value) {
-      let selected = programs.find(
+      const selected = programs.find(
         program => program.id === parseInt(selection.value)
       )
       setProgram(selected)

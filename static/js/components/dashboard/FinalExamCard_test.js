@@ -28,14 +28,14 @@ describe("FinalExamCard", () => {
   let navigateToProfileStub, submitPearsonSSOStub, showPearsonTOSDialogStub
   let props
 
-  let profile = { ...USER_PROFILE_RESPONSE, preferred_name: "Preferred Name" }
+  const profile = { ...USER_PROFILE_RESPONSE, preferred_name: "Preferred Name" }
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create()
     navigateToProfileStub = sandbox.stub()
     submitPearsonSSOStub = sandbox.stub()
     showPearsonTOSDialogStub = sandbox.stub()
-    let program: Program = (_.cloneDeep(
+    const program: Program = (_.cloneDeep(
       DASHBOARD_RESPONSE.programs.find(
         program => program.pearson_exam_status !== undefined
       )
@@ -51,12 +51,12 @@ describe("FinalExamCard", () => {
     }
   })
 
-  let commonText = `You must take a proctored exam for each course. Exams may
+  const commonText = `You must take a proctored exam for each course. Exams may
 be taken at any authorized Pearson test center. Before you can take an exam, you have to
 pay for the course and pass the online work.`
 
   const getDialog = () => document.querySelector(".dialog-to-pearson-site")
-  let renderCard = props =>
+  const renderCard = props =>
     mount(
       <MuiThemeProvider muiTheme={getMuiTheme()}>
         <FinalExamCard {...props} />
@@ -64,13 +64,13 @@ pay for the course and pass the online work.`
     )
 
   it("should not render when pearson_exam_status is empty", () => {
-    let card = renderCard(props)
+    const card = renderCard(props)
     assert.isNull(card.html())
   })
 
   it("should just show a basic message if the profile is absent", () => {
     props.program.pearson_exam_status = PEARSON_PROFILE_ABSENT
-    let card = renderCard(props)
+    const card = renderCard(props)
     assert.include(stringStrip(card.text()), stringStrip(commonText))
     assert.notInclude(
       stringStrip(card.text()),
@@ -80,13 +80,13 @@ pay for the course and pass the online work.`
   ;[PEARSON_PROFILE_SUCCESS, PEARSON_PROFILE_SCHEDULABLE].forEach(status => {
     it(`should let the user know when the profile is ready when the status is ${status}`, () => {
       props.program.pearson_exam_status = status
-      let cardText = stringStrip(renderCard(props).text())
+      const cardText = stringStrip(renderCard(props).text())
       assert.include(cardText, "Your Pearson Testing account has been created")
     })
 
     it(`should include profile info if the profile is ${status}`, () => {
       props.program.pearson_exam_status = status
-      let cardText = stringStrip(renderCard(props).text())
+      const cardText = stringStrip(renderCard(props).text())
       assert.include(cardText, profile.address)
       assert.include(cardText, profile.romanized_first_name)
       assert.include(cardText, profile.romanized_last_name)
@@ -97,7 +97,7 @@ pay for the course and pass the online work.`
 
     it(`should show a button to edit if the profile is ${status}`, () => {
       props.program.pearson_exam_status = status
-      let card = renderCard(props)
+      const card = renderCard(props)
       card.find(IconButton).simulate("click")
       assert(navigateToProfileStub.called)
     })
@@ -105,7 +105,7 @@ pay for the course and pass the online work.`
 
   it("should let the user know if the profile is in progress", () => {
     props.program.pearson_exam_status = PEARSON_PROFILE_IN_PROGRESS
-    let card = renderCard(props)
+    const card = renderCard(props)
     assert.include(
       stringStrip(card.text()),
       "Your updated information has been submitted to Pearson Please check back later"
@@ -114,7 +114,7 @@ pay for the course and pass the online work.`
 
   it("should let the user know if the profile is invalid", () => {
     props.program.pearson_exam_status = PEARSON_PROFILE_INVALID
-    let card = renderCard(props)
+    const card = renderCard(props)
     assert.include(
       stringStrip(card.text()),
       "You need to update your profile in order to take a test at a Pearson Test center"
@@ -123,8 +123,8 @@ pay for the course and pass the online work.`
 
   it("should show a schedule button when an exam is schedulable", () => {
     props.program.pearson_exam_status = PEARSON_PROFILE_SCHEDULABLE
-    let card = renderCard(props)
-    let button = card.find(".exam-button")
+    const card = renderCard(props)
+    const button = card.find(".exam-button")
     assert.equal(button.text(), "Schedule an exam")
     button.simulate("click")
     assert(showPearsonTOSDialogStub.called)
@@ -132,9 +132,9 @@ pay for the course and pass the online work.`
 
   it("should show the titles of schedulable exams", () => {
     props.program.pearson_exam_status = PEARSON_PROFILE_SCHEDULABLE
-    let course = props.program.courses[0]
+    const course = props.program.courses[0]
     course.can_schedule_exam = true
-    let card = renderCard(props)
+    const card = renderCard(props)
     assert.include(
       stringStrip(card.text()),
       `You are ready to schedule an exam for ${stringStrip(course.title)}`
@@ -144,7 +144,7 @@ pay for the course and pass the online work.`
   it("should show a scheduling error, when there is one", () => {
     props.pearson.error = "ERROR ERROR"
     props.program.pearson_exam_status = PEARSON_PROFILE_SCHEDULABLE
-    let card = renderCard(props)
+    const card = renderCard(props)
     assert.include(stringStrip(card.text()), "ERROR ERROR")
   })
 
@@ -184,7 +184,7 @@ pay for the course and pass the online work.`
     props.ui.dialogVisibility = { pearsonTOSDialogVisible: true }
     props.program.pearson_exam_status = PEARSON_PROFILE_SCHEDULABLE
     renderCard(props)
-    let btnContinue = getEl(getDialog(), ".save-button")
+    const btnContinue = getEl(getDialog(), ".save-button")
     assert.equal(btnContinue.textContent, "CONTINUE")
     ReactTestUtils.Simulate.click(btnContinue)
     assert.equal(submitPearsonSSOStub.callCount, 1)

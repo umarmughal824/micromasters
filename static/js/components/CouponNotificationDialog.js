@@ -48,7 +48,7 @@ const CouponNotificationDialog = ({
     courseName = `course ID ${objectId}`
   }
 
-  let isDiscount =
+  const isDiscount =
     amountType === COUPON_AMOUNT_TYPE_FIXED_DISCOUNT ||
     amountType === COUPON_AMOUNT_TYPE_PERCENT_DISCOUNT
 

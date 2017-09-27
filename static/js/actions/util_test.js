@@ -5,15 +5,15 @@ import { withUsername } from "./util"
 
 describe("action creator utils", () => {
   describe("withUsername", () => {
-    let TYPE = "TYPE"
+    const TYPE = "TYPE"
     it("should return an action creator, given a type", () => {
-      let creator = withUsername(TYPE)
+      const creator = withUsername(TYPE)
       assert.isFunction(creator)
     })
 
     it("should add a username and a payload", () => {
-      let creator = withUsername(TYPE)
-      let action = creator("username", { my: "payload" })
+      const creator = withUsername(TYPE)
+      const action = creator("username", { my: "payload" })
       assert.deepEqual(action, {
         type:    TYPE,
         payload: { my: "payload" },

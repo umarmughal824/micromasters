@@ -11,8 +11,8 @@ export default class CustomPaginationDisplay extends React.Component {
 
   onClick(toggleItem: Function, evt: Event): void {
     evt.preventDefault()
-    let target: EventTarget = evt.target
-    let key = target.getAttribute("data-key")
+    const target: EventTarget = evt.target
+    const key = target.getAttribute("data-key")
     toggleItem(key)
   }
 

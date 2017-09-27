@@ -54,7 +54,7 @@ describe("AutomaticEmailPage", () => {
 
   it("redirects you to /dashboard if you are not staff", () => {
     SETTINGS.roles = []
-    let expectedActions = DASHBOARD_SUCCESS_ACTIONS.concat(
+    const expectedActions = DASHBOARD_SUCCESS_ACTIONS.concat(
       actions.automaticEmails.get.requestType,
       actions.automaticEmails.get.successType
     )
@@ -88,7 +88,7 @@ describe("AutomaticEmailPage", () => {
       "/automaticemails",
       successActions
     ).then(([wrapper]) => {
-      let cardText = wrapper.find(".email-campaigns-card").text()
+      const cardText = wrapper.find(".email-campaigns-card").text()
       GET_AUTOMATIC_EMAILS_RESPONSE.forEach(email => {
         assert.include(cardText, email.email_subject)
       })
@@ -106,7 +106,7 @@ describe("AutomaticEmailPage", () => {
       "/automaticemails",
       successActions
     ).then(([wrapper]) => {
-      let cardText = wrapper.find(".empty-message").text()
+      const cardText = wrapper.find(".empty-message").text()
       assert.equal(cardText, "You haven't created any Email Campaigns yet.")
     })
   })
@@ -132,14 +132,14 @@ describe("AutomaticEmailPage", () => {
       "/automaticemails",
       successActions
     ).then(([wrapper]) => {
-      let editButton = wrapper
+      const editButton = wrapper
         .find(".email-campaigns-card")
         .find(".email-row")
         .at(0)
         .find("a")
       editButton.simulate("click")
       // $FlowFixMe:
-      let dialogSave = document
+      const dialogSave = document
         .querySelector(".email-composition-dialog")
         .querySelector(".save-button")
 

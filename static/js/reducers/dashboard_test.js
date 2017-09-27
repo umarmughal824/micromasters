@@ -53,7 +53,7 @@ describe("dashboard reducers", () => {
       REQUEST_DASHBOARD,
       RECEIVE_DASHBOARD_SUCCESS
     ]).then(state => {
-      let dashboardState = state[SETTINGS.user.username]
+      const dashboardState = state[SETTINGS.user.username]
       assert.deepEqual(dashboardState.programs, DASHBOARD_RESPONSE.programs)
       assert.equal(
         dashboardState.isEdxDataFresh,
@@ -64,7 +64,7 @@ describe("dashboard reducers", () => {
       return dispatchThen(clearDashboard(SETTINGS.user.username), [
         CLEAR_DASHBOARD
       ]).then(state => {
-        let dashboardState = state[SETTINGS.user.username]
+        const dashboardState = state[SETTINGS.user.username]
         assert.deepEqual(dashboardState, {
           programs:       [],
           isEdxDataFresh: true,
@@ -80,7 +80,7 @@ describe("dashboard reducers", () => {
       REQUEST_DASHBOARD,
       RECEIVE_DASHBOARD_FAILURE
     ]).then(state => {
-      let dashboardState = state[SETTINGS.user.username]
+      const dashboardState = state[SETTINGS.user.username]
       assert.equal(dashboardState.fetchStatus, FETCH_FAILURE)
     })
   })
@@ -90,24 +90,24 @@ describe("dashboard reducers", () => {
       receiveDashboardSuccess(SETTINGS.user.username, DASHBOARD_RESPONSE)
     )
 
-    let getRun = programs => programs[1].courses[0].runs[0]
+    const getRun = programs => programs[1].courses[0].runs[0]
 
-    let run = getRun(DASHBOARD_RESPONSE.programs)
+    const run = getRun(DASHBOARD_RESPONSE.programs)
     assert.notEqual(run.status, "new_status")
     return dispatchThen(
       updateCourseStatus(SETTINGS.user.username, run.course_id, "new_status"),
       [UPDATE_COURSE_STATUS]
     ).then(state => {
-      let dashboardState = state[SETTINGS.user.username]
+      const dashboardState = state[SETTINGS.user.username]
       assert.equal(getRun(dashboardState.programs).status, "new_status")
     })
   })
 
   describe("support for multiple dashboards", () => {
-    let username = "username"
-    let _username = "_username"
+    const username = "username"
+    const _username = "_username"
 
-    let successExpectation = {
+    const successExpectation = {
       programs:       DASHBOARD_RESPONSE.programs,
       isEdxDataFresh: DASHBOARD_RESPONSE.is_edx_data_fresh,
       fetchStatus:    FETCH_SUCCESS,
@@ -165,9 +165,9 @@ describe("dashboard reducers", () => {
     it("should let you update a course runs status", () => {
       store.dispatch(receiveDashboardSuccess(_username, DASHBOARD_RESPONSE))
 
-      let getRun = programs => programs[1].courses[0].runs[0]
+      const getRun = programs => programs[1].courses[0].runs[0]
 
-      let run = getRun(DASHBOARD_RESPONSE.programs)
+      const run = getRun(DASHBOARD_RESPONSE.programs)
       assert.notEqual(run.status, "new_status")
 
       return dispatchThen(

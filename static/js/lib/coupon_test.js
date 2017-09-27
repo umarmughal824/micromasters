@@ -42,7 +42,7 @@ describe("coupon utility functions", () => {
       programs = dashboard.programs
       coursePrices = makeCoursePrices(dashboard)
       pricesLookup = new Map()
-      for (let price of coursePrices) {
+      for (const price of coursePrices) {
         pricesLookup.set(price.program_id, price.price)
       }
     })
@@ -57,9 +57,9 @@ describe("coupon utility functions", () => {
     })
 
     it("returns some Maps with a price defined for every program, course and run", () => {
-      let expectedRunPrices = new Map()
-      let expectedCoursePrices = new Map()
-      let expectedProgramPrices = new Map()
+      const expectedRunPrices = new Map()
+      const expectedCoursePrices = new Map()
+      const expectedProgramPrices = new Map()
       for (const program of programs) {
         expectedProgramPrices.set(program.id, {
           coupon: null,
@@ -89,10 +89,10 @@ describe("coupon utility functions", () => {
     })
 
     it("applies a program coupon", () => {
-      let program = programs[0]
-      let coupon = makeCoupon(program)
-      let programPrice = pricesLookup.get(program.id)
-      let priceWithCoupon = new Decimal(programPrice - 50)
+      const program = programs[0]
+      const coupon = makeCoupon(program)
+      const programPrice = pricesLookup.get(program.id)
+      const priceWithCoupon = new Decimal(programPrice - 50)
       const prices = calculatePrices(programs, coursePrices, [coupon])
 
       assert.deepEqual(prices.pricesInclCouponByProgram.get(program.id), {
@@ -119,13 +119,13 @@ describe("coupon utility functions", () => {
     })
 
     it("applies a course coupon", () => {
-      let program = programs[0]
-      let course = program.courses[1]
-      let coupon = makeCoupon(program)
+      const program = programs[0]
+      const course = program.courses[1]
+      const coupon = makeCoupon(program)
       coupon.content_type = COUPON_CONTENT_TYPE_COURSE
       coupon.object_id = course.id
-      let programPrice = pricesLookup.get(program.id)
-      let priceWithCoupon = new Decimal(programPrice - 50)
+      const programPrice = pricesLookup.get(program.id)
+      const priceWithCoupon = new Decimal(programPrice - 50)
       const prices = calculatePrices(programs, coursePrices, [coupon])
 
       assert.deepEqual(prices.pricesInclCouponByProgram.get(program.id), {
@@ -222,21 +222,21 @@ describe("coupon utility functions", () => {
 
   describe("makeAmountMessage", () => {
     it("has a message for fixed discount", () => {
-      let coupon = makeCoupon(makeProgram())
+      const coupon = makeCoupon(makeProgram())
       coupon.amount_type = COUPON_AMOUNT_TYPE_FIXED_DISCOUNT
       coupon.amount = Decimal("50.34")
       assert.equal(makeAmountMessage(coupon), "$50.34")
     })
 
     it("has a message for percent discount", () => {
-      let coupon = makeCoupon(makeProgram())
+      const coupon = makeCoupon(makeProgram())
       coupon.amount_type = COUPON_AMOUNT_TYPE_PERCENT_DISCOUNT
       coupon.amount = Decimal("0.3456")
       assert.equal(makeAmountMessage(coupon), "35%")
     })
 
     it("has no message if amount type is unknown", () => {
-      let coupon = makeCoupon(makeProgram())
+      const coupon = makeCoupon(makeProgram())
       coupon.amount_type = "missing"
       assert.equal(makeAmountMessage(coupon), "")
     })
@@ -244,7 +244,7 @@ describe("coupon utility functions", () => {
 
   describe("makeCouponReason", () => {
     it("has a reason for the discounted previous course case", () => {
-      let coupon = makeCoupon(makeProgram())
+      const coupon = makeCoupon(makeProgram())
       coupon.coupon_type = COUPON_TYPE_DISCOUNTED_PREVIOUS_COURSE
       assert.equal(
         makeCouponReason(coupon),
@@ -253,7 +253,7 @@ describe("coupon utility functions", () => {
     })
 
     it("has no reason for other cases", () => {
-      let coupon = makeCoupon(makeProgram())
+      const coupon = makeCoupon(makeProgram())
       assert.equal(makeCouponReason(coupon), "")
     })
   })
@@ -269,7 +269,7 @@ describe("coupon utility functions", () => {
     })
 
     it("renders a message for a coupon for a program", () => {
-      let coupon = makeCoupon(makeProgram())
+      const coupon = makeCoupon(makeProgram())
       assert.equal(
         makeCouponMessage(coupon),
         "You will get $50 off the cost for each course in this program."
@@ -277,12 +277,12 @@ describe("coupon utility functions", () => {
     })
 
     it("renders a message for a coupon for a course", () => {
-      let coupon = makeCoupon(makeProgram())
+      const coupon = makeCoupon(makeProgram())
       coupon.content_type = COUPON_CONTENT_TYPE_COURSE
-      let makeAmountMessageStub = sandbox
+      const makeAmountMessageStub = sandbox
         .stub(couponFuncs, "makeAmountMessage")
         .returns("all of the money")
-      let makeCouponTargetMessageStub = sandbox
+      const makeCouponTargetMessageStub = sandbox
         .stub(couponFuncs, "makeCouponReason")
         .returns(", because why not")
       assert.equal(
@@ -294,13 +294,13 @@ describe("coupon utility functions", () => {
     })
 
     it("renders a message for a coupon for an unknown content type", () => {
-      let coupon = makeCoupon(makeProgram())
+      const coupon = makeCoupon(makeProgram())
       coupon.content_type = "xyz"
       assert.equal(makeCouponMessage(coupon), "")
     })
 
     it("renders a message for a coupon for a fixed price", () => {
-      let coupon = makeCoupon(makeProgram())
+      const coupon = makeCoupon(makeProgram())
       coupon.amount_type = COUPON_AMOUNT_TYPE_FIXED_PRICE
       assert.equal(
         makeCouponMessage(coupon),
@@ -309,9 +309,9 @@ describe("coupon utility functions", () => {
     })
 
     it("renders a message for a course coupon for a fixed price", () => {
-      let program = makeProgram()
-      let course = program.courses[0]
-      let coupon = makeCourseCoupon(course, program)
+      const program = makeProgram()
+      const course = program.courses[0]
+      const coupon = makeCourseCoupon(course, program)
       coupon.amount_type = COUPON_AMOUNT_TYPE_FIXED_PRICE
       assert.equal(
         makeCouponMessage(coupon),

@@ -55,7 +55,7 @@ describe("LearnerSearchPage", function() {
   it("spinner works", () => {
     return renderComponent("/learners").then(([wrapper, div]) => {
       assert.equal(div.querySelector(".loader").style.display, "block")
-      let searchkit = wrapper.find("SearchkitProvider").props().searchkit
+      const searchkit = wrapper.find("SearchkitProvider").props().searchkit
       searchkit.registrationCompleted
         .then(() => Promise.resolve([wrapper, div]))
         .then((wrapper, div) => {
@@ -65,8 +65,8 @@ describe("LearnerSearchPage", function() {
   })
 
   const renderSearch = async () => {
-    let [wrapper] = await renderComponent("/learners")
-    let searchkit = wrapper.find("SearchkitProvider").props().searchkit
+    const [wrapper] = await renderComponent("/learners")
+    const searchkit = wrapper.find("SearchkitProvider").props().searchkit
     await searchkit.registrationCompleted
     // cycle through the event loop to let searchkit do its rendering
     await wait(0)
@@ -118,7 +118,7 @@ describe("LearnerSearchPage", function() {
     const EMAIL_DIALOG_ACTIONS = [START_EMAIL_EDIT, SHOW_DIALOG]
 
     return renderSearch().then(([wrapper]) => {
-      let emailLink = wrapper.find(EMAIL_LINK_SELECTOR).at(0)
+      const emailLink = wrapper.find(EMAIL_LINK_SELECTOR).at(0)
 
       return listenForActions(EMAIL_DIALOG_ACTIONS, () => {
         emailLink.simulate("click")
@@ -139,7 +139,7 @@ describe("LearnerSearchPage", function() {
     const EMAIL_DIALOG_ACTIONS = [START_EMAIL_EDIT, SHOW_DIALOG]
 
     return renderComponent("/learners").then(([wrapper]) => {
-      let emailLink = wrapper.find(EMAIL_LINK_SELECTOR).at(0)
+      const emailLink = wrapper.find(EMAIL_LINK_SELECTOR).at(0)
 
       return listenForActions(EMAIL_DIALOG_ACTIONS, () => {
         emailLink.simulate("click")
@@ -202,7 +202,7 @@ describe("LearnerSearchPage", function() {
   ]
 
   describe("does not render staff filters for learner users", () => {
-    for (let selector of STAFF_ONLY_FILTERS) {
+    for (const selector of STAFF_ONLY_FILTERS) {
       it(`.filter--${selector}`, () => {
         SETTINGS.roles = []
         return renderComponent("/learners").then(([wrapper]) => {
@@ -220,7 +220,7 @@ describe("LearnerSearchPage", function() {
   })
 
   describe("does render staff filters for staff users", () => {
-    for (let selector of STAFF_ONLY_FILTERS) {
+    for (const selector of STAFF_ONLY_FILTERS) {
       it(`.filter--${selector}`, () => {
         return renderComponent("/learners").then(([wrapper]) => {
           assert.isTrue(wrapper.find(`.filter--${selector}`).exists())
@@ -407,7 +407,7 @@ describe("LearnerSearchPage", function() {
 
     it("displays the correct number in the UI", () => {
       return renderSearch().then(([wrapper]) => {
-        let educationItems = wrapper.find("EducationFilter ItemList").props()
+        const educationItems = wrapper.find("EducationFilter ItemList").props()
           .items
 
         assert.deepEqual(educationItems, [
@@ -421,15 +421,15 @@ describe("LearnerSearchPage", function() {
 
   describe("course enrollment filters", () => {
     it("have the expected aggregations", () => {
-      let innerKey = "program.enrollments.course_title"
-      let topLevelKey = `${innerKey}3`
+      const innerKey = "program.enrollments.course_title"
+      const topLevelKey = `${innerKey}3`
 
       return renderSearch().then(() => {
         const callArgs = replySpy.firstCall.args[0]
         const body = JSON.parse(callArgs.data)
         assert.isDefined(body.aggs[topLevelKey])
 
-        let innerAggs = body.aggs[topLevelKey].aggs.inner
+        const innerAggs = body.aggs[topLevelKey].aggs.inner
         assert.deepEqual(innerAggs.nested, { path: "program.enrollments" })
         assert.equal(innerAggs.aggs[innerKey].terms.field, innerKey)
         assert.deepEqual(innerAggs.aggs[innerKey].aggs, {
@@ -487,7 +487,7 @@ describe("LearnerSearchPage", function() {
         const searchkit = wrapper.find("SearchkitProvider").props().searchkit
         searchkit.searchFromUrlQuery(query)
 
-        let titles = wrapper
+        const titles = wrapper
           .find(".mm-filters .sk-selected-filters-option__name")
           .map(filter => filter.text())
         assert.deepEqual(titles, [

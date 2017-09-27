@@ -32,9 +32,8 @@ import { INITIAL_EMAIL_STATE } from "../../reducers/email"
 import { actions } from "../../lib/redux_rest"
 
 describe("Specific email config", () => {
-  let helper,
-    listenForActions,
-    EMAIL_DIALOG_ACTIONS = [START_EMAIL_EDIT, SHOW_DIALOG]
+  let helper, listenForActions
+  const EMAIL_DIALOG_ACTIONS = [START_EMAIL_EDIT, SHOW_DIALOG]
 
   beforeEach(() => {
     helper = new IntegrationTestHelper()
@@ -45,19 +44,19 @@ describe("Specific email config", () => {
     helper.cleanup()
   })
 
-  let wrapContainerComponent = (component, emailKey, emailConfig) =>
+  const wrapContainerComponent = (component, emailKey, emailConfig) =>
     R.compose(
       withEmailDialog({
         [emailKey]: emailConfig
       })
     )(component)
 
-  let renderTestComponentWithDialog = (
+  const renderTestComponentWithDialog = (
     Component,
     emailKey,
     { emailState = INITIAL_EMAIL_STATE, dialogVisible = false } = {}
   ) => {
-    let fullEmailState = {
+    const fullEmailState = {
       currentlyActive: emailKey,
       [emailKey]:      emailState
     }
@@ -97,10 +96,10 @@ describe("Specific email config", () => {
   }`
 
   describe("for the learner email", () => {
-    let wrapper,
-      profile = R.clone(USER_PROFILE_RESPONSE)
+    const profile = R.clone(USER_PROFILE_RESPONSE)
+    let wrapper
 
-    let filledOutEmailState = _.merge(R.clone(INITIAL_EMAIL_STATE), {
+    const filledOutEmailState = _.merge(R.clone(INITIAL_EMAIL_STATE), {
       params: {
         studentId:    123,
         profileImage: "img.jpg"
@@ -114,7 +113,7 @@ describe("Specific email config", () => {
 
     class TestContainerPage extends React.Component {
       render() {
-        let { openEmailComposer } = this.props
+        const { openEmailComposer } = this.props
         return (
           <div>
             <button
@@ -129,7 +128,7 @@ describe("Specific email config", () => {
       }
     }
 
-    let wrappedContainerComponent = wrapContainerComponent(
+    const wrappedContainerComponent = wrapContainerComponent(
       TestContainerPage,
       LEARNER_EMAIL_TYPE,
       LEARNER_EMAIL_CONFIG
@@ -140,14 +139,14 @@ describe("Specific email config", () => {
         wrappedContainerComponent,
         LEARNER_EMAIL_TYPE
       )
-      let dialogComponent = wrapper.find("EmailCompositionDialog")
-      let emailButton = wrapper.find("button")
+      const dialogComponent = wrapper.find("EmailCompositionDialog")
+      const emailButton = wrapper.find("button")
       assert.equal(dialogComponent.props().title, LEARNER_EMAIL_CONFIG.title)
 
       return listenForActions(EMAIL_DIALOG_ACTIONS, () => {
         emailButton.simulate("click")
       }).then(state => {
-        let emailParams = state.email[LEARNER_EMAIL_TYPE].params
+        const emailParams = state.email[LEARNER_EMAIL_TYPE].params
         assert.equal(emailParams.studentId, profile.student_id)
         assert.isDefined(emailParams.profileImage)
       })
@@ -159,8 +158,8 @@ describe("Specific email config", () => {
         LEARNER_EMAIL_TYPE,
         { emailState: filledOutEmailState, dialogVisible: true }
       )
-      let dialogComponent = wrapper.find("EmailCompositionDialog")
-      let renderedSubheading = mount(
+      const dialogComponent = wrapper.find("EmailCompositionDialog")
+      const renderedSubheading = mount(
         dialogComponent.props().subheadingRenderer(filledOutEmailState)
       )
 
@@ -177,7 +176,7 @@ describe("Specific email config", () => {
         LEARNER_EMAIL_TYPE,
         { emailState: filledOutEmailState, dialogVisible: true }
       )
-      let dialogComponent = wrapper.find("EmailCompositionDialog")
+      const dialogComponent = wrapper.find("EmailCompositionDialog")
 
       return listenForActions(
         [UPDATE_EMAIL_VALIDATION, INITIATE_SEND_EMAIL],
@@ -195,11 +194,11 @@ describe("Specific email config", () => {
     })
 
     it("shouldnt use the sendMail email action, if the email config specifies differently", () => {
-      let automaticEmailState = _.clone(filledOutEmailState)
+      const automaticEmailState = _.clone(filledOutEmailState)
       automaticEmailState.inputs.id = 1
       fetchMock.mock("/api/v0/mail/automatic_email/1/", () => ({}))
 
-      let wrapped = wrapContainerComponent(
+      const wrapped = wrapContainerComponent(
         TestContainerPage,
         AUTOMATIC_EMAIL_ADMIN_TYPE,
         AUTOMATIC_EMAIL_ADMIN_CONFIG
@@ -209,7 +208,7 @@ describe("Specific email config", () => {
         AUTOMATIC_EMAIL_ADMIN_TYPE,
         { emailState: automaticEmailState, dialogVisible: true }
       )
-      let dialogComponent = wrapper.find("EmailCompositionDialog")
+      const dialogComponent = wrapper.find("EmailCompositionDialog")
       return listenForActions(
         [UPDATE_EMAIL_VALIDATION, actions.automaticEmails.patch.requestType],
         () => {
@@ -234,11 +233,11 @@ describe("Specific email config", () => {
       })
 
       it("it should preserve any other keys", () => {
-        let obj = {
+        const obj = {
           email_subject: "potato",
           other_field:   "should be here!"
         }
-        let expectation = {
+        const expectation = {
           subject:     "potato",
           other_field: "should be here!"
         }
@@ -263,7 +262,7 @@ describe("Specific email config", () => {
       })
 
       it("should return filters", () => {
-        let filters = getFilters(JSON.parse(queryFilters))
+        const filters = getFilters(JSON.parse(queryFilters))
         assert.deepEqual(filters, [
           {
             id:    "program.enrollments.payment_status",
@@ -275,7 +274,7 @@ describe("Specific email config", () => {
 
       describe("getFilters", () => {
         it("should return filters", () => {
-          let filters = getFilters(JSON.parse(queryFilters))
+          const filters = getFilters(JSON.parse(queryFilters))
           assert.deepEqual(filters, [
             {
               id:    "program.enrollments.payment_status",
@@ -288,7 +287,7 @@ describe("Specific email config", () => {
 
       describe("findFilters", () => {
         it("should return an empty list if passed an empty object", () => {
-          let filters = findFilters({})
+          const filters = findFilters({})
           assert.deepEqual(filters, [])
         })
 
@@ -302,7 +301,7 @@ describe("Specific email config", () => {
               ]
             }
           }`
-          let filters = findFilters(JSON.parse(query))
+          const filters = findFilters(JSON.parse(query))
           assert.deepEqual(filters, [])
         })
 
@@ -331,7 +330,7 @@ describe("Specific email config", () => {
               ]
             }
           }`
-          let filters = findFilters(JSON.parse(query))
+          const filters = findFilters(JSON.parse(query))
           assert.deepEqual(filters, [
             { "program.grade_average": { gte: 0, lte: 81 } },
             { "profile.birth_country": "US" },
@@ -380,7 +379,7 @@ describe("Specific email config", () => {
               ]
             }
           }`
-          let filters = findFilters(JSON.parse(query))
+          const filters = findFilters(JSON.parse(query))
           assert.deepEqual(filters, [
             { "program.enrollments.course_title": "Digital Learning 100" },
             { "program.enrollments.final_grade": { gte: 0, lte: 89 } },
@@ -390,7 +389,7 @@ describe("Specific email config", () => {
         })
 
         it("should return a list of filters which are nested at different levels", () => {
-          let query = `{
+          const query = `{
             "bool": {
               "must": [
                 {
@@ -437,7 +436,7 @@ describe("Specific email config", () => {
               ]
             }
           }`
-          let filters = findFilters(JSON.parse(query))
+          const filters = findFilters(JSON.parse(query))
           assert.deepEqual(filters, [
             { "program.enrollments.course_title": "Digital Learning 100" },
             { "profile.education.degree_name": "b" },
@@ -457,7 +456,7 @@ describe("Specific email config", () => {
               ]
             }
           }`
-          let filters = findFilters(JSON.parse(query))
+          const filters = findFilters(JSON.parse(query))
           assert.deepEqual(filters, [])
         })
       })

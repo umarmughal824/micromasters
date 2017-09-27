@@ -44,7 +44,7 @@ describe("Google Analytics", () => {
 
   describe("sendFormFieldEvent", () => {
     it("should properly format the keySet and send to GA", () => {
-      let keySet = ["some", "keys", "wow"]
+      const keySet = ["some", "keys", "wow"]
       sendFormFieldEvent(keySet)
       assert.ok(
         event.calledWith({

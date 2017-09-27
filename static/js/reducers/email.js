@@ -46,13 +46,13 @@ function updatedState(
   emailType: string,
   updateObject: Object
 ) {
-  let clonedState = _.cloneDeep(state)
+  const clonedState = _.cloneDeep(state)
   _.merge(clonedState[emailType], updateObject)
   return clonedState
 }
 
 function resetState(state: AllEmailsState, emailType: string) {
-  let clonedState = _.cloneDeep(state)
+  const clonedState = _.cloneDeep(state)
   clonedState[emailType] = INITIAL_EMAIL_STATE
   return clonedState
 }
@@ -61,11 +61,11 @@ export const email = (
   state: AllEmailsState = INITIAL_ALL_EMAILS_STATE,
   action: Action<any, null>
 ) => {
-  let emailType = getEmailType(action.payload)
+  const emailType = getEmailType(action.payload)
 
   switch (action.type) {
   case START_EMAIL_EDIT: // eslint-disable-line no-case-declarations
-    let newState = { ...state }
+    const newState = { ...state }
     newState[emailType] = {
       ...INITIAL_EMAIL_STATE,
       params:                  action.payload.params || {},

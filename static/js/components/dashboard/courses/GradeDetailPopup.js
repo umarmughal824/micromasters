@@ -91,7 +91,7 @@ const renderExamRow = (
 const labelBestEdxGrade = (
   runs: Array<CourseRun>
 ): Array<[CourseRun, boolean]> => {
-  let bestGrade = runs.reduce(
+  const bestGrade = runs.reduce(
     (acc, run) =>
       run.final_grade && run.final_grade > acc ? run.final_grade : acc,
     0
@@ -108,7 +108,7 @@ const labelBestEdxGrade = (
 const labelBestExamGrade = (
   exams: Array<ProctoredExamResult>
 ): Array<[ProctoredExamResult, boolean]> => {
-  let bestGrade = exams.reduce(
+  const bestGrade = exams.reduce(
     (acc, exam) => (exam.percentage_grade > acc ? exam.percentage_grade : acc),
     0
   )

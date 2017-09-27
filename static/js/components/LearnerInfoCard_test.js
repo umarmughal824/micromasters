@@ -35,7 +35,7 @@ describe("LearnerInfoCard", () => {
   })
 
   it("render user info card", () => {
-    let wrapper = renderInfoCard()
+    const wrapper = renderInfoCard()
     assert.equal(
       wrapper.find(".profile-title").text(),
       getPreferredName(USER_PROFILE_RESPONSE)
@@ -52,21 +52,21 @@ describe("LearnerInfoCard", () => {
   })
 
   it("edit profile works", () => {
-    let wrapper = renderInfoCard()
-    let editProfileButton = wrapper.find(".edit-profile-holder").childAt(0)
+    const wrapper = renderInfoCard()
+    const editProfileButton = wrapper.find(".edit-profile-holder").childAt(0)
     editProfileButton.simulate("click")
     assert.equal(editProfileBtnStub.callCount, 1)
   })
 
   it("edit about me works", () => {
-    let wrapper = renderInfoCard()
-    let editAboutMeButton = wrapper.find(".edit-about-me-holder").childAt(0)
+    const wrapper = renderInfoCard()
+    const editAboutMeButton = wrapper.find(".edit-about-me-holder").childAt(0)
     editAboutMeButton.simulate("click")
     assert.equal(editAboutMeBtnStub.callCount, 1)
   })
 
   it('should not allow the user to edit "about me" when viewing a different profile', () => {
-    let wrapper = renderInfoCard({
+    const wrapper = renderInfoCard({
       profile: {
         ...USER_PROFILE_RESPONSE,
         username: "xyz"
@@ -76,7 +76,7 @@ describe("LearnerInfoCard", () => {
   })
 
   it('shows an "about me" section', () => {
-    let wrapper = renderInfoCard({
+    const wrapper = renderInfoCard({
       profile: {
         ...USER_PROFILE_RESPONSE,
         about_me: "Hello world"
@@ -87,7 +87,7 @@ describe("LearnerInfoCard", () => {
   })
 
   it('correctly shows a multiline "about me" section', () => {
-    let wrapper = renderInfoCard({
+    const wrapper = renderInfoCard({
       profile: {
         ...USER_PROFILE_RESPONSE,
         about_me: "Hello \n world"
@@ -100,7 +100,7 @@ describe("LearnerInfoCard", () => {
   })
 
   it("should not show legal name if the user is not staff", () => {
-    let wrapper = renderInfoCard()
+    const wrapper = renderInfoCard()
     assert.equal(wrapper.find(".legal-name").length, 0)
   })
 
@@ -112,7 +112,7 @@ describe("LearnerInfoCard", () => {
         program: 1
       }
     ]
-    let wrapper = renderInfoCard({
+    const wrapper = renderInfoCard({
       profile: {
         ...USER_PROFILE_RESPONSE,
         first_name: "FIRST",
@@ -123,7 +123,7 @@ describe("LearnerInfoCard", () => {
   })
 
   describe("email link", () => {
-    let originalUsername = SETTINGS.user.username
+    const originalUsername = SETTINGS.user.username
 
     beforeEach(() => {
       SETTINGS.user.username = "My user"
@@ -136,7 +136,7 @@ describe("LearnerInfoCard", () => {
     })
 
     it("should be shown if a staff user is viewing a different profile", () => {
-      let card = renderInfoCard({
+      const card = renderInfoCard({
         profile: {
           ...USER_PROFILE_RESPONSE,
           email:       "learner@example.com",
@@ -147,7 +147,7 @@ describe("LearnerInfoCard", () => {
     })
 
     it("should not be shown if the user is not opted in to email", () => {
-      let card = renderInfoCard({
+      const card = renderInfoCard({
         profile: {
           ...USER_PROFILE_RESPONSE,
           email:       "learner@example.com",
@@ -158,7 +158,7 @@ describe("LearnerInfoCard", () => {
     })
 
     it("should not be shown if the user has no email address", () => {
-      let card = renderInfoCard({
+      const card = renderInfoCard({
         profile: {
           ...USER_PROFILE_RESPONSE,
           email:       null,
@@ -170,7 +170,7 @@ describe("LearnerInfoCard", () => {
 
     it("should not be shown if the user is viewing their own profile page", () => {
       SETTINGS.user.username = originalUsername
-      let card = renderInfoCard({
+      const card = renderInfoCard({
         profile: {
           ...USER_PROFILE_RESPONSE,
           email:       "learner@example.com",
@@ -182,7 +182,7 @@ describe("LearnerInfoCard", () => {
 
     it("should not be shown if the logged-in user is not staff", () => {
       SETTINGS.roles = []
-      let card = renderInfoCard({
+      const card = renderInfoCard({
         profile: {
           ...USER_PROFILE_RESPONSE,
           email:       "learner@example.com",

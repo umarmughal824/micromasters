@@ -63,8 +63,8 @@ export function boundRadioGroupField(
     validator,
     updateValidationVisibility
   } = this.props
-  let onChange = e => {
-    let clone = _.cloneDeep(profile)
+  const onChange = e => {
+    const clone = _.cloneDeep(profile)
     let value = e.target.value
     if (value === "true") {
       value = true
@@ -118,27 +118,27 @@ export function boundTextField(
     updateProfileValidation
   } = this.props
 
-  let onChange = e => {
-    let clone = _.cloneDeep(profile)
+  const onChange = e => {
+    const clone = _.cloneDeep(profile)
     _.set(clone, keySet, e.target.value)
     updateValidationVisibility(keySet)
     updateProfile(clone, validator)
   }
 
-  let onBlur = () => {
+  const onBlur = () => {
     updateValidationVisibility(keySet)
     updateProfileValidation(profile, validator)
     sendFormFieldEvent(keySet)
   }
 
-  let getValue = () => {
-    let value = _.get(profile, keySet, "")
+  const getValue = () => {
+    const value = _.get(profile, keySet, "")
     return _.isNull(value) || _.isUndefined(value) ? "" : value
   }
 
   // fullWidth means set width to 100% instead of 256px. This lets us use the
   // Grid and Cell to manage its size
-  let options = {}
+  const options = {}
   if (maxLength) {
     options.maxLength = maxLength
   }
@@ -179,7 +179,7 @@ export function boundDateField(
     updateProfileValidation
   } = this.props
 
-  let onBlur = () => {
+  const onBlur = () => {
     updateValidationVisibility(keySet)
     updateProfileValidation(profile, validator)
     sendFormFieldEvent(keySet)
@@ -212,8 +212,8 @@ export function boundCheckbox(
     updateValidationVisibility
   } = this.props
 
-  let onChange = e => {
-    let clone = _.cloneDeep(profile)
+  const onChange = e => {
+    const clone = _.cloneDeep(profile)
     _.set(clone, keySet, e.target.checked)
     updateValidationVisibility(keySet)
     updateProfile(clone, validator)
@@ -243,9 +243,9 @@ export function boundCheckbox(
 
 const onTelChange = R.curry(
   (keySet, profile, updateProfile, validator, newPhoneNumber) => {
-    let currentPhoneNumber = _.get(profile, keySet)
+    const currentPhoneNumber = _.get(profile, keySet)
     if (currentPhoneNumber !== newPhoneNumber) {
-      let clone = _.cloneDeep(profile)
+      const clone = _.cloneDeep(profile)
       _.set(clone, keySet, newPhoneNumber)
       updateProfile(clone, validator)
     }
@@ -262,13 +262,13 @@ export function boundTelephoneInput(keySet: string[]): React$Element<*> {
     updateValidationVisibility
   } = this.props
 
-  let onBlur = () => {
+  const onBlur = () => {
     updateValidationVisibility(keySet)
     updateProfileValidation(profile, validator)
     sendFormFieldEvent(keySet)
   }
 
-  let currentCountry = R.toLower(R.pathOr("", ["country"], profile))
+  const currentCountry = R.toLower(R.pathOr("", ["country"], profile))
   return (
     <div
       className={`bound-telephone ${validationErrorSelector(errors, keySet)}`}
@@ -295,7 +295,7 @@ export function saveProfileStep(
   isLastStep: boolean = false
 ): Promise<Profile> {
   const { saveProfile, profile, ui } = this.props
-  let clone = {
+  const clone = {
     ...profile,
     filled_out: profile.filled_out || isLastStep
   }
@@ -310,7 +310,7 @@ export function saveProfileStep(
  * Returns true when first name or last name has non CP-1252 string(s).
  */
 export function shouldRenderRomanizedFields(profile: Profile): boolean {
-  let firstName = _.get(profile, ["first_name"], "")
-  let lastName = _.get(profile, ["last_name"], "")
+  const firstName = _.get(profile, ["first_name"], "")
+  const lastName = _.get(profile, ["last_name"], "")
   return !CP1252_REGEX.test(firstName) || !CP1252_REGEX.test(lastName)
 }

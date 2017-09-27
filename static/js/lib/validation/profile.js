@@ -75,8 +75,8 @@ export type UIValidator = (a: Profile, b: UIState) => ValidationErrors
  * Program Selector Validation
  */
 export function programValidation(_: Profile, ui: UIState): ValidationErrors {
-  let { selectedProgram } = ui
-  let errors = {}
+  const { selectedProgram } = ui
+  const errors = {}
 
   if (!selectedProgram) {
     errors.program = "Please select a valid program"
@@ -226,7 +226,7 @@ const nestedValidator = R.curry(
     if (R.isEmpty(profile[key]) || R.isNil(profile[key])) {
       return {}
     }
-    let errors = findErrors(profile[key])
+    const errors = findErrors(profile[key])
     if (R.equals(errors, R.repeat({}, errors.length))) {
       return {}
     }
@@ -340,7 +340,7 @@ const dateIsValid = extraErrorCheck(
   "end_date",
   "Please enter a valid end date or leave it blank",
   entry => {
-    let editIsEmpty =
+    const editIsEmpty =
       _.isEmpty(entry.end_date_edit) ||
       (entry.end_date_edit !== undefined &&
         isNilOrEmptyString(entry.end_date_edit.year) &&
@@ -384,7 +384,7 @@ export const privacyValidation = (profile: Profile): ValidationErrors =>
  * Email Validation
  * validate an email for presence of the 'subject' and 'body' fields
  */
-let emailMessages: ErrorMessages = {
+const emailMessages: ErrorMessages = {
   subject: "Please fill in a subject",
   body:    "Please fill in a body"
 }
@@ -396,7 +396,7 @@ const emailBodyValid = R.ifElse(
 )
 
 export const emailValidation = (emailInputs: EmailInputs): ValidationErrors => {
-  let errors = findErrors(emailInputs, R.keys(emailMessages), emailMessages)
+  const errors = findErrors(emailInputs, R.keys(emailMessages), emailMessages)
 
   if (!R.has("body", errors) && !emailBodyValid(emailInputs.body)) {
     errors["body"] =
@@ -458,7 +458,7 @@ const financialAidMessages: ErrorMessages = {
 export const validateFinancialAid = (
   edit: FinancialAidState
 ): FinancialAidValidation => {
-  let errors: FinancialAidValidation = findErrors(
+  const errors: FinancialAidValidation = findErrors(
     edit,
     R.keys(financialAidMessages),
     financialAidMessages

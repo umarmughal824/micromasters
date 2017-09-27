@@ -69,7 +69,7 @@ export default class CourseEnrollmentDialog extends React.Component {
       hasUserApplied,
       pendingFinancialAid
     } = this.props
-    let message, payButton, auditButton
+    let message, payButton
     if (pendingFinancialAid) {
       message = `Your Personalized Course Price is still pending approval, but you can
         sign up now to audit the course for FREE, and then pay later. (Payment is required
@@ -114,7 +114,7 @@ export default class CourseEnrollmentDialog extends React.Component {
         </Button>
       )
     }
-    auditButton = (
+    const auditButton = (
       <Button
         key="audit"
         onClick={this.handleAuditClick}

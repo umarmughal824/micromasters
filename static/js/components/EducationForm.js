@@ -78,7 +78,7 @@ class EducationForm extends ProfileFormFields {
       setEducationDialogVisibility
     } = this.props
 
-    let education = profile["education"][index]
+    const education = profile["education"][index]
     setEducationDialogIndex(index)
     setEducationDegreeLevel(education.degree_name)
     setEducationDialogVisibility(true)
@@ -93,7 +93,7 @@ class EducationForm extends ProfileFormFields {
       setEducationDialogVisibility,
       validator
     } = this.props
-    let clone = {
+    const clone = {
       ...profile,
       education: [...profile.education, generateNewEducation(level)]
     }
@@ -105,7 +105,7 @@ class EducationForm extends ProfileFormFields {
 
   deleteEducationEntry = (): Promise<*> => {
     const { saveProfile, profile, ui } = this.props
-    let clone = _.cloneDeep(profile)
+    const clone = _.cloneDeep(profile)
     if (ui.deletionIndex !== undefined && ui.deletionIndex !== null) {
       clone["education"].splice(ui.deletionIndex, 1)
     }
@@ -114,8 +114,8 @@ class EducationForm extends ProfileFormFields {
 
   educationLevelRadioSwitch = (level: Option): React$Element<*> => {
     const { ui: { educationLevelAnswers } } = this.props
-    let radioIconStyle = { marginRight: "8px" }
-    let valueSelected = level.value in educationLevelAnswers ? "false" : null
+    const radioIconStyle = { marginRight: "8px" }
+    const valueSelected = level.value in educationLevelAnswers ? "false" : null
     return (
       <RadioButtonGroup
         className={`profile-radio-switch ${level.value}`}
@@ -159,9 +159,9 @@ class EducationForm extends ProfileFormFields {
   }
 
   renderEducationQuestionForm(level: Option): React$Element<*> {
-    let label = level.label
-    let prefix = label.toLowerCase().startsWith("a") ? "an" : "a"
-    let levelName = !label.endsWith("degree")
+    const label = level.label
+    const prefix = label.toLowerCase().startsWith("a") ? "an" : "a"
+    const levelName = !label.endsWith("degree")
       ? `${label.toLowerCase()} degree`
       : label.toLowerCase()
     return (
@@ -183,7 +183,7 @@ class EducationForm extends ProfileFormFields {
     let title
     if (!_.isNil(level)) {
       levelValue = level.value
-      let label = EDUCATION_LEVEL_LABELS[levelValue]
+      const label = EDUCATION_LEVEL_LABELS[levelValue]
       filterDegreeName = ([, entry]) => entry.degree_name === level.value
       title = (
         <Cell col={12} className="profile-form-row" key="header-row">
@@ -235,9 +235,9 @@ class EducationForm extends ProfileFormFields {
         // don't show new educations, wait until we saved on the server before showing them
         return
       }
-      let deleteEntry = () => this.openEducationDeleteDialog(index)
-      let editEntry = () => this.openEditEducationForm(index)
-      let validationAlert = () => {
+      const deleteEntry = () => this.openEducationDeleteDialog(index)
+      const editEntry = () => this.openEditEducationForm(index)
+      const validationAlert = () => {
         if (_.get(errors, ["education", String(index)])) {
           return <IconButton name="error" onClick={editEntry} />
         }
@@ -245,10 +245,10 @@ class EducationForm extends ProfileFormFields {
 
       let level
       if (showLevel) {
-        let degree = EDUCATION_LEVEL_LABELS[education.degree_name]
+        const degree = EDUCATION_LEVEL_LABELS[education.degree_name]
         level = <div>{degree}</div>
       }
-      let icons = () => (
+      const icons = () => (
         <div className="profile-row-icons">
           {validationAlert()}
           <IconButton className="edit-button" name="edit" onClick={editEntry} />
@@ -317,12 +317,12 @@ class EducationForm extends ProfileFormFields {
   editEducationForm = (): React$Element<*> => {
     const { ui: { educationDialogIndex }, showSwitch, profile } = this.props
 
-    let keySet = (key): any => ["education", educationDialogIndex, key]
-    let educationDegreeLevel = _.get(profile, keySet("degree_name"))
-    let id = _.get(profile, keySet("id"))
-    let title = id !== undefined ? "Edit Education" : "Add Education"
+    const keySet = (key): any => ["education", educationDialogIndex, key]
+    const educationDegreeLevel = _.get(profile, keySet("degree_name"))
+    const id = _.get(profile, keySet("id"))
+    const title = id !== undefined ? "Edit Education" : "Add Education"
 
-    let fieldOfStudy = () => {
+    const fieldOfStudy = () => {
       if (educationDegreeLevel !== HIGH_SCHOOL) {
         return (
           <Cell col={12}>
@@ -337,7 +337,7 @@ class EducationForm extends ProfileFormFields {
         )
       }
     }
-    let levelForm = () => {
+    const levelForm = () => {
       if (!showSwitch) {
         return (
           <Cell col={12}>
@@ -398,7 +398,7 @@ class EducationForm extends ProfileFormFields {
   renderCard() {
     const { showSwitch, profile } = this.props
 
-    let cardClass = levelValue =>
+    const cardClass = levelValue =>
       this.hasEducationAtLevel(levelValue) ? "" : "collapsed"
 
     if (showSwitch) {
@@ -439,7 +439,7 @@ class EducationForm extends ProfileFormFields {
   }
 
   render() {
-    let {
+    const {
       ui: { showEducationDeleteDialog, educationDialogVisibility },
       profilePatchStatus
     } = this.props

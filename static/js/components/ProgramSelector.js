@@ -42,7 +42,7 @@ export default class ProgramSelector extends React.Component {
       setEnrollSelectedProgram(null)
       setEnrollDialogError(null)
     } else {
-      let selected = programs.find(program => program.id === option.value)
+      const selected = programs.find(program => program.id === option.value)
       if (selected) {
         setCurrentProgramEnrollment(selected)
       }
@@ -58,13 +58,15 @@ export default class ProgramSelector extends React.Component {
     }
 
     const sortedPrograms = _.sortBy(programs, "title")
-    let enrolledPrograms = sortedPrograms.filter(program => program.enrolled)
-    let unenrolledPrograms = sortedPrograms.filter(program => !program.enrolled)
-    let unselected = enrolledPrograms.filter(
+    const enrolledPrograms = sortedPrograms.filter(program => program.enrolled)
+    const unenrolledPrograms = sortedPrograms.filter(
+      program => !program.enrolled
+    )
+    const unselected = enrolledPrograms.filter(
       enrollment => enrollment.id !== currentId
     )
 
-    let options = unselected.map(enrollment => ({
+    const options = unselected.map(enrollment => ({
       value: enrollment.id,
       label: enrollment.title
     }))
@@ -75,7 +77,7 @@ export default class ProgramSelector extends React.Component {
   }
 
   render() {
-    let {
+    const {
       addProgramEnrollment,
       programs,
       enrollDialogError,
@@ -93,8 +95,8 @@ export default class ProgramSelector extends React.Component {
       currentId = currentProgramEnrollment.id
     }
 
-    let selected = programs.find(enrollment => enrollment.id === currentId)
-    let options = this.makeOptions()
+    const selected = programs.find(enrollment => enrollment.id === currentId)
+    const options = this.makeOptions()
 
     if (!SETTINGS.user) {
       return (

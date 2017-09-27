@@ -184,7 +184,7 @@ const serializeValue = (value: Object | string) =>
   _.isObject(value) ? `${value.gte} - ${value.lte}` : value
 
 export const getFilters = (root: Object) => {
-  let terms = findFilters(root)
+  const terms = findFilters(root)
   return _.map(terms, (term: Object) => ({
     id:    Object.keys(term)[0],
     name:  Object.keys(term)[0],

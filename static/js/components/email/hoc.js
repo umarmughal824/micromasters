@@ -48,14 +48,14 @@ export const withEmailDialog = R.curry(
 
       saveEmailChanges = (fieldName, value) => {
         const { dispatch, email: { currentlyActive } } = this.props
-        let activeEmail = this.getActiveEmailState()
-        let inputsClone = R.clone(activeEmail.inputs)
+        const activeEmail = this.getActiveEmailState()
+        const inputsClone = R.clone(activeEmail.inputs)
         inputsClone[fieldName] = value
         dispatch(
           updateEmailEdit({ type: currentlyActive, inputs: inputsClone })
         )
         if (!R.isEmpty(activeEmail.validationErrors)) {
-          let cloneErrors = emailValidation(inputsClone)
+          const cloneErrors = emailValidation(inputsClone)
           dispatch(
             updateEmailValidation({
               type:   currentlyActive,
@@ -84,8 +84,8 @@ export const withEmailDialog = R.curry(
 
       closeEmailComposerAndSend = (): Promise<void> => {
         const { dispatch, email: { currentlyActive } } = this.props
-        let activeEmail = this.getActiveEmailState()
-        let errors = emailValidation(activeEmail.inputs)
+        const activeEmail = this.getActiveEmailState()
+        const errors = emailValidation(activeEmail.inputs)
         dispatch(
           updateEmailValidation({ type: currentlyActive, errors: errors })
         )
@@ -115,9 +115,9 @@ export const withEmailDialog = R.curry(
       }
 
       renderCompositionDialog(): ?React$Element<*> {
-        let { ui: { dialogVisibility } } = this.props
+        const { ui: { dialogVisibility } } = this.props
 
-        let activeEmailType = this.getActiveEmailType()
+        const activeEmailType = this.getActiveEmailType()
 
         if (!activeEmailType) return null
 

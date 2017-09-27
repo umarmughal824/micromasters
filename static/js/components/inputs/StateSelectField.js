@@ -44,7 +44,7 @@ type StateSelectProps = {
 
 export default (props: StateSelectProps) => {
   const { stateKeySet, countryKeySet, profile } = props
-  let country = _.get(profile, countryKeySet)
+  const country = _.get(profile, countryKeySet)
   return (
     <SelectField
       {...props}

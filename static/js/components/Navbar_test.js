@@ -18,11 +18,11 @@ describe("Navbar", () => {
     programs:  PROGRAMS
   }
 
-  let renderNavbar = () => shallow(<Navbar {...props} />)
+  const renderNavbar = () => shallow(<Navbar {...props} />)
 
   it("has a link to the dashboard if the user has no roles", () => {
-    let wrapper = renderNavbar()
-    let hrefs = wrapper.find(Link).map(link => link.props()["to"])
+    const wrapper = renderNavbar()
+    const hrefs = wrapper.find(Link).map(link => link.props()["to"])
     assert.deepEqual(hrefs, [
       "/learner/jane",
       "/learner/jane",
@@ -35,10 +35,10 @@ describe("Navbar", () => {
   })
 
   it("has a link to the learner page and the email page if the user is staff or instructor", () => {
-    for (let role of ["staff", "instructor"]) {
+    for (const role of ["staff", "instructor"]) {
       SETTINGS.roles = [{ role, permissions: [] }]
-      let wrapper = renderNavbar()
-      let hrefs = wrapper.find(Link).map(link => link.props()["to"])
+      const wrapper = renderNavbar()
+      const hrefs = wrapper.find(Link).map(link => link.props()["to"])
       assert.deepEqual(hrefs, [
         "/learner/jane",
         "/learner/jane",
@@ -60,7 +60,7 @@ describe("Navbar", () => {
         program:     1
       }
     ]
-    let wrapper = renderNavbar()
+    const wrapper = renderNavbar()
     assert.equal(
       wrapper.find("a[href='/financial_aid/review/1']").text(),
       "Personal Price Admin"
@@ -68,13 +68,13 @@ describe("Navbar", () => {
   })
 
   it("has a logout link", () => {
-    let wrapper = renderNavbar()
+    const wrapper = renderNavbar()
     assert.equal(wrapper.find("a[href='/logout']").text(), "Logout")
   })
 
   it("should display menu icon when user is logged in", () => {
     SETTINGS.user = { username: "tester" }
-    let wrapper = renderNavbar()
+    const wrapper = renderNavbar()
     assert.isTrue(
       wrapper.find(".menu-icon").exists(),
       "menu icon should be displayed"
@@ -83,7 +83,7 @@ describe("Navbar", () => {
 
   it("should not display menu icon when user is logged out", () => {
     SETTINGS.user = undefined
-    let wrapper = renderNavbar()
+    const wrapper = renderNavbar()
     assert.isFalse(
       wrapper.find(".menu-icon").exists(),
       "menu icon should not be displayed"

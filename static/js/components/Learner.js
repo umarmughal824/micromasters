@@ -68,7 +68,7 @@ export default class Learner extends React.Component {
     } = this.props
 
     if (!R.isEmpty(dashboard) && coupons && !R.isEmpty(prices)) {
-      let calculatedPrices = calculatePrices(
+      const calculatedPrices = calculatePrices(
         dashboard.programs,
         prices.data || [],
         coupons.coupons

@@ -8,7 +8,7 @@ import { USER_PROFILE_RESPONSE } from "../test_constants"
 import { labelSort } from "../util/util"
 
 describe("EducationForm", () => {
-  let renderEducationForm = (props = {}) => {
+  const renderEducationForm = (props = {}) => {
     return shallow(
       <EducationForm
         ui={{
@@ -26,11 +26,11 @@ describe("EducationForm", () => {
   }
 
   it("sorts the fields of study in order", () => {
-    let wrapper = renderEducationForm()
-    let field = wrapper
+    const wrapper = renderEducationForm()
+    const field = wrapper
       .find("SelectField")
       .filterWhere(field => field.props().label === "Field of Study")
-    let options = field.props().options
+    const options = field.props().options
     assert.deepEqual(options, labelSort(options))
   })
 })

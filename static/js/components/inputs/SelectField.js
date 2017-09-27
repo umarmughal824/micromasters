@@ -46,7 +46,7 @@ class SelectField extends React.Component {
 
   onChange = (selection: Option): void => {
     const { profile, updateProfile, keySet, validator } = this.props
-    let clone = _.cloneDeep(profile)
+    const clone = _.cloneDeep(profile)
     _.set(
       clone,
       keySet,
@@ -100,8 +100,8 @@ class SelectField extends React.Component {
     const { keySet, profile, allowCreate, options } = this.props
     const { customOptions } = this.state
 
-    let value = _.get(profile, keySet)
-    let combinedOptions = options.concat(customOptions)
+    const value = _.get(profile, keySet)
+    const combinedOptions = options.concat(customOptions)
     if (
       allowCreate &&
       value &&

@@ -47,8 +47,8 @@ export const profiles = (
   state: Profiles = INITIAL_PROFILES_STATE,
   action: Action<any, null>
 ) => {
-  let patchProfile = newProfile => {
-    let username = action.payload.username
+  const patchProfile = newProfile => {
+    const username = action.payload.username
     return {
       ...state,
       [username]: {
@@ -59,7 +59,7 @@ export const profiles = (
     }
   }
 
-  let getProfile = (): ProfileGetResult | void => {
+  const getProfile = (): ProfileGetResult | void => {
     if (state[action.payload.username] !== undefined) {
       return state[action.payload.username]
     }
@@ -82,7 +82,7 @@ export const profiles = (
       errorInfo: action.payload.errorInfo
     })
   case CLEAR_PROFILE: {
-    let clone = { ...state }
+    const clone = { ...state }
     delete clone[action.payload.username]
     return clone
   }
@@ -136,7 +136,7 @@ export const profiles = (
       return state
     } else {
       let errors = {}
-      let visibility = profile.edit.visibility
+      const visibility = profile.edit.visibility
       if (R.contains(ALL_ERRORS_VISIBLE, visibility)) {
         errors = action.payload.errors
       } else {
@@ -156,7 +156,7 @@ export const profiles = (
     if (profile === undefined || profile.edit === undefined) {
       return state
     } else {
-      let visibility = profile.edit.visibility
+      const visibility = profile.edit.visibility
       return patchProfile({
         edit: {
           ...profile.edit,

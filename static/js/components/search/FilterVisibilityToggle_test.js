@@ -13,9 +13,9 @@ import { makeStrippedHtml } from "../../util/util"
 
 describe("FilterVisibilityToggle", () => {
   let searchKit
-  let checkFilterVisibility = sinon.stub().returns(true)
-  let setFilterVisibility = sinon.stub()
-  let filterName = "a filter"
+  const checkFilterVisibility = sinon.stub().returns(true)
+  const setFilterVisibility = sinon.stub()
+  const filterName = "a filter"
   let sandbox
   let props
 
@@ -33,7 +33,7 @@ describe("FilterVisibilityToggle", () => {
     sandbox.restore()
   })
 
-  let renderToggle = R.curry((renderFunc, props, children) => {
+  const renderToggle = R.curry((renderFunc, props, children) => {
     return renderFunc(
       <SearchkitProvider searchkit={searchKit}>
         <FilterVisibilityToggle {...props}>{children}</FilterVisibilityToggle>
@@ -46,7 +46,10 @@ describe("FilterVisibilityToggle", () => {
 
   it("renders children", () => {
     sandbox.stub(FilterVisibilityToggle.prototype, "getResults").returns(null)
-    let toggle = renderStrippedHtmlToggle(props, <div id="test">Test Text</div>)
+    const toggle = renderStrippedHtmlToggle(
+      props,
+      <div id="test">Test Text</div>
+    )
     assert.include(toggle, "Test Text")
   })
 
@@ -146,7 +149,7 @@ describe("FilterVisibilityToggle", () => {
         }
       }
     })
-    let key = "a.b.c.d.e.f"
+    const key = "a.b.c.d.e.f"
     props.filterName = key
     const wrapper = renderWrappedToggle(props, <div id={key}>Test Text</div>)
     assert.equal(wrapper.find("Icon").length, 1)
@@ -160,7 +163,7 @@ describe("FilterVisibilityToggle", () => {
         }
       }
     })
-    let key = "a.b.c.d.e.f"
+    const key = "a.b.c.d.e.f"
     props.filterName = key
     const wrapper = renderWrappedToggle(props, <div id={key}>Test Text</div>)
     assert.equal(wrapper.find("Icon").length, 0)

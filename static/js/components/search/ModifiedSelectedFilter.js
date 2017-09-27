@@ -15,7 +15,8 @@ export default class ModifiedSelectedFilter extends React.Component {
   countryNameTranslations: Object = makeCountryNameTranslations()
 
   render() {
-    let { labelKey, labelValue, removeFilter, bemBlocks, filterId } = this.props
+    let { labelKey, labelValue } = this.props
+    const { removeFilter, bemBlocks, filterId } = this.props
     if (R.isEmpty(labelKey)) {
       labelKey = SEARCH_FACET_FIELD_LABEL_MAP[filterId]
     } else if (labelKey in SEARCH_FACET_FIELD_LABEL_MAP) {

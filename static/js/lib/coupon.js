@@ -50,20 +50,20 @@ export const calculatePrices = (
   const pricesExclCouponByProgram = new Map()
 
   for (const program of programs) {
-    let priceObj = priceLookup.get(program.id)
+    const priceObj = priceLookup.get(program.id)
     if (!priceObj) {
       // Shouldn't get here, we should only be calling this function
       // if we retrieved all the values from the API already
       throw "Unable to find program to get the price"
     }
-    let originalPrice = priceObj.price
+    const originalPrice = priceObj.price
     // Currently only one coupon per program is allowed, even if that coupon only affects one course
-    let coupon = couponLookup.get(program.id)
-    let priceExclCoupon = {
+    const coupon = couponLookup.get(program.id)
+    const priceExclCoupon = {
       price:  originalPrice,
       coupon: null
     }
-    let priceInclCoupon = coupon
+    const priceInclCoupon = coupon
       ? {
         price: calculateDiscount(
           originalPrice,
@@ -74,14 +74,14 @@ export const calculatePrices = (
       }
       : priceExclCoupon
 
-    let priceExclCouponByProgram = priceExclCoupon
-    let priceInclCouponByProgram = isProgramCoupon(coupon, program)
+    const priceExclCouponByProgram = priceExclCoupon
+    const priceInclCouponByProgram = isProgramCoupon(coupon, program)
       ? priceInclCoupon
       : priceExclCoupon
 
     for (const course of program.courses) {
       // will be either the course coupon price, the program coupon price, or the original price
-      let priceInclCouponByCourse = isCourseCoupon(coupon, course)
+      const priceInclCouponByCourse = isCourseCoupon(coupon, course)
         ? priceInclCoupon
         : priceInclCouponByProgram
 
@@ -162,7 +162,7 @@ export { _makeCouponReason as makeCouponReason }
 import { makeCouponReason } from "./coupon"
 
 export const _couponMessageText = (coupon: Coupon) => {
-  let isDiscount =
+  const isDiscount =
     coupon.amount_type === COUPON_AMOUNT_TYPE_PERCENT_DISCOUNT ||
     coupon.amount_type === COUPON_AMOUNT_TYPE_FIXED_DISCOUNT
 

@@ -40,7 +40,7 @@ class CustomSortingColumnHeaders extends React.Component {
   toggleGradeSort = R.partial(this.toggleSort, [gradeKeys])
 
   sortDirection = (keys: [string, string]) => {
-    let selectedItem = this.getSelectedItem(keys)
+    const selectedItem = this.getSelectedItem(keys)
     if (!selectedItem) {
       return ""
     }

@@ -11,12 +11,12 @@ import {
 import { generateNewWorkHistory, generateNewEducation } from "./util"
 import { HIGH_SCHOOL } from "../constants"
 
-let format = "YYYY-MM"
+const format = "YYYY-MM"
 
 describe("sorting functions", () => {
   describe("momentCompareDesc", () => {
     it("should sort arrays of moment objects in descending order", () => {
-      let moments = [
+      const moments = [
         moment("1987-12", "YYYY-MM"),
         moment("1986-12", "YYYY-MM"),
         moment("1987-09", "YYYY-MM"),
@@ -25,7 +25,7 @@ describe("sorting functions", () => {
         moment("2016-12", "YYYY-MM")
       ]
       moments.sort(momentCompareDesc)
-      let expected = [
+      const expected = [
         "2016-12",
         "2001-04",
         "1987-12",
@@ -38,14 +38,14 @@ describe("sorting functions", () => {
   })
 
   describe("dateOrderDesc", () => {
-    let entries = ["1969-01", "1997-01", "1992-01", "1934-01"].map(year => ({
+    const entries = ["1969-01", "1997-01", "1992-01", "1934-01"].map(year => ({
       end_date: moment(year, format).format(format)
     }))
-    let sorted = dateOrderDesc(
+    const sorted = dateOrderDesc(
       entries.map((entry, index) => [index, entry]),
       "end_date"
     )
-    let expected = ["1997-01", "1992-01", "1969-01", "1934-01"]
+    const expected = ["1997-01", "1992-01", "1969-01", "1934-01"]
 
     it("should sort by date, descending", () => {
       assert.deepEqual(expected, sorted.map(([, entry]) => entry.end_date))
@@ -63,7 +63,7 @@ describe("sorting functions", () => {
   })
 
   describe("workEntriesByDate", () => {
-    let entries = [
+    const entries = [
       ["1962-12", null],
       ["1923-12", null],
       ["2001-01", "2012-03"],
@@ -71,12 +71,12 @@ describe("sorting functions", () => {
       ["1961-08", "1982-01"],
       ["2001-12", null]
     ].map(([start, end]) => {
-      let entry = generateNewWorkHistory()
+      const entry = generateNewWorkHistory()
       entry.start_date = moment(start, format).format(format)
       entry.end_date = end ? moment(end, format).format(format) : null
       return entry
     })
-    let sorted = workEntriesByDate(entries)
+    const sorted = workEntriesByDate(entries)
 
     it('should sort employment entries first by "current" and then by date descending (resume order)', () => {
       // null end date (current position) jobs come first
@@ -88,7 +88,7 @@ describe("sorting functions", () => {
         .forEach(([, entry]) => assert.isNotNull(entry.end_date))
 
       // check overall date order
-      let expectedDateOrder = [
+      const expectedDateOrder = [
         ["2001-12", null],
         ["1962-12", null],
         ["1923-12", null],
@@ -96,7 +96,7 @@ describe("sorting functions", () => {
         ["1961-08", "1982-01"],
         ["1962-12", "1963-11"]
       ]
-      let actualDateOrder = sorted.map(([, entry]) => [
+      const actualDateOrder = sorted.map(([, entry]) => [
         entry.start_date,
         entry.end_date
       ])
@@ -111,7 +111,7 @@ describe("sorting functions", () => {
   })
 
   describe("educationEntriesByDate", () => {
-    let entries = [
+    const entries = [
       "1979-12",
       "1923-12",
       "2001-01",
@@ -119,13 +119,13 @@ describe("sorting functions", () => {
       "1961-08",
       "2001-12"
     ].map(date => {
-      let entry = generateNewEducation(HIGH_SCHOOL)
+      const entry = generateNewEducation(HIGH_SCHOOL)
       entry.graduation_date = moment(date, format).format(format)
       return entry
     })
-    let sorted = educationEntriesByDate(entries)
+    const sorted = educationEntriesByDate(entries)
 
-    let expectation = [
+    const expectation = [
       "2001-12",
       "2001-01",
       "1979-12",

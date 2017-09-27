@@ -60,7 +60,7 @@ export default class CourseAction extends React.Component {
   }
 
   redirectToOrderSummary(run: CourseRun): void {
-    let { hasFinancialAid, checkout } = this.props
+    const { hasFinancialAid, checkout } = this.props
     if (hasFinancialAid) {
       const url = `/order_summary/?course_key=${encodeURIComponent(
         run.course_id

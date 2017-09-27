@@ -40,7 +40,7 @@ describe("order receipt reducer", () => {
   })
 
   it("should let you set the initial time, and the default is a valid time", () => {
-    let initialTime = store.getState().orderReceipt.initialTime
+    const initialTime = store.getState().orderReceipt.initialTime
     assert(moment(initialTime).isValid())
 
     assertReducerResultState(

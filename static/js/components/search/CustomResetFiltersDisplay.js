@@ -13,7 +13,7 @@ export default class CustomResetFiltersDisplay extends SearchkitComponent {
   render() {
     const { bemBlock, hasFilters, resetFilters, clearAllLabel } = this.props
 
-    let hasFiltersOtherThanSelectedProgram =
+    const hasFiltersOtherThanSelectedProgram =
       this.getQuery() &&
       this.getQuery().index &&
       this.getQuery().index.filters &&

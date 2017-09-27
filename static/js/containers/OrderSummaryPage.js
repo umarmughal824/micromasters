@@ -107,8 +107,8 @@ class OrderSummaryPage extends React.Component {
       location: { query }
     } = this.props
     let orderSummaryContent, coursePrice
-    let courseKey = query.course_key
-    let [courseRun, course, program] = findCourseRun(
+    const courseKey = query.course_key
+    const [courseRun, course, program] = findCourseRun(
       dashboard.programs,
       run => run !== null && run.course_id === courseKey
     )

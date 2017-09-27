@@ -81,7 +81,7 @@ export function makeProfileProgressDisplay(active: ?string) {
 
   const elements = []
 
-  let activeTab = [...PROFILE_STEP_LABELS.keys()].findIndex(k => k === active)
+  const activeTab = [...PROFILE_STEP_LABELS.keys()].findIndex(k => k === active)
   ;[...PROFILE_STEP_LABELS.entries()].forEach(([, label], i) => {
     let colorScheme
     if (i < activeTab) {
@@ -95,7 +95,7 @@ export function makeProfileProgressDisplay(active: ?string) {
     const circleX = paddingX + radius + circleDistance * i
     const nextCircleX = paddingX + radius + circleDistance * (i + 1)
 
-    let circleLabel = () => {
+    const circleLabel = () => {
       if (i < activeTab) {
         return (
           <svg
@@ -248,7 +248,7 @@ export const filterPositiveInt = (value: ?string | number): number | void => {
  */
 export function makeStrippedHtml(textOrElement: any): string {
   if (React.isValidElement(textOrElement)) {
-    let container = document.createElement("div")
+    const container = document.createElement("div")
     ReactDOM.render(textOrElement, container)
     return striptags(container.innerHTML)
   } else {
@@ -294,12 +294,13 @@ export function getLocation(
   profile: Profile,
   showState: boolean = true
 ): string {
-  let { country, state_or_territory, city } = profile
+  const { country, state_or_territory } = profile
+  let { city } = profile
   let subCountryLocation, countryLocation
   city = city ? `${city}, ` : ""
 
   if (country === "US") {
-    let state = state_or_territory.replace(/^\D{2}-/, "")
+    const state = state_or_territory.replace(/^\D{2}-/, "")
     subCountryLocation = showState ? `${city}${state}, ` : city
     countryLocation = "US"
   } else {
@@ -313,11 +314,11 @@ export function getLocation(
  * returns the user's most recent (or current) employer
 */
 export function getEmployer(profile: Profile): Maybe<string> {
-  let entries = workEntriesByDate(profile.work_history)
+  const entries = workEntriesByDate(profile.work_history)
   if (_.isEmpty(entries)) {
     return Nothing
   }
-  let [, entry] = entries[0]
+  const [, entry] = entries[0]
   if (entry.company_name) {
     return Just(entry.company_name)
   }
@@ -326,7 +327,7 @@ export function getEmployer(profile: Profile): Maybe<string> {
 
 export function calculateDegreeInclusions(profile: Profile) {
   let highestLevelFound = false
-  let inclusions = {}
+  const inclusions = {}
   for (const { value } of EDUCATION_LEVELS) {
     inclusions[value] = highestLevelFound ? false : true
     if (value === profile.edx_level_of_education) {
@@ -394,7 +395,7 @@ export function createForm(
   form.setAttribute("method", "post")
   form.setAttribute("class", "cybersource-payload")
 
-  for (let key: string of Object.keys(payload)) {
+  for (const key: string of Object.keys(payload)) {
     const value = payload[key]
     const input = document.createElement("input")
     input.setAttribute("name", key)
@@ -432,7 +433,7 @@ export function programCourseInfo(program: Program): Object {
 
   if (program.courses) {
     totalCourses = program.courses.length
-    let passedCourses = program.courses.filter(
+    const passedCourses = program.courses.filter(
       // returns true if any course run has a `status` property set to STATUS_PASSED.
       // $FlowFixMe: Flow thinks second arg is not a valid predicate
       course => _.some(course.runs, ["status", STATUS_PASSED])
@@ -454,7 +455,7 @@ export function findCourseRun(
     program: Program | null
   ) => boolean
 ): [CourseRun | null, Course | null, Program | null] {
-  for (let program of programs) {
+  for (const program of programs) {
     try {
       if (selector(null, null, program)) {
         return [null, null, program]
@@ -497,12 +498,12 @@ export function highlight(text: string, highlightPhrase: ?string) {
     return text
   }
 
-  let filteredPhrase = removeDiacritics(highlightPhrase.toLowerCase())
-  let filteredText = removeDiacritics(text.toLowerCase())
+  const filteredPhrase = removeDiacritics(highlightPhrase.toLowerCase())
+  const filteredText = removeDiacritics(text.toLowerCase())
 
   let startPosition = 0,
     endPosition
-  let pieces = []
+  const pieces = []
   while (
     (endPosition = filteredText.indexOf(filteredPhrase, startPosition)) !== -1
   ) {
@@ -524,9 +525,9 @@ export function highlight(text: string, highlightPhrase: ?string) {
  * Return first, last, preferred_name names if available else username
  */
 export function getUserDisplayName(profile: Profile): string {
-  let first = profile.first_name || profile.username
-  let last = profile.last_name || ""
-  let preferred_name =
+  const first = profile.first_name || profile.username
+  const last = profile.last_name || ""
+  const preferred_name =
     profile.preferred_name && profile.preferred_name !== first
       ? ` (${profile.preferred_name})`
       : ""
@@ -540,7 +541,7 @@ export function getUserDisplayName(profile: Profile): string {
  */
 const intersperse = R.curry((elementFunc: Function, arr: Array<any>) => {
   let i = 0
-  let addGeneratedElement = el => [el, elementFunc(i++)]
+  const addGeneratedElement = el => [el, elementFunc(i++)]
   return R.dropLast(1, R.chain(addGeneratedElement, arr))
 })
 

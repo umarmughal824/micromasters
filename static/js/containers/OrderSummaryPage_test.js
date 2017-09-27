@@ -19,7 +19,7 @@ describe("OrderSummaryPage", () => {
   beforeEach(() => {
     helper = new IntegrationTestHelper()
     renderComponent = helper.renderComponent.bind(helper)
-    let course = findCourse(
+    const course = findCourse(
       course =>
         course.runs.length > 0 && course.runs[0].status === STATUS_OFFERED
     )
@@ -52,8 +52,8 @@ describe("OrderSummaryPage", () => {
 
   describe("checkout", () => {
     it("redirects to edX when the checkout API tells us to", () => {
-      let promise = Promise.resolve(EDX_CHECKOUT_RESPONSE)
-      let checkoutStub = helper.sandbox
+      const promise = Promise.resolve(EDX_CHECKOUT_RESPONSE)
+      const checkoutStub = helper.sandbox
         .stub(actions, "checkout")
         .returns(() => promise)
 
@@ -76,15 +76,15 @@ describe("OrderSummaryPage", () => {
     })
 
     it("constructs a form to be sent to Cybersource and submits it", () => {
-      let promise = Promise.resolve(CYBERSOURCE_CHECKOUT_RESPONSE)
-      let checkoutStub = helper.sandbox
+      const promise = Promise.resolve(CYBERSOURCE_CHECKOUT_RESPONSE)
+      const checkoutStub = helper.sandbox
         .stub(actions, "checkout")
         .returns(() => promise)
-      let submitStub = helper.sandbox.stub()
-      let fakeForm = document.createElement("form")
+      const submitStub = helper.sandbox.stub()
+      const fakeForm = document.createElement("form")
       fakeForm.setAttribute("class", "fake-form")
       fakeForm.submit = submitStub
-      let createFormStub = helper.sandbox
+      const createFormStub = helper.sandbox
         .stub(util, "createForm")
         .returns(fakeForm)
 

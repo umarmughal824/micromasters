@@ -49,11 +49,11 @@ describe("ErrorMessage", () => {
   contactExpectation = contactExpectation.replace(/\s\s+/g, " ")
 
   describe("unit tests", () => {
-    let renderErrorMessage = props => {
+    const renderErrorMessage = props => {
       return makeStrippedHtml(<ErrorMessage {...props} />)
     }
-    let codeAttributes = [["error_code", "500"], ["errorStatusCode", 404]]
-    let messageAttributes = [
+    const codeAttributes = [["error_code", "500"], ["errorStatusCode", 404]]
+    const messageAttributes = [
       ["user_message", "A message"],
       ["detail", "Some details"]
     ]
@@ -61,13 +61,13 @@ describe("ErrorMessage", () => {
     codeAttributes.forEach(([codeAttribute, code]) => {
       messageAttributes.forEach(([msgAttribute, message]) => {
         it(`should render an error and message on the ${codeAttribute} and ${msgAttribute} attributes`, () => {
-          let that = {
+          const that = {
             errorInfo: {
               [codeAttribute]: code,
               [msgAttribute]:  message
             }
           }
-          let errorMessage = renderErrorMessage(that)
+          const errorMessage = renderErrorMessage(that)
           assert.include(errorMessage, String(code))
           assert.include(errorMessage, errorString)
           assert.include(errorMessage, contactExpectation)
@@ -81,8 +81,8 @@ describe("ErrorMessage", () => {
     let renderComponent, helper, patchUserProfileStub, listenForActions
 
     const confirmErrorMessage = (div, codeMessage, extraInfo = "") => {
-      let alert = div.querySelector(".alert-message")
-      let messages = alert.getElementsByTagName("p")
+      const alert = div.querySelector(".alert-message")
+      const messages = alert.getElementsByTagName("p")
       assert.deepEqual(messages[0].textContent, codeMessage)
       assert.deepEqual(messages[1].textContent, extraInfo)
       assert.deepEqual(messages[2].textContent, contactExpectation)
@@ -123,7 +123,7 @@ describe("ErrorMessage", () => {
       })
 
       it("the error from the backend does not need to be complete", () => {
-        let response = _.cloneDeep(ERROR_RESPONSE)
+        const response = _.cloneDeep(ERROR_RESPONSE)
         delete response.user_message
         helper.dashboardStub.returns(Promise.reject(response))
 
@@ -157,14 +157,14 @@ describe("ErrorMessage", () => {
           "/dashboard",
           DASHBOARD_SUCCESS_ACTIONS
         ).then(([, div]) => {
-          let message = div.getElementsByClassName("alert-message")[0]
+          const message = div.getElementsByClassName("alert-message")[0]
           assert.equal(message, undefined)
         })
       })
 
       it("shows nothing if there are no programs", () => {
         helper.dashboardStub.returns(Promise.resolve([]))
-        let expectedActions = DASHBOARD_SUCCESS_NO_LEARNERS_ACTIONS.filter(
+        const expectedActions = DASHBOARD_SUCCESS_NO_LEARNERS_ACTIONS.filter(
           actionType =>
             actionType !== actions.discussionsFrontpage.get.successType
         )
@@ -173,14 +173,14 @@ describe("ErrorMessage", () => {
           "/dashboard",
           expectedActions
         ).then(([wrapper]) => {
-          let message = wrapper.find(".page-content").text()
+          const message = wrapper.find(".page-content").text()
           assert.equal(message, "")
         })
       })
 
       it("shows nothing if there is no matching current program enrollment", () => {
         helper.programsGetStub.returns(Promise.resolve([]))
-        let expectedActions = DASHBOARD_SUCCESS_NO_LEARNERS_ACTIONS.filter(
+        const expectedActions = DASHBOARD_SUCCESS_NO_LEARNERS_ACTIONS.filter(
           actionType =>
             actionType !== actions.discussionsFrontpage.get.successType
         )
@@ -189,7 +189,7 @@ describe("ErrorMessage", () => {
           "/dashboard",
           expectedActions
         ).then(([wrapper]) => {
-          let message = wrapper.find(".page-content").text()
+          const message = wrapper.find(".page-content").text()
           assert.equal(message, "")
         })
       })
@@ -220,14 +220,14 @@ describe("ErrorMessage", () => {
 
     describe("user page", () => {
       it("should show an error for profile GET", () => {
-        let fourOhFour = {
+        const fourOhFour = {
           errorStatusCode: 404,
           detail:          "some error messsage"
         }
         helper.profileGetStub
           .withArgs(SETTINGS.user.username)
           .returns(Promise.reject(fourOhFour))
-        let userPageActions = [
+        const userPageActions = [
           REQUEST_GET_USER_PROFILE,
           REQUEST_GET_USER_PROFILE,
           RECEIVE_GET_USER_PROFILE_FAILURE,
@@ -252,7 +252,7 @@ describe("ErrorMessage", () => {
 
       it("should show an error for profile PATCH", () => {
         patchUserProfileStub.returns(Promise.reject({ errorStatusCode: 500 }))
-        let learnerPageActions = [
+        const learnerPageActions = [
           REQUEST_GET_PROGRAM_ENROLLMENTS,
           RECEIVE_GET_PROGRAM_ENROLLMENTS_SUCCESS,
           REQUEST_GET_USER_PROFILE,
@@ -267,7 +267,7 @@ describe("ErrorMessage", () => {
           `/learner/${SETTINGS.user.username}`,
           learnerPageActions
         ).then(([, div]) => {
-          let editButton = div
+          const editButton = div
             .querySelector(".mdl-card")
             .querySelector(".mdl-button--icon")
           listenForActions(
@@ -283,8 +283,8 @@ describe("ErrorMessage", () => {
             ],
             () => {
               ReactTestUtils.Simulate.click(editButton)
-              let dialog = document.querySelector(".personal-dialog")
-              let save = dialog.querySelector(".save-button")
+              const dialog = document.querySelector(".personal-dialog")
+              const save = dialog.querySelector(".save-button")
               ReactTestUtils.Simulate.click(save)
             }
           ).then(() => {
@@ -299,7 +299,7 @@ describe("ErrorMessage", () => {
         helper.programsGetStub.returns(Promise.resolve([]))
 
         return renderComponent("/learners").then(([wrapper]) => {
-          let message = wrapper.find(".page-content").text()
+          const message = wrapper.find(".page-content").text()
           assert.equal(message, "")
         })
       })

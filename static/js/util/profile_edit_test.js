@@ -56,7 +56,7 @@ describe("Profile Editing utility functions", () => {
 
   describe("Bound radio group", () => {
     let radioGroup, labelSpan, errorSpan
-    let privacyOptions = [
+    const privacyOptions = [
       {
         value:  "public",
         label:  "Public to the world",
@@ -77,8 +77,8 @@ describe("Profile Editing utility functions", () => {
       }
     ]
 
-    let rerender = () => {
-      let component = boundRadioGroupField.call(
+    const rerender = () => {
+      const component = boundRadioGroupField.call(
         that,
         ["account_privacy"],
         "Privacy level",
@@ -141,7 +141,7 @@ describe("Profile Editing utility functions", () => {
     })
 
     it("should use an empty string instead of undefined for the value prop", () => {
-      let blankTextField = boundTextField.call(that, ["missing"], "Missing")
+      const blankTextField = boundTextField.call(that, ["missing"], "Missing")
       assert.equal("", blankTextField.props.value)
     })
 
@@ -159,7 +159,7 @@ describe("Profile Editing utility functions", () => {
 
   describe("Bound date field", () => {
     let validateYearSpy, validateMonthSpy, validateDaySpy
-    let renderDateField = allowFutureYear => {
+    const renderDateField = allowFutureYear => {
       return shallow(
         boundDateField.call(
           that,
@@ -176,29 +176,29 @@ describe("Profile Editing utility functions", () => {
       validateDaySpy = sandbox.spy(dateValidation, "validateDay")
     })
 
-    let _getInputProps = R.curry((idText, wrapper) => {
+    const _getInputProps = R.curry((idText, wrapper) => {
       return wrapper
         .find("TextField")
         .filterWhere(node => node.props().floatingLabelText === idText)
         .props()
     })
 
-    let getMonthProps = _getInputProps("Month")
-    let getYearProps = _getInputProps("Year")
-    let getDayProps = _getInputProps("Day")
+    const getMonthProps = _getInputProps("Month")
+    const getYearProps = _getInputProps("Year")
+    const getDayProps = _getInputProps("Day")
 
-    let currentYear = moment().year()
-    let cutoff = currentYear - YEAR_VALIDATION_CUTOFF
-    let tooOld = cutoff - 5
-    let tooYoung = currentYear + 5
+    const currentYear = moment().year()
+    const cutoff = currentYear - YEAR_VALIDATION_CUTOFF
+    const tooOld = cutoff - 5
+    const tooYoung = currentYear + 5
 
     it("has proper props for an invalid or missing value", () => {
-      for (let dateOfBirth of ["", {}, null, undefined]) {
+      for (const dateOfBirth of ["", {}, null, undefined]) {
         that.props.profile.date_of_birth = dateOfBirth
-        let wrapper = renderDateField(false)
-        let monthProps = getMonthProps(wrapper)
-        let dayProps = getDayProps(wrapper)
-        let yearProps = getYearProps(wrapper)
+        const wrapper = renderDateField(false)
+        const monthProps = getMonthProps(wrapper)
+        const dayProps = getDayProps(wrapper)
+        const yearProps = getYearProps(wrapper)
 
         assert.equal(monthProps.floatingLabelText, "Month")
         assert.equal(monthProps.hintText, "MM")
@@ -215,10 +215,10 @@ describe("Profile Editing utility functions", () => {
 
     it("has proper props for a defined valid value", () => {
       that.props.profile.date_of_birth = "1985-12-31"
-      let wrapper = renderDateField(false)
-      let monthProps = getMonthProps(wrapper)
-      let dayProps = getDayProps(wrapper)
-      let yearProps = getYearProps(wrapper)
+      const wrapper = renderDateField(false)
+      const monthProps = getMonthProps(wrapper)
+      const dayProps = getDayProps(wrapper)
+      const yearProps = getYearProps(wrapper)
 
       assert.equal(monthProps.floatingLabelText, "Month")
       assert.equal(monthProps.hintText, "MM")
@@ -234,9 +234,9 @@ describe("Profile Editing utility functions", () => {
 
     it("has proper props if we set omitDay to true", () => {
       that.props.profile.date_of_birth = "1985-12-31"
-      let wrapper = renderDateField(true)
-      let monthProps = getMonthProps(wrapper)
-      let yearProps = getYearProps(wrapper)
+      const wrapper = renderDateField(true)
+      const monthProps = getMonthProps(wrapper)
+      const yearProps = getYearProps(wrapper)
 
       assert.equal(monthProps.floatingLabelText, "Month")
       assert.equal(monthProps.hintText, "MM")
@@ -249,17 +249,17 @@ describe("Profile Editing utility functions", () => {
 
     it("left pads month and day values when not editing", () => {
       that.props.profile.date_of_birth = "1917-01-07"
-      let wrapper = renderDateField(false)
-      let monthProps = getMonthProps(wrapper)
-      let dayProps = getDayProps(wrapper)
+      const wrapper = renderDateField(false)
+      const monthProps = getMonthProps(wrapper)
+      const dayProps = getDayProps(wrapper)
       assert.equal(monthProps.value, "01")
       assert.equal(dayProps.value, "07")
     })
 
     it("does not left pad month and day values when editing is in progress", () => {
       that.props.profile.date_of_birth = "1917-01-07"
-      let wrapper = renderDateField(false)
-      let monthProps = getMonthProps(wrapper)
+      const wrapper = renderDateField(false)
+      const monthProps = getMonthProps(wrapper)
       monthProps.onChange({ target: { value: "2" } })
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
         month: "2",
@@ -270,8 +270,8 @@ describe("Profile Editing utility functions", () => {
 
     it("rejects non-numerical input for the month field", () => {
       that.props.profile.date_of_birth = "1917-11-07"
-      let wrapper = renderDateField(false)
-      let monthProps = getMonthProps(wrapper)
+      const wrapper = renderDateField(false)
+      const monthProps = getMonthProps(wrapper)
       monthProps.onChange({ target: { value: "text" } })
       assert.deepEqual(that.props.profile.date_of_birth, null)
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
@@ -283,16 +283,16 @@ describe("Profile Editing utility functions", () => {
 
     it("accepts numerical input for the month field", () => {
       that.props.profile.date_of_birth = "1917-11-07"
-      let wrapper = renderDateField(false)
-      let monthProps = getMonthProps(wrapper)
+      const wrapper = renderDateField(false)
+      const monthProps = getMonthProps(wrapper)
       monthProps.onChange({ target: { value: "08" } })
       assert.deepEqual(that.props.profile.date_of_birth, "1917-08-07")
     })
 
     it("rejects non-numerical input for the year field", () => {
       that.props.profile.date_of_birth = "1917-11-07"
-      let wrapper = renderDateField(false)
-      let yearProps = getYearProps(wrapper)
+      const wrapper = renderDateField(false)
+      const yearProps = getYearProps(wrapper)
       yearProps.onChange({ target: { value: "text" } })
       assert.deepEqual(that.props.profile.date_of_birth, null)
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
@@ -304,16 +304,16 @@ describe("Profile Editing utility functions", () => {
 
     it("accepts numerical input for the year field", () => {
       that.props.profile.date_of_birth = "1917-11-07"
-      let wrapper = renderDateField(false)
-      let yearProps = getYearProps(wrapper)
+      const wrapper = renderDateField(false)
+      const yearProps = getYearProps(wrapper)
       yearProps.onChange({ target: { value: "1918" } })
       assert.deepEqual(that.props.profile.date_of_birth, "1918-11-07")
     })
 
     it("only accepts inputs that are valid months, converting when necessary", () => {
       that.props.profile.date_of_birth = "1917-11-07"
-      let wrapper = renderDateField(false)
-      let monthProps = getMonthProps(wrapper)
+      const wrapper = renderDateField(false)
+      const monthProps = getMonthProps(wrapper)
       monthProps.onChange({ target: { value: "233" } })
       assert.deepEqual(that.props.profile.date_of_birth, "1917-12-07")
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
@@ -326,8 +326,8 @@ describe("Profile Editing utility functions", () => {
     describe("year rounding", () => {
       it("only accepts years later than 120 years ago", () => {
         that.props.profile.date_of_birth = "1917-11-07"
-        let wrapper = renderDateField(false)
-        let yearProps = getYearProps(wrapper)
+        const wrapper = renderDateField(false)
+        const yearProps = getYearProps(wrapper)
         yearProps.onChange({ target: { value: tooOld } })
         assert.deepEqual(that.props.profile.date_of_birth, `${cutoff}-11-07`)
         assert.deepEqual(that.props.profile.date_of_birth_edit, {
@@ -339,8 +339,8 @@ describe("Profile Editing utility functions", () => {
 
       it("only accepts years earlier or equal to this year", () => {
         that.props.profile.date_of_birth = "1917-11-07"
-        let wrapper = renderDateField(false)
-        let yearProps = getYearProps(wrapper)
+        const wrapper = renderDateField(false)
+        const yearProps = getYearProps(wrapper)
         yearProps.onChange({ target: { value: tooYoung } })
         assert.deepEqual(
           that.props.profile.date_of_birth,
@@ -355,8 +355,8 @@ describe("Profile Editing utility functions", () => {
     })
 
     it("updates the day edit value when the day TextField onChange is used", () => {
-      let wrapper = renderDateField(false)
-      let dayProps = getDayProps(wrapper)
+      const wrapper = renderDateField(false)
+      const dayProps = getDayProps(wrapper)
       dayProps.onChange({ target: { value: "12" } })
 
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
@@ -367,8 +367,8 @@ describe("Profile Editing utility functions", () => {
     })
 
     it("updates the month edit value when the month TextField onChange is used", () => {
-      let wrapper = renderDateField(false)
-      let monthProps = getMonthProps(wrapper)
+      const wrapper = renderDateField(false)
+      const monthProps = getMonthProps(wrapper)
       monthProps.onChange({ target: { value: "12" } })
 
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
@@ -379,8 +379,8 @@ describe("Profile Editing utility functions", () => {
     })
 
     it("updates the year edit value when the year TextField onChange is used", () => {
-      let wrapper = renderDateField(false)
-      let yearProps = getYearProps(wrapper)
+      const wrapper = renderDateField(false)
+      const yearProps = getYearProps(wrapper)
       yearProps.onChange({ target: { value: "1992" } })
 
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
@@ -396,8 +396,8 @@ describe("Profile Editing utility functions", () => {
         month: "8",
         year:  "1991"
       }
-      let wrapper = renderDateField(false)
-      let dayProps = getDayProps(wrapper)
+      const wrapper = renderDateField(false)
+      const dayProps = getDayProps(wrapper)
       dayProps.onChange({ target: { value: "11" } })
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
         day:   "11",
@@ -412,8 +412,8 @@ describe("Profile Editing utility functions", () => {
         month: "11",
         year:  "1965"
       }
-      let wrapper = renderDateField(false)
-      let monthProps = getMonthProps(wrapper)
+      const wrapper = renderDateField(false)
+      const monthProps = getMonthProps(wrapper)
       monthProps.onChange({ target: { value: "8" } })
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
         day:   "09",
@@ -428,8 +428,8 @@ describe("Profile Editing utility functions", () => {
         month: "11",
         year:  "1965"
       }
-      let wrapper = renderDateField(false)
-      let yearProps = getYearProps(wrapper)
+      const wrapper = renderDateField(false)
+      const yearProps = getYearProps(wrapper)
       yearProps.onChange({ target: { value: "1991" } })
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
         day:   "09",
@@ -470,7 +470,7 @@ describe("Profile Editing utility functions", () => {
 
     it("stores text in date_of_birth_edit if it's not a valid date", () => {
       that.props.profile.date_of_birth = `${tooYoung}-02-28`
-      let wrapper = renderDateField(false)
+      const wrapper = renderDateField(false)
       getMonthProps(wrapper).onChange({ target: { value: "MONTH" } })
       renderDateField(false)
 
@@ -499,19 +499,19 @@ describe("Profile Editing utility functions", () => {
     })
 
     it("uses validateDay for validation", () => {
-      let wrapper = renderDateField(false)
+      const wrapper = renderDateField(false)
       getDayProps(wrapper).onChange({ target: { value: "a day" } })
       assert(validateDaySpy.calledWith("a day"))
     })
 
     it("uses validateMonth for validation", () => {
-      let wrapper = renderDateField(false)
+      const wrapper = renderDateField(false)
       getMonthProps(wrapper).onChange({ target: { value: "a month" } })
       assert(validateMonthSpy.calledWith("a month"))
     })
 
     it("uses validateYear for validation", () => {
-      let wrapper = renderDateField(false)
+      const wrapper = renderDateField(false)
       getYearProps(wrapper).onChange({ target: { value: "a year" } })
       assert(validateYearSpy.calledWith("a year"))
     })
@@ -519,7 +519,7 @@ describe("Profile Editing utility functions", () => {
     it("uses moment.js for validation", () => {
       renderDateField(false)
       that.props.profile.date_of_birth = `${tooYoung}-02-28`
-      let wrapper = renderDateField(false)
+      const wrapper = renderDateField(false)
       getDayProps(wrapper).onChange({ target: { value: "31" } })
       renderDateField(false)
 
@@ -534,7 +534,7 @@ describe("Profile Editing utility functions", () => {
 
     it("treats an empty date string as deleting the format text but not edit data", () => {
       that.props.profile.date_of_birth = `${tooYoung}-02-28`
-      let wrapper = renderDateField(false)
+      const wrapper = renderDateField(false)
       getDayProps(wrapper).onChange({ target: { value: "" } })
       assert.deepEqual(that.props.profile.date_of_birth, null)
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
@@ -546,7 +546,7 @@ describe("Profile Editing utility functions", () => {
 
     it("treats an empty month string as deleting the format text but not edit data", () => {
       that.props.profile.date_of_birth = `${tooYoung}-02-28`
-      let wrapper = renderDateField(false)
+      const wrapper = renderDateField(false)
       getMonthProps(wrapper).onChange({ target: { value: "" } })
       assert.deepEqual(that.props.profile.date_of_birth, null)
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
@@ -558,7 +558,7 @@ describe("Profile Editing utility functions", () => {
 
     it("treats an empty year string as deleting the format text but not edit data", () => {
       that.props.profile.date_of_birth = `${tooYoung}-02-28`
-      let wrapper = renderDateField(false)
+      const wrapper = renderDateField(false)
       getYearProps(wrapper).onChange({ target: { value: "" } })
       assert.deepEqual(that.props.profile.date_of_birth, null)
       assert.deepEqual(that.props.profile.date_of_birth_edit, {
@@ -569,7 +569,7 @@ describe("Profile Editing utility functions", () => {
     })
 
     it("send a form field event to Google Analytics when onBlur is called", () => {
-      let wrapper = renderDateField()
+      const wrapper = renderDateField()
       getYearProps(wrapper).onBlur()
       assert(
         gaEvent.calledWith({
@@ -584,7 +584,7 @@ describe("Profile Editing utility functions", () => {
   describe("boundTelephoneInput", () => {
     let input, telephoneInput, telephoneSpan
 
-    let rerender = () => {
+    const rerender = () => {
       input = boundTelephoneInput.call(that, ["phone_number"])
       ;[telephoneInput, telephoneSpan] = input.props.children
     }
@@ -594,7 +594,7 @@ describe("Profile Editing utility functions", () => {
     })
 
     it("should correctly set props on itself", () => {
-      let { value, onChange, onBlur, flagsImagePath } = telephoneInput.props
+      const { value, onChange, onBlur, flagsImagePath } = telephoneInput.props
       assert.equal(value, USER_PROFILE_RESPONSE.phone_number)
       assert.isFunction(onChange)
       assert.isFunction(onBlur)
@@ -615,8 +615,8 @@ describe("Profile Editing utility functions", () => {
     it("should render validation errors", () => {
       that.props.errors.phone_number = "an error"
       rerender()
-      let { className } = input.props
-      let { children } = telephoneSpan.props
+      const { className } = input.props
+      const { children } = telephoneSpan.props
       assert.equal(children, "an error")
       assert.equal(className, "bound-telephone invalid-input")
     })
@@ -624,7 +624,7 @@ describe("Profile Editing utility functions", () => {
     it("should render without a value", () => {
       that.props.profile.phone_number = null
       rerender()
-      let { value } = telephoneInput.props
+      const { value } = telephoneInput.props
       assert.equal(value, "")
     })
 
@@ -643,10 +643,10 @@ describe("Profile Editing utility functions", () => {
     })
 
     it("saves with finalStep as true", () => {
-      let func = () => null
-      let ret = saveProfileStep.call(that, func, true)
+      const func = () => null
+      const ret = saveProfileStep.call(that, func, true)
 
-      let clone = {
+      const clone = {
         ...that.props.profile,
         filled_out:  true,
         email_optin: true
@@ -659,28 +659,28 @@ describe("Profile Editing utility functions", () => {
 
   describe("shouldRenderRomanizedFields", () => {
     it("when first and last names are empty", () => {
-      let profile = _.cloneDeep(USER_PROFILE_RESPONSE)
+      const profile = _.cloneDeep(USER_PROFILE_RESPONSE)
       profile.first_name = ""
       profile.last_name = ""
       assert.isNotTrue(shouldRenderRomanizedFields(profile))
     })
 
     it("when first name is non cp-1252", () => {
-      let profile = _.cloneDeep(USER_PROFILE_RESPONSE)
+      const profile = _.cloneDeep(USER_PROFILE_RESPONSE)
       profile.first_name = "عامر"
       profile.last_name = "example"
       assert.isTrue(shouldRenderRomanizedFields(profile))
     })
 
     it("when last name is non cp-1252", () => {
-      let profile = _.cloneDeep(USER_PROFILE_RESPONSE)
+      const profile = _.cloneDeep(USER_PROFILE_RESPONSE)
       profile.first_name = "example"
       profile.last_name = "عامر"
       assert.isTrue(shouldRenderRomanizedFields(profile))
     })
 
     it("when first and last names are valid cp-1252", () => {
-      let profile = _.cloneDeep(USER_PROFILE_RESPONSE)
+      const profile = _.cloneDeep(USER_PROFILE_RESPONSE)
       profile.first_name = "ââio"
       profile.last_name = "khan"
       assert.isNotTrue(shouldRenderRomanizedFields(profile))

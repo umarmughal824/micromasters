@@ -29,7 +29,7 @@ import AutomaticEmailPage from "../containers/AutomaticEmailPage"
 export function findCourse(
   courseSelector: (course: ?Course, program: ?Program) => boolean
 ): Course {
-  let [
+  const [
     ,
     course
   ] = findCourseRun(
@@ -64,18 +64,18 @@ export function generateCourseFromExisting(
   desiredRuns: number,
   runToCopy: ?CourseRun
 ) {
-  let course = _.cloneDeep(courseToClone)
-  let currentRunCount = course.runs.length
+  const course = _.cloneDeep(courseToClone)
+  const currentRunCount = course.runs.length
   if (currentRunCount < desiredRuns) {
-    let courseRun = currentRunCount === 0 ? runToCopy : course.runs[0]
+    const courseRun = currentRunCount === 0 ? runToCopy : course.runs[0]
     if (!courseRun) {
       throw new Error("Need a course run to copy.")
     }
-    let runsNeeded = desiredRuns - currentRunCount
+    const runsNeeded = desiredRuns - currentRunCount
     let idMax = _.max(_.map(course.runs, run => run.id)) || 0
     let positionMax = _.max(_.map(course.runs, run => run.position)) || 0
     for (let i = 0; i < runsNeeded; i++) {
-      let newCourseRun = _.cloneDeep(courseRun)
+      const newCourseRun = _.cloneDeep(courseRun)
       positionMax++
       idMax++
       Object.assign(newCourseRun, {
@@ -123,7 +123,7 @@ export const modifyTextField = (
 
 export const modifySelectField = (field: HTMLElement, text: string): void => {
   // let input = field.querySelector('.Select-input').querySelector('input');
-  let input = getEl(getEl(field, ".Select-input"), "input")
+  const input = getEl(getEl(field, ".Select-input"), "input")
   ReactTestUtils.Simulate.focus(input)
   ReactTestUtils.Simulate.change(input, { target: { value: text } })
   ReactTestUtils.Simulate.keyDown(input, { keyCode: 9, key: "Tab" })
@@ -133,7 +133,7 @@ export const modifyWrapperSelectField = (
   wrapper: Object,
   text: string
 ): void => {
-  let input = wrapper.find("input")
+  const input = wrapper.find("input")
   input.simulate("focus")
   input.simulate("change", { target: { value: text } })
   input.simulate("keyDown", { keyCode: 9, key: "Tab" })
@@ -141,7 +141,7 @@ export const modifyWrapperSelectField = (
 
 export const clearSelectField = (field: HTMLElement): void => {
   // let input = field.querySelector('.Select-input').querySelector('input');
-  let input = getEl(getEl(field, ".Select-input"), "input")
+  const input = getEl(getEl(field, ".Select-input"), "input")
   ReactTestUtils.Simulate.focus(input)
   ReactTestUtils.Simulate.keyDown(input, { keyCode: 8, key: "Backspace" })
   ReactTestUtils.Simulate.keyDown(input, { keyCode: 9, key: "Tab" })
@@ -151,8 +151,8 @@ export const clearSelectField = (field: HTMLElement): void => {
 export const isActiveDialog = (dialog: any): boolean =>
   dialog.style["left"] === "0px"
 
-let findActiveDialog = (dialogClassName: string): HTMLDivElement => {
-  let elements: any = document.getElementsByClassName(dialogClassName)
+const findActiveDialog = (dialogClassName: string): HTMLDivElement => {
+  const elements: any = document.getElementsByClassName(dialogClassName)
   return [...elements].find(isActiveDialog)
 }
 
@@ -160,7 +160,7 @@ export const noActiveDialogs = (dialogClassName: string): boolean =>
   findActiveDialog(dialogClassName) === undefined
 
 export const activeDialog = (dialogClassName: string): HTMLDivElement => {
-  let dialog = findActiveDialog(dialogClassName)
+  const dialog = findActiveDialog(dialogClassName)
   assert.isDefined(
     dialog,
     `dialog element w/ className '${dialogClassName}' should be active`
@@ -203,7 +203,7 @@ export const localStorageMock = (init: any = {}) => {
 }
 
 export const getEl = (div: any, selector: string): HTMLElement => {
-  let el: HTMLElement = (div.querySelector(selector): any)
+  const el: HTMLElement = (div.querySelector(selector): any)
   return el
 }
 
@@ -219,7 +219,7 @@ export function createAssertReducerResultState<State>(
     const getState = () => stateLookup(getReducerState(store.getState()))
 
     assert.deepEqual(defaultValue, getState())
-    for (let value of [
+    for (const value of [
       true,
       null,
       false,

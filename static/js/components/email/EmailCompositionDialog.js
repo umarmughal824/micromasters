@@ -20,8 +20,8 @@ import { S, getm } from "../../lib/sanctuary"
 // so we take the HTML we save to the backend and instantiate an EditorState object
 // with it, which we can then keep in the state for our EmailCompositionDialog component.
 const convertHTMLToEditorState = (html: string): Object => {
-  let blocksFromHTML = convertFromHTML(html)
-  let contentState = ContentState.createFromBlockArray(
+  const blocksFromHTML = convertFromHTML(html)
+  const contentState = ContentState.createFromBlockArray(
     blocksFromHTML.contentBlocks,
     blocksFromHTML.entityMap
   )
@@ -77,8 +77,8 @@ export default class EmailCompositionDialog extends React.Component {
   }
 
   componentWillReceiveProps(nextProps: EmailDialogProps) {
-    let newState = editorStateFromProps(nextProps)
-    let newStateHasText = newState.editorState.getCurrentContent().hasText()
+    const newState = editorStateFromProps(nextProps)
+    const newStateHasText = newState.editorState.getCurrentContent().hasText()
 
     if (
       !this.state.editorState.getCurrentContent().hasText() &&
@@ -128,7 +128,7 @@ export default class EmailCompositionDialog extends React.Component {
 
   showValidationError = (fieldName: string): ?React$Element<*> => {
     const { activeEmail: { validationErrors } } = this.props
-    let val = validationErrors[fieldName]
+    const val = validationErrors[fieldName]
     if (val !== undefined) {
       return <span className="validation-error">{val}</span>
     }
@@ -145,7 +145,7 @@ export default class EmailCompositionDialog extends React.Component {
     if (isNilOrBlank(activeEmail.subheading)) {
       return null
     } else {
-      let renderFunc = subheadingRenderer || this.renderDefaultSubheading
+      const renderFunc = subheadingRenderer || this.renderDefaultSubheading
       return renderFunc(activeEmail)
     }
   }

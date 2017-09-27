@@ -23,7 +23,7 @@ describe("SkipFinancialAidDialog", () => {
     sandbox.restore()
   })
 
-  let renderDialog = (open = true): HTMLElement => {
+  const renderDialog = (open = true): HTMLElement => {
     mount(
       <MuiThemeProvider muiTheme={getMuiTheme()}>
         <SkipFinancialAidDialog
@@ -38,7 +38,7 @@ describe("SkipFinancialAidDialog", () => {
   }
 
   it("should have some text and a title, including the full price amount", () => {
-    let dialogText = renderDialog().textContent
+    const dialogText = renderDialog().textContent
     assert.include(dialogText, "Are you sure?")
     assert.include(dialogText, "$3000")
   })

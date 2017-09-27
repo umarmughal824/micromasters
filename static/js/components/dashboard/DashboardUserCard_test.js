@@ -13,7 +13,7 @@ describe("DashboardUserCard", () => {
   it("renders a user card", () => {
     const program = DASHBOARD_RESPONSE.programs[1]
     const profile = USER_PROFILE_RESPONSE
-    let wrapper = shallow(
+    const wrapper = shallow(
       <DashboardUserCard profile={profile} program={program} />
     )
     assert.equal(
@@ -23,7 +23,7 @@ describe("DashboardUserCard", () => {
         .props().profile,
       profile
     )
-    let textContainer = wrapper.find(".dashboard-user-card-text")
+    const textContainer = wrapper.find(".dashboard-user-card-text")
     assert.equal(
       textContainer
         .find(CardTitle)
@@ -36,13 +36,13 @@ describe("DashboardUserCard", () => {
       textContainer.find(".dashboard-user-card-text-program").text(),
       program.title
     )
-    let link = textContainer.find(Link)
+    const link = textContainer.find(Link)
     assert.deepEqual(link.children().text(), "View Profile")
     assert.deepEqual(link.props().to, `/learner/${profile.username}`)
   })
 
   it("shows no title if no program is present", () => {
-    let wrapper = shallow(
+    const wrapper = shallow(
       <DashboardUserCard profile={USER_PROFILE_RESPONSE} program={undefined} />
     )
     assert.equal(wrapper.find(".dashboard-user-card-text-program").text(), "")

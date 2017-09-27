@@ -5,7 +5,7 @@ import R from "ramda"
 import { wait } from "../util/util"
 
 // Start of odl Zendesk Widget script
-/* eslint-disable no-sequences */
+/* eslint-disable no-sequences, prefer-const */
 /*<![CDATA[*/
 window.zEmbed ||
   (function(e, t) {
@@ -62,7 +62,7 @@ zE(function() {
   // pre-populate feedback form
   if (SETTINGS.user) {
     const user = SETTINGS.user
-    let identity = {}
+    const identity = {}
     if (user.first_name && user.last_name) {
       identity.name = `${user.first_name} ${user.last_name}`
     }
@@ -139,7 +139,7 @@ const zendeskCallbacks = {
           const ticketIFrame = document.querySelector(
             "iframe.zEWidget-ticketSubmissionForm"
           )
-          let select = ticketIFrame.contentDocument.querySelector("select")
+          const select = ticketIFrame.contentDocument.querySelector("select")
           const optionValues = _.map(select.options, "value")
           if (optionValues.includes(programSlug)) {
             select.value = programSlug

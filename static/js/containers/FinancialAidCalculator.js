@@ -39,7 +39,7 @@ export const CALCULATOR_DIALOG = "CALCULATOR_DIALOG"
 export const INCOME_DIALOG = "INCOME_DIALOG"
 
 const updateCurrency = R.curry((update, financialAid, selection) => {
-  let _financialAid = R.clone(financialAid)
+  const _financialAid = R.clone(financialAid)
   _financialAid.currency = selection ? selection.value : null
   update(_financialAid)
 })
@@ -60,7 +60,7 @@ const currencySelect = (update, current) => (
 )
 
 const salaryUpdate = R.curry((update, current, e) => {
-  let newEdit = R.clone(current)
+  const newEdit = R.clone(current)
   newEdit.income = e.target.value
   update(newEdit)
 })
@@ -83,7 +83,7 @@ const checkboxText = `I testify that the income I reported is true and accurate.
 I am aware that I may be asked to verify the reported income with documentation.`
 
 const checkboxUpdate = (update, current, bool) => {
-  let newEdit = R.clone(current)
+  const newEdit = R.clone(current)
   newEdit.checkBox = bool
   update(newEdit)
 }
@@ -182,7 +182,7 @@ const FinancialAidCalculator = ({
   }
   const { title, id } = currentProgramEnrollment
 
-  let program = programs.find(prog => prog.id === id)
+  const program = programs.find(prog => prog.id === id)
   if (!program) {
     return null
   }
@@ -196,7 +196,7 @@ const FinancialAidCalculator = ({
       program.financial_aid_user_info.max_possible_cost
     )
   }
-  let confirmDialog = (
+  const confirmDialog = (
     <Dialog
       key="confirm"
       title="Confirm Your Income"
@@ -290,7 +290,7 @@ const closeConfirmDialogAndCancel = dispatch => () => {
 }
 
 const updateFinancialAidValidation = (dispatch, current) => {
-  let errors = validateFinancialAid(current)
+  const errors = validateFinancialAid(current)
   if (!R.equals(errors, current.validation)) {
     dispatch(updateCalculatorValidation(errors))
   }
@@ -298,8 +298,8 @@ const updateFinancialAidValidation = (dispatch, current) => {
 }
 
 const saveFinancialAid = R.curry((dispatch, current) => {
-  let valid = updateFinancialAidValidation(dispatch, current)
-  let clone = _.cloneDeep(current)
+  const valid = updateFinancialAidValidation(dispatch, current)
+  const clone = _.cloneDeep(current)
   delete clone.validation
   if (valid) {
     dispatch(hideDialog(CALCULATOR_DIALOG))
@@ -317,7 +317,7 @@ const submitFinancialAid = R.curry((dispatch, current) => {
 
 const updateFinancialAidEdit = R.curry((dispatch, current) => {
   updateFinancialAidValidation(dispatch, current)
-  let clone = _.cloneDeep(current)
+  const clone = _.cloneDeep(current)
   delete clone.validation
   dispatch(updateCalculatorEdit(clone))
 })

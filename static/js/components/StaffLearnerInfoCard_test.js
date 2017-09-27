@@ -24,7 +24,7 @@ describe("StaffLearnerInfoCard", () => {
     sandbox.restore()
   })
 
-  let renderCard = (program = DASHBOARD_RESPONSE.programs[0], price = 1000) =>
+  const renderCard = (program = DASHBOARD_RESPONSE.programs[0], price = 1000) =>
     mount(
       <MuiThemeProvider muiTheme={getMuiTheme()}>
         <StaffLearnerInfoCard
@@ -48,7 +48,7 @@ describe("StaffLearnerInfoCard", () => {
     )
 
   it("should have the program title", () => {
-    let card = renderCard()
+    const card = renderCard()
     assert.include(
       stringStrip(card.text()),
       `Progress ${DASHBOARD_RESPONSE.programs[0].title}`
@@ -66,30 +66,30 @@ describe("StaffLearnerInfoCard", () => {
     }
   ]
 
-  for (let data of dataSet) {
+  for (const data of dataSet) {
     it(`should have the program price ${data.display}`, () => {
-      let card = renderCard(DASHBOARD_RESPONSE.programs[0], data.price)
-      let price = card.find(".course-price .program-badge").text()
+      const card = renderCard(DASHBOARD_RESPONSE.programs[0], data.price)
+      const price = card.find(".course-price .program-badge").text()
       assert.equal(price, data.display)
     })
   }
 
   it("should render the progress display", () => {
-    let card = renderCard()
+    const card = renderCard()
     assert.include(stringStrip(card.text()), "1 4 Courses complete")
   })
 
   it("should show average grade, if present", () => {
-    let program = { ...DASHBOARD_RESPONSE.programs[0] }
+    const program = { ...DASHBOARD_RESPONSE.programs[0] }
     program.grade_average = 62
-    let badge = renderCard(program).find(
+    const badge = renderCard(program).find(
       ".average-program-grade .program-badge"
     )
     assert.equal(badge.text(), "62%")
   })
 
   it('should show "--" if the grade is not present', () => {
-    let badge = renderCard().find(".average-program-grade .program-badge")
+    const badge = renderCard().find(".average-program-grade .program-badge")
     assert.equal(badge.text(), "--")
   })
 })

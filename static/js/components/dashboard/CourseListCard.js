@@ -42,7 +42,7 @@ export default class CourseListCard extends React.Component {
 
   getProgramCouponPrice = (): CouponPrice => {
     const { couponPrices, program } = this.props
-    let couponPrice = couponPrices.pricesInclCouponByProgram.get(program.id)
+    const couponPrice = couponPrices.pricesInclCouponByProgram.get(program.id)
     if (!couponPrice) {
       // This shouldn't happen since we should have waited for the API requests to finish before getting here
       throw `Unable to find program ${program.id} in list of prices`

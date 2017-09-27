@@ -34,7 +34,7 @@ describe("SignupDialog", () => {
   }
 
   it("has a login link which uses the next query param", () => {
-    let queryParams = "?next=b"
+    const queryParams = "?next=b"
     window.location = `http://fake/${queryParams}`
     helper.store.dispatch(setDialogVisibility(true))
     renderDialog()

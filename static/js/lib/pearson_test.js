@@ -5,10 +5,10 @@ import { generateSSOForm, staticFormEntries, createFormInput } from "./pearson"
 describe("pearson library", () => {
   describe("createFormInput", () => {
     it("returns an input, given a form, name, and value", () => {
-      let form = document.createElement("form")
+      const form = document.createElement("form")
       document.body.appendChild(form)
       createFormInput(form, ["foo", "bar"])
-      let input = form.querySelector("input")
+      const input = form.querySelector("input")
       assert.equal(input.name, "foo")
       assert.equal(input.type, "hidden")
       assert.equal(input.value, "bar")

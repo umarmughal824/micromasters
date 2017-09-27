@@ -57,7 +57,7 @@ export function patchUserProfile(
 
 export async function getDashboard(username: string): Promise<Dashboard> {
   try {
-    let response = await fetchJSONWithCSRF(`/api/v0/dashboard/${username}/`)
+    const response = await fetchJSONWithCSRF(`/api/v0/dashboard/${username}/`)
     return response
   } catch (response) {
     loginOnEdXError(response)
@@ -121,7 +121,7 @@ export function sendLearnerMail(
 
 export async function getPrograms(): Promise<AvailablePrograms> {
   try {
-    let response = await fetchJSONWithCSRF("/api/v0/programs/")
+    const response = await fetchJSONWithCSRF("/api/v0/programs/")
     return response
   } catch (response) {
     loginOnEdXError(response)
@@ -151,7 +151,7 @@ export function updateProfileImage(
   image: Blob,
   name: string
 ): Promise<string> {
-  let formData = new FormData()
+  const formData = new FormData()
   formData.append("image", image, name)
   return fetchWithCSRF(`/api/v0/profiles/${username}/`, {
     headers: {
@@ -227,7 +227,7 @@ export function getCoupons(): Promise<Coupons> {
 export function attachCoupon(
   couponCode: string
 ): Promise<AttachCouponResponse> {
-  let code = encodeURI(couponCode)
+  const code = encodeURI(couponCode)
   return fetchJSONWithCSRF(`/api/v0/coupons/${code}/users/`, {
     method: "POST",
     body:   JSON.stringify({

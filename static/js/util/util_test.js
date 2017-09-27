@@ -93,7 +93,7 @@ describe("utility functions", () => {
 
   describe("generateNewEducation", () => {
     it("generates a new education object", () => {
-      let level = "level"
+      const level = "level"
       assert.deepEqual(generateNewEducation(level), {
         degree_name:               level,
         graduation_date:           "",
@@ -109,7 +109,7 @@ describe("utility functions", () => {
 
   describe("makeProfileImageUrl", () => {
     it("uses the profile image if available", () => {
-      let url = "/url"
+      const url = "/url"
       assert.equal(url, makeProfileImageUrl({ image_medium: url }, false))
     })
 
@@ -121,8 +121,8 @@ describe("utility functions", () => {
     })
 
     it("uses the small profile image", () => {
-      let url = "/url"
-      let smallUrl = "/small"
+      const url = "/url"
+      const smallUrl = "/small"
       assert.equal(
         smallUrl,
         makeProfileImageUrl(
@@ -195,7 +195,7 @@ describe("utility functions", () => {
 
   describe("getLocation", () => {
     it("should return `${city}, ${country}` for a non-us location", () => {
-      let nonUS = {
+      const nonUS = {
         country:            "AF",
         state_or_territory: "AF-KAB",
         city:               "Kabul"
@@ -204,7 +204,7 @@ describe("utility functions", () => {
     })
 
     it("should return `${city}, ${state}, US` for a US location", () => {
-      let us = {
+      const us = {
         country:            "US",
         state_or_territory: "US-ME",
         city:               "Portland"
@@ -215,7 +215,7 @@ describe("utility functions", () => {
     })
 
     it("should return `${city}, ` when no country code", () => {
-      let us = {
+      const us = {
         country:            null,
         state_or_territory: "US-ME",
         city:               "Portland"
@@ -224,7 +224,7 @@ describe("utility functions", () => {
     })
 
     it("should return `US` when no city", () => {
-      let us = {
+      const us = {
         country:            "US",
         state_or_territory: "US-ME",
         city:               null
@@ -233,7 +233,7 @@ describe("utility functions", () => {
     })
 
     it("should return `-` when no city and no country", () => {
-      let us = {
+      const us = {
         country:            null,
         state_or_territory: "US-ME",
         city:               null
@@ -244,13 +244,13 @@ describe("utility functions", () => {
 
   describe("getEmployer", () => {
     it("should return Nothing if the user has no job history", () => {
-      let clone = R.clone(USER_PROFILE_RESPONSE)
+      const clone = R.clone(USER_PROFILE_RESPONSE)
       clone.work_history = []
       assertIsNothing(getEmployer(clone))
     })
 
     it("should return the current employer if the user is currently employed", () => {
-      let clone = R.clone(USER_PROFILE_RESPONSE)
+      const clone = R.clone(USER_PROFILE_RESPONSE)
       clone.work_history.push({
         company_name: "Foobarcorp",
         end_date:     null
@@ -268,18 +268,18 @@ describe("utility functions", () => {
 
   describe("makeProfileProgressDisplay", () => {
     it("renders the right active display", () => {
-      let keys = [...PROFILE_STEP_LABELS.keys()]
+      const keys = [...PROFILE_STEP_LABELS.keys()]
       PROFILE_STEP_LABELS.forEach((label, step) => {
-        let i = keys.findIndex(k => k === step)
+        const i = keys.findIndex(k => k === step)
 
-        let svg = makeProfileProgressDisplay(step)
-        let desc = svg.props.children[0]
+        const svg = makeProfileProgressDisplay(step)
+        const desc = svg.props.children[0]
         assert.equal(desc.props.children.join(""), `Profile progress: ${label}`)
 
         let foundCircle = false,
           foundCircleText = false,
           foundText = false
-        for (let child of svg.props.children[1]) {
+        for (const child of svg.props.children[1]) {
           if (child.key === `circle_${i}`) {
             // the green circle should be the currently selected one
             assert.equal(child.props.fill, "#a31f34")
@@ -306,25 +306,25 @@ describe("utility functions", () => {
 
   describe("currentOrFirstIncompleteStep", () => {
     it("should return the validated step if current step is null", () => {
-      let step = currentOrFirstIncompleteStep(null, PERSONAL_STEP)
+      const step = currentOrFirstIncompleteStep(null, PERSONAL_STEP)
 
       assert.equal(step, PERSONAL_STEP)
     })
 
     it("should return the current step if validated step is null", () => {
-      let step = currentOrFirstIncompleteStep(PERSONAL_STEP, null)
+      const step = currentOrFirstIncompleteStep(PERSONAL_STEP, null)
 
       assert.equal(step, PERSONAL_STEP)
     })
 
     it("should return the current step if validated step is greater", () => {
-      let step = currentOrFirstIncompleteStep(PERSONAL_STEP, EDUCATION_STEP)
+      const step = currentOrFirstIncompleteStep(PERSONAL_STEP, EDUCATION_STEP)
 
       assert.equal(step, PERSONAL_STEP)
     })
 
     it("should return the validated step if current step is greater", () => {
-      let step = currentOrFirstIncompleteStep(EDUCATION_STEP, PERSONAL_STEP)
+      const step = currentOrFirstIncompleteStep(EDUCATION_STEP, PERSONAL_STEP)
 
       assert.equal(step, PERSONAL_STEP)
     })
@@ -333,38 +333,38 @@ describe("utility functions", () => {
   describe("Profile of logged in user check", () => {
     it("when user is not logged in", () => {
       SETTINGS.user = null
-      let profile = { username: "another_user" }
+      const profile = { username: "another_user" }
       assert.isNotTrue(isProfileOfLoggedinUser(profile))
     })
 
     it("when other user's profile", () => {
-      let profile = { username: "another_user" }
+      const profile = { username: "another_user" }
       assert.isNotTrue(isProfileOfLoggedinUser(profile))
     })
 
     it("when loggedin user's profile", () => {
-      let profile = { username: SETTINGS.user.username }
+      const profile = { username: SETTINGS.user.username }
       assert.isTrue(isProfileOfLoggedinUser(profile))
     })
   })
 
   describe("User privilege check", () => {
     it("should return the value of the first function if the profile username matches", () => {
-      let profile = { username: SETTINGS.user.username }
-      let privilegedCallback = () => "hi"
+      const profile = { username: SETTINGS.user.username }
+      const privilegedCallback = () => "hi"
       assert.equal(userPrivilegeCheck(profile, privilegedCallback), "hi")
     })
 
     it("should return the second argument if the profile username matches", () => {
-      let profile = { username: SETTINGS.user.username }
-      let privilegedString = "hi"
+      const profile = { username: SETTINGS.user.username }
+      const privilegedString = "hi"
       assert.equal(userPrivilegeCheck(profile, privilegedString), "hi")
     })
 
     it("should return the value of the second function if the profile username does not match", () => {
-      let profile = { username: "another_user" }
-      let privilegedCallback = () => "vim"
-      let unprivilegedCallback = () => "emacs"
+      const profile = { username: "another_user" }
+      const privilegedCallback = () => "vim"
+      const unprivilegedCallback = () => "emacs"
       assert.equal(
         userPrivilegeCheck(profile, privilegedCallback, unprivilegedCallback),
         "emacs"
@@ -372,9 +372,9 @@ describe("utility functions", () => {
     })
 
     it("should return the value of the second argument if the profile username does not match", () => {
-      let profile = { username: "another_user" }
-      let privilegedCallback = () => "vim"
-      let unprivilegedString = "emacs"
+      const profile = { username: "another_user" }
+      const privilegedCallback = () => "vim"
+      const unprivilegedString = "emacs"
       assert.equal(
         userPrivilegeCheck(profile, privilegedCallback, unprivilegedString),
         "emacs"
@@ -383,9 +383,9 @@ describe("utility functions", () => {
 
     it("should return the value of the second function if user is not logged in", () => {
       SETTINGS.user = null
-      let profile = { username: "another_user" }
-      let privilegedCallback = () => "vim"
-      let unprivilegedCallback = () => "emacs"
+      const profile = { username: "another_user" }
+      const privilegedCallback = () => "vim"
+      const unprivilegedCallback = () => "emacs"
       assert.equal(
         userPrivilegeCheck(profile, privilegedCallback, unprivilegedCallback),
         "emacs"
@@ -396,7 +396,7 @@ describe("utility functions", () => {
   describe("calculateDegreeInclusions", () => {
     for (const { value: outerValue, label } of EDUCATION_LEVELS) {
       it(`turns on all switches before and including ${label}`, () => {
-        let copy = {}
+        const copy = {}
         let found = false
         for (const { value: innerValue } of EDUCATION_LEVELS) {
           copy[innerValue] = !found
@@ -405,7 +405,7 @@ describe("utility functions", () => {
           }
         }
 
-        let clone = {
+        const clone = {
           ...USER_PROFILE_RESPONSE,
           edx_level_of_education: outerValue,
           education:              []
@@ -415,12 +415,12 @@ describe("utility functions", () => {
     }
 
     it("turns on all switches if there is no edx_level_of_education", () => {
-      let defaults = {}
+      const defaults = {}
       for (const { value } of EDUCATION_LEVELS) {
         defaults[value] = true
       }
 
-      let clone = {
+      const clone = {
         ...USER_PROFILE_RESPONSE,
         edx_level_of_education: null,
         education:              []
@@ -429,7 +429,7 @@ describe("utility functions", () => {
     })
 
     it("turns on the switch if there is at least one education of that level", () => {
-      let clone = {
+      const clone = {
         ...USER_PROFILE_RESPONSE,
         edx_level_of_education: HIGH_SCHOOL,
         education:              [
@@ -453,11 +453,11 @@ describe("utility functions", () => {
 
   describe("callFunctionArray", () => {
     it("should take an array of functions, call them in series with given args, and return list of results", () => {
-      let testFunctionA = arg => `testFunctionA ${arg}`,
+      const testFunctionA = arg => `testFunctionA ${arg}`,
         testFunctionB = arg => `testFunctionB ${arg}`,
         arg = "arg"
-      let testFunctionArray = [testFunctionA, testFunctionA, testFunctionB]
-      let results = callFunctionArray(testFunctionArray, arg)
+      const testFunctionArray = [testFunctionA, testFunctionA, testFunctionB]
+      const results = callFunctionArray(testFunctionArray, arg)
       assert.deepEqual(results, [
         "testFunctionA arg",
         "testFunctionA arg",
@@ -470,20 +470,20 @@ describe("utility functions", () => {
     const invalid = "invalid-input"
 
     it("should return invalid-input if keySet matches an error", () => {
-      let errors = { foo: "WARNING" }
-      let keySet = ["foo"]
+      const errors = { foo: "WARNING" }
+      const keySet = ["foo"]
       assert.equal(validationErrorSelector(errors, keySet), invalid)
     })
 
     it("should not return invalid-input if keySet does not match an error", () => {
-      let errors = { foo: "WARNING" }
-      let keySet = ["bar"]
+      const errors = { foo: "WARNING" }
+      const keySet = ["bar"]
       assert.equal(validationErrorSelector(errors, keySet), "")
     })
 
     it("should not return invalid-input if there are no errors", () => {
-      let errors = {}
-      let keySet = ["bar"]
+      const errors = {}
+      const keySet = ["bar"]
       assert.equal(validationErrorSelector(errors, keySet), "")
     })
   })
@@ -512,8 +512,8 @@ describe("utility functions", () => {
       const { url, payload } = CYBERSOURCE_CHECKOUT_RESPONSE
       const form = createForm(url, payload)
 
-      let clone = _.clone(payload)
-      for (let hidden of form.querySelectorAll("input[type=hidden]")) {
+      const clone = _.clone(payload)
+      for (const hidden of form.querySelectorAll("input[type=hidden]")) {
         const key = hidden.getAttribute("name")
         const value = hidden.getAttribute("value")
         assert.equal(clone[key], value)
@@ -555,15 +555,15 @@ describe("utility functions", () => {
 
   describe("findCourseRun", () => {
     it("iterates and finds the course run, course, and program", () => {
-      let run = {
+      const run = {
         id:        3,
         course_id: "xyz"
       }
-      let course = {
+      const course = {
         runs: [run],
         id:   2
       }
-      let program = {
+      const program = {
         courses: [course],
         id:      1
       }
@@ -575,15 +575,15 @@ describe("utility functions", () => {
     })
 
     it("skips runs when there is an exception", () => {
-      let run = {
+      const run = {
         id:        3,
         course_id: "xyz"
       }
-      let course = {
+      const course = {
         runs: [run],
         id:   2
       }
-      let program = {
+      const program = {
         courses: [course],
         id:      1
       }
@@ -597,11 +597,11 @@ describe("utility functions", () => {
     })
 
     it("finds courses with no course runs", () => {
-      let course = {
+      const course = {
         runs: [],
         id:   2
       }
-      let program = {
+      const program = {
         courses: [course],
         id:      1
       }
@@ -613,7 +613,7 @@ describe("utility functions", () => {
     })
 
     it("finds a program with no courses", () => {
-      let program = {
+      const program = {
         courses: [],
         id:      1
       }
@@ -652,7 +652,7 @@ describe("utility functions", () => {
 
   describe("labelSort", () => {
     it("sorts options by lowercase alphabetical order", () => {
-      let input = [
+      const input = [
         {
           value: "1",
           label: "One"
@@ -667,7 +667,7 @@ describe("utility functions", () => {
         }
       ]
 
-      let expected = [input[0], input[2], input[1]]
+      const expected = [input[0], input[2], input[1]]
       assert.deepEqual(expected, labelSort(input))
     })
   })
@@ -713,9 +713,9 @@ describe("utility functions", () => {
     })
 
     it("filters out diacritics and makes text and phrase lowercase", () => {
-      let name = "Côté"
-      let phrase = "CÖ"
-      let result = highlight(name, phrase)
+      const name = "Côté"
+      const phrase = "CÖ"
+      const result = highlight(name, phrase)
       assert.equal(shallow(result).text(), name)
       assert.equal(
         shallow(result)
@@ -726,16 +726,16 @@ describe("utility functions", () => {
     })
 
     it("doesn't highlight if phrase doesn't match", () => {
-      let result = highlight("abc", "xyz")
-      let wrapper = shallow(result)
+      const result = highlight("abc", "xyz")
+      const wrapper = shallow(result)
       assert.equal(wrapper.text(), "abc")
       assert.equal(wrapper.find(".highlight").length, 0)
     })
 
     it("handles unicode properly", () => {
-      let dog = "🐶"
-      let catdogfish = "🐱🐶🐟"
-      let result = highlight(catdogfish, dog)
+      const dog = "🐶"
+      const catdogfish = "🐱🐶🐟"
+      const result = highlight(catdogfish, dog)
       assert.equal(catdogfish, shallow(result).text())
       assert.equal(
         dog,
@@ -746,9 +746,9 @@ describe("utility functions", () => {
     })
 
     it("handles multiple matches", () => {
-      let phrase = "match"
-      let text = "match1 match2"
-      let result = highlight(text, phrase)
+      const phrase = "match"
+      const text = "match1 match2"
+      const result = highlight(text, phrase)
       assert.equal(
         shallow(result).html(),
         '<span><span class="highlight">match</span>1 <span class="highlight">match</span>2</span>'
@@ -758,12 +758,12 @@ describe("utility functions", () => {
 
   describe("renderSeparatedComponents", () => {
     it("renders a list of components with a separator that has specified text content", () => {
-      let components = [
+      const components = [
         <div key={"1"}>div1</div>,
         <div key={"2"}>div2</div>,
         <div key={"3"}>div3</div>
       ]
-      let separatedComponents = renderSeparatedComponents(components, " | ")
+      const separatedComponents = renderSeparatedComponents(components, " | ")
       assert.equal(separatedComponents[0].props.children, "div1")
       assert.equal(separatedComponents[1].type, "span")
       assert.equal(separatedComponents[1].props.children, " | ")
@@ -774,8 +774,8 @@ describe("utility functions", () => {
     })
 
     it("renders a single component without a separator", () => {
-      let components = [<div key={"1"}>div1</div>]
-      let separatedComponents = renderSeparatedComponents(components, " | ")
+      const components = [<div key={"1"}>div1</div>]
+      const separatedComponents = renderSeparatedComponents(components, " | ")
       assert.equal(separatedComponents[0].props.children, "div1")
       assert.lengthOf(separatedComponents, 1)
     })
@@ -880,8 +880,8 @@ describe("utility functions", () => {
 
   describe("mapObj", () => {
     it("it allows you to edit keys and values", () => {
-      let obj = { foo: "bar" }
-      let edited = mapObj(([k, v]) => [`baz_${k}`, `baz_${v}`], obj)
+      const obj = { foo: "bar" }
+      const edited = mapObj(([k, v]) => [`baz_${k}`, `baz_${v}`], obj)
       assert.deepEqual(edited, { baz_foo: "baz_bar" })
     })
   })

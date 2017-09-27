@@ -197,8 +197,8 @@ describe("DashboardPage", () => {
         .find(".open-popup")
         .first()
         .simulate("click")
-      let state = helper.store.getState().ui
-      let key = gradeDetailPopupKey(
+      const state = helper.store.getState().ui
+      const key = gradeDetailPopupKey(
         EDX_GRADE,
         DASHBOARD_RESPONSE.programs[0].courses[0].title
       )
@@ -207,7 +207,7 @@ describe("DashboardPage", () => {
   })
 
   it("should close the <Grades /> dialog if you click outside", () => {
-    let key = gradeDetailPopupKey(
+    const key = gradeDetailPopupKey(
       EDX_GRADE,
       DASHBOARD_RESPONSE.programs[0].courses[0].title
     )
@@ -223,7 +223,7 @@ describe("DashboardPage", () => {
         .first()
         .props()
         .onRequestClose()
-      let state = helper.store.getState().ui
+      const state = helper.store.getState().ui
       assert.isFalse(state.dialogVisibility[key])
     })
   })
@@ -259,13 +259,13 @@ describe("DashboardPage", () => {
     })
 
     it("shows the order status toast when the query param is set for a success", () => {
-      let course = findCourse(
+      const course = findCourse(
         course =>
           course.runs.length > 0 &&
           course.runs[0].status === STATUS_CURRENTLY_ENROLLED
       )
-      let run = course.runs[0]
-      let encodedKey = encodeURIComponent(run.course_id)
+      const run = course.runs[0]
+      const encodedKey = encodeURIComponent(run.course_id)
       return renderComponent(
         `/dashboard?status=receipt&course_key=${encodedKey}`,
         SUCCESS_WITH_TOAST_ACTIONS
@@ -280,13 +280,13 @@ describe("DashboardPage", () => {
 
     describe("toast loop", () => {
       it("doesn't have a toast message loop on success", () => {
-        let course = findCourse(
+        const course = findCourse(
           course =>
             course.runs.length > 0 &&
             course.runs[0].status === STATUS_CURRENTLY_ENROLLED
         )
-        let run = course.runs[0]
-        let encodedKey = encodeURIComponent(run.course_id)
+        const run = course.runs[0]
+        const encodedKey = encodeURIComponent(run.course_id)
         const customMessage = {
           message: "Custom toast message was not replaced"
         }
@@ -320,13 +320,13 @@ describe("DashboardPage", () => {
     })
 
     it("shows the toast when the query param is set for a success but user is not enrolled", () => {
-      let course = findCourse(
+      const course = findCourse(
         course =>
           course.runs.length > 0 &&
           course.runs[0].status === STATUS_PAID_BUT_NOT_ENROLLED
       )
-      let run = course.runs[0]
-      let encodedKey = encodeURIComponent(run.course_id)
+      const run = course.runs[0]
+      const encodedKey = encodeURIComponent(run.course_id)
       return renderComponent(
         `/dashboard?status=receipt&course_key=${encodedKey}`,
         SUCCESS_WITH_TOAST_ACTIONS
@@ -340,17 +340,17 @@ describe("DashboardPage", () => {
     })
 
     it("sets the course run to have a pending status", () => {
-      let course = findCourse(
+      const course = findCourse(
         course =>
           course.runs.length > 0 && course.runs[0].status === STATUS_OFFERED
       )
-      let run = course.runs[0]
-      let encodedKey = encodeURIComponent(run.course_id)
+      const run = course.runs[0]
+      const encodedKey = encodeURIComponent(run.course_id)
       return renderComponent(
         `/dashboard?status=receipt&course_key=${encodedKey}`,
         SUCCESS_WITH_TIMEOUT_ACTIONS
       ).then(() => {
-        let [courseRun] = findCourseRun(
+        const [courseRun] = findCourseRun(
           helper.store.getState().dashboard[SETTINGS.user.username].programs,
           _run => _run.course_id === run.course_id
         )
@@ -390,7 +390,7 @@ describe("DashboardPage", () => {
 
       describe("100% program coupon", () => {
         let coupon
-        let expectedActions = DASHBOARD_SUCCESS_ACTIONS.concat([
+        const expectedActions = DASHBOARD_SUCCESS_ACTIONS.concat([
           REQUEST_SKIP_FINANCIAL_AID,
           RECEIVE_SKIP_FINANCIAL_AID_SUCCESS
         ])
@@ -406,23 +406,25 @@ describe("DashboardPage", () => {
         })
 
         describe("should issue a request to skip if there is a 100% coupon for the program", () => {
-          for (let status of FA_ALL_STATUSES) {
+          for (const status of FA_ALL_STATUSES) {
             it(`only if status is ${status}`, () => {
               program.financial_aid_user_info.application_status = status
-              let expectedSkip = !FA_TERMINAL_STATUSES.includes(status)
+              const expectedSkip = !FA_TERMINAL_STATUSES.includes(status)
               // Extra actions dispatched to refresh the dashboard
-              let expectedActionsWithDashboardRequest = expectedActions.concat([
-                REQUEST_DASHBOARD,
-                RECEIVE_DASHBOARD_SUCCESS,
-                actions.prices.get.requestType,
-                actions.prices.get.successType,
-                SET_CONFIRM_SKIP_DIALOG_VISIBILITY
-              ])
-              let _actions = expectedSkip
+              const expectedActionsWithDashboardRequest = expectedActions.concat(
+                [
+                  REQUEST_DASHBOARD,
+                  RECEIVE_DASHBOARD_SUCCESS,
+                  actions.prices.get.requestType,
+                  actions.prices.get.successType,
+                  SET_CONFIRM_SKIP_DIALOG_VISIBILITY
+                ]
+              )
+              const _actions = expectedSkip
                 ? expectedActionsWithDashboardRequest
                 : DASHBOARD_SUCCESS_ACTIONS
               return renderComponent("/dashboard", _actions).then(() => {
-                let aid = helper.store.getState().financialAid
+                const aid = helper.store.getState().financialAid
                 if (expectedSkip) {
                   assert.equal(aid.fetchSkipStatus, storeActions.FETCH_SUCCESS)
                   sinon.assert.calledWith(
@@ -450,7 +452,7 @@ describe("DashboardPage", () => {
         })
 
         it("should not care about coupons for other programs", () => {
-          let otherProgram = dashboard.programs[1]
+          const otherProgram = dashboard.programs[1]
           coupon.object_id = otherProgram.id
           coupon.program_id = otherProgram.id
 
@@ -467,17 +469,17 @@ describe("DashboardPage", () => {
 
     describe("fake timer tests", function() {
       it("refetches the dashboard after 3 seconds if 2 minutes has not passed", () => {
-        let course = findCourse(
+        const course = findCourse(
           course =>
             course.runs.length > 0 && course.runs[0].status === STATUS_OFFERED
         )
-        let run = course.runs[0]
-        let encodedKey = encodeURIComponent(run.course_id)
+        const run = course.runs[0]
+        const encodedKey = encodeURIComponent(run.course_id)
         return renderComponent(
           `/dashboard?status=receipt&course_key=${encodedKey}`,
           SUCCESS_WITH_TIMEOUT_ACTIONS
         ).then(() => {
-          let fetchDashboardStub = helper.sandbox
+          const fetchDashboardStub = helper.sandbox
             .stub(dashboardActions, "fetchDashboard")
             .returns(() => ({
               type: "fake"
@@ -497,17 +499,17 @@ describe("DashboardPage", () => {
       })
 
       it("shows an error message if more than 30 seconds have passed", () => {
-        let course = findCourse(
+        const course = findCourse(
           course =>
             course.runs.length > 0 && course.runs[0].status === STATUS_OFFERED
         )
-        let run = course.runs[0]
-        let encodedKey = encodeURIComponent(run.course_id)
+        const run = course.runs[0]
+        const encodedKey = encodeURIComponent(run.course_id)
         return renderComponent(
           `/dashboard?status=receipt&course_key=${encodedKey}`,
           SUCCESS_WITH_TIMEOUT_ACTIONS
         ).then(() => {
-          let past = moment()
+          const past = moment()
             .add(-125, "seconds")
             .toISOString()
           helper.store.dispatch(setInitialTime(past))
@@ -595,9 +597,9 @@ describe("DashboardPage", () => {
 
     it("without a race condition", () => {
       // eslint-disable-line mocha/no-skipped-tests
-      let program = DASHBOARD_RESPONSE.programs[1]
-      let coupon1 = makeCoupon(program)
-      let coupon2 = makeCoupon(program)
+      const program = DASHBOARD_RESPONSE.programs[1]
+      const coupon1 = makeCoupon(program)
+      const coupon2 = makeCoupon(program)
       coupon2.coupon_code = "second-coupon"
       const slowPromise = wait(200).then(() => [coupon1])
 
@@ -644,7 +646,7 @@ describe("DashboardPage", () => {
     })
 
     it("shows the email composition dialog when a user has permission to contact a course team", () => {
-      let course = makeCourse()
+      const course = makeCourse()
       course.has_contact_email = true
       course.runs[0].has_paid = true
       makeRunEnrolled(course.runs[0])
@@ -655,7 +657,7 @@ describe("DashboardPage", () => {
         "/dashboard",
         DASHBOARD_SUCCESS_ACTIONS
       ).then(([wrapper]) => {
-        let contactLink = wrapper.find(CONTACT_LINK_SELECTOR).at(0)
+        const contactLink = wrapper.find(CONTACT_LINK_SELECTOR).at(0)
 
         return listenForActions(EMAIL_DIALOG_ACTIONS, () => {
           contactLink.simulate("click")
@@ -693,10 +695,10 @@ describe("DashboardPage", () => {
       })
     })
 
-    for (let faExpectedObj of faExpectedStateList) {
+    for (const faExpectedObj of faExpectedStateList) {
       it(`shows the payment teaser dialog when a user lacks permission
         to contact a course team with financial aid status: ${faExpectedObj.hasFA}`, () => {
-        let course = makeCourse()
+        const course = makeCourse()
         course.has_contact_email = true
         // Set all course runs to unpaid
         course.runs = R.chain(R.set(R.lensProp("has_paid"), false), course.runs)
@@ -717,7 +719,7 @@ describe("DashboardPage", () => {
           "/dashboard",
           DASHBOARD_SUCCESS_ACTIONS
         ).then(([wrapper]) => {
-          let contactLink = wrapper.find(CONTACT_LINK_SELECTOR).at(0)
+          const contactLink = wrapper.find(CONTACT_LINK_SELECTOR).at(0)
 
           return listenForActions(PAYMENT_DIALOG_ACTIONS, () => {
             contactLink.simulate("click")
@@ -750,7 +752,7 @@ describe("DashboardPage", () => {
     })
 
     it("renders correctly", () => {
-      let course = makeCourse()
+      const course = makeCourse()
       course.runs[0].enrollment_start_date = moment().subtract(2, "days")
       dashboardResponse.programs[0].courses = [course]
       helper.dashboardStub.returns(Promise.resolve(dashboardResponse))
@@ -759,7 +761,7 @@ describe("DashboardPage", () => {
         "/dashboard",
         DASHBOARD_SUCCESS_ACTIONS
       ).then(([wrapper]) => {
-        let enrollButton = wrapper.find(ENROLL_BUTTON_SELECTOR).at(0)
+        const enrollButton = wrapper.find(ENROLL_BUTTON_SELECTOR).at(0)
 
         return listenForActions(COURSE_ENROLL_DIALOG_ACTIONS, () => {
           enrollButton.simulate("click")
@@ -770,11 +772,11 @@ describe("DashboardPage", () => {
       })
     })
     R.forEach(faStatus => {
-      let expectedDisabled = FA_PENDING_STATUSES.includes(faStatus)
+      const expectedDisabled = FA_PENDING_STATUSES.includes(faStatus)
       it(`${faStatus} status ${expectedDisabled
         ? "disables"
         : "does not disable"} pay now button`, () => {
-        let course = makeCourse()
+        const course = makeCourse()
         course.runs[0].enrollment_start_date = moment().subtract(2, "days")
         dashboardResponse.programs[0].courses = [course]
         dashboardResponse.programs[0].financial_aid_availability = true
@@ -789,7 +791,7 @@ describe("DashboardPage", () => {
           "/dashboard",
           DASHBOARD_SUCCESS_ACTIONS
         ).then(([wrapper]) => {
-          let enrollButton = wrapper.find(ENROLL_BUTTON_SELECTOR).at(0)
+          const enrollButton = wrapper.find(ENROLL_BUTTON_SELECTOR).at(0)
 
           return listenForActions(COURSE_ENROLL_DIALOG_ACTIONS, () => {
             enrollButton.simulate("click")
@@ -847,9 +849,9 @@ describe("DashboardPage", () => {
 
   describe("checkout for non financial aid courses", () => {
     it("redirects to edX when the checkout API tells us to", () => {
-      let program = makeProgram()
-      let promise = Promise.resolve(EDX_CHECKOUT_RESPONSE)
-      let checkoutStub = helper.sandbox
+      const program = makeProgram()
+      const promise = Promise.resolve(EDX_CHECKOUT_RESPONSE)
+      const checkoutStub = helper.sandbox
         .stub(storeActions, "checkout")
         .returns(() => promise)
 
@@ -869,10 +871,10 @@ describe("DashboardPage", () => {
         }
       ]
 
-      let dashboardResponse = { programs: [program] }
-      let coursePrices = makeCoursePrices(dashboardResponse)
-      let availablePrograms = makeAvailablePrograms(dashboardResponse)
-      let programLearners = makeProgramLearners()
+      const dashboardResponse = { programs: [program] }
+      const coursePrices = makeCoursePrices(dashboardResponse)
+      const availablePrograms = makeAvailablePrograms(dashboardResponse)
+      const programLearners = makeProgramLearners()
       helper.dashboardStub.returns(Promise.resolve(dashboardResponse))
       helper.programsGetStub.returns(Promise.resolve(availablePrograms))
       helper.coursePricesStub.returns(Promise.resolve(coursePrices))

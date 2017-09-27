@@ -210,7 +210,7 @@ export default class CourseRow extends React.Component {
   render() {
     const { ui } = this.props
 
-    let firstRun = this.getFirstRun()
+    const firstRun = this.getFirstRun()
     const showEnrollPayLaterSuccess =
       ui.showEnrollPayLaterSuccess &&
       ui.showEnrollPayLaterSuccess === firstRun.course_id

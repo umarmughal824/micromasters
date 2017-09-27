@@ -58,7 +58,7 @@ export default class CountrySelectField extends React.Component {
       profile
     } = this.props
     // clear state field when country field changes
-    let clone = _.cloneDeep(profile)
+    const clone = _.cloneDeep(profile)
     _.set(clone, stateKeySet, null)
     _.set(clone, countryKeySet, selection ? selection.value : "")
     updateProfile(clone, validator)

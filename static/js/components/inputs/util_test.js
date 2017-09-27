@@ -5,16 +5,22 @@ import { dialogActions } from "./util"
 
 describe("input functions", () => {
   describe("dialogActions", () => {
-    let onCancel = () => null
-    let onSave = () => null
-    let inFlight = true
-    let newClass = "new-class"
-    let newText = "New Text"
+    const onCancel = () => null
+    const onSave = () => null
+    const inFlight = true
+    const newClass = "new-class"
+    const newText = "New Text"
 
     it("renders properly", () => {
-      let actions = dialogActions(onCancel, onSave, inFlight, newText, newClass)
+      const actions = dialogActions(
+        onCancel,
+        onSave,
+        inFlight,
+        newText,
+        newClass
+      )
       assert.lengthOf(actions, 2)
-      let [cancelButton, saveButton] = actions
+      const [cancelButton, saveButton] = actions
       assert.equal(
         cancelButton.props.className,
         "secondary-button cancel-button"
@@ -33,7 +39,7 @@ describe("input functions", () => {
     })
 
     it("uses secondary-button if it's disabled", () => {
-      let actions = dialogActions(
+      const actions = dialogActions(
         onCancel,
         onSave,
         inFlight,
@@ -42,7 +48,7 @@ describe("input functions", () => {
         true
       )
       assert.lengthOf(actions, 2)
-      let [cancelButton, saveButton] = actions
+      const [cancelButton, saveButton] = actions
       assert.equal(
         cancelButton.props.className,
         "secondary-button cancel-button"

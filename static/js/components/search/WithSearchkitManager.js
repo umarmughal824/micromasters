@@ -24,7 +24,7 @@ const withSearchkitManager = (WrappedComponent: ReactClass<*>) => {
 
     render() {
       // Remove any filters that are still applied by searchkit, but don't appear in the querystring
-      let hasFiltersOtherThanSelectedProgram =
+      const hasFiltersOtherThanSelectedProgram =
         _.get(this, "searchkit.query.index.filters.length", 0) > 1
       if (
         window.location &&

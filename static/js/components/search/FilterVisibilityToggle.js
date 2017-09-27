@@ -44,7 +44,7 @@ export default class FilterVisibilityToggle extends SearchkitComponent {
       return 0
     }
 
-    let elementResult = results.aggregations[matchingAggKey]
+    const elementResult = results.aggregations[matchingAggKey]
     if (elementResult["inner"]) {
       return elementResult["inner"]["doc_count"]
     } else {
@@ -53,7 +53,7 @@ export default class FilterVisibilityToggle extends SearchkitComponent {
   }
 
   isInResults = (id: string): boolean => {
-    let results = this.getResults()
+    const results = this.getResults()
     if (results) {
       const resultIdPrefix = FILTER_ID_ADJUST[id] || id
       const docCount = this.getChildFacetDocCount(results, resultIdPrefix)

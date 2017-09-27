@@ -20,7 +20,7 @@ describe("CustomResetFiltersDisplay", () => {
     sandbox.restore()
   })
 
-  let renderFilters = (props = {}) =>
+  const renderFilters = (props = {}) =>
     mount(
       <SearchkitProvider searchkit={searchKit}>
         <CustomResetFiltersDisplay

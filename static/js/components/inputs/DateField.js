@@ -43,14 +43,14 @@ export default class DateField extends React.Component {
     } = this.props
 
     // make a copy of keySet with a slightly different key for temporary storage of the textfields being edited
-    let editKeySet = keySet.concat()
+    const editKeySet = keySet.concat()
     editKeySet[editKeySet.length - 1] = `${editKeySet[
       editKeySet.length - 1
     ]}_edit`
 
     // Get the moment object from the state, or null if not available
-    let getDate = () => {
-      let formattedDate = _.get(data, keySet)
+    const getDate = () => {
+      const formattedDate = _.get(data, keySet)
 
       if (formattedDate !== undefined && formattedDate !== null) {
         return moment(formattedDate, ISO_8601_FORMAT)
@@ -60,12 +60,12 @@ export default class DateField extends React.Component {
 
     // Get an object { day, month, year } which contains the values being edited in the textbox
     // values may be strings or numbers. Otherwise return empty object.
-    let pad = (toPad, length) => _.padStart(String(toPad), length, "0")
-    let getEditObject = () => {
-      let edit = _.get(data, editKeySet, {})
+    const pad = (toPad, length) => _.padStart(String(toPad), length, "0")
+    const getEditObject = () => {
+      const edit = _.get(data, editKeySet, {})
 
       if (_.isEmpty(edit)) {
-        let date = getDate()
+        const date = getDate()
         if (date !== null && date.isValid()) {
           return {
             month: pad(date.month() + 1, 2),
@@ -81,14 +81,14 @@ export default class DateField extends React.Component {
     // if day, month and year are filled out. If at least one are invalid, store the text
     // representation instead in a temporary edit value and store null in place of the
     // date format.
-    let setNewDate = (day, month, year) => {
-      let clone = _.cloneDeep(data)
+    const setNewDate = (day, month, year) => {
+      const clone = _.cloneDeep(data)
 
-      let edit = getEditObject()
+      const edit = getEditObject()
       // Update tuple with the typed text. Typically only one of the arguments
       // will have text at a time since the user can't edit more than one field at once
       // so we need to look in the state to see
-      let newEdit = {
+      const newEdit = {
         ...edit,
         year:  year !== undefined ? year : edit.year,
         month: month !== undefined ? month : edit.month,
@@ -102,7 +102,7 @@ export default class DateField extends React.Component {
         newEdit.day = mstr(S.map(firstIfNumEqual(newEdit.day), validatedDay))
       }
 
-      let validatedMonth = validateMonth(newEdit.month)
+      const validatedMonth = validateMonth(newEdit.month)
       newEdit.month = mstr(
         S.map(firstIfNumEqual(newEdit.month), validatedMonth)
       )
@@ -119,21 +119,21 @@ export default class DateField extends React.Component {
       // keep text up to date
       _.set(clone, editKeySet, newEdit)
 
-      let padYear = s => _.padStart(s, 4, "0")
+      const padYear = s => _.padStart(s, 4, "0")
 
-      let dateList = [validatedYear, validatedMonth, validatedDay]
+      const dateList = [validatedYear, validatedMonth, validatedDay]
 
-      let stringifyDates = R.compose(
+      const stringifyDates = R.compose(
         R.join("-"),
         R.map(mstr),
         R.adjust(S.map(padYear), 0)
       )
 
-      let dateString = S.maybe("", stringifyDates, allJust(dateList))
+      const dateString = S.maybe("", stringifyDates, allJust(dateList))
 
-      let rawDate = Just(moment(dateString, ISO_8601_FORMAT))
+      const rawDate = Just(moment(dateString, ISO_8601_FORMAT))
 
-      let validatedDate = R.compose(
+      const validatedDate = R.compose(
         S.filter(date => date.isValid),
         S.filter(date => date.isAfter(moment("1800", "YYYY")))
       )(rawDate)
@@ -146,7 +146,7 @@ export default class DateField extends React.Component {
       updateHandler(clone, validator)
     }
 
-    let edit = getEditObject()
+    const edit = getEditObject()
 
     let dayField, daySlash
     if (!omitDay) {

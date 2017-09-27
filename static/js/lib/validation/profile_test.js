@@ -108,7 +108,7 @@ describe("Profile validation functions", () => {
     })
 
     it("should return an appropriate error if a field is missing", () => {
-      let clone = _.cloneDeep(USER_PROFILE_RESPONSE)
+      const clone = _.cloneDeep(USER_PROFILE_RESPONSE)
       clone.first_name = ""
       assert.deepEqual(personalValidation(clone), {
         first_name: "Given name is required"
@@ -116,7 +116,7 @@ describe("Profile validation functions", () => {
     })
 
     it("validates required fields", () => {
-      let requiredFields = [
+      const requiredFields = [
         ["first_name"],
         ["last_name"],
         ["preferred_name"],
@@ -128,44 +128,44 @@ describe("Profile validation functions", () => {
         ["nationality"]
       ]
 
-      let profile = {}
-      for (let key of requiredFields) {
+      const profile = {}
+      for (const key of requiredFields) {
         profile[key[0]] = ""
       }
 
-      let errors = personalValidation(profile)
-      for (let key of requiredFields) {
-        let error = errors[key]
+      const errors = personalValidation(profile)
+      for (const key of requiredFields) {
+        const error = errors[key]
         assert.ok(error.indexOf("is required") !== -1)
       }
     })
 
     it("correctly validates fields with 0", () => {
-      let profile = _.cloneDeep(USER_PROFILE_RESPONSE)
+      const profile = _.cloneDeep(USER_PROFILE_RESPONSE)
       profile.first_name = 0
-      let errors = personalValidation(profile)
+      const errors = personalValidation(profile)
       assert.deepEqual(errors, {})
     })
 
     it("should error if date of birth is in the future", () => {
-      let profile = {
+      const profile = {
         ...USER_PROFILE_RESPONSE,
         date_of_birth: "2077-01-01"
       }
-      let errors = {
+      const errors = {
         date_of_birth: "Please enter a valid date of birth"
       }
       assert.deepEqual(personalValidation(profile), errors)
     })
 
     it("should error when first_name is non cp-1252 and romanized fields are missing", () => {
-      let profile = {
+      const profile = {
         ...USER_PROFILE_RESPONSE,
         first_name:           "عامر",
         romanized_first_name: undefined,
         romanized_last_name:  undefined
       }
-      let errors = {
+      const errors = {
         romanized_first_name: "Latin given name is required",
         romanized_last_name:  "Latin family name is required"
       }
@@ -173,13 +173,13 @@ describe("Profile validation functions", () => {
     })
 
     it("should error when last_name is non cp-1252 and romanized fields are missing", () => {
-      let profile = {
+      const profile = {
         ...USER_PROFILE_RESPONSE,
         last_name:            "عامر",
         romanized_first_name: undefined,
         romanized_last_name:  undefined
       }
-      let errors = {
+      const errors = {
         romanized_first_name: "Latin given name is required",
         romanized_last_name:  "Latin family name is required"
       }
@@ -187,26 +187,26 @@ describe("Profile validation functions", () => {
     })
 
     it("should error when romanized_first_name is non cp-1252", () => {
-      let profile = {
+      const profile = {
         ...USER_PROFILE_RESPONSE,
         first_name:           "عامر",
         romanized_first_name: "عامر",
         romanized_last_name:  "test"
       }
-      let errors = {
+      const errors = {
         romanized_first_name: "Latin given name must be in Latin characters"
       }
       assert.deepEqual(personalValidation(profile), errors)
     })
 
     it("should error when romanized_last_name is non cp-1252", () => {
-      let profile = {
+      const profile = {
         ...USER_PROFILE_RESPONSE,
         first_name:           "عامر",
         romanized_first_name: "test",
         romanized_last_name:  "عامر"
       }
-      let errors = {
+      const errors = {
         romanized_last_name: "Latin family name must be in Latin characters"
       }
       assert.deepEqual(personalValidation(profile), errors)
@@ -217,48 +217,48 @@ describe("Profile validation functions", () => {
 
     for (const invalidChar of ['"', ">", ","]) {
       it(`should error when first_name contains ${invalidChar}`, () => {
-        let profile = {
+        const profile = {
           ...USER_PROFILE_RESPONSE,
           first_name: invalidChar
         }
-        let errors = {
+        const errors = {
           first_name: `Given name ${invalidCharErrorSuffix}`
         }
         assert.deepEqual(personalValidation(profile), errors)
       })
 
       it(`should error when last_name contains ${invalidChar}`, () => {
-        let profile = {
+        const profile = {
           ...USER_PROFILE_RESPONSE,
           last_name: invalidChar
         }
-        let errors = {
+        const errors = {
           last_name: `Family name ${invalidCharErrorSuffix}`
         }
         assert.deepEqual(personalValidation(profile), errors)
       })
 
       it(`should error when romanized_first_name contains ${invalidChar}`, () => {
-        let profile = {
+        const profile = {
           ...USER_PROFILE_RESPONSE,
           first_name:           "ر",
           romanized_first_name: invalidChar,
           romanized_last_name:  "name"
         }
-        let errors = {
+        const errors = {
           romanized_first_name: `Latin given name ${invalidCharErrorSuffix}`
         }
         assert.deepEqual(personalValidation(profile), errors)
       })
 
       it(`should error when romanized_last_name contains ${invalidChar}`, () => {
-        let profile = {
+        const profile = {
           ...USER_PROFILE_RESPONSE,
           first_name:           "ر",
           romanized_first_name: "name",
           romanized_last_name:  invalidChar
         }
-        let errors = {
+        const errors = {
           romanized_last_name: `Latin family name ${invalidCharErrorSuffix}`
         }
         assert.deepEqual(personalValidation(profile), errors)
@@ -266,14 +266,14 @@ describe("Profile validation functions", () => {
     }
 
     it("should error when any name is too long", () => {
-      let profile = {
+      const profile = {
         ...USER_PROFILE_RESPONSE,
         first_name:           "ر".repeat(31),
         last_name:            "ر".repeat(51),
         romanized_first_name: "b".repeat(31),
         romanized_last_name:  "b".repeat(51)
       }
-      let errors = {
+      const errors = {
         first_name:           "Given name must be no more than 30 characters",
         last_name:            "Family name must be no more than 50 characters",
         romanized_first_name:
@@ -285,43 +285,43 @@ describe("Profile validation functions", () => {
     })
 
     it("should error when address is non cp-1252", () => {
-      let profile = {
+      const profile = {
         ...USER_PROFILE_RESPONSE,
         address: "عامر"
       }
-      let errors = {
+      const errors = {
         address: "Street address must be in Latin characters"
       }
       assert.deepEqual(personalValidation(profile), errors)
     })
 
     it("should error when postal_code is non cp-1252", () => {
-      let profile = {
+      const profile = {
         ...USER_PROFILE_RESPONSE,
         postal_code: "عامر"
       }
-      let errors = {
+      const errors = {
         postal_code: "Postal code must be in Latin characters"
       }
       assert.deepEqual(personalValidation(profile), errors)
     })
 
     it("should error when city is non cp-1252", () => {
-      let profile = {
+      const profile = {
         ...USER_PROFILE_RESPONSE,
         city: "عامر"
       }
-      let errors = {
+      const errors = {
         city: "City must be in Latin characters"
       }
       assert.deepEqual(personalValidation(profile), errors)
     })
 
-    let validPostalCodes = {
+    const validPostalCodes = {
       US: ["12345", "12345-6789"],
       CA: ["123456", "123ABC", "123abc"]
     }
-    let inValidPostalCodes = {
+    const inValidPostalCodes = {
       US: [
         "a",
         "asdfb",
@@ -334,18 +334,18 @@ describe("Profile validation functions", () => {
       ],
       CA: ["a", "asdfb", "12345-asdf", "12345-1", "12345%", "1234512"]
     }
-    let messages = {
+    const messages = {
       US: "Postal code must be a valid US postal code",
       CA: "Postal code must be a valid Canadian postal code"
     }
     for (const country of ["US", "CA"]) {
       it(`should error when country is ${country} and no postal code`, () => {
-        let profile = {
+        const profile = {
           ...USER_PROFILE_RESPONSE,
           country:     country,
           postal_code: ""
         }
-        let errors = {
+        const errors = {
           postal_code: "Postal code is required"
         }
         assert.deepEqual(personalValidation(profile), errors)
@@ -353,7 +353,7 @@ describe("Profile validation functions", () => {
 
       it(`should reject invalid postal codes for ${country}`, () => {
         inValidPostalCodes[country].forEach(badCode => {
-          let profile = {
+          const profile = {
             ...USER_PROFILE_RESPONSE,
             country:     country,
             postal_code: badCode
@@ -366,7 +366,7 @@ describe("Profile validation functions", () => {
 
       it(`should accept valid postal codes for ${country}`, () => {
         validPostalCodes[country].forEach(goodCode => {
-          let profile = {
+          const profile = {
             ...USER_PROFILE_RESPONSE,
             country:     country,
             postal_code: goodCode
@@ -377,7 +377,7 @@ describe("Profile validation functions", () => {
     }
 
     it(`should not error when country does not require postal code`, () => {
-      let profile = {
+      const profile = {
         ...USER_PROFILE_RESPONSE,
         country:     "DE",
         postal_code: ""
@@ -386,11 +386,11 @@ describe("Profile validation functions", () => {
     })
 
     it("should complain if you enter an invalid phone number", () => {
-      let profile = {
+      const profile = {
         ...USER_PROFILE_RESPONSE,
         phone_number: "+1 222"
       }
-      let errors = {
+      const errors = {
         phone_number: "Please enter a valid phone number"
       }
       assert.deepEqual(personalValidation(profile), errors)
@@ -418,29 +418,29 @@ describe("Profile validation functions", () => {
     })
 
     it("should return an appropriate error if a field is missing", () => {
-      let clone = _.cloneDeep(USER_PROFILE_RESPONSE)
+      const clone = _.cloneDeep(USER_PROFILE_RESPONSE)
       clone.education[0].school_name = ""
-      let expectation = {
+      const expectation = {
         education: [{ school_name: "School name is required" }, {}]
       }
       assert.deepEqual(educationValidation(clone), expectation)
     })
 
     it("should return an empty object if no education present", () => {
-      let clone = _.cloneDeep(USER_PROFILE_RESPONSE)
+      const clone = _.cloneDeep(USER_PROFILE_RESPONSE)
       clone.education = undefined
       assert.deepEqual(educationValidation(clone), {})
     })
 
     it("should not validate field_of_study for high school students", () => {
-      let clone = _.cloneDeep(USER_PROFILE_RESPONSE)
+      const clone = _.cloneDeep(USER_PROFILE_RESPONSE)
       clone.education[0].degree_name = HIGH_SCHOOL
       clone.education[0].field_of_study = ""
       assert.deepEqual(educationValidation(clone), {})
     })
 
     it("should show all fields which are required", () => {
-      let clone = _.cloneDeep(USER_PROFILE_RESPONSE)
+      const clone = _.cloneDeep(USER_PROFILE_RESPONSE)
       clone.education[0].school_name = ""
       clone.education[0].school_city = ""
       assert.deepEqual(educationValidation(clone), {
@@ -462,22 +462,22 @@ describe("Profile validation functions", () => {
     })
 
     it("should return an appropriate error if a field is missing", () => {
-      let clone = _.cloneDeep(USER_PROFILE_RESPONSE)
+      const clone = _.cloneDeep(USER_PROFILE_RESPONSE)
       clone.work_history[0].company_name = ""
-      let expectation = {
+      const expectation = {
         work_history: [{ company_name: "Name of Employer is required" }, {}]
       }
       assert.deepEqual(employmentValidation(clone), expectation)
     })
 
     it("should return an empty object if no employment present", () => {
-      let clone = _.cloneDeep(USER_PROFILE_RESPONSE)
+      const clone = _.cloneDeep(USER_PROFILE_RESPONSE)
       clone.work_history = undefined
       assert.deepEqual(employmentValidation(clone), {})
     })
 
     it("should show all fields which are required", () => {
-      let clone = _.cloneDeep(USER_PROFILE_RESPONSE)
+      const clone = _.cloneDeep(USER_PROFILE_RESPONSE)
       clone.work_history[0].company_name = ""
       clone.work_history[0].city = ""
       assert.deepEqual(employmentValidation(clone), {
@@ -493,7 +493,7 @@ describe("Profile validation functions", () => {
     })
 
     it("should reject end date before start date", () => {
-      let errors = {
+      const errors = {
         work_history: [
           {},
           {
@@ -501,7 +501,7 @@ describe("Profile validation functions", () => {
           }
         ]
       }
-      let profile = _.cloneDeep(USER_PROFILE_RESPONSE)
+      const profile = _.cloneDeep(USER_PROFILE_RESPONSE)
       profile.work_history[1].end_date = moment(
         profile.work_history[1].start_date
       )
@@ -512,10 +512,10 @@ describe("Profile validation functions", () => {
 
     it("should reject an end date in the future", () => {
       sandbox.useFakeTimers(moment("2016-10-01").valueOf())
-      let expectation = {
+      const expectation = {
         work_history: [{}, { end_date: "End date cannot be in the future" }]
       }
-      let profile = _.cloneDeep(USER_PROFILE_RESPONSE)
+      const profile = _.cloneDeep(USER_PROFILE_RESPONSE)
       profile.work_history[1].end_date = moment()
         .add(1, "month")
         .format(ISO_8601_FORMAT)
@@ -524,19 +524,19 @@ describe("Profile validation functions", () => {
 
     it("should not reject an end date in the current month", () => {
       sandbox.useFakeTimers(moment("2016-10-01").valueOf())
-      let profile = _.cloneDeep(USER_PROFILE_RESPONSE)
+      const profile = _.cloneDeep(USER_PROFILE_RESPONSE)
       profile.work_history[1].end_date = moment().format(ISO_8601_FORMAT)
       assert.deepEqual(employmentValidation(profile), {})
     })
 
     it("should not error if end_date is blank", () => {
-      let profile = _.cloneDeep(USER_PROFILE_RESPONSE)
+      const profile = _.cloneDeep(USER_PROFILE_RESPONSE)
       profile.work_history[1].end_date = null
       assert.deepEqual(employmentValidation(profile), {})
     })
 
-    for (let field of ["year", "month"]) {
-      let errors = {
+    for (const field of ["year", "month"]) {
+      const errors = {
         work_history: [
           {},
           {
@@ -546,7 +546,7 @@ describe("Profile validation functions", () => {
       }
 
       it(`should error if end_date has an edit value in ${field}`, () => {
-        let profile = _.cloneDeep(USER_PROFILE_RESPONSE)
+        const profile = _.cloneDeep(USER_PROFILE_RESPONSE)
         profile.work_history[1].end_date = null
         profile.work_history[1].end_date_edit = Object.assign(
           {
@@ -562,7 +562,7 @@ describe("Profile validation functions", () => {
     }
 
     it(`should error if end_date has a number in year`, () => {
-      let errors = {
+      const errors = {
         work_history: [
           {},
           {
@@ -570,7 +570,7 @@ describe("Profile validation functions", () => {
           }
         ]
       }
-      let profile = _.cloneDeep(USER_PROFILE_RESPONSE)
+      const profile = _.cloneDeep(USER_PROFILE_RESPONSE)
       profile.work_history[1].end_date = null
       profile.work_history[1].end_date_edit = {
         year:  1943,
@@ -580,7 +580,7 @@ describe("Profile validation functions", () => {
     })
 
     it("should not error if end_date has an edit value which is blank", () => {
-      let profile = _.cloneDeep(USER_PROFILE_RESPONSE)
+      const profile = _.cloneDeep(USER_PROFILE_RESPONSE)
       profile.work_history[1].end_date = null
       profile.work_history[1].end_date_edit = {
         year:  "",
@@ -597,7 +597,7 @@ describe("Profile validation functions", () => {
     })
 
     it("should return fields for an empty profile", () => {
-      let errors = Object.assign(
+      const errors = Object.assign(
         {},
         ...Object.entries({
           first_name:         "Given name",
@@ -622,7 +622,7 @@ describe("Profile validation functions", () => {
     it("should return appropriate fields when a field is missing", () => {
       profile = _.cloneDeep(USER_PROFILE_RESPONSE)
       profile["first_name"] = ""
-      let expectation = [
+      const expectation = [
         false,
         PERSONAL_STEP,
         {
@@ -643,7 +643,7 @@ describe("Profile validation functions", () => {
     it("should return fields for dialog when a nested field is missing", () => {
       profile = _.cloneDeep(USER_PROFILE_RESPONSE)
       _.set(profile, ["work_history", 0, "country"], "")
-      let expectation = [
+      const expectation = [
         false,
         EMPLOYMENT_STEP,
         {
@@ -662,15 +662,15 @@ describe("Profile validation functions", () => {
 
   describe("combineValidators", () => {
     it("uses _.merge on the output of a series of functions", () => {
-      let mergeStub = sandbox.stub(_, "merge")
+      const mergeStub = sandbox.stub(_, "merge")
       const mergeResult = "mergeResult"
       mergeStub.returns(mergeResult)
       const args = ["some", "args"]
 
-      let func1 = sandbox.stub().returns("ret1")
-      let func2 = sandbox.stub().returns("ret2")
+      const func1 = sandbox.stub().returns("ret1")
+      const func2 = sandbox.stub().returns("ret2")
 
-      let result = combineValidators(func1, func2)(args)
+      const result = combineValidators(func1, func2)(args)
       assert(func1.calledWith(args))
       assert(func2.calledWith(args))
       assert(mergeStub.calledWith({}, "ret1", "ret2"))
@@ -685,23 +685,23 @@ describe("Privacy validation", () => {
   })
 
   it("should return an appropriate error if a field is missing", () => {
-    let clone = {
+    const clone = {
       ...USER_PROFILE_RESPONSE,
       account_privacy: ""
     }
-    let expectation = { account_privacy: "Privacy level is required" }
+    const expectation = { account_privacy: "Privacy level is required" }
     assert.deepEqual(privacyValidation(clone), expectation)
   })
 })
 
 describe("Email validation", () => {
-  let email = {
+  const email = {
     subject: "a great email",
     body:    "hi, how are you?"
   }
 
-  let blank = field => {
-    let emailClone = _.cloneDeep(email)
+  const blank = field => {
+    const emailClone = _.cloneDeep(email)
     emailClone[field] = null
     return emailClone
   }
@@ -725,7 +725,7 @@ describe("Email validation", () => {
       ['<a href="https://foo.bar">my better link :D</a>', false],
       ['<a href="mailto:me@example.com">EMAIL ME!!!!</a>', false]
     ].forEach(([bodyText, shouldFail]) => {
-      let inputs = _.clone(email)
+      const inputs = _.clone(email)
       inputs.body = bodyText
       assert.deepEqual(
         emailValidation(inputs),
@@ -740,7 +740,7 @@ describe("Email validation", () => {
   })
 
   it("should return no errors if all fields are filled out", () => {
-    let errors = emailValidation(email)
+    const errors = emailValidation(email)
     assert.deepEqual(errors, {})
   })
 })
@@ -758,16 +758,16 @@ describe("Financial aid validation", () => {
 
   it("should complain if income is empty", () => {
     financialAid.income = undefined
-    let errors = validateFinancialAid(financialAid)
+    const errors = validateFinancialAid(financialAid)
     assert.deepEqual(errors, {
       income: "Income is required"
     })
   })
 
-  for (let income of ["2000.00", "2000.50", "2Adb", "two thousand"]) {
+  for (const income of ["2000.00", "2000.50", "2Adb", "two thousand"]) {
     it(`should complain if income='${income}' is invalid`, () => {
       financialAid.income = income
-      let errors = validateFinancialAid(financialAid)
+      const errors = validateFinancialAid(financialAid)
       assert.deepEqual(errors, {
         income: "Please only use whole numbers."
       })
@@ -776,7 +776,7 @@ describe("Financial aid validation", () => {
 
   it("should complain if currency is empty", () => {
     financialAid.currency = undefined
-    let errors = validateFinancialAid(financialAid)
+    const errors = validateFinancialAid(financialAid)
     assert.deepEqual(errors, {
       currency: "Please select a currency"
     })
@@ -784,7 +784,7 @@ describe("Financial aid validation", () => {
 
   it("should complain if the checkBox is false", () => {
     financialAid.checkBox = false
-    let errors = validateFinancialAid(financialAid)
+    const errors = validateFinancialAid(financialAid)
     assert.deepEqual(errors, {
       checkBox: "You must agree to these terms"
     })

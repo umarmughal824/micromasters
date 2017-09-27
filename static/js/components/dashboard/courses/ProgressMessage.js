@@ -109,7 +109,7 @@ export default class ProgressMessage extends React.Component {
       if (
         [STATUS_CAN_UPGRADE, STATUS_MISSED_DEADLINE].includes(courseRun.status)
       ) {
-        let now = moment()
+        const now = moment()
         return (
           !_.isNil(courseRun.course_start_date) &&
           moment(courseRun.course_start_date).isBefore(now)
@@ -126,7 +126,7 @@ export default class ProgressMessage extends React.Component {
       return null
     }
 
-    let url = this.isCurrentOrPastEnrolled(courseRun)
+    const url = this.isCurrentOrPastEnrolled(courseRun)
       ? urljoin(EDX_LINK_BASE, courseRun.course_id)
       : courseRun.enrollment_url
 
@@ -159,7 +159,7 @@ export default class ProgressMessage extends React.Component {
   renderCourseLinks = (): React$Element<*> | null => {
     const { courseRun } = this.props
 
-    let courseLinks = R.reject(R.isNil, [
+    const courseLinks = R.reject(R.isNil, [
       this.renderViewCourseEdxLink(courseRun),
       this.renderCourseContactLink()
     ])

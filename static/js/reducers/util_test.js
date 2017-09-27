@@ -9,7 +9,7 @@ import { assertIsJust, assertIsNothing } from "../lib/test_utils"
 
 describe("reducer utilities", () => {
   describe("username selectors", () => {
-    let state = {
+    const state = {
       dashboard: {
         [SETTINGS.user.username]: DASHBOARD_RESPONSE
       }

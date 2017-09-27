@@ -11,7 +11,7 @@ const ssoFormEntries = (
   ssoDigest,
   ssoRedirectURL
 ) => {
-  let baseURL = ssoRedirectURL.replace(/\/$/, "")
+  const baseURL = ssoRedirectURL.replace(/\/$/, "")
   if (R.isNil(SETTINGS.EXAMS_SSO_CLIENT_CODE)) {
     throw "EXAMS_SSO_CLIENT_CODE not configured"
   }
@@ -30,7 +30,7 @@ const ssoFormEntries = (
 }
 
 export const createFormInput = R.curry((form, [name, value]) => {
-  let node = document.createElement("input")
+  const node = document.createElement("input")
   node.type = "hidden"
   node.name = name
   node.value = value
@@ -38,7 +38,7 @@ export const createFormInput = R.curry((form, [name, value]) => {
 })
 
 const createForm = () => {
-  let form = document.createElement("form")
+  const form = document.createElement("form")
   // $FlowFixMe: flow disagrees
   document.body.appendChild(form)
   if (R.isNil(SETTINGS.EXAMS_SSO_URL)) {
@@ -55,7 +55,7 @@ export const generateSSOForm = (
   ssoDigest: string,
   ssoRedirectURL: string
 ) => {
-  let form = createForm()
+  const form = createForm()
   R.map(
     createFormInput(form),
     ssoFormEntries(studentId, timestamp, timeout, ssoDigest, ssoRedirectURL)

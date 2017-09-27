@@ -7,7 +7,7 @@ import { assert } from "chai"
 
 describe("generated profile action helpers", () => {
   it("should take a username and a keySet", () => {
-    let action = updateValidationVisibility("my user", ["a", "key", "set"])
+    const action = updateValidationVisibility("my user", ["a", "key", "set"])
     assert.deepEqual(action, {
       type:    UPDATE_VALIDATION_VISIBILITY,
       payload: {

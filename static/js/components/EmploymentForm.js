@@ -65,7 +65,7 @@ class EmploymentForm extends ProfileFormFields {
       setWorkDialogVisibility,
       validator
     } = this.props
-    let clone = {
+    const clone = {
       ...profile,
       work_history: [...profile.work_history, generateNewWorkHistory()]
     }
@@ -82,7 +82,7 @@ class EmploymentForm extends ProfileFormFields {
 
   deleteWorkHistoryEntry = (): Promise<*> => {
     const { saveProfile, profile, ui } = this.props
-    let clone = _.cloneDeep(profile)
+    const clone = _.cloneDeep(profile)
     if (ui.deletionIndex !== undefined && ui.deletionIndex !== null) {
       clone["work_history"].splice(ui.deletionIndex, 1)
     }
@@ -114,15 +114,15 @@ class EmploymentForm extends ProfileFormFields {
 
   addSpaceForError(keySet: string[]) {
     const { errors } = this.props
-    let value = _.get(errors, keySet)
+    const value = _.get(errors, keySet)
     return value === undefined ? "" : "top-space"
   }
 
   editWorkHistoryForm(): React$Element<*> {
     const { ui, profile } = this.props
-    let keySet = (key): any => ["work_history", ui.workDialogIndex, key]
-    let id = _.get(profile, keySet("id"))
-    let title = id !== undefined ? "Edit Employment" : "Add Employment"
+    const keySet = (key): any => ["work_history", ui.workDialogIndex, key]
+    const id = _.get(profile, keySet("id"))
+    const title = id !== undefined ? "Edit Employment" : "Add Employment"
 
     return (
       <Grid className="profile-tab-grid">
@@ -183,7 +183,7 @@ class EmploymentForm extends ProfileFormFields {
     if (ui.workHistoryEdit === true) {
       let workHistoryRows = []
       if (!_.isUndefined(work_history)) {
-        let sorted = workEntriesByDate(work_history)
+        const sorted = workEntriesByDate(work_history)
         workHistoryRows = sorted.map(
           ([index, entry]) =>
             entry.id === undefined ? undefined : this.jobRow(entry, index)
@@ -217,18 +217,18 @@ class EmploymentForm extends ProfileFormFields {
   jobRow(position: WorkHistoryEntry, index: number) {
     const { errors, profile } = this.props
 
-    let endDateText = () =>
+    const endDateText = () =>
       _.isEmpty(position.end_date)
         ? "Current"
         : formatMonthDate(position.end_date)
-    let deleteEntry = () => this.openWorkDeleteDialog(index)
-    let editEntry = () => this.openEditWorkHistoryForm(index)
-    let validationAlert = () => {
+    const deleteEntry = () => this.openWorkDeleteDialog(index)
+    const editEntry = () => this.openEditWorkHistoryForm(index)
+    const validationAlert = () => {
       if (_.get(errors, ["work_history", String(index)])) {
         return <IconButton name="error" onClick={editEntry} />
       }
     }
-    let icons = () => {
+    const icons = () => {
       return userPrivilegeCheck(
         profile,
         () => (
@@ -281,8 +281,8 @@ class EmploymentForm extends ProfileFormFields {
 
   renderWorkRadioSwitch() {
     const { ui: { workHistoryAnswer } } = this.props
-    let valueSelected = _.isNil(workHistoryAnswer) ? null : "false"
-    let radioIconStyle = { marginRight: "8px" }
+    const valueSelected = _.isNil(workHistoryAnswer) ? null : "false"
+    const radioIconStyle = { marginRight: "8px" }
     return (
       <RadioButtonGroup
         className="profile-radio-switch"
@@ -337,7 +337,7 @@ class EmploymentForm extends ProfileFormFields {
       return null
     }
 
-    let cardClass = workHistoryEdit ? "" : "profile-tab-card-grayed"
+    const cardClass = workHistoryEdit ? "" : "profile-tab-card-grayed"
     return (
       <Card
         shadow={1}

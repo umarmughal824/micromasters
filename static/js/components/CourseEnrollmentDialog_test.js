@@ -60,7 +60,7 @@ describe("CourseEnrollmentDialog", () => {
         }
       }
     )
-    let el: HTMLElement = (document.querySelector(
+    const el: HTMLElement = (document.querySelector(
       ".course-enrollment-dialog"
     ): any)
     return el

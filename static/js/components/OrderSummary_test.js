@@ -22,14 +22,14 @@ describe("OrderSummary", () => {
     sandbox.restore()
   })
 
-  let getElements = renderedComponent => {
-    let button = renderedComponent.find(".continue-payment")
+  const getElements = renderedComponent => {
+    const button = renderedComponent.find(".continue-payment")
     let buttonText
     if (button.length > 0 && button.children().length > 0) {
       buttonText = button.children().text()
     }
-    let explanation = renderedComponent.find(".payment-explanation")
-    let explanationText =
+    const explanation = renderedComponent.find(".payment-explanation")
+    const explanationText =
       explanation.length === 1 ? explanation.text() : undefined
     return {
       button:          button,
@@ -38,13 +38,13 @@ describe("OrderSummary", () => {
     }
   }
 
-  let assertCheckoutButton = (button, courseId) => {
+  const assertCheckoutButton = (button, courseId) => {
     button.simulate("click")
     assert.isAbove(checkoutStub.callCount, 0)
     assert.deepEqual(checkoutStub.args[0], [courseId])
   }
 
-  let renderOrderSummary = (props = {}) => {
+  const renderOrderSummary = (props = {}) => {
     return shallow(
       <OrderSummary
         checkout={checkoutStub}
@@ -61,11 +61,11 @@ describe("OrderSummary", () => {
     ["", "blank coupon code"]
   ].forEach(([code, codeDescription]) => {
     it(`shows discount calculation if user has a coupon with ${codeDescription}`, () => {
-      let course = findCourse(
+      const course = findCourse(
         course =>
           course.runs.length > 0 && course.runs[0].status === STATUS_OFFERED
       )
-      let firstRun = course.runs[0]
+      const firstRun = course.runs[0]
       const wrapper = renderOrderSummary({
         courseRun:  firstRun,
         course:     course,
@@ -74,13 +74,13 @@ describe("OrderSummary", () => {
         couponCode: code
       })
 
-      let descriptions = wrapper.find(".description")
+      const descriptions = wrapper.find(".description")
       assert.equal(descriptions.length, 3)
       assert.equal(
         descriptions.children().nodes[1],
         code ? `Discount from coupon ${code}` : "Discount from coupon"
       )
-      let amounts = wrapper.find(".amount")
+      const amounts = wrapper.find(".amount")
       assert.equal(amounts.length, 3)
       assert.equal(
         amounts.children().nodes[1],
@@ -90,32 +90,32 @@ describe("OrderSummary", () => {
   })
 
   it("does not show discount calculation if no discount applies", () => {
-    let course = findCourse(
+    const course = findCourse(
       course =>
         course.runs.length > 0 && course.runs[0].status === STATUS_OFFERED
     )
-    let firstRun = course.runs[0]
+    const firstRun = course.runs[0]
     const wrapper = renderOrderSummary({
       courseRun: firstRun,
       course:    course,
       discount:  null
     })
 
-    let descriptions = wrapper.find(".description")
+    const descriptions = wrapper.find(".description")
     assert.equal(descriptions.length, 1)
   })
 
   it("shows a message if a user is redirected for checkout when price is above 0", () => {
-    let course = findCourse(
+    const course = findCourse(
       course =>
         course.runs.length > 0 && course.runs[0].status === STATUS_OFFERED
     )
-    let firstRun = course.runs[0]
+    const firstRun = course.runs[0]
     const wrapper = renderOrderSummary({
       courseRun: firstRun,
       course:    course
     })
-    let elements = getElements(wrapper)
+    const elements = getElements(wrapper)
 
     assert.isUndefined(elements.button.props().disabled)
     assert.include(elements.buttonText, "Continue")
@@ -124,18 +124,18 @@ describe("OrderSummary", () => {
   })
 
   it("shows a message if a user skips checkout when price is 0", () => {
-    let course = findCourse(
+    const course = findCourse(
       course =>
         course.runs.length > 0 && course.runs[0].status === STATUS_OFFERED
     )
-    let firstRun = course.runs[0]
+    const firstRun = course.runs[0]
     const wrapper = renderOrderSummary({
       courseRun:   firstRun,
       course:      course,
       coursePrice: 0,
       finalPrice:  0
     })
-    let elements = getElements(wrapper)
+    const elements = getElements(wrapper)
 
     assert.isUndefined(elements.button.props().disabled)
     assert.include(elements.buttonText, "Continue")
@@ -144,17 +144,17 @@ describe("OrderSummary", () => {
   })
 
   it("shows a spinner in place of the continue while API call is in progress", () => {
-    let course = findCourse(
+    const course = findCourse(
       course =>
         course.runs.length > 0 && course.runs[0].status === STATUS_CAN_UPGRADE
     )
-    let firstRun = course.runs[0]
+    const firstRun = course.runs[0]
     const wrapper = renderOrderSummary({
       courseRun:      firstRun,
       course:         course,
       checkoutStatus: FETCH_PROCESSING
     })
-    let button = wrapper.find(".continue-payment")
+    const button = wrapper.find(".continue-payment")
     assert.isTrue(button.props().spinning)
   })
 })
