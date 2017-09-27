@@ -6,10 +6,12 @@ from unittest.mock import (
     patch,
     MagicMock,
 )
+from django.urls import reverse
 
 import pytz
 import ddt
 
+from cms.factories import ProgramCertificateSignatoriesFactory
 from courses.factories import ProgramFactory, CourseFactory, CourseRunFactory
 from dashboard.api_edx_cache import CachedEdxUserData
 from dashboard.models import CachedEnrollment, CachedCertificate, CachedCurrentGrade
@@ -19,7 +21,7 @@ from ecommerce.models import Order
 from exams.factories import ExamProfileFactory, ExamAuthorizationFactory, ExamRunFactory
 from exams.models import ExamProfile, ExamAuthorization
 from grades.factories import FinalGradeFactory
-from grades.models import FinalGrade
+from grades.models import FinalGrade, MicromastersProgramCertificate
 from micromasters.factories import UserFactory
 from micromasters.utils import (
     load_json_from_file,
@@ -624,6 +626,25 @@ class MMTrackTest(MockedESTestCase):
         )
         assert mmtrack.has_passing_certificate(key) is True
         assert mmtrack.has_paid(key) is False
+
+    def test_get_program_certificate_url(self):
+        """
+        Test get_program_certificate_url
+        """
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program_financial_aid,
+            edx_user_data=self.cached_edx_user_data
+        )
+        assert mmtrack.get_program_certificate_url() == ""
+
+        certificate = MicromastersProgramCertificate.objects.create(
+            user=self.user, program=self.program_financial_aid
+        )
+        assert mmtrack.get_program_certificate_url() == ""
+
+        ProgramCertificateSignatoriesFactory.create(program_page__program=certificate.program)
+        assert mmtrack.get_program_certificate_url() == reverse('program-certificate', args=[certificate.hash])
 
     def test_get_passing_final_grades(self):
         """

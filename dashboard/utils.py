@@ -5,7 +5,8 @@ import logging
 from decimal import Decimal
 
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Count
+from django.urls import reverse
 
 from courses.models import CourseRun
 from dashboard.api_edx_cache import CachedEdxUserData
@@ -14,6 +15,7 @@ from grades.constants import FinalGradeStatus
 from grades.models import (
     FinalGrade,
     ProctoredExamGrade,
+    MicromastersProgramCertificate,
 )
 from exams.models import (
     ExamProfile,
@@ -427,6 +429,29 @@ class MMTrack:
             qset: a queryset of grades.models.ProctoredExamGrade
         """
         return ProctoredExamGrade.for_user_course(self.user, course)
+
+    def program_certificate_qset(self):
+        """
+        Returns the queryset of micromasters program certificate
+
+        Returns:
+            qset: a queryset of grades.models.MicromastersProgramCertificate
+        """
+        return MicromastersProgramCertificate.objects.filter(user=self.user, program=self.program)
+
+    def get_program_certificate_url(self):
+        """
+        Returns a string with program certificate url
+
+        Returns:
+            str: a string with url or empty string
+        """
+        certificate = self.program_certificate_qset().annotate(
+            signatories=Count('program__programpage__program_certificate_signatories')
+        ).filter(signatories__gt=0).first()
+        if certificate is None:
+            return ""
+        return reverse('program-certificate', args=[certificate.hash])
 
 
 def get_mmtrack(user, program):
