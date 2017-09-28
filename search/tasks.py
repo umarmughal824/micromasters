@@ -35,7 +35,7 @@ def post_indexing_handler(program_enrollment_ids):
     feature_sync_user = settings.FEATURES.get('OPEN_DISCUSSIONS_USER_SYNC', False)
 
     if not feature_sync_user:
-        log.error('OPEN_DISCUSSIONS_USER_SYNC is set to False (so disabled) in the settings')
+        log.debug('OPEN_DISCUSSIONS_USER_SYNC is set to False (so disabled) in the settings')
 
     _refresh_index(get_default_alias())
     for program_enrollment in ProgramEnrollment.objects.filter(id__in=program_enrollment_ids):
