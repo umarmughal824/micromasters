@@ -10,7 +10,6 @@ import {
   makeCourse,
   makeProctoredExamResult
 } from "../../../factories/dashboard"
-import { COURSE_GRADE_WEIGHT, EXAM_GRADE_WEIGHT } from "../../../lib/grades"
 import { STATUS_PASSED, STATUS_OFFERED } from "../../../constants"
 import { EXAM_GRADE, EDX_GRADE } from "../../../containers/DashboardPage"
 
@@ -60,17 +59,13 @@ describe("Course Grades", () => {
     )
   })
 
-  it("should display a calculated final grade", () => {
-    course.runs[0].final_grade = 82
-    course.proctorate_exams_grades = [makeProctoredExamResult()]
+  it("should display a final grade", () => {
+    course.overall_grade = "40"
     const grades = renderGrades()
-    const expectation = _.round(
-      // $FlowFixMe: flow doesnt like this
-      COURSE_GRADE_WEIGHT * course.runs[0].final_grade +
-        EXAM_GRADE_WEIGHT *
-          (course.proctorate_exams_grades[0].percentage_grade * 100)
+    assert.equal(
+      grades.find(".final-grade .number").text(),
+      `${course.overall_grade}%`
     )
-    assert.equal(grades.find(".final-grade .number").text(), `${expectation}%`)
   })
 
   it("should only display the edX grade if has_exam == false", () => {
