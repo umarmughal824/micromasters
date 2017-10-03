@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.75.4
+--------------
+
+- Show program certificate on dashboard (#3546)
+- Added repl (#3553)
+- Move js_test.sh to match location in cookiecutter and other repos (#3554)
+- Implement &#39;recent posts&#39; display on dashboard
+- Add contributors when new channel is created (#3527)
+- Remove afterImageUpload callback which was erroring and is unnecessary (#3552)
+- Layout changes to the MM Program Certificate (#3561)
+- Changed noisy log.error to log.debug
+
 Version 0.75.3
 --------------
 
