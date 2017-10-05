@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.76.1
+--------------
+
+- Fixed CORS redirect issue with discussions API (#3603)
+- Redirect to new channel after creating it (#3589)
+- Fix typo (#3596)
+- Stagger SFTP operations to Pearson (#3593)
+- Update logging configuration to show celery exceptions (#3591)
+- Link channels to users and add all staff as moderators of channel (#3580)
+
 Version 0.76.0
 --------------
 
