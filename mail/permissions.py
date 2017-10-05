@@ -1,6 +1,10 @@
 """
 Permission classes for mail views
 """
+import hashlib
+import hmac
+
+from django.conf import settings
 
 from rolepermissions.verifications import has_permission
 from rest_framework.permissions import BasePermission
@@ -101,3 +105,43 @@ class UserCanMessageCourseTeamPermission(BasePermission):
         )
         course_run_keys = obj.courserun_set.values_list('edx_course_key', flat=True)
         return any([mmtrack.has_paid(course_run_key) for course_run_key in course_run_keys])
+
+
+class MailGunWebHookPermission(BasePermission):
+    """
+    Verifies HMAC signature for Mailgun webhook
+    """
+    @classmethod
+    def verify(cls, token, timestamp, signature):
+        """
+        Verify signature of event for security
+
+        Args:
+            token (str): Randomly generated alpha numeric string with length 50.
+            timestamp (int): Number of seconds passed since January 1, 1970
+            signature (str): String with hexadecimal digits generate by HMAC algorithm.
+
+        Returns:
+            boolean: True if signature is valid
+        """
+        if timestamp is not None and signature is not None and token is not None:
+            key_bytes = bytes(settings.MAILGUN_KEY, 'latin-1')
+            data_bytes = bytes('{}{}'.format(timestamp, token), 'latin-1')
+
+            hmac_digest = hmac.new(
+                key=key_bytes,
+                msg=data_bytes,
+                digestmod=hashlib.sha256
+            ).hexdigest()
+            return hmac.compare_digest(signature, hmac_digest)
+
+        return False
+
+    def has_permission(self, request, view):
+        """
+        Returns True if signature matches
+        """
+        timestamp = request.POST.get("timestamp", None)
+        signature = request.POST.get("signature", None)
+        token = request.POST.get("token", None)
+        return MailGunWebHookPermission.verify(token, timestamp, signature)

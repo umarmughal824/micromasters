@@ -29,6 +29,7 @@ from mail.permissions import (
     UserCanMessageCourseTeamPermission,
     UserCanMessageLearnersPermission,
     UserCanMessageSpecificLearnerPermission,
+    MailGunWebHookPermission,
 )
 from mail.serializers import GenericMailSerializer, AutomaticEmailSerializer
 from mail.utils import generate_mailgun_response_json
@@ -198,7 +199,7 @@ class CourseTeamMailView(GenericAPIView):
             user=user,
             course=course,
             subject=serializer.data['email_subject'],
-            body=serializer.data['email_body'],
+            body=serializer.data['email_body']
         )
         return Response(
             status=mailgun_response.status_code,
@@ -237,3 +238,35 @@ class FinancialAidMailView(GenericAPIView):
             status=mailgun_response.status_code,
             data=generate_mailgun_response_json(mailgun_response)
         )
+
+
+class MailWebhookView(APIView):
+    """
+    View class that handles Mailgun webhooks
+    """
+    permission_classes = (MailGunWebHookPermission, )
+
+    def post(self, request, *args, **kargs):  # pylint: disable=unused-argument
+        """
+        POST method handler
+        """
+        event = request.POST.get("event", None)
+        recipient = request.POST.get("recipient", None)
+        error = request.POST.get("error", None)
+        message_headers = request.POST.get("message-headers", None)
+        log_error_on_bounce = request.POST.get("log_error_on_bounce", "")
+        error_msg = (
+            "Webhook event {event} received by Mailgun for recipient {to}: {error} {header}".format(
+                to=recipient,
+                error=error,
+                event=event,
+                header=message_headers
+            )
+        )
+
+        if log_error_on_bounce.lower() == "true" and event == "bounced":
+            log.error(error_msg)
+        else:
+            log.debug(error_msg)
+
+        return Response(status=status.HTTP_200_OK)

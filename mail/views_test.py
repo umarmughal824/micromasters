@@ -2,10 +2,13 @@
 Tests for HTTP email API views
 """
 from unittest.mock import Mock, patch
+import ddt
 
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.db.models.signals import post_save
+from django.test import override_settings
+from django.test.client import RequestFactory
 from requests.exceptions import HTTPError
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -28,6 +31,7 @@ from mail.exceptions import SendBatchException
 from mail.factories import AutomaticEmailFactory
 from mail.models import SentAutomaticEmail, AutomaticEmail
 from mail.serializers import AutomaticEmailSerializer
+from mail.views import MailWebhookView
 from profiles.factories import (
     ProfileFactory,
     UserFactory,
@@ -636,3 +640,76 @@ class FinancialAidMailViewTests(FinancialAidBaseTestCase, APITestCase):
         with patch('mail.views.MailgunClient.send_batch', side_effect=ImproperlyConfigured):
             resp = self.client.post(self.url, data=self.request_data, format='json')
         assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+
+
+@ddt.ddt
+class EmailBouncedViewTests(APITestCase, MockedESTestCase):
+    """Test email bounce view web hook"""
+    def setUp(self):
+        super().setUp()
+        self.url = reverse('mailgun_webhook')
+
+    def test_missing_signature(self):
+        """Test that webhook api returns status code 403"""
+        resp_post = self.client.post(
+            self.url,
+            data={
+                "event": "bounced",
+                "recipient": "c@example.com",
+                "error": "Unable to send email"
+            }
+        )
+        # api returns status code 403 because signature is not provided
+        assert resp_post.status_code == status.HTTP_403_FORBIDDEN
+
+    @override_settings(MAILGUN_KEY="key-12345")
+    @ddt.data(
+        ("d717895b90e49108c74df5e0cecf0d80b20e2fb2ed836bfa9209b723d57b2e77", status.HTTP_200_OK),
+        ("f717895b90e49108c74df5e0cecf0d80b20e2fb2ed836bfa9209b723d57b2e88", status.HTTP_403_FORBIDDEN),
+    )
+    @ddt.unpack
+    def test_signature(self, signature, status_code):
+        """Test that webhook api returns status code 200 when valid data"""
+        resp_post = self.client.post(
+            self.url,
+            data={
+                "event": "bounced",
+                "recipient": "c@example.com",
+                "error": "Unable to send email",
+                "timestamp": 1507117424,
+                "token": "43f17fa66f43f64ee7f6f0927b03c5b60a4c5eb88cfff4b2c1",
+                "signature": signature,
+            }
+        )
+        # api returns status code 200 when signature is valid
+        assert resp_post.status_code == status_code
+
+    @patch('mail.views.log')
+    @ddt.data(
+        (True, "error"),
+        (False, "debug")
+    )
+    @ddt.unpack
+    def test_bounce(self, log_error_on_bounce, logger, mock_logger):
+        """Tests that api logs error when email is bounced"""
+        data = {
+            "event": "bounced",
+            "recipient": "c@example.com",
+            "error": "Unable to send email",
+            "log_error_on_bounce": log_error_on_bounce,
+            "message-headers": "[[\"sender\": \"xyx@example.com\"]]"
+        }
+        error_msg = (
+            "Webhook event {event} received by Mailgun for recipient {to}: {error} {header}".format(
+                to=data["recipient"],
+                error=data["error"],
+                event=data["event"],
+                header=data["message-headers"]
+            )
+        )
+        factory = RequestFactory()
+        request = factory.post(self.url, data=data)
+        MailWebhookView().post(request)
+
+        # assert that error message is logged
+        getattr(mock_logger, logger).assert_called_with(error_msg)
