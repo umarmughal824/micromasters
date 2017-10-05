@@ -1,6 +1,22 @@
 Release Notes
 =============
 
+Version 0.76.0
+--------------
+
+- Overall final grade for course (#3567)
+- Generate MicromastersCourseCertificates only when exam grades are available (#3584)
+- Change log.error to log.debug for USER_SYNC feature flag (#3576)
+- Use transaction.on_commit to fix a race condition (#3563)
+- Added message for future scheduled exams for learners who haven&#39;t taken an exam yet (#3558)
+- Layout changes to the MM Program Certificate  (#3578)
+- Change copy for clarity (#3571)
+- Added create discussion channel ui (#3473, #3474)
+- Changed noisy log.error to log.debug
+- Return course certificate url only if course has signatories (#3559)
+- Fixed discussions redirect to show user error page
+- use common eslint config
+
 Version 0.75.4
 --------------
 
