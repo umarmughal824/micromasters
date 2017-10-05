@@ -16,4 +16,4 @@ export const postURL = (postID: string, channelName: string) =>
   )
 
 export const frontpageAPI = () =>
-  urljoin(SETTINGS.open_discussions_redirect_url, "api/v0/frontpage")
+  urljoin(SETTINGS.open_discussions_redirect_url, "api/v0/frontpage/")

@@ -30,11 +30,11 @@ describe("open-discussions utility functions", () => {
 
   it("frontpageAPI should behave as expected", () => {
     [
-      ["http://open.discussions", "http://open.discussions/api/v0/frontpage"],
-      ["http://open.discussions/", "http://open.discussions/api/v0/frontpage"],
+      ["http://open.discussions", "http://open.discussions/api/v0/frontpage/"],
+      ["http://open.discussions/", "http://open.discussions/api/v0/frontpage/"],
       [
         "http://open.discussions/foobar/",
-        "http://open.discussions/foobar/api/v0/frontpage"
+        "http://open.discussions/foobar/api/v0/frontpage/"
       ]
     ].forEach(([redirectURL, expectation]) => {
       SETTINGS.open_discussions_redirect_url = redirectURL
