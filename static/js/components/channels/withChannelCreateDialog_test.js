@@ -10,14 +10,14 @@ import fetchMock from "fetch-mock"
 import IntegrationTestHelper from "../../util/integration_test_helper"
 import { withChannelCreateDialog } from "./withChannelCreateDialog"
 import { actions } from "../../lib/redux_rest"
-import { CHANNEL_CREATE_DIALOG, TOAST_SUCCESS } from "../../constants"
+import { CHANNEL_CREATE_DIALOG } from "../../constants"
 import {
   START_CHANNEL_EDIT,
   CLEAR_CHANNEL_EDIT,
   INITIATE_CREATE_CHANNEL,
   CREATE_CHANNEL_SUCCESS
 } from "../../actions/channels"
-import { SHOW_DIALOG, HIDE_DIALOG, SET_TOAST_MESSAGE } from "../../actions/ui"
+import { SHOW_DIALOG, HIDE_DIALOG } from "../../actions/ui"
 import { INITIAL_CHANNEL_STATE } from "../../reducers/channel_dialog"
 
 describe("withChannelCreateDialog higher-order component", () => {
@@ -139,7 +139,6 @@ describe("withChannelCreateDialog higher-order component", () => {
         actions.channels.post.requestType,
         actions.channels.post.successType,
         CREATE_CHANNEL_SUCCESS,
-        SET_TOAST_MESSAGE,
         CLEAR_CHANNEL_EDIT,
         HIDE_DIALOG
       ],
@@ -150,9 +149,5 @@ describe("withChannelCreateDialog higher-order component", () => {
     assert.isTrue(buildQuerySpy.called)
     assert.isTrue(openSpy.called)
     assert.isFalse(state.ui.dialogVisibility[CHANNEL_CREATE_DIALOG])
-    assert.deepEqual(state.ui.toastMessage, {
-      message: 'Your channel "title" has been created.',
-      icon:    TOAST_SUCCESS
-    })
   })
 })

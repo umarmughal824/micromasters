@@ -4,14 +4,13 @@ import React from "react"
 import R from "ramda"
 import type { Dispatch } from "redux"
 
-import { showDialog, hideDialog, setToastMessage } from "../../actions/ui"
+import { showDialog, hideDialog } from "../../actions/ui"
 import {
   startChannelEdit,
   clearChannelEdit,
   updateChannelEdit,
   createChannel
 } from "../../actions/channels"
-import { TOAST_SUCCESS } from "../../constants"
 import { actions } from "../../lib/redux_rest"
 import { discussionErrors } from "../../lib/validation/discussions"
 import { getDisplayName } from "../../util/util"
@@ -79,15 +78,8 @@ export const withChannelCreateDialog = (WrappedComponent: ReactClass<*>) => {
 
           if (SETTINGS.open_discussions_redirect_url) {
             const channelUrl = `${SETTINGS.open_discussions_redirect_url}channel/${channel.name}`
-            window.open(channelUrl, "_blank")
+            window.open(channelUrl, "_self")
           }
-
-          return dispatch(
-            setToastMessage({
-              message: `Your channel "${channel.title}" has been created.`,
-              icon:    TOAST_SUCCESS
-            })
-          )
         })
       }
     }
