@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.76.2
+--------------
+
+- Add validation for recipient variable tags (#3592)
+- Move root logger to proper place (#3615)
+- Raised an exception to sentry when course team e-mails fail (#3585)
+- Make MAILGUN_URL and MAILGUN_KEY required values (#3600)
+
 Version 0.76.1
 --------------
 
