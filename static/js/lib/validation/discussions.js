@@ -17,9 +17,8 @@ const checkName = checkProp(
 )
 
 const requiredMessages = {
-  name:               "Channel name is required",
-  title:              "Channel title is required",
-  public_description: "Channel description is required"
+  name:  "Channel name is required",
+  title: "Channel title is required"
 }
 
 const checkRequiredFields = R.compose(
