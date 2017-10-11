@@ -97,6 +97,8 @@ import Grades, {
 } from "../components/dashboard/courses/Grades"
 import { EDX_GRADE } from "./DashboardPage"
 import DiscussionCard from "../components/DiscussionCard"
+import { makeFrontPageList } from "../factories/posts"
+import { postURL } from "../lib/discussions"
 
 describe("DashboardPage", () => {
   let renderComponent, helper, listenForActions
@@ -168,6 +170,25 @@ describe("DashboardPage", () => {
           assert.lengthOf(wrapper.find(DiscussionCard), 0)
         }
       })
+    })
+  })
+
+  it("should show the frontpage with data", async () => {
+    const posts = makeFrontPageList()
+    helper.discussionsFrontpageStub.returns(Promise.resolve({ posts }))
+    const [wrapper] = await renderComponent(
+      "/dashboard",
+      DASHBOARD_SUCCESS_ACTIONS
+    )
+    const card = wrapper.find(DiscussionCard)
+
+    card.find(".post").forEach((renderedPost, idx) => {
+      const link = renderedPost.find(".post-title")
+      assert.equal(link.text(), posts[idx].title)
+      assert.equal(
+        link.props().href,
+        postURL(posts[idx].id, posts[idx].channel_name)
+      )
     })
   })
 

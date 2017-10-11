@@ -24,5 +24,5 @@ export const discussionsFrontpageEndpoint: Endpoint = {
       return Promise.resolve([])
     }
   },
-  getSuccessHandler: payload => payload.concat()
+  getSuccessHandler: ({ posts }) => posts.concat()
 }
