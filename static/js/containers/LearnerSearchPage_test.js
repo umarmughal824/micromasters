@@ -18,6 +18,10 @@ import {
   UPDATE_EMAIL_EDIT
 } from "../actions/email"
 import { START_CHANNEL_EDIT } from "../actions/channels"
+import {
+  REQUEST_DASHBOARD,
+  RECEIVE_DASHBOARD_SUCCESS
+} from "../actions/dashboard"
 import { SHOW_DIALOG, HIDE_DIALOG } from "../actions/ui"
 import { EMAIL_COMPOSITION_DIALOG } from "../components/email/constants"
 import { CHANNEL_CREATE_DIALOG } from "../constants"
@@ -567,5 +571,17 @@ describe("LearnerSearchPage", function() {
       assert(wrapper.find(".sk-search-box"), "Unable to find textbox")
       assert.equal(wrapper.find(".filter-visibility-toggle").length, 9)
     })
+  })
+
+  it("navigates between the learner search page and the profile page without error", async () => {
+    await renderSearch()
+    await listenForActions(
+      [REQUEST_DASHBOARD, RECEIVE_DASHBOARD_SUCCESS],
+      () => {
+        helper.browserHistory.push(`/learner/${SETTINGS.user.username}`)
+      }
+    )
+    helper.browserHistory.push("/learners")
+    helper.browserHistory.push(`/learner/${SETTINGS.user.username}`)
   })
 })
