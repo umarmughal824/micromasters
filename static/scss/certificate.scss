@@ -1,3 +1,14 @@
+@media print {
+  @page {
+    size: auto;
+    margin: 0mm;
+  }
+
+  body {
+    margin: 0;
+  }
+}
+
 .certificate {
   max-width: 1120px;
   margin-left: auto;
@@ -9,6 +20,11 @@
   font-weight: 300;
   -webkit-font-smoothing: antialiased; // sass-lint:disable-line no-vendor-prefixes
 
+  @media print {
+    width: 95%;
+    margin: 0;
+  }
+
   .certificate-body {
     border: 1px solid #cdd7db;
     background: #fcfcfc;
@@ -16,8 +32,26 @@
     padding: 35px 50px;
     position: relative;
 
+    @media print {
+      border: none;
+      padding: 0;
+      margin: 1.4cm;
+    }
+
     .col-md-8 {
       position: static;
+    }
+
+    @media print {
+      .col-md-8 {
+        width: 50%;
+        float: left;
+      };
+
+      .col-md-4 {
+        width: 45%;
+        float: right;
+      }
     }
 
     &.verified {
@@ -32,11 +66,20 @@
 
       img {
         width: 405px;
+
+        @media print {
+          width: 320px;
+        }
       }
     }
 
     .organization-logo img {
       width: 150px;
+
+      @media print {
+        width: 100px;
+      }
+
     }
 
     .certificate-text {
@@ -48,6 +91,10 @@
         margin: 0;
         padding-bottom: 15px;
         font-size: 18px;
+
+        @media print {
+          font-size: 12pt;
+        }
       }
 
       .name {
@@ -72,19 +119,34 @@
       bottom: 45px;
       left: 68px;
 
-      div {
-        padding: 0 20px 0 0;
+      @media print {
+        left: 12px;
+        bottom: 15px;
+
+        .col-md-3 {
+          width: 19%;
+          float: left;
+        }
+
+        .col-md-4, .col-md-5 {
+          width: 33%;
+          float: left;
+        }
       }
 
-      .certificate-date, .certificate-id {
-        padding-top: 10px;
+      div {
+        padding: 0 20px 0 0;
+
+        @media print {
+          padding-right: 10px;
+        }
       }
 
       .edx-logo {
         padding-right: 30px;
 
         img {
-          width: 106px;
+          width: 82px;
         }
       }
 
@@ -113,6 +175,10 @@
 
     .organization-logo {
       padding-bottom: 32px;
+
+      @media print {
+        padding-bottom: 20px;
+      }
     }
 
     .signatory {
@@ -134,8 +200,16 @@
         color: #6b6969;
         font-size: 12px;
 
+        @media print {
+          padding-bottom: 0;
+        }
+
         li {
           line-height: 18px;
+
+          @media print {
+            line-height: 15px;
+          }
         }
       }
 
@@ -145,5 +219,17 @@
         font-style: italic;
       }
     }
+  }
+}
+
+@media print {
+  #footer {
+    display: none;
+  }
+}
+
+@media print {
+  a[href]:after {
+    content: "";
   }
 }
