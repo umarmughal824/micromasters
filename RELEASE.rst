@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.77.0
+--------------
+
+- Change course status in GradeDetailPopup to Auditing (#3586)
+- Allow empty public_description (#3605)
+- Update handling of the discussions frontpage API
+- Fixed failed to execute getComputedStyle on Window error on zendesk script (#3624)
+- Fix MAILGUN_KEY validation (#3623)
+- Fixes layout but with button labels on Learner Search page and tweaks styling of Recent Posts card
+- Upgrade eslint configuration and fix throw literal warnings (#3609)
+
 Version 0.76.2
 --------------
 
