@@ -62,7 +62,8 @@ type EmailDialogProps = {
   updateEmailFieldEdit: () => void,
   renderRecipients?: (filters: ?Array<Filter>) => React$Element<*>,
   updateEmailBody: (e: Object) => void,
-  dialogType: string
+  dialogType: string,
+  supportBulkEmails: boolean
 }
 
 export default class EmailCompositionDialog extends React.Component {
@@ -204,6 +205,13 @@ export default class EmailCompositionDialog extends React.Component {
   okButtonLabel = (dialogType: string) =>
     dialogType === AUTOMATIC_EMAIL_ADMIN_TYPE ? "Save Changes" : "Send"
 
+  renderRecipientVariable = () => (
+    <div className="toolbar-below">
+      <div className="insert">Insert:</div>
+      {this.makeCustomToolbarButtons(RECIPIENT_VARIABLE_NAMES)}
+    </div>
+  )
+
   render() {
     if (!this.props.activeEmail) return null
 
@@ -213,7 +221,8 @@ export default class EmailCompositionDialog extends React.Component {
       dialogVisibility,
       updateEmailFieldEdit,
       renderRecipients,
-      dialogType
+      dialogType,
+      supportBulkEmails
     } = this.props
     const { editorState } = this.state
 
@@ -254,10 +263,7 @@ export default class EmailCompositionDialog extends React.Component {
             onEditorStateChange={this.onEditorStateChange}
             toolbar={draftWysiwygToolbar}
           />
-          <div className="toolbar-below">
-            <div className="insert">Insert:</div>
-            {this.makeCustomToolbarButtons(RECIPIENT_VARIABLE_NAMES)}
-          </div>
+          {supportBulkEmails ? this.renderRecipientVariable() : null}
           {this.showValidationError("body")}
         </div>
       </Dialog>

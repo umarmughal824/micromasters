@@ -62,6 +62,7 @@ describe("EmailCompositionDialog", () => {
           closeAndClearEmailComposer={closeStub}
           closeEmailComposerAndSend={sendStub}
           dialogVisibility={true}
+          dialogType={TEST_EMAIL_TYPE}
           activeEmail={emailState}
           title={TEST_EMAIL_CONFIG.title}
           subheadingRenderer={TEST_EMAIL_CONFIG.renderSubheading}
@@ -229,10 +230,26 @@ describe("EmailCompositionDialog", () => {
     })
 
     it("should insert recipient variables", () => {
-      renderDialog()
+      renderDialog({}, { supportBulkEmails: true })
       ReactTestUtils.Simulate.click(getDialog().querySelector(".button-Email"))
       assert.include(getEditorContents().textContent, "[Email]")
     })
+
+    for (const dialogType of [
+      [LEARNER_EMAIL_TYPE, false],
+      [COURSE_EMAIL_TYPE, false],
+      [SEARCH_EMAIL_TYPE, true],
+      [AUTOMATIC_EMAIL_ADMIN_TYPE, true]
+    ]) {
+      it(`should ${!dialogType[1] ? "display" : "not display"} 
+        recipient variables for ${dialogType[0]}`, () => {
+        renderDialog({}, { supportBulkEmails: dialogType[1] })
+        assert.equal(
+          _.isNull(getDialog().querySelector(".toolbar-below")),
+          !dialogType[1]
+        )
+      })
+    }
   })
 
   it("should render recipients", () => {
