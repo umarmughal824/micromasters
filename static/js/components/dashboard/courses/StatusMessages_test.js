@@ -4,7 +4,7 @@ import React from "react"
 import { shallow } from "enzyme"
 import { assert } from "chai"
 import sinon from "sinon"
-import moment from "moment"
+import moment from "moment-timezone"
 
 import {
   formatAction,
@@ -35,6 +35,7 @@ import {
   COURSE_ACTION_REENROLL,
   COUPON_CONTENT_TYPE_COURSE,
   COURSE_CARD_FORMAT,
+  COURSE_DEADLINE_FORMAT,
   STATUS_PAID_BUT_NOT_ENROLLED
 } from "../../../constants"
 import * as libCoupon from "../../../lib/coupon"
@@ -139,6 +140,27 @@ describe("Course Status Messages", () => {
     it("should nag unpaid auditors to pay", () => {
       makeRunCurrent(course.runs[0])
       makeRunEnrolled(course.runs[0])
+      course.runs[0].course_upgrade_deadline = moment().format()
+      const dueDate = moment(course.runs[0].course_upgrade_deadline)
+        .tz(moment.tz.guess())
+        .format(COURSE_DEADLINE_FORMAT)
+      assertIsJust(calculateMessages(calculateMessagesProps), [
+        {
+          action:  "course action was called",
+          message: `You are auditing. To get credit, you need to pay for the course. (Payment due on ${dueDate})`
+        }
+      ])
+      assert(
+        calculateMessagesProps.courseAction.calledWith(
+          course.runs[0],
+          COURSE_ACTION_PAY
+        )
+      )
+    })
+    it("should not show payment due date if missing", () => {
+      makeRunCurrent(course.runs[0])
+      makeRunEnrolled(course.runs[0])
+
       assertIsJust(calculateMessages(calculateMessagesProps), [
         {
           action:  "course action was called",
@@ -420,6 +442,25 @@ describe("Course Status Messages", () => {
       )
     })
 
+    it("should nag about paying after the edx course is complete with no deadline", () => {
+      makeRunPast(course.runs[0])
+      makeRunPassed(course.runs[0])
+
+      assertIsJust(calculateMessages(calculateMessagesProps), [
+        {
+          message:
+            "The edX course is complete, but you need to pay to get credit.",
+          action: "course action was called"
+        }
+      ])
+      assert(
+        calculateMessagesProps.courseAction.calledWith(
+          course.runs[0],
+          COURSE_ACTION_PAY
+        )
+      )
+    })
+
     it("should nag slightly differently if the course has an exam", () => {
       makeRunPast(course.runs[0])
       makeRunPassed(course.runs[0])
@@ -431,6 +472,24 @@ describe("Course Status Messages", () => {
       assertIsJust(calculateMessages(calculateMessagesProps), [
         {
           message: `The edX course is complete, but you need to pass the exam. (Payment due on ${date})`,
+          action:  "course action was called"
+        }
+      ])
+      assert(
+        calculateMessagesProps.courseAction.calledWith(
+          course.runs[0],
+          COURSE_ACTION_PAY
+        )
+      )
+    })
+
+    it("should nag slightly differently if the course has an exam with no deadline", () => {
+      makeRunPast(course.runs[0])
+      makeRunPassed(course.runs[0])
+      course.has_exam = true
+      assertIsJust(calculateMessages(calculateMessagesProps), [
+        {
+          message: "The edX course is complete, but you need to pass the exam.",
           action:  "course action was called"
         }
       ])
