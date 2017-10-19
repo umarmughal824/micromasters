@@ -1,6 +1,19 @@
 Release Notes
 =============
 
+Version 0.78.0
+--------------
+
+- Check if document needs updating before reindexing (#3636)
+- Add payment deadline to course status (#3611)
+- Removed recipient email variables from email composer (#3631)
+- Delete some unused code
+- Split CSS into separate file for production (#3637)
+- Print formatting for program certificates (#3628)
+- Fix error navigating between profile and learner search pages (#3612)
+- Add creator as moderator (#3616)
+- Make OPEN_DISCUSSIONS_COOKIE_NAME required (#3632)
+
 Version 0.77.0
 --------------
 
