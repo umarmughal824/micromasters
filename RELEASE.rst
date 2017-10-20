@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.78.1
+--------------
+
+- Update yarn.lock
+
 Version 0.78.0
 --------------
 
