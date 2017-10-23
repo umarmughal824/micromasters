@@ -15,13 +15,13 @@ then
     exit 1
 fi
 
-docker-compose run \
-   -e DEBUG=False \
-   -e DJANGO_LIVE_TEST_SERVER_ADDRESS=0.0.0.0:7000-8000 \
-   -e ELASTICSEARCH_INDEX=testindex \
-   -e USE_WEBPACK_DEV_SERVER=True \
+# Start hub and chrome containers
+YML_ARGS="-f docker-compose.yml -f docker-compose.override.yml -f docker-compose.selenium.yml"
+
+docker-compose ${YML_ARGS} up -d
+
+# Run tests
+docker-compose ${YML_ARGS} run -v "$PWD:/src" \
+   -e MICROMASTERS_USE_WEBPACK_DEV_SERVER=True \
    -e WEBPACK_DEV_SERVER_HOST="$WEBPACK_SELENIUM_DEV_SERVER_HOST" \
-   -e ELASTICSEARCH_DEFAULT_PAGE_SIZE=5 \
-   -e MAILGUN_URL=http://fake.mailgun.url \
-   -e MAILGUN_KEY=fake_mailgun_key \
    selenium py.test ${@-./selenium_tests}

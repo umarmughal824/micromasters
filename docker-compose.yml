@@ -18,28 +18,23 @@ services:
 
   nginx:
     image: nginx
-    volumes:
-      - ./config/nginx.conf:/etc/nginx/conf.d/web.conf
-      - ./:/src
     ports:
       - "8079:8079"
     links:
       - web
 
   python:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     command: /bin/true
-    volumes:
-      - .:/src
-      - django_media:/var/media
     environment:
-      DEBUG: 'True'
-      DEV_ENV: 'True'
-      NODE_ENV: 'development'
+      DEBUG: 'False'
+      NODE_ENV: 'production'
+      DEV_ENV: 'True'  # necessary to have nginx connect to web container
       PORT: 8077
       COVERAGE_DIR: htmlcov
       DATABASE_URL: postgres://postgres@db:5432/postgres
-      MICROMASTERS_USE_WEBPACK_DEV_SERVER: 'True'
       MICROMASTERS_SECURE_SSL_REDIRECT: 'False'
       MICROMASTERS_DB_DISABLE_SSL: 'True'
       ELASTICSEARCH_URL: elastic:9200
@@ -80,11 +75,8 @@ services:
       /bin/bash -c './webpack_dev_server.sh --install'
     ports:
       - "8078:8078"
-    volumes:
-      - .:/src
-      - yarn-cache:/home/mitodl/.cache/yarn
     environment:
-      NODE_ENV: 'development'
+      NODE_ENV: 'productions'
       DOCKER_HOST: ${DOCKER_HOST:-missing}
       CONTAINER_NAME: 'watch'
     env_file: .env
@@ -105,41 +97,6 @@ services:
 
   sftp:
     image: atmoz/sftp
-    volumes:
-        - sftp_share:/home/odl/results
     ports:
         - "2022:22"
     command: odl:123:1001:1001:results,results/topvue
-
-  selenium:
-    image: micromasters_python
-    extends:
-      service: python
-    links:
-      - db
-      - elastic
-      - redis
-      - hub
-      - chrome
-
-  hub:
-    image: selenium/hub:3.4.0-chromium
-    environment:
-      GRID_TIMEOUT: '3600'
-    ports:
-      - "4444:4444"
-
-  chrome:
-    image: selenium/node-chrome:3.4.0-chromium
-    environment:
-      - HUB_PORT_4444_TCP_ADDR=hub
-      - HUB_PORT_4444_TCP_PORT=4444
-    links:
-      - hub
-    ports:
-      - "5555:5555"
-
-volumes:
-  django_media: {}
-  sftp_share: {}
-  yarn-cache: {}
