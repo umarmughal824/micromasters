@@ -1,25 +1,29 @@
 """Discussions exceptions"""
 
 
-class DiscussionUserSyncException(Exception):
+class DiscussionSyncException(Exception):
+    """Base exception for discussions"""
+
+
+class DiscussionUserSyncException(DiscussionSyncException):
     """Exception indicating failure to sync discussion user"""
 
 
-class ChannelCreationException(Exception):
+class ChannelCreationException(DiscussionSyncException):
     """Exception which occurs when an error happens on open-discussions when creating a channel"""
 
 
-class ContributorSyncException(Exception):
+class ContributorSyncException(DiscussionSyncException):
     """Exception indicating failure to add or remove a contributor"""
 
 
-class SubscriberSyncException(Exception):
+class SubscriberSyncException(DiscussionSyncException):
     """Exception indicating a failure to add or remove a subscriber"""
 
 
-class ModeratorSyncException(Exception):
+class ModeratorSyncException(DiscussionSyncException):
     """Exception indicating a failure to add or remove a moderator"""
 
 
-class UnableToAuthenticateDiscussionUserException(Exception):
+class UnableToAuthenticateDiscussionUserException(DiscussionSyncException):
     """Exception indicating we were unable to generate a valid JWT for a DiscussionUser"""
