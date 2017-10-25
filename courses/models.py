@@ -57,6 +57,7 @@ class Course(models.Model):
     description = models.TextField(blank=True, null=True)
     prerequisites = models.TextField(blank=True, null=True)
     contact_email = models.EmailField(blank=True, null=True)
+    should_display_progress = models.BooleanField(default=True)
 
     def __str__(self):
         return self.title

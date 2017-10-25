@@ -151,6 +151,7 @@ class CourseTests(MockedESTestCase):
         return run
 
 
+@ddt.ddt
 class FormatRunTest(CourseTests):
     """Tests for the format_courserun_for_dashboard function"""
 
@@ -162,6 +163,7 @@ class FormatRunTest(CourseTests):
             'has_paid.return_value': False,
             'has_final_grade.return_value': False
         })
+        self.course.refresh_from_db()
         self.crun = self.create_run(
             start=self.now+timedelta(weeks=52),
             end=self.now+timedelta(weeks=62),
@@ -231,6 +233,40 @@ class FormatRunTest(CourseTests):
         del self.expected_ret_data['final_grade']
         self.assertEqual(
             api.format_courserun_for_dashboard(self.crun, api.CourseStatus.CURRENTLY_ENROLLED, self.mmtrack),
+            self.expected_ret_data
+        )
+
+    @ddt.data(
+        (api.CourseStatus.CURRENTLY_ENROLLED),
+        (api.CourseStatus.CAN_UPGRADE),
+    )
+    def test_format_run_currently_enrolled_dont_display_progress(self, status):
+        """
+        test that setting `should_display_progress` to False prevents
+        the current grade from being returned
+        """
+        self.expected_ret_data.update({
+            'status': status
+        })
+        del self.expected_ret_data['final_grade']
+        if status == api.CourseStatus.CAN_UPGRADE:
+            self.expected_ret_data.update({
+                'course_upgrade_deadline': self.crun.upgrade_deadline
+            })
+        self.crun.course.should_display_progress = False
+        self.assertEqual(
+            api.format_courserun_for_dashboard(self.crun, status, self.mmtrack),
+            self.expected_ret_data
+        )
+
+    def test_format_run_dont_display_progress_final_grade(self):
+        """
+        test that we still return a final grade with should_display_progress
+        set to False
+        """
+        self.crun.course.should_display_progress = False
+        self.assertEqual(
+            api.format_courserun_for_dashboard(self.crun, api.CourseStatus.PASSED, self.mmtrack),
             self.expected_ret_data
         )
 
