@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.79.0
+--------------
+
+- Reduced number of side effects from reindexing
+- Log a diff of the ES document and serialized enrollment (#3657)
+- Fixes a layout fix with radio buttons on the profile pages in Chrome (#3669)
+- Doc about how to freeze final grades (#3658)
+- Use yarn install --frozen-lockfile to error if upgrade needed (#3653)
+- Refactor docker-compose.yml files (#3644)
+- Use HEROKU_APP_NAME as ELASTICSEARCH_INDEX value for PR builds (#3640)
+
 Version 0.78.1
 --------------
 
