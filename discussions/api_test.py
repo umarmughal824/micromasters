@@ -284,6 +284,9 @@ def test_get_membership_ids_needing_sync(patched_users_api):
     """
     user1 = UserFactory.create()
     user2 = UserFactory.create()
+    user3 = UserFactory.create()
+    with mute_signals(post_save):
+        user3.profile.delete()
     member_channels = [ChannelFactory.create() for _ in range(4)]
     nonmember_channels = [ChannelFactory.create() for _ in range(3)]
 
@@ -307,12 +310,24 @@ def test_get_membership_ids_needing_sync(patched_users_api):
         for channel in nonmember_channels
     ]
 
+    memberships_add_no_profile = [
+        PercolateQueryMembership.objects.create(user=user3, query=channel.query, needs_update=True, is_member=True)
+        for channel in member_channels
+    ]
+    memberships_remove_no_profile = [
+        PercolateQueryMembership.objects.create(user=user3, query=channel.query, needs_update=True, is_member=False)
+        for channel in nonmember_channels
+    ]
+
     results = api.get_membership_ids_needing_sync()
 
     for membership in memberships_to_add + memberships_to_remove:
         assert membership.id in results
 
-    for membership in memberships_add_no_update + memberships_remove_no_update:
+    for membership in (
+            memberships_add_no_update + memberships_remove_no_update +
+            memberships_add_no_profile + memberships_remove_no_profile
+    ):
         assert membership.id not in results
 
 

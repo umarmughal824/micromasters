@@ -275,6 +275,7 @@ def get_membership_ids_needing_sync():
     """
     return PercolateQueryMembership.objects.filter(
         query__source_type=PercolateQuery.DISCUSSION_CHANNEL_TYPE,
+        user__profile__isnull=False,
         needs_update=True
     ).values_list("id", flat=True)
 
