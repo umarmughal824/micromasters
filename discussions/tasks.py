@@ -13,7 +13,7 @@ from micromasters.celery import app
 from micromasters.utils import now_in_utc
 from profiles.models import Profile
 
-SYNC_MEMBERSHIPS_LOCK_NAME = 'sync_memberships_lock'
+SYNC_MEMBERSHIPS_LOCK_NAME = 'discussions.tasks.sync_memberships_lock'
 
 # let it run for up to 2 minutes minus a 5 second buffer
 # we do the buffer so the lock is cleared before the next cron run
@@ -37,7 +37,12 @@ def _get_sync_memberships_lock():
         # this is a StrictRedis instance, we need this for the script installation that LuaLock uses
         redis = caches['redis'].client.get_client()
         # don't block acquiring the lock, this runs on a 1-minute cron so we'll try again later
-        _SYNC_LOCK = LuaLock(redis, SYNC_MEMBERSHIPS_LOCK_NAME, blocking=False)
+        _SYNC_LOCK = LuaLock(
+            redis,
+            SYNC_MEMBERSHIPS_LOCK_NAME,
+            blocking=False,
+            timeout=SYNC_MEMBERSHIPS_LOCK_TTL_SECONDS
+        )
 
     return _SYNC_LOCK
 

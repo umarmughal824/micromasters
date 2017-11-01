@@ -1870,7 +1870,7 @@ def test_calculate_fake_user(users_without_with_cache):
     needs_update, _ = users_without_with_cache
     needs_update[0].profile.fake_user = True
     needs_update[0].profile.save()
-    assert api.calculate_users_to_refresh_in_bulk() == [user.id for user in needs_update[1:]]
+    assert sorted(api.calculate_users_to_refresh_in_bulk()) == sorted([user.id for user in needs_update[1:]])
 
 
 def test_calculate_inactive(users_without_with_cache):
@@ -1878,14 +1878,14 @@ def test_calculate_inactive(users_without_with_cache):
     needs_update, _ = users_without_with_cache
     needs_update[0].is_active = False
     needs_update[0].save()
-    assert api.calculate_users_to_refresh_in_bulk() == [user.id for user in needs_update[1:]]
+    assert sorted(api.calculate_users_to_refresh_in_bulk()) == sorted([user.id for user in needs_update[1:]])
 
 
 def test_calculate_missing_social_auth(users_without_with_cache):
     """Users without a linked social auth should not be counted"""
     needs_update, _ = users_without_with_cache
     needs_update[0].social_auth.all().delete()
-    assert api.calculate_users_to_refresh_in_bulk() == [user.id for user in needs_update[1:]]
+    assert sorted(api.calculate_users_to_refresh_in_bulk()) == sorted([user.id for user in needs_update[1:]])
 
 
 @pytest.mark.parametrize("enrollment,certificate,current_grade,expired", [
