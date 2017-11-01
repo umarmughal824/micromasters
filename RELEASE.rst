@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.79.1
+--------------
+
+- Excluded users with no profile from open-discussions sync
+- Use application log level for celery workers (#3685)
+
 Version 0.79.0
 --------------
 
