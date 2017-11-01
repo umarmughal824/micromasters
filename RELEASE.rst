@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.79.2
+--------------
+
+- Added timeout to lock
+- Fixed search do not expand every two-letter abbreviation into a country name (#3649)
+- Refactor batch_update_user_data, fix lock behavior (#3670)
+- Install pcyopg 2.7
+- Remove unused redirects for development nginx configuration, fix buffer settings (#3673)
+- Fix celery env vars for travis (#3672)
+- Don&#39;t reference INSTALLED_APPS directly (#3674)
+- Remove accidentally committed dependency (#3682)
+
 Version 0.79.1
 --------------
 
