@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.79.3
+--------------
+
+- Conditionally hide course progress
+- get final grade from current grades (#3675)
+- Upgrade redux-hammock (#3662)
+
 Version 0.79.2
 --------------
 
