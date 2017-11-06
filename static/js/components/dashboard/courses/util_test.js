@@ -1,6 +1,6 @@
 // @flow
 import { assert } from "chai"
-import moment from "moment"
+import moment from "moment-timezone"
 
 import { makeCourse, makeRun } from "../../../factories/dashboard"
 import {
@@ -14,7 +14,8 @@ import {
   hasFailedCourseRun,
   futureEnrollableRun,
   hasEnrolledInAnyRun,
-  hasPassedCourseRun
+  hasPassedCourseRun,
+  isEnrollableRun
 } from "./util"
 import {
   STATUS_PASSED,
@@ -303,6 +304,45 @@ describe("dashboard course utilities", () => {
 
     it("should return false if the user has never enrolled", () => {
       assert.isFalse(hasEnrolledInAnyRun(course))
+    })
+  })
+
+  describe("isEnrollableRun", () => {
+    const now = moment()
+    let course
+
+    beforeEach(() => {
+      course = makeCourse(0)
+    })
+
+    for (const data of [
+      ["", false],
+      [now.toISOString(), true],
+      [
+        moment()
+          .add(10, "days")
+          .toISOString(),
+        false
+      ],
+      [
+        moment()
+          .subtract(10, "days")
+          .toISOString(),
+        true
+      ]
+    ]) {
+      it(`should return ${data[1]
+        ? "true"
+        : "false"} for enrollment_start_date = ${data[0]}`, () => {
+        course.runs[0].status = STATUS_OFFERED
+        course.runs[0].enrollment_start_date = data[0]
+        assert.equal(isEnrollableRun(course.runs[0]), data[1])
+      })
+    }
+
+    it("should return false when course id is empty", () => {
+      course.runs[0].course_id = ""
+      assert.isFalse(isEnrollableRun(course.runs[0]))
     })
   })
 })

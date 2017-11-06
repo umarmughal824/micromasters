@@ -272,10 +272,21 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
         paymentDueDate.isBefore(moment())
       ) {
         const date = run => formatDate(run.course_start_date)
-        const msg = run =>
-          `You missed the payment deadline, but you can re-enroll. Next course starts ${date(
+        const msg = run => {
+          let enrollmentDateMessage = ""
+          if (
+            !R.isNil(run.enrollment_start_date) &&
+            !R.isEmpty(run.enrollment_start_date) &&
+            !isEnrollableRun(run)
+          ) {
+            enrollmentDateMessage = ` Enrollment starts ${formatDate(
+              run.enrollment_start_date
+            )}`
+          }
+          return `You missed the payment deadline, but you can re-enroll. Next course starts ${date(
             run
-          )}`
+          )}.${enrollmentDateMessage}`
+        }
         messages.push(
           S.maybe(
             {
@@ -311,15 +322,28 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
   } else {
     if (hasFailedCourseRun(course) && !hasPassedCourseRun(course)) {
       const date = run => formatDate(run.course_start_date)
+      const msg = run => {
+        let enrollmentDateMessage = ""
+        if (
+          !R.isNil(run.enrollment_start_date) &&
+          !R.isEmpty(run.enrollment_start_date) &&
+          !isEnrollableRun(run)
+        ) {
+          enrollmentDateMessage = ` Enrollment starts ${formatDate(
+            run.enrollment_start_date
+          )}`
+        }
+        return `You did not pass the edX course, but you can re-enroll. Next course starts ${date(
+          run
+        )}.${enrollmentDateMessage}`
+      }
       return S.Just(
         S.maybe(
           messages.concat({ message: "You did not pass the edX course." }),
           run =>
             messages.concat({
-              message: `You did not pass the edX course, but you can re-enroll. Next course starts ${date(
-                run
-              )}.`,
-              action: courseAction(run, COURSE_ACTION_REENROLL)
+              message: msg(run),
+              action:  courseAction(run, COURSE_ACTION_REENROLL)
             }),
           futureEnrollableRun(course)
         )

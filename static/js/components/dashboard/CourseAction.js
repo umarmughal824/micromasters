@@ -3,6 +3,7 @@
 import React from "react"
 import PropTypes from "prop-types"
 import Button from "react-mdl/lib/Button"
+import R from "ramda"
 
 import SpinnerButton from "../SpinnerButton"
 import type { Coupon } from "../../flow/couponTypes"
@@ -18,6 +19,7 @@ import {
   COURSE_ACTION_REENROLL
 } from "../../constants"
 import { isFreeCoupon } from "../../lib/coupon"
+import { isEnrollableRun } from "./courses/util"
 
 export default class CourseAction extends React.Component {
   static contextTypes = {
@@ -92,6 +94,7 @@ export default class CourseAction extends React.Component {
       <div className="course-action">
         <SpinnerButton
           className="dashboard-button enroll-button"
+          disabled={R.not(isEnrollableRun(run))}
           component={Button}
           spinning={run.status === STATUS_PENDING_ENROLLMENT}
           onClick={() => this.handleEnrollButtonClick(run)}
