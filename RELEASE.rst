@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.80.0
+--------------
+
+- Refactor celery locking (#3696)
+- Disable re-enroll button for courses with future enrollment start date (#3703)
+- Fixed an exception, happens when ZenDesk floating widget is not loaded (#3687)
+- Make MICROMASTERS_LOG_LEVEL a required variable and set default to INFO (#3690)
+- CourseCertificates: create if final grade is complete (#3683)
+
 Version 0.79.3
 --------------
 
