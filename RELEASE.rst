@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.80.1
+--------------
+
+- Reduce rate of batch_update_user_data (#3702)
+
 Version 0.80.0
 --------------
 
