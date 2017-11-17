@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.81.0
+--------------
+
+- Log failed send_automatic_email and update_percolate_memberships (#3707)
+- fixes layout bug with radio buttons (#3706)
+
 Version 0.80.1
 --------------
 
