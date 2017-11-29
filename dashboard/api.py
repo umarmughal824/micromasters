@@ -12,6 +12,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
 from django.urls import reverse
 from edx_api.client import EdxApi
+from django_redis import get_redis_connection
 
 from backends.exceptions import InvalidCredentialStored
 from backends import utils
@@ -31,6 +32,12 @@ ATTEMPTS_PER_PAID_RUN = 2
 
 COURSE_GRADE_WEIGHT = 0.4
 EXAM_GRADE_WEIGHT = 0.6
+
+# key that stores user_key and number of failures in a hash
+CACHE_KEY_FAILURE_NUMS_BY_USER = "update_cache_401_failure_numbers"
+# key that stores user ids to exclude from cache update
+CACHE_KEY_FAILED_USERS_NOT_TO_UPDATE = "failed_cache_update_users_not_to_update"
+FIELD_USER_ID_BASE_STR = "user_{0}"
 
 log = logging.getLogger(__name__)
 
@@ -543,6 +550,9 @@ def calculate_users_to_refresh_in_bulk():
 
     all_users = User.objects.filter(is_active=True, profile__fake_user=False).exclude(social_auth=None)
 
+    con = get_redis_connection("redis")
+    user_ids_invalid_credentials = con.smembers(CACHE_KEY_FAILED_USERS_NOT_TO_UPDATE)
+
     # If one of these fields is null in the database the gte expression will be false, so we will refresh those users
     users_not_expired = all_users.filter(
         usercacherefreshtime__enrollment__gte=refresh_time_limit,
@@ -550,7 +560,12 @@ def calculate_users_to_refresh_in_bulk():
         usercacherefreshtime__current_grade__gte=refresh_time_limit
     )
 
-    return list(all_users.exclude(id__in=users_not_expired.values_list("id", flat=True)).values_list("id", flat=True))
+    return list(
+        all_users
+        .exclude(id__in=users_not_expired.values_list("id", flat=True))
+        .exclude(id__in=user_ids_invalid_credentials)
+        .values_list("id", flat=True)
+    )
 
 
 def refresh_user_data(user_id):
@@ -579,6 +594,7 @@ def refresh_user_data(user_id):
     try:
         utils.refresh_user_token(user_social)
     except:
+        save_cache_update_failure(user_id)
         log.exception("Unable to refresh token for student %s", user.username)
         return
 
@@ -592,5 +608,20 @@ def refresh_user_data(user_id):
         try:
             CachedEdxDataApi.update_cache_if_expired(user, edx_client, cache_type)
         except:
+            save_cache_update_failure(user_id)
             log.exception("Unable to refresh cache %s for student %s", cache_type, user.username)
             continue
+
+
+def save_cache_update_failure(user_id):
+    """
+    Store the number of time update cache failed for a user
+
+    Args:
+        user_id (int): The user id
+    """
+    con = get_redis_connection("redis")
+    user_key = FIELD_USER_ID_BASE_STR.format(user_id)
+    new_value = con.hincrby(CACHE_KEY_FAILURE_NUMS_BY_USER, user_key, 1)
+    if int(new_value) >= 3:
+        con.sadd(CACHE_KEY_FAILED_USERS_NOT_TO_UPDATE, user_id)

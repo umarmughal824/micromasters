@@ -12,6 +12,7 @@ from unittest.mock import (
 import ddt
 from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
+from django_redis import get_redis_connection
 import pytest
 from rest_framework import status as http_status
 
@@ -27,6 +28,7 @@ from dashboard import (
     api,
     models,
 )
+from dashboard.api import save_cache_update_failure, FIELD_USER_ID_BASE_STR
 from dashboard.api_edx_cache import CachedEdxDataApi
 from dashboard.factories import CachedEnrollmentFactory, CachedCurrentGradeFactory, UserCacheRefreshTimeFactory
 from dashboard.models import CachedCertificate
@@ -45,6 +47,9 @@ from micromasters.utils import (
 )
 from profiles.factories import SocialProfileFactory
 from search.base import MockedESTestCase
+
+TEST_CACHE_KEY_USER_IDS_NOT_TO_UPDATE = "test_users_not_to_update"
+TEST_CACHE_KEY_FAILURES_BY_USER = "test_failure_nums_by_user"
 
 
 # pylint: disable=too-many-lines, too-many-arguments
@@ -1881,6 +1886,18 @@ def users_without_with_cache(db):
     return needs_update, up_to_date
 
 
+@pytest.fixture
+def patched_redis_keys(mocker):
+    """Patch redis cache keys"""
+    mocker.patch("dashboard.api.CACHE_KEY_FAILED_USERS_NOT_TO_UPDATE", TEST_CACHE_KEY_USER_IDS_NOT_TO_UPDATE)
+    mocker.patch("dashboard.api.CACHE_KEY_FAILURE_NUMS_BY_USER", TEST_CACHE_KEY_FAILURES_BY_USER)
+
+    yield
+    con = get_redis_connection("redis")
+    con.delete(TEST_CACHE_KEY_FAILURES_BY_USER)
+    con.delete(TEST_CACHE_KEY_USER_IDS_NOT_TO_UPDATE)
+
+
 def test_calculate_up_to_date(users_without_with_cache):
     """
     calculate_users_to_refresh should return a list of user ids
@@ -1949,6 +1966,17 @@ def test_calculate_expired(users_without_with_cache, enrollment, certificate, cu
     cache.save()
 
     expected = needs_update + [up_to_date[0]] if expired else needs_update
+    assert sorted(api.calculate_users_to_refresh_in_bulk()) == sorted([user.id for user in expected])
+
+
+def test_calculate_exclude_users(users_without_with_cache, patched_redis_keys):
+    """
+    Users in the 'failed update cache' set should be excluded
+    """
+    needs_update, _ = users_without_with_cache
+    expected = needs_update[1:]
+    con = get_redis_connection('redis')
+    con.sadd(TEST_CACHE_KEY_USER_IDS_NOT_TO_UPDATE, needs_update[0].id)
 
     assert sorted(api.calculate_users_to_refresh_in_bulk()) == sorted([user.id for user in expected])
 
@@ -2010,12 +2038,14 @@ def test_refresh_failed_oauth_update(db, mocker):
     edx_api = mocker.Mock()
     edx_api_init = mocker.patch('dashboard.api.EdxApi', autospec=True, return_value=edx_api)
     update_cache_mock = mocker.patch('dashboard.api.CachedEdxDataApi.update_cache_if_expired')
+    save_failure_mock = mocker.patch('dashboard.api.save_cache_update_failure')
 
     api.refresh_user_data(user.id)
 
     refresh_user_token_mock.assert_called_once_with(user_social)
     assert edx_api_init.called is False
     assert update_cache_mock.called is False
+    assert save_failure_mock.called is True
 
 
 def test_refresh_failed_edx_client(db, mocker):
@@ -2046,7 +2076,7 @@ def test_refresh_update_cache(db, mocker, failed_cache_type):
     edx_api = mocker.Mock()
     edx_api_init = mocker.patch('dashboard.api.EdxApi', autospec=True, return_value=edx_api)
 
-    def _update_cache(self, user, edx_client, cache_type):
+    def _update_cache(user, edx_client, cache_type):
         """Fail updating the cache for only the given cache type"""
         if cache_type == failed_cache_type:
             raise KeyError()
@@ -2054,10 +2084,29 @@ def test_refresh_update_cache(db, mocker, failed_cache_type):
     update_cache_mock = mocker.patch(
         'dashboard.api.CachedEdxDataApi.update_cache_if_expired', side_effect=_update_cache,
     )
+    save_failure_mock = mocker.patch('dashboard.api.save_cache_update_failure', autospec=True)
 
     api.refresh_user_data(user.id)
 
     refresh_user_token_mock.assert_called_once_with(user_social)
     edx_api_init.assert_called_once_with(user_social.extra_data, settings.EDXORG_BASE_URL)
+    assert save_failure_mock.call_count == 1
     for cache_type in CachedEdxDataApi.SUPPORTED_CACHES:
         update_cache_mock.assert_any_call(user, edx_api, cache_type)
+
+
+def test_save_cache_update_failures(db, patched_redis_keys):
+    """Count the number of failures and then add to the list to not try to update cache"""
+    user = _make_fake_real_user()
+    con = get_redis_connection("redis")
+    user_key = FIELD_USER_ID_BASE_STR.format(user.id)
+
+    save_cache_update_failure(user.id)
+    assert int(con.hget(TEST_CACHE_KEY_FAILURES_BY_USER, user_key)) == 1
+
+    save_cache_update_failure(user.id)
+    assert int(con.hget(TEST_CACHE_KEY_FAILURES_BY_USER, user_key)) == 2
+
+    save_cache_update_failure(user.id)
+    assert int(con.hget(TEST_CACHE_KEY_FAILURES_BY_USER, user_key)) == 3
+    assert con.sismember(TEST_CACHE_KEY_USER_IDS_NOT_TO_UPDATE, user.id) is True
