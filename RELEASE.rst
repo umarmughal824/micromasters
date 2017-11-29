@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.82.0
+--------------
+
+- Propagate 409 response from open-discussions when creating a channel (#3708)
+
 Version 0.81.0
 --------------
 
