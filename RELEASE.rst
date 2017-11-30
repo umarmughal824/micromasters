@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.82.1
+--------------
+
+- Count cache update failure for user (#3700)
+
 Version 0.82.0
 --------------
 
