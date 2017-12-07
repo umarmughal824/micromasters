@@ -18,7 +18,7 @@ from micromasters.envs import (
 )
 
 
-VERSION = "0.82.1"
+VERSION = "0.83.0"
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

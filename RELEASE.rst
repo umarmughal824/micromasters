@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.83.0
+--------------
+
+- fixes mobile layout issue with edit icons on profile page (#3717)
+- bump psycopg to 2.7.2 (#3718)
+- Fix run_snapshot_dashboard_states.sh to use new docker-compose files (#3716)
+
 Version 0.82.1
 --------------
 
