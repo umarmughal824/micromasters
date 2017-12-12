@@ -16,7 +16,8 @@ import {
   FA_TERMINAL_STATUSES,
   COURSE_ACTION_PAY,
   COURSE_ACTION_ENROLL,
-  COURSE_ACTION_REENROLL
+  COURSE_ACTION_REENROLL,
+  COURSE_ACTION_CALCULATE_PRICE
 } from "../../constants"
 import { isFreeCoupon } from "../../lib/coupon"
 import { isEnrollableRun } from "./courses/util"
@@ -35,6 +36,7 @@ export default class CourseAction extends React.Component {
     addCourseEnrollment: (courseId: string) => Promise<*>,
     setEnrollSelectedCourseRun: (r: CourseRun) => void,
     setEnrollCourseDialogVisibility: (b: boolean) => void,
+    setCalculatePriceDialogVisibility: (b: boolean) => void,
     coupon: ?Coupon,
     actionType: string,
     checkout: (s: string) => void
@@ -90,6 +92,9 @@ export default class CourseAction extends React.Component {
   }
 
   renderEnrollButton(run: CourseRun, actionType: string): React$Element<*> {
+    const asterisk =
+      this.hasPendingFinancialAid() || this.needsPriceCalculation() ? " *" : ""
+
     return (
       <div className="course-action">
         <SpinnerButton
@@ -99,23 +104,31 @@ export default class CourseAction extends React.Component {
           spinning={run.status === STATUS_PENDING_ENROLLMENT}
           onClick={() => this.handleEnrollButtonClick(run)}
         >
-          {actionType === COURSE_ACTION_REENROLL ? "Re-Enroll" : "Enroll"}
+          {actionType === COURSE_ACTION_REENROLL
+            ? "Re-Enroll"
+            : `Enroll${asterisk}`}
         </SpinnerButton>
       </div>
     )
   }
 
   renderPayButton(run: CourseRun): React$Element<*> {
-    let props
-    if (this.needsPriceCalculation()) {
+    const { setCalculatePriceDialogVisibility } = this.props
+    let props,
+      payText = "Pay Now"
+    if (this.hasPendingFinancialAid()) {
       props = { disabled: true }
+      payText = `${payText} *`
+    } else if (this.needsPriceCalculation()) {
+      props = { onClick: () => setCalculatePriceDialogVisibility(true) }
+      payText = `${payText} *`
     } else {
       props = { onClick: () => this.redirectToOrderSummary(run) }
     }
     return (
       <div className="course-action">
         <Button className="dashboard-button pay-button" key="1" {...props}>
-          Pay Now
+          {payText}
         </Button>
       </div>
     )
@@ -129,7 +142,10 @@ export default class CourseAction extends React.Component {
       actionType === COURSE_ACTION_REENROLL
     ) {
       return this.renderEnrollButton(courseRun, actionType)
-    } else if (actionType === COURSE_ACTION_PAY) {
+    } else if (
+      actionType === COURSE_ACTION_PAY ||
+      actionType === COURSE_ACTION_CALCULATE_PRICE
+    ) {
       return this.renderPayButton(courseRun)
     }
     return null

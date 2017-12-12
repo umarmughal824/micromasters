@@ -5,15 +5,24 @@ import R from "ramda"
 import moment from "moment-timezone"
 
 import type { Coupon } from "../../../flow/couponTypes"
-import type { Course, CourseRun } from "../../../flow/programTypes"
+import type {
+  Course,
+  CourseRun,
+  FinancialAidUserInfo
+} from "../../../flow/programTypes"
 import { makeCouponMessage } from "../../../lib/coupon"
 import {
   COUPON_CONTENT_TYPE_COURSE,
   COURSE_ACTION_PAY,
   COURSE_ACTION_REENROLL,
+  FA_PENDING_STATUSES,
+  FA_TERMINAL_STATUSES,
   STATUS_MISSED_DEADLINE,
   STATUS_PAID_BUT_NOT_ENROLLED,
-  STATUS_CAN_UPGRADE
+  STATUS_CAN_UPGRADE,
+  COURSE_ACTION_CALCULATE_PRICE,
+  COURSE_CARD_FORMAT,
+  COURSE_DEADLINE_FORMAT
 } from "../../../constants"
 import { S } from "../../../lib/sanctuary"
 import {
@@ -30,7 +39,6 @@ import {
   hasFailingExamGrade,
   hasPassedCourseRun
 } from "../../../lib/grades"
-import { COURSE_CARD_FORMAT, COURSE_DEADLINE_FORMAT } from "../../../constants"
 
 type Message = {
   message: string | React$Element<*>,
@@ -53,6 +61,8 @@ export const formatDate = (date: ?string) =>
 
 type CalculateMessagesProps = {
   courseAction: (run: CourseRun, actionType: string) => React$Element<*>,
+  financialAid: FinancialAidUserInfo,
+  hasFinancialAid: boolean,
   firstRun: CourseRun,
   course: Course,
   expandedStatuses: Set<number>,
@@ -84,6 +94,8 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
   const {
     coupon,
     courseAction,
+    financialAid,
+    hasFinancialAid,
     firstRun,
     course,
     expandedStatuses,
@@ -146,8 +158,21 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
     courseUpcomingOrCurrent(firstRun) ||
     firstRun.status === STATUS_CAN_UPGRADE
   ) {
-    const message =
+    let message =
       "You are auditing. To get credit, you need to pay for the course."
+    let actionType = COURSE_ACTION_PAY
+    if (hasFinancialAid) {
+      if (FA_PENDING_STATUSES.includes(financialAid.application_status)) {
+        message =
+          "You are auditing. Your personal course price is pending, " +
+          "and needs to be approved before you can pay for courses."
+      } else if (
+        !FA_TERMINAL_STATUSES.includes(financialAid.application_status)
+      ) {
+        actionType = COURSE_ACTION_CALCULATE_PRICE
+      }
+    }
+
     let paymentDueMessage = ""
     if (paymentDueDate.isValid()) {
       paymentDueMessage = ` (Payment due on ${paymentDueDate
@@ -156,7 +181,7 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
     }
     messages.push({
       message: message + paymentDueMessage,
-      action:  courseAction(firstRun, COURSE_ACTION_PAY)
+      action:  courseAction(firstRun, actionType)
     })
     return S.Just(messages)
   }

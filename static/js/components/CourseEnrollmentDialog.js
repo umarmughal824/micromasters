@@ -34,7 +34,8 @@ export default class CourseEnrollmentDialog extends React.Component {
     pendingFinancialAid: boolean,
     addCourseEnrollment: (courseId: string) => Promise<*>,
     checkout: Function,
-    financialAidAvailability: boolean
+    financialAidAvailability: boolean,
+    openFinancialAidCalculator: () => void
   }
 
   handlePayClick = () => {
@@ -61,6 +62,13 @@ export default class CourseEnrollmentDialog extends React.Component {
     addCourseEnrollment(courseRun.course_id)
   }
 
+  handleCalculatePriceClick = (e: Event) => {
+    const { openFinancialAidCalculator, setVisibility } = this.props
+    setVisibility(false)
+    openFinancialAidCalculator()
+    e.preventDefault()
+  }
+
   render() {
     const {
       open,
@@ -71,9 +79,16 @@ export default class CourseEnrollmentDialog extends React.Component {
     } = this.props
     let message, payButton
     if (pendingFinancialAid) {
-      message = `Your Personalized Course Price is still pending approval, but you can
-        sign up now to audit the course for FREE, and then pay later. (Payment is required
-        to get credit for the MicroMasters certificate.)`
+      message = [
+        <p key="1">
+          Your personal course price is pending, and needs to approved before
+          you can pay for courses. Or you can audit for free and pay later.
+        </p>,
+        <p key="2">
+          You will need to pay in order to get credit for MicroMasters
+          certificate.
+        </p>
+      ]
       payButton = (
         <Button
           key="pay"
@@ -85,9 +100,13 @@ export default class CourseEnrollmentDialog extends React.Component {
         </Button>
       )
     } else if (hasUserApplied) {
-      message = `You can pay now, or you can audit the course for FREE
-        and upgrade later. (Payment is required to get credit for the
-        MicroMasters certificate.)`
+      message = (
+        <p>
+          You can pay now, or you can audit the course for FREE and upgrade
+          later. (Payment is required to get credit for the MicroMasters
+          certificate.)
+        </p>
+      )
       payButton = (
         <Button
           key="pay"
@@ -99,10 +118,24 @@ export default class CourseEnrollmentDialog extends React.Component {
         </Button>
       )
     } else {
-      message = `You need to get a Personalized Course Price before
-        you can pay for this course. Or you can audit the course for FREE
-        and upgrade later. (Payment is required to get credit for the
-        MicroMasters certificate.)`
+      message = [
+        <p key="1">
+          You need to{" "}
+          <a
+            href="#"
+            className="calculate-link"
+            onClick={this.handleCalculatePriceClick}
+          >
+            calculate you course price
+          </a>{" "}
+          before you can pay for this course. Or you can audit courses for free
+          and pay later.
+        </p>,
+        <p key="2">
+          You will need to pay in order to get credit for MicroMasters
+          certificate.
+        </p>
+      ]
       payButton = (
         <Button
           key="pay"
@@ -137,7 +170,7 @@ export default class CourseEnrollmentDialog extends React.Component {
         contentStyle={{ maxWidth: "600px" }}
         actionsContainerStyle={{ paddingBottom: "20px", textAlign: "center" }}
       >
-        <p>{message}</p>
+        {message}
       </Dialog>
     )
   }

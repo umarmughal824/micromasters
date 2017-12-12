@@ -14,8 +14,10 @@ import {
   STATUS_CAN_UPGRADE,
   STATUS_PENDING_ENROLLMENT,
   COURSE_ACTION_PAY,
+  COURSE_ACTION_CALCULATE_PRICE,
   COURSE_ACTION_ENROLL,
-  COURSE_ACTION_REENROLL
+  COURSE_ACTION_REENROLL,
+  FA_STATUS_PENDING_DOCS
 } from "../../constants"
 import {
   findCourse,
@@ -190,7 +192,7 @@ describe("CourseAction", () => {
       })
       const button = wrapper.find(SpinnerButton)
       assert.isFalse(button.props().disabled)
-      assert.equal(button.props().children, "Enroll")
+      assert.equal(button.props().children, "Enroll *")
     })
 
     it("indicates that a user must calculate the course price to upgrade to paid", () => {
@@ -209,12 +211,35 @@ describe("CourseAction", () => {
           has_user_applied: false
         },
         hasFinancialAid: true,
+        actionType:      COURSE_ACTION_CALCULATE_PRICE
+      })
+
+      const button = wrapper.find(Button)
+      assert.equal(button.props().children, "Pay Now *")
+    })
+
+    it("indicates that a user can't pay for course while FA is pending", () => {
+      const course = findAndCloneCourse(
+        course =>
+          course.runs.length > 0 && course.runs[0].status === STATUS_CAN_UPGRADE
+      )
+      const firstRun = alterFirstRun(course, {
+        enrollment_start_date: now.toISOString()
+      })
+
+      const wrapper = renderCourseAction({
+        courseRun:    firstRun,
+        financialAid: {
+          has_user_applied:   true,
+          application_status: FA_STATUS_PENDING_DOCS
+        },
+        hasFinancialAid: true,
         actionType:      COURSE_ACTION_PAY
       })
 
       const button = wrapper.find(Button)
       assert.isTrue(button.props().disabled)
-      assert.equal(button.props().children, "Pay Now")
+      assert.equal(button.props().children, "Pay Now *")
     })
 
     it("pay button redirects to checkout", () => {

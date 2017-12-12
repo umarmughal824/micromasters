@@ -12,6 +12,7 @@ import type { CourseRun } from "../../flow/programTypes"
 import type { UIState } from "../../reducers/ui"
 import {
   FA_TERMINAL_STATUSES,
+  FA_PENDING_STATUSES,
   COUPON_CONTENT_TYPE_PROGRAM
 } from "../../constants"
 import { isFreeCoupon } from "../../lib/coupon"
@@ -33,6 +34,7 @@ export default class CourseListCard extends React.Component {
     ) => void,
     setEnrollSelectedCourseRun?: (r: CourseRun) => void,
     setEnrollCourseDialogVisibility?: (bool: boolean) => void,
+    setCalculatePriceDialogVisibility?: (bool: boolean) => void,
     setShowExpandedCourseStatus?: (n: number) => void,
     setShowGradeDetailDialog: (b: boolean, t: GradeType, title: string) => void,
     ui: UIState,
@@ -52,6 +54,30 @@ export default class CourseListCard extends React.Component {
       throw new Error(`Unable to find program ${program.id} in list of prices`)
     }
     return couponPrice
+  }
+
+  handleCalculatePriceClick = (e: Event) => {
+    const { openFinancialAidCalculator } = this.props
+    if (openFinancialAidCalculator) openFinancialAidCalculator()
+    e.preventDefault()
+  }
+
+  renderCalculatePriceLink(): ?React$Element<*> {
+    const calculateLink = (
+      <a
+        href="#"
+        className="calculate-link"
+        onClick={this.handleCalculatePriceClick}
+      >
+        calculate your course price
+      </a>
+    )
+    return (
+      <p className={priceMessageClassName}>
+        *You need to {calculateLink} before you can pay for courses. Or you can
+        audit courses for free by clicking Enroll.
+      </p>
+    )
   }
 
   renderFinancialAidPriceMessage(): ?React$Element<*> {
@@ -83,14 +109,16 @@ export default class CourseListCard extends React.Component {
           </p>
         )
       }
-    } else {
+    } else if (FA_PENDING_STATUSES.includes(finAidStatus)) {
       return (
         <p className={priceMessageClassName}>
-          You need to get your Personal Course Price before you can pay for
-          courses. If you want to audit courses for FREE and upgrade later,
-          click Enroll then choose the audit option.
+          *Your personal course price is pending, and needs to be approved
+          before you can pay for courses. Or you can audit courses for free by
+          clicking Enroll.
         </p>
       )
+    } else {
+      return this.renderCalculatePriceLink()
     }
   }
 
@@ -133,6 +161,7 @@ export default class CourseListCard extends React.Component {
       openCourseContactDialog,
       setEnrollSelectedCourseRun,
       setEnrollCourseDialogVisibility,
+      setCalculatePriceDialogVisibility,
       setShowExpandedCourseStatus,
       setShowGradeDetailDialog,
       ui,
@@ -158,6 +187,7 @@ export default class CourseListCard extends React.Component {
         openCourseContactDialog={openCourseContactDialog}
         setEnrollSelectedCourseRun={setEnrollSelectedCourseRun}
         setEnrollCourseDialogVisibility={setEnrollCourseDialogVisibility}
+        setCalculatePriceDialogVisibility={setCalculatePriceDialogVisibility}
         ui={ui}
         checkout={checkout}
         setShowExpandedCourseStatus={setShowExpandedCourseStatus}

@@ -29,12 +29,18 @@ import {
 import {
   FA_STATUS_CREATED,
   FA_STATUS_APPROVED,
-  COUPON_AMOUNT_TYPE_PERCENT_DISCOUNT
+  COUPON_AMOUNT_TYPE_PERCENT_DISCOUNT,
+  FA_STATUS_PENDING_DOCS
 } from "../../constants"
 import { makeCoupon, makeCourseCoupon } from "../../factories/dashboard"
 
 describe("CourseListCard", () => {
-  let program, coursePrice, sandbox, helper, routerPushStub
+  let program,
+    coursePrice,
+    sandbox,
+    helper,
+    routerPushStub,
+    openFinancialAidCalculatorStub
   beforeEach(() => {
     program = _.cloneDeep(DASHBOARD_RESPONSE.programs[1])
     coursePrice = _.cloneDeep(
@@ -46,6 +52,7 @@ describe("CourseListCard", () => {
     assert.isAbove(program.courses.length, 0)
     sandbox = sinon.sandbox.create()
     routerPushStub = sandbox.stub()
+    openFinancialAidCalculatorStub = sandbox.spy()
     helper = new IntegrationTestHelper()
   })
 
@@ -84,6 +91,7 @@ describe("CourseListCard", () => {
             program={program}
             coursePrice={coursePrice}
             addCourseEnrollment={() => Promise.resolve()}
+            openFinancialAidCalculator={openFinancialAidCalculatorStub}
             couponPrices={couponPrices}
             ui={INITIAL_UI_STATE}
             openCourseContactDialog={() => undefined}
@@ -94,6 +102,7 @@ describe("CourseListCard", () => {
             email={INITIAL_EMAIL_STATE}
             setEnrollCourseDialogVisibility={() => undefined}
             setEnrollSelectedCourseRun={() => undefined}
+            setCalculatePriceDialogVisibility={() => undefined}
             checkout={() => undefined}
             setShowExpandedCourseStatus={() => undefined}
             setShowGradeDetailDialog={() => undefined}
@@ -130,7 +139,24 @@ describe("CourseListCard", () => {
         assert.lengthOf(messageEl, 1)
         assert.include(
           messageEl.text(),
-          "You need to get your Personal Course Price before you can pay for courses."
+          "You need to calculate your course price before you can pay for courses."
+        )
+
+        const linkEl = messageEl.find("a.calculate-link")
+        assert.include(linkEl.text(), "calculate your course price")
+        linkEl.simulate("click")
+        sinon.assert.calledOnce(openFinancialAidCalculatorStub)
+      })
+
+      it("notifies about pending financial aid", () => {
+        changeToFinancialAid(FA_STATUS_PENDING_DOCS, true)
+        const wrapper = renderCourseListCard()
+        const messageEl = wrapper.find(".price-message")
+        assert.lengthOf(messageEl, 1)
+        assert.include(
+          messageEl.text(),
+          "Your personal course price is pending, and needs to be approved before you can " +
+            "pay for courses. Or you can audit courses for free by clicking Enroll."
         )
       })
 
