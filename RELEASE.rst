@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.84.0
+--------------
+
+- Change personal course pricing messages and buttons  (#3713)
+
 Version 0.83.0
 --------------
 
