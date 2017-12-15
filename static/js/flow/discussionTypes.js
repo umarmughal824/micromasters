@@ -17,10 +17,10 @@ export type Post = {
 type ChannelType = "private" | "public";
 
 export type ChannelInputs = {
-  name:               string,
-  title:              string,
-  public_description: string,
-  channel_type:       ChannelType,
+  name:         string,
+  title:        string,
+  description:  string,
+  channel_type: ChannelType,
 };
 
 export type Filter = {
@@ -32,7 +32,7 @@ export type Filter = {
 export type ChannelValidationErrors = {
   name?:               string,
   title?:              string,
-  public_description?: string,
+  description?: string,
 };
 
 export type ChannelState = {
@@ -47,7 +47,7 @@ export type ChannelState = {
 export type CreateChannelResponse = {
   name:               string,
   title:              string,
-  public_description: string,
+  description: string,
   channel_type:       ChannelType,
   query:              Object
 };

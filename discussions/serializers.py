@@ -14,7 +14,7 @@ class ChannelSerializer(serializers.Serializer):
     """
     title = serializers.CharField()
     name = serializers.CharField()
-    public_description = serializers.CharField(required=False, allow_blank=True)
+    description = serializers.CharField(required=False, allow_blank=True)
     channel_type = serializers.ChoiceField(choices=[
         (choice, choice) for choice in VALID_CHANNEL_TYPES
     ])
@@ -30,14 +30,14 @@ class ChannelSerializer(serializers.Serializer):
         )
         title = validated_data['title']
         name = validated_data['name']
-        public_description = validated_data['public_description']
+        description = validated_data['description']
         channel_type = validated_data['channel_type']
         program_id = validated_data['program_id']
         channel = add_channel(
             original_search=search_obj,
             title=title,
             name=name,
-            public_description=public_description,
+            description=description,
             channel_type=channel_type,
             program_id=program_id,
             creator_id=user.id,
@@ -46,7 +46,7 @@ class ChannelSerializer(serializers.Serializer):
             "title": title,
             "name": name,
             "query": channel.query.query,
-            "public_description": public_description,
+            "description": description,
             "channel_type": channel_type,
             "program_id": program_id,
         }

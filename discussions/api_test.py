@@ -487,7 +487,7 @@ def test_add_channel(mock_staff_client, mocker, patched_users_api):
 
     title = "title"
     name = "name"
-    public_description = "public description"
+    description = "description"
     channel_type = "private"
     input_search = Search.from_dict({"unmodified": "search"})
     modified_search = Search.from_dict({"result": "modified"})
@@ -512,7 +512,7 @@ def test_add_channel(mock_staff_client, mocker, patched_users_api):
         original_search=input_search,
         title=title,
         name=name,
-        public_description=public_description,
+        description=description,
         channel_type=channel_type,
         program_id=program.id,
         creator_id=mod.id,
@@ -521,7 +521,7 @@ def test_add_channel(mock_staff_client, mocker, patched_users_api):
     mock_staff_client.channels.create.assert_called_once_with(
         title=title,
         name=name,
-        public_description=public_description,
+        description=description,
         channel_type=channel_type,
     )
     adjust_search_for_percolator_stub.assert_called_once_with(input_search)
@@ -557,7 +557,7 @@ def test_add_channel_failed_create_channel(mock_staff_client, mocker):
             Search.from_dict({}),
             "title",
             "name",
-            "public_description",
+            "description",
             "channel_type",
             123,
             456,
@@ -577,7 +577,7 @@ def test_add_channel_channel_already_exists(mock_staff_client, patched_users_api
 
     title = "title"
     name = "name"
-    public_description = "public description"
+    description = "public description"
     channel_type = "private"
     input_search = Search.from_dict({"unmodified": "search"})
     role = RoleFactory.create()
@@ -588,7 +588,7 @@ def test_add_channel_channel_already_exists(mock_staff_client, patched_users_api
             original_search=input_search,
             title=title,
             name=name,
-            public_description=public_description,
+            description=description,
             channel_type=channel_type,
             program_id=role.program.id,
             creator_id=mod.id,
@@ -597,7 +597,7 @@ def test_add_channel_channel_already_exists(mock_staff_client, patched_users_api
     mock_staff_client.channels.create.assert_called_once_with(
         title=title,
         name=name,
-        public_description=public_description,
+        description=description,
         channel_type=channel_type,
     )
 

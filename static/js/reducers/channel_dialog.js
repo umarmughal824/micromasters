@@ -16,10 +16,10 @@ import type { Action } from "../flow/reduxTypes"
 import type { ChannelInputs, ChannelState } from "../flow/discussionTypes"
 
 export const NEW_CHANNEL_EDIT: ChannelInputs = {
-  name:               "",
-  title:              "",
-  public_description: "",
-  channel_type:       "private"
+  name:         "",
+  title:        "",
+  description:  "",
+  channel_type: "private"
 }
 
 export const INITIAL_CHANNEL_STATE: ChannelState = {

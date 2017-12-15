@@ -93,7 +93,7 @@ def _make_create_channel_input(program_id, description="default description"):
     return {
         "title": "title",
         "name": "name",
-        "public_description": description,
+        "description": description,
         "channel_type": "public",
         "query": {},
         "program_id": program_id,
@@ -120,7 +120,7 @@ def test_create_channel(description, mocker, patched_users_api):
     assert resp.json() == {
         "name": channel.name,
         "title": create_channel_input['title'],
-        "public_description": create_channel_input['public_description'],
+        "description": create_channel_input['description'],
         "channel_type": create_channel_input['channel_type'],
         "query": channel.query.query,
         "program_id": role.program.id,
@@ -129,7 +129,7 @@ def test_create_channel(description, mocker, patched_users_api):
     kwargs = add_channel_mock.call_args[1]
     assert kwargs['title'] == create_channel_input['title']
     assert kwargs['name'] == channel.name
-    assert kwargs['public_description'] == create_channel_input['public_description']
+    assert kwargs['description'] == create_channel_input['description']
     assert kwargs['channel_type'] == create_channel_input['channel_type']
     assert kwargs['original_search'].to_dict() == {
         'query': {

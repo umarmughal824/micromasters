@@ -338,7 +338,7 @@ def sync_channel_memberships(membership_ids):
 
 
 def add_channel(
-        original_search, title, name, public_description, channel_type, program_id, creator_id,
+        original_search, title, name, description, channel_type, program_id, creator_id,
 ):  # pylint: disable=too-many-arguments
     """
     Add the channel and associated query
@@ -349,7 +349,7 @@ def add_channel(
             or for percolated queries.
         title (str): Title of the channel
         name (str): Name of the channel
-        public_description (str): Description for the channel
+        description (str): Description for the channel
         channel_type (str): Whether the channel is public or private
         program_id (int): The program id to connect the new channel to
         creator_id (int): The user id of the creator of a channel
@@ -362,7 +362,7 @@ def add_channel(
         client.channels.create(
             title=title,
             name=name,
-            public_description=public_description,
+            description=description,
             channel_type=channel_type,
         ).raise_for_status()
     except HTTPError as ex:

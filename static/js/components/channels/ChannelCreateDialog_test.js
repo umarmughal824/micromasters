@@ -80,12 +80,12 @@ describe("ChannelCreateDialog", () => {
   }
   it(`should trigger updates on the description field`, () => {
     renderDialog()
-    const input = getDialog().querySelector(`textarea[name=public_description]`)
+    const input = getDialog().querySelector(`textarea[name=description]`)
     ReactTestUtils.Simulate.change(input)
     assert.isTrue(updateEmailFieldEditStub.called, "called send handler")
   })
 
-  for (const field of ["title", "name", "public_description"]) {
+  for (const field of ["title", "name", "description"]) {
     it(`should show validation error on the ${field} field`, () => {
       renderDialog({
         validationErrors: {

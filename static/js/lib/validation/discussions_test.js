@@ -14,9 +14,9 @@ describe("Discussion validation functions", () => {
     it(`should return an error for invalid channel name: ${invalidName}`, () => {
       assert.deepEqual(
         discussionErrors({
-          name:               invalidName,
-          title:              "valid",
-          public_description: "valid"
+          name:        invalidName,
+          title:       "valid",
+          description: "valid"
         }),
         {
           name: CHANNEL_NAME_ERROR
@@ -40,9 +40,9 @@ describe("Discussion validation functions", () => {
     it(`should not return an error for valid channel name: ${validName}`, () => {
       assert.deepEqual(
         discussionErrors({
-          name:               validName,
-          title:              "valid",
-          public_description: "valid"
+          name:        validName,
+          title:       "valid",
+          description: "valid"
         }),
         {}
       )

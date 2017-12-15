@@ -125,10 +125,10 @@ describe("withChannelCreateDialog higher-order component", () => {
       channelDialog: {
         ...INITIAL_CHANNEL_STATE,
         inputs: {
-          name:               "name",
-          title:              "title",
-          public_description: "public_description",
-          channel_type:       "private"
+          name:         "name",
+          title:        "title",
+          description:  "description",
+          channel_type: "private"
         }
       }
     })

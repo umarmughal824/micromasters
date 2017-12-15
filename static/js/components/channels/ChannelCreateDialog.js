@@ -128,14 +128,14 @@ export default class ChannelCreateDialog extends React.Component {
           <Cell col={12}>
             <TextField
               floatingLabelText="Description"
-              name="public_description"
-              value={inputs.public_description || ""}
-              onChange={updateEmailFieldEdit("public_description")}
+              name="description"
+              value={inputs.description || ""}
+              onChange={updateEmailFieldEdit("description")}
               fullWidth={true}
               multiLine={true}
               maxLength={500}
             />
-            {this.showValidationError("public_description")}
+            {this.showValidationError("description")}
           </Cell>
         </Grid>
       </Dialog>

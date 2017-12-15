@@ -69,10 +69,10 @@ describe("channel_dialog reducers for the createChannel action", () => {
   let helper, createFuncStub, dispatchThen
   const createArgs = [
     {
-      name:               "name",
-      title:              "title",
-      public_description: "public_description",
-      channel_type:       "private"
+      name:         "name",
+      title:        "title",
+      description:  "description",
+      channel_type: "private"
     }
   ]
 
