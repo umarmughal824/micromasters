@@ -83,6 +83,34 @@ In that case you will find the error in Sentry, but if you want to force the fre
 
 And this will complete the freezing of the course (but it will not solve the problem for the students who got the error).
 
+### A user did not get a final grade
+
+Get the user and course run
+
+    from django.contrib.auth.models import User
+    user = User.objects.get(username=username)
+    from grades.models import *
+    course_run=CourseRun.objects.get(edx_course_key=edx_course_key)
+
+Check if user has a final grade
+
+    FinalGrade.objects.filter(course_run=course_run, user=user)
+
+Try to refresh cache
+
+    from dashboard.api_edx_cache import CachedEdxDataApi
+    CachedEdxDataApi.update_all_cached_grade_data(user)
+
+Compute the final grade
+
+    from grades.api import *
+    get_final_grade(user, course_run)
+
+Create a final grade for user
+
+    from grades.api import *
+    freeze_user_final_grade(user, course_run)
+
 
 ### The grades are frozen, but you changed your mind.
 
