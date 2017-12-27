@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.84.1
+--------------
+
+- Two small tweaks to padding (#3729)
+- Grades: Add usefull code snippets to README (#3726)
+
 Version 0.84.0
 --------------
 
