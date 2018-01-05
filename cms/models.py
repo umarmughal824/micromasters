@@ -17,15 +17,10 @@ from wagtail.wagtailimages.models import Image
 
 from courses.models import Program
 from micromasters.serializers import serialize_maybe_user
-from micromasters.utils import (
-    now_in_utc,
-    webpack_dev_server_host,
-)
+from micromasters.utils import webpack_dev_server_host
 from profiles.api import get_social_username
 from roles.models import Instructor, Staff
 from cms.util import get_coupon_code
-
-now = now_in_utc()
 
 
 class HomePage(Page):
@@ -272,9 +267,7 @@ class SemesterDate(Orderable):
     program_page = ParentalKey(ProgramPage, related_name='semester_dates')
     semester_name = models.CharField(
         max_length=50,
-        help_text='Name for the semester. For example: "Fall" or "Fall {year}"'.format(
-            year=now.year + 1
-        )
+        help_text='Name for the semester. For example: "Fall" or "Fall 2018"'
     )
     start_date = models.DateField()
 
