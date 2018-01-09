@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.85.0
+--------------
+
+- Don&#39;t create extra RedeemedCoupon objects if the coupon is not being applied (#3744)
+- Use old year in help text (#3745)
+- Switched create channel to new description field (#3715)
+
 Version 0.84.1
 --------------
 
