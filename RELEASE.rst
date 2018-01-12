@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.85.1
+--------------
+
+- Change layout of &#34;More Programs Coming Soon&#34; on Micromasters home page (#3754)
+- Put persistence before middleware() to persist actions dispatched within async dispatchers (#3755)
+- Update docstring (#3752)
+- Freeze grades only for users that have cached current grade (#3747)
+- Fixes the line height of course names in the course description popover on program page (#3751)
+
 Version 0.85.0
 --------------
 
