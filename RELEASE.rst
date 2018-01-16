@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.86.0
+--------------
+
+- larger max width on dashboard (#3758)
+- Schedule freeze grades task (#3756)
+
 Version 0.85.1
 --------------
 
