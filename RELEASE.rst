@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.86.1
+--------------
+
+- Add command to create snapshots for learner search page (#3761)
+
 Version 0.86.0
 --------------
 
