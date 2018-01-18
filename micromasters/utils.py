@@ -116,6 +116,8 @@ def custom_exception_handler(exc, context):
             data=[formatted_exception_string]
         )
 
+    return None
+
 
 def serialize_model_object(obj):
     """

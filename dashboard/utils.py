@@ -339,6 +339,7 @@ class MMTrack:
                 sum(Decimal(final_grade.grade_percent) for final_grade in final_grades) /
                 len(final_grades)
             )
+        return None
 
     def get_current_grade(self, edx_course_key):
         """
@@ -350,10 +351,10 @@ class MMTrack:
             float: the current grade of the user in the course run
         """
         if not self.is_enrolled(edx_course_key):
-            return
+            return None
         current_grade = self.current_grades.get_current_grade(edx_course_key)
         if current_grade is None:
-            return
+            return None
         return float(current_grade.percent) * 100
 
     def count_courses_passed(self):

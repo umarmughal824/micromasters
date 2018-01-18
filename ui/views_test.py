@@ -712,7 +712,7 @@ class TestUsersPage(ViewsTests):
     Tests for user page
     """
 
-    def test_users_logged_in(self):
+    def test_users_logged_in(self):  # pylint: disable=too-many-locals
         """
         Assert settings we pass to dashboard
         """
@@ -791,7 +791,7 @@ class TestUsersPage(ViewsTests):
                     'zendesk_widget',
                 }
 
-    def test_users_anonymous(self):
+    def test_users_anonymous(self):  # pylint: disable=too-many-locals
         """
         Assert settings we pass to dashboard
         """

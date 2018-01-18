@@ -31,7 +31,7 @@ class FullProgramFactory(ProgramFactory):
             if self.financial_aid_availability:
                 from financialaid.factories import TierProgramFactory
                 TierProgramFactory.create_properly_configured_batch(2, program=self)
-            return self
+        return self
 
 
 class CourseFactory(DjangoModelFactory):

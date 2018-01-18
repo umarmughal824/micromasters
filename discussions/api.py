@@ -7,6 +7,7 @@ from django.db import transaction
 from open_discussions_api.client import OpenDiscussionsApi
 from open_discussions_api.constants import ROLE_STAFF
 from requests.exceptions import HTTPError
+from rest_framework import status as statuses
 
 from discussions.models import (
     Channel,
@@ -22,7 +23,6 @@ from discussions.exceptions import (
     ModeratorSyncException,
     SubscriberSyncException,
 )
-from rest_framework import status as statuses
 from roles.models import Role
 from roles.roles import Permissions
 from search.api import adjust_search_for_percolator
