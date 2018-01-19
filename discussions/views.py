@@ -90,7 +90,10 @@ class ChannelsView(APIView):
         try:
             serializer.save()
         except ChannelAlreadyExistsException:
-            return Response(status=status.HTTP_409_CONFLICT)
+            return Response(
+                {"name": "A channel with that name already exists"},
+                status=status.HTTP_409_CONFLICT,
+            )
 
         return Response(
             serializer.data,

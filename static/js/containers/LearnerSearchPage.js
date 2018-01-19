@@ -86,7 +86,8 @@ const mapStateToProps = (state, props) => {
     ui:                       state.ui,
     email:                    email,
     currentProgramEnrollment: state.currentProgramEnrollment,
-    channelDialog:            state.channelDialog
+    channelDialog:            state.channelDialog,
+    channels:                 state.channels
   }
 }
 

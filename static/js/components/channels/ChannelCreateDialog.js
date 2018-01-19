@@ -8,18 +8,18 @@ import R from "ramda"
 
 import { dialogActions } from "../inputs/util"
 import { renderFilterOptions } from "../email/lib"
-import { FETCH_PROCESSING } from "../../actions"
 
 import type { ChannelState, Filter } from "../../flow/discussionTypes"
 import type { AvailableProgram } from "../../flow/enrollmentTypes"
 
 type ChannelCreateDialogProps = {
   channelDialog: ChannelState,
+  isSavingChannel: boolean,
   dialogVisibility: boolean,
   currentProgramEnrollment: ?AvailableProgram,
   closeAndClearDialog: () => void,
   closeAndCreateDialog: () => void,
-  updateEmailFieldEdit: () => void
+  updateFieldEdit: () => void
 }
 
 export default class ChannelCreateDialog extends React.Component {
@@ -67,10 +67,11 @@ export default class ChannelCreateDialog extends React.Component {
 
   render() {
     const {
-      channelDialog: { inputs, filters, validationErrors, fetchStatus },
+      channelDialog: { inputs, filters, validationErrors },
       dialogVisibility,
       currentProgramEnrollment,
-      updateEmailFieldEdit
+      updateFieldEdit,
+      isSavingChannel
     } = this.props
 
     if (!currentProgramEnrollment) {
@@ -88,7 +89,7 @@ export default class ChannelCreateDialog extends React.Component {
         actions={dialogActions(
           this.closeAndClear,
           this.closeAndCreate,
-          fetchStatus === FETCH_PROCESSING,
+          isSavingChannel,
           "Create",
           "",
           !R.isEmpty(validationErrors)
@@ -105,7 +106,7 @@ export default class ChannelCreateDialog extends React.Component {
               name="title"
               value={inputs.title || ""}
               fullWidth={true}
-              onChange={updateEmailFieldEdit("title")}
+              onChange={updateFieldEdit("title")}
               maxLength={100}
             />
             {this.showValidationError("title")}
@@ -115,7 +116,7 @@ export default class ChannelCreateDialog extends React.Component {
               floatingLabelText="Name"
               name="name"
               value={inputs.name || ""}
-              onChange={updateEmailFieldEdit("name")}
+              onChange={updateFieldEdit("name")}
               fullWidth={true}
               maxLength={21}
             />
@@ -130,7 +131,7 @@ export default class ChannelCreateDialog extends React.Component {
               floatingLabelText="Description"
               name="description"
               value={inputs.description || ""}
-              onChange={updateEmailFieldEdit("description")}
+              onChange={updateFieldEdit("description")}
               fullWidth={true}
               multiLine={true}
               maxLength={500}

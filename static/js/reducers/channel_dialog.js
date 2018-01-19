@@ -4,13 +4,10 @@ import R from "ramda"
 import {
   START_CHANNEL_EDIT,
   UPDATE_CHANNEL_EDIT,
-  CLEAR_CHANNEL_EDIT,
-  INITIATE_CREATE_CHANNEL,
-  CREATE_CHANNEL_SUCCESS,
-  CREATE_CHANNEL_FAILURE
+  UPDATE_CHANNEL_ERRORS,
+  CLEAR_CHANNEL_EDIT
 } from "../actions/channels"
 import { discussionErrors } from "../lib/validation/discussions"
-import { FETCH_FAILURE, FETCH_SUCCESS, FETCH_PROCESSING } from "../actions"
 
 import type { Action } from "../flow/reduxTypes"
 import type { ChannelInputs, ChannelState } from "../flow/discussionTypes"
@@ -26,10 +23,8 @@ export const INITIAL_CHANNEL_STATE: ChannelState = {
   inputs:               { ...NEW_CHANNEL_EDIT },
   validationErrors:     {},
   validationVisibility: {},
-  saveError:            {},
   filters:              [],
-  searchkit:            {},
-  fetchStatus:          ""
+  searchkit:            {}
 }
 
 export const channelDialog = (
@@ -51,15 +46,23 @@ export const channelDialog = (
     }
     return newState
   }
+  case UPDATE_CHANNEL_ERRORS: {
+    return {
+      ...state,
+      validationErrors: {
+        ...action.payload
+      }
+    }
+  }
   case UPDATE_CHANNEL_EDIT: {
-    const updatedInputs = {
+    const inputs = {
       ...state.inputs,
       ...action.payload.inputs
     }
     return {
       ...state,
-      inputs:               updatedInputs,
-      validationErrors:     discussionErrors(updatedInputs),
+      inputs:               inputs,
+      validationErrors:     discussionErrors(inputs),
       validationVisibility: {
         ...state.validationVisibility,
         ...action.payload.validationVisibility
@@ -68,24 +71,6 @@ export const channelDialog = (
   }
   case CLEAR_CHANNEL_EDIT:
     return R.clone(INITIAL_CHANNEL_STATE)
-
-  case INITIATE_CREATE_CHANNEL:
-    return {
-      ...state,
-      fetchStatus: FETCH_PROCESSING
-    }
-  case CREATE_CHANNEL_SUCCESS:
-    return {
-      ...state,
-      fetchStatus: FETCH_SUCCESS
-    }
-  case CREATE_CHANNEL_FAILURE:
-    return {
-      ...state,
-      fetchStatus: FETCH_FAILURE,
-      sendError:   action.payload.error
-    }
-
   default:
     return state
   }

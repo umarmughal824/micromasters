@@ -9,7 +9,7 @@ import {
   startChannelEdit,
   clearChannelEdit,
   updateChannelEdit,
-  createChannel
+  updateChannelErrors
 } from "../../actions/channels"
 import { actions } from "../../lib/redux_rest"
 import { discussionErrors } from "../../lib/validation/discussions"
@@ -18,11 +18,9 @@ import { CHANNEL_CREATE_DIALOG } from "../../constants"
 import ChannelCreateDialog from "./ChannelCreateDialog"
 
 import type { AvailableProgram } from "../../flow/enrollmentTypes"
-import type {
-  ChannelState,
-  CreateChannelResponse
-} from "../../flow/discussionTypes"
+import type { ChannelInputs, ChannelState } from "../../flow/discussionTypes"
 import type { UIState } from "../../reducers/ui"
+import type { RestState } from "../../flow/restTypes"
 
 const isVisible = R.propOr(false, CHANNEL_CREATE_DIALOG)
 
@@ -35,6 +33,7 @@ export const withChannelCreateDialog = (WrappedComponent: ReactClass<*>) => {
   class WithChannelCreateDialog extends React.Component {
     props: {
       channelDialog: ChannelState,
+      channels: RestState<any>,
       currentProgramEnrollment: AvailableProgram,
       dispatch: Dispatch,
       ui: UIState
@@ -64,23 +63,11 @@ export const withChannelCreateDialog = (WrappedComponent: ReactClass<*>) => {
         currentProgramEnrollment
       } = this.props
       const query = searchkit.buildQuery().query
-      if (R.isEmpty(discussionErrors(inputs))) {
-        dispatch(
-          createChannel((...args) => dispatch(actions.channels.post(...args)), [
-            {
-              ...inputs,
-              query,
-              program_id: currentProgramEnrollment.id
-            }
-          ])
-        ).then((channel: CreateChannelResponse) => {
-          this.closeAndClearDialog()
-
-          if (SETTINGS.open_discussions_redirect_url) {
-            const channelUrl = `${SETTINGS.open_discussions_redirect_url}channel/${channel.name}`
-            window.open(channelUrl, "_self")
-          }
-        })
+      const errors = discussionErrors(inputs)
+      if (R.isEmpty(errors)) {
+        this.createChannel(inputs, query, currentProgramEnrollment)
+      } else {
+        dispatch(updateChannelErrors(errors))
       }
     }
 
@@ -98,7 +85,33 @@ export const withChannelCreateDialog = (WrappedComponent: ReactClass<*>) => {
       )
     }
 
-    updateEmailFieldEdit = R.curry((fieldName, e): void => {
+    createChannel = async (
+      inputs: ChannelInputs,
+      query: Object,
+      programEnrollment: AvailableProgram
+    ) => {
+      const { dispatch } = this.props
+      try {
+        const channel = await dispatch(
+          actions.channels.post({
+            ...inputs,
+            query,
+            program_id: programEnrollment.id
+          })
+        )
+
+        this.closeAndClearDialog()
+
+        if (SETTINGS.open_discussions_redirect_url) {
+          const channelUrl = `${SETTINGS.open_discussions_redirect_url}channel/${channel.name}`
+          window.open(channelUrl, "_self")
+        }
+      } catch (remoteErrors) {
+        dispatch(updateChannelErrors(remoteErrors))
+      }
+    }
+
+    updateFieldEdit = R.curry((fieldName, e): void => {
       this.updateChannelChanges(fieldName, e.target.value)
     })
 
@@ -106,6 +119,7 @@ export const withChannelCreateDialog = (WrappedComponent: ReactClass<*>) => {
       const {
         ui: { dialogVisibility },
         channelDialog,
+        channels,
         currentProgramEnrollment
       } = this.props
       return (
@@ -115,12 +129,13 @@ export const withChannelCreateDialog = (WrappedComponent: ReactClass<*>) => {
             openChannelCreateDialog={this.openChannelCreateDialog}
           />
           <ChannelCreateDialog
-            updateEmailFieldEdit={this.updateEmailFieldEdit}
+            updateFieldEdit={this.updateFieldEdit}
             dialogVisibility={isVisible(dialogVisibility)}
             closeAndClearDialog={this.closeAndClearDialog}
             closeAndCreateDialog={this.closeAndCreateDialog}
             currentProgramEnrollment={currentProgramEnrollment}
             channelDialog={channelDialog}
+            isSavingChannel={channels.processing}
           />
         </div>
       )

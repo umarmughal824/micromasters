@@ -32,7 +32,7 @@ export type Filter = {
 export type ChannelValidationErrors = {
   name?:               string,
   title?:              string,
-  description?: string,
+  description?:        string,
 };
 
 export type ChannelState = {
@@ -40,14 +40,13 @@ export type ChannelState = {
   validationErrors:     ChannelValidationErrors,
   validationVisibility: { [string]: bool },
   filters:              ?Array<Filter>,
-  searchkit:            Object,
-  fetchStatus:          string
+  searchkit:            Object
 };
 
 export type CreateChannelResponse = {
   name:               string,
   title:              string,
-  description: string,
+  description:        string,
   channel_type:       ChannelType,
   query:              Object
 };

@@ -219,3 +219,4 @@ def test_create_channel_duplicate(mocker, patched_users_api):
         "name": channel.name,
     }, format="json")
     assert resp.status_code == statuses.HTTP_409_CONFLICT
+    assert resp.json() == {"name": "A channel with that name already exists"}

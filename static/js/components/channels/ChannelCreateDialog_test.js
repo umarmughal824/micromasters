@@ -8,12 +8,11 @@ import getMuiTheme from "material-ui/styles/getMuiTheme"
 import ReactTestUtils from "react-dom/test-utils"
 
 import * as inputUtil from "../inputs/util"
-import { FETCH_PROCESSING } from "../../actions"
 import ChannelCreateDialog from "./ChannelCreateDialog"
 import { INITIAL_CHANNEL_STATE } from "../../reducers/channel_dialog"
 
 describe("ChannelCreateDialog", () => {
-  let sandbox, closeAndClearStub, closeAndCreateStub, updateEmailFieldEditStub
+  let sandbox, closeAndClearStub, closeAndCreateStub, updateFieldEditStub
 
   const getDialog = () => document.querySelector(".create-channel-dialog")
 
@@ -21,7 +20,7 @@ describe("ChannelCreateDialog", () => {
     sandbox = sinon.sandbox.create()
     closeAndClearStub = sandbox.stub()
     closeAndCreateStub = sandbox.stub()
-    updateEmailFieldEditStub = sandbox.stub()
+    updateFieldEditStub = sandbox.stub()
   })
 
   afterEach(() => {
@@ -35,8 +34,9 @@ describe("ChannelCreateDialog", () => {
         <ChannelCreateDialog
           closeAndClearDialog={closeAndClearStub}
           closeAndCreateDialog={closeAndCreateStub}
-          updateEmailFieldEdit={updateEmailFieldEditStub}
+          updateFieldEdit={updateFieldEditStub}
           channelDialog={dialogState}
+          isSavingChannel={false}
           dialogVisibility={true}
           currentProgramEnrollment={{
             title: "Test Program"
@@ -59,9 +59,9 @@ describe("ChannelCreateDialog", () => {
     assert.isTrue(closeAndClearStub.called, "called send handler")
   })
 
-  it("should show a disabled spinner button if email send is in progress", () => {
+  it("should show a disabled spinner button if channelCreate is in progress", () => {
     const dialogActionsSpy = sandbox.spy(inputUtil, "dialogActions")
-    renderDialog({ fetchStatus: FETCH_PROCESSING })
+    renderDialog({}, { isSavingChannel: true })
 
     // assert that inFlight is true
     assert.isTrue(
@@ -75,14 +75,14 @@ describe("ChannelCreateDialog", () => {
       renderDialog()
       const input = getDialog().querySelector(`input[name=${field}]`)
       ReactTestUtils.Simulate.change(input)
-      assert.isTrue(updateEmailFieldEditStub.called, "called send handler")
+      assert.isTrue(updateFieldEditStub.called, "called send handler")
     })
   }
   it(`should trigger updates on the description field`, () => {
     renderDialog()
     const input = getDialog().querySelector(`textarea[name=description]`)
     ReactTestUtils.Simulate.change(input)
-    assert.isTrue(updateEmailFieldEditStub.called, "called send handler")
+    assert.isTrue(updateFieldEditStub.called, "called send handler")
   })
 
   for (const field of ["title", "name", "description"]) {

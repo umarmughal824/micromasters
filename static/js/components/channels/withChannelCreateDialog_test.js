@@ -11,12 +11,7 @@ import IntegrationTestHelper from "../../util/integration_test_helper"
 import { withChannelCreateDialog } from "./withChannelCreateDialog"
 import { actions } from "../../lib/redux_rest"
 import { CHANNEL_CREATE_DIALOG } from "../../constants"
-import {
-  START_CHANNEL_EDIT,
-  CLEAR_CHANNEL_EDIT,
-  INITIATE_CREATE_CHANNEL,
-  CREATE_CHANNEL_SUCCESS
-} from "../../actions/channels"
+import { START_CHANNEL_EDIT, CLEAR_CHANNEL_EDIT } from "../../actions/channels"
 import { SHOW_DIALOG, HIDE_DIALOG } from "../../actions/ui"
 import { INITIAL_CHANNEL_STATE } from "../../reducers/channel_dialog"
 
@@ -59,6 +54,7 @@ describe("withChannelCreateDialog higher-order component", () => {
           ui={{ dialogVisibility: { [CHANNEL_CREATE_DIALOG]: dialogVisible } }}
           channelDialog={{ ...channelDialog, searchkit }}
           currentProgramEnrollment={{}}
+          channels={{ processing: false }}
         />
       </MuiThemeProvider>
     )
@@ -135,10 +131,8 @@ describe("withChannelCreateDialog higher-order component", () => {
 
     const state = await listenForActions(
       [
-        INITIATE_CREATE_CHANNEL,
         actions.channels.post.requestType,
         actions.channels.post.successType,
-        CREATE_CHANNEL_SUCCESS,
         CLEAR_CHANNEL_EDIT,
         HIDE_DIALOG
       ],
