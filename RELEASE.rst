@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.86.2
+--------------
+
+- Freeze grades every day (#3766)
+- bump react-dropzone version to latest
+
 Version 0.86.1
 --------------
 
