@@ -15,7 +15,8 @@ import {
   futureEnrollableRun,
   hasEnrolledInAnyRun,
   hasPassedCourseRun,
-  isEnrollableRun
+  isEnrollableRun,
+  isOfferedInUncertainFuture
 } from "./util"
 import {
   STATUS_PASSED,
@@ -343,6 +344,28 @@ describe("dashboard course utilities", () => {
     it("should return false when course id is empty", () => {
       course.runs[0].course_id = ""
       assert.isFalse(isEnrollableRun(course.runs[0]))
+    })
+  })
+
+  describe("isOfferedInUncertainFuture", () => {
+    let course
+
+    beforeEach(() => {
+      course = makeCourse(0)
+    })
+
+    it("should return true if course run is offered in fuzzy future", () => {
+      [
+        [STATUS_OFFERED, "Fuzzy date", null, true],
+        [STATUS_WILL_ATTEND, "Fuzzy date", null, false],
+        [STATUS_OFFERED, "Fuzzy date", moment(), false],
+        [STATUS_OFFERED, "", null, false]
+      ].forEach(([status, fuzzyDate, startDate, result]) => {
+        course.runs[0].status = status
+        course.runs[0].fuzzy_start_date = fuzzyDate
+        course.runs[0].course_start_date = startDate
+        assert.equal(isOfferedInUncertainFuture(course.runs[0]), result)
+      })
     })
   })
 })
