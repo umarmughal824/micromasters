@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.87.0
+--------------
+
+- Updated create channel UI to handle backend errors (#3618)
+- Use TimestampedModel base in channel and discussionUser models (#3773)
+- Added course num to course model (#3774)
+- Fix CourseRunStatus for course runs with fuzzy start date (#3771)
+- add status message for course run with fuzzy start date (#3775)
+- Pinned astroid to 1.5.3 to fix lints locally
+
 Version 0.86.2
 --------------
 
