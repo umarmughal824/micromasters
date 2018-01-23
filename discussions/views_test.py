@@ -8,10 +8,7 @@ from rest_framework.test import (
     APIClient,
 )
 
-from discussions.exceptions import (
-    ChannelAlreadyExistsException,
-    UnableToAuthenticateDiscussionUserException,
-)
+from discussions.exceptions import ChannelAlreadyExistsException
 from discussions.factories import ChannelFactory
 from micromasters.factories import UserFactory
 from roles.factories import RoleFactory
@@ -84,8 +81,24 @@ def test_logged_in_user_redirect_no_username(client, patched_users_api):
     user.discussion_user.save()
 
     client.force_login(user)
-    with pytest.raises(UnableToAuthenticateDiscussionUserException):
-        client.get(reverse('discussions'))
+    response = client.get(reverse('discussions'), follow=True)
+    assert response.redirect_chain[0] == ('http://localhost/', 302)
+    assert 'jwt_cookie' in response.client.cookies
+    assert response.client.cookies['jwt_cookie'] is not None
+
+
+def test_logged_in_user_redirect_no_discussion_user(client, patched_users_api):
+    """
+    Tests that logged in user gets cookie and redirect
+    """
+    user = UserFactory.create()
+    user.discussion_user.delete()
+
+    client.force_login(user)
+    response = client.get(reverse('discussions'), follow=True)
+    assert response.redirect_chain[0] == ('http://localhost/', 302)
+    assert 'jwt_cookie' in response.client.cookies
+    assert response.client.cookies['jwt_cookie'] is not None
 
 
 def _make_create_channel_input(program_id, description="default description"):

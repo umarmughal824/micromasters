@@ -54,6 +54,7 @@ def test_get_token_for_user(settings, mocker):
     settings.OPEN_DISCUSSIONS_JWT_EXPIRES_DELTA = 3600
 
     mock_get_token = mocker.patch('open_discussions_api.utils.get_token')
+    mock_create_user = mocker.patch('discussions.api.create_or_update_discussion_user')
 
     DiscussionUser.objects.create(user=user, username='username')
     assert get_token_for_user(user) is not None
@@ -67,3 +68,32 @@ def test_get_token_for_user(settings, mocker):
             'session_url': None
         }
     )
+    assert mock_create_user.call_count == 0
+
+
+def test_get_token_for_user_force_discussion_user(settings, mocker):
+    """
+    Assert that get_token_for_user returns a token for a valid DiscussionUser
+    """
+    with mute_signals(post_save):
+        user = UserFactory.create()
+
+    settings.OPEN_DISCUSSIONS_JWT_SECRET = 'secret'
+    settings.OPEN_DISCUSSIONS_JWT_EXPIRES_DELTA = 3600
+
+    mock_get_token = mocker.patch('open_discussions_api.utils.get_token')
+    mock_create_user = mocker.patch('discussions.api.create_or_update_discussion_user')
+    mock_create_user.return_value = DiscussionUser(user=user, username='username')
+
+    assert get_token_for_user(user, force_create=True) is not None
+    mock_get_token.assert_called_once_with(
+        'secret',
+        'username',
+        [],
+        expires_delta=3600,
+        extra_payload={
+            'auth_url': None,
+            'session_url': None
+        }
+    )
+    assert mock_create_user.called_once_with(user.id)

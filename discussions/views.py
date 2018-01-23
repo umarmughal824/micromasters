@@ -60,7 +60,8 @@ def discussions_redirect(request):
     """
     View for setting discussions JWT token and redirecting to discussions
     """
-    token = get_token_for_request(request)
+    token = get_token_for_request(request, force_create=True)
+
     if token is not None:
         response = redirect(settings.OPEN_DISCUSSIONS_REDIRECT_URL)
         _set_jwt_cookie(response, token)
