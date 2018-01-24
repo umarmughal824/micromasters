@@ -5,6 +5,8 @@ import sinon from "sinon"
 import MockAdapter from "axios-mock-adapter"
 import axios from "axios"
 import { Utils as SearchkitUtils } from "searchkit"
+import qs from "qs"
+import { browserHistory } from "react-router"
 
 import { wait } from "../util/util"
 import IntegrationTestHelper from "../util/integration_test_helper"
@@ -25,6 +27,7 @@ import {
 import { SHOW_DIALOG, HIDE_DIALOG } from "../actions/ui"
 import { EMAIL_COMPOSITION_DIALOG } from "../components/email/constants"
 import { CHANNEL_CREATE_DIALOG } from "../constants"
+import { matchFieldName } from "../components/search/util"
 import { modifyTextField } from "../util/test_utils"
 import EmailCompositionDialog from "../components/email/EmailCompositionDialog"
 
@@ -70,8 +73,9 @@ describe("LearnerSearchPage", function() {
     })
   })
 
-  const renderSearch = async () => {
-    const [wrapper] = await renderComponent("/learners")
+  const renderSearch = async (query: Object) => {
+    const url = query ? `/learners?${qs.stringify(query)}` : "/learners"
+    const [wrapper] = await renderComponent(url)
     const searchkit = wrapper.find("SearchkitProvider").props().searchkit
     await searchkit.registrationCompleted
     // cycle through the event loop to let searchkit do its rendering
@@ -97,14 +101,6 @@ describe("LearnerSearchPage", function() {
       const callArgs = replySpy.firstCall.args[0]
       const body = JSON.parse(callArgs.data)
       assert.deepEqual(body.post_filter.term["program.id"], PROGRAMS[0].id)
-    })
-  })
-
-  it("doesn't filter by program id for current enrollment if it's not set to anything", () => {
-    helper.programsGetStub.returns(Promise.resolve([]))
-
-    return renderSearch().then(() => {
-      assert.equal(replySpy.callCount, 0)
     })
   })
 
@@ -304,7 +300,7 @@ describe("LearnerSearchPage", function() {
           query:    "xyz",
           type:     "phrase_prefix"
         })
-        assert.equal(window.location.toString(), "http://fake/?q=xyz")
+        assert.equal(window.location.toString(), "http://fake/learners?q=xyz")
       })
   })
 
@@ -316,9 +312,7 @@ describe("LearnerSearchPage", function() {
         const body = JSON.parse(callArgs.data)
 
         const keys = Object.keys(body.aggs)
-        const degreeNameKeys = keys.filter(key =>
-          key.startsWith("profile.work_history.company_name")
-        )
+        const degreeNameKeys = keys.filter(matchFieldName("company_name"))
 
         // make sure the accessor is modifying an existing field and not adding a new one with a different name
         assert.lengthOf(degreeNameKeys, 1)
@@ -343,10 +337,7 @@ describe("LearnerSearchPage", function() {
                   },
                   terms: {
                     field: "profile.work_history.company_name",
-                    order: {
-                      company_name_count: "desc"
-                    },
-                    size: 20
+                    size:  20
                   }
                 },
                 "profile.work_history.company_name_count": {
@@ -374,12 +365,33 @@ describe("LearnerSearchPage", function() {
         const workHistoryItems = wrapper
           .find("ModifiedMultiSelect Select")
           .props().options
-        assert.deepEqual(workHistoryItems, [
-          {
-            label: "Microsoft (1) ",
-            value: "Microsoft"
-          }
-        ])
+
+        const expected = [
+          ["Hyundai", 7],
+          ["Chase", 6],
+          ["Goldman Sachs", 6],
+          ["Google", 6],
+          ["Volvo", 6],
+          ["Ford", 5],
+          ["TD Bank", 5],
+          ["Toyota", 5],
+          ["Apple", 4],
+          ["Microsoft", 4],
+          ["Berkshire Hathaway", 3],
+          ["Fidelity", 3],
+          ["Bank of America", 2],
+          ["Vanguard", 2],
+          ["Audi", 1],
+          ["ME", 1]
+        ]
+
+        assert.deepEqual(
+          workHistoryItems,
+          expected.map(([company, count]) => ({
+            label: `${company} (${count}) `,
+            value: company
+          }))
+        )
       })
     })
   })
@@ -392,9 +404,7 @@ describe("LearnerSearchPage", function() {
         const body = JSON.parse(callArgs.data)
 
         const keys = Object.keys(body.aggs)
-        const degreeNameKeys = keys.filter(key =>
-          key.startsWith("profile.education.degree_name")
-        )
+        const degreeNameKeys = keys.filter(matchFieldName("education_level"))
 
         // make sure the accessor is modifying an existing field and not adding a new one with a different name
         assert.lengthOf(degreeNameKeys, 1)
@@ -448,9 +458,10 @@ describe("LearnerSearchPage", function() {
           .items
 
         assert.deepEqual(educationItems, [
-          { doc_count: 1, key: "b" },
-          { doc_count: 1, key: "hs" },
-          { doc_count: 1, key: "m" }
+          { doc_count: 66, key: "$all", label: "All" },
+          { doc_count: 65, key: "hs" },
+          { doc_count: 64, key: "b" },
+          { doc_count: 57, key: "m" }
         ])
       })
     })
@@ -459,7 +470,7 @@ describe("LearnerSearchPage", function() {
   describe("course enrollment filters", () => {
     it("have the expected aggregations", () => {
       const innerKey = "program.enrollments.course_title"
-      const topLevelKey = `${innerKey}3`
+      const topLevelKey = `${innerKey}2`
 
       return renderSearch().then(() => {
         const callArgs = replySpy.firstCall.args[0]
@@ -483,23 +494,31 @@ describe("LearnerSearchPage", function() {
         const courseTitleItems = allEnrollmentItems.at(0).prop("items")
         const paymentStatusItems = allEnrollmentItems.at(1).prop("items")
 
+        assert.deepEqual(_.pick(courseTitleItems[0], ["key", "doc_count"]), {
+          doc_count: 66,
+          key:       "$all"
+        })
         assert.deepEqual(
-          _.pick(courseTitleItems[0], ["key", "doc_count"]),
+          _.pick(courseTitleItems[1], ["key", "doc_count"]),
           // doc_count for these custom nested aggregations should be set to the reverse_nested count
           // instead of the normal doc_count
-          { doc_count: 15, key: "Test Course 100" }
+          { doc_count: 65, key: "Digital Learning 100" }
         )
-        assert.deepEqual(_.pick(courseTitleItems[1], ["key", "doc_count"]), {
-          doc_count: 10,
-          key:       "Test Course 200"
+        assert.deepEqual(_.pick(courseTitleItems[2], ["key", "doc_count"]), {
+          doc_count: 31,
+          key:       "Digital Learning 200"
         })
 
         assert.deepEqual(_.pick(paymentStatusItems[0], ["key", "doc_count"]), {
-          doc_count: 15,
-          key:       "Auditing"
+          doc_count: 66,
+          key:       "$all"
         })
         assert.deepEqual(_.pick(paymentStatusItems[1], ["key", "doc_count"]), {
-          doc_count: 5,
+          doc_count: 65,
+          key:       "Auditing"
+        })
+        assert.deepEqual(_.pick(paymentStatusItems[2], ["key", "doc_count"]), {
+          doc_count: 31,
           key:       "Paid"
         })
       })
@@ -522,7 +541,7 @@ describe("LearnerSearchPage", function() {
       }
       return renderSearch().then(([wrapper]) => {
         const searchkit = wrapper.find("SearchkitProvider").props().searchkit
-        searchkit.searchFromUrlQuery(query)
+        searchkit.searchFromUrlQuery(qs.stringify(query))
 
         const titles = wrapper
           .find(".mm-filters .sk-selected-filters-option__name")
@@ -551,7 +570,7 @@ describe("LearnerSearchPage", function() {
       }
       return renderSearch().then(([wrapper]) => {
         const searchkit = wrapper.find("SearchkitProvider").props().searchkit
-        searchkit.searchFromUrlQuery(query)
+        searchkit.searchFromUrlQuery(qs.stringify(query))
 
         const titles = wrapper
           .find(".mm-filters .sk-selected-filters-option__name")
@@ -591,10 +610,60 @@ describe("LearnerSearchPage", function() {
     replySpy.returns(Promise.resolve([200, noHitsResponse]))
     return renderSearch().then(([wrapper]) => {
       const searchkit = wrapper.find("SearchkitProvider").props().searchkit
-      searchkit.searchFromUrlQuery(query)
+      searchkit.searchFromUrlQuery(qs.stringify(query))
 
       assert(wrapper.find(".sk-search-box"), "Unable to find textbox")
       assert.equal(wrapper.find(".filter-visibility-toggle").length, 9)
+    })
+  })
+
+  it("has correctly adjusted filters for the final grade", async () => {
+    const query = {
+      courses:       ["Digital Learning 200"],
+      "final-grade": { min: 40, max: 100 }
+    }
+
+    await renderSearch(query)
+
+    assert.equal(replySpy.callCount, 1)
+    const callArgs = replySpy.firstCall.args[0]
+    const body = JSON.parse(callArgs.data)
+    // there should be three filters, none should be duplicates
+    assert.deepEqual(body.aggs.education_level10.filter, {
+      bool: {
+        must: [
+          {
+            nested: {
+              path:  "program.enrollments",
+              query: {
+                bool: {
+                  must: [
+                    {
+                      term: {
+                        "program.enrollments.course_title":
+                          "Digital Learning 200"
+                      }
+                    },
+                    {
+                      range: {
+                        "program.enrollments.final_grade": {
+                          gte: "40",
+                          lte: "100"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            term: {
+              "program.id": 3
+            }
+          }
+        ]
+      }
     })
   })
 
@@ -603,10 +672,10 @@ describe("LearnerSearchPage", function() {
     await listenForActions(
       [REQUEST_DASHBOARD, RECEIVE_DASHBOARD_SUCCESS],
       () => {
-        helper.browserHistory.push(`/learner/${SETTINGS.user.username}`)
+        browserHistory.push(`/learner/${SETTINGS.user.username}`)
       }
     )
-    helper.browserHistory.push("/learners")
-    helper.browserHistory.push(`/learner/${SETTINGS.user.username}`)
+    browserHistory.push("/learners")
+    browserHistory.push(`/learner/${SETTINGS.user.username}`)
   })
 })

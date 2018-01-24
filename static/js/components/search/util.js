@@ -96,11 +96,18 @@ export const NestedAccessorMixin = BaseSearchkitAccessorClass =>
         filters.push(groupedNestedFilter)
         query = query.update({ filters: { $set: filters } })
 
-        const filtersMap = _.cloneDeep(query.index.filtersMap)
+        let filtersMap = _.cloneDeep(query.index.filtersMap)
         // Add the same 'AND' filter to query.index.filtersMap, with the nested path (not the uuid) as the key
         filtersMap[nestedPath] = groupedNestedFilter
         // If it exists, delete the key for this specific filter (since all filters on this path are grouped together).
-        delete filtersMap[this.getFilterMapKey()]
+        const oldKey = this.getFilterMapKey()
+        const matcher = matchFieldName(oldKey)
+        filtersMap = R.compose(
+          R.fromPairs,
+          R.reject(R.compose(matcher, R.view(R.lensIndex(0)))),
+          R.toPairs
+        )(filtersMap)
+
         query = query.update({ filtersMap: { $set: filtersMap } })
       }
       return query
@@ -128,14 +135,14 @@ export const NestedAccessorMixin = BaseSearchkitAccessorClass =>
         return this.fieldContext.wrapFilter(filterToAdd)
       } else {
         let mustFilters = []
-        const nestedFilter = _.get(appliedFiltersOnPath, ["nested", "filter"])
+        const nestedFilter = _.get(appliedFiltersOnPath, ["nested", "query"])
         if (nestedFilter.bool) {
           mustFilters = _.get(nestedFilter, ["bool", "must"])
         } else {
           mustFilters = [nestedFilter]
         }
         mustFilters.push(filterToAdd)
-        _.set(appliedFiltersOnPath, ["nested", "filter"], BoolMust(mustFilters))
+        _.set(appliedFiltersOnPath, ["nested", "query"], BoolMust(mustFilters))
         return appliedFiltersOnPath
       }
     }
@@ -175,7 +182,7 @@ export const NestedAccessorMixin = BaseSearchkitAccessorClass =>
       const appliedNestedFilters = query.getFiltersWithKeys(nestedPath)
       const filterElement = R.pathOr(
         {},
-        ["nested", "filter"],
+        ["nested", "query"],
         appliedNestedFilters
       )
       if (R.path(["bool", "must"], filterElement)) {
@@ -219,3 +226,13 @@ export const NestedAccessorMixin = BaseSearchkitAccessorClass =>
       return otherFilters.length > 0 ? BoolMust(otherFilters) : undefined
     }
   }
+
+// Accept keys that start with the given prefix and end with numbers
+export const matchFieldName: (
+  resultIdPrefix: string,
+  key: string
+) => boolean = R.curry(
+  (resultIdPrefix: string, key: string) =>
+    key.startsWith(resultIdPrefix) &&
+    !isNaN(key.substring(resultIdPrefix.length))
+)
