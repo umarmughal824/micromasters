@@ -21,7 +21,7 @@ def handle_create_coursecertificate(sender, instance, created, **kwargs):  # pyl
 
 
 @receiver(post_save, sender=ProctoredExamGrade, dispatch_uid="examgrade_post_save")
-def handle_create_coursecertificate(sender, instance, created, **kwargs):  # pylint: disable=unused-argument
+def handle_create_exam_grade(sender, instance, created, **kwargs):  # pylint: disable=unused-argument
     """
     When a ProctoredExamGrade model is created or updated
     """
