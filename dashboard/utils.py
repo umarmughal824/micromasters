@@ -326,7 +326,6 @@ class MMTrack:
             list(course.courserun_set.values_list('edx_course_key', flat=True))
         ).order_by('-grade').first()
 
-
     def get_all_enrolled_course_runs(self):
         """
         Returns a list of CourseRuns for which the user is either enrolled
