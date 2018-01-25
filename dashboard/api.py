@@ -30,9 +30,6 @@ from profiles.api import get_social_auth
 # maximum number of exam attempts per payment
 ATTEMPTS_PER_PAID_RUN = 2
 
-COURSE_GRADE_WEIGHT = 0.4
-EXAM_GRADE_WEIGHT = 0.6
-
 # key that stores user_key and number of failures in a hash
 CACHE_KEY_FAILURE_NUMS_BY_USER = "update_cache_401_failure_numbers"
 # key that stores user ids to exclude from cache update
@@ -535,7 +532,7 @@ def get_overall_final_grade_for_course(mmtrack, course):
     if best_exam is None:
         return ""
 
-    return str(round(best_grade.grade_percent * COURSE_GRADE_WEIGHT + best_exam.score * EXAM_GRADE_WEIGHT))
+    return str(round(best_grade.grade_percent * api.COURSE_GRADE_WEIGHT + best_exam.score * api.EXAM_GRADE_WEIGHT))
 
 
 def calculate_users_to_refresh_in_bulk():
