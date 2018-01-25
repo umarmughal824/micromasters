@@ -669,6 +669,23 @@ class MMTrackTest(MockedESTestCase):
         low_grade.save()
         assert mmtrack.get_passing_final_grades_for_course(finaid_course).count() == 3
 
+    def test_get_best_final_grade_for_course(self):
+        """
+        Test for get_best_final_grade_for_course to return the highest grade over all course runs
+        """
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program_financial_aid,
+            edx_user_data=self.cached_edx_user_data
+        )
+        finaid_course = self.crun_fa.course
+        assert mmtrack.get_best_final_grade_for_course(finaid_course) is None
+        final_grade = FinalGradeFactory.create(user=self.user, course_run=self.crun_fa, grade=0.0, passed=False)
+        assert mmtrack.get_best_final_grade_for_course(finaid_course) == final_grade
+        course_run = CourseRunFactory.create(course=finaid_course)
+        final_grade = FinalGradeFactory.create(user=self.user, course_run=course_run, grade=0.4, passed=False)
+        assert mmtrack.get_best_final_grade_for_course(finaid_course) == final_grade
+
     def test_get_best_proctored_exam_grade(self):
         """
         Test get_best_proctorate_exam_grade to return a passed exam with the highest score
