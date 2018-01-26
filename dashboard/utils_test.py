@@ -679,12 +679,16 @@ class MMTrackTest(MockedESTestCase):
             edx_user_data=self.cached_edx_user_data
         )
         finaid_course = self.crun_fa.course
+
+        FinalGradeFactory.create(user=self.user, course_run=self.crun_fa, grade=0.3, passed=False)
         assert mmtrack.get_best_final_grade_for_course(finaid_course) is None
-        final_grade = FinalGradeFactory.create(user=self.user, course_run=self.crun_fa, grade=0.0, passed=False)
-        assert mmtrack.get_best_final_grade_for_course(finaid_course) == final_grade
-        course_run = CourseRunFactory.create(course=finaid_course)
-        final_grade = FinalGradeFactory.create(user=self.user, course_run=course_run, grade=0.4, passed=False)
-        assert mmtrack.get_best_final_grade_for_course(finaid_course) == final_grade
+
+        for grade in [0.3, 0.5, 0.8]:
+            course_run = CourseRunFactory.create(
+                course=finaid_course,
+            )
+            FinalGradeFactory.create(user=self.user, course_run=course_run, grade=grade, passed=True)
+        assert mmtrack.get_best_final_grade_for_course(finaid_course).grade == 0.8
 
     def test_get_best_proctored_exam_grade(self):
         """
