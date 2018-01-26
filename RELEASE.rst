@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.87.1
+--------------
+
+- Fixed user trying to navigate to discussion if no user (#3736)
+- Upgrade searchkit (#3763)
+
 Version 0.87.0
 --------------
 
