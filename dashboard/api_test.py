@@ -38,7 +38,7 @@ from exams.factories import ExamRunFactory, ExamAuthorizationFactory
 from grades.constants import FinalGradeStatus
 from grades.exceptions import FreezeGradeFailedException
 from grades.factories import ProctoredExamGradeFactory, FinalGradeFactory, MicromastersCourseCertificateFactory
-from grades.models import FinalGrade, CourseRunGradingStatus, ProctoredExamGrade
+from grades.models import FinalGrade, CourseRunGradingStatus, ProctoredExamGrade, CombinedFinalGrade
 from grades.serializers import ProctoredExamGradeSerializer
 from micromasters.factories import UserFactory
 from micromasters.utils import (
@@ -1845,35 +1845,9 @@ class GetOverallGradeForCourseTests(CourseTests):
 
     def test_get_overall_final_grade_for_course(self):
         """Test get_overall_final_grade_for_course return overall grade"""
-
-        ExamRunFactory.create(course=self.course)
-        self.mmtrack.get_best_final_grade_for_course.return_value = self.final_grade
-        best_exam = ProctoredExamGradeFactory(
-            user=self.user, course=self.course, percentage_grade=0.7
-        )
-        self.mmtrack.get_best_proctored_exam_grade.return_value = best_exam
-        assert api.get_overall_final_grade_for_course(self.mmtrack, self.course) == '74'
-
-    def test_no_final_grade(self):
-        """Test get_overall_final_grade_for_course user has no final grade"""
-
-        self.mmtrack.get_best_final_grade_for_course.return_value = None
-        assert api.get_overall_final_grade_for_course(self.mmtrack, self.course) == ''
-
-    def test_course_has_no_exam(self):
-        """Test get_overall_final_grade_for_course for course with no exam"""
-
-        self.mmtrack.get_best_final_grade_for_course.return_value = self.final_grade
-        self.mmtrack.get_best_proctored_exam_grade.return_value = None
-        assert api.get_overall_final_grade_for_course(self.mmtrack, self.course) == '80'
-
-    def test_no_passing_exam(self):
-        """Test get_overall_final_grade_for_course user has no passing exam"""
-
-        ExamRunFactory.create(course=self.course)
-        self.mmtrack.get_best_final_grade_for_course.return_value = self.final_grade
-        self.mmtrack.get_best_proctored_exam_grade.return_value = None
-        assert api.get_overall_final_grade_for_course(self.mmtrack, self.course) == ''
+        assert api.get_overall_final_grade_for_course(self.user, self.course) == ""
+        CombinedFinalGrade.objects.create(user=self.user, course=self.course, grade="74")
+        assert api.get_overall_final_grade_for_course(self.user, self.course) == "74"
 
 
 # pylint: disable=unused-argument, redefined-outer-name
