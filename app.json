@@ -217,6 +217,10 @@
     "OPEN_EXCHANGE_RATES_URL": {
       "value": "https://openexchangerates.org/api/"
     },
+    "PARAMIKO_LOG_LEVEL": {
+      "description": "The log level for the paramiko logger",
+      "required": false
+    },
     "PGBOUNCER_DEFAULT_POOL_SIZE": {
       "value": "50"
     },

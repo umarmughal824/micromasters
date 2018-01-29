@@ -317,6 +317,10 @@ HOSTNAME = platform.node().split('.')[0]
 NPLUSONE_LOGGER = logging.getLogger('nplusone')
 NPLUSONE_LOG_LEVEL = logging.ERROR
 
+# paramiko logger configuration
+# default log level to critical to silence everything
+PARAMIKO_LOG_LEVEL = get_string('PARAMIKO_LOG_LEVEL', 'CRITICAL')
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -383,6 +387,9 @@ LOGGING = {
         'nplusone': {
             'handlers': ['console'],
             'level': 'ERROR',
+        },
+        'paramiko': {
+            'level': PARAMIKO_LOG_LEVEL,
         },
     },
     'root': {
