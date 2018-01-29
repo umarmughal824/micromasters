@@ -222,9 +222,8 @@ def generate_program_certificate(user, program):
         return
 
     for course in program.course_set.all():
-        final_grades = mmtrack.get_passing_final_grades_for_course(course)
+        best_grade = mmtrack.get_best_final_grade_for_course(course)
 
-        best_grade = final_grades.first()
         if best_grade is None or not best_grade.has_certificate:
             return
     MicromastersProgramCertificate.objects.create(user=user, program=program)

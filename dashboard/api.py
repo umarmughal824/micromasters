@@ -497,9 +497,8 @@ def get_certificate_url(mmtrack, course):
         str: url to view the certificate
     """
     url = ""
-    final_grades = mmtrack.get_passing_final_grades_for_course(course)
-    if final_grades.exists():
-        best_grade = final_grades.first()
+    best_grade = mmtrack.get_best_final_grade_for_course(course)
+    if best_grade:
         course_key = best_grade.course_run.edx_course_key
         if mmtrack.financial_aid_available:
             if best_grade.has_certificate and course.signatories.exists():
@@ -521,8 +520,7 @@ def get_overall_final_grade_for_course(mmtrack, course):
     Returns:
         str: the overall final grade
     """
-    final_grades = mmtrack.get_passing_final_grades_for_course(course)
-    best_grade = final_grades.first()
+    best_grade = mmtrack.get_best_final_grade_for_course(course)
     if best_grade is None:
         return ""
     if not course.has_exam:

@@ -646,29 +646,6 @@ class MMTrackTest(MockedESTestCase):
         ProgramCertificateSignatoriesFactory.create(program_page__program=certificate.program)
         assert mmtrack.get_program_certificate_url() == reverse('program-certificate', args=[certificate.hash])
 
-    def test_get_passing_final_grades(self):
-        """
-        Test for get_passing_final_grades_for_course to sort passing grades
-        """
-        mmtrack = MMTrack(
-            user=self.user,
-            program=self.program_financial_aid,
-            edx_user_data=self.cached_edx_user_data
-        )
-        finaid_course = self.crun_fa.course
-        for grade in [0.3, 0.5, 0.8]:
-            course_run = CourseRunFactory.create(
-                course=finaid_course,
-            )
-            FinalGradeFactory.create(user=self.user, course_run=course_run, grade=grade, passed=True)
-        highest_grade = FinalGradeFactory.create(user=self.user, course_run=self.crun_fa, grade=0.9, passed=True)
-        qset = mmtrack.get_passing_final_grades_for_course(finaid_course)
-        assert qset.first() == highest_grade
-        low_grade = qset.last()
-        low_grade.passed = False
-        low_grade.save()
-        assert mmtrack.get_passing_final_grades_for_course(finaid_course).count() == 3
-
     def test_get_best_final_grade_for_course(self):
         """
         Test for get_best_final_grade_for_course to return the highest grade over all course runs
