@@ -499,12 +499,12 @@ class UpdateCombinedFinalGradesTests(MockedESTestCase):
     def setUpTestData(cls):
         cls.user = SocialUserFactory.create()
 
-        cls.run = CourseRunFactory.create(
+        cls.course_run = CourseRunFactory.create(
             course__program__financial_aid_availability=True,
         )
         cls.not_passing_final_grade = FinalGradeFactory.create(
             user=cls.user,
-            course_run=cls.run,
+            course_run=cls.course_run,
             grade=0.5,
             passed=False
         )
@@ -513,22 +513,28 @@ class UpdateCombinedFinalGradesTests(MockedESTestCase):
         """
         Test create and update
         """
-        combined_grade_qset = CombinedFinalGrade.objects.filter(ser=self.user, course=self.run.course)
+        combined_grade_qset = CombinedFinalGrade.objects.filter(user=self.user, course=self.course_run.course)
         # no passing final grade
-        api.update_combined_final_grade(self.user, self.run.course)
+        api.update_combined_final_grade(self.user, self.course_run.course)
         assert combined_grade_qset.exists() is False
 
-        FinalGradeFactory.create(user=self.user, course_run=self.run, grade=0.6, passed=True)
+        FinalGradeFactory.create(user=self.user, course_run__course=self.course_run.course, grade=0.6, passed=True)
         # no passing exam grade
-        api.update_combined_final_grade(self.user, self.run.course)
+        api.update_combined_final_grade(self.user, self.course_run.course)
         assert combined_grade_qset.exists() is False
-        ProctoredExamGradeFactory.create(user=self.user, course=self.run.course, percentage_grade=0.8, passed=True)
+        ProctoredExamGradeFactory.create(
+            user=self.user,
+            course=self.course_run.course,
+            percentage_grade=0.8,
+            passed=True,
+            exam_run__date_grades_available=now_in_utc() - timedelta(weeks=1)
+        )
 
         # now should create combined grade
-        api.update_combined_final_grade(self.user, self.run.course)
+        api.update_combined_final_grade(self.user, self.course_run.course)
         assert combined_grade_qset.exists() is True
 
         # now update it with a new grade
-        FinalGradeFactory.create(user=self.user, course_run__course=self.run.course, grade=0.8, passed=True)
-        api.update_combined_final_grade(self.user, self.run.course)
+        FinalGradeFactory.create(user=self.user, course_run__course=self.course_run.course, grade=0.8, passed=True)
+        api.update_combined_final_grade(self.user, self.course_run.course)
         assert combined_grade_qset.first().grade == 80.0

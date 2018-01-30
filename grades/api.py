@@ -256,9 +256,9 @@ def update_combined_final_grade(user, course):
         return
 
     calculated_grade = round(final_grade.grade_percent * COURSE_GRADE_WEIGHT + best_exam.score * EXAM_GRADE_WEIGHT, 1)
-    combined_grade = CombinedFinalGrade.objects.update_or_create(
+    combined_grade, _ = CombinedFinalGrade.objects.update_or_create(
         user=user,
         course=course,
         defaults={'grade': calculated_grade}
     )
-    combined_grade.save_and_log()
+    combined_grade.save_and_log(None)
