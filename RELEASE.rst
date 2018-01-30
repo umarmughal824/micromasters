@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.88.0
+--------------
+
+- Updating log config to quiet noncritical errors
+- Displayed learner&#39;s exam eligibility for staff on profile page (#3792)
+
 Version 0.87.1
 --------------
 
