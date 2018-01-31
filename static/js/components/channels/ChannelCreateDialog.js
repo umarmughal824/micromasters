@@ -35,13 +35,19 @@ export default class ChannelCreateDialog extends React.Component {
     closeAndCreateDialog()
   }
 
-  showValidationError = (fieldName: string): ?React$Element<*> => {
+  showValidationError = (
+    fieldName: string,
+    ignoreVisibility: boolean = false
+  ): ?React$Element<*> => {
     const {
       channelDialog: { validationErrors, validationVisibility }
     } = this.props
     const isVisible = R.propOr(false, fieldName)
     const val = validationErrors[fieldName]
-    if (isVisible(validationVisibility) && val !== undefined) {
+    if (
+      (isVisible(validationVisibility) && val !== undefined) ||
+      ignoreVisibility
+    ) {
       return <span className="validation-error">{val}</span>
     }
   }
@@ -137,6 +143,8 @@ export default class ChannelCreateDialog extends React.Component {
               maxLength={500}
             />
             {this.showValidationError("description")}
+            {/* 'detail' is the key for a backend permission error */}
+            {this.showValidationError("detail", true)}
           </Cell>
         </Grid>
       </Dialog>

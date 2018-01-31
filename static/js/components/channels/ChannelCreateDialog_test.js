@@ -102,6 +102,18 @@ describe("ChannelCreateDialog", () => {
     })
   }
 
+  it("should show a validation error for a 403", () => {
+    renderDialog({
+      validationErrors: {
+        detail: "You do not have permission to perform this action."
+      }
+    })
+    assert.equal(
+      getDialog().querySelector(".validation-error").textContent,
+      "You do not have permission to perform this action."
+    )
+  })
+
   it("should show all users in program if no filters", () => {
     renderDialog()
     assert.equal(

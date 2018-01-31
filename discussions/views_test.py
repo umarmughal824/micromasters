@@ -115,11 +115,13 @@ def _make_create_channel_input(program_id, description="default description"):
 
 @pytest.mark.parametrize("description", ["public description", ""])
 def test_create_channel(description, mocker, patched_users_api):
-    """Staff can create a channel using the REST API"""
+    """superuser can create a channel using the REST API"""
     client = APIClient()
     role = RoleFactory.create(role=Staff.ROLE_ID)
-    user = role.user
-    client.force_login(user)
+    role.user.is_superuser = True
+    role.user.save()
+
+    client.force_login(role.user)
 
     channel = ChannelFactory.create()
     add_channel_mock = mocker.patch('discussions.serializers.add_channel', return_value=channel, autospec=True)
@@ -168,21 +170,37 @@ def test_create_channel(description, mocker, patched_users_api):
     assert kwargs['program_id'] == role.program.id
 
 
-def test_create_channel_anonymous(patched_users_api):
+def test_create_channel_anonymous(mocker, patched_users_api):
     """Anonymous users should get a 401 error"""
     client = APIClient()
     program = RoleFactory.create().program
+    add_channel_mock = mocker.patch('discussions.serializers.add_channel', return_value={}, autospec=True)
     resp = client.post(reverse('channel-list'), data=_make_create_channel_input(program.id), format="json")
+    assert add_channel_mock.called is False
     assert resp.status_code == 403
 
 
-def test_create_channel_user_without_permission(patched_users_api):
-    """If a user doesn't have permission to create the channel they should get a forbidden status"""
+def test_create_channel_normal_user(mocker, patched_users_api):
+    """If a user is not a superuser they should get a forbidden status"""
     client = APIClient()
     user = UserFactory.create()
     client.force_login(user)
     program = RoleFactory.create().program
+    add_channel_mock = mocker.patch('discussions.serializers.add_channel', return_value={}, autospec=True)
     resp = client.post(reverse('channel-list'), data=_make_create_channel_input(program.id), format="json")
+    assert add_channel_mock.called is False
+    assert resp.status_code == 403
+
+
+def test_create_channel_staff_non_superuser(mocker, patched_users_api):
+    """a staff role user who is not superuser should also get a forbidden status"""
+    client = APIClient()
+    role = RoleFactory.create(role=Staff.ROLE_ID)
+    client.force_login(role.user)
+    program = role.program
+    add_channel_mock = mocker.patch('discussions.serializers.add_channel', return_value={}, autospec=True)
+    resp = client.post(reverse('channel-list'), data=_make_create_channel_input(program.id), format="json")
+    assert add_channel_mock.called is False
     assert resp.status_code == 403
 
 
@@ -191,6 +209,8 @@ def test_create_channel_missing_param(missing_param, patched_users_api):
     """A missing param should cause a validation error"""
     client = APIClient()
     role = RoleFactory.create(role=Staff.ROLE_ID)
+    role.user.is_superuser = True
+    role.user.save()
     client.force_login(role.user)
     inputs = {**_make_create_channel_input(role.program.id)}
     del inputs[missing_param]
@@ -202,22 +222,27 @@ def test_create_channel_missing_param(missing_param, patched_users_api):
 
 
 def test_create_channel_bad_program_id(patched_users_api):
-    """A missing param should cause a validation error"""
+    """A bad program ID should cause a validation error"""
     client = APIClient()
     role = RoleFactory.create(role=Staff.ROLE_ID)
+    role.user.is_superuser = True
+    role.user.save()
     client.force_login(role.user)
-    inputs = {**_make_create_channel_input("invalid_program_id")}
+    inputs = _make_create_channel_input("invalid_program_id")
     resp = client.post(reverse('channel-list'), data=inputs, format="json")
     assert resp.status_code == 400
-    assert resp.json() == ["missing or invalid program id"]
+    assert resp.json() == {
+        "program_id": ['A valid integer is required.']
+    }
 
 
 def test_create_channel_duplicate(mocker, patched_users_api):
-    """Staff can create a channel using the REST API"""
+    """creating a duplicate channel should return an error"""
     client = APIClient()
     role = RoleFactory.create(role=Staff.ROLE_ID)
-    user = role.user
-    client.force_login(user)
+    role.user.is_superuser = True
+    role.user.save()
+    client.force_login(role.user)
 
     channel = ChannelFactory.create()
     mocker.patch(
