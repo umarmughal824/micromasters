@@ -234,15 +234,13 @@ def generate_program_certificate(user, program):
     )
 
 
-def update_combined_final_grade(user, course):
+def update_or_create_combined_final_grade(user, course):
     """
-    Update or create CombineFinalGrade
+    Update or create CombinedFinalGrade
+
     Args:
         user (User): a django User
         course (Course): a course model object
-
-    Returns:
-        None
     """
     mmtrack = get_mmtrack(user, course.program)
     final_grade = mmtrack.get_best_final_grade_for_course(course)

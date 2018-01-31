@@ -59,10 +59,10 @@ class ProctoredExamGradesTests(MockedESTestCase):
             cls.user = ProfileFactory.create().user
             cls.course = CourseFactory.create()
 
-    @patch('grades.signals.update_combined_final_grade', autospec=True)
+    @patch('grades.signals.update_or_create_combined_final_grade', autospec=True)
     def test_create_exam_grade(self, update_grade_mock, mock_on_commit):
         """
-        Test that update_combined_final_grade is called when a proctored exam
+        Test that update_or_create_combined_final_grade is called when a proctored exam
         grade is created or updated
         """
         exam_grade = ProctoredExamGradeFactory.create(user=self.user, course=self.course)

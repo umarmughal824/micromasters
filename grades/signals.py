@@ -6,7 +6,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from grades.models import MicromastersCourseCertificate, ProctoredExamGrade, FinalGrade
-from grades.api import generate_program_certificate, update_combined_final_grade
+from grades.api import generate_program_certificate, update_or_create_combined_final_grade
 
 
 @receiver(post_save, sender=MicromastersCourseCertificate, dispatch_uid="coursecertificate_post_save")
@@ -25,7 +25,7 @@ def handle_create_exam_grade(sender, instance, created, **kwargs):  # pylint: di
     """
     When a ProctoredExamGrade model is created or updated
     """
-    transaction.on_commit(lambda: update_combined_final_grade(instance.user, instance.course))
+    transaction.on_commit(lambda: update_or_create_combined_final_grade(instance.user, instance.course))
 
 
 @receiver(post_save, sender=FinalGrade, dispatch_uid="final_grade_post_save")
@@ -33,4 +33,4 @@ def handle_create_final_grade(sender, instance, created, **kwargs):  # pylint: d
     """
     When a FinalGrade model is created or updated
     """
-    transaction.on_commit(lambda: update_combined_final_grade(instance.user, instance.course_run.course))
+    transaction.on_commit(lambda: update_or_create_combined_final_grade(instance.user, instance.course_run.course))
