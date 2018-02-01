@@ -52,9 +52,17 @@ const runStatus = (courseRun: CourseRun): React$Element<*> => {
     return passed()
   }
   if (courseRun.status === STATUS_CURRENTLY_ENROLLED) {
-    return <div className="status audited">Auditing</div>
+    return courseRun.has_paid ? (
+      <div className="status paid">In Progress (paid)</div>
+    ) : (
+      <div className="status audited">Auditing</div>
+    )
   }
-  return <div className="status audited">Audited</div>
+  return courseRun.has_paid ? (
+    <div className="status paid">Paid</div>
+  ) : (
+    <div className="status audited">Audited</div>
+  )
 }
 
 const examStatus = (grade: ProctoredExamResult): React$Element<*> =>
