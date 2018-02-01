@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.88.1
+--------------
+
+- restrict channel creation to superusers
+
 Version 0.88.0
 --------------
 
