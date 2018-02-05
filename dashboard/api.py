@@ -513,14 +513,14 @@ def get_certificate_url(mmtrack, course):
 
 def get_overall_final_grade_for_course(mmtrack, course):
     """
-   Calculate overall grade for course
+    Calculate overall grade for course
 
-   Args:
+    Args:
        mmtrack (dashboard.utils.MMTrack): an instance of all user information about a program
        course (courses.models.Course): A course
-   Returns:
+    Returns:
        str: the overall final grade
-   """
+    """
     if settings.FEATURES.get('USE_COMBINED_FINAL_GRADE', False):
 
         combined_grade = CombinedFinalGrade.objects.filter(user=mmtrack.user, course=course)
