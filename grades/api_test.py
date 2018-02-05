@@ -17,6 +17,7 @@ from dashboard.factories import (
     CachedCurrentGradeFactory,
     CachedEnrollmentFactory,
 )
+from exams.factories import ExamRunFactory
 from financialaid.constants import FinancialAidStatus
 from financialaid.factories import (
     FinancialAidFactory,
@@ -500,7 +501,11 @@ class UpdateCombinedFinalGradesTests(MockedESTestCase):
         cls.user = SocialUserFactory.create()
 
         cls.course_run = CourseRunFactory.create(
-            course__program__financial_aid_availability=True,
+            course__program__financial_aid_availability=True
+        )
+        cls.exam_run = ExamRunFactory.create(
+            course=cls.course_run.course,
+            date_grades_available=now_in_utc() - timedelta(weeks=1)
         )
         cls.not_passing_final_grade = FinalGradeFactory.create(
             user=cls.user,
@@ -527,7 +532,7 @@ class UpdateCombinedFinalGradesTests(MockedESTestCase):
             course=self.course_run.course,
             percentage_grade=0.8,
             passed=True,
-            exam_run__date_grades_available=now_in_utc() - timedelta(weeks=1)
+            exam_run=self.exam_run
         )
 
         # now should create combined grade

@@ -254,7 +254,10 @@ def update_or_create_combined_final_grade(user, course):
             log.warning('User [%s] does not have a passing exam grade for course [%s]', user, course)
             return
 
-        calculated_grade = round(final_grade.grade_percent * COURSE_GRADE_WEIGHT + best_exam.score * EXAM_GRADE_WEIGHT, 1)
+        calculated_grade = round(
+            final_grade.grade_percent * COURSE_GRADE_WEIGHT + best_exam.score * EXAM_GRADE_WEIGHT,
+            1
+        )
         combined_grade, _ = CombinedFinalGrade.objects.update_or_create(
             user=user,
             course=course,
