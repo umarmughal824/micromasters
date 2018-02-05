@@ -235,9 +235,8 @@ def get_info_for_course(course, mmtrack):
         ).data,
         "has_exam": course.has_exam,
         "certificate_url": get_certificate_url(mmtrack, course),
-        "overall_grade": get_overall_final_grade_for_course(mmtrack.user, course)
-        if settings.FEATURES.get('USE_COMBINED_FINAL_GRADE', False)
-        else get_overall_final_grade_for_course_old(mmtrack, course)
+        "overall_grade":
+            get_overall_final_grade_for_course(mmtrack, course)
     }
 
     def _add_run(run, mmtrack_, status):
@@ -512,23 +511,7 @@ def get_certificate_url(mmtrack, course):
     return url
 
 
-def get_overall_final_grade_for_course(user, course):
-    """
-    Calculate overall grade for course
-
-    Args:
-        user (django.contrib.auth.models.User): A user
-        course (courses.models.Course): A course
-    Returns:
-        str: the overall final grade
-    """
-    combined_grade = CombinedFinalGrade.objects.filter(user=user, course=course)
-    if combined_grade.exists():
-        return str(round(combined_grade.first().grade))
-    return ""
-
-
-def get_overall_final_grade_for_course_old(mmtrack, course):
+def get_overall_final_grade_for_course(mmtrack, course):
     """
    Calculate overall grade for course
 
@@ -538,17 +521,24 @@ def get_overall_final_grade_for_course_old(mmtrack, course):
    Returns:
        str: the overall final grade
    """
-    best_grade = mmtrack.get_best_final_grade_for_course(course)
-    if best_grade is None:
-        return ""
-    if not course.has_exam:
-        return str(round(best_grade.grade_percent))
+    if settings.FEATURES.get('USE_COMBINED_FINAL_GRADE', False):
 
-    best_exam = mmtrack.get_best_proctored_exam_grade(course)
-    if best_exam is None:
+        combined_grade = CombinedFinalGrade.objects.filter(user=mmtrack.user, course=course)
+        if combined_grade.exists():
+            return str(round(combined_grade.first().grade))
         return ""
+    else:
+        best_grade = mmtrack.get_best_final_grade_for_course(course)
+        if best_grade is None:
+            return ""
+        if not course.has_exam:
+            return str(round(best_grade.grade_percent))
 
-    return str(round(best_grade.grade_percent * api.COURSE_GRADE_WEIGHT + best_exam.score * api.EXAM_GRADE_WEIGHT))
+        best_exam = mmtrack.get_best_proctored_exam_grade(course)
+        if best_exam is None:
+            return ""
+
+        return str(round(best_grade.grade_percent * api.COURSE_GRADE_WEIGHT + best_exam.score * api.EXAM_GRADE_WEIGHT))
 
 
 def calculate_users_to_refresh_in_bulk():

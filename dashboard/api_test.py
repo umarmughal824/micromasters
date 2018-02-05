@@ -12,6 +12,7 @@ from unittest.mock import (
 import ddt
 from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
+from django.test import override_settings
 from django_redis import get_redis_connection
 import pytest
 from rest_framework import status as http_status
@@ -1843,11 +1844,12 @@ class GetOverallGradeForCourseTests(CourseTests):
             passed=True
         )
 
+    @override_settings(FEATURES={"USE_COMBINED_FINAL_GRADE": True})
     def test_get_overall_final_grade_for_course(self):
         """Test get_overall_final_grade_for_course return overall grade"""
-        assert api.get_overall_final_grade_for_course(self.user, self.course) == ""
+        assert api.get_overall_final_grade_for_course(self.mmtrack, self.course) == ""
         CombinedFinalGrade.objects.create(user=self.user, course=self.course, grade="74")
-        assert api.get_overall_final_grade_for_course(self.user, self.course) == "74"
+        assert api.get_overall_final_grade_for_course(self.mmtrack, self.course) == "74"
 
 
 # pylint: disable=unused-argument, redefined-outer-name
