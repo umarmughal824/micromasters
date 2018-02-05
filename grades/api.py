@@ -16,13 +16,16 @@ from grades.models import (
     FinalGrade,
     FinalGradeStatus,
     MicromastersProgramCertificate,
-)
+    CombinedFinalGrade)
 
 CACHE_KEY_FAILED_USERS_BASE_STR = "failed_users_{0}"
 
 log = logging.getLogger(__name__)
 
 UserFinalGrade = namedtuple('UserFinalGrade', ['grade', 'passed', 'payed_on_edx'])
+
+COURSE_GRADE_WEIGHT = 0.4
+EXAM_GRADE_WEIGHT = 0.6
 
 
 def _compute_grade_for_fa(user_edx_run_data):
@@ -219,9 +222,8 @@ def generate_program_certificate(user, program):
         return
 
     for course in program.course_set.all():
-        final_grades = mmtrack.get_passing_final_grades_for_course(course)
+        best_grade = mmtrack.get_best_final_grade_for_course(course)
 
-        best_grade = final_grades.first()
         if best_grade is None or not best_grade.has_certificate:
             return
     MicromastersProgramCertificate.objects.create(user=user, program=program)
@@ -230,3 +232,33 @@ def generate_program_certificate(user, program):
         user.username,
         program.title
     )
+
+
+def update_or_create_combined_final_grade(user, course):
+    """
+    Update or create CombinedFinalGrade
+
+    Args:
+        user (User): a django User
+        course (Course): a course model object
+    """
+    if not course.has_exam:
+        return
+    mmtrack = get_mmtrack(user, course.program)
+    final_grade = mmtrack.get_best_final_grade_for_course(course)
+    if final_grade is None:
+        log.warning('User [%s] does not have a final for course [%s]', user, course)
+        return
+
+    best_exam = mmtrack.get_best_proctored_exam_grade(course)
+    if best_exam is None:
+        log.warning('User [%s] does not have a passing exam grade for course [%s]', user, course)
+        return
+
+    calculated_grade = round(final_grade.grade_percent * COURSE_GRADE_WEIGHT + best_exam.score * EXAM_GRADE_WEIGHT, 1)
+    combined_grade, _ = CombinedFinalGrade.objects.update_or_create(
+        user=user,
+        course=course,
+        defaults={'grade': calculated_grade}
+    )
+    combined_grade.save_and_log(None)
