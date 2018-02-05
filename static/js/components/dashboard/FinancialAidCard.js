@@ -39,7 +39,7 @@ export default class FinancialAidCard extends React.Component {
     setConfirmSkipDialogVisibility: (b: boolean) => void,
     setDocsInstructionsVisibility: (b: boolean) => void,
     setDocumentSentDate: (sentDate: string) => void,
-    skipFinancialAid: (p: number) => void,
+    skipFinancialAid: (p: number) => Promise<*>,
     ui: UIState,
     updateDocumentSentDate: (
       financialAidId: number,

@@ -99,6 +99,7 @@ import { EDX_GRADE } from "./DashboardPage"
 import DiscussionCard from "../components/DiscussionCard"
 import { makeFrontPageList } from "../factories/posts"
 import { postURL } from "../lib/discussions"
+import FinancialAidCard from "../components/dashboard/FinancialAidCard"
 
 describe("DashboardPage", () => {
   let renderComponent, helper, listenForActions
@@ -388,7 +389,7 @@ describe("DashboardPage", () => {
     })
 
     describe("course pricing", () => {
-      let dashboard, availablePrograms, coursePrices, programLearners
+      let dashboard, availablePrograms, coursePrices, programLearners, coupon
       let run, program: Program, course
 
       beforeEach(() => {
@@ -407,23 +408,41 @@ describe("DashboardPage", () => {
           `/api/v0/programlearners/${program.id}/`
         )
         helper.programLearnersStub.returns(Promise.resolve(programLearners))
+        coupon = makeCoupon(program)
+        coupon.amount_type = "percent-discount"
+        coupon.amount = Decimal(".05")
+        helper.couponsStub.returns(Promise.resolve([coupon]))
+        program.financial_aid_user_info = {
+          has_user_applied: false
+        }
+      })
+
+      it("should show a toast message if skip financial aid fails", async () => {
+        helper.skipFinancialAidStub.returns(Promise.reject())
+
+        const [wrapper] = await renderComponent(
+          "/dashboard",
+          DASHBOARD_SUCCESS_ACTIONS
+        )
+        await wrapper
+          .find(FinancialAidCard)
+          .props()
+          .skipFinancialAid()
+        const { toastMessage } = helper.store.getState().ui
+        assert.deepEqual(toastMessage, {
+          message: "Failed to skip financial aid.",
+          icon:    "error"
+        })
       })
 
       describe("100% program coupon", () => {
-        let coupon
         const expectedActions = DASHBOARD_SUCCESS_ACTIONS.concat([
           REQUEST_SKIP_FINANCIAL_AID,
           RECEIVE_SKIP_FINANCIAL_AID_SUCCESS
         ])
 
         beforeEach(() => {
-          coupon = makeCoupon(program)
-          coupon.amount_type = "percent-discount"
           coupon.amount = Decimal("1")
-          helper.couponsStub.returns(Promise.resolve([coupon]))
-          program.financial_aid_user_info = {
-            has_user_applied: false
-          }
         })
 
         describe("should issue a request to skip if there is a 100% coupon for the program", () => {

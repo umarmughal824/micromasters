@@ -387,11 +387,11 @@ describe("api", function() {
     describe("for skipping financial aid", () => {
       const programId = 2
       it("successfully skips financial aid", () => {
-        fetchJSONStub.returns(Promise.resolve())
+        fetchStub.returns(Promise.resolve())
 
         return skipFinancialAid(programId).then(() => {
           assert.ok(
-            fetchJSONStub.calledWith("/api/v0/financial_aid_skip/2/", {
+            fetchStub.calledWith("/api/v0/financial_aid_skip/2/", {
               method: "PATCH"
             })
           )
@@ -399,11 +399,11 @@ describe("api", function() {
       })
 
       it("fails to skip financial aid", () => {
-        fetchJSONStub.returns(Promise.reject())
+        fetchStub.returns(Promise.reject())
 
         return assert.isRejected(skipFinancialAid(programId)).then(() => {
           assert.ok(
-            fetchJSONStub.calledWith("/api/v0/financial_aid_skip/2/", {
+            fetchStub.calledWith("/api/v0/financial_aid_skip/2/", {
               method: "PATCH"
             })
           )

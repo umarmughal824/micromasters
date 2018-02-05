@@ -7,7 +7,7 @@ import { dialogActions } from "./inputs/util"
 
 type SkipProps = {
   cancel: () => void,
-  skip: () => void,
+  skip: () => Promise<*>,
   open: boolean,
   fullPrice: React$Element<*>,
   fetchAddStatus?: string,

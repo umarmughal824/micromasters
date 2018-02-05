@@ -192,7 +192,7 @@ export function getCoursePrices(username: string): Promise<CoursePrices> {
 }
 
 export function skipFinancialAid(programId: number): Promise<*> {
-  return fetchJSONWithCSRF(`/api/v0/financial_aid_skip/${programId}/`, {
+  return fetchWithCSRF(`/api/v0/financial_aid_skip/${programId}/`, {
     method: "PATCH"
   })
 }
