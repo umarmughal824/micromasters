@@ -242,21 +242,22 @@ def update_or_create_combined_final_grade(user, course):
         user (User): a django User
         course (Course): a course model object
     """
-    mmtrack = get_mmtrack(user, course.program)
-    final_grade = mmtrack.get_best_final_grade_for_course(course)
-    if final_grade is None:
-        log.warning('User [%s] does not have a final for course [%s]', user, course)
-        return
+    if course.has_exam:
+        mmtrack = get_mmtrack(user, course.program)
+        final_grade = mmtrack.get_best_final_grade_for_course(course)
+        if final_grade is None:
+            log.warning('User [%s] does not have a final for course [%s]', user, course)
+            return
 
-    best_exam = mmtrack.get_best_proctored_exam_grade(course)
-    if best_exam is None:
-        log.warning('User [%s] does not have a passing exam grade for course [%s]', user, course)
-        return
+        best_exam = mmtrack.get_best_proctored_exam_grade(course)
+        if best_exam is None:
+            log.warning('User [%s] does not have a passing exam grade for course [%s]', user, course)
+            return
 
-    calculated_grade = round(final_grade.grade_percent * COURSE_GRADE_WEIGHT + best_exam.score * EXAM_GRADE_WEIGHT, 1)
-    combined_grade, _ = CombinedFinalGrade.objects.update_or_create(
-        user=user,
-        course=course,
-        defaults={'grade': calculated_grade}
-    )
-    combined_grade.save_and_log(None)
+        calculated_grade = round(final_grade.grade_percent * COURSE_GRADE_WEIGHT + best_exam.score * EXAM_GRADE_WEIGHT, 1)
+        combined_grade, _ = CombinedFinalGrade.objects.update_or_create(
+            user=user,
+            course=course,
+            defaults={'grade': calculated_grade}
+        )
+        combined_grade.save_and_log(None)
