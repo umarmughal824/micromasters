@@ -49,21 +49,10 @@ def update_profile_from_edx(backend, user, response, is_new, *args, **kwargs):  
         next_url = next_relative_url
     backend.strategy.session_set('next', next_url)
 
-    if not is_new:
-        return
-
     access_token = response.get('access_token')
     if not access_token:
         # this should never happen for the edx oauth provider, but just in case...
         log.error('Missing access token for the user %s', user.username)
-        return
-
-    try:
-        user_profile = Profile.objects.get(user=user)
-    except Profile.DoesNotExist:
-        # this should never happen, since the profile is created with a signal
-        # right after the user is created
-        log.error('No profile found for the user %s', user.username)
         return
 
     username = get_social_username(user)
@@ -73,6 +62,18 @@ def update_profile_from_edx(backend, user, response, is_new, *args, **kwargs):  
             "Authorization": "Bearer {}".format(access_token),
         }
     )
+
+    update_email(user_profile_edx, user)
+    if not is_new:
+        return
+
+    try:
+        user_profile = Profile.objects.get(user=user)
+    except Profile.DoesNotExist:
+        # this should never happen, since the profile is created with a signal
+        # right after the user is created
+        log.error('No profile found for the user %s', user.username)
+        return
 
     name = user_profile_edx.get('name', "")
     user_profile.edx_name = name
@@ -114,3 +115,14 @@ def set_last_update(details, *args, **kwargs):  # pylint: disable=unused-argumen
     """
     details['updated_at'] = now_in_utc().timestamp()
     return details
+
+
+def update_email(user_profile_edx, user):
+    """
+    updates email address of user
+    Args:
+        user_profile_edx (dict): user details from edX
+        user (User): user object
+    """
+    user.email = user_profile_edx.get('email')
+    user.save()
