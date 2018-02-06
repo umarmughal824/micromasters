@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.89.0
+--------------
+
+- Added CombinedFinalGrade model (#3791)
+- Fix the course run popup status messages
+
 Version 0.88.1
 --------------
 
