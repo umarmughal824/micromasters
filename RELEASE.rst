@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.89.2
+--------------
+
+- Fix percolate doc type for legacy index (#3818)
+- fix financial aid skip UI bug
+- Install certifi (#3815)
+- count_courses_passed for courses with exams (#3809)
+- Upgrade to Elasticsearch 5 (#3789)
+
 Version 0.89.1
 --------------
 
