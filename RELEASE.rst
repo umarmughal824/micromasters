@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.89.1
+--------------
+
+- Turn off codecov status updates (#3811)
+- Synchronized email address with email address from edX (#3801)
+
 Version 0.89.0
 --------------
 
