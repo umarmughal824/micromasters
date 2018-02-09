@@ -27,6 +27,7 @@ from ecommerce.factories import LineFactory
 from ecommerce.models import (
     Coupon,
     UserCoupon,
+    Order,
 )
 from exams.factories import ExamRunFactory
 from exams.models import ExamAuthorization
@@ -96,7 +97,6 @@ class DashboardStates:
         course_run = course.courserun_set.first()
         exam_run = ExamRunFactory.create(course=course, eligibility_past=True, scheduling_past=True)
         ExamAuthorization(user=self.user, course=course, exam_run=exam_run, exam_taken=True)
-        from ecommerce.models import Order
         LineFactory.create(
             order__status=Order.FULFILLED,
             course_key=course_run
