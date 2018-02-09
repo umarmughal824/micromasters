@@ -23,11 +23,14 @@ from courses.models import (
     Program,
 )
 from dashboard.models import ProgramEnrollment
+from ecommerce.factories import LineFactory
 from ecommerce.models import (
     Coupon,
     UserCoupon,
+    Order,
 )
 from exams.factories import ExamRunFactory
+from exams.models import ExamAuthorization
 from financialaid.factories import FinancialAidFactory
 from financialaid.models import FinancialAidStatus
 from grades.factories import ProctoredExamGradeFactory
@@ -79,18 +82,25 @@ class DashboardStates:
 
     def create_exams(self, edx_passed, exam_passed, new_offering):
         """Create an exam and mark it and the related course as passed or not passed"""
+        self.make_fa_program_enrollment(FinancialAidStatus.AUTO_APPROVED)
         if edx_passed:
             call_command(
                 "alter_data", 'set_to_passed', '--username', 'staff',
-                '--course-title', 'Analog Learning 200', '--grade', '75',
+                '--course-title', 'Digital Learning 200', '--grade', '75',
             )
         else:
             call_command(
                 "alter_data", 'set_to_failed', '--username', 'staff',
-                '--course-title', 'Analog Learning 200', '--grade', '45',
+                '--course-title', 'Digital Learning 200', '--grade', '45',
             )
-        course = Course.objects.get(title='Analog Learning 200')
+        course = Course.objects.get(title='Digital Learning 200')
+        course_run = course.courserun_set.first()
         exam_run = ExamRunFactory.create(course=course, eligibility_past=True, scheduling_past=True)
+        ExamAuthorization(user=self.user, course=course, exam_run=exam_run, exam_taken=True)
+        LineFactory.create(
+            order__status=Order.FULFILLED,
+            course_key=course_run
+        )
         for _ in range(2):
             ProctoredExamGradeFactory.create(
                 user=self.user,
@@ -193,6 +203,10 @@ class DashboardStates:
             call_command(
                 "alter_data", 'set_to_offered', '--username', 'staff', '--course-title', 'Digital Learning 200'
             )
+        self.make_fa_program_enrollment(status)
+
+    def make_fa_program_enrollment(self, status):
+        """Enroll user in financial aid program"""
         Program.objects.get(title='Analog Learning').delete()
         # We need to use Digital Learning here since it has financial aid enabled. Deleting Analog Learning
         # because it's simpler than adjusting the UI to show the right one
