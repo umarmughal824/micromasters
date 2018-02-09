@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.89.3
+--------------
+
+- Fix missing field (#3827)
+- Forward port 7000 (#3821)
+
 Version 0.89.2
 --------------
 
