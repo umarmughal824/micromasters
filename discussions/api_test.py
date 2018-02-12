@@ -117,10 +117,14 @@ def test_create_discussion_user(mock_staff_client):
     api.create_discussion_user(discussion_user)
     assert discussion_user.username == 'username'
     mock_staff_client.users.create.assert_called_once_with(
-        name=profile.full_name,
-        image=profile.image.url,
-        image_small=profile.image_small.url,
-        image_medium=profile.image_medium.url,
+        email=profile.user.email,
+        profile=dict(
+            name=profile.full_name,
+            image=profile.image.url if profile.image else None,
+            image_small=profile.image_small.url if profile.image_small else None,
+            image_medium=profile.image_medium.url if profile.image_medium else None,
+            email_optin=profile.email_optin
+        )
     )
 
 
@@ -149,10 +153,13 @@ def test_update_discussion_user(mock_staff_client):
     api.update_discussion_user(discussion_user)
     mock_staff_client.users.update.assert_called_once_with(
         discussion_user.username,
-        name=profile.full_name,
-        image=profile.image.url,
-        image_small=profile.image_small.url,
-        image_medium=profile.image_medium.url,
+        email=profile.user.email,
+        profile=dict(
+            name=profile.full_name,
+            image=profile.image.url if profile.image else None,
+            image_small=profile.image_small.url if profile.image_small else None,
+            image_medium=profile.image_medium.url if profile.image_medium else None,
+        )
     )
 
 
