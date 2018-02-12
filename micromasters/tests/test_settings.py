@@ -19,6 +19,7 @@ REQUIRED_SETTINGS = {
     'MAILGUN_URL': 'http://fake.mailgun.url',
     'MAILGUN_KEY': 'fake_mailgun_key',
     'ELASTICSEARCH_INDEX': 'some_index',
+    'OPEN_DISCUSSIONS_SITE_KEY': 'mm_test',
 }
 
 

@@ -1,13 +1,12 @@
 """Discussions utils"""
 from django.conf import settings
-from django.urls import reverse
 from open_discussions_api import utils
 
 from discussions import api
 from discussions.models import DiscussionUser
 
 
-def get_token_for_user(user, auth_url=None, session_url=None, force_create=False):
+def get_token_for_user(user, force_create=False):
     """
     Generates a token for the given user
 
@@ -40,7 +39,7 @@ def get_token_for_user(user, auth_url=None, session_url=None, force_create=False
             discussion_user.username,
             [],  # no roles for learners,
             expires_delta=settings.OPEN_DISCUSSIONS_JWT_EXPIRES_DELTA,
-            extra_payload=dict(auth_url=auth_url, session_url=session_url)
+            extra_payload=dict(site_key=settings.OPEN_DISCUSSIONS_SITE_KEY)
         )
 
     return None
@@ -57,9 +56,4 @@ def get_token_for_request(request, force_create=False):
     Returns:
         str: the token or None
     """
-    return get_token_for_user(
-        request.user,
-        auth_url=request.build_absolute_uri(reverse('discussions')),  # this will redirect to login
-        session_url=request.build_absolute_uri(reverse('discussions_token')),
-        force_create=force_create
-    )
+    return get_token_for_user(request.user, force_create=force_create)

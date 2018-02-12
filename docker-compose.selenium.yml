@@ -13,6 +13,7 @@ services:
       # To silence ImproperlyConfigured when running tests
       MAILGUN_URL: http://fake.mailgun.url
       MAILGUN_KEY: fake_mailgun_key
+      OPEN_DISCUSSIONS_SITE_KEY: fake_site_key
     links:
       - db
       - elastic

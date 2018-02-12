@@ -211,6 +211,9 @@
       "description": "The URL to redirect the uer to for the discussions site",
       "required": false
     },
+    "OPEN_DISCUSSIONS_SITE_KEY": {
+      "description": "The site key to use for discussions JWT tokens"
+    },
     "OPEN_EXCHANGE_RATES_APP_ID": {
       "description": "The app ID for the open exchange rates API"
     },

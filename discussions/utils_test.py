@@ -64,8 +64,7 @@ def test_get_token_for_user(settings, mocker):
         [],
         expires_delta=3600,
         extra_payload={
-            'auth_url': None,
-            'session_url': None
+            'site_key': 'mm_test'
         }
     )
     assert mock_create_user.call_count == 0
@@ -92,8 +91,7 @@ def test_get_token_for_user_force_discussion_user(settings, mocker):
         [],
         expires_delta=3600,
         extra_payload={
-            'auth_url': None,
-            'session_url': None
+            'site_key': 'mm_test'
         }
     )
     assert mock_create_user.called_once_with(user.id)
