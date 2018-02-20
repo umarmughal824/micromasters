@@ -54,12 +54,13 @@ def get_staff_client():
     )
 
 
-def create_or_update_discussion_user(user_id):
+def create_or_update_discussion_user(user_id, allow_email_optin=False):
     """
     Create or update a DiscussionUser record and sync it
 
     Args:
         user_id (int): user id of the user to sync
+         allow_email_optin (bool): if True send email_optin in profile dict on users.update call
 
     Returns:
         DiscussionUser: The DiscussionUser connected to the user
@@ -77,7 +78,7 @@ def create_or_update_discussion_user(user_id):
         if discussion_user.username is None:
             create_discussion_user(discussion_user)
         else:
-            update_discussion_user(discussion_user)
+            update_discussion_user(discussion_user, allow_email_optin=allow_email_optin)
 
         return discussion_user
 
@@ -118,31 +119,41 @@ def create_discussion_user(discussion_user):
     discussion_user.save()
 
 
-def update_discussion_user(discussion_user):
+def update_discussion_user(discussion_user, allow_email_optin=False):
     """
     Updates the user's discussion user profile
 
     Args:
-        discussion_user (profiles.models.DiscussionUser): discussion user to update
+        discussion_user (discussions.models.DiscussionUser): discussion user to update
+        allow_email_optin (bool): if True send email_optin in profile dict on users.update call
 
     Raises:
         DiscussionUserSyncException: if there was an error syncing the profile
     """
     profile = discussion_user.user.profile
 
-    if discussion_user.last_sync is not None and profile.updated_on <= discussion_user.last_sync:
+    if (
+            not allow_email_optin and
+            discussion_user.last_sync is not None and
+            profile.updated_on <= discussion_user.last_sync
+    ):
         return
 
     api = get_staff_client()
+    profile_dict = dict(
+        name=profile.full_name,
+        image=profile.image.url if profile.image else None,
+        image_small=profile.image_small.url if profile.image_small else None,
+        image_medium=profile.image_medium.url if profile.image_medium else None,
+    )
+
+    if allow_email_optin:
+        profile_dict["email_optin"] = profile.email_optin
+
     result = api.users.update(
         discussion_user.username,
         email=profile.user.email,
-        profile=dict(
-            name=profile.full_name,
-            image=profile.image.url if profile.image else None,
-            image_small=profile.image_small.url if profile.image_small else None,
-            image_medium=profile.image_medium.url if profile.image_medium else None,
-        )
+        profile=profile_dict
     )
 
     try:
