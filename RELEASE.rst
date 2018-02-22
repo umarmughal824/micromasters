@@ -1,6 +1,20 @@
 Release Notes
 =============
 
+Version 0.90.0
+--------------
+
+- Update emails and email optin flag of existing users in OD (#3836)
+- Dashboard Snapshots: Add scenario for FA paid course run  (#3837)
+- Lower elasticsearch memory usage limit (#3838)
+- Snapshot Dashboard States: add more exam states (#3824)
+- Upgrade Elasticsearch to same version used in production (#3831)
+- Remove Elasticsearch 2.x code (#3823)
+- Disable dynamic mapping (#3830)
+- When creating discussion user, added email address to OD (#3822)
+- Update update_docker_hub.sh to use a new hash for each image (#3781)
+- Snapshots: Make exam related dashboard states use FA program (#3826)
+
 Version 0.89.3
 --------------
 
