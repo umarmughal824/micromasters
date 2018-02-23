@@ -47,10 +47,11 @@ class UserProgramSearchSerializer:
         course_title = course_run.course.title
         has_paid = mmtrack.has_paid(course_run.edx_course_key)
         payment_status = cls.PAID_STATUS if has_paid else cls.UNPAID_STATUS
-        final_grade = mmtrack.get_final_grade_percent(course_run.edx_course_key)
+
+        final_grade = mmtrack.get_final_grades_for_course(course_run.course).first()
         semester = cls.serialize_semester(course_run)
         return {
-            'final_grade': final_grade,
+            'final_grade': final_grade.grade_percent if final_grade else None,
             'semester': semester,
             'course_title': course_title,
             'payment_status': payment_status,
