@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.91.0
+--------------
+
+- Update rolepermissions and social-auth-django-app (#3848)
+- Added scroll api to fetch search code (#3846)
+- Fix some deprecation warnings (#3847)
+- Serialize best final grades for search (#3841)
+
 Version 0.90.0
 --------------
 
