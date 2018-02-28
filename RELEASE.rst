@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.91.1
+--------------
+
+- Fixed end date issues on progress messages (#3844)
+- Use site_key in discussions JWT token
+
 Version 0.91.0
 --------------
 
