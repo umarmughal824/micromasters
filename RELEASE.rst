@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.91.2
+--------------
+
+- Snapshots: Add more PAID_BUT_NOT_ENROLLED states for FA program (#3860)
+- Update pylint, django-webpack-loader and remove DeprecationWarning filter (#3849)
+
 Version 0.91.1
 --------------
 
