@@ -141,11 +141,23 @@ def driver():
 
 
 @pytest.fixture(scope='session')
-def browser(driver, live_server):
+def browser(driver, set_live_server_host, live_server):
     """
     Fixture for our Browser abstraction. 'live_server' is provided by pytest-django.
     """
     return Browser(driver, live_server.url)
+
+
+@pytest.fixture(scope='session')
+def set_live_server_host():
+    """
+    Override pytest fixture to set the environment variable to set the host and port for the live server.
+    Note that this env variable was removed by Django but is still used by pytest-django.
+    Also, for some reason 0.0.0.0 no longer works to bind all hosts, but we only really need the
+    external IP address.
+    """
+    os.environ.setdefault('DJANGO_LIVE_TEST_SERVER_ADDRESS', "0.0.0.0:7000")
+    yield
 
 
 @pytest.fixture()
@@ -188,7 +200,15 @@ def base_test_data():
 
 
 @pytest.fixture()
-def logged_in_staff(browser, base_test_data):
+def override_allowed_hosts(settings):
+    """
+    Override ALLOWED_HOSTS to force Django to allow outside connections to the selenium test server
+    """
+    settings.ALLOWED_HOSTS = "['*']"
+
+
+@pytest.fixture()
+def logged_in_staff(browser, override_allowed_hosts, base_test_data):
     """
     Fixture for a logged-in staff user
 
@@ -199,7 +219,7 @@ def logged_in_staff(browser, base_test_data):
 
 
 @pytest.fixture()
-def logged_in_student(browser, base_test_data):
+def logged_in_student(browser, override_allowed_hosts, base_test_data):
     """
     Fixture for a logged-in student user
 
