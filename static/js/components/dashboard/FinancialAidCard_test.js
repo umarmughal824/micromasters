@@ -271,7 +271,7 @@ describe("FinancialAidCard", () => {
           const wrapper = renderCard({ program })
           assert.include(
             wrapper.text(),
-            "Documents mailed/faxed on Mar 3, 2003"
+            "Documents mailed/faxed on March 3, 2003"
           )
         })
       }

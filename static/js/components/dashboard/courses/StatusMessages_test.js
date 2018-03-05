@@ -36,7 +36,7 @@ import {
   COURSE_ACTION_CALCULATE_PRICE,
   COURSE_ACTION_REENROLL,
   COUPON_CONTENT_TYPE_COURSE,
-  COURSE_CARD_FORMAT,
+  DASHBOARD_FORMAT,
   COURSE_DEADLINE_FORMAT,
   STATUS_PAID_BUT_NOT_ENROLLED,
   FA_STATUS_PENDING_DOCS
@@ -549,7 +549,7 @@ describe("Course Status Messages", () => {
       makeRunPassed(course.runs[0])
       makeRunDueSoon(course.runs[0])
       const date = moment(course.runs[0].course_upgrade_deadline).format(
-        COURSE_CARD_FORMAT
+        DASHBOARD_FORMAT
       )
       assertIsJust(calculateMessages(calculateMessagesProps), [
         {
@@ -590,7 +590,7 @@ describe("Course Status Messages", () => {
       makeRunDueSoon(course.runs[0])
       course.has_exam = true
       const date = moment(course.runs[0].course_upgrade_deadline).format(
-        COURSE_CARD_FORMAT
+        DASHBOARD_FORMAT
       )
       assertIsJust(calculateMessages(calculateMessagesProps), [
         {
@@ -631,7 +631,9 @@ describe("Course Status Messages", () => {
       course.runs[1].enrollment_start_date = moment()
         .subtract(10, "days")
         .toISOString()
-      const date = moment(course.runs[1].course_start_date).format("MM/DD/YYYY")
+      const date = moment(course.runs[1].course_start_date).format(
+        DASHBOARD_FORMAT
+      )
       assertIsJust(calculateMessages(calculateMessagesProps), [
         {
           message: `You did not pass the edX course, but you can re-enroll. Next course starts ${date}.`,
@@ -661,7 +663,7 @@ describe("Course Status Messages", () => {
         makeRunFuture(course.runs[1])
         course.runs[1].enrollment_start_date = nextEnrollmentStart[0]
         const date = moment(course.runs[1].course_start_date).format(
-          "MM/DD/YYYY"
+          DASHBOARD_FORMAT
         )
         assertIsJust(calculateMessages(calculateMessagesProps), [
           {

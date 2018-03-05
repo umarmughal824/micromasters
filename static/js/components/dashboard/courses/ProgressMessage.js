@@ -15,7 +15,7 @@ import {
   STATUS_CURRENTLY_ENROLLED,
   STATUS_PAID_BUT_NOT_ENROLLED,
   EDX_LINK_BASE,
-  COURSE_CARD_FORMAT
+  DASHBOARD_FORMAT
 } from "../../../constants"
 import { renderSeparatedComponents } from "../../../util/util"
 import { hasAnyStaffRole } from "../../../lib/roles"
@@ -63,7 +63,7 @@ export const staffCourseInfo = (courseRun: CourseRun, course: Course) => {
       if (courseCurrentlyInProgress(courseRun)) {
         return `Auditing (Upgrade deadline ${moment(
           courseRun.course_upgrade_deadline
-        ).format(COURSE_CARD_FORMAT)})`
+        ).format(DASHBOARD_FORMAT)})`
       }
       return "Auditing"
     }

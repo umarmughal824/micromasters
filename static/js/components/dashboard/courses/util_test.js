@@ -28,7 +28,7 @@ import {
   STATUS_PENDING_ENROLLMENT,
   STATUS_MISSED_DEADLINE,
   STATUS_PAID_BUT_NOT_ENROLLED,
-  COURSE_CARD_FORMAT
+  DASHBOARD_FORMAT
 } from "../../../constants"
 import { assertIsNothing, assertIsJust } from "../../../lib/test_utils"
 
@@ -48,7 +48,7 @@ describe("dashboard course utilities", () => {
         run.course_start_date = inTheFuture.format()
         assert.equal(
           courseStartDateMessage(run),
-          `Course starts ${inTheFuture.format(COURSE_CARD_FORMAT)}`
+          `Course starts ${inTheFuture.format(DASHBOARD_FORMAT)}`
         )
       })
     })

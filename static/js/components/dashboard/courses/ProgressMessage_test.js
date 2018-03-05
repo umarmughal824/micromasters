@@ -18,7 +18,7 @@ import {
 import {
   EDX_LINK_BASE,
   STATUS_CAN_UPGRADE,
-  COURSE_CARD_FORMAT,
+  DASHBOARD_FORMAT,
   STATUS_MISSED_DEADLINE,
   STATUS_PAID_BUT_NOT_ENROLLED,
   STATUS_PASSED,
@@ -142,7 +142,7 @@ describe("Course ProgressMessage", () => {
         staffCourseInfo(course.runs[0], course),
         `Auditing (Upgrade deadline ${moment(
           course.runs[0].course_upgrade_deadline
-        ).format(COURSE_CARD_FORMAT)})`
+        ).format(DASHBOARD_FORMAT)})`
       )
     })
 

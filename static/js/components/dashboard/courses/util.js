@@ -11,7 +11,7 @@ import {
   STATUS_CAN_UPGRADE,
   STATUS_CURRENTLY_ENROLLED,
   STATUS_WILL_ATTEND,
-  COURSE_CARD_FORMAT
+  DASHBOARD_FORMAT
 } from "../../../constants"
 import { S } from "../../../lib/sanctuary"
 
@@ -25,11 +25,11 @@ export const courseStartDateMessage = (courseRun: CourseRun) => {
   if (daysUntilStart === 0) {
     return "Course starts today"
   } else if (daysUntilStart < 0) {
-    return `Course started ${startDate.format(COURSE_CARD_FORMAT)}`
+    return `Course started ${startDate.format(DASHBOARD_FORMAT)}`
   } else if (daysUntilStart < 10) {
     return `Course starts in ${daysUntilStart} days`
   } else {
-    return `Course starts ${startDate.format(COURSE_CARD_FORMAT)}`
+    return `Course starts ${startDate.format(DASHBOARD_FORMAT)}`
   }
 }
 

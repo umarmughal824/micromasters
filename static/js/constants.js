@@ -8,10 +8,9 @@ export const MASTERS = "m"
 export const DOCTORATE = "p"
 
 export const ISO_8601_FORMAT = "YYYY-MM-DD"
-export const DASHBOARD_FORMAT = "MMM D, Y"
+export const DASHBOARD_FORMAT = "MMMM D, Y"
 export const DASHBOARD_MONTH_FORMAT = "MM[/]YYYY"
-export const COURSE_CARD_FORMAT = "MM/DD/YYYY"
-export const COURSE_DEADLINE_FORMAT = "MM/DD/YYYY [at] hA z"
+export const COURSE_DEADLINE_FORMAT = `${DASHBOARD_FORMAT} [at] hA z`
 
 export const CP1252_REGEX = /^[\u0020-\u00FF]*$/
 // greater-than, comma, quotation-mark

@@ -21,7 +21,7 @@ import {
   STATUS_PAID_BUT_NOT_ENROLLED,
   STATUS_CAN_UPGRADE,
   COURSE_ACTION_CALCULATE_PRICE,
-  COURSE_CARD_FORMAT,
+  DASHBOARD_FORMAT,
   COURSE_DEADLINE_FORMAT
 } from "../../../constants"
 import { S } from "../../../lib/sanctuary"
@@ -58,7 +58,7 @@ export const formatMessage = (message: Message, index?: number) => (
 )
 
 export const formatDate = (date: ?string) =>
-  moment(date).format(COURSE_CARD_FORMAT)
+  moment(date).format(DASHBOARD_FORMAT)
 
 type CalculateMessagesProps = {
   courseAction: (run: CourseRun, actionType: string) => React$Element<*>,
@@ -337,7 +337,7 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
         )
       } else {
         const dueDate = paymentDueDate.isValid()
-          ? ` (Payment due on ${paymentDueDate.format(COURSE_CARD_FORMAT)})`
+          ? ` (Payment due on ${paymentDueDate.format(DASHBOARD_FORMAT)})`
           : ""
         if (exams) {
           messages.push({
