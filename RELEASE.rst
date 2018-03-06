@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.92.1
+--------------
+
+- Fixes overlapping icons on Profile page (#3858)
+- Upgrade to wagtail 2.0 (#3865)
+- Dashboard: show certificate if user has it (#3871)
+
 Version 0.92.0
 --------------
 
