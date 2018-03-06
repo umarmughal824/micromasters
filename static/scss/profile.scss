@@ -130,9 +130,11 @@
     .col {
       &.user-credentials {
         width: 50%;
-
         vertical-align: middle;
         padding-bottom: 13px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
 
         &.row-padding {
           padding-top: 30px;
