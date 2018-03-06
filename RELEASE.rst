@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.92.0
+--------------
+
+- Fix date format
+- Upgrade to Django 1.11 (#3855)
+- CMS: Remove external program url (#3857)
+- Fixes toast layout in mobile (#3859)
+
 Version 0.91.2
 --------------
 
