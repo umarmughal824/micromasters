@@ -175,6 +175,29 @@ describe("Course Status Messages", () => {
         )
       )
     })
+    it("should ask to pay for a new grade, if already has a certificate ", () => {
+      makeRunCurrent(course.runs[0])
+      makeRunEnrolled(course.runs[0])
+      course.certificate_url = "certificate"
+      const messages = calculateMessages(calculateMessagesProps).value
+      assert.equal(messages.length, 2)
+      const mounted = shallow(messages[0]["message"])
+
+      assert.equal(mounted.text(), "You passed this course! View Certificate")
+
+      assert.deepEqual(messages[1], {
+        action:  "course action was called",
+        message:
+          "You are re-taking this course. To get a new grade, you need to pay again."
+      })
+
+      assert(
+        calculateMessagesProps.courseAction.calledWith(
+          course.runs[0],
+          COURSE_ACTION_PAY
+        )
+      )
+    })
     it("should tell auditors to calculate price and pay for course", () => {
       makeRunCurrent(course.runs[0])
       makeRunEnrolled(course.runs[0])
@@ -273,6 +296,7 @@ describe("Course Status Messages", () => {
       })
 
       it("should prompt to schedule exam", () => {
+        course.has_exam = true
         course.can_schedule_exam = true
 
         assertIsJust(calculateMessages(calculateMessagesProps), [
@@ -283,6 +307,7 @@ describe("Course Status Messages", () => {
       })
 
       it("should prompt to sign up for future", () => {
+        course.has_exam = true
         course.can_schedule_exam = false
         course.exams_schedulable_in_future = [
           moment()
@@ -300,6 +325,7 @@ describe("Course Status Messages", () => {
       })
 
       it("should inform that no exam is avaiable", () => {
+        course.has_exam = true
         course.can_schedule_exam = false
         course.exams_schedulable_in_future = []
 
