@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.92.2
+--------------
+
+- Schedule task to create CombinedFinalGrades (#3863)
+- Upgrade to Django 2.0 (#3843)
+- Add a link to the TOS in the footer
+- Update Django REST Framework, django-server-status (#3873)
+
 Version 0.92.1
 --------------
 
