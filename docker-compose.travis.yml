@@ -14,6 +14,7 @@ services:
       MAILGUN_URL: 'http://fake.example.com'
       MAILGUN_KEY: 'fake'
       ELASTICSEARCH_INDEX: 'testindex'
+      OPEN_DISCUSSIONS_SITE_KEY: 'fake'
 
   web:
     build:
