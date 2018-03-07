@@ -125,7 +125,10 @@ describe("FinancialAidCard", () => {
       const max = program.financial_aid_user_info.max_possible_cost
       assert.deepEqual(
         [`$${min}`, `$${max}`],
-        wrapper.find(".price").map(node => node.text())
+        wrapper
+          .find(".explanation")
+          .find(".bold")
+          .map(node => node.text())
       )
     })
 

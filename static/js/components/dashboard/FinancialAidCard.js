@@ -27,7 +27,7 @@ import {
 import SkipFinancialAidDialog from "../SkipFinancialAidDialog"
 import type { UIState } from "../../reducers/ui"
 
-const price = price => <span className="price">{formatPrice(price)}</span>
+const price = price => <span className="bold">{formatPrice(price)}</span>
 
 export default class FinancialAidCard extends React.Component {
   props: {
@@ -130,25 +130,31 @@ export default class FinancialAidCard extends React.Component {
 
     return (
       <div className="personalized-pricing">
-        <div className="heading">How much does it cost?</div>
-        <div className="explanation">
-          The cost of courses in the {title} MicroMasters varies between{" "}
-          {price(minPossibleCost)} and {price(maxPossibleCost)}, depending on
-          your income and ability to pay.
+        <div className="coupon-explanation">
+          <span className="bold">Do you have a coupon?</span> Please determine
+          your course pricing below. The coupon will be applied at checkout.
         </div>
-        <div className="pricing-actions">
-          <button
-            className="mdl-button dashboard-button calculate-cost-button"
-            onClick={openFinancialAidCalculator}
-          >
-            Get My Price Now
-          </button>
-          <button
-            className="mm-minor-action full-price"
-            onClick={() => setConfirmSkipDialogVisibility(true)}
-          >
-            Skip this and Pay Full Price
-          </button>
+        <div className="grey-box">
+          <div className="heading">How much does it cost?</div>
+          <div className="explanation">
+            The cost of courses in the {title} MicroMasters varies between{" "}
+            {price(minPossibleCost)} and {price(maxPossibleCost)}, depending on
+            your income and ability to pay.
+          </div>
+          <div className="pricing-actions">
+            <button
+              className="mdl-button dashboard-button calculate-cost-button"
+              onClick={openFinancialAidCalculator}
+            >
+              Get My Price Now
+            </button>
+            <button
+              className="mm-minor-action full-price"
+              onClick={() => setConfirmSkipDialogVisibility(true)}
+            >
+              Skip this and Pay Full Price
+            </button>
+          </div>
         </div>
       </div>
     )

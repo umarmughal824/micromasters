@@ -100,13 +100,17 @@ export default class CourseEnrollmentDialog extends React.Component {
         </Button>
       )
     } else if (hasUserApplied) {
-      message = (
-        <p>
+      message = [
+        <p key="1">
           You can pay now, or you can audit the course for FREE and upgrade
           later. (Payment is required to get credit for the MicroMasters
           certificate.)
+        </p>,
+        <p key="2">
+          <span className="bold">Coupon Holders</span> - If you have a coupon,
+          click Pay Now. The coupon will be applied during checkout.
         </p>
-      )
+      ]
       payButton = (
         <Button
           key="pay"
