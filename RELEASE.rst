@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.92.3
+--------------
+
+- Fixed celery startup under travis
+- Override ALLOWED_HOSTS for snapshot states tests (#3882)
+
 Version 0.92.2
 --------------
 
