@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.93.0
+--------------
+
+- Remove accidentally committed empty file (#3885)
+- Some copy changes for personalized pricing and coupons
+
 Version 0.92.3
 --------------
 
