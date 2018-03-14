@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.93.1
+--------------
+
+- Fix n+1 warnings on dashboard API (#3886)
+- Pin docker image versions (#3888)
+- Make environment variable to control batch update throttling (#3889)
+
 Version 0.93.0
 --------------
 
