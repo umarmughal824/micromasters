@@ -1212,12 +1212,7 @@ class InfoCourseTest(CourseTests):
                 self.course,
                 api.get_info_for_course(self.course, self.mmtrack)
             )
-        mock_format.assert_called_once_with(
-            self.course_run_ver,
-            api.CourseStatus.PASSED,
-            self.mmtrack,
-            position=1
-        )
+        assert mock_format.call_count == 2
         assert mock_schedulable.call_count == 1
         assert mock_has_to_pay.call_count == 1
         assert mock_future_exams.call_count == 1

@@ -157,6 +157,19 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
           >
             View Certificate
           </a>
+          {S.maybe(
+            null,
+            () => [
+              <span key="first">{" | "}</span>,
+              <a
+                key="second"
+                onClick={() => setShowExpandedCourseStatus(course.id)}
+              >
+                Re-enroll
+              </a>
+            ],
+            futureEnrollableRun(course)
+          )}
         </div>
       )
     })
@@ -283,26 +296,27 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
             futureEnrollableRun(course)
           )
         )
-
-        // this is the expanded message, which we should if the user clicks the link above
-        if (expandedStatuses.has(course.id)) {
-          messages.push(
-            S.maybe(
-              null,
-              run => ({
-                message: `Next course starts ${formatDate(
-                  run.course_start_date
-                )}.`,
-                action: courseAction(run, COURSE_ACTION_REENROLL)
-              }),
-              futureEnrollableRun(course)
-            )
-          )
-        }
       } else if (!course.certificate_url) {
         messages.push({
           message: "You passed this course."
         })
+      }
+
+      // this is the expanded message, which we should show if the user
+      // has clicked one of the 're-enroll' links
+      if (expandedStatuses.has(course.id)) {
+        messages.push(
+          S.maybe(
+            null,
+            run => ({
+              message: `Next course starts ${formatDate(
+                run.course_start_date
+              )}.`,
+              action: courseAction(run, COURSE_ACTION_REENROLL)
+            }),
+            futureEnrollableRun(course)
+          )
+        )
       }
       return S.Just(messages)
     } else {

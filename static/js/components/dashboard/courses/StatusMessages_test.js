@@ -175,6 +175,7 @@ describe("Course Status Messages", () => {
         )
       )
     })
+
     it("should ask to pay for a new grade, if already has a certificate ", () => {
       makeRunCurrent(course.runs[0])
       makeRunEnrolled(course.runs[0])
@@ -183,7 +184,10 @@ describe("Course Status Messages", () => {
       assert.equal(messages.length, 2)
       const mounted = shallow(messages[0]["message"])
 
-      assert.equal(mounted.text(), "You passed this course! View Certificate")
+      assert.equal(
+        mounted.text(),
+        "You passed this course! View Certificate | Re-enroll"
+      )
 
       assert.deepEqual(messages[1], {
         action:  "course action was called",
@@ -198,6 +202,7 @@ describe("Course Status Messages", () => {
         )
       )
     })
+
     it("should tell auditors to calculate price and pay for course", () => {
       makeRunCurrent(course.runs[0])
       makeRunEnrolled(course.runs[0])
@@ -220,6 +225,7 @@ describe("Course Status Messages", () => {
         )
       )
     })
+
     it("should tell auditors to wait while FA application is pending", () => {
       makeRunCurrent(course.runs[0])
       makeRunEnrolled(course.runs[0])
@@ -247,6 +253,7 @@ describe("Course Status Messages", () => {
         )
       )
     })
+
     it("should tell auditors to wait while FA is pending without due date", () => {
       makeRunCurrent(course.runs[0])
       makeRunEnrolled(course.runs[0])
@@ -269,6 +276,7 @@ describe("Course Status Messages", () => {
         )
       )
     })
+
     it("should not show payment due date if missing", () => {
       makeRunCurrent(course.runs[0])
       makeRunEnrolled(course.runs[0])
@@ -428,6 +436,7 @@ describe("Course Status Messages", () => {
           }
         ])
       })
+
       // no exam runs to schedule
       it("should ask to check back later if there is no future course run", () => {
         course.runs = [course.runs[0]]
@@ -478,7 +487,7 @@ describe("Course Status Messages", () => {
       })
     })
 
-    it("should congradulate the user on passing, exam or no", () => {
+    it("should congratulate the user on passing, exam or no", () => {
       makeRunPast(course.runs[0])
       makeRunPassed(course.runs[0])
       makeRunPaid(course.runs[0])
@@ -498,8 +507,23 @@ describe("Course Status Messages", () => {
       course.certificate_url = "certificate_url"
       const [{ message }] = calculateMessages(calculateMessagesProps).value
       const mounted = shallow(message)
-      assert.equal(mounted.text(), "You passed this course! View Certificate")
-      assert.equal(mounted.find("a").props().href, "certificate_url")
+      assert.equal(
+        mounted.text(),
+        "You passed this course! View Certificate | Re-enroll"
+      )
+      assert.equal(
+        mounted
+          .find("a")
+          .at(0)
+          .props().href,
+        "certificate_url"
+      )
+      mounted
+        .find("a")
+        .at(1)
+        .props()
+        .onClick()
+      assert(calculateMessagesProps.setShowExpandedCourseStatus.called)
     })
 
     it("should nag about missing the payment deadline", () => {

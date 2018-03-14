@@ -285,14 +285,16 @@ def get_info_for_course(course, mmtrack):
         _add_run(run_status.course_run, mmtrack, CourseStatus.CURRENTLY_ENROLLED)
     # check if we need to check the certificate
     elif run_status.status == CourseRunStatus.CHECK_IF_PASSED:
-        # if the user never passed the course she needs to enroll in the next one
         if not mmtrack.has_passed_course(run_status.course_run.edx_course_key):
             _add_run(run_status.course_run, mmtrack, CourseRunStatus.NOT_PASSED)
-            next_run = course.first_unexpired_run()
-            if next_run is not None:
-                _add_run(next_run, mmtrack, CourseStatus.OFFERED)
         else:
             _add_run(run_status.course_run, mmtrack, CourseStatus.PASSED)
+
+        # we want to return the next run, so the user can re-enroll regardless
+        # of whether they passed or failed
+        next_run = course.first_unexpired_run()
+        if next_run is not None:
+            _add_run(next_run, mmtrack, CourseStatus.OFFERED)
     elif run_status.status == CourseRunStatus.WILL_ATTEND:
         _add_run(run_status.course_run, mmtrack, CourseStatus.WILL_ATTEND)
     elif run_status.status == CourseRunStatus.CAN_UPGRADE:
