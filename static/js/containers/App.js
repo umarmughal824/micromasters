@@ -14,9 +14,7 @@ import { FETCH_SUCCESS, FETCH_FAILURE } from "../actions"
 import {
   fetchUserProfile,
   clearProfile,
-  startProfileEdit,
-  updateProfileValidation,
-  updateValidationVisibility
+  startProfileEdit
 } from "../actions/profile"
 import {
   addProgramEnrollment,
@@ -40,7 +38,6 @@ import type {
 } from "../flow/enrollmentTypes"
 import type { ProfileGetResult } from "../flow/profileTypes"
 import type { UIState } from "../reducers/ui"
-import { ALL_ERRORS_VISIBLE } from "../constants"
 
 const PROFILE_REGEX = /^\/profile\/?[a-z]?/
 const LEARNER_REGEX = /^\/learner\/?[a-z]?/
@@ -73,8 +70,20 @@ class App extends React.Component {
     this.updateRequirements()
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
+    const { location: { pathname }, userProfile: { profile } } = this.props
+
     this.updateRequirements()
+
+    const [complete] = validateProfileComplete(profile)
+    if (
+      (!complete || !profile.filled_out) &&
+      !PROFILE_REGEX.test(prevProps.location.pathname) &&
+      PROFILE_REGEX.test(pathname)
+    ) {
+      // user was redirected from somewhere to the profile
+      this.showProfileNagToast()
+    }
   }
 
   componentWillUnmount() {
@@ -85,23 +94,15 @@ class App extends React.Component {
     dispatch(clearEnrollments())
   }
 
-  fetchUserProfile(username) {
+  fetchUserProfile = async username => {
     const { userProfile, dispatch, location: { pathname } } = this.props
     if (userProfile.getStatus === undefined) {
-      dispatch(fetchUserProfile(username)).then(() => {
-        this.requireCompleteProfile()
-        if (PROFILE_REGEX.test(pathname)) {
-          dispatch(startProfileEdit(SETTINGS.user.username))
-        }
-      })
+      await dispatch(fetchUserProfile(username))
+      if (PROFILE_REGEX.test(pathname)) {
+        dispatch(startProfileEdit(SETTINGS.user.username))
+      }
     }
-  }
-
-  fetchEnrollments() {
-    const { programs, dispatch } = this.props
-    if (programs.getStatus === undefined && SETTINGS.user) {
-      dispatch(fetchProgramEnrollments())
-    }
+    this.requireCompleteProfile()
   }
 
   requireCompleteProfile() {
@@ -109,11 +110,9 @@ class App extends React.Component {
       userProfile,
       userProfile: { profile },
       location: { pathname },
-      dispatch,
       ui: { profileStep }
     } = this.props
-    const [complete, step, errors] = validateProfileComplete(profile)
-    const username = SETTINGS.user ? SETTINGS.user.username : null
+    const [complete, step] = validateProfileComplete(profile)
     const idealStep = currentOrFirstIncompleteStep(profileStep, step)
 
     if (
@@ -121,18 +120,26 @@ class App extends React.Component {
       !PROFILE_REGEX.test(pathname) &&
       (!complete || !profile.filled_out)
     ) {
-      dispatch(startProfileEdit(SETTINGS.user.username))
-      dispatch(updateValidationVisibility(username, ALL_ERRORS_VISIBLE))
-      dispatch(updateProfileValidation(username, errors))
-      dispatch(
-        setToastMessage({
-          title:   "Profile",
-          message:
-            "We need to know a little bit more about you. Please complete your profile.",
-          icon: TOAST_FAILURE
-        })
-      )
       this.context.router.push(`/profile/${idealStep}`)
+    }
+  }
+
+  showProfileNagToast = () => {
+    const { dispatch } = this.props
+    dispatch(
+      setToastMessage({
+        title:   "Profile",
+        message:
+          "We need to know a little bit more about you. Please complete your profile.",
+        icon: TOAST_FAILURE
+      })
+    )
+  }
+
+  fetchEnrollments() {
+    const { programs, dispatch } = this.props
+    if (programs.getStatus === undefined && SETTINGS.user) {
+      dispatch(fetchProgramEnrollments())
     }
   }
 
