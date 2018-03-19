@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.94.0
+--------------
+
+- Lint fix (#3902)
+- Fix incorrect profile redirect behavior
+- add .pytest_cache to gitignore
+- Add back size parameter (#3893)
+
 Version 0.93.1
 --------------
 
