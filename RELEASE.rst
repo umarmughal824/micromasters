@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.94.1
+--------------
+
+- Add social auth data for all fake users (#3895)
+- Add re-enroll button
+
 Version 0.94.0
 --------------
 
