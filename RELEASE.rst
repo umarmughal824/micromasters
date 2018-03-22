@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.94.2
+--------------
+
+- Add email footer (#3909)
+
 Version 0.94.1
 --------------
 
