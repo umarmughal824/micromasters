@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.94.3
+--------------
+
+- Snapshots: add more failed course states (#3896)
+- Redirect user to profile wizard if residence is missing (#3907)
+
 Version 0.94.2
 --------------
 
