@@ -684,10 +684,15 @@ describe("Course Status Messages", () => {
       const date = moment(course.runs[1].course_start_date).format(
         DASHBOARD_FORMAT
       )
+      const enrollmentDate = moment(
+        course.runs[1].enrollment_start_date
+      ).format(DASHBOARD_FORMAT)
       assertIsJust(calculateMessages(calculateMessagesProps), [
         {
-          message: `You did not pass the edX course, but you can re-enroll. Next course starts ${date}.`,
-          action:  "course action was called"
+          message:
+            "You did not pass the edX course, but you can re-enroll." +
+            ` Next course starts ${date}. Enrollment started ${enrollmentDate}.`,
+          action: "course action was called"
         }
       ])
       assert(
@@ -704,7 +709,7 @@ describe("Course Status Messages", () => {
         moment()
           .add(10, "days")
           .toISOString(),
-        ` Enrollment starts ${formatDate(moment().add(10, "days"))}`
+        ` Enrollment starts ${formatDate(moment().add(10, "days"))}.`
       ]
     ]) {
       it(`should inform next enrollment date after failing edx course when date is ${nextEnrollmentStart[0]}`, () => {

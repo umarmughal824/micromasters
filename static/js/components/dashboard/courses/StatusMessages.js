@@ -375,21 +375,28 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
     }
   } else {
     if (hasFailedCourseRun(course) && !hasPassedCourseRun(course)) {
-      const date = run => formatDate(run.course_start_date)
       const msg = run => {
         let enrollmentDateMessage = ""
+        let courseStartMessage = ""
         if (
           !R.isNil(run.enrollment_start_date) &&
-          !R.isEmpty(run.enrollment_start_date) &&
-          !isEnrollableRun(run)
+          !R.isEmpty(run.enrollment_start_date)
         ) {
-          enrollmentDateMessage = ` Enrollment starts ${formatDate(
+          const startText = isEnrollableRun(run) ? "started" : "starts"
+          enrollmentDateMessage = ` Enrollment ${startText} ${formatDate(
             run.enrollment_start_date
-          )}`
+          )}.`
+        } else if (run.fuzzy_enrollment_start_date) {
+          enrollmentDateMessage = `Enrollment starts ${run.fuzzy_enrollment_start_date}.`
         }
-        return `You did not pass the edX course, but you can re-enroll. Next course starts ${date(
-          run
-        )}.${enrollmentDateMessage}`
+        if (run.course_start_date) {
+          courseStartMessage = `Next course starts ${formatDate(
+            run.course_start_date
+          )}.`
+        } else if (run.fuzzy_start_date) {
+          courseStartMessage = `Next course starts ${run.fuzzy_start_date}.`
+        }
+        return `You did not pass the edX course, but you can re-enroll. ${courseStartMessage}${enrollmentDateMessage}`
       }
       return S.Just(
         S.maybe(
