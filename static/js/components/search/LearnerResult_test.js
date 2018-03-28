@@ -4,7 +4,6 @@ import _ from "lodash"
 import React from "react"
 import R from "ramda"
 import { Provider } from "react-redux"
-import sinon from "sinon"
 import { assert } from "chai"
 import { mount } from "enzyme"
 import MuiThemeProvider from "material-ui/styles/MuiThemeProvider"
@@ -13,10 +12,6 @@ import { SearchkitManager, SearchkitProvider } from "searchkit"
 
 import ProfileImage from "../../containers/ProfileImage"
 import LearnerResult from "./LearnerResult"
-import {
-  SET_LEARNER_CHIP_VISIBILITY,
-  setLearnerChipVisibility
-} from "../../actions/ui"
 import IntegrationTestHelper from "../../util/integration_test_helper"
 import { getPreferredName } from "../../util/util"
 import {
@@ -79,6 +74,16 @@ describe("LearnerResult", () => {
       .find(".learner-name")
       .find(".user-name")
     assert.equal(result.text(), USER_PROFILE_RESPONSE.username)
+  })
+
+  it("should render profile link", () => {
+    const href = renderLearnerResult()
+      .find(".learner-name")
+      .find(".display-name")
+      .find("a")
+      .at(0)
+      .props().href
+    assert.equal(href, `/learner/${USER_PROFILE_RESPONSE.username}`)
   })
 
   it("should include the user's location for US residence", () => {
@@ -165,89 +170,6 @@ describe("LearnerResult", () => {
         .find(ProfileImage)
         .props().useSmall
     )
-  })
-
-  it("should render the user chip if the visibility equals the username", () => {
-    helper.store.dispatch(
-      setLearnerChipVisibility(USER_PROFILE_RESPONSE.username)
-    )
-
-    const result = renderLearnerResult()
-    assert.equal(result.find(".user-chip").length, 1)
-  })
-
-  for (const username of ["xyz", null]) {
-    it(`should not render the user chip if visibility is set to ${String(
-      username
-    )}`, () => {
-      helper.store.dispatch(setLearnerChipVisibility(username))
-
-      const result = renderLearnerResult()
-      assert.equal(result.find(".user-chip").length, 0)
-    })
-  }
-
-  it("should set user chip visibility if onMouseEnter is triggered", () => {
-    const result = renderLearnerResult()
-    return helper
-      .listenForActions([SET_LEARNER_CHIP_VISIBILITY], () => {
-        result
-          .find(".learner-name")
-          .props()
-          .onMouseEnter()
-      })
-      .then(state => {
-        assert.equal(
-          state.ui.learnerChipVisibility,
-          USER_PROFILE_RESPONSE.username
-        )
-      })
-  })
-
-  it("should clear user chip visibility if onMouseLeave is triggered", () => {
-    helper.store.dispatch(
-      setLearnerChipVisibility(USER_PROFILE_RESPONSE.username)
-    )
-    const result = renderLearnerResult()
-    return helper
-      .listenForActions([SET_LEARNER_CHIP_VISIBILITY], () => {
-        result
-          .find(".learner-name")
-          .props()
-          .onMouseLeave()
-      })
-      .then(state => {
-        assert.equal(state.ui.learnerChipVisibility, null)
-      })
-  })
-
-  it("should pass down a function that can open a dialog to email a learner", () => {
-    helper.store.dispatch(
-      setLearnerChipVisibility(USER_PROFILE_RESPONSE.username)
-    )
-    const openLearnerEmailComposerStub = helper.sandbox.stub()
-
-    const result = renderLearnerResult({
-      openLearnerEmailComposer: openLearnerEmailComposerStub
-    })
-    return helper
-      .listenForActions([SET_LEARNER_CHIP_VISIBILITY], () => {
-        result
-          .find(".learner-name")
-          .props()
-          .onMouseEnter()
-      })
-      .then(() => {
-        const chip = result.find("LearnerChip")
-        assert.lengthOf(chip, 1)
-        // Execute the openLearnerEmailComposer function passed down to the LearnerChip
-        chip.props().openLearnerEmailComposer()
-        sinon.assert.called(openLearnerEmailComposerStub)
-        sinon.assert.calledWith(
-          openLearnerEmailComposerStub,
-          USER_PROFILE_RESPONSE
-        )
-      })
   })
 
   for (const [index, profile] of ELASTICSEARCH_RESPONSE.hits.hits.entries()) {
