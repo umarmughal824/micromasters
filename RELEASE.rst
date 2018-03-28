@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.95.0
+--------------
+
+- Increased the buffer size in uWSGI to address wagtail errors (#3887)
+- Remove User Chip on Learner Search Page (#3919)
+- Add states for View Certificate and re-enroll (#3905)
+
 Version 0.94.3
 --------------
 
