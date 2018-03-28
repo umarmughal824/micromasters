@@ -35,7 +35,7 @@ from exams.factories import ExamRunFactory, ExamProfileFactory, ExamAuthorizatio
 from financialaid.factories import FinancialAidFactory
 from financialaid.models import FinancialAidStatus
 from grades.factories import ProctoredExamGradeFactory, MicromastersCourseCertificateFactory
-from grades.models import FinalGrade, CourseRunGradingStatus
+from grades.models import FinalGrade, CourseRunGradingStatus, MicromastersCourseCertificate
 from profiles.api import get_social_username
 from roles.models import Role, Staff
 from seed_data.lib import set_course_run_current, CachedEnrollmentHandler
@@ -74,7 +74,7 @@ def bind_args(func, *args, **kwargs):
     return lambda: func(*args, **kwargs)
 
 
-class DashboardStates:
+class DashboardStates:  # pylint: disable=too-many-locals
     """Runs through each dashboard state taking a snapshot"""
     def __init__(self, user=None):
         """
@@ -275,6 +275,24 @@ class DashboardStates:
                 '--course-run-key', course_run.edx_course_key, '--fuzzy'
             )
 
+    def create_passed_and_offered_course_run(self, grades_frozen, with_certificate):
+        """Make passed and currently offered course run, and see the View Certificate and Re-Enroll"""
+        self.make_fa_program_enrollment(FinancialAidStatus.AUTO_APPROVED)
+        call_command(
+            "alter_data", 'set_to_passed', '--username', 'staff',
+            '--course-title', 'Digital Learning 200', '--grade', '89',
+        )
+        course = Course.objects.get(title='Digital Learning 200')
+        # create another currently offered run
+        CourseRunFactory.create(course=course)
+
+        if grades_frozen:
+            final_grade = FinalGrade.objects.filter(user=self.user, course_run__course=course, passed=True).first()
+            CourseRunGradingStatus.objects.create(course_run=final_grade.course_run, status='complete')
+            if with_certificate:
+                MicromastersCourseCertificate.objects.create(final_grade=final_grade)
+                CourseCertificateSignatoriesFactory.create(course=course)
+
     def create_paid_but_no_enrollable_run(self, in_future, fuzzy):
         """Make paid but not enrolled, with offered currently, in future, and fuzzy """
         self.make_fa_program_enrollment(FinancialAidStatus.AUTO_APPROVED)
@@ -357,6 +375,14 @@ class DashboardStates:
                        in_future='_offered_in_future' if in_future else '',
                        fuzzy='_offered_fuzzy' if fuzzy else ''
                    ))
+
+        yield from (
+            (bind_args(self.create_passed_and_offered_course_run, frozen, with_certificate),
+             'create_passed_and_offered_course_run{frozen}{with_certificate}'.format(
+                 frozen='_grades_frozen' if frozen else '',
+                 with_certificate='_with_certificate' if with_certificate else ''
+             )) for frozen, with_certificate in [(True, True), (True, False), (False, False)]
+        )
 
         yield (self.create_passed_enrolled_again, 'passed_and_taking_again')
 
