@@ -503,8 +503,9 @@ def get_certificate_url(mmtrack, course):
     if best_grade:
         course_key = best_grade.course_run.edx_course_key
         if mmtrack.financial_aid_available:
-            if best_grade.has_certificate and course.signatories.exists():
-                url = reverse('certificate', args=[best_grade.certificate.hash])
+            certificate = mmtrack.get_course_certificate(course)
+            if certificate:
+                url = reverse('certificate', args=[certificate.hash])
         elif mmtrack.has_passing_certificate(course_key):
             download_url = mmtrack.certificates.get_verified_cert(course_key).download_url
             if download_url:

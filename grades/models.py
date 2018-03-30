@@ -156,20 +156,23 @@ class MicromastersCourseCertificate(TimestampedModel):
     """
     Model for storing MicroMasters course certificates
     """
-    final_grade = models.OneToOneField(FinalGrade, null=False, related_name='certificate', on_delete=models.CASCADE)
+    final_grade = models.OneToOneField(FinalGrade, null=True, related_name='certificate', on_delete=models.SET_NULL)
+    user = models.ForeignKey(User, models.SET_NULL, null=True, related_name='course_certificates')
+    course = models.ForeignKey(Course, models.SET_NULL, null=True)
     hash = models.CharField(max_length=32, null=False, unique=True)
 
     def save(self, *args, **kwargs):  # pylint: disable=arguments-differ
         """Overridden save method"""
         if not self.hash:
             self.hash = generate_md5(
-                '{}|{}'.format(self.final_grade.user_id, self.final_grade.course_run_id).encode('utf-8')
+                '{}|{}'.format(self.user_id, self.course_id).encode('utf-8')
             )
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return 'final_grade_id={final_grade_id}, hash="{hash}"'.format(
-            final_grade_id=self.final_grade.id,
+        return 'Course Certificate for user={user}, course={course}, hash="{hash}"'.format(
+            user=self.user,
+            course=self.course.id,
             hash=self.hash,
         )
 

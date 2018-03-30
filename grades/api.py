@@ -17,7 +17,7 @@ from grades.models import (
     FinalGrade,
     FinalGradeStatus,
     MicromastersProgramCertificate,
-    CombinedFinalGrade)
+    CombinedFinalGrade, MicromastersCourseCertificate)
 
 CACHE_KEY_FAILED_USERS_BASE_STR = "failed_users_{0}"
 
@@ -214,17 +214,21 @@ def generate_program_certificate(user, program):
         user (User): a Django user.
         program (programs.models.Program): program where the user is enrolled.
     """
-    mmtrack = get_mmtrack(user, program)
 
     if MicromastersProgramCertificate.objects.filter(user=user, program=program).exists():
         log.error('User [%s] already has a certificate for program [%s]', user, program)
         return
 
-    for course in program.course_set.all():
-        best_grade = mmtrack.get_best_final_grade_for_course(course)
+    courses_in_program_ids = set(program.course_set.all().values_list('id', flat=True))
 
-        if best_grade is None or not best_grade.has_certificate:
-            return
+    num_courses_with_cert = MicromastersCourseCertificate.objects.filter(
+        user=user,
+        course_id__in=courses_in_program_ids
+    ).values_list('course__id', flat=True).distinct().count()
+
+    if len(courses_in_program_ids) > num_courses_with_cert:
+        return
+
     MicromastersProgramCertificate.objects.create(user=user, program=program)
     log.info(
         'Created MM program certificate for [%s] in program [%s]',
