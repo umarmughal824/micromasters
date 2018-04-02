@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.96.0
+--------------
+
+- Updating MicromastersCertificateModel to relate to User and Course (#3910)
+- Add postal address to email footer (#3922)
+
 Version 0.95.0
 --------------
 
