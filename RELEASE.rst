@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.96.1
+--------------
+
+- Added contact us link on mm footer (#3924)
+
 Version 0.96.0
 --------------
 
