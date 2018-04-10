@@ -189,7 +189,7 @@ These commands will help you to fully explore the MicroMasters UI:
    both the learner and instructor UX for the app.
    
    ```bash
-   # Run rom a shell in your host machine
+   # Run from a shell in your host machine
    # Replace 'staff' with the username of the edX user you logged in with
    docker-compose run web ./manage.py seed_db --staff-user='staff'
    ```
