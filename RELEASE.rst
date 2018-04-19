@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.97.0
+--------------
+
+- Fix migration (#3942)
+- sanitize requirements per pip 10
+- Fixed selenium issues (#3935)
+- Update README.md
+- Remove final_grade from MicromastersCourseCertificate (#3920)
+- Fix learner search page email send error
+- Updated README to refer to common web app guide where appropriate
+
 Version 0.96.1
 --------------
 
