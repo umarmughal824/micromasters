@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.97.1
+--------------
+
+- If no courses show I&#39;m insterested button (#3950)
+- Program Page: remove empty courses box (#3947)
+- change grid from 3 columns to 2 or 4 depending on width (#3948)
+
 Version 0.97.0
 --------------
 
