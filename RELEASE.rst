@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.97.2
+--------------
+
+- unhide interested button on mobile (#3954)
+- brighter font and better spacing in text over hero image (#3951)
+
 Version 0.97.1
 --------------
 
