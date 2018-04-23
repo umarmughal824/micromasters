@@ -9,7 +9,7 @@ from urllib.parse import (
     ParseResult,
     urlparse,
 )
-from subprocess import check_call, check_output, DEVNULL
+from subprocess import call, check_output, DEVNULL
 import pytest
 import requests
 from django.conf import settings
@@ -224,10 +224,10 @@ class DatabaseLoader:
             db_backup_name (str): The name that will be given to the backup database
         """
         self.db_settings = db_settings or settings.DATABASES['default']
-        self.db_name = self.db_settings['NAME']
+        self.db_name = self.db_settings.get('TEST', {}).get('NAME', None) or self.db_settings['NAME']
         if self.db_name[0:5] != 'test_':
             raise Exception(
-                "The test suite is attempting to use the database '{}'."
+                "The test suite is attempting to use the database '{}'. "
                 "The test database should have a name that begins with 'test_'. Exiting...".format(self.db_name)
             )
         self.db_backup_name = db_backup_name or getattr(settings, 'BACKUP_DB_NAME', self.DEFAULT_BACKUP_DB_NAME)
@@ -280,7 +280,7 @@ class DatabaseLoader:
         """
         Drops the main database and loads the backup
         """
-        check_call(["dropdb", *self.db_cmd_args, self.db_name], stdout=DEVNULL, stderr=DEVNULL)
+        call(["dropdb", *self.db_cmd_args, self.db_name], stdout=DEVNULL, stderr=DEVNULL)
         sql = self._db_copy_sql(self.db_backup_name, self.db_name)
         check_output(["psql", *self.db_cmd_args], input=sql)
 

@@ -487,7 +487,8 @@ def test_data(django_db_blocker, seeded_database_loader):
         with django_db_blocker.unblock():
             terminate_db_connections()
         seeded_database_loader.load_backup()
-        user = User.objects.get(username='staff')
+        with django_db_blocker.unblock():
+            user = User.objects.get(username='staff')
     yield dict(user=user)
 
 
