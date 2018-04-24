@@ -161,12 +161,27 @@ describe("api", function() {
         it(`redirects to login if status = ${statusCode}`, () => {
           fetchJSONStub.returns(Promise.reject({ errorStatusCode: statusCode }))
 
-          return getDashboard().then(() => {
-            const redirectUrl = `/logout?next=${encodeURIComponent(
-              "/login/edxorg/"
-            )}`
-            assert.include(window.location.toString(), redirectUrl)
-          })
+          return getDashboard().then(
+            () => {},
+            () => {
+              const redirectUrl = `/logout?next=${encodeURIComponent(
+                "/login/edxorg/"
+              )}`
+              assert.include(window.location.toString(), redirectUrl)
+            }
+          )
+        })
+      }
+
+      for (const statusCode of [503, 500, 404]) {
+        it(`dashboard api returns error if status = ${statusCode}`, () => {
+          fetchJSONStub.returns(Promise.reject({ errorStatusCode: statusCode }))
+          return getDashboard().then(
+            () => {},
+            (error: string) => {
+              assert.deepEqual(error, { errorStatusCode: statusCode })
+            }
+          )
         })
       }
     })
@@ -303,12 +318,27 @@ describe("api", function() {
         it(`redirects to login if status = ${statusCode}`, () => {
           fetchJSONStub.returns(Promise.reject({ errorStatusCode: statusCode }))
 
-          return getPrograms().then(() => {
-            const redirectUrl = `/logout?next=${encodeURIComponent(
-              "/login/edxorg/"
-            )}`
-            assert.include(window.location.toString(), redirectUrl)
-          })
+          return getPrograms().then(
+            () => {},
+            () => {
+              const redirectUrl = `/logout?next=${encodeURIComponent(
+                "/login/edxorg/"
+              )}`
+              assert.include(window.location.toString(), redirectUrl)
+            }
+          )
+        })
+      }
+
+      for (const statusCode of [503, 500, 404]) {
+        it(`programs api returns error if status = ${statusCode}`, () => {
+          fetchJSONStub.returns(Promise.reject({ errorStatusCode: statusCode }))
+          return getPrograms().then(
+            () => {},
+            (error: string) => {
+              assert.deepEqual(error, { errorStatusCode: statusCode })
+            }
+          )
         })
       }
 
