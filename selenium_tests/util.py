@@ -223,8 +223,8 @@ class DatabaseLoader:
             db_settings (dict): A dict of database settings
             db_backup_name (str): The name that will be given to the backup database
         """
-        self.db_settings = db_settings or settings.DATABASES['default']
-        self.db_name = self.db_settings.get('TEST', {}).get('NAME', None) or self.db_settings['NAME']
+        self.db_settings = db_settings or connection.settings_dict
+        self.db_name = self.db_settings['NAME']
         if self.db_name[0:5] != 'test_':
             raise Exception(
                 "The test suite is attempting to use the database '{}'. "

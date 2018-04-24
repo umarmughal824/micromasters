@@ -451,7 +451,7 @@ def make_filename(num, name, output_directory='', use_mobile=False):
 
 
 @pytest.fixture(scope="session")
-def seeded_database_loader():
+def seeded_database_loader(django_db_blocker):
     """
     Fixture for a DatabaseLoader object. Using a different object than the fixture defined
     in selenium_tests/conftest.py because we don't want to overwrite the backup database used
