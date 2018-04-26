@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.98.0
+--------------
+
+- add proctored exam grades to grades README (#3912)
+
 Version 0.97.2
 --------------
 
