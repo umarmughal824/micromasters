@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.98.1
+--------------
+
+- When user has a passed run but upgrade deadline passed (#3931)
+- Updated heroku stack in app.js file (#3939)
+- Style and layout tweaks to Micromasters program pages (#3956)
+- Handle 503 error on dashboard api (#3957)
+- Fixed status message of current/future course when status is missed upgrade deadline (#3937)
+- Pin pytest to fix selenium issues (#3962)
+- Rename footer link (#3960)
+- display courserun dates in admin list view; make them editable (#3941)
+
 Version 0.98.0
 --------------
 
