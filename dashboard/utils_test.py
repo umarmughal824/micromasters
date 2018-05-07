@@ -93,6 +93,9 @@ class MMTrackTest(MockedESTestCase):
             enrollment_end=cls.now-timedelta(weeks=53),
             edx_course_key="course-v1:odl+FOO101+CR-FALL15"
         )
+        cls.crun_fa2 = CourseRunFactory.create(
+            course=finaid_course
+        )
         CourseRunFactory.create(
             course=finaid_course,
             edx_course_key=None
@@ -132,7 +135,7 @@ class MMTrackTest(MockedESTestCase):
             "course-v1:MITx+8.MechCX+2014_T1",
             "course-v1:odl+FOO102+CR-FALL16"
         }
-        assert mmtrack.paid_course_keys == set()
+        assert mmtrack.paid_course_fa == {}
 
     def test_init_financial_aid_track(self):
         """
@@ -150,8 +153,8 @@ class MMTrackTest(MockedESTestCase):
         assert mmtrack.current_grades == self.cached_edx_user_data.current_grades
         assert mmtrack.certificates == self.cached_edx_user_data.certificates
         assert mmtrack.financial_aid_available == self.program_financial_aid.financial_aid_availability
-        assert mmtrack.edx_course_keys == {"course-v1:odl+FOO101+CR-FALL15"}
-        assert mmtrack.paid_course_keys == set()
+        assert mmtrack.edx_course_keys == {self.crun_fa.edx_course_key, self.crun_fa2.edx_course_key}
+        assert mmtrack.paid_course_fa == {self.crun_fa.course.id: False}
 
     def test_fa_paid(self):
         """
@@ -165,14 +168,14 @@ class MMTrackTest(MockedESTestCase):
             program=self.program_financial_aid,
             edx_user_data=self.cached_edx_user_data
         )
-        assert mmtrack_paid.paid_course_keys == {key}
+        assert mmtrack_paid.paid_course_fa == {self.crun_fa.course.id: True}
 
         mmtrack = MMTrack(
             user=UserFactory.create(),
             program=self.program_financial_aid,
             edx_user_data=self.cached_edx_user_data
         )
-        assert mmtrack.paid_course_keys == set()
+        assert mmtrack.paid_course_fa == {self.crun_fa.course.id: False}
 
     def test_is_course_in_program(self):
         """
@@ -538,6 +541,19 @@ class MMTrackTest(MockedESTestCase):
             edx_user_data=self.cached_edx_user_data
         )
         assert mmtrack.has_paid(key) is True
+
+    def test_has_paid_for_entire_course(self):
+        """
+        Tests that the .has_paid method returns true if
+        any of the course runs in the course have been paid for
+        """
+        self.pay_for_fa_course(self.crun_fa.edx_course_key)
+        mmtrack = MMTrack(
+            user=self.user,
+            program=self.program_financial_aid,
+            edx_user_data=self.cached_edx_user_data
+        )
+        assert mmtrack.has_paid(self.crun_fa2.edx_course_key) is True
 
     def test_not_paid_fa_with_course_run_paid_on_edx(self):
         """
