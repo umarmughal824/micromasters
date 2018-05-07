@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.99.0
+--------------
+
+- Payment for courses not course run (#3545)
+
 Version 0.98.1
 --------------
 
