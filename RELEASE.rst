@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.100.0
+---------------
+
+- Check freeze status show correct enrollment numbers (#3977)
+- Fixed document deletion issue appears when user upload exact same document in edit view (#3974)
+- fixing ipad layout bug (#3979)
+- fix toast layout issue (#3978)
+- Revert &#34;Check freeze status show correct enrollment numbers&#34;
+- Check freeze status show correct enrollment numbers
+
 Version 0.99.0
 --------------
 
