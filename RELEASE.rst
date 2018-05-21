@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.101.0
+---------------
+
+- Update edx-api-client to 0.5.0 (#3981)
+
 Version 0.100.0
 ---------------
 
