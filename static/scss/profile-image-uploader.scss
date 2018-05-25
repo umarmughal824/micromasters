@@ -20,11 +20,17 @@
       text-align: center;
       color: $font-black;
     }
-    .mobile-upload-message  {display: none;}
+    .mobile-upload-message  {
+      display: none;
+    }
 
     @include breakpoint(mobile) {
-      .desktop-upload-message {display: none;}
-      .mobile-upload-message  {display: block;}
+      .desktop-upload-message {
+        display: none;
+      }
+      .mobile-upload-message  {
+        display: block;
+      }
     }
   }
 
