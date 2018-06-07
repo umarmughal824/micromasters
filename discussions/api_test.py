@@ -91,8 +91,10 @@ def test_create_or_update_discussion_user_no_username(mocker):
     assert DiscussionUser.objects.count() == 1
 
 
-def test_create_or_update_discussion_user_has_username(mocker):
+@pytest.mark.parametrize('enable_update', [True, False])
+def test_create_or_update_discussion_user_has_username(mocker, enable_update, settings):
     """Test that create_or_update_discussion_user updates if we have a username"""
+    settings.FEATURES['OPEN_DISCUSSIONS_USER_SYNC'] = enable_update
     create_mock = mocker.patch('discussions.api.create_discussion_user')
     update_mock = mocker.patch('discussions.api.update_discussion_user')
     with mute_signals(post_save):
@@ -100,7 +102,7 @@ def test_create_or_update_discussion_user_has_username(mocker):
     DiscussionUser.objects.create(user=profile.user, username='username')
     api.create_or_update_discussion_user(profile.user_id)
     assert create_mock.call_count == 0
-    assert update_mock.call_count == 1
+    assert update_mock.call_count == (1 if enable_update else 0)
     assert DiscussionUser.objects.count() == 1
 
 
