@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.103.0
+---------------
+
+- FEATURE_OPEN_DISCUSSIONS_USER_SYNC flag determines if discussions user is updated or not (#4010)
+- Fixing 2 layout bugs in Micromasters Program page (#4013)
+- Do not show upgrade button when learner has fail edX course (#4011)
+- Fixed semester facet count issues (#4008)
+
 Version 0.102.0
 ---------------
 
