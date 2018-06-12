@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.103.1
+---------------
+
+- Fix fonts and spacing on program pages (#4015)
+- centered sign up/login buttons (#4017)
+
 Version 0.103.0
 ---------------
 
