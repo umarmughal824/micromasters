@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.103.2
+---------------
+
+- Fix sentry error/exception logging (#4020)
+
 Version 0.103.1
 ---------------
 
