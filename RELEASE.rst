@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.104.0
+---------------
+
+- Show exam message even when has enrollable runs (#4028)
+- Pinned Dockerfile to python:3.6.4
+- Skip exam authorization for inactive user (#4022)
+- Add dashbaord state: failed and pending price (#4005)
+
 Version 0.103.2
 ---------------
 
