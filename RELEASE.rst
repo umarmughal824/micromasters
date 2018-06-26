@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.105.0
+---------------
+
+- Add exam states where course is in progress (#4035)
+- slight header font size change (#4027)
+- Update program page header (#4030)
+
 Version 0.104.0
 ---------------
 
