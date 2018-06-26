@@ -9,6 +9,7 @@ from rest_framework import (
     permissions,
     status,
 )
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.mixins import UpdateModelMixin
 from rest_framework.views import APIView
@@ -24,6 +25,7 @@ from mail.api import (
     MailgunClient,
     mark_emails_as_sent,
 )
+from mail.authentication import StatelessTokenAuthentication
 from mail.exceptions import SendBatchException
 from mail.permissions import (
     UserCanMessageCourseTeamPermission,
@@ -126,8 +128,11 @@ class SearchResultMailView(APIView):
         """
         POST method handler
         """
+        token = get_encoded_and_signed_subscription_token(request.user)
         email_subject = request.data['email_subject']
-        email_body = request.data['email_body'] + get_email_footer(request.build_absolute_uri('/settings'))
+        email_body = request.data['email_body'] + get_email_footer(
+            request.build_absolute_uri('/settings')
+        )
         sender_name = full_name(request.user)
         search_obj = create_search_obj(
             request.user,
@@ -269,4 +274,20 @@ class MailWebhookView(APIView):
         else:
             log.debug(error_msg)
 
+        return Response(status=status.HTTP_200_OK)
+
+
+class EmailUnSubscribeView(APIView):
+    """View for email unsub settings"""
+    authentication_classes = (
+        JSONWebTokenAuthentication,
+        authentication.SessionAuthentication,
+        StatelessTokenAuthentication,
+    )
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        """update email optin settings"""
+        self.request.user.profile.email_optin = False
+        self.request.user.profile.save()
         return Response(status=status.HTTP_200_OK)
