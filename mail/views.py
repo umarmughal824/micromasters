@@ -25,7 +25,10 @@ from mail.api import (
     MailgunClient,
     mark_emails_as_sent,
 )
-from mail.authentication import StatelessTokenAuthentication
+from mail.authentication import (
+    get_encoded_and_signed_subscription_token,
+    StatelessTokenAuthentication,
+)
 from mail.exceptions import SendBatchException
 from mail.permissions import (
     UserCanMessageCourseTeamPermission,
