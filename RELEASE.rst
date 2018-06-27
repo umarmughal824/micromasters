@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.105.1
+---------------
+
+- Fix course certificate generation task (#4044)
+- Message about exam when course run in progress (#4032)
+
 Version 0.105.0
 ---------------
 
