@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.106.0
+---------------
+
+- Add space in FA Card (#4041)
+- add line break in program page h1 (#4043)
+
 Version 0.105.1
 ---------------
 
