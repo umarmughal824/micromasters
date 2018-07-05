@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.106.1
+---------------
+
+- Loading session engine from env var (#4049)
+- Fix semester user count bug (#4048)
+
 Version 0.106.0
 ---------------
 
