@@ -71,6 +71,16 @@
     },
     {
         "model": "financialaid.countryincomethreshold",
+        "pk": 216,
+        "fields": {
+            "country_code": "AR",
+            "income_threshold": 50000,
+            "created_on": "2018-07-06T14:40:08.247Z",
+            "updated_on": "2018-07-06T14:40:08.247Z"
+        }
+    },
+    {
+        "model": "financialaid.countryincomethreshold",
         "pk": 7,
         "fields": {
             "country_code": "AS",
