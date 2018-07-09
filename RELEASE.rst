@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.107.0
+---------------
+
+- add course_number &amp; allow filtering by program in course admin list view (#4058)
+
 Version 0.106.1
 ---------------
 
