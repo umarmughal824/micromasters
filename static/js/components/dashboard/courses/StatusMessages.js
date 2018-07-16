@@ -23,7 +23,8 @@ import {
   COURSE_ACTION_CALCULATE_PRICE,
   DASHBOARD_FORMAT,
   COURSE_DEADLINE_FORMAT,
-  STATUS_CURRENTLY_ENROLLED
+  STATUS_CURRENTLY_ENROLLED,
+  COURSE_ACTION_ENROLL
 } from "../../../constants"
 import { S } from "../../../lib/sanctuary"
 import {
@@ -34,7 +35,8 @@ import {
   isEnrollableRun,
   userIsEnrolled,
   isOfferedInUncertainFuture,
-  isPassedOrCurrentlyEnrolled
+  isPassedOrCurrentlyEnrolled,
+  notNilorEmpty
 } from "./util"
 import {
   hasPassingExamGrade,
@@ -84,6 +86,27 @@ const messageForNotAttemptedExam = (course: Course) => {
       `on ${formatDate(course.exams_schedulable_in_future[0])}.`
   }
   return message
+}
+
+const courseStartMessage = (run: CourseRun) => {
+  const startDate = notNilorEmpty(run.course_start_date)
+    ? formatDate(run.course_start_date)
+    : run.fuzzy_start_date
+  if (startDate) {
+    return `Next course starts ${startDate}.`
+  }
+  return ""
+}
+
+const enrollmentDateMessage = (run: CourseRun) => {
+  const enrollmentDate = notNilorEmpty(run.enrollment_start_date)
+    ? formatDate(run.enrollment_start_date)
+    : run.fuzzy_enrollment_start_date
+  if (enrollmentDate) {
+    const startText = isEnrollableRun(run) ? "started" : "starts"
+    return ` Enrollment ${startText} ${enrollmentDate}.`
+  }
+  return ""
 }
 
 // this calculates any status messages we'll need to show the user
@@ -156,28 +179,51 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
     }
   }
 
-  if (firstRun.status === STATUS_PAID_BUT_NOT_ENROLLED && !hasFinancialAid) {
+  //If first run is paid but user never enrolled, most likely there was
+  //problem enrolling, and first_unexpired_run is returned, so no need to check for past enrollment
+  if (firstRun.status === STATUS_PAID_BUT_NOT_ENROLLED) {
     const contactHref = `mailto:${SETTINGS.support_email}`
+    let date = ""
+    if (isEnrollableRun(firstRun)) {
+      date = `now`
+    } else if (notNilorEmpty(firstRun.enrollment_start_date)) {
+      date = formatDate(firstRun.enrollment_start_date)
+    } else if (
+      firstRun.fuzzy_start_date &&
+      isOfferedInUncertainFuture(firstRun)
+    ) {
+      date = `in ${firstRun.fuzzy_start_date}`
+    }
     return S.Just([
       {
         message: (
           <div>
-            {
-              "Something went wrong. You paid for this course but are not enrolled. "
-            }
-            <a href={contactHref}>Contact us for help.</a>
+            {`You paid for this course but are not enrolled. You can enroll ${date}, or if` +
+              " you think there is a problem, "}
+            <a href={contactHref}>contact us for help.</a>
           </div>
-        )
+        ),
+        action: courseAction(firstRun, COURSE_ACTION_ENROLL)
       }
     ])
   }
 
-  // Course run isn't enrollable, user never enrolled
-  if (!isEnrollableRun(firstRun) && !R.any(userIsEnrolled, course.runs)) {
-    if (firstRun.fuzzy_start_date && isOfferedInUncertainFuture(firstRun)) {
+  // User never enrolled
+  if (!R.any(userIsEnrolled, course.runs)) {
+    if (isEnrollableRun(firstRun)) {
       return S.Just([
         {
-          message: `Course starts ${firstRun.fuzzy_start_date}.`
+          message: `${courseStartMessage(firstRun)}`,
+          action:  courseAction(firstRun, COURSE_ACTION_ENROLL)
+        }
+      ])
+    } else if (
+      firstRun.fuzzy_start_date &&
+      isOfferedInUncertainFuture(firstRun)
+    ) {
+      return S.Just([
+        {
+          message: `${courseStartMessage(firstRun)}`
         }
       ])
     } else {
@@ -340,19 +386,9 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
       ) {
         const date = run => formatDate(run.course_start_date)
         const msg = run => {
-          let enrollmentDateMessage = ""
-          if (
-            !R.isNil(run.enrollment_start_date) &&
-            !R.isEmpty(run.enrollment_start_date) &&
-            !isEnrollableRun(run)
-          ) {
-            enrollmentDateMessage = ` Enrollment starts ${formatDate(
-              run.enrollment_start_date
-            )}`
-          }
           return `You missed the payment deadline, but you can re-enroll. Next course starts ${date(
             run
-          )}.${enrollmentDateMessage}`
+          )}.${enrollmentDateMessage(run)}`
         }
         messages.push(
           S.maybe(
@@ -388,36 +424,15 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
     }
   } else {
     if (hasFailedCourseRun(course) && !hasPassedCourseRun(course)) {
-      const msg = run => {
-        let enrollmentDateMessage = ""
-        let courseStartMessage = ""
-        if (
-          !R.isNil(run.enrollment_start_date) &&
-          !R.isEmpty(run.enrollment_start_date)
-        ) {
-          const startText = isEnrollableRun(run) ? "started" : "starts"
-          enrollmentDateMessage = ` Enrollment ${startText} ${formatDate(
-            run.enrollment_start_date
-          )}.`
-        } else if (run.fuzzy_enrollment_start_date) {
-          enrollmentDateMessage = `Enrollment starts ${run.fuzzy_enrollment_start_date}.`
-        }
-        if (run.course_start_date) {
-          courseStartMessage = `Next course starts ${formatDate(
-            run.course_start_date
-          )}.`
-        } else if (run.fuzzy_start_date) {
-          courseStartMessage = `Next course starts ${run.fuzzy_start_date}.`
-        }
-        return `You did not pass the edX course, but you can re-enroll. ${courseStartMessage}${enrollmentDateMessage}`
-      }
       return S.Just(
         S.maybe(
           messages.concat({ message: "You did not pass the edX course." }),
           run =>
             messages.concat({
-              message: msg(run),
-              action:  courseAction(run, COURSE_ACTION_REENROLL)
+              message: `You did not pass the edX course, but you can re-enroll. ${courseStartMessage(
+                run
+              )}${enrollmentDateMessage(run)}`,
+              action: courseAction(run, COURSE_ACTION_REENROLL)
             }),
           futureEnrollableRun(course)
         )

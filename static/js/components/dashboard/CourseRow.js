@@ -175,7 +175,7 @@ export default class CourseRow extends React.Component {
   }
 
   renderEnrollableCourseInfo = (run: CourseRun) => {
-    const { course, showStaffView } = this.props
+    const { course, hasFinancialAid, showStaffView } = this.props
 
     return (
       <div className="enrollable-course-info">
@@ -186,14 +186,17 @@ export default class CourseRow extends React.Component {
           <div className="second-col">
             {run.status === STATUS_PENDING_ENROLLMENT ? (
               <Spinner singleColor />
-            ) : (
-              this.courseAction(run, COURSE_ACTION_ENROLL)
-            )}
+            ) : null}
             {run.status === STATUS_PENDING_ENROLLMENT ? "Processing..." : null}
           </div>
         </div>
-        {!isEnrollableRun(run) && !showStaffView ? (
-          <StatusMessages course={course} firstRun={run} />
+        {!showStaffView ? (
+          <StatusMessages
+            course={course}
+            courseAction={this.courseAction}
+            hasFinancialAid={hasFinancialAid}
+            firstRun={run}
+          />
         ) : null}
       </div>
     )

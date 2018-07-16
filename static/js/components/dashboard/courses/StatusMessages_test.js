@@ -31,7 +31,7 @@ import {
   makeRunFailed,
   makeRunCanUpgrade
 } from "./test_util"
-import { assertIsJust, assertIsNothing } from "../../../lib/test_utils"
+import { assertIsJust } from "../../../lib/test_utils"
 import {
   COURSE_ACTION_PAY,
   COURSE_ACTION_CALCULATE_PRICE,
@@ -41,7 +41,8 @@ import {
   COURSE_DEADLINE_FORMAT,
   STATUS_PAID_BUT_NOT_ENROLLED,
   FA_STATUS_PENDING_DOCS,
-  STATUS_MISSED_DEADLINE
+  STATUS_MISSED_DEADLINE,
+  COURSE_ACTION_ENROLL
 } from "../../../constants"
 import * as libCoupon from "../../../lib/coupon"
 import { FINANCIAL_AID_PARTIAL_RESPONSE } from "../../../test_constants"
@@ -108,24 +109,35 @@ describe("Course Status Messages", () => {
       sandbox.restore()
     })
 
-    it("should have a message for STATUS_PAID_BUT_NOT_ENROLLED", () => {
-      course.runs[0].status = STATUS_PAID_BUT_NOT_ENROLLED
-      course.runs[0].has_paid = true
-      const [{ message }] = calculateMessages(calculateMessagesProps).value
-      const mounted = shallow(message)
-      assert.equal(
-        mounted.text(),
-        "Something went wrong. You paid for this course but are not enrolled. Contact us for help."
-      )
-      assert.equal(
-        mounted.find("a").props().href,
-        `mailto:${SETTINGS.support_email}`
-      )
-      calculateMessagesProps["hasFinancialAid"] = true
-      course.runs[1].has_paid = true
-      makeRunCurrent(course.runs[0])
-      makeRunFuture(course.runs[1])
-      assertIsNothing(calculateMessages(calculateMessagesProps))
+    it("should have a message for STATUS_PAID_BUT_NOT_ENROLLED for FA", () => {
+      [true, false].forEach(finAid => {
+        course.runs[0].status = STATUS_PAID_BUT_NOT_ENROLLED
+        course.runs[0].has_paid = true
+        calculateMessagesProps["hasFinancialAid"] = finAid
+        course.runs[1].has_paid = true
+        makeRunCurrent(course.runs[0])
+        makeRunFuture(course.runs[1])
+        const [{ message, action }] = calculateMessages(
+          calculateMessagesProps
+        ).value
+        const mounted = shallow(message)
+        assert.equal(
+          mounted.text(),
+          "You paid for this course but are not enrolled. You can enroll now, or if you" +
+            " think there is a problem, contact us for help."
+        )
+        assert.equal(
+          mounted.find("a").props().href,
+          `mailto:${SETTINGS.support_email}`
+        )
+        assert.equal(action, "course action was called")
+        assert(
+          calculateMessagesProps.courseAction.calledWith(
+            course.runs[0],
+            COURSE_ACTION_ENROLL
+          )
+        )
+      })
     })
 
     it("should show next promised course", () => {
@@ -133,7 +145,7 @@ describe("Course Status Messages", () => {
 
       assertIsJust(calculateMessages(calculateMessagesProps), [
         {
-          message: "Course starts Fall 2018."
+          message: "Next course starts Fall 2018."
         }
       ])
     })
@@ -606,8 +618,12 @@ describe("Course Status Messages", () => {
       const date = formatDate(course.runs[1].course_start_date)
       assertIsJust(calculateMessages(calculateMessagesProps), [
         {
-          message: `You missed the payment deadline, but you can re-enroll. Next course starts ${date}.`,
-          action:  "course action was called"
+          message:
+            `You missed the payment deadline, but you can re-enroll. Next course starts ${date}.` +
+            ` Enrollment started ${formatDate(
+              course.runs[1].enrollment_start_date
+            )}.`,
+          action: "course action was called"
         }
       ])
       assert(
@@ -652,7 +668,7 @@ describe("Course Status Messages", () => {
         moment()
           .add(10, "days")
           .toISOString(),
-        ` Enrollment starts ${formatDate(moment().add(10, "days"))}`
+        ` Enrollment starts ${formatDate(moment().add(10, "days"))}.`
       ]
     ]) {
       it(`should nag about missing the payment deadline when future re-enrollments and date is ${nextEnrollmentStart[0]}`, () => {

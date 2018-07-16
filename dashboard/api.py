@@ -306,7 +306,12 @@ def get_info_for_course(course, mmtrack):
     elif run_status.status == CourseRunStatus.CAN_UPGRADE:
         _add_run(run_status.course_run, mmtrack, CourseStatus.CAN_UPGRADE)
     elif run_status.status == CourseRunStatus.PAID_BUT_NOT_ENROLLED:
-        _add_run(run_status.course_run, mmtrack, CourseStatus.PAID_BUT_NOT_ENROLLED)
+        if course.program.financial_aid_availability:
+            next_run = course.first_unexpired_run()
+            if next_run is not None:
+                _add_run(next_run, mmtrack, CourseStatus.PAID_BUT_NOT_ENROLLED)
+        else:
+            _add_run(run_status.course_run, mmtrack, CourseStatus.PAID_BUT_NOT_ENROLLED)
 
     # add all the other runs with status != NOT_ENROLLED
     # the first one (or two in some cases) has been added with the logic before
