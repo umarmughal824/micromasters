@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.108.0
+---------------
+
+- Status message for paid but not enrolled (#4052)
+- Fixed education and employment dialog titles (#4059)
+
 Version 0.107.0
 ---------------
 
