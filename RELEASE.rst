@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.108.1
+---------------
+
+- Removed cybersource transaction key (#4054)
+- Offer to pay again for exam when already passed (#4062)
+
 Version 0.108.0
 ---------------
 
