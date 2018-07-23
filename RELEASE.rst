@@ -1,49 +1,49 @@
 Release Notes
 =============
 
-Version 0.108.1
+Version 0.108.1 (Released July 23, 2018)
 ---------------
 
 - Removed cybersource transaction key (#4054)
 - Offer to pay again for exam when already passed (#4062)
 
-Version 0.108.0
+Version 0.108.0 (Released July 17, 2018)
 ---------------
 
 - Status message for paid but not enrolled (#4052)
 - Fixed education and employment dialog titles (#4059)
 
-Version 0.107.0
+Version 0.107.0 (Released July 09, 2018)
 ---------------
 
 - add course_number &amp; allow filtering by program in course admin list view (#4058)
 
-Version 0.106.1
+Version 0.106.1 (Released July 05, 2018)
 ---------------
 
 - Loading session engine from env var (#4049)
 - Fix semester user count bug (#4048)
 
-Version 0.106.0
+Version 0.106.0 (Released July 02, 2018)
 ---------------
 
 - Add space in FA Card (#4041)
 - add line break in program page h1 (#4043)
 
-Version 0.105.1
+Version 0.105.1 (Released June 27, 2018)
 ---------------
 
 - Fix course certificate generation task (#4044)
 - Message about exam when course run in progress (#4032)
 
-Version 0.105.0
+Version 0.105.0 (Released June 26, 2018)
 ---------------
 
 - Add exam states where course is in progress (#4035)
 - slight header font size change (#4027)
 - Update program page header (#4030)
 
-Version 0.104.0
+Version 0.104.0 (Released June 21, 2018)
 ---------------
 
 - Show exam message even when has enrollable runs (#4028)
@@ -51,18 +51,18 @@ Version 0.104.0
 - Skip exam authorization for inactive user (#4022)
 - Add dashbaord state: failed and pending price (#4005)
 
-Version 0.103.2
+Version 0.103.2 (Released June 14, 2018)
 ---------------
 
 - Fix sentry error/exception logging (#4020)
 
-Version 0.103.1
+Version 0.103.1 (Released June 12, 2018)
 ---------------
 
 - Fix fonts and spacing on program pages (#4015)
 - centered sign up/login buttons (#4017)
 
-Version 0.103.0
+Version 0.103.0 (Released June 11, 2018)
 ---------------
 
 - FEATURE_OPEN_DISCUSSIONS_USER_SYNC flag determines if discussions user is updated or not (#4010)
@@ -70,7 +70,7 @@ Version 0.103.0
 - Do not show upgrade button when learner has fail edX course (#4011)
 - Fixed semester facet count issues (#4008)
 
-Version 0.102.0
+Version 0.102.0 (Released June 01, 2018)
 ---------------
 
 - Fixed regression on semester facet front end side (#4000)
@@ -82,12 +82,12 @@ Version 0.102.0
 - Serialize all semesters enrolled (#3963)
 - Added multiple semester select (#3936)
 
-Version 0.101.0
+Version 0.101.0 (Released May 21, 2018)
 ---------------
 
 - Update edx-api-client to 0.5.0 (#3981)
 
-Version 0.100.0
+Version 0.100.0 (Released May 17, 2018)
 ---------------
 
 - Check freeze status show correct enrollment numbers (#3977)
@@ -97,12 +97,12 @@ Version 0.100.0
 - Revert &#34;Check freeze status show correct enrollment numbers&#34;
 - Check freeze status show correct enrollment numbers
 
-Version 0.99.0
+Version 0.99.0 (Released May 07, 2018)
 --------------
 
 - Payment for courses not course run (#3545)
 
-Version 0.98.1
+Version 0.98.1 (Released April 27, 2018)
 --------------
 
 - When user has a passed run but upgrade deadline passed (#3931)
@@ -114,25 +114,25 @@ Version 0.98.1
 - Rename footer link (#3960)
 - display courserun dates in admin list view; make them editable (#3941)
 
-Version 0.98.0
+Version 0.98.0 (Released April 23, 2018)
 --------------
 
 - add proctored exam grades to grades README (#3912)
 
-Version 0.97.2
+Version 0.97.2 (Released April 20, 2018)
 --------------
 
 - unhide interested button on mobile (#3954)
 - brighter font and better spacing in text over hero image (#3951)
 
-Version 0.97.1
+Version 0.97.1 (Released April 19, 2018)
 --------------
 
 - If no courses show I&#39;m insterested button (#3950)
 - Program Page: remove empty courses box (#3947)
 - change grid from 3 columns to 2 or 4 depending on width (#3948)
 
-Version 0.97.0
+Version 0.97.0 (Released April 19, 2018)
 --------------
 
 - Fix migration (#3942)
@@ -143,42 +143,42 @@ Version 0.97.0
 - Fix learner search page email send error
 - Updated README to refer to common web app guide where appropriate
 
-Version 0.96.1
+Version 0.96.1 (Released April 05, 2018)
 --------------
 
 - Added contact us link on mm footer (#3924)
 
-Version 0.96.0
+Version 0.96.0 (Released April 02, 2018)
 --------------
 
 - Updating MicromastersCertificateModel to relate to User and Course (#3910)
 - Add postal address to email footer (#3922)
 
-Version 0.95.0
+Version 0.95.0 (Released March 28, 2018)
 --------------
 
 - Increased the buffer size in uWSGI to address wagtail errors (#3887)
 - Remove User Chip on Learner Search Page (#3919)
 - Add states for View Certificate and re-enroll (#3905)
 
-Version 0.94.3
+Version 0.94.3 (Released March 23, 2018)
 --------------
 
 - Snapshots: add more failed course states (#3896)
 - Redirect user to profile wizard if residence is missing (#3907)
 
-Version 0.94.2
+Version 0.94.2 (Released March 22, 2018)
 --------------
 
 - Add email footer (#3909)
 
-Version 0.94.1
+Version 0.94.1 (Released March 20, 2018)
 --------------
 
 - Add social auth data for all fake users (#3895)
 - Add re-enroll button
 
-Version 0.94.0
+Version 0.94.0 (Released March 19, 2018)
 --------------
 
 - Lint fix (#3902)
@@ -186,26 +186,26 @@ Version 0.94.0
 - add .pytest_cache to gitignore
 - Add back size parameter (#3893)
 
-Version 0.93.1
+Version 0.93.1 (Released March 14, 2018)
 --------------
 
 - Fix n+1 warnings on dashboard API (#3886)
 - Pin docker image versions (#3888)
 - Make environment variable to control batch update throttling (#3889)
 
-Version 0.93.0
+Version 0.93.0 (Released March 12, 2018)
 --------------
 
 - Remove accidentally committed empty file (#3885)
 - Some copy changes for personalized pricing and coupons
 
-Version 0.92.3
+Version 0.92.3 (Released March 08, 2018)
 --------------
 
 - Fixed celery startup under travis
 - Override ALLOWED_HOSTS for snapshot states tests (#3882)
 
-Version 0.92.2
+Version 0.92.2 (Released March 07, 2018)
 --------------
 
 - Schedule task to create CombinedFinalGrades (#3863)
@@ -213,14 +213,14 @@ Version 0.92.2
 - Add a link to the TOS in the footer
 - Update Django REST Framework, django-server-status (#3873)
 
-Version 0.92.1
+Version 0.92.1 (Released March 06, 2018)
 --------------
 
 - Fixes overlapping icons on Profile page (#3858)
 - Upgrade to wagtail 2.0 (#3865)
 - Dashboard: show certificate if user has it (#3871)
 
-Version 0.92.0
+Version 0.92.0 (Released March 05, 2018)
 --------------
 
 - Fix date format
@@ -228,19 +228,19 @@ Version 0.92.0
 - CMS: Remove external program url (#3857)
 - Fixes toast layout in mobile (#3859)
 
-Version 0.91.2
+Version 0.91.2 (Released March 01, 2018)
 --------------
 
 - Snapshots: Add more PAID_BUT_NOT_ENROLLED states for FA program (#3860)
 - Update pylint, django-webpack-loader and remove DeprecationWarning filter (#3849)
 
-Version 0.91.1
+Version 0.91.1 (Released February 28, 2018)
 --------------
 
 - Fixed end date issues on progress messages (#3844)
 - Use site_key in discussions JWT token
 
-Version 0.91.0
+Version 0.91.0 (Released February 26, 2018)
 --------------
 
 - Update rolepermissions and social-auth-django-app (#3848)
@@ -248,7 +248,7 @@ Version 0.91.0
 - Fix some deprecation warnings (#3847)
 - Serialize best final grades for search (#3841)
 
-Version 0.90.0
+Version 0.90.0 (Released February 22, 2018)
 --------------
 
 - Update emails and email optin flag of existing users in OD (#3836)
@@ -262,13 +262,13 @@ Version 0.90.0
 - Update update_docker_hub.sh to use a new hash for each image (#3781)
 - Snapshots: Make exam related dashboard states use FA program (#3826)
 
-Version 0.89.3
+Version 0.89.3 (Released February 09, 2018)
 --------------
 
 - Fix missing field (#3827)
 - Forward port 7000 (#3821)
 
-Version 0.89.2
+Version 0.89.2 (Released February 08, 2018)
 --------------
 
 - Fix percolate doc type for legacy index (#3818)
@@ -277,36 +277,36 @@ Version 0.89.2
 - count_courses_passed for courses with exams (#3809)
 - Upgrade to Elasticsearch 5 (#3789)
 
-Version 0.89.1
+Version 0.89.1 (Released February 08, 2018)
 --------------
 
 - Turn off codecov status updates (#3811)
 - Synchronized email address with email address from edX (#3801)
 
-Version 0.89.0
+Version 0.89.0 (Released February 06, 2018)
 --------------
 
 - Added CombinedFinalGrade model (#3791)
 - Fix the course run popup status messages
 
-Version 0.88.1
+Version 0.88.1 (Released February 01, 2018)
 --------------
 
 - restrict channel creation to superusers
 
-Version 0.88.0
+Version 0.88.0 (Released January 30, 2018)
 --------------
 
 - Updating log config to quiet noncritical errors
 - Displayed learner&#39;s exam eligibility for staff on profile page (#3792)
 
-Version 0.87.1
+Version 0.87.1 (Released January 26, 2018)
 --------------
 
 - Fixed user trying to navigate to discussion if no user (#3736)
 - Upgrade searchkit (#3763)
 
-Version 0.87.0
+Version 0.87.0 (Released January 23, 2018)
 --------------
 
 - Updated create channel UI to handle backend errors (#3618)
@@ -316,24 +316,24 @@ Version 0.87.0
 - add status message for course run with fuzzy start date (#3775)
 - Pinned astroid to 1.5.3 to fix lints locally
 
-Version 0.86.2
+Version 0.86.2 (Released January 19, 2018)
 --------------
 
 - Freeze grades every day (#3766)
 - bump react-dropzone version to latest
 
-Version 0.86.1
+Version 0.86.1 (Released January 18, 2018)
 --------------
 
 - Add command to create snapshots for learner search page (#3761)
 
-Version 0.86.0
+Version 0.86.0 (Released January 16, 2018)
 --------------
 
 - larger max width on dashboard (#3758)
 - Schedule freeze grades task (#3756)
 
-Version 0.85.1
+Version 0.85.1 (Released January 11, 2018)
 --------------
 
 - Change layout of &#34;More Programs Coming Soon&#34; on Micromasters home page (#3754)
@@ -342,53 +342,53 @@ Version 0.85.1
 - Freeze grades only for users that have cached current grade (#3747)
 - Fixes the line height of course names in the course description popover on program page (#3751)
 
-Version 0.85.0
+Version 0.85.0 (Released January 09, 2018)
 --------------
 
 - Don&#39;t create extra RedeemedCoupon objects if the coupon is not being applied (#3744)
 - Use old year in help text (#3745)
 - Switched create channel to new description field (#3715)
 
-Version 0.84.1
+Version 0.84.1 (Released December 27, 2017)
 --------------
 
 - Two small tweaks to padding (#3729)
 - Grades: Add usefull code snippets to README (#3726)
 
-Version 0.84.0
+Version 0.84.0 (Released December 12, 2017)
 --------------
 
 - Change personal course pricing messages and buttons  (#3713)
 
-Version 0.83.0
+Version 0.83.0 (Released December 07, 2017)
 --------------
 
 - fixes mobile layout issue with edit icons on profile page (#3717)
 - bump psycopg to 2.7.2 (#3718)
 - Fix run_snapshot_dashboard_states.sh to use new docker-compose files (#3716)
 
-Version 0.82.1
+Version 0.82.1 (Released November 30, 2017)
 --------------
 
 - Count cache update failure for user (#3700)
 
-Version 0.82.0
+Version 0.82.0 (Released November 29, 2017)
 --------------
 
 - Propagate 409 response from open-discussions when creating a channel (#3708)
 
-Version 0.81.0
+Version 0.81.0 (Released November 17, 2017)
 --------------
 
 - Log failed send_automatic_email and update_percolate_memberships (#3707)
 - fixes layout bug with radio buttons (#3706)
 
-Version 0.80.1
+Version 0.80.1 (Released November 07, 2017)
 --------------
 
 - Reduce rate of batch_update_user_data (#3702)
 
-Version 0.80.0
+Version 0.80.0 (Released November 06, 2017)
 --------------
 
 - Refactor celery locking (#3696)
@@ -397,14 +397,14 @@ Version 0.80.0
 - Make MICROMASTERS_LOG_LEVEL a required variable and set default to INFO (#3690)
 - CourseCertificates: create if final grade is complete (#3683)
 
-Version 0.79.3
+Version 0.79.3 (Released November 02, 2017)
 --------------
 
 - Conditionally hide course progress
 - get final grade from current grades (#3675)
 - Upgrade redux-hammock (#3662)
 
-Version 0.79.2
+Version 0.79.2 (Released November 01, 2017)
 --------------
 
 - Added timeout to lock
@@ -416,13 +416,13 @@ Version 0.79.2
 - Don&#39;t reference INSTALLED_APPS directly (#3674)
 - Remove accidentally committed dependency (#3682)
 
-Version 0.79.1
+Version 0.79.1 (Released November 01, 2017)
 --------------
 
 - Excluded users with no profile from open-discussions sync
 - Use application log level for celery workers (#3685)
 
-Version 0.79.0
+Version 0.79.0 (Released October 31, 2017)
 --------------
 
 - Reduced number of side effects from reindexing
@@ -433,12 +433,12 @@ Version 0.79.0
 - Refactor docker-compose.yml files (#3644)
 - Use HEROKU_APP_NAME as ELASTICSEARCH_INDEX value for PR builds (#3640)
 
-Version 0.78.1
+Version 0.78.1 (Released October 20, 2017)
 --------------
 
 - Update yarn.lock
 
-Version 0.78.0
+Version 0.78.0 (Released October 19, 2017)
 --------------
 
 - Check if document needs updating before reindexing (#3636)
@@ -451,7 +451,7 @@ Version 0.78.0
 - Add creator as moderator (#3616)
 - Make OPEN_DISCUSSIONS_COOKIE_NAME required (#3632)
 
-Version 0.77.0
+Version 0.77.0 (Released October 11, 2017)
 --------------
 
 - Change course status in GradeDetailPopup to Auditing (#3586)
@@ -462,7 +462,7 @@ Version 0.77.0
 - Fixes layout but with button labels on Learner Search page and tweaks styling of Recent Posts card
 - Upgrade eslint configuration and fix throw literal warnings (#3609)
 
-Version 0.76.2
+Version 0.76.2 (Released October 06, 2017)
 --------------
 
 - Add validation for recipient variable tags (#3592)
@@ -470,7 +470,7 @@ Version 0.76.2
 - Raised an exception to sentry when course team e-mails fail (#3585)
 - Make MAILGUN_URL and MAILGUN_KEY required values (#3600)
 
-Version 0.76.1
+Version 0.76.1 (Released October 05, 2017)
 --------------
 
 - Fixed CORS redirect issue with discussions API (#3603)
@@ -480,7 +480,7 @@ Version 0.76.1
 - Update logging configuration to show celery exceptions (#3591)
 - Link channels to users and add all staff as moderators of channel (#3580)
 
-Version 0.76.0
+Version 0.76.0 (Released October 03, 2017)
 --------------
 
 - Overall final grade for course (#3567)
@@ -496,7 +496,7 @@ Version 0.76.0
 - Fixed discussions redirect to show user error page
 - use common eslint config
 
-Version 0.75.4
+Version 0.75.4 (Released September 29, 2017)
 --------------
 
 - Show program certificate on dashboard (#3546)
@@ -508,19 +508,19 @@ Version 0.75.4
 - Layout changes to the MM Program Certificate (#3561)
 - Changed noisy log.error to log.debug
 
-Version 0.75.3
+Version 0.75.3 (Released September 21, 2017)
 --------------
 
 - Add template for MM Program certificate (#3528)
 - Add queryset for create channel API (#3534)
 
-Version 0.75.2
+Version 0.75.2 (Released September 20, 2017)
 --------------
 
 - Add open discussions redirect URL to the SETTINGS object
 - Add a really simple link over to discussions, behind a feature flag
 
-Version 0.75.1
+Version 0.75.1 (Released September 19, 2017)
 --------------
 
 - Add prettier-eslint-cli, fiddle with eslint config
@@ -529,7 +529,7 @@ Version 0.75.1
 - Generate MM Program Certificates (#3524)
 - Updated open-discussions-client (#3529)
 
-Version 0.75.0
+Version 0.75.0 (Released September 18, 2017)
 --------------
 
 - Add npm script for running tests in watch mode
@@ -538,29 +538,29 @@ Version 0.75.0
 - Add REST API to create channels (#3514)
 - Added DiscussionUser model and code to sync it (#3479)
 
-Version 0.74.0
+Version 0.74.0 (Released September 06, 2017)
 --------------
 
 - Filter on coupon id for automatic emails (#3509)
 
-Version 0.73.1
+Version 0.73.1 (Released September 01, 2017)
 --------------
 
 - Delete failed users when course run grading status is complete (#3506)
 
-Version 0.73.0
+Version 0.73.0 (Released August 31, 2017)
 --------------
 
 - Complete freeze final grades task when cache refresh fails (#3488)
 - Fixed course upgrade deadline on learners page (#3501)
 
-Version 0.72.1
+Version 0.72.1 (Released August 25, 2017)
 --------------
 
 - Add link to view certificates for FA courses (#3497)
 - Added MicromastersCourseCertificate to django admin
 
-Version 0.72.0
+Version 0.72.0 (Released August 22, 2017)
 --------------
 
 - Added task to generate course certificates
@@ -581,19 +581,19 @@ Version 0.72.0
 - Added nginx configs to increase header and body buffer size to address Issue#3453
 - Added redux-asserts flow types (#3452)
 
-Version 0.70.2
+Version 0.70.2 (Released August 02, 2017)
 --------------
 
 - Raise an exception if there are two social auth objects (#3445)
 
-Version 0.70.1
+Version 0.70.1 (Released August 01, 2017)
 --------------
 
 - Fix duplicate social auth creation during log in (#3444)
 - Fix CORS issue with hot reloading (#3446)
 - Added factories to produce social auth for Users
 
-Version 0.70.0
+Version 0.70.0 (Released July 31, 2017)
 --------------
 
 - Added --learner to take snapshots of learner info page (#3436)
@@ -601,45 +601,45 @@ Version 0.70.0
 - Fixed issue when a user have more the one social auth objects (#3429)
 - Put expiration date far into future (#3434)
 
-Version 0.69.1
+Version 0.69.1 (Released July 27, 2017)
 --------------
 
 - Rewrote selenium suite in pytest style
 - Refactored various factory classes and usages
 
-Version 0.69.0
+Version 0.69.0 (Released July 25, 2017)
 --------------
 
 - Created management command to make exam grade adjustments
 - Cleared filters of learner page on learner page link refresh (#3422)
 - Fixed broken cms migrations
 
-Version 0.68.3
+Version 0.68.3 (Released July 20, 2017)
 --------------
 
 - Allow user to enroll in a course if FA pending (#3419)
 - Add no-sequences eslint rule (#3423)
 - Dashboard API: displayed final grade if user has it and he missed the deadline. (#3417)
 
-Version 0.68.2
+Version 0.68.2 (Released July 19, 2017)
 --------------
 
 - Added exam grade detail display
 
-Version 0.68.1
+Version 0.68.1 (Released July 18, 2017)
 --------------
 
 - Fixed financial aid income dialog that was showing up twice (#3414)
 - Remove geosuggest component, revert to dropdowns
 
-Version 0.68.0
+Version 0.68.0 (Released July 17, 2017)
 --------------
 
 - Fixed jumbled text when entering text in search mail dialog in chrome (#3372)
 - Some style tweaks on the marketing site  (#3408)
 - Fix JS race condition in tests (#3403)
 
-Version 0.67.1
+Version 0.67.1 (Released July 13, 2017)
 --------------
 
 - Bumped react-telephone-input version
@@ -648,7 +648,7 @@ Version 0.67.1
 - Replace get_var with more specific variants (#3387)
 - Displayed course price in staff view of learner&#39;s profile page (#3374)
 
-Version 0.67.0
+Version 0.67.0 (Released July 12, 2017)
 --------------
 
 - Fixed management commands effected by celery upgrade
@@ -656,12 +656,12 @@ Version 0.67.0
 - Remove fallback config code (#3386)
 - Fix selenium test (#3391)
 
-Version 0.66.0
+Version 0.66.0 (Released July 11, 2017)
 --------------
 
 - Disable selenium test with intermittent failures (#3389)
 
-Version 0.65.0
+Version 0.65.0 (Released July 10, 2017)
 --------------
 
 - Add selenium test for login redirect behavior (#3381)
@@ -670,7 +670,7 @@ Version 0.65.0
 - Use specific hash seed (#3346)
 - Fix course coupon program messages (#3345)
 
-Version 0.64.0
+Version 0.64.0 (Released July 06, 2017)
 --------------
 
 - Remove accidentially commited file (#3377)
@@ -682,7 +682,7 @@ Version 0.64.0
 - Updateed the mailing address (#3362)
 - Added selenium test for program page, refactored ProgramPageFactory (#3337)
 
-Version 0.63.0
+Version 0.63.0 (Released June 28, 2017)
 --------------
 
 - Revert &#34;Fixed message for course-level coupon (#3281)&#34; (#3357)
@@ -702,7 +702,7 @@ Version 0.63.0
 - Layout and style tweaks to the course card layout (#3328)
 - Update the README for changes in selenium tests (#3333)
 
-Version 0.62.3
+Version 0.62.3 (Released June 21, 2017)
 --------------
 
 - Fixed bug with weird grades coming from edx
@@ -712,13 +712,13 @@ Version 0.62.3
 - Implemented past course run display
 - Upgrade to Celery 4.0 (#3245)
 
-Version 0.62.2
+Version 0.62.2 (Released June 15, 2017)
 --------------
 
 - Upgraded chai and chai-as-promised
 - Replaced state and country dropdowns with Geosuggest React component for profile education and employment forms.
 
-Version 0.62.1
+Version 0.62.1 (Released June 14, 2017)
 --------------
 
 - Fixed encoding issue for binary audit files
@@ -726,13 +726,13 @@ Version 0.62.1
 - Added check for exam attempts (#2286)
 - Use UserInfo in edx_api to get user data (#3304)
 
-Version 0.62.0
+Version 0.62.0 (Released June 13, 2017)
 --------------
 
 - Use database templates for faster database restore during selenium tests (#3278)
 - Use override_settings to use test index for management command (#3286)
 
-Version 0.61.2
+Version 0.61.2 (Released June 09, 2017)
 --------------
 
 - Fixed mail dialog rich text editor jumbling up letters (#3290)
@@ -740,7 +740,7 @@ Version 0.61.2
 - Implemented dashboard redesign
 - Fixed preferred name behavior
 
-Version 0.61.1
+Version 0.61.1 (Released June 07, 2017)
 --------------
 
 - Fixed travis node-sass install issue
@@ -749,45 +749,45 @@ Version 0.61.1
 - Use test database when running snapshot_dashboard_states (#3257)
 - Added redirect of mm.mit.edu to micromasters.mit.edu (#3268)
 
-Version 0.61.0
+Version 0.61.0 (Released June 05, 2017)
 --------------
 
 - Upgraded some JS dependencies
 - Added loader to learners search page (#3101)
 
-Version 0.60.2
+Version 0.60.2 (Released June 01, 2017)
 --------------
 
 - Show recipients on email edit box (#3238)
 - Rewrote two functions in lib/api.js to use async/await syntax
 - Handle reuse_db option (#3247)
 
-Version 0.60.1
+Version 0.60.1 (Released May 31, 2017)
 --------------
 
 - Fix selenium tests dev script to run all tests (#3256)
 - Add script to use webpack dev server to serve javascript bundles (#3250)
 - Added management command to take screenshots of dashboard states (#3242)
 
-Version 0.60.0
+Version 0.60.0 (Released May 30, 2017)
 --------------
 
 - Upgrade to python 3.6.1 (#3236)
 - Mail search now skips users without a profile (#3240)
 - Upgrade pylint, treat warnings as errors, fix related errors (#3235)
 
-Version 0.59.2
+Version 0.59.2 (Released May 25, 2017)
 --------------
 
 - Fix flaky selenium tests (#3234)
 - Add function to calculate current time in UTC (#3229)
 
-Version 0.59.1
+Version 0.59.1 (Released May 24, 2017)
 --------------
 
 - Add fake_user field to Profile (#3214)
 
-Version 0.59.0
+Version 0.59.0 (Released May 23, 2017)
 --------------
 
 - Remove coupon course run code in frontend (#3225)
@@ -798,7 +798,7 @@ Version 0.59.0
 - Shown Coupons without code on order summary page (#3210)
 - Renamed send button to Save Changes on automatic email edit button (#3219)
 
-Version 0.58.3
+Version 0.58.3 (Released May 19, 2017)
 --------------
 
 - Fix migration and bug
@@ -806,7 +806,7 @@ Version 0.58.3
 - Fixed bug involving exam no-shows
 - Added missed flow flag
 
-Version 0.58.2
+Version 0.58.2 (Released May 17, 2017)
 --------------
 
 - Fixed email composition styling
@@ -816,21 +816,21 @@ Version 0.58.2
 - Update readme for selenium tests (#3201)
 - Update edX cache only for active users (#3191)
 
-Version 0.58.1
+Version 0.58.1 (Released May 17, 2017)
 --------------
 
 - Fixed # of Courses Passed facet disappearing (#3095)
 - On pay now redirected users to checkout page instead of order summary for non FA programs (#3178)
 - Fixed error with bucket reference (#3183)
 
-Version 0.58.0
+Version 0.58.0 (Released May 15, 2017)
 --------------
 
 - Fixed email composiition dialog body loading
 - Added learner-learner search page (#2512)
 - Added label for num courses passed (#3095)
 
-Version 0.57.9
+Version 0.57.9 (Released May 12, 2017)
 --------------
 
 - Added temporary message for FA final grades (#3176)
@@ -840,42 +840,42 @@ Version 0.57.9
 - Use official selenium images (#3170)
 - small css change (#3168)
 
-Version 0.57.8
+Version 0.57.8 (Released May 09, 2017)
 --------------
 
 - Implemented basic display for the exam grade
 
-Version 0.57.7
+Version 0.57.7 (Released May 08, 2017)
 --------------
 
 - Added signal to authorize for exams on order fulfillment (#3161)
 - Bypassed order summary for non FA courses and redirect users to edX course enrollment page (#3135)
 - small css change to headers on tab pages (#3149)
 
-Version 0.57.6
+Version 0.57.6 (Released May 05, 2017)
 --------------
 
 - Fixed is_exam_schedulable to check schedule dates (#3150)
 
-Version 0.57.5
+Version 0.57.5 (Released May 05, 2017)
 --------------
 
 - Fixed an issue with old ExamAuthorizations updating (#3146)
 
-Version 0.57.4
+Version 0.57.4 (Released May 04, 2017)
 --------------
 
 - Fixed missing module column in exam auth export (#3142)
 - Pass through code coverage environment variables (#3140)
 - Fixed CourseRunFactory.edx_course_key against collisions (#3113)
 
-Version 0.57.3
+Version 0.57.3 (Released May 04, 2017)
 --------------
 
 - Fixed exam auth operation on exam run update (#3133)
 - Removed unused fields (#3085)
 
-Version 0.57.2
+Version 0.57.2 (Released May 03, 2017)
 --------------
 
 - Populate ExamRun and update ExamAuth writers (#3085)
@@ -883,13 +883,13 @@ Version 0.57.2
 - Don&#39;t prompt for confirmation when running migrations locally (#3129)
 - Firefox fixed email type radios (#3127)
 
-Version 0.57.1
+Version 0.57.1 (Released May 02, 2017)
 --------------
 
 - Added ExamRun model and updated logic (#3085)
 - Center align toast message (#3120)
 
-Version 0.57.0
+Version 0.57.0 (Released May 01, 2017)
 --------------
 
 - Mail: Filter recipient variables (#3115)
@@ -898,18 +898,18 @@ Version 0.57.0
 - some small tweaks to visual styles (#3119)
 - Switched off is_public flag from financial_aid footer (#3121)
 
-Version 0.56.2
+Version 0.56.2 (Released April 27, 2017)
 --------------
 
 - Added max height and scroll to Current residence (#3076)
 - Implemented basic HTML capabilities for the email composer
 
-Version 0.56.1
+Version 0.56.1 (Released April 25, 2017)
 --------------
 
 - Populate ExamProfile timestamp values and set not null (#3025)
 
-Version 0.56.0
+Version 0.56.0 (Released April 24, 2017)
 --------------
 
 - Added timestamp fields to ExamProfile (#3025)
@@ -917,26 +917,26 @@ Version 0.56.0
 - Exams: Updated Pearson TOS text (#3098)
 - Added page titles all over the MM app (#3081)
 
-Version 0.55.3
+Version 0.55.3 (Released April 21, 2017)
 --------------
 
 - Restored final grade histogram for selected courses in learner search
 - Fixed ProgramFactory price values (#3093)
 
-Version 0.55.2
+Version 0.55.2 (Released April 20, 2017)
 --------------
 
 - Pin selenium container to a non-broken version
 - Fixed typos in terms of service (#3090)
 - Fixed bug with freeze grade management command not using the right value in a call
 
-Version 0.55.1
+Version 0.55.1 (Released April 19, 2017)
 --------------
 
 - Fixed alter_data payment and grade issues, and cleaned up docs
 - Fixed issue where date change is empty (#3082)
 
-Version 0.55.0
+Version 0.55.0 (Released April 18, 2017)
 --------------
 
 - Pinned pylint deps
@@ -945,7 +945,7 @@ Version 0.55.0
 - Removed Edit Photo from Sidenav. Also, link user photo to profile. (#3075)
 - Search: fixed error message, when there are no results (#3073)
 
-Version 0.54.3
+Version 0.54.3 (Released April 14, 2017)
 --------------
 
 - CMS: increased file upload size of a document (#3065)
@@ -954,13 +954,13 @@ Version 0.54.3
 - Preserve search URL on reload (#3061)
 - Fixed course contact message for non fa courses (#3062)
 
-Version 0.54.2
+Version 0.54.2 (Released April 13, 2017)
 --------------
 
 - Added tables to database for country code and country sub division look-ups (#3014)
 - Refactored course enrollments API to use redux-rest
 
-Version 0.54.1
+Version 0.54.1 (Released April 12, 2017)
 --------------
 
 - Fixed menu icon display when user is logged out (#3056)
@@ -968,7 +968,7 @@ Version 0.54.1
 - Added ability to edit emails on the email admin page
 - Add mail_id and template variables to Mailgun functions (#3019)
 
-Version 0.54.0
+Version 0.54.0 (Released April 11, 2017)
 --------------
 
 - Fixed faulty course ordering in search facet
@@ -979,7 +979,7 @@ Version 0.54.0
 - Fixed promise error handling
 - Upgrade postgres-client (#3029)
 
-Version 0.53.12
+Version 0.53.12 (Released April 10, 2017)
 ---------------
 
 - Implemented AutomaticEmail admin page
@@ -988,34 +988,34 @@ Version 0.53.12
 - Modified the mmtrack has paid to better handle FA programs
 - Fixed unexpected course enrollment counts/results in learners search
 
-Version 0.53.11
+Version 0.53.11 (Released April 07, 2017)
 ---------------
 
 - Mail: displayed search filters as recipients (#2992)
 - Search: Fix SelectedFilters titles (#3006)
 - Remove deprecated object handling code for Celery tasks (#2985)
 
-Version 0.53.10
+Version 0.53.10 (Released April 06, 2017)
 ---------------
 
 - Pass object ids to Celery tasks instead of objects (#2984)
 - Use reverse nested aggregation for education and fix related tests (#3010)
 - Added UI for email composition type (#2961)
 
-Version 0.53.9
+Version 0.53.9 (Released April 05, 2017)
 --------------
 
 - Set thumbnails to null if main image is null (#2999)
 - Upgraded celery to 3.1.25 as 1st step to migrate to celery 4
 - Progress widget: Removed apply for master button and text (#2996)
 
-Version 0.53.8
+Version 0.53.8 (Released April 03, 2017)
 --------------
 
 - Remove remove_user (#2982)
 - Do percolate on document instead of document id (#2980)
 
-Version 0.53.7
+Version 0.53.7 (Released March 31, 2017)
 --------------
 
 - Bringing back the runtime to python-3.5.2
@@ -1025,7 +1025,7 @@ Version 0.53.7
 - Refactored course price API to take a &#39;username&#39; parameter
 - Fixed seed data for naive timestamps (#2712)
 
-Version 0.53.6
+Version 0.53.6 (Released March 29, 2017)
 --------------
 
 - Fixed bug with grade in case the grade is 0
@@ -1037,7 +1037,7 @@ Version 0.53.6
 - Added program.price, removed CoursePrice (#2956)
 - Modified dashboard rest API to return proctorate exam grades
 
-Version 0.53.5
+Version 0.53.5 (Released March 28, 2017)
 --------------
 
 - PR fix
@@ -1050,7 +1050,7 @@ Version 0.53.5
 - Revert &quot;Fixed Order Summary text&quot;
 - Fixed Order Summary text
 
-Version 0.53.4
+Version 0.53.4 (Released March 24, 2017)
 --------------
 
 - Enroll and pay later: Load dashboard page without reloading (#2821)
@@ -1058,12 +1058,12 @@ Version 0.53.4
 - Added model and admin for Proctorate Exam Grades
 - Changed course description to show: Auditing or Paid (#2936)
 
-Version 0.53.3
+Version 0.53.3 (Released March 23, 2017)
 --------------
 
 - Fixed bug with gdm_grade_task_fail_bug management command
 
-Version 0.53.2
+Version 0.53.2 (Released March 22, 2017)
 --------------
 
 - Removed &#39;view on edx&#39; link for staff (#2925)
@@ -1072,12 +1072,12 @@ Version 0.53.2
 - Generate robotic avatars (#2910)
 - Create thumbnails in Profile.save (#2903)
 
-Version 0.53.1
+Version 0.53.1 (Released March 21, 2017)
 --------------
 
 - Upgraded sanctuary to latest version
 
-Version 0.53.0
+Version 0.53.0 (Released March 20, 2017)
 --------------
 
 - Added dialog before opening pearson site (#2865)
@@ -1089,7 +1089,7 @@ Version 0.53.0
 - More small UI layout tweaks for Mobile etc (#2897)
 - Reindexed search on adding or deleting user role (#2869)
 
-Version 0.52.3
+Version 0.52.3 (Released March 17, 2017)
 --------------
 
 - Removed feature flag code related to the final grade algorithm
@@ -1097,7 +1097,7 @@ Version 0.52.3
 - Optimized the exam status query in MMTrack
 - Added average grade to the staff view of the Learner page
 
-Version 0.52.2
+Version 0.52.2 (Released March 16, 2017)
 --------------
 
 - Modified Dashboard REST API to include edx data freshness status
@@ -1107,7 +1107,7 @@ Version 0.52.2
 - Restrict pay now button to when financial aid is in terminal state (#2877)
 - Various small style tweaks (#2874)
 
-Version 0.52.1
+Version 0.52.1 (Released March 15, 2017)
 --------------
 
 - Upgrade Wagtail to 1.9 (#2832)
@@ -1124,7 +1124,7 @@ Version 0.52.1
 - Enabled learner-to-learner emails
 - Updated required yarn version in readme file (#2864)
 
-Version 0.52.0
+Version 0.52.0 (Released March 13, 2017)
 --------------
 
 - Added course history display to staff view of learner page
@@ -1133,7 +1133,7 @@ Version 0.52.0
 - Refactored profile validation for better scalability
 - Removed send_bcc (#2848)
 
-Version 0.51.3
+Version 0.51.3 (Released March 10, 2017)
 --------------
 
 - Add logging for recreate_index (#2843)
@@ -1141,7 +1141,7 @@ Version 0.51.3
 - Allowed users to expand/hide search facets by clicking facet title (#2777)
 - fixes layout issue (#2840)
 
-Version 0.51.2
+Version 0.51.2 (Released March 09, 2017)
 --------------
 
 - Add transaction.on_commit on signals (#2835)
@@ -1152,7 +1152,7 @@ Version 0.51.2
 - Reintroduce new course enrollment UX (#2802)
 - Freeze grade modified to be race condition safe
 
-Version 0.51.1
+Version 0.51.1 (Released March 08, 2017)
 --------------
 
 - Modified management commands for grades
@@ -1167,7 +1167,7 @@ Version 0.51.1
 - Fixed issue with &#39;/learner&#39; page
 - Added staff-to-learner email with link in learner chip
 
-Version 0.51.0
+Version 0.51.0 (Released March 07, 2017)
 --------------
 
 - Filter out zendesk errors (#2800)
@@ -1176,13 +1176,13 @@ Version 0.51.0
 - Added StaffLearnerInfoCard
 - Configured JS test script to allow for specific test cases to be run
 
-Version 0.50.0
+Version 0.50.0 (Released March 06, 2017)
 --------------
 
 - Moved Elasticsearch connection management to own module (#2789)
 - Search: Included username and e-mail address in name search (#2729)
 
-Version 0.49.5
+Version 0.49.5 (Released March 03, 2017)
 --------------
 
 - Added feature flag for showing exam card (#2769)
@@ -1192,7 +1192,7 @@ Version 0.49.5
 - Fixed postal code validation
 - small change to size of search box on learner page (#2762)
 
-Version 0.49.4
+Version 0.49.4 (Released March 03, 2017)
 --------------
 
 - Fixed dashboard UI to correctly display upgradable past course runs
@@ -1202,7 +1202,7 @@ Version 0.49.4
 - Add trailing comma to tuple
 - Fixed EOFError (#2753)
 
-Version 0.49.3
+Version 0.49.3 (Released March 02, 2017)
 --------------
 
 - Added handling of can-upgrade status for past courses
@@ -1216,7 +1216,7 @@ Version 0.49.3
 - Removed program.email_optin from ES index (#2730)
 - Modified user dashboard to handle 400 and 401 http errors
 
-Version 0.49.2
+Version 0.49.2 (Released March 01, 2017)
 --------------
 
 - Revert &quot;New course enrollment UX (#2519)&quot;
@@ -1227,7 +1227,7 @@ Version 0.49.2
 - Refactored profile form container into an HOC
 - Removed program.email_optin from ES index (#2730)
 
-Version 0.49.1
+Version 0.49.1 (Released March 01, 2017)
 --------------
 
 - Added PercolateQuery model (#2701)
@@ -1240,7 +1240,7 @@ Version 0.49.1
 - Fix flaky test (#2715)
 - Added setting for Django Storage to use Cloudfront for S3 files (#2711)
 
-Version 0.49.0
+Version 0.49.0 (Released February 27, 2017)
 --------------
 
 - Refactored dashboard reducer to support multiple users
@@ -1249,7 +1249,7 @@ Version 0.49.0
 - Upgrade Django to 1.10.5 (#2698)
 - Removed excessive logging from MMTrack
 
-Version 0.48.1
+Version 0.48.1 (Released February 23, 2017)
 --------------
 
 - Fixed coupons to check enrollments instead of certs (#2561)
@@ -1273,7 +1273,7 @@ Version 0.48.1
 - added cursor style
 - style changes to sidebar
 
-Version 0.48.0
+Version 0.48.0 (Released February 22, 2017)
 --------------
 
 - Refactored dashboard API to support getting dashboard for other users
@@ -1290,7 +1290,7 @@ Version 0.48.0
 - return a 204 on requests for dnt-policy.txt (#2635)
 - Exams: Added environment variable to suppress payment requirement (#2640)
 
-Version 0.47.3
+Version 0.47.3 (Released February 17, 2017)
 --------------
 
 - Reduced MAX_AGE for PG connections to 0 (#2219)
@@ -1298,7 +1298,7 @@ Version 0.47.3
 - Added person search (#2562)
 - Add link to grid for selenium container (#2645)
 
-Version 0.47.2
+Version 0.47.2 (Released February 16, 2017)
 --------------
 
 - Added runtime feature flags via cookie (#2558)
@@ -1311,7 +1311,7 @@ Version 0.47.2
 - Personal Pricing: Added validation on income so that it can only be an integer (#2559)
 - Respect DNT request header (#2280)
 
-Version 0.47.1
+Version 0.47.1 (Released February 15, 2017)
 --------------
 
 - Lower logging of unexceptional exception to debug
@@ -1319,7 +1319,7 @@ Version 0.47.1
 - Update html5lib from 0.999999 to 0.999999999 (#2483)
 - Added Confirm Income dialog (#2536)
 
-Version 0.47.0
+Version 0.47.0 (Released February 14, 2017)
 --------------
 
 - Added certificate status to check if user passed course
@@ -1327,7 +1327,7 @@ Version 0.47.0
 - Fixed exam util tests for v0 and v1 (#2544)
 - Added selenium testing (#2511)
 
-Version 0.46.2
+Version 0.46.2 (Released February 10, 2017)
 --------------
 
 - Added exception chaining for FreezeGradeFailedException (#2503)
@@ -1335,7 +1335,7 @@ Version 0.46.2
 - Skip if the status is not terminal (#2533)
 - Fixed exam authorization command and refactoring (#2448)
 
-Version 0.46.1
+Version 0.46.1 (Released February 08, 2017)
 --------------
 
 - Validate exam profile
@@ -1352,13 +1352,13 @@ Version 0.46.1
 - Fixed bug with extracting final grade for not_passed courses
 - The Frozen grade should be taken in account before enything else in case they exist
 
-Version 0.46.0
+Version 0.46.0 (Released February 07, 2017)
 --------------
 
 - Fixed ES search result email bug
 - Scope enrollment under program (#2515)
 
-Version 0.45.0
+Version 0.45.0 (Released February 03, 2017)
 --------------
 
 - Cap coupon-adjusted price to between 0 and the full price (#2498)
@@ -1368,7 +1368,7 @@ Version 0.45.0
 - Fixing code to run with v1 grades agorithm
 - Fixed CoursePrice and TierProgram handling in seed_db (#2484)
 
-Version 0.44.0
+Version 0.44.0 (Released February 02, 2017)
 --------------
 
 - Show Coupon code on OrderSummary page
@@ -1377,7 +1377,7 @@ Version 0.44.0
 - Implemented coupon messaging (#2453)
 - Gs/more eslint rules (#2476)
 
-Version 0.43.0
+Version 0.43.0 (Released February 01, 2017)
 --------------
 
 - Pearson SSO callback views (#2472)
@@ -1404,7 +1404,7 @@ Version 0.43.0
 - Remove readonly_fields for Coupon admin (#2402)
 - Display coupon-discounted prices in UI (#2431)
 
-Version 0.42.0
+Version 0.42.0 (Released January 25, 2017)
 --------------
 
 - Add handling for next parameter (#2406)
@@ -1426,12 +1426,12 @@ Version 0.42.0
 - Ensured that the Toast component is always visible
 - Triggered exam authorizations when users enrolled or passed course (#2331)
 
-Version 0.41.1
+Version 0.41.1 (Released January 23, 2017)
 --------------
 
 - Past enrolled courses need to be under feature flag (#2413)
 
-Version 0.41.0
+Version 0.41.0 (Released January 19, 2017)
 --------------
 
 - Updated realistic user and program data to add more fake users
@@ -1454,7 +1454,7 @@ Version 0.41.0
 - Moved test constants out of `constants.js`
 - Added timestamps for Coupon-related models (#2330)
 
-Version 0.40.0
+Version 0.40.0 (Released January 17, 2017)
 --------------
 
 - Filtered out coupons redeemed by another user (#2327)
@@ -1469,17 +1469,17 @@ Version 0.40.0
 - Added UserCoupon, removed num_... fields, added helper properties (#2282)
 - sudo: false for Travis CI (#2311)
 
-Version 0.39.2
+Version 0.39.2 (Released January 12, 2017)
 --------------
 
 - Fixed unused variable linting error (#2338)
 
-Version 0.39.1
+Version 0.39.1 (Released January 12, 2017)
 --------------
 
 - Fixed missing pagination in learner's search (#2337)
 
-Version 0.39.0
+Version 0.39.0 (Released January 11, 2017)
 --------------
 
 - Use factory.Faker() (#2306)
@@ -1490,7 +1490,7 @@ Version 0.39.0
 - Don&#39;t need to make pylint disable missing-docstring for serializer Meta (#2300)
 - remove extraneous about_me serializer fields (#2296)
 
-Version 0.38.0
+Version 0.38.0 (Released January 09, 2017)
 --------------
 
 - Upgrade test dependencies (#2269)
@@ -1517,7 +1517,7 @@ Version 0.38.0
 - Added find_test.sh (#2239)
 - Ask users with non-Latin names to enter a Latin first name and last name (#2215)
 
-Version 0.37.0
+Version 0.37.0 (Released January 03, 2017)
 --------------
 
 - Use image_medium for profile images (#2225)
@@ -1575,14 +1575,14 @@ Version 0.37.0
 - Fixed a bug with startProfileEdit
 - Added more Google Analytics events
 
-Version 0.36.0
+Version 0.36.0 (Released December 22, 2016)
 --------------
 
 - Added access control header for static assets (#2197)
 - Fixed errors when viewing profile as anonymous user (#2193)
 - Changed travis JS Dockerfile back to inheriting from mm_watch_travis
 
-Version 0.35.0
+Version 0.35.0 (Released December 22, 2016)
 --------------
 
 - Updated yarn to 0.18.1
@@ -1605,7 +1605,7 @@ Version 0.35.0
 - Remove static line from uwsgi.ini
 - Use staticfiles
 
-Version 0.34.0
+Version 0.34.0 (Released December 21, 2016)
 --------------
 
 - Fix django template comment (#2177)
@@ -1629,12 +1629,12 @@ Version 0.34.0
 - Disabled enroll in new program save button during API activity (#2110)
 - Disables financial aid application button during API activity (#2109)
 
-Version 0.33.0
+Version 0.33.0 (Released December 15, 2016)
 --------------
 
 - Updated app to proxy requests through Nginx (#2063)
 
-Version 0.32.0
+Version 0.32.0 (Released December 15, 2016)
 --------------
 
 - Correct spacing for course search facet (#2125)
@@ -1642,7 +1642,7 @@ Version 0.32.0
 - Added ECOMMERCE_EMAIL setting, added decision to email subject (#2103)
 - Disabled Pay Now button during API activity (#2067)
 
-Version 0.31.0
+Version 0.31.0 (Released December 14, 2016)
 --------------
 
 - Made twitter description tag shorter (#2083)
@@ -1660,13 +1660,13 @@ Version 0.31.0
 - Changed to https-only in npm-shrinkwrap
 - Fixed faulty hiding for facets that use nested fields
 
-Version 0.30.1
+Version 0.30.1 (Released December 13, 2016)
 --------------
 
 - Removed eslint rule disables on entry/public.js
 - Check for cross-domain security for Zendesk widget (#2075)
 
-Version 0.30.0
+Version 0.30.0 (Released December 12, 2016)
 --------------
 
 - Made the profile gender radio buttons more accessible
@@ -1688,7 +1688,7 @@ Version 0.30.0
 - Revert &quot;Changed profile validation to not require a photo&quot;
 
 
-Version 0.29.0
+Version 0.29.0 (Released December 09, 2016)
 --------------
 
 - Created course facet to filter learners by course enrollment
@@ -1699,7 +1699,7 @@ Version 0.29.0
 - Added grades app
 - Revert &quot;Changed profile validation to not require a photo&quot;
 
-Version 0.28.0
+Version 0.28.0 (Released December 07, 2016)
 --------------
 
 - Remove extra lines which were accidentally committed (#2023)
@@ -1709,19 +1709,19 @@ Version 0.28.0
 - Removed &#39;Clear all filters&#39; link when user switch pages of unfiltered search (#1989)
 - fixes a layout issue on the FAQ tab
 
-Version 0.27.1
+Version 0.27.1 (Released December 06, 2016)
 --------------
 
 - Removed First and Last Name from the edxorg pipeline
 
-Version 0.27.0
+Version 0.27.0 (Released December 06, 2016)
 --------------
 
 - Changed profile validation to not require a photo
 - Disabled photo button during upload (#1996)
 - Add warning about legal name requirement (#1999)
 
-Version 0.26.0
+Version 0.26.0 (Released December 06, 2016)
 --------------
 
 - Remove alt text from course images (#1939)
@@ -1749,22 +1749,22 @@ Version 0.26.0
 - Added integration tests for about me (#1933)
 - Increase order fulfillment timeout
 
-Version 0.25.3
+Version 0.25.3 (Released December 05, 2016)
 --------------
 
 -  Changed image uploader to not use png, it is too big  (#1972)
 
-Version 0.25.2
+Version 0.25.2 (Released December 05, 2016)
 --------------
 
 - Use enrollment_url if provided for URL (#1963)
 
-Version 0.25.1
+Version 0.25.1 (Released December 05, 2016)
 --------------
 
 - Updated address for sending financial aid documents (#1953)
 
-Version 0.25.0
+Version 0.25.0 (Released December 02, 2016)
 --------------
 
 - Decrease padding for button within course action column (#1885)
@@ -1791,7 +1791,7 @@ Version 0.25.0
 - rebasing
 - removes the x in the react select component
 
-Version 0.24.0
+Version 0.24.0 (Released November 28, 2016)
 --------------
 
 - Fixed browser history for profile tabs (#1363)
@@ -1809,7 +1809,7 @@ Version 0.24.0
 - fixes the sort by dropdown layout
 - a few small changes and reorder sections on the home page
 
-Version 0.23.0
+Version 0.23.0 (Released November 22, 2016)
 --------------
 
 - Fixed dashboard API course status regression
@@ -1862,7 +1862,7 @@ Version 0.23.0
 - Course queries should be ordered by default (#1692)
 - Docker Compose version 2 (#1641)
 
-Version 0.22.0
+Version 0.22.0 (Released November 07, 2016)
 --------------
 
 - Removed react-loader, use react-mdl react (#1653)
@@ -1891,7 +1891,7 @@ Version 0.22.0
 - Upgrade Django REST Framework to 3.5.2 (#1638)
 - Upgrade NewRelic to 2.72.1.53 (#1642)
 
-Version 0.21.0
+Version 0.21.0 (Released November 04, 2016)
 --------------
 
 - Made small optimization to user serialization for search results
@@ -1917,7 +1917,7 @@ Version 0.21.0
 - Zendesk prepopulate name/email (#1482)
 - Fixed View on edX url inside dashboard (#1591)
 
-Version 0.20.0
+Version 0.20.0 (Released October 28, 2016)
 --------------
 
 - Upgraded redux-asserts again
@@ -1929,7 +1929,7 @@ Version 0.20.0
 - Make modals more consistent (#1565)
 - Hide the x-scroll on program page
 
-Version 0.19.0
+Version 0.19.0 (Released October 28, 2016)
 --------------
 
 - Refactored financial aid tests (#1495)
@@ -2013,7 +2013,7 @@ Version 0.19.0
 - Partial Fix for Responsive Styles in Dashboard (#1386)
 - Fixed bug with current grade refresh and no enrollments
 
-Version 0.18.0
+Version 0.18.0 (Released October 14, 2016)
 --------------
 
 - Updated process count and basicauth exemption (#1395)
@@ -2032,7 +2032,7 @@ Version 0.18.0
 - Add CategorizedFaqsPage to the faqs hierarchy
 - Remove ParentalKey from faqs model
 
-Version 0.17.0
+Version 0.17.0 (Released October 13, 2016)
 --------------
 
 - adds has_delete_permission to financial aid django admin model (#1326)
@@ -2076,7 +2076,7 @@ Version 0.17.0
 - adding test coverage for currency exchange rate management command
 - management command for generating exchange rate objects
 
-Version 0.16.0
+Version 0.16.0 (Released October 07, 2016)
 --------------
 
 - Updated financial aid review page frontend (#1161)
@@ -2098,7 +2098,7 @@ Version 0.16.0
 - Added &#39;skip financial aid&#39; feature
 - Add back terms of service link in dialog, and change Log in link to act the same as signup (#1182)
 
-Version 0.15.0
+Version 0.15.0 (Released October 05, 2016)
 --------------
 
 - Add course description and page link (#1209)
@@ -2168,7 +2168,7 @@ Version 0.15.0
 - Added profile image to profile API and to frontend
 - Added order receipt and cancellation UI (#1085)
 
-Version 0.14.0
+Version 0.14.0 (Released September 29, 2016)
 --------------
 
 - Style changes for the home page (#1056)
@@ -2291,7 +2291,7 @@ Version 0.14.0
 - Changed indexing structure and logic to use a user&#39;s program enrollments
 - Enforced permissions on profiles REST API (#790)
 
-Version 0.13.0
+Version 0.13.0 (Released August 04, 2016)
 --------------
 
 - Added celery start command to Procfile
@@ -2329,7 +2329,7 @@ Version 0.13.0
 - Updated README with basic CMS docs (#688)
 - Added celery, elasticsearch, redis
 
-Version 0.12.0
+Version 0.12.0 (Released July 06, 2016)
 --------------
 
 - Added ErrorMessage to UserPage
@@ -2386,7 +2386,7 @@ Version 0.12.0
 - Fixed spinner positioning (#563)
 - Bumped django version
 
-Version 0.11.0
+Version 0.11.0 (Released June 22, 2016)
 --------------
 
 - Updated field of study select to use JSON data
@@ -2429,7 +2429,7 @@ Version 0.11.0
 - addressing comments
 - Updated Programs page
 
-Version 0.10.0
+Version 0.10.0 (Released June 07, 2016)
 --------------
 
 - Fixed handling of multiple validation errors for education and work history (#491)
@@ -2442,7 +2442,7 @@ Version 0.10.0
 - Docker with python35
 - Switched to old OAUTH endpoints for edX
 
-Version 0.9.0
+Version 0.9.0 (Released June 06, 2016)
 -------------
 
 - Added handler for rejected promises (#454)
@@ -2492,7 +2492,7 @@ Version 0.9.0
 - Fixed AutoComplete quirks
 - Added favicon
 
-Version 0.8.0
+Version 0.8.0 (Released May 23, 2016)
 -------------
 
 - Use Django OAuth Toolkit
@@ -2543,7 +2543,7 @@ Version 0.8.0
 - Added field for state or territory
 - Removed programs and courses APIs which are replaced by dashboard API
 
-Version 0.7.0
+Version 0.7.0 (Released May 04, 2016)
 -------------
 
 - Moved stage1 plugin into production. Add --bail to exit with non-zero status on error
@@ -2565,7 +2565,7 @@ Version 0.7.0
 - Added ProfileTab utility class
 - Added script to run development server on OS X without docker
 
-Version 0.6.0
+Version 0.6.0 (Released April 22, 2016)
 -------------
 
 - Fixed striptags requirement issue
@@ -2575,7 +2575,7 @@ Version 0.6.0
 - Added course progress indicator for dashboard
 - Added country and city fields
 
-Version 0.5.0
+Version 0.5.0 (Released April 22, 2016)
 -------------
 
 - Deleted the `employment` route placeholder
@@ -2583,7 +2583,7 @@ Version 0.5.0
 - Added validation to personal page on profile
 - Move arguments for boundSelectField for consistency
 
-Version 0.4.0
+Version 0.4.0 (Released April 21, 2016)
 -------------
 
 - Use only information from dashboard API for dashboard display.
@@ -2608,7 +2608,7 @@ Version 0.4.0
 - Removed programs link in the header
 - Added wagtail, use it for home page
 
-Version 0.3.0
+Version 0.3.0 (Released April 13, 2016)
 -------------
 
 - Moved JS tests to npm scripts
@@ -2628,7 +2628,7 @@ Version 0.3.0
 - Updated django-server-status
 - Fixed LICENSE organization
 
-Version 0.2.0
+Version 0.2.0 (Released March 28, 2016)
 -------------
 
 - Updated dockerignore
@@ -2649,7 +2649,7 @@ Version 0.2.0
 - Rename inner to dashboard, and outer to public.
 - Add react, redux and friends.
 
-Version 0.1.0
+Version 0.1.0 (Released March 11, 2016)
 -------------
 
 - Fetch information for user profile from edX
