@@ -103,6 +103,7 @@ class CouponInvoiceAuditAdmin(admin.ModelAdmin):
 class CouponAdmin(admin.ModelAdmin):
     """Admin for Coupon"""
     model = Coupon
+    list_filter = ['enabled', 'content_type', 'coupon_type', 'amount_type']
 
     def save_model(self, request, obj, form, change):
         """
