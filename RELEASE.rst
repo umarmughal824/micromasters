@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.108.2
+Version 0.108.2 (Released July 30, 2018)
 ---------------
 
 - Show payment button when user has to pay (#4079)
