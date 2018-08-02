@@ -270,34 +270,3 @@ class MailWebhookView(APIView):
             log.debug(error_msg)
 
         return Response(status=status.HTTP_200_OK)
-
-
-class UnSubWebhookView(APIView):
-    """
-    View class that handles Mailgun unsubscribed webhooks
-    """
-    permission_classes = (MailGunWebHookPermission, )
-
-    def post(self, request, *args, **kargs):  # pylint: disable=unused-argument
-        """
-        POST method handler
-        """
-        event = request.POST.get("event", None)
-        recipient = request.POST.get("recipient", None)
-
-        if recipient and event == "unsubscribed":
-            profile = Profile.objects.get(user__email=recipient)
-            profile.email_optin = False
-            profile.save()
-
-            message_headers = request.POST.get("message", None)
-            debug_msg = (
-                "Webhook event {event} received by Mailgun for recipient {to}:{header}".format(
-                    to=recipient,
-                    event=event,
-                    header=message_headers
-                )
-            )
-            log.debug(debug_msg)
-
-        return Response(status=status.HTTP_200_OK)

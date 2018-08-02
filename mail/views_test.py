@@ -32,8 +32,7 @@ from mail.factories import AutomaticEmailFactory
 from mail.models import SentAutomaticEmail, AutomaticEmail
 from mail.serializers import AutomaticEmailSerializer
 from mail.utils import get_email_footer
-from mail.views import MailWebhookView, UnSubWebhookView
-from profiles.models import Profile
+from mail.views import MailWebhookView
 from profiles.factories import (
     ProfileFactory,
     UserFactory,
@@ -719,52 +718,3 @@ class EmailBouncedViewTests(APITestCase, MockedESTestCase):
 
         # assert that error message is logged
         getattr(mock_logger, logger).assert_called_with(error_msg)
-
-
-@ddt.ddt
-class UnSubWebhookViewTests(APITestCase):
-    """Test email unsub webhook view web hook"""
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
-        cls.url = reverse('mailgun_unsub_webhook')
-
-    def test_unsub(self):
-        """Tests that api unsub user"""
-        with mute_signals(post_save):
-            recipient = ProfileFactory.create(
-                email_optin=True,
-                user__username="foo"
-            )
-
-        data = {
-            "event": "unsubscribed",
-            "recipient": recipient.user.email,
-            "message": {
-                "headers": {
-                    "message-id": "20130822232216.13966.79700@samples.mailgun.org"
-                }
-            }
-        }
-        factory = RequestFactory()
-        request = factory.post(self.url, data=data)
-        UnSubWebhookView().post(request)
-        recipient.refresh_from_db()
-        assert recipient.email_optin is False
-
-    def test_unsub_invalid_email(self):
-        """Tests when invalid email comes from webhook"""
-        data = {
-            "event": "unsubscribed",
-            "recipient": "foo@example.com",
-            "message": {
-                "headers": {
-                    "message-id": "20130822232216.13966.79700@samples.mailgun.org"
-                }
-            }
-        }
-        factory = RequestFactory()
-        request = factory.post(self.url, data=data)
-
-        with self.assertRaises(Profile.DoesNotExist):
-            UnSubWebhookView().post(request)
