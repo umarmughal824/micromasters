@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.109.0
+Version 0.109.0 (Released August 02, 2018)
 ---------------
 
 - Update user as moderator when staff role is added or removed (#4077)
