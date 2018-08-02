@@ -2,8 +2,11 @@
 from datetime import timedelta
 
 import pytest
+from django.db.models.signals import post_save
+from factory.django import mute_signals
 
 from discussions import tasks
+from discussions.factories import ChannelProgramFactory, DiscussionUserFactory
 from discussions.exceptions import DiscussionUserSyncException
 from profiles.factories import UserFactory
 from micromasters.utils import (
@@ -273,3 +276,45 @@ def test_sync_channel_memberships_no_feature_flag(settings, mocker):
     api_stub = mocker.patch('discussions.api.sync_channel_memberships', autospec=True)
     tasks.sync_channel_memberships.delay()
     assert api_stub.call_count == 0
+
+
+def test_add_moderator_to_channel(mocker):
+    """add_moderator_to_channels should forward all arguments to the api function"""
+    stub = mocker.patch('discussions.api.add_and_subscribe_moderator', autospec=True)
+    program = ChannelProgramFactory.create().program
+    with mute_signals(post_save):
+        discussion_user = DiscussionUserFactory.create()
+    tasks.add_user_as_moderator_to_channel.delay(discussion_user.user_id, program.id)
+    assert stub.called is True
+
+
+def test_add_moderator_to_channel_no_feature_flag(settings, mocker):
+    """add_moderator_to_channels should not call the api function if the feature flag is disabled"""
+    settings.FEATURES['OPEN_DISCUSSIONS_USER_SYNC'] = False
+    stub = mocker.patch('discussions.api.add_and_subscribe_moderator', autospec=True)
+    program = ChannelProgramFactory.create().program
+    with mute_signals(post_save):
+        discussion_user = DiscussionUserFactory.create()
+    tasks.add_user_as_moderator_to_channel.delay(discussion_user.user_id, program.id)
+    assert stub.called is False
+
+
+def test_remove_moderator_to_channel(mocker):
+    """add_moderator_to_channels should forward all arguments to the api function"""
+    stub = mocker.patch('discussions.api.remove_moderator_from_channel', autospec=True)
+    program = ChannelProgramFactory.create().program
+    with mute_signals(post_save):
+        discussion_user = DiscussionUserFactory.create()
+    tasks.remove_user_as_moderator_from_channel.delay(discussion_user.user_id, program.id)
+    assert stub.called is True
+
+
+def test_remove_moderator_to_channel_no_feature_flag(settings, mocker):
+    """add_moderator_to_channels should not call the api function if the feature flag is disabled"""
+    settings.FEATURES['OPEN_DISCUSSIONS_USER_SYNC'] = False
+    stub = mocker.patch('discussions.api.remove_moderator_from_channel', autospec=True)
+    program = ChannelProgramFactory.create().program
+    with mute_signals(post_save):
+        discussion_user = DiscussionUserFactory.create()
+    tasks.remove_user_as_moderator_from_channel.delay(discussion_user.user_id, program.id)
+    assert stub.called is False

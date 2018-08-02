@@ -24,6 +24,7 @@ from discussions.exceptions import (
 from discussions.factories import (
     ChannelFactory,
     ChannelProgramFactory,
+    DiscussionUserFactory,
 )
 from discussions.models import (
     Channel,
@@ -401,7 +402,8 @@ def test_sync_channel_memberships(mocker, patched_users_api):
         for channel in nonmember_channels
     ]
     for program in staff_programs:
-        RoleFactory.create(program=program, user=user, role=Staff.ROLE_ID)
+        with mute_signals(post_save):
+            RoleFactory.create(program=program, user=user, role=Staff.ROLE_ID)
 
     # Enroll the user in all programs. This isn't technically required but it's unrealistic to have a query
     # matching a user if they are not enrolled in the program.
@@ -641,14 +643,20 @@ def test_add_moderators_to_channel(mocker, patched_users_api):
     mods = []
     for _ in range(3):
         program = ChannelProgramFactory.create(channel=channel).program
-        mods += [RoleFactory.create(program=program).user for _ in range(5)]
+        with mute_signals(post_save):
+            mods += [
+                RoleFactory.create(
+                    program=program,
+                    user=ProfileFactory.create().user
+                ).user for _ in range(5)
+            ]
 
         for __ in range(5):
             # Add some users to the channel to show that being part of the channel is not enough to be added as a mod
             ProgramEnrollmentFactory.create(program=program)
 
-    _, updated_stub = patched_users_api
-    updated_stub.reset_mock()
+    create_stub, _ = patched_users_api
+    create_stub.reset_mock()
     add_subscriber_stub = mocker.patch('discussions.api.add_subscriber_to_channel', autospec=True)
     add_moderator_stub = mocker.patch('discussions.api.add_moderator_to_channel', autospec=True)
     api.add_moderators_to_channel(channel.name)
@@ -656,11 +664,11 @@ def test_add_moderators_to_channel(mocker, patched_users_api):
     for mod in mods:
         add_subscriber_stub.assert_any_call(channel.name, mod.discussion_user.username)
         add_moderator_stub.assert_any_call(channel.name, mod.discussion_user.username)
-        updated_stub.assert_any_call(mod.discussion_user, allow_email_optin=False)
+        create_stub.assert_any_call(mod.discussion_user)
 
     assert add_subscriber_stub.call_count == len(mods)
     assert add_moderator_stub.call_count == len(mods)
-    assert updated_stub.call_count == len(mods)
+    assert create_stub.call_count == len(mods)
 
 
 def test_add_moderator_to_channel(mock_staff_client):
@@ -677,3 +685,24 @@ def test_add_moderator_to_channel_failed(mock_staff_client):
         api.add_moderator_to_channel('channel', 'user')
 
     mock_staff_client.channels.add_moderator.assert_called_once_with('channel', 'user')
+
+
+def test_remove_moderator_from_channel(mock_staff_client):
+    """remove_moderator_from_channel should remove a moderator from a channel"""
+    api.remove_moderator_from_channel('channel', 'user')
+
+    mock_staff_client.channels.remove_moderator.assert_called_once_with('channel', 'user')
+
+
+def test_add_and_sub_moderator_to_channel(mocker):
+    """add_moderators_to_channel should add user as moderators and subscribers"""
+    channel = ChannelFactory.create()
+    add_subscriber_stub = mocker.patch('discussions.api.add_subscriber_to_channel', autospec=True)
+    add_moderator_stub = mocker.patch('discussions.api.add_moderator_to_channel', autospec=True)
+    discussion_user = DiscussionUserFactory.create()
+
+    # call api
+    api.add_and_subscribe_moderator(discussion_user.username, channel.name)
+
+    add_subscriber_stub.assert_any_call(channel.name, discussion_user.username)
+    add_moderator_stub.assert_any_call(channel.name, discussion_user.username)

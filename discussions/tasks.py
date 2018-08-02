@@ -6,6 +6,7 @@ import logging
 from django.conf import settings
 
 from discussions import api
+from discussions.models import ChannelProgram, DiscussionUser
 from discussions.exceptions import DiscussionUserSyncException
 from micromasters.celery import app
 from micromasters.locks import Lock
@@ -99,3 +100,57 @@ def sync_channel_memberships():
     with Lock(SYNC_MEMBERSHIPS_LOCK_NAME, expiration) as lock:
         membership_ids = takewhile(lock.is_still_locked, api.get_membership_ids_needing_sync())
         api.sync_channel_memberships(membership_ids)
+
+
+@app.task()
+def add_user_as_moderator_to_channel(user_id, program_id):
+    """
+    Add moderator to a open-discussions channels of given program
+
+    Args:
+        user_id (int): user id
+        program_id(int): program id
+    """
+    if not settings.FEATURES.get('OPEN_DISCUSSIONS_USER_SYNC', False):
+        log.debug('OPEN_DISCUSSIONS_USER_SYNC is set to False (so disabled) in the settings')
+        return
+
+    try:
+        discussion_user = DiscussionUser.objects.get(user_id=user_id)
+    except DiscussionUser.DoesNotExist:
+        log.exception('unable to add user with id: %d as moderator', user_id)
+        return
+
+    channel_programs = ChannelProgram.objects.filter(program_id=program_id)
+    for channel_program in channel_programs:
+        api.add_and_subscribe_moderator(
+            discussion_user.username,
+            channel_program.channel.name
+        )
+
+
+@app.task()
+def remove_user_as_moderator_from_channel(user_id, program_id):
+    """
+    Remove moderator to a open-discussions channels of given program
+
+    Args:
+        user_id (int): user id
+        program_id(int): program id
+    """
+    if not settings.FEATURES.get('OPEN_DISCUSSIONS_USER_SYNC', False):
+        log.debug('OPEN_DISCUSSIONS_USER_SYNC is set to False (so disabled) in the settings')
+        return
+
+    try:
+        discussion_user = DiscussionUser.objects.get(user_id=user_id)
+    except DiscussionUser.DoesNotExist:
+        log.exception('unable to remove user with id: %d as moderator', user_id)
+        return
+
+    channel_programs = ChannelProgram.objects.filter(program_id=program_id)
+    for channel_program in channel_programs:
+        api.remove_moderator_from_channel(
+            channel_program.channel.name,
+            discussion_user.username
+        )

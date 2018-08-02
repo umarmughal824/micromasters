@@ -1,5 +1,5 @@
 """Factories for discussions models"""
-from django.contrib.auth.models import User
+from pytz import UTC
 from django.db.models.signals import post_save
 from factory import (
     Faker,
@@ -16,6 +16,7 @@ from discussions.models import (
     ChannelProgram,
     DiscussionUser,
 )
+from profiles.factories import UserFactory
 from search.factories import PercolateQueryFactory
 from search.models import PercolateQuery
 
@@ -40,9 +41,9 @@ class ChannelProgramFactory(DjangoModelFactory):
 
 class DiscussionUserFactory(DjangoModelFactory):
     """Factory for DiscussionUser"""
-    user = SubFactory(User)
+    user = SubFactory(UserFactory)
     username = Faker('user_name')
-    last_sync = Faker('date_time_this_month')
+    last_sync = Faker('date_time_this_month', before_now=True, after_now=False, tzinfo=UTC)
 
     @classmethod
     def create(cls, *args, **kwargs):
