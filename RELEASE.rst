@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.109.0
+---------------
+
+- Update user as moderator when staff role is added or removed (#4077)
+- update readme with details on how to adjust exam grades (#4037)
+- Added mailgun unsub feature (#4051)
+- Check if email is verified before creating account (#4076)
+- Added partially refunded status (#4071)
+- fix error in comment (#4067)
+
 Version 0.108.2 (Released July 30, 2018)
 ---------------
 
