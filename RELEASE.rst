@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.109.2
+Version 0.109.2 (Released August 02, 2018)
 ---------------
 
 - Revert "Added mailgun unsub feature (#4051)"
