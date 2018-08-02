@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.109.2
+---------------
+
+- Revert "Added mailgun unsub feature (#4051)"
+- Updated odc and switched to passing user.username
+
 Version 0.109.0 (Released August 02, 2018)
 ---------------
 
