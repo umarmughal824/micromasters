@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.110.0
+Version 0.110.0 (Released August 06, 2018)
 ---------------
 
 - SESSION_ENGINE is not a required setting (#4096)
