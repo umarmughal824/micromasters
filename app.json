@@ -240,7 +240,7 @@
     },
     "SESSION_ENGINE": {
       "description": "Django session engine",
-      "required": true
+      "required": false
     },
     "STATUS_TOKEN": {
       "description": "Token to access the status API.",
