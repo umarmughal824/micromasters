@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.110.0
+---------------
+
+- SESSION_ENGINE is not a required setting (#4096)
+- use the raw id for user in admin instead of drop-down (#4088)
+
 Version 0.109.2 (Released August 02, 2018)
 ---------------
 
