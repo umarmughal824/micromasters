@@ -21,7 +21,7 @@ import type { AvailableProgram } from "../../flow/enrollmentTypes"
 import type { ChannelInputs, ChannelState } from "../../flow/discussionTypes"
 import type { UIState } from "../../reducers/ui"
 import type { RestState } from "../../flow/restTypes"
-import { channelURL } from "../../lib/discussions";
+import { channelURL } from "../../lib/discussions"
 
 const isVisible = R.propOr(false, CHANNEL_CREATE_DIALOG)
 
