@@ -78,7 +78,7 @@ def create_or_update_discussion_user(user_id, allow_email_optin=False):
         if discussion_user.username is None:
             create_discussion_user(discussion_user)
         else:
-            if settings.FEATURES.get('OPEN_DISCUSSIONS_USER_SYNC', True):
+            if settings.FEATURES.get('OPEN_DISCUSSIONS_USER_UPDATE', True):
                 update_discussion_user(discussion_user, allow_email_optin=allow_email_optin)
         return discussion_user
 

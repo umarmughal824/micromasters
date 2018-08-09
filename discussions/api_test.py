@@ -95,7 +95,7 @@ def test_create_or_update_discussion_user_no_username(mocker):
 @pytest.mark.parametrize('enable_update', [True, False])
 def test_create_or_update_discussion_user_has_username(mocker, enable_update, settings):
     """Test that create_or_update_discussion_user updates if we have a username"""
-    settings.FEATURES['OPEN_DISCUSSIONS_USER_SYNC'] = enable_update
+    settings.FEATURES['OPEN_DISCUSSIONS_USER_UPDATE'] = enable_update
     create_mock = mocker.patch('discussions.api.create_discussion_user')
     update_mock = mocker.patch('discussions.api.update_discussion_user')
     with mute_signals(post_save):
@@ -519,9 +519,10 @@ def test_sync_channel_memberships_api_error(mocker, patched_users_api):
         remove_subscriber_stub.assert_any_call(channel.name, user.discussion_user.username)
 
 
-def test_add_channel(mock_staff_client, mocker, patched_users_api):
+def test_add_channel(settings, mock_staff_client, mocker, patched_users_api):
     """add_channel should tell open-discussions to create a channel"""
     mock_staff_client.channels.create.return_value.ok = True
+    settings.FEATURES['OPEN_DISCUSSIONS_USER_UPDATE'] = True
 
     title = "title"
     name = "name"
