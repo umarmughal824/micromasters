@@ -17,6 +17,7 @@ from django_redis import get_redis_connection
 from backends.exceptions import InvalidCredentialStored
 from backends import utils
 from courses.models import Program
+from courses.utils import format_season_year_for_course_run
 from dashboard.api_edx_cache import CachedEdxDataApi
 from dashboard.utils import get_mmtrack
 from financialaid.serializers import FinancialAidDashboardSerializer
@@ -459,6 +460,7 @@ def format_courserun_for_dashboard(course_run, status_for_user, mmtrack, positio
         'course_end_date': course_run.end_date,
         'fuzzy_start_date': course_run.fuzzy_start_date,
         'enrollment_url': course_run.enrollment_url,
+        'year_season': format_season_year_for_course_run(course_run),
     }
 
     # check if there are extra fields to pull in
