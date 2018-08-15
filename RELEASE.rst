@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.111.1
+Version 0.111.1 (Released August 15, 2018)
 ---------------
 
 - Show semester year in GradeDetailPopup (#4102)
