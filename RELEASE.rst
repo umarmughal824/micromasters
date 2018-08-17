@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.111.2
+---------------
+
+- Remove call to ready() (#4110)
+- improve program enrollments admin (#4099)
+
 Version 0.111.1 (Released August 15, 2018)
 ---------------
 
