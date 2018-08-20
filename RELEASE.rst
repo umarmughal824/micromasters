@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.111.2
+Version 0.111.2 (Released August 20, 2018)
 ---------------
 
 - Remove call to ready() (#4110)
