@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.112.0
+---------------
+
+- Audited passed, then audited failed course (#4116)
+- Remove IS_OSX check now that everyone is on Docker for Mac (#4112)
+
 Version 0.111.2 (Released August 20, 2018)
 ---------------
 
