@@ -29,7 +29,8 @@ import {
   makeRunOverdue,
   makeRunDueSoon,
   makeRunFailed,
-  makeRunCanUpgrade
+  makeRunCanUpgrade,
+  makeRunMissedDeadline
 } from "./test_util"
 import { assertIsJust } from "../../../lib/test_utils"
 import {
@@ -626,7 +627,7 @@ describe("Course Status Messages", () => {
 
     it("should nag about missing the payment deadline", () => {
       makeRunPast(course.runs[0])
-      makeRunPassed(course.runs[0])
+      makeRunMissedDeadline(course.runs[0])
       makeRunOverdue(course.runs[0])
       makeRunFuture(course.runs[1])
       course.runs[1].enrollment_start_date = moment()
@@ -690,7 +691,7 @@ describe("Course Status Messages", () => {
     ]) {
       it(`should nag about missing the payment deadline when future re-enrollments and date is ${nextEnrollmentStart[0]}`, () => {
         makeRunPast(course.runs[0])
-        makeRunPassed(course.runs[0])
+        makeRunMissedDeadline(course.runs[0])
         makeRunOverdue(course.runs[0])
         makeRunFuture(course.runs[1])
         course.runs[1].enrollment_start_date = nextEnrollmentStart[0]
@@ -713,7 +714,7 @@ describe("Course Status Messages", () => {
     it("should have a message for missing the payment deadline with no future courses", () => {
       course.runs = [course.runs[0]]
       makeRunPast(course.runs[0])
-      makeRunPassed(course.runs[0])
+      makeRunMissedDeadline(course.runs[0])
       makeRunOverdue(course.runs[0])
       assertIsJust(calculateMessages(calculateMessagesProps), [
         {
@@ -726,7 +727,7 @@ describe("Course Status Messages", () => {
 
     it("should nag about paying after the edx course is complete", () => {
       makeRunPast(course.runs[0])
-      makeRunPassed(course.runs[0])
+      makeRunCanUpgrade(course.runs[0])
       makeRunDueSoon(course.runs[0])
       const date = moment(course.runs[0].course_upgrade_deadline).format(
         DASHBOARD_FORMAT
@@ -747,7 +748,7 @@ describe("Course Status Messages", () => {
 
     it("should nag about paying after the edx course is complete with no deadline", () => {
       makeRunPast(course.runs[0])
-      makeRunPassed(course.runs[0])
+      makeRunCanUpgrade(course.runs[0])
 
       assertIsJust(calculateMessages(calculateMessagesProps), [
         {
@@ -766,7 +767,7 @@ describe("Course Status Messages", () => {
 
     it("should nag slightly differently if the course has an exam", () => {
       makeRunPast(course.runs[0])
-      makeRunPassed(course.runs[0])
+      makeRunCanUpgrade(course.runs[0])
       makeRunDueSoon(course.runs[0])
       course.has_exam = true
       const date = moment(course.runs[0].course_upgrade_deadline).format(
@@ -788,7 +789,7 @@ describe("Course Status Messages", () => {
 
     it("should nag slightly differently if the course has an exam with no deadline", () => {
       makeRunPast(course.runs[0])
-      makeRunPassed(course.runs[0])
+      makeRunCanUpgrade(course.runs[0])
       course.has_exam = true
       assertIsJust(calculateMessages(calculateMessagesProps), [
         {

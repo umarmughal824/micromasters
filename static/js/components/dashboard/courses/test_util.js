@@ -6,7 +6,8 @@ import {
   STATUS_CURRENTLY_ENROLLED,
   STATUS_CAN_UPGRADE,
   STATUS_PASSED,
-  STATUS_NOT_PASSED
+  STATUS_NOT_PASSED,
+  STATUS_MISSED_DEADLINE
 } from "../../../constants"
 
 export const makeRunCurrent = (run: CourseRun) => {
@@ -65,6 +66,10 @@ export const makeRunPaid = (run: CourseRun) => {
 
 export const makeRunPassed = (run: CourseRun) => {
   run.status = STATUS_PASSED
+}
+
+export const makeRunMissedDeadline = (run: CourseRun) => {
+  run.status = STATUS_MISSED_DEADLINE
 }
 
 export const makeRunFailed = (run: CourseRun) => {

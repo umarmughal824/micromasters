@@ -17,7 +17,6 @@ import {
   COURSE_ACTION_REENROLL,
   FA_PENDING_STATUSES,
   FA_TERMINAL_STATUSES,
-  STATUS_MISSED_DEADLINE,
   STATUS_PAID_BUT_NOT_ENROLLED,
   STATUS_CAN_UPGRADE,
   COURSE_ACTION_CALCULATE_PRICE,
@@ -29,14 +28,15 @@ import {
 import { S } from "../../../lib/sanctuary"
 import {
   courseUpcomingOrCurrent,
-  isPassedOrMissedDeadline,
   hasFailedCourseRun,
   futureEnrollableRun,
   isEnrollableRun,
   userIsEnrolled,
   isOfferedInUncertainFuture,
   isPassedOrCurrentlyEnrolled,
-  notNilorEmpty
+  notNilorEmpty,
+  hasCanUpgradeCourseRun,
+  hasMissedDeadlineCourseRun
 } from "./util"
 import {
   hasPassingExamGrade,
@@ -274,7 +274,10 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
   }
 
   // handle other 'in-progress' cases
-  if (firstRun.status === STATUS_CAN_UPGRADE) {
+  if (
+    firstRun.status === STATUS_CAN_UPGRADE &&
+    courseUpcomingOrCurrent(firstRun)
+  ) {
     let message =
       "You are auditing. To get credit, you need to pay for the course."
     if (course.certificate_url) {
@@ -342,90 +345,81 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
       })
     }
   }
-
   // all cases where courseRun is not currently in progress
-  // first, all cases where the user has already passed the course
-  if (isPassedOrMissedDeadline(firstRun)) {
-    // paid statuses
-    if (paid) {
-      // this is the expanded message, which we should show if the user
-      // has clicked one of the 're-enroll' links
-      if (expandedStatuses.has(course.id)) {
-        messages.push(
-          S.maybe(
-            null,
-            run => ({
-              message: `Next course starts ${formatDate(
-                run.course_start_date
-              )}.`,
-              action: courseAction(run, COURSE_ACTION_REENROLL)
-            }),
-            futureEnrollableRun(course)
-          )
-        )
-      }
-      return S.Just(messages)
-    } else {
-      // user missed the payment due date
-      if (
-        firstRun.status === STATUS_MISSED_DEADLINE ||
-        paymentDueDate.isBefore(moment())
-      ) {
-        const date = run => formatDate(run.course_start_date)
-        const msg = run => {
-          return `You missed the payment deadline, but you can re-enroll. Next course starts ${date(
-            run
-          )}.${enrollmentDateMessage(run)}`
-        }
-        messages.push(
-          S.maybe(
-            {
-              message:
-                "You missed the payment deadline and will not receive MicroMasters credit for this course. " +
-                "There are no future runs of this course scheduled at this time."
-            },
-            run => ({
-              message: msg(run),
-              action:  courseAction(run, COURSE_ACTION_REENROLL)
-            }),
-            futureEnrollableRun(course)
-          )
-        )
-      } else {
-        const dueDate = paymentDueDate.isValid()
-          ? ` (Payment due on ${paymentDueDate.format(DASHBOARD_FORMAT)})`
-          : ""
-        if (exams) {
-          messages.push({
-            message: `The edX course is complete, but you need to pass the exam.${dueDate}`,
-            action:  courseAction(firstRun, COURSE_ACTION_PAY)
-          })
-        } else {
-          messages.push({
-            message: `The edX course is complete, but you need to pay to get credit.${dueDate}`,
-            action:  courseAction(firstRun, COURSE_ACTION_PAY)
-          })
-        }
-        return S.Just(messages)
-      }
-    }
-  } else {
-    if (hasFailedCourseRun(course) && !hasPassedCourseRun(course)) {
-      return S.Just(
+  //passed means user also paid
+  if (hasPassedCourseRun(course)) {
+    // this is the expanded message, which we should show if the user
+    // has clicked one of the 're-enroll' links
+    if (expandedStatuses.has(course.id)) {
+      messages.push(
         S.maybe(
-          messages.concat({ message: "You did not pass the edX course." }),
-          run =>
-            messages.concat({
-              message: `You did not pass the edX course, but you can re-enroll. ${courseStartMessage(
-                run
-              )}${enrollmentDateMessage(run)}`,
-              action: courseAction(run, COURSE_ACTION_REENROLL)
-            }),
+          null,
+          run => ({
+            message: `Next course starts ${formatDate(run.course_start_date)}.`,
+            action:  courseAction(run, COURSE_ACTION_REENROLL)
+          }),
           futureEnrollableRun(course)
         )
       )
     }
+    return S.Just(messages)
+  } else if (hasCanUpgradeCourseRun(course)) {
+    //the course finished but can still pay
+    const dueDate = paymentDueDate.isValid()
+      ? ` (Payment due on ${paymentDueDate.format(DASHBOARD_FORMAT)})`
+      : ""
+    if (exams) {
+      messages.push({
+        message: `The edX course is complete, but you need to pass the exam.${dueDate}`,
+        action:  courseAction(firstRun, COURSE_ACTION_PAY)
+      })
+    } else {
+      messages.push({
+        message: `The edX course is complete, but you need to pay to get credit.${dueDate}`,
+        action:  courseAction(firstRun, COURSE_ACTION_PAY)
+      })
+    }
+    return S.Just(messages)
+  } else if (hasMissedDeadlineCourseRun(course)) {
+    //the course finished can't pay
+    const date = run => formatDate(run.course_start_date)
+    const msg = run => {
+      return `You missed the payment deadline, but you can re-enroll. Next course starts ${date(
+        run
+      )}.${enrollmentDateMessage(run)}`
+    }
+    messages.push(
+      S.maybe(
+        {
+          message:
+            "You missed the payment deadline and will not receive MicroMasters credit for this course. " +
+            "There are no future runs of this course scheduled at this time."
+        },
+        run => ({
+          message: msg(run),
+          action:  courseAction(run, COURSE_ACTION_REENROLL)
+        }),
+        futureEnrollableRun(course)
+      )
+    )
+    return S.Just(messages)
   }
+  if (hasFailedCourseRun(course) && !hasPassedCourseRun(course)) {
+    return S.Just(
+      S.maybe(
+        messages.concat({ message: "You did not pass the edX course." }),
+        run =>
+          messages.concat({
+            message: `You did not pass the edX course, but you can re-enroll. ${courseStartMessage(
+              run
+            )}${enrollmentDateMessage(run)}`,
+            action: courseAction(run, COURSE_ACTION_REENROLL)
+          }),
+        futureEnrollableRun(course)
+      )
+    )
+  }
+
   return messages.length === 0 ? S.Nothing : S.Just(messages)
 }
 
