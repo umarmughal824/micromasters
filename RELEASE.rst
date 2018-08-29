@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.112.0
+Version 0.112.0 (Released August 29, 2018)
 ---------------
 
 - Audited passed, then audited failed course (#4116)
