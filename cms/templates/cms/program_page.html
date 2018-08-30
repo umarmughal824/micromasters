@@ -3,6 +3,7 @@
 {% load i18n static %}
 {% load wagtailcore_tags %}
 {% load wagtailimages_tags %}
+{% load custom_tags %}
 
 {% block title %}{{ page.title }} MicroMasters{% endblock %}
 {% block description %}{% if page.program.description %}{{ page.program.description }}{% endif %}{% endblock %}
@@ -82,7 +83,7 @@
       <div class="mdl-cell mdl-cell--8-col">
       {% if active_tab == 'about' %}
         <div class="panel-content">
-          {{ page.description|richtext }}
+          {{ page.description|richtext_description }}
         </div>
       {% else %}
         <div class="panel-content">
