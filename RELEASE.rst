@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.112.1
+Version 0.112.1 (Released August 31, 2018)
 ---------------
 
 - Fix attribute error when running exam states (#4120)
