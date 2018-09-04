@@ -1,7 +1,7 @@
 """
 cms custom filters
 """
-from six.moves.html_parser import HTMLParser
+from html import unescape
 from django import template
 from django.utils.safestring import mark_safe
 
@@ -23,4 +23,4 @@ def richtext_description(value):
     else:
         html = expand_db_html(value)
 
-    return mark_safe('<div class="rich-text">' + HTMLParser().unescape(html) + '</div>')
+    return mark_safe('<div class="rich-text">' + unescape(html) + '</div>')
