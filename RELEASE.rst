@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.113.0
+---------------
+
+- Update progress message for staff (#4123)
+- add search and filter to coupon admin (#4125)
+- Offer to pay after missed deadline (#4115)
+
 Version 0.112.1 (Released August 31, 2018)
 ---------------
 
