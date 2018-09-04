@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.113.0
+Version 0.113.0 (Released September 04, 2018)
 ---------------
 
 - Update progress message for staff (#4123)
