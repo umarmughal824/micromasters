@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.114.0
+---------------
+
+- profile admin improvements (#4129)
+
 Version 0.113.0 (Released September 04, 2018)
 ---------------
 
