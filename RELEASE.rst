@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.114.1
+---------------
+
+- Oauth maintenance page on login (#4132)
+
 Version 0.114.0 (Released September 14, 2018)
 ---------------
 
