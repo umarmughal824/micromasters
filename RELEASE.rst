@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.114.2
+Version 0.114.2 (Released October 01, 2018)
 ---------------
 
 - Updated package versions that have reported vulnerabilities
