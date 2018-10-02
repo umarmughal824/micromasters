@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.115.0
+Version 0.115.0 (Released October 02, 2018)
 ---------------
 
 - Added course run and description to exam run (#4141)
