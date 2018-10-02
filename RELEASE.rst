@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.115.0
+---------------
+
+- Added course run and description to exam run (#4141)
+- Changed the source of video on home page (#4145)
+- improve certificates admin (#4136)
+
 Version 0.114.2 (Released October 01, 2018)
 ---------------
 
