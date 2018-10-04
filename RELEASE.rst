@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.115.1 (Released October 04, 2018)
+---------------
+
+- Handle exception in certification creation process (#4143)
+
 Version 0.115.0 (Released October 02, 2018)
 ---------------
 
