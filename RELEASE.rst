@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.115.2
+---------------
+
+- Added unenroll program(s) feature (#4084)
+- Added student id on learners page for staff only use (#4148)
+
 Version 0.115.1 (Released October 04, 2018)
 ---------------
 
