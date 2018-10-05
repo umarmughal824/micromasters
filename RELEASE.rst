@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.115.2
+Version 0.115.2 (Released October 05, 2018)
 ---------------
 
 - Added unenroll program(s) feature (#4084)
