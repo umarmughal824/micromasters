@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.116.0
+---------------
+
+- Set discussions JWT cookie max age (#4155)
+
 Version 0.115.2 (Released October 05, 2018)
 ---------------
 
