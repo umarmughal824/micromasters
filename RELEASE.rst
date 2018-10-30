@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.117.0
+---------------
+
+- Dashboard state: Missed deadline for course in progress (#4163)
+- Add future examruns check with current scheduling ones for calculating can_schedule_exam for a course (#4151)
+- Added command to retire user (#4153)
+
 Version 0.116.0 (Released October 10, 2018)
 ---------------
 
