@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.117.0
+Version 0.117.0 (Released October 31, 2018)
 ---------------
 
 - Dashboard state: Missed deadline for course in progress (#4163)
