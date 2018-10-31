@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.117.1
+Version 0.117.1 (Released October 31, 2018)
 ---------------
 
 - Update edx_api_client to 0.6.0 (#4165)
