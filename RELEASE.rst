@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.118.0
+---------------
+
+- Upgrade requirements (#4147)
+- make the missed payment deadline message work for all learners (#4162)
+
 Version 0.117.1 (Released October 31, 2018)
 ---------------
 
