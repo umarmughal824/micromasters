@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.118.0
+Version 0.118.0 (Released November 06, 2018)
 ---------------
 
 - Upgrade requirements (#4147)
