@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.118.1
+---------------
+
+- upgrade requirements, including bumping edx-apl-client to 0.6.1 (#4171)
+
 Version 0.118.0 (Released November 06, 2018)
 ---------------
 
