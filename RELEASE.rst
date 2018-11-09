@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.118.2
+---------------
+
+- Upgrade Django and Wagtail (#4161)
+
 Version 0.118.1 (Released November 07, 2018)
 ---------------
 
