@@ -196,6 +196,7 @@ export default class CourseRow extends React.Component {
             courseAction={this.courseAction}
             hasFinancialAid={hasFinancialAid}
             firstRun={run}
+            coupon={this.getCourseCoupon()}
           />
         ) : null}
       </div>
