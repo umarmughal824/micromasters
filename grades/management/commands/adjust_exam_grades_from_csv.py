@@ -95,7 +95,7 @@ class Command(BaseCommand):
             score=kwargs.get('score_col_name'),
         )
         csvfile = kwargs.get('csvfile')
-        reader = csv.DictReader(csvfile.read().splitlines(), delimiter='\t')
+        reader = csv.DictReader(csvfile.read().splitlines())
         grade_row_parser = GradeRowParser(col_names=col_names)
 
         total_rows = 0
