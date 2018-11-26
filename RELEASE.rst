@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.118.3 (Released November 26, 2018)
+---------------
+
+- fix css issue on dashboard gradding popup
+
 Version 0.118.2 (Released November 16, 2018)
 ---------------
 
