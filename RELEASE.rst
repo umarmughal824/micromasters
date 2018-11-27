@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.119.0
+Version 0.119.0 (Released November 27, 2018)
 ---------------
 
 - add review time of 5 days to financial aid email (#4170)
