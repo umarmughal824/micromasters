@@ -160,6 +160,8 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
     R.defaultTo("", firstRun.course_upgrade_deadline)
   )
 
+  const messages = []
+
   //If first run is paid but user never enrolled, most likely there was
   //problem enrolling, and first_unexpired_run is returned, so no need to check for past enrollment
   if (firstRun.status === STATUS_PAID_BUT_NOT_ENROLLED) {
@@ -189,34 +191,34 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
     ])
   }
 
+  if (
+    coupon &&
+    coupon.content_type === COUPON_CONTENT_TYPE_COURSE &&
+    coupon.object_id === course.id
+  ) {
+    messages.push({ message: makeCouponMessage(coupon) })
+  }
+
   // User never enrolled
   if (!R.any(userIsEnrolled, course.runs)) {
     if (isEnrollableRun(firstRun)) {
-      return S.Just([
-        {
-          message: `${courseStartMessage(firstRun)}`,
-          action:  courseAction(firstRun, COURSE_ACTION_ENROLL)
-        }
-      ])
+      messages.push({
+        message: `${courseStartMessage(firstRun)}`,
+        action:  courseAction(firstRun, COURSE_ACTION_ENROLL)
+      })
     } else if (
       firstRun.fuzzy_start_date &&
       isOfferedInUncertainFuture(firstRun)
     ) {
-      return S.Just([
-        {
-          message: `${courseStartMessage(firstRun)}`
-        }
-      ])
+      messages.push({
+        message: `${courseStartMessage(firstRun)}`
+      })
     } else {
-      return S.Just([
-        {
-          message: "There are no future course runs scheduled."
-        }
-      ])
+      messages.push({
+        message: "There are no future course runs scheduled."
+      })
     }
   }
-
-  const messages = []
 
   if (course.certificate_url) {
     messages.push({
@@ -263,14 +265,6 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
     !exams
   ) {
     return S.Just(messages)
-  }
-
-  if (
-    coupon &&
-    coupon.content_type === COUPON_CONTENT_TYPE_COURSE &&
-    coupon.object_id === course.id
-  ) {
-    messages.push({ message: makeCouponMessage(coupon) })
   }
 
   // handle other 'in-progress' cases

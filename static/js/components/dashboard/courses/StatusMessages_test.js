@@ -1,6 +1,7 @@
 // @flow
 /* global SETTINGS: false */
 import _ from "lodash"
+import Decimal from "decimal.js-light"
 import React from "react"
 import { shallow } from "enzyme"
 import { assert } from "chai"
@@ -38,6 +39,7 @@ import {
   COURSE_ACTION_CALCULATE_PRICE,
   COURSE_ACTION_REENROLL,
   COUPON_CONTENT_TYPE_COURSE,
+  COUPON_AMOUNT_TYPE_PERCENT_DISCOUNT,
   DASHBOARD_FORMAT,
   COURSE_DEADLINE_FORMAT,
   STATUS_PAID_BUT_NOT_ENROLLED,
@@ -174,6 +176,23 @@ describe("Course Status Messages", () => {
       ])
       assert.isTrue(makeAmountMessageStub.calledWith(coupon))
       assert.isTrue(makeCouponTargetMessageStub.calledWith(coupon))
+    })
+
+    it("should display 'You will receive 100% off' message", () => {
+      const program = makeProgram()
+      const coupon = makeCoupon(program)
+      coupon.content_type = COUPON_CONTENT_TYPE_COURSE
+      coupon.object_id = program.courses[0].id
+      coupon.amount_type = COUPON_AMOUNT_TYPE_PERCENT_DISCOUNT
+      coupon.amount = Decimal("1")
+      calculateMessagesProps.course = program.courses[0]
+      calculateMessagesProps.coupon = coupon
+      const messages = calculateMessages(calculateMessagesProps).value
+
+      assert.equal(
+        messages[0]["message"],
+        "You will get 100% off the cost for this course."
+      )
     })
 
     it("should nag unpaid auditors to pay", () => {
