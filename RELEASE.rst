@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.119.1
+---------------
+
+- add coupon message on dashboard
+- add support for csv, remove delimeter used for tsv
+
 Version 0.119.0 (Released November 27, 2018)
 ---------------
 
