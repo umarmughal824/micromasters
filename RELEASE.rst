@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.119.1
+Version 0.119.1 (Released December 04, 2018)
 ---------------
 
 - add coupon message on dashboard
