@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.120.0
+Version 0.120.0 (Released December 04, 2018)
 ---------------
 
 - Handle users who are inactive or have no profiles during populate_query_memberships (#4189)
