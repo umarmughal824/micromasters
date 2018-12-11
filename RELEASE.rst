@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.121.0
+---------------
+
+- fix: don't allow learners with a deleted exam run schedule an exam
+
 Version 0.120.0 (Released December 04, 2018)
 ---------------
 
