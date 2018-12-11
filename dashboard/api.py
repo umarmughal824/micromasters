@@ -496,7 +496,8 @@ def is_exam_schedulable(user, course):
     schedulable_exam_runs = ExamRun.objects.filter(
         course=course, date_last_eligible__gte=now.date()
     )
-    return ExamAuthorization.objects.filter(user=user, exam_run__in=schedulable_exam_runs).exists()
+    return ExamAuthorization.objects.filter(user=user, exam_run__in=schedulable_exam_runs).exclude(
+        operation=ExamAuthorization.OPERATION_DELETE).exists()
 
 
 def get_future_exam_runs(course):

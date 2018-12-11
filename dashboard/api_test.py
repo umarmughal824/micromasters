@@ -1828,17 +1828,19 @@ class InfoProgramTest(MockedESTestCase):
 class ExamSchedulableTests(MockedESTestCase):
     """Tests exam schedulable"""
     @ddt.data(
-        (False, False, False, False),
-        (False, True, False, False),
-        (True, False, False, False),
-        (True, True, False, False),
-        (False, False, True, True),
-        (False, True, True, True),
-        (True, False, True, True),
-        (True, True, True, True),
+        (False, False, False, False, False),
+        (False, True, False, False, False),
+        (True, False, False, False, False),
+        (True, True, False, False, False),
+        (False, False, True, False, True),
+        (False, True, True, False, True),
+        (True, False, True, False, True),
+        (True, True, True, False, True),
+        (True, True, True, True, False),
     )
     @ddt.unpack
-    def test_is_exam_schedulable(self, is_past, is_future, has_eligibility_future, can_schedule_exam):
+    def test_is_exam_schedulable(self, is_past, is_future, has_eligibility_future, is_operation_delete,
+                                 can_schedule_exam):
         """Test that is_exam_schedulable is correct"""
         exam_run = ExamRunFactory.create(
             scheduling_past=is_past,
@@ -1849,7 +1851,8 @@ class ExamSchedulableTests(MockedESTestCase):
         exam_auth = ExamAuthorizationFactory.create(
             exam_run=exam_run,
             course=exam_run.course,
-            status=ExamAuthorization.STATUS_SUCCESS
+            status=ExamAuthorization.STATUS_SUCCESS,
+            operation=ExamAuthorization.OPERATION_DELETE if is_operation_delete else ExamAuthorization.OPERATION_ADD
         )
 
         assert api.is_exam_schedulable(exam_auth.user, exam_auth.course) is can_schedule_exam
