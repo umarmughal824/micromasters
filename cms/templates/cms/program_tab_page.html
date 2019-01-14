@@ -5,5 +5,5 @@
 {% endblock %}
 
 {% block panel %}
-  {{ child_page.content|richtext }}
+  {% include_block child_page.content %}
 {% endblock %}
