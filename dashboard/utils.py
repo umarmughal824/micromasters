@@ -4,16 +4,15 @@ Utility functions and classes for the dashboard
 import logging
 from decimal import Decimal
 
-from django.conf import settings
 from django.db import transaction
 from django.db.models import Q, Count
 from django.urls import reverse
 
 from courses.models import CourseRun, Course
 from dashboard.api_edx_cache import CachedEdxUserData
+from dashboard.models import ProgramEnrollment
 from ecommerce.models import Order, Line
 from grades.constants import FinalGradeStatus
-from grades.constants import COURSE_GRADE_WEIGHT, EXAM_GRADE_WEIGHT
 from grades.models import (
     FinalGrade,
     ProctoredExamGrade,
@@ -94,6 +93,12 @@ class MMTrack:
         Returns whether the edx_course_key id belongs to the program
         """
         return edx_course_key in self.edx_course_keys
+
+    def get_program_enrollment(self):
+        """
+        Returns ProgramEnrollment for this mmtrack
+        """
+        return ProgramEnrollment.objects.filter(user=self.user, program=self.program).first()
 
     def get_course_ids(self):
         """
@@ -329,25 +334,16 @@ class MMTrack:
         Returns:
            str: the overall final grade
         """
-        if settings.FEATURES.get('USE_COMBINED_FINAL_GRADE', False):
-
-            combined_grade = CombinedFinalGrade.objects.filter(user=self.user, course=course)
-            if combined_grade.exists():
-                return str(round(combined_grade.first().grade))
+        best_grade = self.get_best_final_grade_for_course(course)
+        if best_grade is None:
             return ""
-        else:
-            best_grade = self.get_best_final_grade_for_course(course)
-            if best_grade is None:
-                return ""
-            if not course.has_exam:
-                return str(round(best_grade.grade_percent))
+        if not course.has_exam:
+            return str(round(best_grade.grade_percent))
 
-            best_exam = self.get_best_proctored_exam_grade(course)
-            if best_exam is None:
-                return ""
-
-            return str(
-                round(best_grade.grade_percent * COURSE_GRADE_WEIGHT + best_exam.score * EXAM_GRADE_WEIGHT))
+        combined_grade = CombinedFinalGrade.objects.filter(user=self.user, course=course)
+        if combined_grade.exists():
+            return str(round(combined_grade.first().grade))
+        return ""
 
     def get_all_enrolled_course_runs(self):
         """

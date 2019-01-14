@@ -8,7 +8,6 @@ from unittest.mock import (
     PropertyMock
 )
 
-from django.test import override_settings
 from django.urls import reverse
 
 import pytz
@@ -752,7 +751,6 @@ class MMTrackTest(MockedESTestCase):
             FinalGradeFactory.create(user=self.user, course_run=course_run, grade=grade, passed=True)
         assert mmtrack.get_best_final_grade_for_course(finaid_course).grade == 0.8
 
-    @override_settings(FEATURES={"USE_COMBINED_FINAL_GRADE": True})
     def test_get_overall_final_grade_for_course(self):
         """
         Test for get_overall_final_grade_for_course to return CombinedFinalGrade for course
@@ -764,6 +762,9 @@ class MMTrackTest(MockedESTestCase):
         )
         finaid_course = self.crun_fa.course
         assert mmtrack.get_overall_final_grade_for_course(finaid_course) == ""
+        FinalGradeFactory.create(user=self.user, course_run=self.crun_fa, passed=True, grade=0.8)
+        assert mmtrack.get_overall_final_grade_for_course(finaid_course) == "80"
+        ExamRunFactory.create(course=finaid_course)
         CombinedFinalGrade.objects.create(user=self.user, course=finaid_course, grade="74")
         assert mmtrack.get_overall_final_grade_for_course(finaid_course) == "74"
 
