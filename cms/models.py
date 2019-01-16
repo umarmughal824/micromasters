@@ -13,9 +13,12 @@ from wagtail.admin.edit_handlers import (
     FieldPanel,
     InlinePanel,
     MultiFieldPanel,
+    StreamFieldPanel,
 )
-from wagtail.core.fields import RichTextField
+from wagtail.core.blocks import RichTextBlock
+from wagtail.core.fields import RichTextField, StreamField
 from wagtail.core.models import Orderable, Page
+from wagtail.contrib.table_block.blocks import TableBlock
 from wagtail.images.models import Image
 
 from courses.models import Program
@@ -110,12 +113,18 @@ class ProgramTabPage(ProgramChildPage):
     """
     CMS page for custom tabs on the program page
     """
-    content = RichTextField(
-        blank=True,
-        help_text='The content of this tab on the program page'
-    )
+    course_table_options = {
+        'startRows': 3,
+        'startCols': 2,
+    }
+
+    content = StreamField([
+        ('rich_text', RichTextBlock()),
+        ('course_table', TableBlock(table_options=course_table_options)),
+    ], blank=True, help_text='The content of this tab on the program page')
+
     content_panels = Page.content_panels + [
-        FieldPanel('content')
+        StreamFieldPanel('content'),
     ]
 
 
