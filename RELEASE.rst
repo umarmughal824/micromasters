@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.122.0
+---------------
+
+- Few more trademark updates (#4228)
+- add support for tables in program tab page
+- clarify review steps before adjusted grades are imported (#4218)
+- Program record view (#4204)
+- Trademark updates (#4222)
+
 Version 0.121.0 (Released December 17, 2018)
 ---------------
 
