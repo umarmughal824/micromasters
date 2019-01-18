@@ -75,7 +75,7 @@ def bind_args(func, *args, **kwargs):
     return lambda: func(*args, **kwargs)
 
 
-class DashboardStates:  # pylint: disable=too-many-locals
+class DashboardStates:  # pylint: disable=too-many-locals, too-many-public-methods
     """Runs through each dashboard state taking a snapshot"""
     def __init__(self, user=None):
         """
