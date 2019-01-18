@@ -453,6 +453,40 @@ class DashboardStates:  # pylint: disable=too-many-locals
                 course=course
             )
 
+    def two_no_show_exam_attempts(self):
+        """Passed and later failed course, and two exam attempts"""
+        self.make_fa_program_enrollment(FinancialAidStatus.AUTO_APPROVED)
+
+        course = Course.objects.get(title='Digital Learning 200')
+        course_run = CourseRunFactory(course=course, edx_course_key='course-passed')
+        call_command(
+            "alter_data", 'set_to_passed', '--username', 'staff',
+            '--course-run-key', course_run.edx_course_key
+        )
+
+        ExamProfileFactory.create(status='success', profile=self.user.profile)
+        # run 1
+        exam_run = ExamRunFactory.create(course=course, eligibility_past=True, scheduling_past=True)
+        ExamAuthorizationFactory.create(
+            user=self.user, course=course, exam_run=exam_run, status='success', exam_taken=True, exam_no_show=True
+        )
+        # run 2
+        exam_run = ExamRunFactory.create(course=course, eligibility_past=True, scheduling_past=True)
+        ExamAuthorizationFactory.create(
+            user=self.user, course=course, exam_run=exam_run, status='success', exam_taken=True, exam_no_show=True
+        )
+        # another offered
+        course_run = CourseRunFactory.create(course=course, edx_course_key='course-enrollable')
+        call_command(
+            "alter_data", 'set_to_offered', '--username', 'staff',
+            '--course-run-key', course_run.edx_course_key
+        )
+        course_run = CourseRunFactory.create(course=course, edx_course_key='course-failed')
+        call_command(
+            "alter_data", 'set_to_failed', '--username', 'staff',
+            '--course-run-key', course_run.edx_course_key, '--audit',
+        )
+
     def create_paid_enrolled_currently_with_future_run(self):
         """Make paid and enrolled with offered currently and a future run """
         self.make_fa_program_enrollment(FinancialAidStatus.AUTO_APPROVED)
@@ -530,6 +564,7 @@ class DashboardStates:  # pylint: disable=too-many-locals
         yield (self.create_passed_and_upgrade_deadline_past, 'passed_and_missed_deadline_and_fail_in_next')
         yield (self.create_failed_course_price_pending, 'failed_and_pending_price')
         yield (self.create_audited_passed_enrolled_again_failed, 'create_audited_passed_enrolled_again_failed')
+        yield (self.two_no_show_exam_attempts, 'two_no_show_exam_attempts')
 
         for tup in itertools.product([True, False], repeat=3):
             enrollable, future_exam, current = tup
@@ -687,6 +722,8 @@ def test_dashboard_states(browser, override_allowed_hosts, seeded_database_loade
                     Role.objects.create(role=Staff.ROLE_ID, user=dashboard_states.user, program=program)
             filename = make_filename(num, name, output_directory=output_directory, use_mobile=use_mobile)
             new_url = run_scenario()
+            # import pdb
+            # pdb.set_trace()
             if new_url is None:
                 if use_learner_page:
                     new_url = '/learner'
