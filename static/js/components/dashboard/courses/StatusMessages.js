@@ -305,7 +305,11 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
   }
 
   //Exam messages only
-  if ((hasPassedCourseRun(course) || hasCurrentlyEnrolledCourseRun(course)) && exams && paid) {
+  if (
+    (hasPassedCourseRun(course) || hasCurrentlyEnrolledCourseRun(course)) &&
+    exams &&
+    paid
+  ) {
     let message
     if (!passedExam) {
       message = failedExam
