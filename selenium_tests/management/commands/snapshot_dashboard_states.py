@@ -722,8 +722,6 @@ def test_dashboard_states(browser, override_allowed_hosts, seeded_database_loade
                     Role.objects.create(role=Staff.ROLE_ID, user=dashboard_states.user, program=program)
             filename = make_filename(num, name, output_directory=output_directory, use_mobile=use_mobile)
             new_url = run_scenario()
-            # import pdb
-            # pdb.set_trace()
             if new_url is None:
                 if use_learner_page:
                     new_url = '/learner'

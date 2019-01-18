@@ -33,10 +33,10 @@ import {
   isEnrollableRun,
   userIsEnrolled,
   isOfferedInUncertainFuture,
-  isPassedOrCurrentlyEnrolled,
   notNilorEmpty,
   hasCanUpgradeCourseRun,
-  hasMissedDeadlineCourseRun
+  hasMissedDeadlineCourseRun,
+  hasCurrentlyEnrolledCourseRun
 } from "./util"
 import {
   hasPassingExamGrade,
@@ -305,7 +305,7 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
   }
 
   //Exam messages only
-  if (isPassedOrCurrentlyEnrolled(firstRun) && exams && paid) {
+  if ((hasPassedCourseRun(course) || hasCurrentlyEnrolledCourseRun(course)) && exams && paid) {
     let message
     if (!passedExam) {
       message = failedExam
