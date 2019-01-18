@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.122.0
+Version 0.122.0 (Released January 18, 2019)
 ---------------
 
 - Few more trademark updates (#4228)
