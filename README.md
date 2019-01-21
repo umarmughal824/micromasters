@@ -81,7 +81,7 @@ and add a new Application. Fill in the values as follows:
 
 - **User**: Use the lookup (magnifying glass) to find your superuser from the previous step.
 - **Redirect uris**: The URL where MicroMaster’s will be running, followed by "/complete/edxorg/". 
-  `http://localhost:8079/complete/edxorg/` should work for Linux and MacOS users
+  `http://localhost:8079/complete/edxorg/` should work for Linux and OSX users
 - **Client type**: Set to '_Confidential_'.
 - **Authorization grant type**: Set to '_Authorization Code_'.
 - **Name**: Anything you want. Something like 'mm-local' would do fine here.
@@ -96,7 +96,7 @@ a template to create your ``.env`` file. For MicroMasters to work, it needs 4 va
 
     The base URL where the LMS server is running on your machine. 
     **Linux Users** use ``http://localhost:18000``, 
-    **MacOS Users** The MicroMasters container won't be able to reach the LMS container without a name. Use 
+    **OSX Users** The MicroMasters container won't be able to reach the LMS container without a name. Use 
     ``http://edx.devstack.lms:18000`` and make sure `edx.devstack.lms` is configured to point to 127.0.0.1 in your
    `/etc/hosts` file.  The LMS server runs on port ``18000`` by default.
     
@@ -106,6 +106,17 @@ a template to create your ``.env`` file. For MicroMasters to work, it needs 4 va
     **Client id:** and **Client secret:** values should be auto-generated for
     that new Application. Use those values for the corresponding ``EDXORG_``
     variables in the ``.env`` file.
+
+#### 6) [OSX] Connect the MicroMasters web container to the edX devstack network
+
+MicroMasters containers and edX docker devstack containers run on separate networks. We need MicroMasters to be able
+to connect to the lms application to complete oauth authentication. Run the following command to add the MM web
+container to the devstack network:
+
+- ``docker network connect devstack_default micromasters_web_1``
+
+Unless we can find a way to add this to docker-compose.yml, you'll have to run this command every time you 
+start the MicroMasters containers. 
 
 #### General edX devstack debugging notes
 
