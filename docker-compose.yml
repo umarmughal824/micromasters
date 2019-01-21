@@ -100,8 +100,3 @@ services:
     ports:
         - "2022:22"
     command: odl:123:1001:1001:results,results/topvue
-
-networks:
-  default:
-    external:
-      name: devstack_default
