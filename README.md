@@ -80,7 +80,8 @@ navigate to the Django OAuth Toolkit section (http://localhost:18000/admin/oauth
 and add a new Application. Fill in the values as follows:
 
 - **User**: Use the lookup (magnifying glass) to find your superuser from the previous step.
-- **Redirect uris**: `http://localhost:8079` should work for Linux and MacOS users
+- **Redirect uris**: The URL where MicroMaster’s will be running, followed by "/complete/edxorg/". 
+  `http://localhost:8079/complete/edxorg/` should work for Linux and MacOS users
 - **Client type**: Set to '_Confidential_'.
 - **Authorization grant type**: Set to '_Authorization Code_'.
 - **Name**: Anything you want. Something like 'mm-local' would do fine here.
