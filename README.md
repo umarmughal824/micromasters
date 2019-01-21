@@ -26,40 +26,28 @@ likely need to run it locally for other projects in the future.
 
 #### 1) Install edX
 
-Download the edX Vagrant box according to
-[these instructions provided by edX](https://edx-installing-configuring-and-running.readthedocs.io/en/latest/installation/devstack/install_devstack.html#installing-devstack-with-a-direct-vagrant-box-download)
-
-*NOTE: edX now maintains a [Docker-based solution](https://github.com/edx/devstack) for running Open edX, and they have stopped supporting the Vagrant solution. We have not yet done the work necessary to properly
-integrate MicroMasters with Open edX running on Docker in a development context, so Vagrant is still recommended here*
+Download and install the edX Docker containers according to [these instructions provided by 
+edX](https://edx-installing-configuring-and-running.readthedocs.io/en/latest/installation/install_devstack.html)
 
 #### 2) Connect to the VM and run the LMS server
 
 edX has [instructions for this as well](https://edx-installing-configuring-and-running.readthedocs.io/en/latest/installation/devstack/start_devstack.html#connect-to-devstack-vm).
 More concisely, these are the commands you should run to connect to the VM and run the LMS server:
 
-    # In your local edx_devstack/ directory, start the VM
-    vagrant up
-    # Once that's done, ssh into the running VM
-    vagrant ssh
-    # Switch to the edxapp account within SSH session
-    sudo su edxapp
-    # Run the LMS server
-    paver devstack lms
-    # To run the server without updating requirements and compiling assets, add the '--fast' parameter
-    # eg: paver devstack --fast lms
-
-A few notes:
-
-- Switching to the edxapp account sources the edxapp environment and sets the
- current working directory to the edx-platform repository.
-- "LMS" stands for "Learning Management System". The Open edX platform has
- [several different components](http://edx.readthedocs.io/projects/edx-developer-guide/en/latest/architecture.html#overview);
- MicroMaster's only depends on LMS.
+    # In your local edx_devstack/ directory, checkout the master branch of devstack
+    git checkout master
+    # assuming you want to run the master branch of edX, check it out
+    make dev.checkout
+    # update devstack, just in case:
+    make down
+    make pull
+    make dev.up
 
 #### 3) Configure a user with superuser permissions
 
-edX devstack ships with [several test users](https://openedx.atlassian.net/wiki/spaces/OXA/pages/157751033/What+are+the+default+accounts+and+passwords) (there
-is also an `edx` user not listed in this wiki, already configured as a superuser). To keep things
+edX devstack ships with [several test 
+users](https://openedx.atlassian.net/wiki/spaces/OXA/pages/157751033/What+are+the+default+accounts+and+passwords) 
+(there is also an `edx` user not listed in this wiki, already configured as a superuser). To keep things
 simple, it is **highly** recommended that for your main MicroMasters login you use (a) the `edx` superuser, or (b) 
 one of the other test users and manually set superuser permissions. Setting superuser permissions can be done
 in Django admin or in a shell. It's preferable to do it in Django admin as you'll
@@ -68,6 +56,7 @@ need to use Django admin for the next step anyway.
 - **In Django admin**
 
     Run the server (discussed in step 2) and navigate to Django admin
+### change this URL
     (eg: http://192.168.33.10:8000/admin). In the **Authentication and Authorization**
     section, select a **User**, or add one then select it. In the **Permissions**
     section, check the **Superuser status** box and save.
@@ -88,11 +77,13 @@ need to use Django admin for the next step anyway.
 
 Open Django admin (see "In Django admin" in the previous step),
 login as the user you chose in the previous step,
+### check/change this URL
 navigate to the Django OAuth Toolkit section (/admin/oauth2_provider/),
 and add a new Application. Fill in the values as follows:
 
 - **User**: Use the lookup (magnifying glass) to find your superuser from the previous step.
 - **Redirect uris**: The URL where MicroMaster’s will be running, followed by "/complete/edxorg/".
+### check/change these URLs
  **Linux users:** the MicroMaster’s URL will be `http://localhost:8079`. **OSX users:** The MicroMaster's
  IP can be found by running ``docker-machine ip <machine_name>`` from the host machine. MicroMaster’s runs on port
  ``8079`` by default, so the full URL should be something like
@@ -108,6 +99,7 @@ a template to create your ``.env`` file. For MicroMasters to work, it needs 4 va
 
 - ``EDXORG_BASE_URL``
 
+### check/change these URLs
     The base URL where the LMS server is running on your machine. When running in Vagrant, this 
     _should_ be ``http://192.168.33.10:8000``. The Vagrant VM IP is hard-coded in the Vagrantfile, and 
     it's unlikely that edX will change that. The LMS server runs on port ``8000`` by default.
@@ -121,7 +113,7 @@ a template to create your ``.env`` file. For MicroMasters to work, it needs 4 va
 
 #### General edX devstack debugging notes
 
-- To update your devstack with important changes from edX, run `vagrant provision` in
+- To update your devstack with important changes from edX, run `make dev.provision` in
 your edx_devstack directory. This will pull down the latest release and run migrations, among
 other things.
 - If you get an error related to Mongo locking while ssh'ed into the Vagrant VM, run the following
