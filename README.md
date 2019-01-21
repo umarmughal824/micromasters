@@ -56,8 +56,7 @@ need to use Django admin for the next step anyway.
 - **In Django admin**
 
     Run the server (discussed in step 2) and navigate to Django admin
-### change this URL
-    (eg: http://192.168.33.10:8000/admin). In the **Authentication and Authorization**
+    (eg: http://localhost:18000/admin/). In the **Authentication and Authorization**
     section, select a **User**, or add one then select it. In the **Permissions**
     section, check the **Superuser status** box and save.
 
@@ -77,20 +76,15 @@ need to use Django admin for the next step anyway.
 
 Open Django admin (see "In Django admin" in the previous step),
 login as the user you chose in the previous step,
-### check/change this URL
-navigate to the Django OAuth Toolkit section (/admin/oauth2_provider/),
+navigate to the Django OAuth Toolkit section (http://localhost:18000/admin/oauth2_provider/),
 and add a new Application. Fill in the values as follows:
 
 - **User**: Use the lookup (magnifying glass) to find your superuser from the previous step.
-- **Redirect uris**: The URL where MicroMaster’s will be running, followed by "/complete/edxorg/".
-### check/change these URLs
- **Linux users:** the MicroMaster’s URL will be `http://localhost:8079`. **OSX users:** The MicroMaster's
- IP can be found by running ``docker-machine ip <machine_name>`` from the host machine. MicroMaster’s runs on port
- ``8079`` by default, so the full URL should be something like
- ``http://192.168.99.100:8079/complete/edxorg/``
+- **Redirect uris**: `http://localhost:8079` should work for Linux and MacOS users
 - **Client type**: Set to '_Confidential_'.
 - **Authorization grant type**: Set to '_Authorization Code_'.
 - **Name**: Anything you want. Something like 'mm-local' would do fine here.
+- **Skip authorization**: Check this box to mimic the UX in production.
 
 #### 5) Copy relevant values to use in the MicroMasters .env file
 
@@ -99,10 +93,11 @@ a template to create your ``.env`` file. For MicroMasters to work, it needs 4 va
 
 - ``EDXORG_BASE_URL``
 
-### check/change these URLs
-    The base URL where the LMS server is running on your machine. When running in Vagrant, this 
-    _should_ be ``http://192.168.33.10:8000``. The Vagrant VM IP is hard-coded in the Vagrantfile, and 
-    it's unlikely that edX will change that. The LMS server runs on port ``8000`` by default.
+    The base URL where the LMS server is running on your machine. 
+    **Linux Users** use ``http://localhost:18000``, 
+    **MacOS Users** The MicroMasters container won't be able to reach the LMS container without a name. Use 
+    ``http://edx.devstack.lms:18000`` and make sure `edx.devstack.lms` is configured to point to 127.0.0.1 in your
+   `/etc/hosts` file.  The LMS server runs on port ``18000`` by default.
     
 - ``EDXORG_CLIENT_ID`` and ``EDXORG_CLIENT_SECRET``
 
