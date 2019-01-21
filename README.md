@@ -116,8 +116,7 @@ a template to create your ``.env`` file. For MicroMasters to work, it needs 4 va
 - To update your devstack with important changes from edX, run `make dev.provision` in
 your edx_devstack directory. This will pull down the latest release and run migrations, among
 other things.
-- If you get an error related to Mongo locking while ssh'ed into the Vagrant VM, run the following
- **as the default 'vagrant' user, NOT as the 'edxapp' user**:
+- If you get an error related to Mongo locking, run the following in the lms container
 
        function mongo_unlock {
            sudo rm /edx/var/mongo/mongodb/mongod.lock
