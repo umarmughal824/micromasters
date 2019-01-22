@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.123.0
+---------------
+
+- Upgrade Django and urllib3 (#4226)
+- Fix exam messages when user has failed and passed course runs (#4234)
+- Add edX logo to Program Record (#4230)
+
 Version 0.122.0 (Released January 18, 2019)
 ---------------
 
