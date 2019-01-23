@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.123.0
+Version 0.123.0 (Released January 23, 2019)
 ---------------
 
 - Upgrade Django and urllib3 (#4226)
