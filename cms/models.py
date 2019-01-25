@@ -116,6 +116,7 @@ class ProgramTabPage(ProgramChildPage):
     course_table_options = {
         'startRows': 3,
         'startCols': 2,
+        'renderer': 'html',
     }
 
     content = StreamField([
