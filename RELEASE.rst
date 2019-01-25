@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.123.1
+---------------
+
+- allow link in table block
+
 Version 0.123.0 (Released January 23, 2019)
 ---------------
 
