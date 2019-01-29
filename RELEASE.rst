@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.124.0
+---------------
+
+- add Completed program style (#4236)
+
 Version 0.123.1 (Released January 28, 2019)
 ---------------
 
