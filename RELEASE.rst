@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.124.1
+Version 0.124.1 (Released January 31, 2019)
 ---------------
 
 - Add a letter grade to Program Grades (#4241)
