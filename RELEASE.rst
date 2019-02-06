@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.125.0
+Version 0.125.0 (Released February 06, 2019)
 ---------------
 
 - Share Program Records Link Dialog (#4242)
