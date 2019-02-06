@@ -83,6 +83,11 @@ const openDialog = () => store.dispatch(setDialogVisibility(true))
 
 const nodes = [...document.querySelectorAll(".open-signup-dialog")]
 
+const url = new URL(window.location.href)
+if (url.searchParams.get("next")) {
+  openDialog()
+}
+
 nodes.forEach(signUpButton => {
   signUpButton.onclick = openDialog
 })
