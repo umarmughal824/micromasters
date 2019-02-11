@@ -57,7 +57,9 @@ services:
       sleep 3 &&
       python3 manage.py collectstatic --noinput &&
       python3 manage.py migrate --no-input &&
-      uwsgi uwsgi.ini'
+      uwsgi uwsgi.ini --honour-stdin'
+    stdin_open: true
+    tty: true
     ports:
       - "8077:8077"
     links:
