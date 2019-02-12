@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.126.0
+---------------
+
+- update docker compose file for local debugging
+- show signup/login dialog, if user is not logged in
+
 Version 0.125.0 (Released February 06, 2019)
 ---------------
 
