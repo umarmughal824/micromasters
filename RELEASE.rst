@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.127.0
+---------------
+
+- add RFC template (#4255)
+
 Version 0.126.0 (Released February 19, 2019)
 ---------------
 
