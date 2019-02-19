@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.126.0
+Version 0.126.0 (Released February 19, 2019)
 ---------------
 
 - update docker compose file for local debugging
