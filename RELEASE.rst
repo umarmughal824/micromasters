@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.127.1
+---------------
+
+- rfc for congratulation letter on dashboard (#4258)
+- add search, filter and fields to order admin list view (#4257)
+- upgrade django to 2.1.7 (#4256)
+- fix `next` parameter issue for /discussions (#4253)
+
 Version 0.127.0 (Released February 20, 2019)
 ---------------
 
