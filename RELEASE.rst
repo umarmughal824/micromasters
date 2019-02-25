@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.127.1
+Version 0.127.1 (Released February 25, 2019)
 ---------------
 
 - rfc for congratulation letter on dashboard (#4258)
