@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.128.0
+Version 0.128.0 (Released February 28, 2019)
 ---------------
 
 - Show Created Date in Grade Records (#4264)
