@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.129.0
+---------------
+
+- fix css on program page
+
 Version 0.128.0 (Released February 28, 2019)
 ---------------
 
