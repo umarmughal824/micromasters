@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load i18n static wagtailimages_tags %}
+
+{% block title %}{% trans "MITx MicroMasters" %}{% endblock %}
+
+{% block content %}
+
+<div class="letter">
+
+    <div class="letter-logo">
+        <img class="mit-logo" src="{% static 'images/mitx_logo.png' %}" alt="">
+        {% image letter_logo max-200x100 %}
+    </div>
+
+    <div class="letter-content">
+
+        <p>
+            <strong>Dear {{ name }},</strong>
+        </p>
+
+        <div class="letter-text">
+            {{ letter_text | safe}}
+        </div>
+
+        <p>
+            Cordially Yours,
+        </p>
+
+        <div class="signatories">
+            {% for signatory in signatories %}
+            <div class="signatory">
+                <div class="sig-image">
+                    {% image signatory.signature_image max-200x100 %}
+                </div>
+
+                <div class="name">{{ signatory.name }}</div>
+                <div>{{ signatory.title_line_1 }}</div>
+                {% if signatory.title_line_2 %}
+                <div>{{ signatory.title_line_2 }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+    <div class="program-title">
+        MITx MicroMasters in {{ program_title }}
+    </div>
+</div>
+
+{% include "footer.html" %}
+{% endblock %}

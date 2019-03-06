@@ -9,12 +9,16 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView
 from rest_framework.generics import Http404
 
-from cms.models import CourseCertificateSignatories, ProgramCertificateSignatories
+from cms.models import CourseCertificateSignatories, ProgramCertificateSignatories, ProgramLetterSignatory
 from dashboard.api import get_certificate_url
 from dashboard.models import ProgramEnrollment
 from dashboard.utils import get_mmtrack, convert_to_letter
-from grades.models import MicromastersCourseCertificate, MicromastersProgramCertificate, CombinedFinalGrade
-
+from grades.models import (
+    MicromastersCourseCertificate,
+    MicromastersProgramCertificate,
+    MicromastersProgramCommendation,
+    CombinedFinalGrade,
+)
 log = logging.getLogger(__name__)
 
 
@@ -103,6 +107,67 @@ class ProgramCertificateView(CertificateView):
         context['signatories'] = list(signatories)
         context['certificate'] = certificate
 
+        return context
+
+
+class ProgramLetterView(TemplateView):
+    """
+    View for program letters
+    """
+
+    template_name = "program_letter.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        letter = (
+            MicromastersProgramCommendation.objects.filter(uuid=kwargs.get('letter_uuid')).
+            select_related('program', 'user__profile').
+            first()
+        )
+
+        if not letter:
+            raise Http404
+
+        program = letter.program
+
+        signatories = ProgramLetterSignatory.objects.filter(program_page__program=program).select_related(
+            'program_page__program')
+        if not signatories.exists():
+            log.error(
+                'Program "%s" (id: %s) does not have any signatories set in the CMS.',
+                program.title,
+                program.id
+            )
+            raise Http404
+
+        program_letter_logo = signatories[0].program_page.program_letter_logo
+
+        if not program_letter_logo:
+            log.error(
+                'Program "%s" (id: %s) does not have letter logo set in the CMS.',
+                program.title,
+                program.id
+            )
+            raise Http404
+
+        program_letter_text = signatories[0].program_page.program_letter_text
+
+        if not program_letter_text:
+            log.error(
+                'Program "%s" (id: %s) does not have letter text set in the CMS.',
+                program.title,
+                program.id
+            )
+            raise Http404
+
+        context.update({
+            'program_title': program.title,
+            'letter_logo': program_letter_logo,
+            'name': letter.user.profile.full_name,
+            'letter_text': program_letter_text,
+            'signatories': list(signatories),
+            'letter': letter,
+        })
         return context
 
 
