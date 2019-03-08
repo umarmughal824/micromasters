@@ -5,11 +5,11 @@ language: ruby
 matrix:
   include:
     - install:
-      cache: pip
       - env | grep TRAVIS > .env
       - env | grep CI >> .env
       - docker-compose -f docker-compose.yml -f docker-compose.travis.yml run celery echo
       script: (docker-compose -f docker-compose.yml -f docker-compose.travis.yml up celery &); sleep 5; docker-compose -f docker-compose.yml -f docker-compose.travis.yml run web tox
+      cache: pip
       services:
         - docker
       env:
