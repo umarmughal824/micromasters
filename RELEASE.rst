@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.129.1 (Released March 08, 2019)
+---------------
+
+- fix migration dependency
+- remove max validation from final grade
+- Add support for congratulation letters for non-fa programs (#4263)
+
 Version 0.129.0 (Released March 05, 2019)
 ---------------
 
