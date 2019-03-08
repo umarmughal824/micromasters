@@ -5,6 +5,7 @@ language: ruby
 matrix:
   include:
     - install:
+      cache: pip
       - env | grep TRAVIS > .env
       - env | grep CI >> .env
       - docker-compose -f docker-compose.yml -f docker-compose.travis.yml run celery echo

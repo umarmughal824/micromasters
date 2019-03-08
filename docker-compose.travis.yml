@@ -1,10 +1,5 @@
-version: '2.1'
+version: '3.6'
 services:
-  python:
-    build:
-      context: .
-      dockerfile: ./travis/Dockerfile-travis-web
-
   celery:
     build:
       context: .
@@ -15,13 +10,10 @@ services:
       MAILGUN_KEY: 'fake'
       ELASTICSEARCH_INDEX: 'testindex'
       OPEN_DISCUSSIONS_SITE_KEY: 'fake'
-
-  web:
-    build:
-      context: .
-      dockerfile: ./travis/Dockerfile-travis-web
-
-  selenium:
-    build:
-      context: .
-      dockerfile: ./travis/Dockerfile-travis-web
+volumes:
+  # use the host system's pip cache
+  pip-cache:
+    driver: local
+    driver_opts:
+       device: /tmp/.cache/pip
+       o: bind
