@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.129.1
+Version 0.129.1 (Released March 08, 2019)
 ---------------
 
 - fix migration dependency
