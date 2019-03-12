@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.130.0
+---------------
+
+- change log level form error to info
+- remove extra mit logo
+
 Version 0.129.2 (Released March 12, 2019)
 ---------------
 
