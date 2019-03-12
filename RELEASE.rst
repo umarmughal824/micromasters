@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.129.2
+Version 0.129.2 (Released March 12, 2019)
 ---------------
 
 - prioritize the syncing of channel memberships
