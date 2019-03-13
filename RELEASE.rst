@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.130.0
+Version 0.130.0 (Released March 13, 2019)
 ---------------
 
 - change log level form error to info
