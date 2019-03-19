@@ -20,18 +20,6 @@ def handle_create_coursecertificate(sender, instance, created, **kwargs):  # pyl
         transaction.on_commit(lambda: generate_program_certificate(user, program))
 
 
-@receiver(post_save, sender=MicromastersCourseCertificate, dispatch_uid="coursecertificate_post_save_for_letters")
-def handle_for_createprogram_letters(sender, instance, created, **kwargs):  # pylint: disable=unused-argument
-    """
-    When a MicromastersCourseCertificate model is created
-    """
-    if created:
-        user = instance.user
-        program = instance.course.program
-        if not program.financial_aid_availability:
-            transaction.on_commit(lambda: generate_program_letter(user, program))
-
-
 @receiver(post_save, sender=ProctoredExamGrade, dispatch_uid="examgrade_post_save")
 def handle_create_exam_grade(sender, instance, created, **kwargs):  # pylint: disable=unused-argument
     """
@@ -45,4 +33,12 @@ def handle_create_final_grade(sender, instance, created, **kwargs):  # pylint: d
     """
     When a FinalGrade model is created or updated
     """
-    transaction.on_commit(lambda: update_or_create_combined_final_grade(instance.user, instance.course_run.course))
+    def _on_transaction_commit():
+        """If either are applicable, update/create combined final grade and generate program letter"""
+        user = instance.user
+        course = instance.course_run.course
+        update_or_create_combined_final_grade(user, course)
+        if created and not course.program.financial_aid_availability:
+            generate_program_letter(instance.user, course.program)
+
+    transaction.on_commit(_on_transaction_commit)

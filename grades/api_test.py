@@ -503,11 +503,11 @@ class GenerateProgramLetterApiTests(MockedESTestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = SocialUserFactory.create()
-
         cls.run_1 = CourseRunFactory.create(
             freeze_grade_date=now_in_utc()-timedelta(days=1),
             course__program__financial_aid_availability=True,
         )
+        CourseRunGradingStatus.objects.create(course_run=cls.run_1, status='complete')
         cls.program = cls.run_1.course.program
 
     def test_successful_program_letter_generation(self):
@@ -515,19 +515,15 @@ class GenerateProgramLetterApiTests(MockedESTestCase):
         Test happy scenario
         """
         self.program.financial_aid_availability = False
-
-        final_grade = FinalGradeFactory.create(
-            user=self.user,
-            course_run=self.run_1,
-            passed=True,
-            status='complete',
-            grade=0.8
-        )
-
-        CourseRunGradingStatus.objects.create(course_run=self.run_1, status='complete')
-
+        self.program.save()
         with mute_signals(post_save):
-            MicromastersCourseCertificate.objects.create(course=final_grade.course_run.course, user=self.user)
+            FinalGradeFactory.create(
+                user=self.user,
+                course_run=self.run_1,
+                passed=True,
+                status='complete',
+                grade=0.8
+            )
 
         cert_qset = MicromastersProgramCommendation.objects.filter(user=self.user, program=self.program)
         assert cert_qset.exists() is False
@@ -536,58 +532,40 @@ class GenerateProgramLetterApiTests(MockedESTestCase):
 
     def test_with_fa_program(self):
         """
-        Test that letter won't be created if program is fa.
+        Test that letter won't be created if program is FA-enabled
         """
-        final_grade = FinalGradeFactory.create(
-            user=self.user,
-            course_run=self.run_1,
-            passed=True,
-            status='complete',
-            grade=0.8
-        )
         self.program.financial_aid_availability = True
         self.program.save()
-
         with mute_signals(post_save):
-            MicromastersCourseCertificate.objects.create(course=final_grade.course_run.course, user=self.user)
+            FinalGradeFactory.create(
+                user=self.user,
+                course_run=self.run_1,
+                passed=True,
+                status='complete',
+                grade=0.8
+            )
 
         cert_qset = MicromastersProgramCommendation.objects.filter(user=self.user, program=self.program)
         assert cert_qset.exists() is False
-
         api.generate_program_letter(self.user, self.program)
         assert cert_qset.exists() is False
 
     def test_already_has_program_letter(self):
         """
-        Test already has a letter
+        Test scenario where a user already has a letter for the given program
         """
         MicromastersProgramCommendation.objects.create(user=self.user, program=self.program)
         # should not raise an exception
         api.generate_program_letter(self.user, self.program)
+        assert MicromastersProgramCommendation.objects.filter(user=self.user, program=self.program).count() == 1
 
     def test_has_no_final_grade(self):
         """
-        Test has no final grade
+        Test that a user without the needed final grades will not have a letter generated
         """
-        CourseRunGradingStatus.objects.create(course_run=self.run_1, status='complete')
+        self.program.financial_aid_availability = False
+        self.program.save()
         letter_qset = MicromastersProgramCommendation.objects.filter(user=self.user, program=self.program)
-        api.generate_program_letter(self.user, self.program)
-        assert letter_qset.exists() is False
-
-    def test_final_grade_with_no_certificate(self):
-        """
-        Test has a final grade but no certificate
-        """
-        FinalGradeFactory.create(
-            user=self.user,
-            course_run=self.run_1,
-            passed=True,
-            status='complete',
-            grade=0.8
-        )
-        CourseRunGradingStatus.objects.create(course_run=self.run_1, status='complete')
-        letter_qset = MicromastersProgramCommendation.objects.filter(user=self.user, program=self.program)
-        assert letter_qset.exists() is False
         api.generate_program_letter(self.user, self.program)
         assert letter_qset.exists() is False
 
