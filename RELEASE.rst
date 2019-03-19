@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.131.0
+Version 0.131.0 (Released March 19, 2019)
 ---------------
 
 - Fixed logic for program commendation letter creation
