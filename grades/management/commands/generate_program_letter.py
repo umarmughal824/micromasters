@@ -1,5 +1,5 @@
 """
-Find all users those have completed the non-FA program and create letters
+Finds users that have passed all courses in non-FA programs and generates commendation letters for them
 """
 from django.core.management import BaseCommand
 
@@ -10,9 +10,9 @@ from grades.api import generate_program_letter
 
 class Command(BaseCommand):
     """
-    Finds all users, those have completed non-FA programs and generate letter for them
+    Finds users that have passed all courses in non-FA programs and generates commendation letters for them.
     """
-    help = "Finds all users those have completed the non-FA program and generate letter for them."
+    help = "Finds users that have passed all courses in non-FA programs and generates commendation letters for them."
 
     def handle(self, *args, **kwargs):  # pylint: disable=unused-argument
         programs = Program.objects.filter(live=True, financial_aid_availability=False)
