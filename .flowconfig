@@ -3,6 +3,20 @@
 .*/node_modules/draft-js/.*
 .*/node_modules/draftjs-utils/.*
 .*/node_modules/react-event-listener/src/index.js
+.*/node_modules/autoprefixer/node_modules/chalk/index.js.flow
+.*/node_modules/cramda/src/cramda.js
+.*/node_modules/icss-utils/node_modules/chalk/index.js.flow
+.*/node_modules/inquirer/node_modules/chalk/index.js.flow
+.*/node_modules/prettier-eslint/node_modules/chalk/index.js.flow
+.*/node_modules/prettier-eslint-cli/.*
+.*/node_modules/postcss-loader/node_modules/chalk/index.js.flow
+.*/node_modules/postcss-modules-extract-imports/node_modules/chalk/index.js.flow
+.*/node_modules/postcss-modules-local-by-default/node_modules/chalk/index.js.flow
+.*/node_modules/postcss-modules-scope/node_modules/chalk/index.js.flow
+.*/node_modules/postcss-modules-values/node_modules/chalk/index.js.flow
+.*/node_modules/react-draft-wysiwyg/.*
+.*/node_modules/react-virtualized/.*
+.*/node_modules/table/node_modules/chalk/index.js.flow
 .*.git/.*
 .*/staticfiles/.*
 
