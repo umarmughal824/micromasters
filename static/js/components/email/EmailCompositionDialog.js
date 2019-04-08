@@ -2,6 +2,7 @@
 import React from "react"
 import Dialog from "material-ui/Dialog"
 import R from "ramda"
+// $FlowFixMe: Flow thinks this module isn't present for some reason
 import { Editor } from "react-draft-wysiwyg"
 // $FlowFixMe: Flow thinks this module isn't present for some reason
 import { EditorState, ContentState, convertFromHTML, Modifier } from "draft-js"
