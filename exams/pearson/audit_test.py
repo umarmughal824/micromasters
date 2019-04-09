@@ -12,7 +12,7 @@ import re
 
 from django.core.exceptions import ImproperlyConfigured
 from django.test import override_settings
-import gnupg
+from pretty_bad_protocol import gnupg
 import pytest
 
 from exams.pearson import audit
@@ -179,7 +179,7 @@ def test_exam_data_auditor_public_key(auditor):
 def test_exam_data_auditor_configure(auditor):
     """Test that configure() succeeds with correct settings"""
     auditor.configure()
-    assert auditor.gpg.list_keys().fingerprints == [FINGERPRINT_STRIPPED]
+    assert FINGERPRINT_STRIPPED in auditor.gpg.list_keys().fingerprints
     assert auditor.configured is True
 
 
