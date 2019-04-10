@@ -10,8 +10,8 @@ from boto.s3 import (
 )
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-import gnupg
-import gnupg._util
+from pretty_bad_protocol import gnupg
+import pretty_bad_protocol._util
 
 from micromasters import utils
 
@@ -25,7 +25,7 @@ log = logging.getLogger(__name__)
 
 # monkey patch gnupg so it doesn't utf-8 encode our files
 # see: https://github.com/isislovecruft/python-gnupg/issues/169
-gnupg._util.binary = lambda data: data  # pylint: disable=protected-access
+pretty_bad_protocol._util.binary = lambda data: data  # pylint: disable=protected-access
 
 
 class S3AuditStorage:
