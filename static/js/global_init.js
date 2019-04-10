@@ -64,8 +64,8 @@ afterEach(function() {
   }
   document.body.innerHTML = ""
   global.SETTINGS = _createSettings()
-  window.localStorage.reset()
-  window.sessionStorage.reset()
+  window.localStorage.clear()
+  window.sessionStorage.clear()
   window.location = "http://fake/"
 
   // Comment next line to diagnose stray API calls. Also see relevant block in beforeEach
