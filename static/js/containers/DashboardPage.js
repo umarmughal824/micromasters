@@ -485,7 +485,7 @@ class DashboardPage extends React.Component {
     )
   }
 
-  skipFinancialAid = async programId => {
+  skipFinancialAid = programId => {
     const { dispatch, financialAid } = this.props
 
     const program = this.getCurrentlyEnrolledProgram()
@@ -497,10 +497,10 @@ class DashboardPage extends React.Component {
       ) &&
       financialAid.fetchSkipStatus === undefined
     ) {
-      try {
-        await dispatch(skipFinancialAid(programId))
+      return dispatch(skipFinancialAid(programId)).then(() => {
         this.setConfirmSkipDialogVisibility(false)
-      } catch (_) {
+      },
+      () => {
         this.setConfirmSkipDialogVisibility(false)
         dispatch(
           setToastMessage({
@@ -508,7 +508,7 @@ class DashboardPage extends React.Component {
             icon:    TOAST_FAILURE
           })
         )
-      }
+      })
     }
   }
 

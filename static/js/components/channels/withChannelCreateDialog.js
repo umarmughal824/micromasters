@@ -85,30 +85,28 @@ export const withChannelCreateDialog = (WrappedComponent: ReactClass<*>) => {
       )
     }
 
-    createChannel = async (
+    createChannel = (
       inputs: ChannelInputs,
       query: Object,
       programEnrollment: AvailableProgram
     ) => {
       const { dispatch } = this.props
-      try {
-        const channel = await dispatch(
-          actions.channels.post({
-            ...inputs,
-            query,
-            program_id: programEnrollment.id
-          })
-        )
-
+      dispatch(
+        actions.channels.post({
+          ...inputs,
+          query,
+          program_id: programEnrollment.id
+        })
+      ).then(channel => {
         this.closeAndClearDialog()
 
         if (SETTINGS.open_discussions_redirect_url) {
           const channelUrl = `${SETTINGS.open_discussions_redirect_url}channel/${channel.name}`
           window.open(channelUrl, "_self")
         }
-      } catch (remoteErrors) {
+      }, remoteErrors => {
         dispatch(updateChannelErrors(remoteErrors))
-      }
+      })
     }
 
     updateFieldEdit = R.curry((fieldName, e): void => {

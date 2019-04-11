@@ -350,6 +350,7 @@ describe("DashboardPage", () => {
       UPDATE_COURSE_STATUS
     ])
     let waitResolve, waitPromise, waitStub
+
     beforeEach(() => {
       waitPromise = new Promise(resolve => {
         // Note that most tests here won't call waitResolve at all so the promise won't resolve. The only tests

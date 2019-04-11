@@ -89,7 +89,7 @@ describe("LearnerSearchPage", function() {
       assert.equal(replySpy.callCount, 1)
 
       const callArgs = replySpy.firstCall.args[0]
-      assert.deepEqual(callArgs.url, "_search")
+      assert.deepEqual(callArgs.url, "/_search")
       assert.deepEqual(callArgs.method, "post")
     })
   })

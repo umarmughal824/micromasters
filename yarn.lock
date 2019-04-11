@@ -1999,6 +1999,11 @@ cosmiconfig@^4.0.0:
     parse-json "^4.0.0"
     require-from-string "^2.0.1"
 
+countries-list@^2.4.2:
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/countries-list/-/countries-list-2.4.2.tgz#16d34de32ebd12b4f057ca4f6ee5e22fc6069f65"
+  integrity sha512-U8Hlh7L7ipmkCV53sukl7xI1fbwsfoKzvWEuyNSKFHVIDnG/uWmsUnhhKTlG8v4n2FfADhm+bYe1ia53c+J7lw==
+
 country-telephone-data@0.4.2:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/country-telephone-data/-/country-telephone-data-0.4.2.tgz#780124aa7c0a4c42fc26a388e5648c508b02b3ab"

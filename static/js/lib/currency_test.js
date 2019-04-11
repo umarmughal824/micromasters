@@ -36,10 +36,6 @@ describe("currency", () => {
       assert.equal("", currencyForCountry("asdfasdf"))
     })
 
-    it("should return an empty string if a country does not have a currency listing", () => {
-      assert.equal("", currencyForCountry("PS"))
-    })
-
     it("should return an empty string if a countrys currency is in the excluded list", () => {
       ["UY", "CH", "SS"].forEach(country => {
         assert.equal("", currencyForCountry(country))
