@@ -1,4 +1,4 @@
-FROM mitodl/micromasters_watch_travis_cc1461
+FROM mitodl/micromasters_watch_travis_68ac10
 
 WORKDIR /src
 
