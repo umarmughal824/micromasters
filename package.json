@@ -34,6 +34,7 @@
     "chai": "^4.0.2",
     "chai-as-promised": "^7.0.0",
     "codecov": "^2.2.0",
+    "countries-list": "^2.4.2",
     "css-loader": "^0.28.3",
     "currency-codes": "^1.1.2",
     "decimal.js-light": "^2.2.3",

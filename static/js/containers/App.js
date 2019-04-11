@@ -95,15 +95,19 @@ class App extends React.Component {
     dispatch(clearEnrollments())
   }
 
-  fetchUserProfile = async username => {
+  fetchUserProfile = (username: string) => {
     const { userProfile, dispatch, location: { pathname } } = this.props
     if (userProfile.getStatus === undefined) {
-      await dispatch(fetchUserProfile(username))
-      if (PROFILE_REGEX.test(pathname)) {
-        dispatch(startProfileEdit(SETTINGS.user.username))
-      }
+      dispatch(fetchUserProfile(username)).then(() => {
+        if (PROFILE_REGEX.test(pathname)) {
+          dispatch(startProfileEdit(SETTINGS.user.username)).then(() => {
+            this.requireCompleteProfile()
+          })
+        }
+      })
+    } else {
+      this.requireCompleteProfile()
     }
-    this.requireCompleteProfile()
   }
 
   requireCompleteProfile() {

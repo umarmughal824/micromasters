@@ -38,12 +38,8 @@ if (!Object.entries) {
 }
 
 import fetchMock from "fetch-mock"
-const localStorageMock = require("./util/test_utils").localStorageMock
 // eslint-disable-next-line mocha/no-top-level-hooks
 beforeEach(() => {
-  window.localStorage = localStorageMock()
-  window.sessionStorage = localStorageMock()
-
   // Uncomment to diagnose stray API calls. Also see relevant block in afterEach
   /*
   fetchMock.restore();

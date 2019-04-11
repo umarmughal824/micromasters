@@ -1,8 +1,8 @@
 // @flow
 import cc from "currency-codes"
 import R from "ramda"
+import { countries } from "countries-list"
 
-import { codeToCountryName } from "./location"
 import { labelSort } from "../util/util"
 
 export const excludedCurrencyCodes = [
@@ -37,15 +37,14 @@ const codesToOptions = R.compose(
 
 export const currencyOptions = codesToOptions(cc.codes())
 
-const currencyToCode = currency =>
-  currency.length === 0 ? "" : currency[0].code
+export const currencyForCountry = countryCode => {
+  const entry = countries[countryCode]
 
-const excludeSingleCode = code => (invalidCurrency(code) ? "" : code)
+  if (!entry) {
+    return ""
+  }
 
-export const currencyForCountry = R.compose(
-  excludeSingleCode,
-  currencyToCode,
-  cc.country,
-  R.toLower,
-  codeToCountryName
-)
+  const currency = entry.currency.split(",")[0]
+
+  return invalidCurrency(currency) ? "" : currency
+}
