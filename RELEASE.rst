@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.131.1
+Version 0.131.1 (Released April 11, 2019)
 ---------------
 
 - add 'program' after 'MITx MicroMasters' in footer (#4291)
