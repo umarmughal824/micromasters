@@ -485,7 +485,7 @@ class DashboardPage extends React.Component {
     )
   }
 
-  skipFinancialAid = programId => {
+  skipFinancialAid = (programId : number) : any => {
     const { dispatch, financialAid } = this.props
 
     const program = this.getCurrentlyEnrolledProgram()
