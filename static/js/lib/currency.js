@@ -37,7 +37,7 @@ const codesToOptions = R.compose(
 
 export const currencyOptions = codesToOptions(cc.codes())
 
-export const currencyForCountry = countryCode => {
+export const currencyForCountry = (countryCode : string): string => {
   const entry = countries[countryCode]
 
   if (!entry) {
