@@ -21,7 +21,11 @@ export default class LearnerResult extends SearchkitComponent {
     _.has(program, "grade_average") && _.isNumber(program.grade_average)
 
   render() {
-    const { result: { _source: { profile, program } } } = this.props
+    const {
+      result: {
+        _source: { profile, program }
+      }
+    } = this.props
 
     const showGrade =
       program && canAdvanceSearchProgram(program, SETTINGS.roles)

@@ -77,79 +77,81 @@ describe("FinancialAidCalculator", () => {
   })
 
   it("should let you open and close the financial aid calculator", () => {
-    return renderComponent(
-      "/dashboard",
-      DASHBOARD_SUCCESS_ACTIONS
-    ).then(([wrapper]) => {
-      wrapper
-        .find(".pricing-actions")
-        .find(".calculate-cost-button")
-        .simulate("click")
-      assert.equal(
-        helper.store.getState().ui.dialogVisibility[CALCULATOR_DIALOG],
-        true
-      )
-      const calculator = document.querySelector(".financial-aid-calculator")
+    return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+      ([wrapper]) => {
+        wrapper
+          .find(".pricing-actions")
+          .find(".calculate-cost-button")
+          .simulate("click")
+        assert.equal(
+          helper.store.getState().ui.dialogVisibility[CALCULATOR_DIALOG],
+          true
+        )
+        const calculator = document.querySelector(".financial-aid-calculator")
 
-      ReactTestUtils.Simulate.click(calculator.querySelector(".cancel-button"))
-      assert.equal(
-        helper.store.getState().ui.dialogVisibility[CALCULATOR_DIALOG],
-        false
-      )
-    })
+        ReactTestUtils.Simulate.click(
+          calculator.querySelector(".cancel-button")
+        )
+        assert.equal(
+          helper.store.getState().ui.dialogVisibility[CALCULATOR_DIALOG],
+          false
+        )
+      }
+    )
   })
 
   it("should let you skip and pay full price", () => {
     helper.skipFinancialAidStub.returns(
       Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE)
     )
-    return renderComponent(
-      "/dashboard",
-      DASHBOARD_SUCCESS_ACTIONS
-    ).then(([wrapper]) => {
-      return listenForActions(
-        [
-          START_CALCULATOR_EDIT,
-          UPDATE_CALCULATOR_EDIT,
-          SHOW_DIALOG,
-          HIDE_DIALOG,
-          CLEAR_CALCULATOR_EDIT,
-          SET_CONFIRM_SKIP_DIALOG_VISIBILITY,
-          REQUEST_SKIP_FINANCIAL_AID,
-          RECEIVE_SKIP_FINANCIAL_AID_SUCCESS,
-          actions.prices.get.requestType,
-          REQUEST_DASHBOARD,
-          actions.prices.get.successType,
-          RECEIVE_DASHBOARD_SUCCESS,
-          SET_CONFIRM_SKIP_DIALOG_VISIBILITY
-        ],
-        () => {
-          wrapper
-            .find(".pricing-actions")
-            .find(".calculate-cost-button")
-            .simulate("click")
-          assert.equal(
-            helper.store.getState().ui.dialogVisibility[CALCULATOR_DIALOG],
-            true
+    return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+      ([wrapper]) => {
+        return listenForActions(
+          [
+            START_CALCULATOR_EDIT,
+            UPDATE_CALCULATOR_EDIT,
+            SHOW_DIALOG,
+            HIDE_DIALOG,
+            CLEAR_CALCULATOR_EDIT,
+            SET_CONFIRM_SKIP_DIALOG_VISIBILITY,
+            REQUEST_SKIP_FINANCIAL_AID,
+            RECEIVE_SKIP_FINANCIAL_AID_SUCCESS,
+            actions.prices.get.requestType,
+            REQUEST_DASHBOARD,
+            actions.prices.get.successType,
+            RECEIVE_DASHBOARD_SUCCESS,
+            SET_CONFIRM_SKIP_DIALOG_VISIBILITY
+          ],
+          () => {
+            wrapper
+              .find(".pricing-actions")
+              .find(".calculate-cost-button")
+              .simulate("click")
+            assert.equal(
+              helper.store.getState().ui.dialogVisibility[CALCULATOR_DIALOG],
+              true
+            )
+            const calculator = document.querySelector(
+              ".financial-aid-calculator-wrapper"
+            )
+            ReactTestUtils.Simulate.click(
+              calculator.querySelector(".full-price")
+            )
+            const confirmDialog = document.querySelector(
+              ".skip-financial-aid-dialog-wrapper"
+            )
+            ReactTestUtils.Simulate.click(
+              confirmDialog.querySelector(".skip-button")
+            )
+          }
+        ).then(() => {
+          assert(
+            helper.skipFinancialAidStub.calledWith(program.id),
+            "should skip with the right program id"
           )
-          const calculator = document.querySelector(
-            ".financial-aid-calculator-wrapper"
-          )
-          ReactTestUtils.Simulate.click(calculator.querySelector(".full-price"))
-          const confirmDialog = document.querySelector(
-            ".skip-financial-aid-dialog-wrapper"
-          )
-          ReactTestUtils.Simulate.click(
-            confirmDialog.querySelector(".skip-button")
-          )
-        }
-      ).then(() => {
-        assert(
-          helper.skipFinancialAidStub.calledWith(program.id),
-          "should skip with the right program id"
-        )
-      })
-    })
+        })
+      }
+    )
   })
 
   for (const activity of [true, false]) {
@@ -163,20 +165,19 @@ describe("FinancialAidCalculator", () => {
       if (activity) {
         helper.store.dispatch(requestSkipFinancialAid())
       }
-      return renderComponent(
-        "/dashboard",
-        DASHBOARD_SUCCESS_ACTIONS
-      ).then(() => {
-        // assert inFlight arg
-        assert.isTrue(
-          dialogActionsSpy.calledWith(
-            sinon.match.any,
-            sinon.match.any,
-            activity,
-            "Pay Full Price"
+      return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+        () => {
+          // assert inFlight arg
+          assert.isTrue(
+            dialogActionsSpy.calledWith(
+              sinon.match.any,
+              sinon.match.any,
+              activity,
+              "Pay Full Price"
+            )
           )
-        )
-      })
+        }
+      )
     })
   }
 
@@ -202,95 +203,8 @@ describe("FinancialAidCalculator", () => {
   })
 
   it("should let you enter your income", () => {
-    return renderComponent(
-      "/dashboard",
-      DASHBOARD_SUCCESS_ACTIONS
-    ).then(([wrapper]) => {
-      return listenForActions(
-        [
-          START_CALCULATOR_EDIT,
-          UPDATE_CALCULATOR_EDIT,
-          SHOW_DIALOG,
-          UPDATE_CALCULATOR_VALIDATION,
-          UPDATE_CALCULATOR_EDIT
-        ],
-        () => {
-          wrapper
-            .find(".pricing-actions")
-            .find(".calculate-cost-button")
-            .simulate("click")
-          modifyTextField(document.querySelector("#user-salary-input"), "1000")
-        }
-      ).then(() => {
-        assert.deepEqual(helper.store.getState().financialAid, {
-          income:          "1000",
-          currency:        "USD",
-          checkBox:        false,
-          fetchAddStatus:  undefined,
-          fetchSkipStatus: undefined,
-          programId:       program.id,
-          validation:      {
-            checkBox: "You must agree to these terms"
-          },
-          fetchError: null
-        })
-      })
-    })
-  })
-
-  it("should show validation errors if the user doesnt fill out fields", () => {
-    const checkInvalidInput = (selector, reqdAttr) => {
-      const calculator = document.querySelector(".financial-aid-calculator")
-      const input = calculator.querySelector(selector)
-      assert.ok(
-        input.attributes.getNamedItem("aria-invalid").value,
-        "should be invalid"
-      )
-      assert.isNotNull(input.attributes.getNamedItem(reqdAttr))
-    }
-
-    return renderComponent(
-      "/dashboard",
-      DASHBOARD_SUCCESS_ACTIONS
-    ).then(([wrapper]) => {
-      return listenForActions(
-        [
-          START_CALCULATOR_EDIT,
-          UPDATE_CALCULATOR_EDIT,
-          SHOW_DIALOG,
-          UPDATE_CALCULATOR_VALIDATION,
-          UPDATE_CALCULATOR_EDIT
-        ],
-        () => {
-          wrapper
-            .find(".pricing-actions")
-            .find(".calculate-cost-button")
-            .simulate("click")
-          clearSelectField(document.querySelector(".currency"))
-          ReactTestUtils.Simulate.click(
-            document.querySelector(".financial-aid-calculator .save-button")
-          )
-        }
-      ).then(() => {
-        const state = helper.store.getState().financialAid
-        assert.deepEqual(state.validation, {
-          checkBox: "You must agree to these terms",
-          income:   "Income is required",
-          currency: "Please select a currency"
-        })
-        checkInvalidInput(".salary-field input", "aria-required")
-        checkInvalidInput(".checkbox input", "required")
-        checkInvalidInput(".currency .Select-input input", "aria-required")
-      })
-    })
-  })
-
-  for (const income of ["2000.00", "2000.50", "2Adb", "two thousand"]) {
-    it(`should show validation errors if invalid income=${income}`, () => {
-      return renderComponent(
-        "/dashboard",
-        DASHBOARD_SUCCESS_ACTIONS
-      ).then(([wrapper]) => {
+    return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+      ([wrapper]) => {
         return listenForActions(
           [
             START_CALCULATOR_EDIT,
@@ -306,112 +220,202 @@ describe("FinancialAidCalculator", () => {
               .simulate("click")
             modifyTextField(
               document.querySelector("#user-salary-input"),
-              income
+              "1000"
+            )
+          }
+        ).then(() => {
+          assert.deepEqual(helper.store.getState().financialAid, {
+            income:          "1000",
+            currency:        "USD",
+            checkBox:        false,
+            fetchAddStatus:  undefined,
+            fetchSkipStatus: undefined,
+            programId:       program.id,
+            validation:      {
+              checkBox: "You must agree to these terms"
+            },
+            fetchError: null
+          })
+        })
+      }
+    )
+  })
+
+  it("should show validation errors if the user doesnt fill out fields", () => {
+    const checkInvalidInput = (selector, reqdAttr) => {
+      const calculator = document.querySelector(".financial-aid-calculator")
+      const input = calculator.querySelector(selector)
+      assert.ok(
+        input.attributes.getNamedItem("aria-invalid").value,
+        "should be invalid"
+      )
+      assert.isNotNull(input.attributes.getNamedItem(reqdAttr))
+    }
+
+    return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+      ([wrapper]) => {
+        return listenForActions(
+          [
+            START_CALCULATOR_EDIT,
+            UPDATE_CALCULATOR_EDIT,
+            SHOW_DIALOG,
+            UPDATE_CALCULATOR_VALIDATION,
+            UPDATE_CALCULATOR_EDIT
+          ],
+          () => {
+            wrapper
+              .find(".pricing-actions")
+              .find(".calculate-cost-button")
+              .simulate("click")
+            clearSelectField(document.querySelector(".currency"))
+            ReactTestUtils.Simulate.click(
+              document.querySelector(".financial-aid-calculator .save-button")
             )
           }
         ).then(() => {
           const state = helper.store.getState().financialAid
-          assert.equal(
-            state.validation["income"],
-            "Please only use whole numbers."
-          )
+          assert.deepEqual(state.validation, {
+            checkBox: "You must agree to these terms",
+            income:   "Income is required",
+            currency: "Please select a currency"
+          })
+          checkInvalidInput(".salary-field input", "aria-required")
+          checkInvalidInput(".checkbox input", "required")
+          checkInvalidInput(".currency .Select-input input", "aria-required")
         })
-      })
+      }
+    )
+  })
+
+  for (const income of ["2000.00", "2000.50", "2Adb", "two thousand"]) {
+    it(`should show validation errors if invalid income=${income}`, () => {
+      return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+        ([wrapper]) => {
+          return listenForActions(
+            [
+              START_CALCULATOR_EDIT,
+              UPDATE_CALCULATOR_EDIT,
+              SHOW_DIALOG,
+              UPDATE_CALCULATOR_VALIDATION,
+              UPDATE_CALCULATOR_EDIT
+            ],
+            () => {
+              wrapper
+                .find(".pricing-actions")
+                .find(".calculate-cost-button")
+                .simulate("click")
+              modifyTextField(
+                document.querySelector("#user-salary-input"),
+                income
+              )
+            }
+          ).then(() => {
+            const state = helper.store.getState().financialAid
+            assert.equal(
+              state.validation["income"],
+              "Please only use whole numbers."
+            )
+          })
+        }
+      )
     })
   }
 
   it("should let you enter your preferred currency", () => {
-    return renderComponent(
-      "/dashboard",
-      DASHBOARD_SUCCESS_ACTIONS
-    ).then(([wrapper]) => {
-      return listenForActions(
-        [
-          START_CALCULATOR_EDIT,
-          UPDATE_CALCULATOR_EDIT,
-          SHOW_DIALOG,
-          UPDATE_CALCULATOR_VALIDATION,
-          UPDATE_CALCULATOR_EDIT
-        ],
-        () => {
-          wrapper
-            .find(".pricing-actions")
-            .find(".calculate-cost-button")
-            .simulate("click")
-          const select = document.querySelector(".currency")
-          modifySelectField(select, "GBP")
-        }
-      ).then(() => {
-        assert.deepEqual(helper.store.getState().financialAid, {
-          income:          "",
-          currency:        "GBP",
-          checkBox:        false,
-          fetchAddStatus:  undefined,
-          fetchSkipStatus: undefined,
-          programId:       program.id,
-          validation:      {
-            checkBox: "You must agree to these terms",
-            income:   "Income is required"
-          },
-          fetchError: null
+    return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+      ([wrapper]) => {
+        return listenForActions(
+          [
+            START_CALCULATOR_EDIT,
+            UPDATE_CALCULATOR_EDIT,
+            SHOW_DIALOG,
+            UPDATE_CALCULATOR_VALIDATION,
+            UPDATE_CALCULATOR_EDIT
+          ],
+          () => {
+            wrapper
+              .find(".pricing-actions")
+              .find(".calculate-cost-button")
+              .simulate("click")
+            const select = document.querySelector(".currency")
+            modifySelectField(select, "GBP")
+          }
+        ).then(() => {
+          assert.deepEqual(helper.store.getState().financialAid, {
+            income:          "",
+            currency:        "GBP",
+            checkBox:        false,
+            fetchAddStatus:  undefined,
+            fetchSkipStatus: undefined,
+            programId:       program.id,
+            validation:      {
+              checkBox: "You must agree to these terms",
+              income:   "Income is required"
+            },
+            fetchError: null
+          })
         })
-      })
-    })
+      }
+    )
   })
 
   it("should let you submit a financial aid request", () => {
     helper.addFinancialAidStub.returns(
       Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE)
     )
-    return renderComponent(
-      "/dashboard",
-      DASHBOARD_SUCCESS_ACTIONS
-    ).then(([wrapper]) => {
-      return listenForActions(
-        [
-          START_CALCULATOR_EDIT,
-          UPDATE_CALCULATOR_EDIT,
-          SHOW_DIALOG,
-          UPDATE_CALCULATOR_VALIDATION,
-          UPDATE_CALCULATOR_VALIDATION,
-          UPDATE_CALCULATOR_EDIT,
-          UPDATE_CALCULATOR_EDIT,
-          HIDE_DIALOG,
-          SHOW_DIALOG,
-          REQUEST_ADD_FINANCIAL_AID,
-          RECEIVE_ADD_FINANCIAL_AID_SUCCESS,
-          actions.prices.get.requestType,
-          REQUEST_DASHBOARD,
-          actions.prices.get.successType,
-          RECEIVE_DASHBOARD_SUCCESS,
-          CLEAR_CALCULATOR_EDIT,
-          HIDE_DIALOG
-        ],
-        () => {
-          wrapper
-            .find(".pricing-actions")
-            .find(".calculate-cost-button")
-            .simulate("click")
-          const calculator = document.querySelector(".financial-aid-calculator")
-          ReactTestUtils.Simulate.change(
-            calculator.querySelector(".mdl-checkbox__input")
+    return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+      ([wrapper]) => {
+        return listenForActions(
+          [
+            START_CALCULATOR_EDIT,
+            UPDATE_CALCULATOR_EDIT,
+            SHOW_DIALOG,
+            UPDATE_CALCULATOR_VALIDATION,
+            UPDATE_CALCULATOR_VALIDATION,
+            UPDATE_CALCULATOR_EDIT,
+            UPDATE_CALCULATOR_EDIT,
+            HIDE_DIALOG,
+            SHOW_DIALOG,
+            REQUEST_ADD_FINANCIAL_AID,
+            RECEIVE_ADD_FINANCIAL_AID_SUCCESS,
+            actions.prices.get.requestType,
+            REQUEST_DASHBOARD,
+            actions.prices.get.successType,
+            RECEIVE_DASHBOARD_SUCCESS,
+            CLEAR_CALCULATOR_EDIT,
+            HIDE_DIALOG
+          ],
+          () => {
+            wrapper
+              .find(".pricing-actions")
+              .find(".calculate-cost-button")
+              .simulate("click")
+            const calculator = document.querySelector(
+              ".financial-aid-calculator"
+            )
+            ReactTestUtils.Simulate.change(
+              calculator.querySelector(".mdl-checkbox__input")
+            )
+            modifyTextField(
+              document.querySelector("#user-salary-input"),
+              "1000"
+            )
+            ReactTestUtils.Simulate.click(
+              calculator.querySelector(".save-button")
+            )
+            const confirmDialog = document.querySelector(".confirm-dialog")
+            ReactTestUtils.Simulate.click(
+              confirmDialog.querySelector(".save-button")
+            )
+          }
+        ).then(() => {
+          assert(
+            helper.addFinancialAidStub.calledWith("1000", "USD", program.id),
+            "should be called with the right arguments"
           )
-          modifyTextField(document.querySelector("#user-salary-input"), "1000")
-          ReactTestUtils.Simulate.click(
-            calculator.querySelector(".save-button")
-          )
-          const confirmDialog = document.querySelector(".confirm-dialog")
-          ReactTestUtils.Simulate.click(
-            confirmDialog.querySelector(".save-button")
-          )
-        }
-      ).then(() => {
-        assert(
-          helper.addFinancialAidStub.calledWith("1000", "USD", program.id),
-          "should be called with the right arguments"
-        )
-      })
-    })
+        })
+      }
+    )
   })
 
   for (const activity of [true, false]) {
@@ -424,19 +428,18 @@ describe("FinancialAidCalculator", () => {
       helper.addFinancialAidStub.returns(
         Promise.resolve(FINANCIAL_AID_PARTIAL_RESPONSE)
       )
-      return renderComponent(
-        "/dashboard",
-        DASHBOARD_SUCCESS_ACTIONS
-      ).then(() => {
-        assert.isTrue(
-          dialogActionsSpy.calledWith(
-            sinon.match.any,
-            sinon.match.any,
-            activity,
-            "Submit"
+      return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+        () => {
+          assert.isTrue(
+            dialogActionsSpy.calledWith(
+              sinon.match.any,
+              sinon.match.any,
+              activity,
+              "Submit"
+            )
           )
-        )
-      })
+        }
+      )
     })
   }
 
@@ -479,59 +482,65 @@ describe("FinancialAidCalculator", () => {
         errorStatusCode: 500
       })
     )
-    return renderComponent(
-      "/dashboard",
-      DASHBOARD_SUCCESS_ACTIONS
-    ).then(([wrapper]) => {
-      return listenForActions(
-        [
-          START_CALCULATOR_EDIT,
-          UPDATE_CALCULATOR_EDIT,
-          SHOW_DIALOG,
-          UPDATE_CALCULATOR_VALIDATION,
-          UPDATE_CALCULATOR_VALIDATION,
-          UPDATE_CALCULATOR_EDIT,
-          UPDATE_CALCULATOR_EDIT,
-          HIDE_DIALOG,
-          SHOW_DIALOG,
-          REQUEST_ADD_FINANCIAL_AID,
-          RECEIVE_ADD_FINANCIAL_AID_FAILURE
-        ],
-        () => {
-          wrapper
-            .find(".pricing-actions")
-            .find(".calculate-cost-button")
-            .simulate("click")
-          const calculator = document.querySelector(".financial-aid-calculator")
-          ReactTestUtils.Simulate.change(
-            calculator.querySelector(".mdl-checkbox__input")
+    return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+      ([wrapper]) => {
+        return listenForActions(
+          [
+            START_CALCULATOR_EDIT,
+            UPDATE_CALCULATOR_EDIT,
+            SHOW_DIALOG,
+            UPDATE_CALCULATOR_VALIDATION,
+            UPDATE_CALCULATOR_VALIDATION,
+            UPDATE_CALCULATOR_EDIT,
+            UPDATE_CALCULATOR_EDIT,
+            HIDE_DIALOG,
+            SHOW_DIALOG,
+            REQUEST_ADD_FINANCIAL_AID,
+            RECEIVE_ADD_FINANCIAL_AID_FAILURE
+          ],
+          () => {
+            wrapper
+              .find(".pricing-actions")
+              .find(".calculate-cost-button")
+              .simulate("click")
+            const calculator = document.querySelector(
+              ".financial-aid-calculator"
+            )
+            ReactTestUtils.Simulate.change(
+              calculator.querySelector(".mdl-checkbox__input")
+            )
+            modifyTextField(
+              document.querySelector("#user-salary-input"),
+              "1000"
+            )
+            ReactTestUtils.Simulate.click(
+              calculator.querySelector(".save-button")
+            )
+            const confirmDialog = document.querySelector(".confirm-dialog")
+            ReactTestUtils.Simulate.click(
+              confirmDialog.querySelector(".save-button")
+            )
+          }
+        ).then(() => {
+          assert(
+            helper.addFinancialAidStub.calledWith("1000", "USD", program.id),
+            "should be called with the right arguments"
           )
-          modifyTextField(document.querySelector("#user-salary-input"), "1000")
-          ReactTestUtils.Simulate.click(
-            calculator.querySelector(".save-button")
-          )
-          const confirmDialog = document.querySelector(".confirm-dialog")
-          ReactTestUtils.Simulate.click(
-            confirmDialog.querySelector(".save-button")
-          )
-        }
-      ).then(() => {
-        assert(
-          helper.addFinancialAidStub.calledWith("1000", "USD", program.id),
-          "should be called with the right arguments"
-        )
-        assert.equal(
-          document.querySelector(".api-error").textContent,
-          `There was an error (Error 500: an error message). Please contact ${SETTINGS.support_email} \
+          assert.equal(
+            document.querySelector(".api-error").textContent,
+            `There was an error (Error 500: an error message). Please contact ${
+              SETTINGS.support_email
+            } \
 if you continue to have problems.`
-        )
-        const state = helper.store.getState()
-        assert.deepEqual(state.financialAid.fetchError, {
-          message: "an error message",
-          code:    500
+          )
+          const state = helper.store.getState()
+          assert.deepEqual(state.financialAid.fetchError, {
+            message: "an error message",
+            code:    500
+          })
         })
-      })
-    })
+      }
+    )
   })
 
   it("should show nothing if there is no program found", () => {

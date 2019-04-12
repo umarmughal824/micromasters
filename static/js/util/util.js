@@ -312,7 +312,7 @@ export function getLocation(
 
 /**
  * returns the user's most recent (or current) employer
-*/
+ */
 export function getEmployer(profile: Profile): Maybe<string> {
   const entries = workEntriesByDate(profile.work_history)
   if (_.isEmpty(entries)) {
@@ -491,7 +491,12 @@ export const classify: (s: string) => string = R.compose(
   R.defaultTo("")
 )
 
-export const labelSort = R.sortBy(R.compose(R.toLower, R.prop("label")))
+export const labelSort = R.sortBy(
+  R.compose(
+    R.toLower,
+    R.prop("label")
+  )
+)
 
 export function highlight(text: string, highlightPhrase: ?string) {
   if (!highlightPhrase || !text) {
@@ -580,7 +585,10 @@ export const wrapWithProps = (
 
 export const isNilOrBlank = R.either(R.isNil, R.isEmpty)
 
-export const pickExistingProps = R.compose(R.reject(R.isNil), R.pick)
+export const pickExistingProps = R.compose(
+  R.reject(R.isNil),
+  R.pick
+)
 
 export function sortedCourseRuns(program: Program): Array<CourseRun> {
   const sortedCourses = R.sortBy(R.prop("position_in_program"), program.courses)
@@ -592,7 +600,11 @@ export function sortedCourseRuns(program: Program): Array<CourseRun> {
 // lets you edit both keys and values
 // just pass a function that expects and returns [key, value]
 export const mapObj = R.curry((fn, obj) =>
-  R.compose(R.fromPairs, R.map(fn), R.toPairs)(obj)
+  R.compose(
+    R.fromPairs,
+    R.map(fn),
+    R.toPairs
+  )(obj)
 )
 
 /**

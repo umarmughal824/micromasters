@@ -47,7 +47,10 @@ export const withEmailDialog = R.curry(
       )
 
       saveEmailChanges = (fieldName, value) => {
-        const { dispatch, email: { currentlyActive } } = this.props
+        const {
+          dispatch,
+          email: { currentlyActive }
+        } = this.props
         const activeEmail = this.getActiveEmailState()
         const inputsClone = R.clone(activeEmail.inputs)
         inputsClone[fieldName] = value
@@ -65,9 +68,11 @@ export const withEmailDialog = R.curry(
         }
       }
 
-      updateEmailFieldEdit = R.curry((fieldName, e): void => {
-        this.saveEmailChanges(fieldName, e.target.value)
-      })
+      updateEmailFieldEdit = R.curry(
+        (fieldName, e): void => {
+          this.saveEmailChanges(fieldName, e.target.value)
+        }
+      )
 
       updateEmailBody = (editorState: EditorState): void => {
         this.saveEmailChanges(
@@ -77,13 +82,20 @@ export const withEmailDialog = R.curry(
       }
 
       closeAndClearEmailComposer = (): void => {
-        const { dispatch, email: { currentlyActive } } = this.props
+        const {
+          dispatch,
+          email: { currentlyActive }
+        } = this.props
         dispatch(clearEmailEdit(currentlyActive))
         dispatch(hideDialog(EMAIL_COMPOSITION_DIALOG))
       }
 
       closeEmailComposerAndSend = (): Promise<void> => {
-        const { dispatch, email: { currentlyActive }, searchkit } = this.props
+        const {
+          dispatch,
+          email: { currentlyActive },
+          searchkit
+        } = this.props
         const activeEmail = this.getActiveEmailState()
         const errors = emailValidation(activeEmail.inputs)
         dispatch(
@@ -121,7 +133,9 @@ export const withEmailDialog = R.curry(
       }
 
       renderCompositionDialog(): ?React$Element<*> {
-        const { ui: { dialogVisibility } } = this.props
+        const {
+          ui: { dialogVisibility }
+        } = this.props
 
         const activeEmailType = this.getActiveEmailType()
 

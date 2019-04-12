@@ -54,30 +54,30 @@ describe("financial aid reducers", () => {
   })
 
   it("should let you start editing", () => {
-    return dispatchThen(startCalculatorEdit(1), [
-      START_CALCULATOR_EDIT
-    ]).then(state => {
-      const expectation = {
-        ...FINANCIAL_AID_EDIT,
-        programId:       1,
-        fetchAddStatus:  undefined,
-        fetchSkipStatus: undefined
+    return dispatchThen(startCalculatorEdit(1), [START_CALCULATOR_EDIT]).then(
+      state => {
+        const expectation = {
+          ...FINANCIAL_AID_EDIT,
+          programId:       1,
+          fetchAddStatus:  undefined,
+          fetchSkipStatus: undefined
+        }
+        assert.deepEqual(state, expectation)
       }
-      assert.deepEqual(state, expectation)
-    })
+    )
   })
 
   it("should let you clear edits", () => {
     store.dispatch(startCalculatorEdit(1))
-    return dispatchThen(clearCalculatorEdit(), [
-      CLEAR_CALCULATOR_EDIT
-    ]).then(state => {
-      assert.deepEqual(state, {
-        ...FINANCIAL_AID_EDIT,
-        fetchAddStatus:  undefined,
-        fetchSkipStatus: undefined
-      })
-    })
+    return dispatchThen(clearCalculatorEdit(), [CLEAR_CALCULATOR_EDIT]).then(
+      state => {
+        assert.deepEqual(state, {
+          ...FINANCIAL_AID_EDIT,
+          fetchAddStatus:  undefined,
+          fetchSkipStatus: undefined
+        })
+      }
+    )
   })
 
   it("should let you update an edit in progress", () => {

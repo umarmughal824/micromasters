@@ -113,8 +113,10 @@ describe("enrollments", () => {
         assert.ok(fetchDashboardStub.calledWith())
 
         assert.deepEqual(store.getState().ui.toastMessage, {
-          message: `You are now enrolled in the ${newEnrollment.title} MicroMasters`,
-          icon:    TOAST_SUCCESS
+          message: `You are now enrolled in the ${
+            newEnrollment.title
+          } MicroMasters`,
+          icon: TOAST_SUCCESS
         })
       })
     })
@@ -146,13 +148,13 @@ describe("enrollments", () => {
     it("should clear the enrollments", () => {
       store.dispatch(receiveGetProgramEnrollmentsSuccess(PROGRAMS))
 
-      return dispatchThen(clearEnrollments(), [
-        CLEAR_ENROLLMENTS
-      ]).then(enrollmentsState => {
-        assert.deepEqual(enrollmentsState, {
-          availablePrograms: []
-        })
-      })
+      return dispatchThen(clearEnrollments(), [CLEAR_ENROLLMENTS]).then(
+        enrollmentsState => {
+          assert.deepEqual(enrollmentsState, {
+            availablePrograms: []
+          })
+        }
+      )
     })
   })
 

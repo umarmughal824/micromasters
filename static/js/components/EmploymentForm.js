@@ -174,14 +174,17 @@ class EmploymentForm extends ProfileFormFields {
   }
 
   renderWorkHistory(): Array<React$Element<*> | void> | void {
-    const { ui, profile, profile: { work_history } } = this.props
+    const {
+      ui,
+      profile,
+      profile: { work_history }
+    } = this.props
     if (ui.workHistoryEdit === true) {
       let workHistoryRows = []
       if (!_.isUndefined(work_history)) {
         const sorted = workEntriesByDate(work_history)
-        workHistoryRows = sorted.map(
-          ([index, entry]) =>
-            entry.id === undefined ? undefined : this.jobRow(entry, index)
+        workHistoryRows = sorted.map(([index, entry]) =>
+          entry.id === undefined ? undefined : this.jobRow(entry, index)
         )
       }
       userPrivilegeCheck(profile, () => {
@@ -275,7 +278,9 @@ class EmploymentForm extends ProfileFormFields {
   }
 
   renderWorkRadioSwitch() {
-    const { ui: { workHistoryAnswer } } = this.props
+    const {
+      ui: { workHistoryAnswer }
+    } = this.props
     const valueSelected = _.isNil(workHistoryAnswer) ? null : "false"
     const radioIconStyle = { marginRight: "8px" }
     return (
@@ -302,7 +307,10 @@ class EmploymentForm extends ProfileFormFields {
   }
 
   handleRadioClick = (value: string): void => {
-    const { setWorkHistoryAnswer, ui: { workHistoryAnswer } } = this.props
+    const {
+      setWorkHistoryAnswer,
+      ui: { workHistoryAnswer }
+    } = this.props
     if (value === "true") {
       if (!_.isNil(workHistoryAnswer)) {
         setWorkHistoryAnswer()
@@ -314,7 +322,10 @@ class EmploymentForm extends ProfileFormFields {
   }
 
   renderCardBody() {
-    const { showSwitch, profile: { work_history } } = this.props
+    const {
+      showSwitch,
+      profile: { work_history }
+    } = this.props
     if (showSwitch && work_history.length === 0) {
       return this.renderWorkQuestionForm()
     } else {
@@ -323,7 +334,10 @@ class EmploymentForm extends ProfileFormFields {
   }
 
   renderCard() {
-    const { ui: { workHistoryEdit }, profile } = this.props
+    const {
+      ui: { workHistoryEdit },
+      profile
+    } = this.props
 
     if (
       !isProfileOfLoggedinUser(profile) &&

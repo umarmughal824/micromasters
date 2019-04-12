@@ -408,9 +408,9 @@ describe("dashboard course utilities", () => {
         true
       ]
     ]) {
-      it(`should return ${data[1]
-        ? "true"
-        : "false"} for enrollment_start_date = ${data[0]}`, () => {
+      it(`should return ${
+        data[1] ? "true" : "false"
+      } for enrollment_start_date = ${data[0]}`, () => {
         course.runs[0].status = STATUS_OFFERED
         course.runs[0].enrollment_start_date = data[0]
         assert.equal(isEnrollableRun(course.runs[0]), data[1])

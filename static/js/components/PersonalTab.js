@@ -57,7 +57,12 @@ export default class PersonalTab extends React.Component {
     dispatch: Function
   }
 
-  sortPrograms = R.sortBy(R.compose(R.toLower, R.prop("title")))
+  sortPrograms = R.sortBy(
+    R.compose(
+      R.toLower,
+      R.prop("title")
+    )
+  )
 
   programOptions = R.compose(
     R.map(program => ({ value: program.id, label: program.title })),
@@ -90,7 +95,9 @@ export default class PersonalTab extends React.Component {
   }
 
   getSelectedProgramId = (): number | null => {
-    const { ui: { selectedProgram } } = this.props
+    const {
+      ui: { selectedProgram }
+    } = this.props
     return selectedProgram ? selectedProgram.id : null
   }
 
@@ -111,7 +118,11 @@ export default class PersonalTab extends React.Component {
   }
 
   render() {
-    const { ui: { selectedProgram }, errors, uneditedProfile } = this.props
+    const {
+      ui: { selectedProgram },
+      errors,
+      uneditedProfile
+    } = this.props
 
     return (
       <DocumentTitle title="Personal Profile | MITx MicroMasters">

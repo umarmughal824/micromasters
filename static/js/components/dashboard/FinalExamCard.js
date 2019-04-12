@@ -166,7 +166,8 @@ const renderPearsonTOSDialog = (open, show, submitPearsonSSO, pearson) => (
             href="https://home.pearsonvue.com/Legal/Privacy-and-cookies-policy.aspx"
           >
             Terms of Service
-          </a>. MIT is not responsible for the content of third-party sites
+          </a>
+          . MIT is not responsible for the content of third-party sites
           hyper-linked from the Pearson VUE website, nor does MIT guarantee or
           endorse the information, recommendations, products or services offered
           on third-party sites.
@@ -252,7 +253,9 @@ export default class FinalExamCard extends React.Component<void, Props, void> {
       navigateToProfile,
       submitPearsonSSO,
       pearson,
-      ui: { dialogVisibility: { pearsonTOSDialogVisible = false } },
+      ui: {
+        dialogVisibility: { pearsonTOSDialogVisible = false }
+      },
       showPearsonTOSDialog
     } = this.props
 

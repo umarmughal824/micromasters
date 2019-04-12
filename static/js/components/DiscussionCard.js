@@ -8,7 +8,11 @@ import { channelURL, postURL } from "../lib/discussions"
 
 import type { Post } from "../flow/discussionTypes"
 
-const formatTime = R.compose(date => date.fromNow(), moment, R.prop("created"))
+const formatTime = R.compose(
+  date => date.fromNow(),
+  moment,
+  R.prop("created")
+)
 
 const renderPosts = R.compose(
   R.map(post => (

@@ -9,9 +9,9 @@ import type {
 } from "../flow/reduxTypes"
 
 /**
-* takes an actionCreator and dispatch and returns a function that
-* dispatches the action created by that actionCreator to the store
-*/
+ * takes an actionCreator and dispatch and returns a function that
+ * dispatches the action created by that actionCreator to the store
+ */
 export function createActionHelper(
   dispatch: Dispatch,
   actionCreator: Function

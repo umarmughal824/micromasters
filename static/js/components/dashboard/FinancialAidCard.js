@@ -219,11 +219,16 @@ export default class FinancialAidCard extends React.Component {
           <Grid>
             <Cell col={1} />
             <Cell col={5}>
-                J-PAL<br />
-                DEDP MicroMasters<br />
-                Massachusetts Institute of Technology<br />
-                77 Massachusetts Avenue E19-235D<br />
-                Cambridge, MA 02139 United States of America<br />
+                J-PAL
+              <br />
+                DEDP MicroMasters
+              <br />
+                Massachusetts Institute of Technology
+              <br />
+                77 Massachusetts Avenue E19-235D
+              <br />
+                Cambridge, MA 02139 United States of America
+              <br />
             </Cell>
             <Cell col={6}>1 (617) 715-5799</Cell>
           </Grid>
@@ -278,7 +283,8 @@ export default class FinancialAidCard extends React.Component {
           of the page, or e-mail{" "}
           <a href="mailto:micromasters-support@mit.edu">
             micromasters-support@mit.edu
-          </a>. Due to high volume of inquiries we do not have a support phone
+          </a>
+          . Due to high volume of inquiries we do not have a support phone
           number at this time.
         </div>
       </Card>

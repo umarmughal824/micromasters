@@ -72,7 +72,10 @@ class App extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { location: { pathname }, userProfile: { profile } } = this.props
+    const {
+      location: { pathname },
+      userProfile: { profile }
+    } = this.props
 
     this.updateRequirements()
 
@@ -96,7 +99,11 @@ class App extends React.Component {
   }
 
   fetchUserProfile = (username: string) => {
-    const { userProfile, dispatch, location: { pathname } } = this.props
+    const {
+      userProfile,
+      dispatch,
+      location: { pathname }
+    } = this.props
     if (userProfile.getStatus === undefined) {
       dispatch(fetchUserProfile(username)).then(() => {
         if (PROFILE_REGEX.test(pathname)) {
@@ -183,7 +190,9 @@ class App extends React.Component {
   }
 
   renderToast() {
-    const { ui: { toastMessage } } = this.props
+    const {
+      ui: { toastMessage }
+    } = this.props
     if (!toastMessage) {
       return null
     }

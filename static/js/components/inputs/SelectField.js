@@ -84,9 +84,9 @@ class SelectField extends React.Component {
 
   selectClassName = (): string => {
     const { errors, keySet, topMenu } = this.props
-    return `${validationErrorSelector(errors, keySet)} ${topMenu
-      ? "menu-outer-top"
-      : ""}`
+    return `${validationErrorSelector(errors, keySet)} ${
+      topMenu ? "menu-outer-top" : ""
+    }`
   }
 
   label = (label: string, element: React$Element<*>) => (

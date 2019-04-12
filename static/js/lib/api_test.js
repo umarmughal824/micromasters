@@ -229,65 +229,59 @@ describe("api", function() {
 
       it("returns expected values when a POST to send a search result email succeeds", () => {
         fetchJSONStub.returns(Promise.resolve(MAIL_RESPONSE))
-        return sendSearchResultMail(
-          "subject",
-          "body",
-          searchRequest
-        ).then(mailResp => {
-          assert.ok(
-            fetchJSONStub.calledWith("/api/v0/mail/search/", {
-              method: "POST",
-              body:   JSON.stringify({
-                email_subject:  "subject",
-                email_body:     "body",
-                search_request: searchRequest
+        return sendSearchResultMail("subject", "body", searchRequest).then(
+          mailResp => {
+            assert.ok(
+              fetchJSONStub.calledWith("/api/v0/mail/search/", {
+                method: "POST",
+                body:   JSON.stringify({
+                  email_subject:  "subject",
+                  email_body:     "body",
+                  search_request: searchRequest
+                })
               })
-            })
-          )
-          assert.deepEqual(mailResp, MAIL_RESPONSE)
-        })
+            )
+            assert.deepEqual(mailResp, MAIL_RESPONSE)
+          }
+        )
       })
 
       it("returns expected values when a POST to send a course team email succeeds", () => {
         fetchJSONStub.returns(Promise.resolve(MAIL_RESPONSE))
-        return sendCourseTeamMail(
-          "subject",
-          "body",
-          courseId
-        ).then(mailResp => {
-          assert.ok(
-            fetchJSONStub.calledWith(`/api/v0/mail/course/${courseId}/`, {
-              method: "POST",
-              body:   JSON.stringify({
-                email_subject: "subject",
-                email_body:    "body"
+        return sendCourseTeamMail("subject", "body", courseId).then(
+          mailResp => {
+            assert.ok(
+              fetchJSONStub.calledWith(`/api/v0/mail/course/${courseId}/`, {
+                method: "POST",
+                body:   JSON.stringify({
+                  email_subject: "subject",
+                  email_body:    "body"
+                })
               })
-            })
-          )
-          assert.deepEqual(mailResp, MAIL_RESPONSE)
-        })
+            )
+            assert.deepEqual(mailResp, MAIL_RESPONSE)
+          }
+        )
       })
 
       it("returns expected values when a POST to send a learner email succeeds", () => {
         fetchJSONStub.returns(Promise.resolve(MAIL_RESPONSE))
-        return sendLearnerMail(
-          "subject",
-          "body",
-          learnerStudentId
-        ).then(mailResp => {
-          sinon.assert.calledWith(
-            fetchJSONStub,
-            `/api/v0/mail/learner/${learnerStudentId}/`,
-            {
-              method: "POST",
-              body:   JSON.stringify({
-                email_subject: "subject",
-                email_body:    "body"
-              })
-            }
-          )
-          assert.deepEqual(mailResp, MAIL_RESPONSE)
-        })
+        return sendLearnerMail("subject", "body", learnerStudentId).then(
+          mailResp => {
+            sinon.assert.calledWith(
+              fetchJSONStub,
+              `/api/v0/mail/learner/${learnerStudentId}/`,
+              {
+                method: "POST",
+                body:   JSON.stringify({
+                  email_subject: "subject",
+                  email_body:    "body"
+                })
+              }
+            )
+            assert.deepEqual(mailResp, MAIL_RESPONSE)
+          }
+        )
       })
 
       it("returns a rejected Promise when a POST to any email sending function fails", () => {

@@ -91,9 +91,7 @@ export default class CourseListCard extends React.Component {
         // financial aid + coupon
         return (
           <p className={priceMessageClassName}>
-            Your price is <strong>
-              {formatPrice(price)} USD per course,
-            </strong>{" "}
+            Your price is <strong>{formatPrice(price)} USD per course,</strong>{" "}
             including both financial aid and your coupon. If you want to audit
             courses for FREE and upgrade later, click Enroll then choose the
             audit option.

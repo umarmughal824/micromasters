@@ -29,9 +29,9 @@ export const dialogActions = (
     disabled={disabled}
     type="button"
     key="save"
-    className={`${disabled
-      ? "secondary-button"
-      : "primary-button"} save-button ${saveClass}`}
+    className={`${
+      disabled ? "secondary-button" : "primary-button"
+    } save-button ${saveClass}`}
     onClick={onSave}
   >
     {text}

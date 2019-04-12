@@ -46,43 +46,43 @@ describe("image upload reducer", () => {
   })
 
   it("should let you set an error", () => {
-    return dispatchThen(setPhotoError("an error"), [
-      SET_PHOTO_ERROR
-    ]).then(state => {
-      assert.deepEqual(state, {
-        edit:        null,
-        error:       "an error",
-        photo:       null,
-        patchStatus: null
-      })
-    })
+    return dispatchThen(setPhotoError("an error"), [SET_PHOTO_ERROR]).then(
+      state => {
+        assert.deepEqual(state, {
+          edit:        null,
+          error:       "an error",
+          photo:       null,
+          patchStatus: null
+        })
+      }
+    )
   })
 
   it("should start editing a photo", () => {
-    return dispatchThen(startPhotoEdit("a photo"), [
-      START_PHOTO_EDIT
-    ]).then(state => {
-      assert.deepEqual(state, {
-        edit:        null,
-        error:       null,
-        photo:       "a photo",
-        patchStatus: null
-      })
-    })
+    return dispatchThen(startPhotoEdit("a photo"), [START_PHOTO_EDIT]).then(
+      state => {
+        assert.deepEqual(state, {
+          edit:        null,
+          error:       null,
+          photo:       "a photo",
+          patchStatus: null
+        })
+      }
+    )
   })
 
   it("should clear any errors when beginning to edit", () => {
     store.dispatch(setPhotoError("an error"))
-    return dispatchThen(startPhotoEdit("a photo"), [
-      START_PHOTO_EDIT
-    ]).then(state => {
-      assert.deepEqual(state, {
-        edit:        null,
-        error:       null,
-        photo:       "a photo",
-        patchStatus: null
-      })
-    })
+    return dispatchThen(startPhotoEdit("a photo"), [START_PHOTO_EDIT]).then(
+      state => {
+        assert.deepEqual(state, {
+          edit:        null,
+          error:       null,
+          photo:       "a photo",
+          patchStatus: null
+        })
+      }
+    )
   })
 
   it("should let you update an edit in progress", () => {
@@ -90,16 +90,16 @@ describe("image upload reducer", () => {
     const second = new Blob()
     store.dispatch(startPhotoEdit(first))
 
-    return dispatchThen(updatePhotoEdit(second), [
-      UPDATE_PHOTO_EDIT
-    ]).then(state => {
-      assert.deepEqual(state, {
-        edit:        second,
-        error:       null,
-        photo:       first,
-        patchStatus: null
-      })
-    })
+    return dispatchThen(updatePhotoEdit(second), [UPDATE_PHOTO_EDIT]).then(
+      state => {
+        assert.deepEqual(state, {
+          edit:        second,
+          error:       null,
+          photo:       first,
+          patchStatus: null
+        })
+      }
+    )
   })
 
   it("should clear an edit in progress", () => {

@@ -78,4 +78,7 @@ const mapDispatchToProps = dispatch =>
     ["setCopySuccess", setCopySuccess]
   ])
 
-export default connect(mapStateToProps, mapDispatchToProps)(CopyLinkDialog)
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(CopyLinkDialog)

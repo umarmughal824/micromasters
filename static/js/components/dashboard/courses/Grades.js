@@ -110,14 +110,16 @@ const Grades = (props: CourseGradeProps) => {
         <div
           className="open-popup"
           onClick={() =>
-            setShowGradeDetailDialog(true, EDX_GRADE, course.title)}
+            setShowGradeDetailDialog(true, EDX_GRADE, course.title)
+          }
         >
           {renderEdXGrade(course)}
         </div>
         <div
           className="open-popup"
           onClick={() =>
-            setShowGradeDetailDialog(true, EXAM_GRADE, course.title)}
+            setShowGradeDetailDialog(true, EXAM_GRADE, course.title)
+          }
         >
           {renderExamGrade(course)}
         </div>

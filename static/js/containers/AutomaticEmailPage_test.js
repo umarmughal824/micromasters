@@ -64,35 +64,32 @@ describe("AutomaticEmailPage", () => {
   })
 
   it("has all the cards it should", () => {
-    return renderComponent(
-      "/automaticemails",
-      successActions
-    ).then(([wrapper]) => {
-      assert.lengthOf(wrapper.find(".email-campaigns-card"), 1)
-    })
+    return renderComponent("/automaticemails", successActions).then(
+      ([wrapper]) => {
+        assert.lengthOf(wrapper.find(".email-campaigns-card"), 1)
+      }
+    )
   })
 
   it("shows a spinner while the email info request is in-flight", () => {
     helper.store.dispatch({ type: actions.automaticEmails.get.requestType })
 
-    return renderComponent(
-      "/automaticemails",
-      baseActions
-    ).then(([wrapper]) => {
-      assert.lengthOf(wrapper.find(Spinner), 1)
-    })
+    return renderComponent("/automaticemails", baseActions).then(
+      ([wrapper]) => {
+        assert.lengthOf(wrapper.find(Spinner), 1)
+      }
+    )
   })
 
   it("shows the automatic emails for the logged-in user", () => {
-    return renderComponent(
-      "/automaticemails",
-      successActions
-    ).then(([wrapper]) => {
-      const cardText = wrapper.find(".email-campaigns-card").text()
-      GET_AUTOMATIC_EMAILS_RESPONSE.forEach(email => {
-        assert.include(cardText, email.email_subject)
-      })
-    })
+    return renderComponent("/automaticemails", successActions).then(
+      ([wrapper]) => {
+        const cardText = wrapper.find(".email-campaigns-card").text()
+        GET_AUTOMATIC_EMAILS_RESPONSE.forEach(email => {
+          assert.include(cardText, email.email_subject)
+        })
+      }
+    )
   })
 
   it("shows a placeholder if there is no data", () => {
@@ -102,13 +99,12 @@ describe("AutomaticEmailPage", () => {
       body: JSON.stringify([])
     }))
 
-    return renderComponent(
-      "/automaticemails",
-      successActions
-    ).then(([wrapper]) => {
-      const cardText = wrapper.find(".empty-message").text()
-      assert.equal(cardText, "You haven't created any Email Campaigns yet.")
-    })
+    return renderComponent("/automaticemails", successActions).then(
+      ([wrapper]) => {
+        const cardText = wrapper.find(".empty-message").text()
+        assert.equal(cardText, "You haven't created any Email Campaigns yet.")
+      }
+    )
   })
 
   it("should let you save an email", () => {
@@ -128,33 +124,32 @@ describe("AutomaticEmailPage", () => {
       }
     )
 
-    return renderComponent(
-      "/automaticemails",
-      successActions
-    ).then(([wrapper]) => {
-      const editButton = wrapper
-        .find(".email-campaigns-card")
-        .find(".email-row")
-        .at(0)
-        .find("a")
-      editButton.simulate("click")
-      // $FlowFixMe:
-      const dialogSave = document
-        .querySelector(".email-composition-dialog")
-        .querySelector(".save-button")
+    return renderComponent("/automaticemails", successActions).then(
+      ([wrapper]) => {
+        const editButton = wrapper
+          .find(".email-campaigns-card")
+          .find(".email-row")
+          .at(0)
+          .find("a")
+        editButton.simulate("click")
+        // $FlowFixMe:
+        const dialogSave = document
+          .querySelector(".email-composition-dialog")
+          .querySelector(".save-button")
 
-      return helper.listenForActions(
-        [
-          UPDATE_EMAIL_VALIDATION,
-          actions.automaticEmails.patch.requestType,
-          actions.automaticEmails.patch.successType,
-          CLEAR_EMAIL_EDIT,
-          HIDE_DIALOG
-        ],
-        () => {
-          ReactTestUtils.Simulate.click(dialogSave)
-        }
-      )
-    })
+        return helper.listenForActions(
+          [
+            UPDATE_EMAIL_VALIDATION,
+            actions.automaticEmails.patch.requestType,
+            actions.automaticEmails.patch.successType,
+            CLEAR_EMAIL_EDIT,
+            HIDE_DIALOG
+          ],
+          () => {
+            ReactTestUtils.Simulate.click(dialogSave)
+          }
+        )
+      }
+    )
   })
 })

@@ -43,7 +43,10 @@ const withSearchkitManager = (WrappedComponent: ReactClass<*>) => {
     }
 
     componentDidMount() {
-      const { props: { currentProgramEnrollment }, searchkitCanSearch } = this
+      const {
+        props: { currentProgramEnrollment },
+        searchkitCanSearch
+      } = this
 
       if (!R.isNil(currentProgramEnrollment)) {
         // tell searchkit it can run the initial search. This function is a resolver, after the first time
@@ -53,7 +56,10 @@ const withSearchkitManager = (WrappedComponent: ReactClass<*>) => {
     }
 
     componentDidUpdate() {
-      const { props: { currentProgramEnrollment }, searchkitCanSearch } = this
+      const {
+        props: { currentProgramEnrollment },
+        searchkitCanSearch
+      } = this
 
       if (!R.isNil(currentProgramEnrollment)) {
         // tell searchkit it can run the initial search. This function is a resolver, after the first time

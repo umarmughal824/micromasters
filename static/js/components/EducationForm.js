@@ -113,7 +113,9 @@ class EducationForm extends ProfileFormFields {
   }
 
   educationLevelRadioSwitch = (level: Option): React$Element<*> => {
-    const { ui: { educationLevelAnswers } } = this.props
+    const {
+      ui: { educationLevelAnswers }
+    } = this.props
     const radioIconStyle = { marginRight: "8px" }
     const valueSelected = level.value in educationLevelAnswers ? "false" : null
     return (
@@ -275,7 +277,9 @@ class EducationForm extends ProfileFormFields {
             <div className="profile-row-date-range">
               {formatMonthDate(education.graduation_date)}
             </div>
-            {userPrivilegeCheck(profile, icons, () => <div />)}
+            {userPrivilegeCheck(profile, icons, () => (
+              <div />
+            ))}
           </div>
         </Cell>
       )
@@ -283,7 +287,9 @@ class EducationForm extends ProfileFormFields {
   )
 
   hasEducationAtLevel(levelValue: string): boolean {
-    const { profile: { education } } = this.props
+    const {
+      profile: { education }
+    } = this.props
     return !_.isUndefined(
       education.find(entry => entry.degree_name === levelValue)
     )
@@ -315,7 +321,11 @@ class EducationForm extends ProfileFormFields {
   }
 
   editEducationForm = (): React$Element<*> => {
-    const { ui: { educationDialogIndex }, showSwitch, profile } = this.props
+    const {
+      ui: { educationDialogIndex },
+      showSwitch,
+      profile
+    } = this.props
 
     const keySet = (key): any => ["education", educationDialogIndex, key]
     const educationDegreeLevel = _.get(profile, keySet("degree_name"))

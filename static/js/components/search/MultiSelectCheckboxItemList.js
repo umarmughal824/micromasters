@@ -102,9 +102,9 @@ export default class MultiSelectCheckboxItemList extends SearchkitComponent {
 
   allAction = (itemsSelected: boolean) => (
     <div
-      className={`sk-item-list-option sk-item-list__item ${itemsSelected
-        ? this.state.allOptionClass
-        : ""}`}
+      className={`sk-item-list-option sk-item-list__item ${
+        itemsSelected ? this.state.allOptionClass : ""
+      }`}
       key="select-all-items"
       onClick={this.rowClickHandler}
     >

@@ -44,9 +44,9 @@ export default class DateField extends React.Component {
 
     // make a copy of keySet with a slightly different key for temporary storage of the textfields being edited
     const editKeySet = keySet.concat()
-    editKeySet[editKeySet.length - 1] = `${editKeySet[
-      editKeySet.length - 1
-    ]}_edit`
+    editKeySet[editKeySet.length - 1] = `${
+      editKeySet[editKeySet.length - 1]
+    }_edit`
 
     // Get the moment object from the state, or null if not available
     const getDate = () => {

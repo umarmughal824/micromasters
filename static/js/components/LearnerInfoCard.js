@@ -18,7 +18,9 @@ import type { Profile } from "../flow/profileTypes"
 
 const showLegalNameIfStaff = profile => {
   return hasAnyStaffRole(SETTINGS.roles) ? (
-    <div className="legal-name">{`(Legal name: ${profile.first_name} ${profile.last_name})`}</div>
+    <div className="legal-name">{`(Legal name: ${profile.first_name} ${
+      profile.last_name
+    })`}</div>
   ) : null
 }
 

@@ -19,7 +19,7 @@ export const circularProgressWidget = (
   const viewBox = `0 0 ${width} ${height}`
   const dashArray = radiusForMeasures * Math.PI * 2
   const dashOffset =
-    dashArray - dashArray * totalPassedCourses / (totalCourses || 1)
+    dashArray - (dashArray * totalPassedCourses) / (totalCourses || 1)
 
   return (
     <div className="circular-progress-widget">

@@ -36,7 +36,9 @@ class LearnerSearchPage extends React.Component {
   }
 
   checkFilterVisibility = (filterName: string): boolean => {
-    const { ui: { searchFilterVisibility } } = this.props
+    const {
+      ui: { searchFilterVisibility }
+    } = this.props
     const visibility = searchFilterVisibility[filterName]
     return visibility === undefined
       ? SEARCH_FILTER_DEFAULT_VISIBILITY
@@ -44,7 +46,10 @@ class LearnerSearchPage extends React.Component {
   }
 
   setFilterVisibility = (filterName: string, visibility: boolean): void => {
-    const { ui: { searchFilterVisibility }, dispatch } = this.props
+    const {
+      ui: { searchFilterVisibility },
+      dispatch
+    } = this.props
     const clone = _.clone(searchFilterVisibility)
     clone[filterName] = visibility
     dispatch(setSearchFilterVisibility(clone))

@@ -29,10 +29,7 @@ import AutomaticEmailPage from "../containers/AutomaticEmailPage"
 export function findCourse(
   courseSelector: (course: ?Course, program: ?Program) => boolean
 ): Course {
-  const [
-    ,
-    course
-  ] = findCourseRun(
+  const [, course] = findCourseRun(
     DASHBOARD_RESPONSE.programs,
     (courseRun, _course, program) => courseSelector(_course, program)
   )
@@ -260,4 +257,7 @@ export const testRoutes = (
   </Route>
 )
 
-export const stringStrip = R.compose(R.join(" "), _.words)
+export const stringStrip = R.compose(
+  R.join(" "),
+  _.words
+)

@@ -29,7 +29,10 @@ const noEmailsMessage = () => (
 const emptyMessage = automaticEmails =>
   fetchingEmail(automaticEmails) ? <Spinner singleColor /> : noEmailsMessage()
 
-const notEmpty = R.compose(R.not, R.isEmpty)
+const notEmpty = R.compose(
+  R.not,
+  R.isEmpty
+)
 
 type AutomaticEmailsType = RestState<Array<AutomaticEmail>> & {
   emailsInFlight: Set<number>
@@ -77,7 +80,10 @@ class AutomaticEmailPage extends React.Component {
   }
 
   toggleEmailActive = email => {
-    const { dispatch, automaticEmails: { emailsInFlight } } = this.props
+    const {
+      dispatch,
+      automaticEmails: { emailsInFlight }
+    } = this.props
 
     if (!emailsInFlight.has(email.id)) {
       const updatedEmail = R.evolve(

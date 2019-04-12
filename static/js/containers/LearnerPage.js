@@ -41,19 +41,28 @@ type LearnerPageProps = ProfileContainerProps & {
 
 class LearnerPage extends React.Component<*, LearnerPageProps, *> {
   componentDidMount() {
-    const { params: { username }, fetchProfile } = this.props
+    const {
+      params: { username },
+      fetchProfile
+    } = this.props
     fetchProfile(username)
     this.fetchDashboard()
   }
 
   componentDidUpdate() {
-    const { params: { username }, fetchProfile } = this.props
+    const {
+      params: { username },
+      fetchProfile
+    } = this.props
     fetchProfile(username)
     this.fetchDashboard()
   }
 
   componentWillUnmount() {
-    const { dispatch, params: { username } } = this.props
+    const {
+      dispatch,
+      params: { username }
+    } = this.props
     if (!SETTINGS.user || SETTINGS.user.username !== username) {
       // don't erase the user's own profile from the state
       dispatch(clearProfile(username))
@@ -62,7 +71,10 @@ class LearnerPage extends React.Component<*, LearnerPageProps, *> {
   }
 
   getFocusedDashboard() {
-    const { dashboard, params: { username } } = this.props
+    const {
+      dashboard,
+      params: { username }
+    } = this.props
     return S.filter(
       () => hasAnyStaffRole(SETTINGS.roles),
       getDashboard(username, dashboard)
@@ -70,7 +82,10 @@ class LearnerPage extends React.Component<*, LearnerPageProps, *> {
   }
 
   fetchDashboard() {
-    const { dispatch, params: { username } } = this.props
+    const {
+      dispatch,
+      params: { username }
+    } = this.props
 
     R.compose(
       S.map(() => dispatch(fetchDashboard(username))),
@@ -87,7 +102,10 @@ class LearnerPage extends React.Component<*, LearnerPageProps, *> {
     )
 
   getDocumentTitle = () => {
-    const { params: { username }, profiles } = this.props
+    const {
+      params: { username },
+      profiles
+    } = this.props
     const profilePath = [username, "profile"]
 
     const name = R.pathOr("", profilePath.concat("preferred_name"), profiles)
