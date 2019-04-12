@@ -183,12 +183,12 @@ export function addFinancialAid(
 }
 
 export function getCoursePrices(username: string): Promise<CoursePrices> {
-  return fetchJSONWithCSRF(
-    `/api/v0/course_prices/${username}/`
-  ).then(coursePrices => {
-    // turn `price` from string into decimal
-    return R.map(R.evolve({ price: Decimal }), coursePrices)
-  })
+  return fetchJSONWithCSRF(`/api/v0/course_prices/${username}/`).then(
+    coursePrices => {
+      // turn `price` from string into decimal
+      return R.map(R.evolve({ price: Decimal }), coursePrices)
+    }
+  )
 }
 
 export function skipFinancialAid(programId: number): Promise<*> {

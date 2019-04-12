@@ -61,13 +61,11 @@ describe("Date validation", () => {
         })
 
         it("should trim a number down to the correct number of places", () => {
-          [
-            [1999, 4, "1999"],
-            [1999, 2, "19"],
-            [112341234, 1, "1"]
-          ].forEach(([input, length, expectation]) => {
-            assert.deepEqual(sanitizeNumberString(length, input), expectation)
-          })
+          [[1999, 4, "1999"], [1999, 2, "19"], [112341234, 1, "1"]].forEach(
+            ([input, length, expectation]) => {
+              assert.deepEqual(sanitizeNumberString(length, input), expectation)
+            }
+          )
         })
       })
     })

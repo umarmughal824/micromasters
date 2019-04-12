@@ -133,14 +133,14 @@ describe("dashboard reducers", () => {
 
     it("should let you clear just one dashboard", () => {
       store.dispatch(receiveDashboardSuccess(_username, DASHBOARD_RESPONSE))
-      return dispatchThen(clearDashboard(username), [
-        CLEAR_DASHBOARD
-      ]).then(state => {
-        assert.deepEqual(state, {
-          [_username]: successExpectation,
-          [username]:  { programs: [], isEdxDataFresh: true, noSpinner: false }
-        })
-      })
+      return dispatchThen(clearDashboard(username), [CLEAR_DASHBOARD]).then(
+        state => {
+          assert.deepEqual(state, {
+            [_username]: successExpectation,
+            [username]:  { programs: [], isEdxDataFresh: true, noSpinner: false }
+          })
+        }
+      )
     })
 
     it("should let you fail to fetch just one dashboard", () => {

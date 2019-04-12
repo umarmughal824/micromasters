@@ -185,7 +185,10 @@ class DashboardPage extends React.Component {
   }
 
   submitPearsonSSO = () => {
-    const { dispatch, profile: { profile } } = this.props
+    const {
+      dispatch,
+      profile: { profile }
+    } = this.props
 
     dispatch(getPearsonSSODigest())
       .then(res => {
@@ -226,7 +229,10 @@ class DashboardPage extends React.Component {
   }
 
   handleOrderSuccess = (course: Course): void => {
-    const { dispatch, ui: { toastMessage } } = this.props
+    const {
+      dispatch,
+      ui: { toastMessage }
+    } = this.props
     const firstRun: ?CourseRun = course.runs.length > 0 ? course.runs[0] : null
 
     if (_.isNil(toastMessage)) {
@@ -234,8 +240,10 @@ class DashboardPage extends React.Component {
         dispatch(
           setToastMessage({
             title:   "Course Enrollment",
-            message: `Something went wrong. You paid for this course '${course.title}' but are not enrolled.`,
-            icon:    TOAST_FAILURE
+            message: `Something went wrong. You paid for this course '${
+              course.title
+            }' but are not enrolled.`,
+            icon: TOAST_FAILURE
           })
         )
       } else {
@@ -252,7 +260,10 @@ class DashboardPage extends React.Component {
   }
 
   handleOrderCancellation = (): void => {
-    const { dispatch, ui: { toastMessage } } = this.props
+    const {
+      dispatch,
+      ui: { toastMessage }
+    } = this.props
     if (_.isNil(toastMessage)) {
       dispatch(
         setToastMessage({
@@ -307,7 +318,10 @@ class DashboardPage extends React.Component {
   }
 
   checkFinancialAidError = () => {
-    const { financialAid: { fetchError }, dispatch } = this.props
+    const {
+      financialAid: { fetchError },
+      dispatch
+    } = this.props
     if (fetchError && fetchError.message === "Profile is not complete") {
       dispatch(clearProfile(SETTINGS.user.username))
       this.context.router.push(`/profile/`)
@@ -349,7 +363,10 @@ class DashboardPage extends React.Component {
   }
 
   handleOrderStatus = () => {
-    const { dashboard, location: { query } } = this.props
+    const {
+      dashboard,
+      location: { query }
+    } = this.props
 
     if (dashboard.fetchStatus !== FETCH_SUCCESS) {
       // wait until we have access to the dashboard
@@ -400,7 +417,11 @@ class DashboardPage extends React.Component {
   }
 
   handleCoupon = () => {
-    const { coupons, dispatch, location: { query } } = this.props
+    const {
+      coupons,
+      dispatch,
+      location: { query }
+    } = this.props
 
     if (!query.coupon) {
       // If there's no coupon code in the URL query parameters,
@@ -460,7 +481,9 @@ class DashboardPage extends React.Component {
     const {
       dispatch,
       currentProgramEnrollment,
-      profile: { profile: { country } }
+      profile: {
+        profile: { country }
+      }
     } = this.props
     dispatch(startCalculatorEdit(currentProgramEnrollment.id))
     if (country) {
@@ -485,7 +508,7 @@ class DashboardPage extends React.Component {
     )
   }
 
-  skipFinancialAid = (programId:number):any => {
+  skipFinancialAid = (programId: number): any => {
     const { dispatch, financialAid } = this.props
 
     const program = this.getCurrentlyEnrolledProgram()
@@ -497,18 +520,20 @@ class DashboardPage extends React.Component {
       ) &&
       financialAid.fetchSkipStatus === undefined
     ) {
-      return dispatch(skipFinancialAid(programId)).then(() => {
-        this.setConfirmSkipDialogVisibility(false)
-      },
-      () => {
-        this.setConfirmSkipDialogVisibility(false)
-        dispatch(
-          setToastMessage({
-            message: "Failed to skip financial aid.",
-            icon:    TOAST_FAILURE
-          })
-        )
-      })
+      return dispatch(skipFinancialAid(programId)).then(
+        () => {
+          this.setConfirmSkipDialogVisibility(false)
+        },
+        () => {
+          this.setConfirmSkipDialogVisibility(false)
+          dispatch(
+            setToastMessage({
+              message: "Failed to skip financial aid.",
+              icon:    TOAST_FAILURE
+            })
+          )
+        }
+      )
     }
   }
 

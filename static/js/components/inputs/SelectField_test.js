@@ -14,14 +14,12 @@ describe("SelectField", () => {
         assert.match(string, CREATE_OPTION_REGEX)
       })
     })
-    ;[
-      "Crete option",
-      "Some other option with nothing in common",
-      ""
-    ].forEach(string => {
-      it(`should not match ${string}`, () => {
-        assert.notMatch(string, CREATE_OPTION_REGEX)
-      })
-    })
+    ;["Crete option", "Some other option with nothing in common", ""].forEach(
+      string => {
+        it(`should not match ${string}`, () => {
+          assert.notMatch(string, CREATE_OPTION_REGEX)
+        })
+      }
+    )
   })
 })

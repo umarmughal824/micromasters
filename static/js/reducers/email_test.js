@@ -42,14 +42,14 @@ describe("email reducers", () => {
   const initialExpectedEmailState = INITIAL_EMAIL_STATE
 
   it("should let you start editing an email", () => {
-    return dispatchThen(startEmailEdit(emailType), [
-      START_EMAIL_EDIT
-    ]).then(state => {
-      assert.deepEqual(state[emailType], {
-        ...initialExpectedEmailState,
-        supportsAutomaticEmails: undefined
-      })
-    })
+    return dispatchThen(startEmailEdit(emailType), [START_EMAIL_EDIT]).then(
+      state => {
+        assert.deepEqual(state[emailType], {
+          ...initialExpectedEmailState,
+          supportsAutomaticEmails: undefined
+        })
+      }
+    )
   })
 
   it("should let you update an email edit in progress", () => {

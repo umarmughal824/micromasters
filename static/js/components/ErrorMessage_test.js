@@ -106,16 +106,15 @@ describe("ErrorMessage", () => {
       it("error from the backend triggers error message in dashboard", () => {
         helper.dashboardStub.returns(Promise.reject(ERROR_RESPONSE))
 
-        return renderComponent(
-          "/dashboard",
-          DASHBOARD_ERROR_ACTIONS
-        ).then(([, div]) => {
-          confirmErrorMessage(
-            div,
-            `AB123 ${errorString}`,
-            "Additional info: custom error message for the user."
-          )
-        })
+        return renderComponent("/dashboard", DASHBOARD_ERROR_ACTIONS).then(
+          ([, div]) => {
+            confirmErrorMessage(
+              div,
+              `AB123 ${errorString}`,
+              "Additional info: custom error message for the user."
+            )
+          }
+        )
       })
 
       it("the error from the backend does not need to be complete", () => {
@@ -123,12 +122,11 @@ describe("ErrorMessage", () => {
         delete response.user_message
         helper.dashboardStub.returns(Promise.reject(response))
 
-        return renderComponent(
-          "/dashboard",
-          DASHBOARD_ERROR_ACTIONS
-        ).then(([, div]) => {
-          confirmErrorMessage(div, `AB123 ${errorString}`)
-        })
+        return renderComponent("/dashboard", DASHBOARD_ERROR_ACTIONS).then(
+          ([, div]) => {
+            confirmErrorMessage(div, `AB123 ${errorString}`)
+          }
+        )
       })
 
       it("the error from the backend does not need to exist at all as long as there is an http error", () => {
@@ -138,24 +136,22 @@ describe("ErrorMessage", () => {
           })
         )
 
-        return renderComponent(
-          "/dashboard",
-          DASHBOARD_ERROR_ACTIONS
-        ).then(([, div]) => {
-          confirmErrorMessage(div, `500 ${errorString}`)
-        })
+        return renderComponent("/dashboard", DASHBOARD_ERROR_ACTIONS).then(
+          ([, div]) => {
+            confirmErrorMessage(div, `500 ${errorString}`)
+          }
+        )
       })
 
       it("a regular response does not show the error", () => {
         helper.dashboardStub.returns(Promise.resolve(DASHBOARD_RESPONSE))
 
-        return renderComponent(
-          "/dashboard",
-          DASHBOARD_SUCCESS_ACTIONS
-        ).then(([, div]) => {
-          const message = div.getElementsByClassName("alert-message")[0]
-          assert.equal(message, undefined)
-        })
+        return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+          ([, div]) => {
+            const message = div.getElementsByClassName("alert-message")[0]
+            assert.equal(message, undefined)
+          }
+        )
       })
 
       it("shows enrollment card if there are no programs", () => {
@@ -165,16 +161,15 @@ describe("ErrorMessage", () => {
             actionType !== actions.discussionsFrontpage.get.successType
         )
 
-        return renderComponent(
-          "/dashboard",
-          expectedActions
-        ).then(([wrapper]) => {
-          const message = wrapper.find(".page-content").text()
-          assert.equal(
-            message,
-            "You are not currently enrolled in any programsEnroll in a MicroMasters Program"
-          )
-        })
+        return renderComponent("/dashboard", expectedActions).then(
+          ([wrapper]) => {
+            const message = wrapper.find(".page-content").text()
+            assert.equal(
+              message,
+              "You are not currently enrolled in any programsEnroll in a MicroMasters Program"
+            )
+          }
+        )
       })
 
       it("shows enrollment card if there is no matching current program enrollment", () => {
@@ -184,16 +179,15 @@ describe("ErrorMessage", () => {
             actionType !== actions.discussionsFrontpage.get.successType
         )
 
-        return renderComponent(
-          "/dashboard",
-          expectedActions
-        ).then(([wrapper]) => {
-          const message = wrapper.find(".page-content").text()
-          assert.equal(
-            message,
-            "You are not currently enrolled in any programsEnroll in a MicroMasters Program"
-          )
-        })
+        return renderComponent("/dashboard", expectedActions).then(
+          ([wrapper]) => {
+            const message = wrapper.find(".page-content").text()
+            assert.equal(
+              message,
+              "You are not currently enrolled in any programsEnroll in a MicroMasters Program"
+            )
+          }
+        )
       })
     })
 

@@ -38,7 +38,12 @@ const convertHTMLToEditorState = (html: string): Object => {
 const editorStateFromProps = R.compose(
   S.maybe({ editorState: EditorState.createEmpty() }, R.objOf("editorState")),
   S.map(convertHTMLToEditorState),
-  S.filter(R.compose(R.not, R.isEmpty)),
+  S.filter(
+    R.compose(
+      R.not,
+      R.isEmpty
+    )
+  ),
   getm("body"),
   R.pathOr({}, ["activeEmail", "inputs"])
 )
@@ -130,7 +135,9 @@ export default class EmailCompositionDialog extends React.Component {
   }
 
   showValidationError = (fieldName: string): ?React$Element<*> => {
-    const { activeEmail: { validationErrors } } = this.props
+    const {
+      activeEmail: { validationErrors }
+    } = this.props
     const val = validationErrors[fieldName]
     if (val !== undefined) {
       return <span className="validation-error">{val}</span>

@@ -81,8 +81,10 @@ export const addProgramEnrollment = (
         dispatch(receiveAddProgramEnrollmentSuccess(enrollment))
         dispatch(
           setToastMessage({
-            message: `You are now enrolled in the ${enrollment.title} MicroMasters`,
-            icon:    TOAST_SUCCESS
+            message: `You are now enrolled in the ${
+              enrollment.title
+            } MicroMasters`,
+            icon: TOAST_SUCCESS
           })
         )
         dispatch(setEnrollProgramDialogVisibility(false))

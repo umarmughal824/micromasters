@@ -86,4 +86,7 @@ const mapDispatchToProps = dispatch =>
     ["setDialogVisibility", setDialogVisibility]
   ])
 
-export default connect(mapStateToProps, mapDispatchToProps)(SignupDialog)
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(SignupDialog)

@@ -56,6 +56,7 @@ class SettingsPage extends React.Component<*, ProfileContainerProps, *> {
     )
   }
 }
-export default R.compose(connect(mapStateToProfileProps), profileFormContainer)(
-  SettingsPage
-)
+export default R.compose(
+  connect(mapStateToProfileProps),
+  profileFormContainer
+)(SettingsPage)

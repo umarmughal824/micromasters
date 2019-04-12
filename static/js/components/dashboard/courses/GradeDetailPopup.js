@@ -142,9 +142,9 @@ const renderExamRows = R.compose(
 )
 
 const dialogTitle = (course: Course, gradeType: GradeType): string =>
-  `${course.title} - ${gradeType === EDX_GRADE
-    ? "Completed edX Course Runs"
-    : "Completed Exams"}`
+  `${course.title} - ${
+    gradeType === EDX_GRADE ? "Completed edX Course Runs" : "Completed Exams"
+  }`
 
 type GradeDetailPopupProps = {
   course: Course,
@@ -168,7 +168,8 @@ const GradeDetailPopup = (props: GradeDetailPopupProps) => {
       titleClassName="grade-dialog-title"
       open={dialogVisibility}
       onRequestClose={() =>
-        setShowGradeDetailDialog(false, gradeType, course.title)}
+        setShowGradeDetailDialog(false, gradeType, course.title)
+      }
     >
       {gradeType === EDX_GRADE
         ? renderRunRows(course.runs)

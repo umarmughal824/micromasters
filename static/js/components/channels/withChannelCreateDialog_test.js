@@ -44,9 +44,10 @@ describe("withChannelCreateDialog higher-order component", () => {
 
   const WrappedTestContainerPage = withChannelCreateDialog(TestContainerPage)
 
-  const renderTestComponentWithDialog = (
-    { channelDialog = INITIAL_CHANNEL_STATE, dialogVisible = false } = {}
-  ) =>
+  const renderTestComponentWithDialog = ({
+    channelDialog = INITIAL_CHANNEL_STATE,
+    dialogVisible = false
+  } = {}) =>
     mount(
       <MuiThemeProvider muiTheme={getMuiTheme()}>
         <WrappedTestContainerPage

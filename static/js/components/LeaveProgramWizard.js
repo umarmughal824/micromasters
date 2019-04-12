@@ -61,14 +61,19 @@ class LeaveProgramWizard extends ProfileFormFields {
   }
 
   unEnrollUserTask = () => {
-    const { dispatch, ui: { programsToUnEnroll } } = this.props
+    const {
+      dispatch,
+      ui: { programsToUnEnroll }
+    } = this.props
     if (!_.isEmpty(programsToUnEnroll)) {
       dispatch(unEnrollProgramEnrollments(programsToUnEnroll))
     }
   }
 
   menuItems = (programs: Array<AvailableProgram>) => {
-    const { ui: { programsToUnEnroll = [] } } = this.props
+    const {
+      ui: { programsToUnEnroll = [] }
+    } = this.props
     return programs.map((program: AvailableProgram) => (
       <MenuItem
         key={program.id}
@@ -84,7 +89,10 @@ class LeaveProgramWizard extends ProfileFormFields {
   }
 
   renderUnenrollUI = () => {
-    const { ui: { programsToUnEnroll = [] }, programs } = this.props
+    const {
+      ui: { programsToUnEnroll = [] },
+      programs
+    } = this.props
     const enrolledPrograms = enrolledInPrograms(programs)
     return (
       <SelectField

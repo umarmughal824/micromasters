@@ -127,34 +127,32 @@ describe("DashboardPage", () => {
   })
 
   it("shows a spinner when dashboard get is processing", () => {
-    return renderComponent(
-      "/dashboard",
-      DASHBOARD_SUCCESS_ACTIONS
-    ).then(([, div]) => {
-      assert.notOk(
-        div.querySelector(".loader"),
-        "Found spinner but no fetch in progress"
-      )
-      helper.store.dispatch({
-        type:    REQUEST_DASHBOARD,
-        payload: false,
-        meta:    SETTINGS.user.username
-      })
+    return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+      ([, div]) => {
+        assert.notOk(
+          div.querySelector(".loader"),
+          "Found spinner but no fetch in progress"
+        )
+        helper.store.dispatch({
+          type:    REQUEST_DASHBOARD,
+          payload: false,
+          meta:    SETTINGS.user.username
+        })
 
-      assert(div.querySelector(".loader"), "Unable to find spinner")
-    })
+        assert(div.querySelector(".loader"), "Unable to find spinner")
+      }
+    )
   })
 
   it("has all the cards we expect", () => {
-    return renderComponent(
-      "/dashboard",
-      DASHBOARD_SUCCESS_ACTIONS
-    ).then(([wrapper]) => {
-      assert.lengthOf(wrapper.find(".dashboard-user-card"), 1)
-      assert.lengthOf(wrapper.find(".course-list"), 1)
-      assert.lengthOf(wrapper.find(".progress-widget"), 1)
-      assert.lengthOf(wrapper.find(".learners-card"), 1)
-    })
+    return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+      ([wrapper]) => {
+        assert.lengthOf(wrapper.find(".dashboard-user-card"), 1)
+        assert.lengthOf(wrapper.find(".course-list"), 1)
+        assert.lengthOf(wrapper.find(".progress-widget"), 1)
+        assert.lengthOf(wrapper.find(".learners-card"), 1)
+      }
+    )
   })
 
   it("should not load the discussions frontpage if the feature flag is false", async () => {
@@ -167,9 +165,9 @@ describe("DashboardPage", () => {
     await renderComponent("/dashboard", DASHBOARD_SUCCESS_NO_FRONTPAGE_ACTIONS)
   })
   ;[true, false].forEach(showCard => {
-    it(`should ${showCard
-      ? "show"
-      : "not show"} discussions card when feature flag is ${showCard}`, () => {
+    it(`should ${
+      showCard ? "show" : "not show"
+    } discussions card when feature flag is ${showCard}`, () => {
       SETTINGS.FEATURES.DISCUSSIONS_POST_UI = showCard
       return renderComponent(
         "/dashboard",
@@ -213,12 +211,11 @@ describe("DashboardPage", () => {
       })
     )
 
-    return renderComponent(
-      "/dashboard",
-      DASHBOARD_SUCCESS_ACTIONS
-    ).then(([wrapper]) => {
-      assert.lengthOf(wrapper.find(".learners-card"), 0)
-    })
+    return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+      ([wrapper]) => {
+        assert.lengthOf(wrapper.find(".learners-card"), 0)
+      }
+    )
   })
 
   it("should show no program enrolled view", () => {
@@ -232,16 +229,15 @@ describe("DashboardPage", () => {
       DASHBOARD_SUCCESS_NO_LEARNERS_ACTIONS
     )
 
-    return renderComponent(
-      "/dashboard",
-      actionsNoFrontpage
-    ).then(([wrapper]) => {
-      const text = wrapper.find(".no-program-card").text()
-      assert.equal(
-        text,
-        "You are not currently enrolled in any programsEnroll in a MicroMasters Program"
-      )
-    })
+    return renderComponent("/dashboard", actionsNoFrontpage).then(
+      ([wrapper]) => {
+        const text = wrapper.find(".no-program-card").text()
+        assert.equal(
+          text,
+          "You are not currently enrolled in any programsEnroll in a MicroMasters Program"
+        )
+      }
+    )
   })
 
   it("should enroll user in program", () => {
@@ -258,65 +254,63 @@ describe("DashboardPage", () => {
       DASHBOARD_SUCCESS_NO_LEARNERS_ACTIONS
     )
 
-    return renderComponent(
-      "/dashboard",
-      actionsNoFrontpage
-    ).then(([wrapper]) => {
-      const link = wrapper.find(".enroll-wizard-button")
-      assert.equal(link.text(), "Enroll in a MicroMasters Program")
-      return helper
-        .listenForActions([SET_ENROLL_PROGRAM_DIALOG_VISIBILITY], () => {
-          link.simulate("click")
-        })
-        .then(() => {
-          assert.isFalse(addProgramEnrollmentStub.called)
-          const enrollBtn = document.querySelector(".enroll-button")
-          return helper
-            .listenForActions([SET_ENROLL_PROGRAM_DIALOG_ERROR], () => {
-              enrollBtn.click()
-            })
-            .then(() => {
-              return helper
-                .listenForActions(
-                  [
-                    REQUEST_ADD_PROGRAM_ENROLLMENT,
-                    RECEIVE_ADD_PROGRAM_ENROLLMENT_SUCCESS,
-                    SET_ENROLL_SELECTED_PROGRAM
-                  ],
-                  () => {
-                    const props = wrapper
-                      .find(ProgramEnrollmentDialog)
-                      .at(2)
-                      .props()
-                    props.setSelectedProgram(availablePrograms[0].id)
-                    enrollBtn.click()
-                  }
-                )
-                .then(() => {
-                  assert.isTrue(addProgramEnrollmentStub.called)
-                })
-            })
-        })
-    })
+    return renderComponent("/dashboard", actionsNoFrontpage).then(
+      ([wrapper]) => {
+        const link = wrapper.find(".enroll-wizard-button")
+        assert.equal(link.text(), "Enroll in a MicroMasters Program")
+        return helper
+          .listenForActions([SET_ENROLL_PROGRAM_DIALOG_VISIBILITY], () => {
+            link.simulate("click")
+          })
+          .then(() => {
+            assert.isFalse(addProgramEnrollmentStub.called)
+            const enrollBtn = document.querySelector(".enroll-button")
+            return helper
+              .listenForActions([SET_ENROLL_PROGRAM_DIALOG_ERROR], () => {
+                enrollBtn.click()
+              })
+              .then(() => {
+                return helper
+                  .listenForActions(
+                    [
+                      REQUEST_ADD_PROGRAM_ENROLLMENT,
+                      RECEIVE_ADD_PROGRAM_ENROLLMENT_SUCCESS,
+                      SET_ENROLL_SELECTED_PROGRAM
+                    ],
+                    () => {
+                      const props = wrapper
+                        .find(ProgramEnrollmentDialog)
+                        .at(2)
+                        .props()
+                      props.setSelectedProgram(availablePrograms[0].id)
+                      enrollBtn.click()
+                    }
+                  )
+                  .then(() => {
+                    assert.isTrue(addProgramEnrollmentStub.called)
+                  })
+              })
+          })
+      }
+    )
   })
 
   it("should show a <Grades /> component, and open the dialog when clicked", () => {
-    return renderComponent(
-      "/dashboard",
-      DASHBOARD_SUCCESS_ACTIONS
-    ).then(([wrapper]) => {
-      wrapper
-        .find(Grades)
-        .find(".open-popup")
-        .first()
-        .simulate("click")
-      const state = helper.store.getState().ui
-      const key = gradeDetailPopupKey(
-        EDX_GRADE,
-        DASHBOARD_RESPONSE.programs[0].courses[0].title
-      )
-      assert.isTrue(state.dialogVisibility[key])
-    })
+    return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+      ([wrapper]) => {
+        wrapper
+          .find(Grades)
+          .find(".open-popup")
+          .first()
+          .simulate("click")
+        const state = helper.store.getState().ui
+        const key = gradeDetailPopupKey(
+          EDX_GRADE,
+          DASHBOARD_RESPONSE.programs[0].courses[0].title
+        )
+        assert.isTrue(state.dialogVisibility[key])
+      }
+    )
   })
 
   it("should close the <Grades /> dialog if you click outside", () => {
@@ -326,19 +320,18 @@ describe("DashboardPage", () => {
     )
 
     helper.store.dispatch(showDialog(key))
-    return renderComponent(
-      "/dashboard",
-      DASHBOARD_SUCCESS_ACTIONS
-    ).then(([wrapper]) => {
-      wrapper
-        .find(Grades)
-        .find(Dialog)
-        .first()
-        .props()
-        .onRequestClose()
-      const state = helper.store.getState().ui
-      assert.isFalse(state.dialogVisibility[key])
-    })
+    return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+      ([wrapper]) => {
+        wrapper
+          .find(Grades)
+          .find(Dialog)
+          .first()
+          .props()
+          .onRequestClose()
+        const state = helper.store.getState().ui
+        assert.isFalse(state.dialogVisibility[key])
+      }
+    )
   })
 
   describe("order receipt and cancellation pages", () => {
@@ -447,8 +440,10 @@ describe("DashboardPage", () => {
       ).then(() => {
         assert.deepEqual(helper.store.getState().ui.toastMessage, {
           title:   "Course Enrollment",
-          message: `Something went wrong. You paid for this course '${course.title}' but are not enrolled.`,
-          icon:    TOAST_FAILURE
+          message: `Something went wrong. You paid for this course '${
+            course.title
+          }' but are not enrolled.`,
+          icon: TOAST_FAILURE
         })
       })
     })
@@ -575,12 +570,11 @@ describe("DashboardPage", () => {
         })
 
         it("should hide the financial aid card if there is a 100% coupon for the program", () => {
-          return renderComponent(
-            "/dashboard",
-            expectedActions
-          ).then(([wrapper]) => {
-            assert.equal(wrapper.find(".financial-aid-card").length, 0)
-          })
+          return renderComponent("/dashboard", expectedActions).then(
+            ([wrapper]) => {
+              assert.equal(wrapper.find(".financial-aid-card").length, 0)
+            }
+          )
         })
 
         it("should not care about coupons for other programs", () => {
@@ -588,13 +582,12 @@ describe("DashboardPage", () => {
           coupon.object_id = otherProgram.id
           coupon.program_id = otherProgram.id
 
-          return renderComponent(
-            "/dashboard",
-            DASHBOARD_SUCCESS_ACTIONS
-          ).then(([wrapper]) => {
-            sinon.assert.notCalled(helper.skipFinancialAidStub)
-            assert.equal(wrapper.find(".financial-aid-card").length, 1)
-          })
+          return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+            ([wrapper]) => {
+              sinon.assert.notCalled(helper.skipFinancialAidStub)
+              assert.equal(wrapper.find(".financial-aid-card").length, 1)
+            }
+          )
         })
       })
     })
@@ -659,25 +652,24 @@ describe("DashboardPage", () => {
   })
 
   it("dispatches actions to clean up after unmounting", () => {
-    return renderComponent(
-      "/dashboard",
-      DASHBOARD_SUCCESS_ACTIONS
-    ).then(([, div]) => {
-      return helper.listenForActions(
-        [
-          CLEAR_PROFILE,
-          CLEAR_UI,
-          CLEAR_ENROLLMENTS,
-          CLEAR_DASHBOARD,
-          actions.prices.clearType,
-          actions.programLearners.clearType,
-          CLEAR_COUPONS
-        ],
-        () => {
-          ReactDOM.unmountComponentAtNode(div)
-        }
-      )
-    })
+    return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+      ([, div]) => {
+        return helper.listenForActions(
+          [
+            CLEAR_PROFILE,
+            CLEAR_UI,
+            CLEAR_ENROLLMENTS,
+            CLEAR_DASHBOARD,
+            actions.prices.clearType,
+            actions.programLearners.clearType,
+            CLEAR_COUPONS
+          ],
+          () => {
+            ReactDOM.unmountComponentAtNode(div)
+          }
+        )
+      }
+    )
   })
 
   describe("handles redeeming coupons", () => {
@@ -785,51 +777,58 @@ describe("DashboardPage", () => {
       dashboardResponse.programs[0].courses = [course]
       helper.dashboardStub.returns(Promise.resolve(dashboardResponse))
 
-      return renderComponent(
-        "/dashboard",
-        DASHBOARD_SUCCESS_ACTIONS
-      ).then(([wrapper]) => {
-        const contactLink = wrapper.find(CONTACT_LINK_SELECTOR).at(0)
+      return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+        ([wrapper]) => {
+          const contactLink = wrapper.find(CONTACT_LINK_SELECTOR).at(0)
 
-        return listenForActions(EMAIL_DIALOG_ACTIONS, () => {
-          contactLink.simulate("click")
-        }).then(state => {
-          assert.isFalse(state.ui.paymentTeaserDialogVisibility)
-          assert.isTrue(state.ui.dialogVisibility[EMAIL_COMPOSITION_DIALOG])
+          return listenForActions(EMAIL_DIALOG_ACTIONS, () => {
+            contactLink.simulate("click")
+          }).then(state => {
+            assert.isFalse(state.ui.paymentTeaserDialogVisibility)
+            assert.isTrue(state.ui.dialogVisibility[EMAIL_COMPOSITION_DIALOG])
 
-          modifyTextField(document.querySelector(".email-subject"), "subject")
-          // it is difficult to programmatically edit the draft-js field
-          wrapper
-            .find(EmailCompositionDialog)
-            .props()
-            .updateEmailFieldEdit("body", { target: { value: "body" } })
+            modifyTextField(document.querySelector(".email-subject"), "subject")
+            // it is difficult to programmatically edit the draft-js field
+            wrapper
+              .find(EmailCompositionDialog)
+              .props()
+              .updateEmailFieldEdit("body", { target: { value: "body" } })
 
-          return listenForActions(
-            [
-              UPDATE_EMAIL_VALIDATION,
-              INITIATE_SEND_EMAIL,
-              SEND_EMAIL_SUCCESS,
-              CLEAR_EMAIL_EDIT,
-              HIDE_DIALOG
-            ],
-            () => {
-              document
-                .querySelector(".email-composition-dialog .save-button")
-                .click()
-            }
-          ).then(state => {
-            assert.isFalse(state.ui.dialogVisibility[EMAIL_COMPOSITION_DIALOG])
-            assert.isTrue(
-              helper.sendCourseTeamMail.calledWith("subject", "body", course.id)
-            )
+            return listenForActions(
+              [
+                UPDATE_EMAIL_VALIDATION,
+                INITIATE_SEND_EMAIL,
+                SEND_EMAIL_SUCCESS,
+                CLEAR_EMAIL_EDIT,
+                HIDE_DIALOG
+              ],
+              () => {
+                document
+                  .querySelector(".email-composition-dialog .save-button")
+                  .click()
+              }
+            ).then(state => {
+              assert.isFalse(
+                state.ui.dialogVisibility[EMAIL_COMPOSITION_DIALOG]
+              )
+              assert.isTrue(
+                helper.sendCourseTeamMail.calledWith(
+                  "subject",
+                  "body",
+                  course.id
+                )
+              )
+            })
           })
-        })
-      })
+        }
+      )
     })
 
     for (const faExpectedObj of faExpectedStateList) {
       it(`shows the payment teaser dialog when a user lacks permission
-        to contact a course team with financial aid status: ${faExpectedObj.hasFA}`, () => {
+        to contact a course team with financial aid status: ${
+  faExpectedObj.hasFA
+}`, () => {
         const course = makeCourse()
         course.has_contact_email = true
         // Set all course runs to unpaid
@@ -847,23 +846,24 @@ describe("DashboardPage", () => {
         }
         helper.dashboardStub.returns(Promise.resolve(dashboardResponse))
 
-        return renderComponent(
-          "/dashboard",
-          DASHBOARD_SUCCESS_ACTIONS
-        ).then(([wrapper]) => {
-          const contactLink = wrapper.find(CONTACT_LINK_SELECTOR).at(0)
+        return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+          ([wrapper]) => {
+            const contactLink = wrapper.find(CONTACT_LINK_SELECTOR).at(0)
 
-          return listenForActions(PAYMENT_DIALOG_ACTIONS, () => {
-            contactLink.simulate("click")
-          }).then(state => {
-            assert.equal(
-              document.querySelector(".inner-content > p").textContent,
-              faExpectedObj.expectedMessage
-            )
-            assert.isTrue(state.ui.paymentTeaserDialogVisibility)
-            assert.isFalse(state.ui.dialogVisibility[EMAIL_COMPOSITION_DIALOG])
-          })
-        })
+            return listenForActions(PAYMENT_DIALOG_ACTIONS, () => {
+              contactLink.simulate("click")
+            }).then(state => {
+              assert.equal(
+                document.querySelector(".inner-content > p").textContent,
+                faExpectedObj.expectedMessage
+              )
+              assert.isTrue(state.ui.paymentTeaserDialogVisibility)
+              assert.isFalse(
+                state.ui.dialogVisibility[EMAIL_COMPOSITION_DIALOG]
+              )
+            })
+          }
+        )
       })
     }
   })
@@ -889,25 +889,24 @@ describe("DashboardPage", () => {
       dashboardResponse.programs[0].courses = [course]
       helper.dashboardStub.returns(Promise.resolve(dashboardResponse))
 
-      return renderComponent(
-        "/dashboard",
-        DASHBOARD_SUCCESS_ACTIONS
-      ).then(([wrapper]) => {
-        const enrollButton = wrapper.find(ENROLL_BUTTON_SELECTOR).at(0)
+      return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+        ([wrapper]) => {
+          const enrollButton = wrapper.find(ENROLL_BUTTON_SELECTOR).at(0)
 
-        return listenForActions(COURSE_ENROLL_DIALOG_ACTIONS, () => {
-          enrollButton.simulate("click")
-        }).then(state => {
-          assert.isTrue(state.ui.enrollCourseDialogVisibility)
-          assert.deepEqual(state.ui.enrollSelectedCourseRun, course.runs[0])
-        })
-      })
+          return listenForActions(COURSE_ENROLL_DIALOG_ACTIONS, () => {
+            enrollButton.simulate("click")
+          }).then(state => {
+            assert.isTrue(state.ui.enrollCourseDialogVisibility)
+            assert.deepEqual(state.ui.enrollSelectedCourseRun, course.runs[0])
+          })
+        }
+      )
     })
     R.forEach(faStatus => {
       const expectedDisabled = FA_PENDING_STATUSES.includes(faStatus)
-      it(`${faStatus} status ${expectedDisabled
-        ? "disables"
-        : "does not disable"} pay now button`, () => {
+      it(`${faStatus} status ${
+        expectedDisabled ? "disables" : "does not disable"
+      } pay now button`, () => {
         const course = makeCourse()
         course.runs[0].enrollment_start_date = moment().subtract(2, "days")
         dashboardResponse.programs[0].courses = [course]
@@ -919,22 +918,21 @@ describe("DashboardPage", () => {
         }
 
         helper.dashboardStub.returns(Promise.resolve(dashboardResponse))
-        return renderComponent(
-          "/dashboard",
-          DASHBOARD_SUCCESS_ACTIONS
-        ).then(([wrapper]) => {
-          const enrollButton = wrapper.find(ENROLL_BUTTON_SELECTOR).at(0)
+        return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+          ([wrapper]) => {
+            const enrollButton = wrapper.find(ENROLL_BUTTON_SELECTOR).at(0)
 
-          return listenForActions(COURSE_ENROLL_DIALOG_ACTIONS, () => {
-            enrollButton.simulate("click")
-          }).then(state => {
-            assert.isTrue(state.ui.enrollCourseDialogVisibility)
-            assert.equal(
-              document.querySelector(".pay-button").disabled,
-              expectedDisabled
-            )
-          })
-        })
+            return listenForActions(COURSE_ENROLL_DIALOG_ACTIONS, () => {
+              enrollButton.simulate("click")
+            }).then(state => {
+              assert.isTrue(state.ui.enrollCourseDialogVisibility)
+              assert.equal(
+                document.querySelector(".pay-button").disabled,
+                expectedDisabled
+              )
+            })
+          }
+        )
       })
     }, FA_ALL_STATUSES)
   })
@@ -949,33 +947,30 @@ describe("DashboardPage", () => {
 
     it("if the edx is fresh there is no error box", () => {
       helper.dashboardStub.returns(Promise.resolve(dashboardResponse))
-      return renderComponent(
-        "/dashboard",
-        DASHBOARD_SUCCESS_ACTIONS
-      ).then(([wrapper]) => {
-        assert.lengthOf(wrapper.find(ERROR_MESSAGE_SELECTOR), 0)
-      })
+      return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+        ([wrapper]) => {
+          assert.lengthOf(wrapper.find(ERROR_MESSAGE_SELECTOR), 0)
+        }
+      )
     })
 
     it("if the edx is not fresh there is the error box", () => {
       dashboardResponse.is_edx_data_fresh = false
       helper.dashboardStub.returns(Promise.resolve(dashboardResponse))
-      return renderComponent(
-        "/dashboard",
-        DASHBOARD_SUCCESS_ACTIONS
-      ).then(([wrapper]) => {
-        assert.lengthOf(wrapper.find(ERROR_MESSAGE_SELECTOR), 1)
-      })
+      return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+        ([wrapper]) => {
+          assert.lengthOf(wrapper.find(ERROR_MESSAGE_SELECTOR), 1)
+        }
+      )
     })
 
     it("if the dashboard does not load there is no error box for edx cache", () => {
       helper.dashboardStub.returns(Promise.reject(ERROR_RESPONSE))
-      return renderComponent(
-        "/dashboard",
-        DASHBOARD_ERROR_ACTIONS
-      ).then(([wrapper]) => {
-        assert.lengthOf(wrapper.find(ERROR_MESSAGE_SELECTOR), 0)
-      })
+      return renderComponent("/dashboard", DASHBOARD_ERROR_ACTIONS).then(
+        ([wrapper]) => {
+          assert.lengthOf(wrapper.find(ERROR_MESSAGE_SELECTOR), 0)
+        }
+      )
     })
   })
 
@@ -1015,24 +1010,23 @@ describe("DashboardPage", () => {
       )
       helper.programLearnersStub.returns(Promise.resolve(programLearners))
 
-      return renderComponent(
-        "/dashboard",
-        DASHBOARD_SUCCESS_ACTIONS
-      ).then(([wrapper]) => {
-        wrapper
-          .find(".pay-button")
-          .props()
-          .onClick()
+      return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
+        ([wrapper]) => {
+          wrapper
+            .find(".pay-button")
+            .props()
+            .onClick()
 
-        assert.equal(checkoutStub.callCount, 1)
-        assert.deepEqual(checkoutStub.args[0], [
-          program.courses[0].runs[0].course_id
-        ])
+          assert.equal(checkoutStub.callCount, 1)
+          assert.deepEqual(checkoutStub.args[0], [
+            program.courses[0].runs[0].course_id
+          ])
 
-        return promise.then(() => {
-          assert.equal(window.location.toString(), EDX_CHECKOUT_RESPONSE.url)
-        })
-      })
+          return promise.then(() => {
+            assert.equal(window.location.toString(), EDX_CHECKOUT_RESPONSE.url)
+          })
+        }
+      )
     })
   })
 })

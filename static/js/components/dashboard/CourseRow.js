@@ -117,7 +117,8 @@ export default class CourseRow extends React.Component {
       <Grid className="course-sub-row enroll-pay-later-success">
         <Cell col={2} key="1">
           <Icon name="check" className="tick-icon" />
-        </Cell>,
+        </Cell>
+        ,
         <Cell col={7} key="2">
           <p className="enroll-pay-later-heading">
             You are now auditing this course

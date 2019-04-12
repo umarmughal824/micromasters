@@ -354,6 +354,7 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(
-  FinancialAidCalculator
-)
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(FinancialAidCalculator)

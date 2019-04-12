@@ -84,11 +84,11 @@ describe("reducers", () => {
 
         assert.ok(getUserProfileStub.calledWith("jane"))
 
-        return dispatchThen(clearProfile("jane"), [
-          CLEAR_PROFILE
-        ]).then(state => {
-          assert.deepEqual(state, INITIAL_PROFILES_STATE)
-        })
+        return dispatchThen(clearProfile("jane"), [CLEAR_PROFILE]).then(
+          state => {
+            assert.deepEqual(state, INITIAL_PROFILES_STATE)
+          }
+        )
       })
     })
 
@@ -156,36 +156,36 @@ describe("reducers", () => {
       store.dispatch(
         receiveGetUserProfileSuccess("jane", _.cloneDeep(USER_PROFILE_RESPONSE))
       )
-      return dispatchThen(startProfileEdit("jane"), [
-        START_PROFILE_EDIT
-      ]).then(profileState => {
-        assert.deepEqual(profileState["jane"].edit, {
-          profile:    USER_PROFILE_RESPONSE,
-          errors:     {},
-          visibility: []
-        })
-
-        const newProfile = {
-          ...USER_PROFILE_RESPONSE,
-          newField: true
-        }
-
-        return dispatchThen(updateProfile("jane", newProfile), [
-          UPDATE_PROFILE
-        ]).then(profileState => {
+      return dispatchThen(startProfileEdit("jane"), [START_PROFILE_EDIT]).then(
+        profileState => {
           assert.deepEqual(profileState["jane"].edit, {
-            profile:    newProfile,
+            profile:    USER_PROFILE_RESPONSE,
             errors:     {},
             visibility: []
           })
 
-          return dispatchThen(clearProfileEdit("jane"), [
-            CLEAR_PROFILE_EDIT
+          const newProfile = {
+            ...USER_PROFILE_RESPONSE,
+            newField: true
+          }
+
+          return dispatchThen(updateProfile("jane", newProfile), [
+            UPDATE_PROFILE
           ]).then(profileState => {
-            assert.deepEqual(profileState["jane"].edit, undefined)
+            assert.deepEqual(profileState["jane"].edit, {
+              profile:    newProfile,
+              errors:     {},
+              visibility: []
+            })
+
+            return dispatchThen(clearProfileEdit("jane"), [
+              CLEAR_PROFILE_EDIT
+            ]).then(profileState => {
+              assert.deepEqual(profileState["jane"].edit, undefined)
+            })
           })
-        })
-      })
+        }
+      )
     })
 
     it("should start editing the profile, and validate it", () => {
@@ -263,11 +263,11 @@ describe("reducers", () => {
     })
 
     it("can't edit a profile if we never get it successfully", () => {
-      return dispatchThen(startProfileEdit("jane"), [
-        START_PROFILE_EDIT
-      ]).then(profileState => {
-        assert.deepEqual(profileState["jane"], undefined)
-      })
+      return dispatchThen(startProfileEdit("jane"), [START_PROFILE_EDIT]).then(
+        profileState => {
+          assert.deepEqual(profileState["jane"], undefined)
+        }
+      )
     })
 
     it("can't edit a profile if edit doesn't exist", () => {

@@ -163,26 +163,24 @@ describe("ProfilePage", function() {
         .withArgs(SETTINGS.user.username)
         .returns(Promise.resolve(response))
 
-      return renderComponent(
-        "/profile/professional",
-        REDIRECT_ACTIONS
-      ).then(() => {
-        assert.equal(window.location.pathname, "/profile/education")
-        assert.equal(getStep(), EDUCATION_STEP)
-      })
+      return renderComponent("/profile/professional", REDIRECT_ACTIONS).then(
+        () => {
+          assert.equal(window.location.pathname, "/profile/education")
+          assert.equal(getStep(), EDUCATION_STEP)
+        }
+      )
     })
   })
 
   it("navigates backward when Previous button is clicked", () => {
-    return renderComponent(
-      "/profile/education",
-      SUCCESS_ACTIONS
-    ).then(([, div]) => {
-      const button = div.querySelector(prevButtonSelector)
-      assert.equal(getStep(), EDUCATION_STEP)
-      ReactTestUtils.Simulate.click(button)
-      assert.equal(getStep(), PERSONAL_STEP)
-    })
+    return renderComponent("/profile/education", SUCCESS_ACTIONS).then(
+      ([, div]) => {
+        const button = div.querySelector(prevButtonSelector)
+        assert.equal(getStep(), EDUCATION_STEP)
+        ReactTestUtils.Simulate.click(button)
+        assert.equal(getStep(), PERSONAL_STEP)
+      }
+    )
   })
 
   for (const step of profileSteps.slice(0, 2)) {
@@ -246,33 +244,32 @@ describe("ProfilePage", function() {
     patchUserProfileStub.returns(Promise.resolve(USER_PROFILE_RESPONSE))
 
     helper.store.dispatch(setProgram(program))
-    return renderComponent(
-      "/profile/personal",
-      SUCCESS_ACTIONS
-    ).then(([wrapper]) => {
-      assert.isFalse(addProgramEnrollmentStub.called)
+    return renderComponent("/profile/personal", SUCCESS_ACTIONS).then(
+      ([wrapper]) => {
+        assert.isFalse(addProgramEnrollmentStub.called)
 
-      return helper
-        .listenForActions(
-          [
-            REQUEST_PATCH_USER_PROFILE,
-            RECEIVE_PATCH_USER_PROFILE_SUCCESS,
-            CLEAR_PROFILE_EDIT,
-            UPDATE_PROFILE_VALIDATION,
-            REQUEST_ADD_PROGRAM_ENROLLMENT,
-            RECEIVE_ADD_PROGRAM_ENROLLMENT_SUCCESS,
-            SET_PROFILE_STEP,
-            UPDATE_VALIDATION_VISIBILITY,
-            SET_TOAST_MESSAGE
-          ],
-          () => {
-            wrapper.find(".next").simulate("click")
-          }
-        )
-        .then(() => {
-          assert.isTrue(addProgramEnrollmentStub.called)
-        })
-    })
+        return helper
+          .listenForActions(
+            [
+              REQUEST_PATCH_USER_PROFILE,
+              RECEIVE_PATCH_USER_PROFILE_SUCCESS,
+              CLEAR_PROFILE_EDIT,
+              UPDATE_PROFILE_VALIDATION,
+              REQUEST_ADD_PROGRAM_ENROLLMENT,
+              RECEIVE_ADD_PROGRAM_ENROLLMENT_SUCCESS,
+              SET_PROFILE_STEP,
+              UPDATE_VALIDATION_VISIBILITY,
+              SET_TOAST_MESSAGE
+            ],
+            () => {
+              wrapper.find(".next").simulate("click")
+            }
+          )
+          .then(() => {
+            assert.isTrue(addProgramEnrollmentStub.called)
+          })
+      }
+    )
   })
 
   for (const [step, component] of [

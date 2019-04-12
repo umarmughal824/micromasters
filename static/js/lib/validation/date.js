@@ -20,8 +20,8 @@ export const sanitizeNumberString = R.curry((length, input) =>
 )
 
 /**
-  * validate a day input
-  */
+ * validate a day input
+ */
 export const checkDayRange = ifNil(day => (day > 31 ? Just(31) : Just(day)))
 
 export const validateDay = R.compose(
@@ -33,8 +33,8 @@ export const validateDay = R.compose(
 /**
  * Validate a month input
  */
-export const checkMonthRange = ifNil(
-  month => (month > 12 ? Just(12) : Just(month))
+export const checkMonthRange = ifNil(month =>
+  month > 12 ? Just(12) : Just(month)
 )
 
 export const validateMonth = R.compose(
@@ -44,12 +44,12 @@ export const validateMonth = R.compose(
 )
 
 /**
-  * Validate a year input
-  *
-  * checks to make sure a year n is in the range of
-  * x - YEAR_VALIDATION_CUTOFF <= n <= highCutoff,
-  * where x is moment().year()
-  */
+ * Validate a year input
+ *
+ * checks to make sure a year n is in the range of
+ * x - YEAR_VALIDATION_CUTOFF <= n <= highCutoff,
+ * where x is moment().year()
+ */
 export const validYearInput = R.curry((highCutoff, year) => {
   if (year === undefined) {
     return Nothing
@@ -74,8 +74,8 @@ export const validateYear = ifNil(
 )
 
 /**
-  * checks that year is valid, with years up to 10 years in the future being allowable
-  */
+ * checks that year is valid, with years up to 10 years in the future being allowable
+ */
 export const validateNearFutureYear = ifNil(
   R.compose(
     validYearInput(

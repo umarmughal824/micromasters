@@ -19,10 +19,10 @@ const WithReverseNestedAccessor = (
     buildSharedQuery(query: Object) {
       const modifiedQuery = super.buildSharedQuery(query)
       /**
-     *  Modify query to perform aggregation on unique users,
-     *  to avoid duplicate counts of multiple work histories or education items
-     *  for the same user
-     **/
+       *  Modify query to perform aggregation on unique users,
+       *  to avoid duplicate counts of multiple work histories or education items
+       *  for the same user
+       **/
       const pieces = nestedField.split(".")
       if (pieces.length !== 3) {
         throw new Error(`Assumed three pieces but found ${pieces.length}`)

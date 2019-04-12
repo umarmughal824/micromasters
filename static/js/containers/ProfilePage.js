@@ -103,6 +103,7 @@ class ProfilePage extends React.Component<*, ProfileContainerProps, *> {
   }
 }
 
-export default R.compose(connect(mapStateToProfileProps), profileFormContainer)(
-  ProfilePage
-)
+export default R.compose(
+  connect(mapStateToProfileProps),
+  profileFormContainer
+)(ProfilePage)
