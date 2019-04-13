@@ -56,6 +56,8 @@ if [[ $(
     grep -v "Warning: A Component: React.createClass is deprecated" |
     grep -v "Warning: Accessing createClass" |
     grep -v "process.on(SIGPROF) is reserved while debugging" |
+    grep -v "ReactGA.initialize" |
+    grep -v "Warning: CreatableSelect" |
     wc -l |
     awk '{print $1}'
     ) -ne 0 ]]  # is file empty?
