@@ -23,14 +23,14 @@ services:
       - "7000:7000"
 
   hub:
-    image: selenium/hub:3.4.0-chromium
+    image: selenium/hub:3.141.59-mercury
     environment:
       GRID_TIMEOUT: '3600'
     ports:
       - "4444:4444"
 
   chrome:
-    image: selenium/node-chrome:3.4.0-chromium
+    image: selenium/node-chrome:3.141.59-mercury
     environment:
       - HUB_PORT_4444_TCP_ADDR=hub
       - HUB_PORT_4444_TCP_PORT=4444
