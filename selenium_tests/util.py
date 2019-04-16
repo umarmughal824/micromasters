@@ -224,7 +224,7 @@ class DatabaseLoader:
             db_backup_name (str): The name that will be given to the backup database
         """
         self.db_settings = db_settings or settings.DATABASES['default']
-        self.db_name = self.db_settings['NAME']
+        self.db_name = self.db_settings['TEST']['NAME']
         if self.db_name[0:5] != 'test_':
             raise Exception(
                 "The test suite is attempting to use the database '{}'."
