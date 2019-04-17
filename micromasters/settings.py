@@ -235,8 +235,6 @@ if get_bool('MICROMASTERS_DB_DISABLE_SSL', False):
 else:
     DEFAULT_DATABASE_CONFIG['OPTIONS'] = {'sslmode': 'require'}
 
-DEFAULT_DATABASE_CONFIG['TEST'] = {'NAME': 'test_database'}
-
 DATABASES = {
     'default': DEFAULT_DATABASE_CONFIG
 }
