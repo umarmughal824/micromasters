@@ -54,8 +54,8 @@ def database_loader():
     return DatabaseLoader()
 
 
-@pytest.fixture(scope='session')
-def django_db_setup(django_db_setup, django_db_blocker, database_loader):
+@pytest.fixture(scope='session', autouse=True)
+def django_db_setup_override(django_db_setup, django_db_blocker, database_loader):
     """
     Fixture provided by pytest-django to allow for custom Django database config.
     'django_db_setup' exists in the arguments because we want to perform the normal pytest-django
