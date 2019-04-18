@@ -77,6 +77,10 @@
     "ELASTICSEARCH_URL": {
       "description": "URL for connecting to Elasticsearch cluster"
     },
+    "EXAMS_AUDIT_NACL_PUBLIC_KEY": {
+      "description": "NaCl public key for encrypting audit files",
+      "required": false
+    },
     "EXAMS_SFTP_HOST": {
       "description": "Hostname for Pearson SFTP server",
       "required": false
