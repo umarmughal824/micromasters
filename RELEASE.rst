@@ -1,6 +1,33 @@
 Release Notes
 =============
 
+Version 0.132.0
+---------------
+
+- Added EXAMS_AUDIT_NACL_PUBLIC_KEY to app.json
+- adjusted selenium database fixture and reverted test db name changes
+- Switched exam result auditing encryption to NaCl
+- use test_database for selenium tests
+- update selenium images and version
+- silence cov errors on build
+- latest images pushed to dockerhub
+- run fmt
+- fix lint issues
+- fix flow error
+- revise dependcies
+- revise dependcies
+- images and dep update
+- apply alice patch to resolve js tests
+- removed celery worker from travis
+- replace reset to clear for localstorage and session storage to fix js error
+- Update to latest gnupg dep
+- Bump travis version
+- pytest and pytest-django  versions updated
+- latest images added
+- fix scss issue and upgrade yarn
+- fix flow error
+- update docker to use stretch
+
 Version 0.131.1 (Released April 11, 2019)
 ---------------
 
