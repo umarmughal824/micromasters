@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.132.1
+Version 0.132.1 (Released April 19, 2019)
 ---------------
 
 - make program email subscription like dynamic (#4298)
