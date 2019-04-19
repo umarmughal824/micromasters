@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.132.0
+Version 0.132.0 (Released April 19, 2019)
 ---------------
 
 - Added EXAMS_AUDIT_NACL_PUBLIC_KEY to app.json
