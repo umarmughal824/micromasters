@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.132.1
+---------------
+
+- make program email subscription like dynamic (#4298)
+- remove 0 courses from home page (#4300)
+
 Version 0.132.0 (Released April 19, 2019)
 ---------------
 
