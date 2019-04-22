@@ -4,6 +4,9 @@ Views for email REST APIs
 import logging
 
 from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
+from django.template.loader import render_to_string
+from django.urls import reverse
 from rest_framework import (
     authentication,
     permissions,
@@ -16,6 +19,7 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework.response import Response
 
 from courses.models import Course
+from dashboard.models import ProgramEnrollment
 from financialaid.models import FinancialAid
 from financialaid.permissions import UserCanEditFinancialAid
 from mail.api import (
@@ -33,7 +37,7 @@ from mail.permissions import (
 )
 from mail.serializers import GenericMailSerializer, AutomaticEmailSerializer
 from mail.utils import generate_mailgun_response_json, get_email_footer
-from mail.models import AutomaticEmail
+from mail.models import AutomaticEmail, PartnerSchool
 from profiles.models import Profile
 from profiles.util import full_name
 from search.api import (
@@ -233,6 +237,48 @@ class FinancialAidMailView(GenericAPIView):
             acting_user=request.user,
             subject=serializer.data['email_subject'],
             financial_aid=financial_aid
+        )
+        return Response(
+            status=mailgun_response.status_code,
+            data=generate_mailgun_response_json(mailgun_response)
+        )
+
+
+class GradesRecordMailView(GenericAPIView):
+    """
+    View for sending program grades emails to partner schools
+    """
+    authentication_classes = (
+        authentication.SessionAuthentication,
+        authentication.TokenAuthentication,
+    )
+    permission_classes = (permissions.IsAuthenticated, )
+    lookup_field = "id"
+    lookup_url_kwarg = "partner_id"
+    queryset = PartnerSchool.objects.all()
+
+    def post(self, request, *args, **kargs):  # pylint: disable=unused-argument
+        """
+        POST method handler
+        """
+        sender_user = request.user
+        school = self.get_object()
+        enrollment = get_object_or_404(ProgramEnrollment, hash=request.data['enrollment_hash'])
+        mailgun_response = MailgunClient.send_individual_email(
+            subject="MicroMasters Program Record",
+            body=render_to_string(
+                'grades_record_email.html',
+                {
+                    'user_full_name': sender_user.profile.full_name,
+                    'pathway_name': school.name,
+                    'program_name': enrollment.program.title,
+                    'record_link': request.build_absolute_uri(
+                        reverse('grade_records', args=[request.data['enrollment_hash']])
+                    ),
+                }),
+            recipient=school.email,
+            sender_address=sender_user.email,
+            sender_name=sender_user.profile.display_name,
         )
         return Response(
             status=mailgun_response.status_code,

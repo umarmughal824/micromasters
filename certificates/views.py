@@ -19,6 +19,8 @@ from grades.models import (
     MicromastersProgramCommendation,
     CombinedFinalGrade,
 )
+from mail.models import PartnerSchool
+
 log = logging.getLogger(__name__)
 
 
@@ -180,16 +182,20 @@ class GradeRecordView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        enrollment = get_object_or_404(ProgramEnrollment, hash=kwargs.get('record_hash'))
+        user = enrollment.user
+        authenticated = not user.is_anonymous
         js_settings = {
             "gaTrackingID": settings.GA_TRACKING_ID,
             "reactGaDebug": settings.REACT_GA_DEBUG,
             "edx_base_url": settings.EDXORG_BASE_URL,
+            "authenticated": authenticated,
+            "partner_schools": list(PartnerSchool.objects.values_list("id", "name")),
+            "hash": enrollment.hash
         }
         context["js_settings_json"] = json.dumps(js_settings)
         context["is_public"] = True
-
-        enrollment = get_object_or_404(ProgramEnrollment, hash=kwargs.get('record_hash'))
-        user = enrollment.user
         courses = enrollment.program.course_set.all()
         mmtrack = get_mmtrack(user, enrollment.program)
         combined_grade = CombinedFinalGrade.objects.filter(
