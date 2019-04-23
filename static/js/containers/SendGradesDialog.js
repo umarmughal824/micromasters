@@ -119,4 +119,7 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(SendGradesDialog)
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(SendGradesDialog)
