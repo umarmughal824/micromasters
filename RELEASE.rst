@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.133.1
+---------------
+
+- mark channel and percolatequery is deleted and update memeberships (#4289)
+
 Version 0.133.0 (Released April 24, 2019)
 ---------------
 
