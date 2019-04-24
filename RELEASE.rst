@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.133.0 (Released April 24, 2019)
+---------------
+
+- Fix formatting for SendGradesDialog.js (#4306)
+- adding a management command to authorize users for expired exam runs (#4295)
+- Adding Send dialog (#4284)
+
 Version 0.132.1 (Released April 19, 2019)
 ---------------
 
