@@ -14,7 +14,7 @@ from courses.factories import (
 from courses.serializers import (
     CourseSerializer,
     ProgramSerializer,
-)
+    CourseRunSerializer)
 from dashboard.models import ProgramEnrollment
 from profiles.factories import UserFactory
 from search.base import MockedESTestCase
@@ -49,6 +49,24 @@ class CourseSerializerTests(MockedESTestCase):
         data = CourseSerializer(course).data
         assert data['url'] == course_run.enrollment_url
         assert data['enrollment_text'] == course.enrollment_text
+
+
+class CourseRunSerializerTests(MockedESTestCase):
+    """
+    Tests for CourseRunSerializer
+    """
+
+    def test_course_run(self):
+        """
+        Make sure course run serializer correctly
+        """
+        course_run = CourseRunFactory.create()
+        data = CourseRunSerializer(course_run).data
+        expected = {
+            'edx_course_key': course_run.edx_course_key,
+            'program_title': course_run.course.program.title,
+        }
+        assert data == expected
 
 
 class ProgramSerializerTests(MockedESTestCase):

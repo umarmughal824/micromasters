@@ -15,8 +15,8 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from courses.models import Program
-from courses.serializers import ProgramSerializer
+from courses.models import Program, CourseRun
+from courses.serializers import ProgramSerializer, CourseRunSerializer
 from dashboard.models import ProgramEnrollment
 from profiles.models import Profile
 from profiles.serializers import ProfileImageSerializer
@@ -118,3 +118,16 @@ class ProgramEnrollmentListView(CreateAPIView):
             status=status_code,
             data=serializer(program, context={'request': request}).data
         )
+
+
+class CourseRunViewSet(viewsets.ReadOnlyModelViewSet):
+    """API for the CourseRun model"""
+    authentication_classes = (
+        SessionAuthentication,
+        TokenAuthentication,
+    )
+    permission_classes = (
+        IsAuthenticated,
+    )
+    serializer_class = CourseRunSerializer
+    queryset = CourseRun.objects.all()

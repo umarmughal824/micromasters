@@ -6,11 +6,12 @@ from rest_framework import routers
 from courses.views import (
     ProgramEnrollmentListView,
     ProgramViewSet,
-    ProgramLearnersView
-)
+    ProgramLearnersView,
+    CourseRunViewSet)
 
 router = routers.DefaultRouter()
 router.register(r'programs', ProgramViewSet)
+router.register(r'courseruns', CourseRunViewSet)
 
 urlpatterns = [
     url(r'^api/v0/', include(router.urls)),
