@@ -3,7 +3,7 @@ Serializers for courses
 """
 from rest_framework import serializers
 
-from courses.models import Course, Program
+from courses.models import Course, Program, CourseRun
 from dashboard.models import ProgramEnrollment
 
 
@@ -72,3 +72,12 @@ class CourseSerializer(serializers.ModelSerializer):
             'url',
             'enrollment_text',
         )
+
+
+class CourseRunSerializer(serializers.ModelSerializer):
+    """Serializer for Course Run Objects"""
+    program_title = serializers.CharField(source='course.program.title')
+
+    class Meta:
+        model = CourseRun
+        fields = ('edx_course_key', 'program_title')

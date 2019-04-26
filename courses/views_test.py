@@ -6,8 +6,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from courses.factories import ProgramFactory
-from courses.serializers import ProgramSerializer
+from courses.factories import ProgramFactory, CourseRunFactory
+from courses.serializers import ProgramSerializer, CourseRunSerializer
 from dashboard.factories import ProgramEnrollmentFactory
 from dashboard.models import ProgramEnrollment
 from micromasters.factories import UserFactory
@@ -210,3 +210,26 @@ class ProgramEnrollmentTests(MockedESTestCase, APITestCase):
         self.assert_program_enrollments_count(count_before+1)
         assert resp.status_code == status.HTTP_201_CREATED
         assert resp.data.get('id') == self.program3.pk
+
+
+class CourseRunTests(MockedESTestCase, APITestCase):
+    """Tests for CourseRun API"""
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.user = UserFactory.create()
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.user)
+
+    def test_lists_course_runs(self):
+        """Course Runs should show up"""
+        course_run = CourseRunFactory.create()
+        resp = self.client.get(reverse('courserun-list'))
+
+        assert len(resp.json()) == 1
+        context = {"request": Mock(user=self.user)}
+        data = CourseRunSerializer(course_run, context=context).data
+        assert [data] == resp.json()
