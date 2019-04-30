@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.133.2 (Released April 30, 2019)
+---------------
+
+- Adds viewset for courseruns API, required serializer, and related tests
+
 Version 0.133.1 (Released April 25, 2019)
 ---------------
 
