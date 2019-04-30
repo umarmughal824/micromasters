@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.134.0
+---------------
+
+- rename wiledcard
+- bump elasticsearch version
+- Remove authentication from courseruns endpoint, and update test
+- upgrade urllib (#4309)
+
 Version 0.133.2 (Released April 30, 2019)
 ---------------
 
