@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.135.0
+---------------
+
+- Revert "bump elasticsearch version (#4303)"
+- remove passed from course progress for staff view (#4315)
+- use fork of iso-3166-2.js for Kosovo country (#4314)
+
 Version 0.134.0 (Released May 06, 2019)
 ---------------
 
