@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.135.0
+Version 0.135.0 (Released May 07, 2019)
 ---------------
 
 - Revert "bump elasticsearch version (#4303)"
