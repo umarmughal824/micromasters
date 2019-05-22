@@ -957,5 +957,14 @@ describe("Course Status Messages", () => {
         }
       ])
     })
+
+    it("should not have a message if course is past but still not frozen", () => {
+      makeRunPast(course.runs[0])
+      makeRunEnrolled(course.runs[0])
+      makeRunPaid(course.runs[0])
+      makeRunMissedDeadline(course.runs[1])
+      makeRunPast(course.runs[1])
+      assertIsJust(calculateMessages(calculateMessagesProps), [])
+    })
   })
 })

@@ -13,6 +13,8 @@ import {
   makeRunCurrent,
   makeRunEnrolled,
   makeRunFuture,
+  makeRunMissedDeadline,
+  makeRunPaid,
   makeRunPast
 } from "./test_util"
 import {
@@ -236,6 +238,15 @@ describe("Course ProgressMessage", () => {
         staffCourseInfo(course.runs[0], course),
         "Audited, missed payment deadline"
       )
+    })
+
+    it("should return Paid when course is past, but still currently-enrolled", () => {
+      makeRunPast(course.runs[0])
+      makeRunEnrolled(course.runs[0])
+      makeRunPaid(course.runs[0])
+      makeRunMissedDeadline(course.runs[1])
+      makeRunPast(course.runs[1])
+      assert.equal(staffCourseInfo(course.runs[0], course), "Paid")
     })
   })
 })
