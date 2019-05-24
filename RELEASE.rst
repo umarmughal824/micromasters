@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.136.1
+---------------
+
+- Let the workers use pgbouncer too
+
 Version 0.136.0 (Released May 24, 2019)
 ---------------
 
