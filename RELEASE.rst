@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.136.0
+Version 0.136.0 (Released May 24, 2019)
 ---------------
 
 - fix dashboard message for past end date course run (#4322)
