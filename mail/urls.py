@@ -12,7 +12,7 @@ from mail.views import (
     GradesRecordMailView)
 
 router = routers.DefaultRouter()
-router.register(r'automatic_email', AutomaticEmailView, base_name='automatic_email_api')
+router.register(r'automatic_email', AutomaticEmailView, basename='automatic_email_api')
 
 urlpatterns = [
     url(r'^api/v0/financial_aid_mail/(?P<financial_aid_id>[\d]+)/$', FinancialAidMailView.as_view(),
