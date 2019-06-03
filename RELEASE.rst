@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.137.0
+Version 0.137.0 (Released June 03, 2019)
 ---------------
 
 - Adding Google Tag Manager (#4328)
