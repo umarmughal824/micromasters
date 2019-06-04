@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.138.0
+---------------
+
+- Bumped DRF version
+
 Version 0.137.0 (Released June 03, 2019)
 ---------------
 
