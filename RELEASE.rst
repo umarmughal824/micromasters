@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.138.1
+---------------
+
+- Fix fetch user profile (#4332)
+
 Version 0.138.0 (Released June 04, 2019)
 ---------------
 
