@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.139.0
+Version 0.139.0 (Released June 11, 2019)
 ---------------
 
 - Upgrading css-loader to get rid of js-yaml@3.7.0 (#4335)
