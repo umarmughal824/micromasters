@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.140.0
+---------------
+
+- Bump fstream from 1.0.11 to 1.0.12 (#4331)
+
 Version 0.139.0 (Released June 11, 2019)
 ---------------
 
