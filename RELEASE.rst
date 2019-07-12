@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.140.1
+---------------
+
+- Verification email not sent email edx (#4345)
+- Upgrde django to 2.1.10 (#4346)
+
 Version 0.140.0 (Released June 24, 2019)
 ---------------
 
