@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.140.1
+Version 0.140.1 (Released July 15, 2019)
 ---------------
 
 - Verification email not sent email edx (#4345)
