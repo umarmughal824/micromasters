@@ -272,6 +272,10 @@
     color: $header_font_color !important;
   }
 
+  .Select.is-focused .Select-placeholder {
+    color: $select-menu-outer-bg !important;
+  }
+
   .Select-arrow {
     border-color: $header_font_color transparent transparent !important;
   }
