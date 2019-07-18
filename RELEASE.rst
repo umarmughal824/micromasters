@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.140.2
+Version 0.140.2 (Released July 18, 2019)
 ---------------
 
 - Add color to select-placeholder (#4344)
