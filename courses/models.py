@@ -28,7 +28,7 @@ class Program(TimestampedModel):
     description = models.TextField(blank=True, null=True)
     financial_aid_availability = models.BooleanField(default=False, null=False)
     ga_tracking_id = models.CharField(max_length=255, blank=True, default="")
-
+    num_required_courses = models.PositiveSmallIntegerField(null=False)
     price = models.DecimalField(decimal_places=2, max_digits=20)
 
     def __str__(self):
@@ -312,3 +312,36 @@ class CourseRun(models.Model):
         ).filter(freeze_grade_date__lt=now_in_utc())
 
         return course_runs
+
+
+class ElectivesSet(models.Model):
+    """
+    This represents an electives requirement for a program, with choice of courses and
+    required number of courses to be passed.
+    """
+    program = models.ForeignKey(Program, on_delete=models.CASCADE)
+    required_number = models.PositiveSmallIntegerField()
+    title = models.CharField(max_length=255)
+
+    def __str__(self):
+        return 'An electives set "{title}" for program "{program_title}"'.format(
+            title=self.title,
+            program_title=self.program.title
+        )
+
+
+class ElectiveCourse(models.Model):
+    """
+    Links to a course to an ElectivesSet
+    """
+    course = models.OneToOneField(Course, on_delete=models.CASCADE)
+    electives_set = models.ForeignKey(ElectivesSet, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('course', 'electives_set',)
+
+    def __str__(self):
+        return 'Elective course "{course_title}" in electives set "{electives_set}"'.format(
+            course_title=self.course.title,
+            electives_set=self.electives_set.title
+        )

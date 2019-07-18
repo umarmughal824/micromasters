@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 
 from django_redis import get_redis_connection
 
+from courses.models import ElectivesSet
 from dashboard.api_edx_cache import CachedEdxUserData, CachedEdxDataApi
 from dashboard.models import CachedEnrollment, CachedCurrentGrade
 from dashboard.utils import get_mmtrack
@@ -230,7 +231,17 @@ def generate_program_certificate(user, program):
         log.error('User [%s] already has a certificate for program [%s]', user, program)
         return
 
-    courses_in_program_ids = set(program.course_set.all().values_list('id', flat=True))
+    for electives_set in ElectivesSet.objects.filter(program=program):
+        elective_courses_id = set(electives_set.electivecourse_set.all().values_list('course__id', flat=True))
+        num_electives_with_cert = MicromastersCourseCertificate.objects.filter(
+            user=user,
+            course_id__in=elective_courses_id
+        ).values_list('course__id', flat=True).distinct().count()
+        if electives_set.required_number > num_electives_with_cert:
+            return
+
+    # filtering out the courses that are not elective
+    courses_in_program_ids = set(program.course_set.filter(electivecourse=None).values_list('id', flat=True))
 
     num_courses_with_cert = MicromastersCourseCertificate.objects.filter(
         user=user,
