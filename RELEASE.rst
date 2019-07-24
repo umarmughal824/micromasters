@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.141.0
+---------------
+
+- Learner dashboard: elective courses (#4352)
+- Adding models for course electives (#4349)
+
 Version 0.140.2 (Released July 18, 2019)
 ---------------
 
