@@ -96,6 +96,7 @@ export const makeCourse = (positionInProgram: number): Course => {
     past_exam_date:              "",
     has_to_pay:                  false,
     has_exam:                    false,
+    is_elective:                 false,
     proctorate_exams_grades:     [],
     certificate_url:             "",
     overall_grade:               ""
@@ -129,10 +130,11 @@ export const makeProgram = (): Program => {
     },
     pearson_exam_status:
       PEARSON_STATUSES[Math.floor(Math.random() * PEARSON_STATUSES.length)],
-    grade_average:      Math.floor(Math.random() * 100),
-    certificate:        "",
-    grade_records_url:  "",
-    program_letter_url: ""
+    grade_average:           Math.floor(Math.random() * 100),
+    certificate:             "",
+    grade_records_url:       "",
+    program_letter_url:      "",
+    number_courses_required: courses.length
   }
 }
 

@@ -11,6 +11,7 @@ export const program = {
   financial_aid_user_info:    null,
   description:                "Not passed program",
   title:                      "Not passed program",
+  number_courses_required:    5,
   courses:                    [
     {
       prerequisites: "",
@@ -141,6 +142,14 @@ describe("ProgressWidget", () => {
       "Courses complete"
     )
     assert.equal(wrapper.find(".circular-progress-widget-txt").text(), "3/5")
+
+    program.number_courses_required = 3
+    assert.equal(
+      shallow(<ProgressWidget program={program} />)
+        .find(".circular-progress-widget-txt")
+        .text(),
+      "3/3"
+    )
   })
   it("should display program certificate when a certificate link exists", () => {
     program["certificate"] = "certificate_url"
