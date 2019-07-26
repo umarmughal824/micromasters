@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.141.1
+Version 0.141.1 (Released July 26, 2019)
 ---------------
 
 - Update Mocha (#4358)
