@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.142.0
+Version 0.142.0 (Released August 08, 2019)
 ---------------
 
 - Update handlebars to 4.1.2 (#4376)
