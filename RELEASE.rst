@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.142.1
+Version 0.142.1 (Released August 12, 2019)
 ---------------
 
 - update codecov (#4378)
