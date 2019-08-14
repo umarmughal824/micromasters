@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.142.2
+---------------
+
+- Freeze grades scheduling update (#4382)
+- Mark courses as electives in Program Records (#4387)
+
 Version 0.142.1 (Released August 12, 2019)
 ---------------
 
