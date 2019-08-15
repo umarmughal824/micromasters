@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.142.2
+Version 0.142.2 (Released August 15, 2019)
 ---------------
 
 - Freeze grades scheduling update (#4382)
