@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.142.3
+---------------
+
+- Add catalog API for discussions
+- Add elective tags to program page courses (#4389)
+- upgrade django ro 2.1.11 (#4391)
+- Upgrade node-sass to 4.12.0 (#4392)
+
 Version 0.142.2 (Released August 15, 2019)
 ---------------
 
