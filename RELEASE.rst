@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.142.3
+Version 0.142.3 (Released August 19, 2019)
 ---------------
 
 - Add catalog API for discussions
