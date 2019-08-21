@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.143.0
+Version 0.143.0 (Released August 21, 2019)
 ---------------
 
 - Update redux and redux-asserts (#4396)
