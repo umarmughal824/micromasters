@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.144.0
+---------------
+
+- Updated python version in runtime.txt
+
 Version 0.143.0 (Released August 21, 2019)
 ---------------
 
