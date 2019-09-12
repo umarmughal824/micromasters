@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.145.0
+---------------
+
+- Allow blank edx_key
+
 Version 0.144.0 (Released August 28, 2019)
 ---------------
 
