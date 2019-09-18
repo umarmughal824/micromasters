@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.146.0
+---------------
+
+- Run Elasticsearch as elasticsearch user in Docker
+- Update Elasticsearch index type for version 6
+- Upgrade Elasticsearch to version 6
+
 Version 0.145.0 (Released September 13, 2019)
 ---------------
 
