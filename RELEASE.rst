@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.146.0
+Version 0.146.0 (Released September 25, 2019)
 ---------------
 
 - Run Elasticsearch as elasticsearch user in Docker
