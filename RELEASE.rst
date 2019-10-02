@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.147.0
+Version 0.147.0 (Released October 02, 2019)
 ---------------
 
 - Revert "Revert "Upgrade to Elasticsearch 6" (#4408)" (#4409)
