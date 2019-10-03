@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.147.1
+---------------
+
+- Re-remove course run api permissions
+
 Version 0.147.0 (Released October 02, 2019)
 ---------------
 
