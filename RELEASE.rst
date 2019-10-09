@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.148.0
+Version 0.148.0 (Released October 09, 2019)
 ---------------
 
 - Full program page URL (#4416)
