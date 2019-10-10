@@ -4,7 +4,7 @@ Admin views for Courses & Programs
 
 from django.contrib import admin
 
-from courses.models import Course, CourseRun, Program, ElectivesSet, ElectiveCourse
+from courses.models import Course, CourseRun, Program, ElectivesSet, ElectiveCourse, Topic
 
 
 class CourseInline(admin.StackedInline):
@@ -24,7 +24,7 @@ class CourseRunInline(admin.StackedInline):
 class ProgramAdmin(admin.ModelAdmin):
     """ModelAdmin for Programs"""
     list_display = ('title', 'live',)
-    list_filter = ('live',)
+    list_filter = ('live', 'topics')
     inlines = [CourseInline]
 
 
@@ -73,8 +73,14 @@ class ElectiveCourseAdmin(admin.ModelAdmin):
     list_display = ('course', 'electives_set',)
 
 
+class TopicAdmin(admin.ModelAdmin):
+    """ModelAdmin for Programs"""
+    list_display = ('name',)
+
+
 admin.site.register(CourseRun, CourseRunAdmin)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(Program, ProgramAdmin)
 admin.site.register(ElectivesSet, ElectivesSetAdmin)
 admin.site.register(ElectiveCourse, ElectiveCourseAdmin)
+admin.site.register(Topic, TopicAdmin)
