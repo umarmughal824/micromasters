@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.148.1
+---------------
+
+- Add instructors, price, start_date, end_date, and enrollment_start to catalog API (#4420)
+- Program Topics (#4419)
+
 Version 0.148.0 (Released October 09, 2019)
 ---------------
 
