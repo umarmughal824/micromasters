@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.148.2
+Version 0.148.2 (Released October 21, 2019)
 ---------------
 
 - Fix Non-Error exception issue
