@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.149.0
+Version 0.149.0 (Released October 31, 2019)
 ---------------
 
 - fix flaky test (#4442)
