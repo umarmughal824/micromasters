@@ -87,9 +87,15 @@
               </div>
             </div>
               <p>A MicroMasters program credential is a professional and academic credential for online learners from
-                anywhere in the world. Learners who pass an integrated set of MITx graduate-level courses on edX.org,
-                and one or more proctored exams, will earn a MicroMasters program credential from MITx, and can then
-                apply for an accelerated, on campus, master’s degree program at MIT or other top universities.</p>
+                anywhere in the world. Learners who pass an integrated set of MIT graduate-level courses on edX.org,
+                and one or more proctored exams. This credential is valuable in and of itself.  Additionally,
+                credential-holders can then apply for an accelerated, on campus, master’s degree program at MIT
+                or other universities.
+                {% if benefits_url %}
+                  All MicroMasters program credential holders are also considered
+                  <a href="{{benefits_url}}">affiliates of the MIT Alumni Association</a>.
+                {% endif %}
+              </p>
               <p>MicroMasters program courses offer the same learning and challenge as MIT courses.</p>
               <div class="sub-banner-logos">
                 <div class="sub-banner-logos-text">All MITx MicroMasters program courses are delivered on</div>
@@ -105,34 +111,35 @@
         <div class="centered-content">
           <h3>How It Works</h3>
           <div class="hiw col-md-3">
+            <h4>Online Learning</h4>
             <div class="reasons-images-wrap">
                <img src="{% static 'images/hiw1.png' %}" alt="">
             </div>
-
-            <h4>Online Learning</h4>
             <p>Take a series of online courses on edX, and pass all the course requirements.</p>
           </div>
           <div class="hiw col-md-3">
+            <h4>Proctored Tests</h4>
             <div class="reasons-images-wrap">
               <img src="{% static 'images/hiw2.png' %}" alt="">
             </div>
-
-            <h4>Proctored Tests</h4>
             <p>Pass one (or more) proctored exams—either a single final exam, or one exam for each course, depending on the program.</p>
-
           </div>
           <div class="hiw col-md-3">
+            <h4 class="longer-heading">Earn a Valuable Credential and Boost Your Network</h4>
             <div class="reasons-images-wrap">
               <img src="{% static 'images/hiw3.png' %}" alt="">
             </div>
-            <h4>Earn a Valuable Credential</h4>
-            <p>A MicroMasters credential from MITx proves that you’ve gained the knowledge and skills to give you a competitive advantage for career success.</p>
+            <p>A MicroMasters program credential from MITx proves that you’ve gained the knowledge
+              and skills to stand out in your field and qualifies you as an affiliate of
+              the MIT Alumni Association.
+              {% if benefits_url %} <a href="{{benefits_url}}">Learn More</a> {% endif %}
+            </p>
           </div>
           <div class="hiw col-md-3">
+            <h4>Pursue a Master’s</h4>
             <div class="reasons-images-wrap">
               <img src="{% static 'images/hiw4.png' %}" alt="">
             </div>
-            <h4>Pursue a Master’s</h4>
             <p>Learners who complete the MicroMasters program can apply for the Master’s degree program at MIT or other universities.</p>
           </div>
         </div>
