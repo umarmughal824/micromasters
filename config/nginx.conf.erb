@@ -55,6 +55,12 @@ http {
     }
 
     server {
+        listen <%= ENV["PORT"] %>;
+        server_name mmfin.mit.edu;
+        return 301 https://micromasters.mit.edu/fin;
+    }
+
+    server {
         listen <%= ENV["PORT"] %> default_server;
         server_name _;
         root /app;
