@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.149.1
+Version 0.149.1 (Released November 05, 2019)
 ---------------
 
 - New Elective tags for program page (#4437)
