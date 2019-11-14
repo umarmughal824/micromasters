@@ -343,6 +343,12 @@ body.app-media {
 
 .enroll-reason {
   margin-bottom: 20px;
+
+  a {
+    color: white;
+    font-weight: bold;
+    text-decoration: underline;
+  }
 }
 
 .reasons-section, .current-programs-section, .how-it-works-section {
