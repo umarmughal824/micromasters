@@ -36,12 +36,12 @@
       <div class="tab-container">
         <div class="tab-wrapper">
           <a href="{{ page.url }}"
-             class="tab-link {% if active_tab == 'about' %}active-tab{% endif %}">
-            About the Program
+            class="tab-link {% if active_tab == 'about' %}active-tab{% endif %}">
+           About the Program
           </a>
           {% for child in page.get_children.live %}
             <a href="{{ child.url }}"
-               class="tab-link {% if child.title == active_tab %}active-tab{% endif %}">
+              class="tab-link {% if child.title == active_tab %}active-tab{% endif %}">
               {{ child.title }}
             </a>
           {% endfor %}
@@ -79,7 +79,8 @@
     {% endif %}
 
     <div class="mdl-grid tabs-content">
-      <div class="mdl-cell mdl-cell--8-col">
+      {% block tab-content %}
+        <div class="mdl-cell mdl-cell--8-col">
       {% if active_tab == 'about' %}
         <div class="panel-content">
           {{ page.description|richtext }}
@@ -92,8 +93,7 @@
         </div>
       {% endif %}
       </div>
-
-      <div class="mdl-cell mdl-cell--4-col">
+        <div class="mdl-cell mdl-cell--4-col">
         <div id="courses-component">
           <!-- CourseListWithPopover component injected here -->
         </div>
@@ -152,6 +152,8 @@
           <img src="{% static 'images/edx_logo.png' %}" alt="edX" />
         </div>
       </div>
+      {% endblock %}
+
     </div>
   </div>
 
