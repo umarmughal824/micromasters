@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.150.0
+Version 0.150.0 (Released November 18, 2019)
 ---------------
 
 - #4455 Home: grow your network
