@@ -212,7 +212,9 @@ describe("FinancialAidCard", () => {
       it(`provides a link to open a dialog with complete instruction for status ${FA_STATUS_PENDING_DOCS}`, () => {
         const program = programWithStatus(FA_STATUS_PENDING_DOCS)
         const wrapper = renderCard({ program, setDocsInstructionsVisibility })
-        const link = wrapper.find(".financial-aid-box").find("a")
+        const link = wrapper
+          .find(".financial-aid-box")
+          .find(".btn-instructions")
         link.simulate("click")
         assert.ok(
           setDocsInstructionsVisibility.called,
@@ -230,8 +232,8 @@ describe("FinancialAidCard", () => {
         assert.equal(
           instruction.text(),
           "Before you can pay, you need to verify your income. " +
-            "Please mail or fax an English-translated and notarized income tax or " +
-            "income statement document. DO NOT SEND BY EMAIL." +
+            "Please visit the secure DocuSign website to upload an English-translated and notarized income tax or income statement document. " +
+            "You can also send documents by mail. DO NOT SEND BY EMAIL." +
             "Read Complete Instructions"
         )
       })
@@ -274,7 +276,7 @@ describe("FinancialAidCard", () => {
           const wrapper = renderCard({ program })
           assert.include(
             wrapper.text(),
-            "Documents mailed/faxed on March 3, 2003"
+            "Documents mailed/uploaded on March 3, 2003"
           )
         })
       }
