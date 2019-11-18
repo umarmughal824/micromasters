@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.151.0
+---------------
+
+- Replace fax no with link to DocuSign (#4456)
+- acknowledge admin and course team on program page (#4454)
+
 Version 0.150.0 (Released November 18, 2019)
 ---------------
 
