@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.151.0
+Version 0.151.0 (Released November 19, 2019)
 ---------------
 
 - Replace fax no with link to DocuSign (#4456)
