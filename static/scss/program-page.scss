@@ -65,6 +65,13 @@
     }
   }
 
+  .program-course h4.course-row {
+    color: $link-text;
+    font-size: 15px;
+    line-height: 1.4em;
+    margin: 0 0 6px 0;
+  }
+
   .mdl-tabs {
     .tab-container {
       background-color: $mm-brand-bg;
