@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.151.1
+Version 0.151.1 (Released November 21, 2019)
 ---------------
 
 - Fix styling of the Courses on program page (#4462)
