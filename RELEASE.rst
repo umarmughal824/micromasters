@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.151.2
+Version 0.151.2 (Released November 21, 2019)
 ---------------
 
 - Update phonenumbers lib
