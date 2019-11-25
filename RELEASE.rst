@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.152.0
+---------------
+
+- remove instructors carousel from course team tab page. (#4469)
+
 Version 0.151.2 (Released November 21, 2019)
 ---------------
 
