@@ -23,7 +23,6 @@ from ecommerce.factories import LineFactory
 from exams.api import (
     authorize_for_exam_run,
     authorize_for_latest_passed_course,
-    bulk_authorize_for_exam_run,
     update_authorizations_for_exam_run,
     sso_digest,
     MESSAGE_NOT_ELIGIBLE_TEMPLATE,
@@ -140,7 +139,7 @@ class ExamAuthorizationApiTests(TestCase):
         ).exists() is False
 
         with self.assertRaises(ExamAuthorizationException):
-            authorize_for_exam_run(mmtrack, self.course_run, self.exam_run)
+            authorize_for_exam_run(self.user, self.course_run, self.exam_run)
 
         # Assert user doesn't have exam profile and authorization
         assert ExamProfile.objects.filter(profile=mmtrack.user.profile).exists() is False
@@ -165,7 +164,7 @@ class ExamAuthorizationApiTests(TestCase):
             course=self.course_run.course
         ).exists() is False
 
-        authorize_for_exam_run(mmtrack, self.course_run, self.exam_run)
+        authorize_for_exam_run(self.user, self.course_run, self.exam_run)
 
         # Assert user has exam profile and authorization.
         assert ExamProfile.objects.filter(profile=mmtrack.user.profile).exists() is True
@@ -197,7 +196,7 @@ class ExamAuthorizationApiTests(TestCase):
         ).count() == 2
 
         with self.assertRaises(ExamAuthorizationException):
-            authorize_for_exam_run(mmtrack, self.course_run, self.exam_run)
+            authorize_for_exam_run(self.user, self.course_run, self.exam_run)
 
         # assert no new authorizations got created
         assert ExamAuthorization.objects.filter(
@@ -209,24 +208,22 @@ class ExamAuthorizationApiTests(TestCase):
         """
         test exam_authorization fails if course_run and exam_run courses mismatch
         """
-        mmtrack = get_mmtrack(self.user, self.program)
-
         # Neither user has exam profile nor authorization.
-        assert ExamProfile.objects.filter(profile=mmtrack.user.profile).exists() is False
+        assert ExamProfile.objects.filter(profile=self.user.profile).exists() is False
         assert ExamAuthorization.objects.filter(
-            user=mmtrack.user,
+            user=self.user,
             course=self.course_run.course
         ).exists() is False
 
         exam_run = ExamRunFactory.create()
 
         with self.assertRaises(ExamAuthorizationException):
-            authorize_for_exam_run(mmtrack, self.course_run, exam_run)
+            authorize_for_exam_run(self.user, self.course_run, exam_run)
 
         # Assert user has exam profile and authorization.
-        assert ExamProfile.objects.filter(profile=mmtrack.user.profile).exists() is False
+        assert ExamProfile.objects.filter(profile=self.user.profile).exists() is False
         assert ExamAuthorization.objects.filter(
-            user=mmtrack.user,
+            user=self.user,
             course=self.course_run.course
         ).exists() is False
 
@@ -253,7 +250,7 @@ class ExamAuthorizationApiTests(TestCase):
         ).exists() is False
 
         with self.assertRaises(ExamAuthorizationException) as eae:
-            authorize_for_exam_run(mmtrack, self.course_run, self.exam_run)
+            authorize_for_exam_run(self.user, self.course_run, self.exam_run)
 
         assert eae.exception.args[0] == expected_errors_message
 
@@ -286,7 +283,7 @@ class ExamAuthorizationApiTests(TestCase):
             ).exists() is False
 
             with self.assertRaises(ExamAuthorizationException) as eae:
-                authorize_for_exam_run(mmtrack, self.course_run, self.exam_run)
+                authorize_for_exam_run(self.user, self.course_run, self.exam_run)
 
             assert eae.exception.args[0] == expected_errors_message
 
@@ -349,89 +346,6 @@ class ExamAuthorizationApiTests(TestCase):
                 assert auth.operation == ExamAuthorization.OPERATION_UPDATE
 
 
-class ExamBulkAuthorizationApiTests(TestCase):
-    """Tests for bulk authorization api"""
-    @classmethod
-    def setUpTestData(cls):
-        cls.program, _ = create_program(past=True)
-        cls.course_run = cls.program.course_set.first().courserun_set.first()
-        cls.program_enrollment = ProgramEnrollmentFactory.create(program=cls.program)
-        cls.user = cls.program_enrollment.user
-        create_order(cls.user, cls.course_run)
-        with mute_signals(post_save):
-            CachedEnrollmentFactory.create(user=cls.user, course_run=cls.course_run)
-            cls.final_grade = FinalGradeFactory.create(
-                user=cls.user,
-                course_run=cls.course_run,
-                passed=True,
-                course_run_paid_on_edx=False,
-            )
-
-    def test_bulk_authorize_for_exam_run_future(self):
-        """Test that we don't create an authorization for a run in the future"""
-        exam_run = ExamRunFactory.create(
-            course=self.course_run.course,
-            scheduling_future=True,
-        )
-
-        assert ExamAuthorization.objects.filter(
-            course=exam_run.course,
-        ).count() == 0
-
-        bulk_authorize_for_exam_run(exam_run)
-
-        assert ExamAuthorization.objects.filter(
-            course=exam_run.course,
-        ).count() == 0
-
-    def test_bulk_authorize_for_exam_run_past(self):
-        """Test that we don't create an authorization for a run in the past"""
-        exam_run = ExamRunFactory.create(
-            scheduling_past=True,
-            course=self.course_run.course,
-        )
-
-        assert ExamAuthorization.objects.filter(
-            course=exam_run.course,
-        ).count() == 0
-
-        bulk_authorize_for_exam_run(exam_run)
-
-        assert ExamAuthorization.objects.filter(
-            course=exam_run.course,
-        ).count() == 0
-
-    def test_bulk_authorize_for_exam_run_current(self):
-        """Test that we do create an authorization for a current run"""
-        exam_run = ExamRunFactory.create(course=self.course_run.course)
-
-        assert ExamAuthorization.objects.filter(
-            course=exam_run.course,
-        ).count() == 0
-
-        bulk_authorize_for_exam_run(exam_run)
-
-        assert ExamAuthorization.objects.filter(
-            course=exam_run.course,
-        ).count() == 1
-
-    def test_bulk_authorize_for_exam_run_multiple(self):
-        """Test that we check all program enrollments"""
-        ProgramEnrollmentFactory.create(program=self.program)
-        exam_run = ExamRunFactory.create(course=self.course_run.course)
-
-        assert ExamAuthorization.objects.filter(
-            course=exam_run.course,
-        ).count() == 0
-
-        bulk_authorize_for_exam_run(exam_run)
-
-        assert ExamAuthorization.objects.filter(
-            course=exam_run.course,
-            user=self.user
-        ).count() == 1
-
-
 class ExamLatestCourseAuthorizationApiTests(TestCase):
     """Tests for latest course authorization api"""
     @classmethod
@@ -466,12 +380,11 @@ class ExamLatestCourseAuthorizationApiTests(TestCase):
     def test_exam_authorization_multiple_runs(self):
         """Test that if the first enrollment is invalid it checks the second, but not the third"""
         exam_run = ExamRunFactory.create(course=self.course)
-        mmtrack = get_mmtrack(self.user, self.program)
 
         with patch('exams.api.authorize_for_exam_run') as mock:
             mock.side_effect = [ExamAuthorizationException('invalid'), None, None]
-            authorize_for_latest_passed_course(mmtrack, exam_run)
+            authorize_for_latest_passed_course(self.user, exam_run)
 
         assert mock.call_count == 2
         for enrollment in self.final_grades[:2]:  # two most recent runs
-            mock.assert_any_call(mmtrack, enrollment.course_run, exam_run)
+            mock.assert_any_call(self.user, enrollment.course_run, exam_run)

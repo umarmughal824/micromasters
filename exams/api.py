@@ -8,7 +8,6 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Q
 
-from dashboard.models import ProgramEnrollment
 from dashboard.utils import get_mmtrack
 from dashboard.api import has_to_pay_for_exam
 from exams.exceptions import ExamAuthorizationException
@@ -65,7 +64,7 @@ def sso_digest(client_candidate_id, timestamp, session_timeout):
     return hashlib.sha256(data).hexdigest()
 
 
-def authorize_for_exam_run(mmtrack, course_run, exam_run):
+def authorize_for_exam_run(user, course_run, exam_run):
     """
     Authorize user for exam if he has paid for course and passed course.
 
@@ -74,6 +73,8 @@ def authorize_for_exam_run(mmtrack, course_run, exam_run):
         course_run (courses.models.CourseRun): A CourseRun object.
         exam_run (exams.models.ExamRun): the ExamRun we're authorizing for
     """
+
+    mmtrack = get_mmtrack(user, course_run.course.program)
     if not mmtrack.user.is_active:
         raise ExamAuthorizationException(
             "Inactive user '{}' cannot be authorized for the exam for course id '{}'".format(
@@ -127,7 +128,7 @@ def authorize_for_exam_run(mmtrack, course_run, exam_run):
     )
 
 
-def authorize_for_latest_passed_course(mmtrack, exam_run):
+def authorize_for_latest_passed_course(user, exam_run):
     """
     This walks the FinalGrade backwards chronologically and authorizes the first eligible one.
 
@@ -136,7 +137,7 @@ def authorize_for_latest_passed_course(mmtrack, exam_run):
         exam_run (exams.models.ExamRun): the ExamRun to authorize the learner for
     """
     final_grades = FinalGrade.objects.filter(
-        user=mmtrack.user,
+        user=user,
         passed=True,
         status=FinalGradeStatus.COMPLETE,
         course_run__course__id=exam_run.course_id,
@@ -147,33 +148,15 @@ def authorize_for_latest_passed_course(mmtrack, exam_run):
 
     for final_grade in final_grades:
         try:
-            authorize_for_exam_run(mmtrack, final_grade.course_run, exam_run)
+            authorize_for_exam_run(user, final_grade.course_run, exam_run)
         except ExamAuthorizationException:
             log.debug(
                 'Unable to authorize user: %s for exam on course_id: %s',
-                mmtrack.user.username,
+                user.username,
                 final_grade.course_run.course.id
             )
         else:
             break
-
-
-def bulk_authorize_for_exam_run(exam_run):
-    """
-    Authorize all eligible users for the given exam run
-
-    Args:
-        exam_run(exams.models.ExamRun): the exam run to authorize for
-    """
-    for program_enrollment in ProgramEnrollment.objects.filter(
-            program=exam_run.course.program
-    ).iterator():
-        mmtrack = get_mmtrack(
-            program_enrollment.user,
-            program_enrollment.program
-        )
-
-        authorize_for_latest_passed_course(mmtrack, exam_run)
 
 
 def authorize_user_for_schedulable_exam_runs(user, course_run):
@@ -184,12 +167,11 @@ def authorize_user_for_schedulable_exam_runs(user, course_run):
         user (django.contib.auth.models.User): the user to authorize
         course_run (courses.models.CourseRun): the course run to check
     """
-    mmtrack = get_mmtrack(user, course_run.course.program)
 
     # for each ExamRun for this course that is currently schedulable, attempt to authorize the user
     for exam_run in ExamRun.get_currently_schedulable(course_run.course):
         try:
-            authorize_for_exam_run(mmtrack, course_run, exam_run)
+            authorize_for_exam_run(user, course_run, exam_run)
         except ExamAuthorizationException:
             log.debug(
                 'Unable to authorize user: %s for exam on course_id: %s',

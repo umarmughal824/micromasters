@@ -5,8 +5,11 @@ import tempfile
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
+from celery import group
 
+from dashboard.models import ProgramEnrollment
 from exams import api
+from exams.api import authorize_for_latest_passed_course
 from exams.pearson.exceptions import RetryableSFTPException
 from exams.models import (
     ExamAuthorization,
@@ -25,7 +28,7 @@ from exams.utils import (
     validate_profile,
 )
 from micromasters.celery import app
-from micromasters.utils import now_in_utc
+from micromasters.utils import now_in_utc, chunks
 
 PEARSON_CDD_FILE_PREFIX = "cdd-%Y%m%d%H_"
 PEARSON_EAD_FILE_PREFIX = "ead-%Y%m%d%H_"
@@ -219,7 +222,37 @@ def authorize_exam_runs():
             authorized=False,
             date_first_schedulable__lte=now_in_utc(),
     ):
-        api.bulk_authorize_for_exam_run(exam_run)
-
+        enrollment_ids_qset = ProgramEnrollment.objects.filter(
+            program=exam_run.course.program).values_list('id', flat=True)
+        # create a group of subtasks
+        job = group(
+            authorize_enrollment_for_exam_run.s(enrollment_ids, exam_run.id)
+            for enrollment_ids in chunks(enrollment_ids_qset)
+        )
+        job.apply_async()
         exam_run.authorized = True
         exam_run.save()
+
+
+@app.task(acks_late=True)
+def authorize_enrollment_for_exam_run(enrollment_ids, exam_run_id):
+    """
+    Task to authorize all eligible enrollments in the list for the given exam run
+
+    Args:
+        enrollment_ids (list): a list of program enrollment ids
+        exam_run_id (int): an exam run id to authorize for
+
+    Returns:
+        None
+    """
+    exam_run = ExamRun.objects.get(id=exam_run_id)
+    for enrollment in ProgramEnrollment.objects.filter(id__in=enrollment_ids).prefetch_related('user'):
+        try:
+            authorize_for_latest_passed_course(enrollment.user, exam_run)
+        # pylint: disable=bare-except
+        except:
+            log.exception(
+                'Impossible to authorize user "%s" for exam_run %s',
+                enrollment.user.username, exam_run.id
+            )
