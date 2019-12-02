@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.153.0
+---------------
+
+- Splitting exam authorization task into smaller subtasks (#4473)
+- Commendation Letter for FA program (#4458)
+
 Version 0.152.0 (Released November 26, 2019)
 ---------------
 
