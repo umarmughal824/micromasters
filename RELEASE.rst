@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.153.0
+Version 0.153.0 (Released December 03, 2019)
 ---------------
 
 - Splitting exam authorization task into smaller subtasks (#4473)
