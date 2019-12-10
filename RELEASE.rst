@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.154.0
+Version 0.154.0 (Released December 10, 2019)
 ---------------
 
 - decrease the padding to allow for 3 signatures (#4477)
