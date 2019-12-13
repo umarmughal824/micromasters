@@ -305,11 +305,33 @@ class ProgramPage(Page):
             'The logo that will appear at the top of the program congratulation letter.'
         ),
     )
+    program_letter_header_text = RichTextField(
+        blank=True,
+        null=True,
+        help_text="Header text that will appear next to the logo."
+    )
+
+    program_letter_footer = models.ForeignKey(
+        Image,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='+',
+        help_text=(
+            'The logo that will appear at the bottom of the program congratulation letter.'
+        ),
+    )
 
     program_letter_text = RichTextField(
         blank=True,
         null=True,
         help_text="Text that will appear on the program congratulation letter."
+    )
+
+    program_letter_footer_text = RichTextField(
+        blank=True,
+        null=True,
+        help_text="Footer text that will appear on the program congratulation letter."
     )
 
     program_subscribe_link = models.URLField(
@@ -330,7 +352,10 @@ class ProgramPage(Page):
         FieldPanel('title_over_image'),
         FieldPanel('faculty_description'),
         FieldPanel('program_letter_logo'),
+        FieldPanel('program_letter_header_text'),
+        FieldPanel('program_letter_footer'),
         FieldPanel('program_letter_text'),
+        FieldPanel('program_letter_footer_text'),
         FieldPanel('program_subscribe_link'),
         InlinePanel('courses', label='Program Courses'),
         InlinePanel('info_links', label='More Info Links'),
@@ -600,11 +625,7 @@ class ProgramLetterSignatory(Orderable):
     name = models.CharField(max_length=255, help_text='Full name of the signatory')
     title_line_1 = models.TextField(help_text='Signatory title (e.g.: Associate Professor)')
     title_line_2 = models.TextField(blank=True, help_text='Signatory title (optional second line)')
-    organization = models.CharField(
-        max_length=255,
-        default="Massachusetts Institute of Technology",
-        help_text='Name of the organization where the signatory holds the given title.'
-    )
+
     signature_image = models.ForeignKey(
         Image,
         related_name='+',
@@ -618,7 +639,6 @@ class ProgramLetterSignatory(Orderable):
                 FieldPanel('name'),
                 FieldPanel('title_line_1'),
                 FieldPanel('title_line_2'),
-                FieldPanel('organization'),
                 FieldPanel('signature_image'),
             ]
         )

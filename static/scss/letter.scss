@@ -9,22 +9,66 @@
     margin-top: 30px;
   }
 
-  .letter-logo {
-    float: right;
+  .program-footer {
+    margin-top: 50px;
+    display: flex;
+
+    .footer-logo {
+      width: 50%;
+    }
+
+    .footer-text {
+      font-size: 12px;
+      text-align: end;
+      width: 50%;
+
+      p {
+        line-height: 0.5em;
+      }
+
+      h2, h3, h4 {
+        font-size: 13px;
+        margin-top: 0;
+      }
+    }
+  }
+
+  .header-row {
+    display: flex;
+
+    .header-text {
+      width: 50%;
+
+      p {
+        font-size: 14px;
+        line-height: 1.2em;
+        margin: 0;
+      }
+
+      h2, h3, h4 {
+        font-size: 18px;
+        margin: 0;
+      }
+    }
+
+    .letter-logo {
+      width: 50%;
+      text-align: end;
+    }
   }
 
   .letter-content {
-    margin-top: 50px;
+    margin-top: 65px;
   }
 
   .signatories {
     .signatory {
-      margin-right: 15px;
-      display: inline-block;
+      margin: 15px 0 5px;
     }
 
     .sig-image {
-      height: 100px;
+      max-height: 80px;
+      margin-bottom: 3px;
     }
   }
 }
