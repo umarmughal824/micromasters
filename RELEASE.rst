@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.154.1
+Version 0.154.1 (Released December 16, 2019)
 ---------------
 
 - Updates to the program letter (#4480)
