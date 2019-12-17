@@ -229,7 +229,10 @@ DEFAULT_DATABASE_CONFIG = dj_database_url.parse(
     )
 )
 DEFAULT_DATABASE_CONFIG['CONN_MAX_AGE'] = get_int('MICROMASTERS_DB_CONN_MAX_AGE', 0)
-
+# If True, disables server-side database cursors to prevent invalid cursor errors when using pgbouncer
+DEFAULT_DATABASE_CONFIG["DISABLE_SERVER_SIDE_CURSORS"] = get_bool(
+    "MICROMASTERS_DB_DISABLE_SS_CURSORS", True
+)
 if get_bool('MICROMASTERS_DB_DISABLE_SSL', False):
     DEFAULT_DATABASE_CONFIG['OPTIONS'] = {}
 else:

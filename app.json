@@ -135,6 +135,10 @@
       "required": true,
       "value": "0"
     },
+    "MICROMASTERS_DB_DISABLE_SS_CURSORS": {
+      "description": "Disable server-side cursors to avoid issues with pgbouncer",
+      "required": false
+    },
     "MICROMASTERS_DB_DISABLE_SSL": {
       "required": true,
       "value": "true"
