@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.155.0
+---------------
+
+- Disable server-side cursors by default to avoid invalid cursor errors (#4481)
+
 Version 0.154.1 (Released December 16, 2019)
 ---------------
 
