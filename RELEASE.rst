@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.156.0
+Version 0.156.0 (Released January 02, 2020)
 ---------------
 
 - Dashboard: fix elective tags (#4485)
