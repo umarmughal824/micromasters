@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.156.0 (Released January 02, 2020)
+---------------
+
+- Dashboard: fix elective tags (#4485)
+- Bump django from 2.1.11 to 2.1.15 (#4488)
+- Bump jquery from 3.3.1 to 3.4.0 (#4445)
+- Bump mixin-deep from 1.3.1 to 1.3.2 (#4446)
+- Bump lodash.merge from 4.6.1 to 4.6.2 (#4444)
+
 Version 0.155.0 (Released December 19, 2019)
 ---------------
 
