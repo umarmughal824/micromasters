@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.157.0
+---------------
+
+- Fixing the Grade record view (#4491)
+
 Version 0.156.0 (Released January 02, 2020)
 ---------------
 
