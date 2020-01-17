@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.157.1
+---------------
+
+- Update CombinedFinalGrades when exam run gets updated (#4492)
+
 Version 0.157.0 (Released January 13, 2020)
 ---------------
 
