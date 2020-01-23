@@ -1,9 +1,9 @@
 // @flow
 import React from "react"
 import _ from "lodash"
-import TextField from "material-ui/TextField"
-import { RadioButton, RadioButtonGroup } from "material-ui/RadioButton"
-import Checkbox from "material-ui/Checkbox"
+import TextField from "@material-ui/core/TextField"
+import Radio from "@material-ui/core/Radio"
+import Checkbox from "@material-ui/core/Checkbox"
 import R from "ramda"
 import ReactTelInput from "react-telephone-input"
 
@@ -12,25 +12,13 @@ import { validationErrorSelector, classify } from "./util"
 import { sendFormFieldEvent } from "../lib/google_analytics"
 import type { Validator, UIValidator } from "../lib/validation/profile"
 import type { Profile } from "../flow/profileTypes"
-import type { Option } from "../flow/generalTypes"
 import { CP1252_REGEX } from "../constants"
+import FormControlLabel from "@material-ui/core/FormControlLabel"
 
 // utility functions for pushing changes to profile forms back to the
 // redux store.
 // this expects that the `updateProfile` and `profile` props are passed
 // in to whatever component it is used in.
-
-/**
- * bind this to this.boundRadioGroupField in the constructor of a form component
- * to update radio buttons.
- * pass in the name (used as placeholder), key for profile, and the options.
- */
-const radioStyles = {
-  labelStyle: {
-    left:  -10,
-    width: "100%"
-  }
-}
 
 const radioButtonLabelSelector = label => `radio-label-${classify(label)}`
 
@@ -40,59 +28,15 @@ const radioButtonLabel = label => (
   </label>
 )
 
-const radioButtons = R.map(option => (
-  <RadioButton
-    className="profile-radio-button"
-    labelStyle={radioStyles.labelStyle}
+export const radioButtons = R.map(option => (
+  <FormControlLabel
+    classes={{ root: "profile-radio-button" }}
     value={option.value}
-    aria-labelledby={radioButtonLabelSelector(option.label)}
+    control={<Radio />}
     label={radioButtonLabel(option.label)}
-    key={radioButtonLabel(option.label)}
+    key={option.label}
   />
 ))
-
-export function boundRadioGroupField(
-  keySet: string[],
-  label: string,
-  options: Option[]
-): React$Element<*> {
-  const {
-    profile,
-    updateProfile,
-    errors,
-    validator,
-    updateValidationVisibility
-  } = this.props
-  const onChange = e => {
-    const clone = _.cloneDeep(profile)
-    let value = e.target.value
-    if (value === "true") {
-      value = true
-    } else if (value === "false") {
-      value = false
-    }
-    _.set(clone, keySet, value)
-    updateValidationVisibility(keySet)
-    updateProfile(clone, validator)
-    sendFormFieldEvent(keySet)
-  }
-
-  const value = String(_.get(profile, keySet))
-  return (
-    <fieldset className={validationErrorSelector(errors, keySet)}>
-      <legend className="profile-radio-group-label">{label}</legend>
-      <RadioButtonGroup
-        className="profile-radio-group"
-        name={label}
-        onChange={onChange}
-        valueSelected={value}
-      >
-        {radioButtons(options)}
-      </RadioButtonGroup>
-      <span className="validation-error-text">{_.get(errors, keySet)}</span>
-    </fieldset>
-  )
-}
 
 /**
  * bind to this.boundTextField in the constructor of a form component
@@ -142,16 +86,19 @@ export function boundTextField(
   if (maxLength) {
     options.maxLength = maxLength
   }
+  const error = _.get(errors, keySet, undefined) !== undefined
   return (
     <TextField
       onBlur={onBlur}
       name={label}
-      multiLine={multiLine}
-      className={validationErrorSelector(errors, keySet)}
-      floatingLabelText={label}
+      multiline={multiLine}
+      classes={{
+        root: `input-text ${validationErrorSelector(errors, keySet)}`
+      }}
+      label={label}
       value={getValue()}
       fullWidth={true}
-      errorText={_.get(errors, keySet)}
+      error={error}
       onChange={onChange}
       {...options}
     />

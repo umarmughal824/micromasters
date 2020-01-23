@@ -1,6 +1,6 @@
 // @flow
 import React from "react"
-import Grid, { Cell } from "react-mdl/lib/Grid"
+import Grid from "@material-ui/core/Grid"
 import ReactTooltip from "react-tooltip"
 import _ from "lodash"
 
@@ -9,7 +9,9 @@ import SelectField from "./inputs/SelectField"
 import CountrySelectField from "./inputs/CountrySelectField"
 import StateSelectField from "./inputs/StateSelectField"
 import ProfileFormFields from "../util/ProfileFormFields"
-import { shouldRenderRomanizedFields } from "../util/profile_edit"
+import { radioButtons, shouldRenderRomanizedFields } from "../util/profile_edit"
+import { validationErrorSelector } from "../util/util"
+
 import type {
   Profile,
   SaveProfileFunc,
@@ -19,6 +21,11 @@ import type {
 import type { Validator, UIValidator } from "../lib/validation/profile"
 import type { UIState } from "../reducers/ui"
 import type { Option } from "../flow/generalTypes"
+import RadioGroup from "@material-ui/core/RadioGroup"
+import FormControl from "@material-ui/core/FormControl"
+import FormHelperText from "@material-ui/core/FormHelperText"
+import FormLabel from "@material-ui/core/FormLabel"
+import { sendFormFieldEvent } from "../lib/google_analytics"
 
 export default class PersonalForm extends ProfileFormFields {
   genderOptions: Array<Option> = [
@@ -40,29 +47,78 @@ export default class PersonalForm extends ProfileFormFields {
     saveProfile: SaveProfileFunc,
     updateProfile: UpdateProfileFunc,
     validator: Validator | UIValidator,
+    updateValidationVisibility: (xs: Array<string>) => void,
     ui: UIState
   }
 
   renderRomanizedFields = (): React$Element<*> => (
-    <Cell col={12}>
+    <Grid item xs={12}>
       <section className="romanized-name">
         <h3>Please enter your name in Latin characters</h3>
-        <Grid className="profile-form-grid">
-          <Cell col={6}>
+        <Grid container className="profile-form-grid">
+          <Grid item xs={6}>
             {this.boundTextField(["romanized_first_name"], "Given name")}
-          </Cell>
-          <Cell col={6}>
+          </Grid>
+          <Grid item xs={6}>
             {this.boundTextField(["romanized_last_name"], "Family name")}
-          </Cell>
+          </Grid>
         </Grid>
       </section>
-    </Cell>
+    </Grid>
   )
 
   showRomanizedFields = (): React$Element<*> | null =>
     shouldRenderRomanizedFields(this.props.profile)
       ? this.renderRomanizedFields()
       : null
+
+  radioGroupField(
+    keySet: string[],
+    label: string,
+    options: Option[]
+  ): React$Element<*> {
+    const {
+      profile,
+      updateProfile,
+      errors,
+      validator,
+      updateValidationVisibility
+    } = this.props
+    const onChange = e => {
+      const clone = _.cloneDeep(profile)
+      let value = e.target.value
+      if (value === "true") {
+        value = true
+      } else if (value === "false") {
+        value = false
+      }
+      _.set(clone, keySet, value)
+      updateValidationVisibility(keySet)
+      updateProfile(clone, validator)
+      sendFormFieldEvent(keySet)
+    }
+
+    const value = String(_.get(profile, keySet))
+    const error = _.get(errors, keySet) !== undefined
+
+    return (
+      <FormControl error={error}>
+        <FormLabel classes={{ root: "form-label" }}>{label}</FormLabel>
+        <RadioGroup
+          className={`profile-radio-group ${validationErrorSelector(
+            errors,
+            keySet
+          )}`}
+          name="gender"
+          onChange={onChange}
+          value={value}
+        >
+          {radioButtons(options)}
+        </RadioGroup>
+        <FormHelperText error>{_.get(errors, keySet)}</FormHelperText>
+      </FormControl>
+    )
+  }
 
   render() {
     const { profile } = this.props
@@ -75,9 +131,9 @@ export default class PersonalForm extends ProfileFormFields {
     let postalCodeField = null
     if (profile && ["US", "CA"].includes(profile.country)) {
       postalCodeField = (
-        <Cell col={4} key="postal_code">
+        <Grid item xs={4} key="postal_code">
           {this.boundTextField(["postal_code"], "Postal code")}
-        </Cell>
+        </Grid>
       )
     }
 
@@ -87,47 +143,43 @@ export default class PersonalForm extends ProfileFormFields {
         <p className="alert-info" role="alert">
           Please provide your legal name, and truthful information.
         </p>
-        <Grid className="profile-form-grid">
-          <Cell col={6}>
+        <Grid container spacing={3} className="profile-form-grid">
+          <Grid item xs={6}>
             {this.boundTextField(["first_name"], "Given name")}
-          </Cell>
-          <Cell col={6}>
+          </Grid>
+          <Grid item xs={6}>
             {this.boundTextField(["last_name"], "Family name")}
-          </Cell>
+          </Grid>
           {this.showRomanizedFields()}
           <p className="alert-info" role="alert">
             Do you prefer to use a name different that your legal name entered
             above? If so enter it below.
           </p>
-          <Cell col={12}>
+          <Grid item xs={12}>
             {this.boundTextField(
               ["preferred_name"],
               "Nickname / Preferred name"
             )}
-          </Cell>
-          <Cell col={12}>
+          </Grid>
+          <Grid item xs={12}>
             {this.boundDateField(["date_of_birth"], "Date of birth")}
-          </Cell>
-          <Cell col={12} className="profile-gender-group">
-            {this.boundRadioGroupField(
-              ["gender"],
-              "Gender",
-              this.genderOptions
-            )}
-          </Cell>
-          <Cell col={12}>
+          </Grid>
+          <Grid item xs={12} className="profile-gender-group">
+            {this.radioGroupField(["gender"], "Gender", this.genderOptions)}
+          </Grid>
+          <Grid item xs={12}>
             <SelectField
               keySet={["preferred_language"]}
               label="Preferred language"
               options={this.languageOptions}
               {...this.defaultInputComponentProps()}
             />
-          </Cell>
+          </Grid>
         </Grid>
         <section>
           <h3>Where are you currently living?</h3>
-          <Grid className="profile-form-grid">
-            <Cell col={12}>
+          <Grid container className="profile-form-grid">
+            <Grid item xs={12}>
               <CountrySelectField
                 stateKeySet={["state_or_territory"]}
                 countryKeySet={["country"]}
@@ -135,16 +187,16 @@ export default class PersonalForm extends ProfileFormFields {
                 label="Country"
                 {...this.defaultInputComponentProps()}
               />
-            </Cell>
-            <Cell col={12} key="address">
+            </Grid>
+            <Grid item xs={12} key="address">
               {this.boundTextField(["address"], "Street address", {
                 maxLength: 100
               })}
-            </Cell>
-            <Cell col={4} key="city">
+            </Grid>
+            <Grid item xs={4} key="city">
               {this.boundTextField(["city"], "City")}
-            </Cell>
-            <Cell col={4} key="state_or_territory">
+            </Grid>
+            <Grid item xs={4} key="state_or_territory">
               <StateSelectField
                 stateKeySet={["state_or_territory"]}
                 countryKeySet={["country"]}
@@ -152,7 +204,7 @@ export default class PersonalForm extends ProfileFormFields {
                 label="State or Territory"
                 {...this.defaultInputComponentProps()}
               />
-            </Cell>
+            </Grid>
             {postalCodeField}
           </Grid>
         </section>
@@ -174,23 +226,23 @@ export default class PersonalForm extends ProfileFormFields {
           >
             {whyWeAskThis}
           </ReactTooltip>
-          <Grid className="profile-form-grid">
-            <Cell col={4}>
+          <Grid container spacing={3} className="profile-form-grid">
+            <Grid item xs={4}>
               <CountrySelectField
                 countryKeySet={["birth_country"]}
                 label="Country of birth"
                 topMenu={true}
                 {...this.defaultInputComponentProps()}
               />
-            </Cell>
-            <Cell col={4}>
+            </Grid>
+            <Grid item xs={4}>
               <CountrySelectField
                 countryKeySet={["nationality"]}
                 label="Nationality"
                 topMenu={true}
                 {...this.defaultInputComponentProps()}
               />
-            </Cell>
+            </Grid>
           </Grid>
         </section>
         <section>

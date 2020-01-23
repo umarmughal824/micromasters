@@ -11,28 +11,39 @@ body {
 }
 
 
-.mdl-card {
-  padding: 20px 24px 30px;
+.card {
+  padding: 8px 0 10px 10px;
   margin: 0 0 18px 0;
   min-height: 150px;
   width: 100%;
   border-radius: 2px;
   font-size: 14px;
+  overflow: inherit !important;
 
-  .mdl-card__title {
+  span.title {
     padding: 0;
     margin: 0 0 20px;
   }
 
-  .mdl-card__title-text {
+  h2 {
     font-weight: 500;
     font-size: 16px;
     color: $font-black;
+    margin: 0 0 15px;
+
+  }
+
+  .grid-padding {
+    padding: 20px 0;
   }
 }
 
 .row {
   margin: 0;
+}
+
+li.menu-item {
+  font-size: 14px;
 }
 
 .mdl-shadow--2dp, .mdl-shadow--3dp {
@@ -64,4 +75,8 @@ blockquote {
 
 blockquote:before, blockquote:after {
   content: none;
+}
+
+p.error-helper-text {
+  font-size: 12px;
 }

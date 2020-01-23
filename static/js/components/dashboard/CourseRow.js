@@ -1,9 +1,9 @@
 // @flow
 import React from "react"
-import Grid, { Cell } from "react-mdl/lib/Grid"
+import Grid from "@material-ui/core/Grid"
 import R from "ramda"
-import Icon from "react-mdl/lib/Icon"
-import Spinner from "react-mdl/lib/Spinner"
+import Icon from "@material-ui/core/Icon"
+import CircularProgress from "@material-ui/core/CircularProgress"
 
 import CourseAction from "./CourseAction"
 import Grades from "./courses/Grades"
@@ -115,19 +115,19 @@ export default class CourseRow extends React.Component {
 
   renderEnrollmentSuccess = (): React$Element<*> => {
     return (
-      <Grid className="course-sub-row enroll-pay-later-success">
-        <Cell col={2} key="1">
+      <Grid container className="course-sub-row enroll-pay-later-success">
+        <Grid item xs={2} key="1">
           <Icon name="check" className="tick-icon" />
-        </Cell>
+        </Grid>
         ,
-        <Cell col={7} key="2">
+        <Grid item xs={7} key="2">
           <p className="enroll-pay-later-heading">
             You are now auditing this course
           </p>
           <span className="enroll-pay-later-txt">
             But you still need to pay to get credit.
           </span>
-        </Cell>
+        </Grid>
       </Grid>
     )
   }
@@ -187,7 +187,7 @@ export default class CourseRow extends React.Component {
           </div>
           <div className="second-col">
             {run.status === STATUS_PENDING_ENROLLMENT ? (
-              <Spinner singleColor />
+              <CircularProgress />
             ) : null}
             {run.status === STATUS_PENDING_ENROLLMENT ? "Processing..." : null}
           </div>

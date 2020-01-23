@@ -1,9 +1,9 @@
 // @flow
 /* global SETTINGS: false */
 import React from "react"
-import { Card } from "react-mdl/lib/Card"
-import Icon from "react-mdl/lib/Icon"
-import IconButton from "react-mdl/lib/IconButton"
+import Card from "@material-ui/core/Card"
+import Icon from "@material-ui/core/Icon"
+import IconButton from "@material-ui/core/IconButton"
 
 import ProfileImage from "../containers/ProfileImage"
 import { hasAnyStaffRole } from "../lib/roles"
@@ -15,6 +15,7 @@ import {
 } from "../util/util"
 import { mstr } from "../lib/sanctuary"
 import type { Profile } from "../flow/profileTypes"
+import CardContent from "@material-ui/core/CardContent"
 
 const showLegalNameIfStaff = profile => {
   return hasAnyStaffRole(SETTINGS.roles) ? (
@@ -79,10 +80,11 @@ export default class LearnerInfoCard extends React.Component {
       aboutMeEditContent = (
         <div className="edit-about-me-holder">
           <IconButton
-            name="edit about me section"
             className="edit-about-me-button"
             onClick={toggleShowAboutMeDialog}
-          />
+          >
+            <Icon>edit</Icon>
+          </IconButton>
         </div>
       )
     }
@@ -122,30 +124,33 @@ export default class LearnerInfoCard extends React.Component {
       personalInfoEditContent = (
         <div className="edit-profile-holder">
           <IconButton
-            name="edit personal information"
             onClick={toggleShowPersonalDialog}
             className="edit-personal-info-button"
-          />
+          >
+            <Icon>edit</Icon>
+          </IconButton>
         </div>
       )
     }
 
     return (
-      <Card shadow={1} className="profile-form user-page">
-        <div className="profile-form-row">
-          <ProfileImage profile={profile} editable={true} />
-          <div className="col user-info">
-            <div className="profile-title">{getPreferredName(profile)}</div>
-            {showLegalNameIfStaff(profile)}
-            {showIdIfStaff(profile)}
-            <div className="profile-company-name">
-              {mstr(getEmployer(profile))}
+      <Card shadow={1} className="card profile-form user-page">
+        <CardContent>
+          <div className="profile-form-row">
+            <ProfileImage profile={profile} editable={true} />
+            <div className="col user-info">
+              <div className="profile-title">{getPreferredName(profile)}</div>
+              {showLegalNameIfStaff(profile)}
+              {showIdIfStaff(profile)}
+              <div className="profile-company-name">
+                {mstr(getEmployer(profile))}
+              </div>
+              {this.renderEmailLink()}
             </div>
-            {this.renderEmailLink()}
+            {personalInfoEditContent}
           </div>
-          {personalInfoEditContent}
-        </div>
-        {this.renderAboutMeSection(profile, toggleShowAboutMeDialog)}
+          {this.renderAboutMeSection(profile, toggleShowAboutMeDialog)}
+        </CardContent>
       </Card>
     )
   }

@@ -1,5 +1,11 @@
 // Define globals we would usually get from Django
+import React from "react"
 import ReactDOM from "react-dom"
+import { configure } from "enzyme"
+import Adapter from "enzyme-adapter-react-16"
+import * as ReactTransitionGroup from "react-transition-group"
+
+configure({ adapter: new Adapter() })
 
 const _createSettings = () => ({
   user: {
@@ -38,6 +44,15 @@ if (!Object.entries) {
 }
 
 import fetchMock from "fetch-mock"
+// Mock react-transition-group which is used by material-ui. It causes test failures due to a callback timed to
+// occur after the test has already cleaned up the DOM elements.
+const FakeTransition = ({ children }) => children()
+const FakeCSSTransition = props =>
+  props.in ? <FakeTransition>{props.children}</FakeTransition> : null
+// adapted from https://testing-library.com/docs/example-react-transition-group
+ReactTransitionGroup.Transition = FakeTransition
+ReactTransitionGroup.CSSTransition = FakeCSSTransition
+
 // eslint-disable-next-line mocha/no-top-level-hooks
 beforeEach(() => {
   // Uncomment to diagnose stray API calls. Also see relevant block in afterEach
@@ -72,26 +87,11 @@ afterEach(function() {
   // return require('./util/util').wait(200);
 })
 
-// required for interacting with react-mdl components
-require("react-mdl/extra/material.js")
-
 // rethrow all unhandled promise errors
 // eslint-disable-next-line no-unused-vars
 process.on("unhandledRejection", reason => {
   // throw reason; // uncomment to show promise-related errors
 })
-
-// fix 'unknown prop' error
-import injectTapEventPlugin from "react-tap-event-plugin"
-
-// injectTapEventPlugin should only be called once, and it throws an
-// error if it is called twice. we wrap our call to it in a try / catch
-// so that it doesn't throw an error when running tests in watch mode
-// (which would otherwise cause it to be called twice)
-try {
-  injectTapEventPlugin()
-  // eslint-disable-next-line no-empty
-} catch (_) {}
 
 // enable chai-as-promised
 import chai from "chai"

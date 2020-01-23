@@ -2,14 +2,17 @@
 /* global SETTINGS: false */
 import DocumentTitle from "react-document-title"
 import React from "react"
-import { Card } from "react-mdl/lib/Card"
+import Card from "@material-ui/core/Card"
 import PropTypes from "prop-types"
 import type { Dispatch } from "redux"
 import { connect } from "react-redux"
 import _ from "lodash"
 import moment from "moment"
 import R from "ramda"
-import Dialog from "material-ui/Dialog"
+import Dialog from "@material-ui/core/Dialog"
+import DialogTitle from "@material-ui/core/DialogTitle"
+import DialogContent from "@material-ui/core/DialogContent"
+import DialogActions from "@material-ui/core/DialogActions"
 import Alert from "react-bootstrap/lib/Alert"
 
 import ProgramEnrollmentDialog from "../components/ProgramEnrollmentDialog"
@@ -684,22 +687,25 @@ class DashboardPage extends React.Component {
         : "verified learners"
     return (
       <Dialog
-        title="Contact the Course Team"
-        titleClassName="dialog-title"
-        contentClassName="dialog"
-        className="course-payment-dialog-wrapper"
-        bodyStyle={{ padding: "0 24px" }}
+        classes={{ paper: "dialog", root: "course-payment-dialog-wrapper" }}
         open={ui.paymentTeaserDialogVisibility}
-        actions={singleBtnDialogActions(this.closePaymentTeaserDialog)}
-        onRequestClose={this.closePaymentTeaserDialog}
+        onClose={this.closePaymentTeaserDialog}
       >
-        <div className="inner-content">
-          <img
-            src="/static/images/contact_course_team_icon.png"
-            alt="Instructor icon"
-          />
-          <p>{`This is a premium feature for ${messageTail}.`}</p>
-        </div>
+        <DialogTitle className="dialog-title">
+          Contact the Course Team
+        </DialogTitle>
+        <DialogContent>
+          <div className="inner-content">
+            <img
+              src="/static/images/contact_course_team_icon.png"
+              alt="Instructor icon"
+            />
+            <p>{`This is a premium feature for ${messageTail}.`}</p>
+          </div>
+        </DialogContent>
+        <DialogActions>
+          {singleBtnDialogActions(this.closePaymentTeaserDialog)}
+        </DialogActions>
       </Dialog>
     )
   }

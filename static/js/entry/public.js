@@ -7,11 +7,8 @@ import "ajaxchimp"
 import _ from "lodash"
 import React from "react"
 import ReactDOM from "react-dom"
-import MuiThemeProvider from "material-ui/styles/MuiThemeProvider"
-import getMuiTheme from "material-ui/styles/getMuiTheme"
+import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles"
 import { Provider } from "react-redux"
-import injectTapEventPlugin from "react-tap-event-plugin"
-injectTapEventPlugin()
 
 import CourseListWithPopover from "../components/CourseListWithPopover"
 import FacultyCarousel from "../components/FacultyCarousel"
@@ -35,7 +32,7 @@ if (SETTINGS.program) {
 
 if (courseListEl && !_.isEmpty(courseList)) {
   ReactDOM.render(
-    <MuiThemeProvider muiTheme={getMuiTheme()}>
+    <MuiThemeProvider theme={createMuiTheme()}>
       <CourseListWithPopover courses={courseList} />
     </MuiThemeProvider>,
     courseListEl
@@ -68,7 +65,7 @@ const shareButton = document.querySelector(".open-share-dialog")
 if (shareDialog) {
   shareButton.onclick = openShareDialog
   ReactDOM.render(
-    <MuiThemeProvider muiTheme={getMuiTheme()}>
+    <MuiThemeProvider theme={createMuiTheme()}>
       <Provider store={shareStore}>
         <CopyLinkDialog />
       </Provider>
@@ -85,7 +82,7 @@ const sendButton = document.querySelector(".open-send-dialog")
 if (sendDialog) {
   sendButton.onclick = openSendDialog
   ReactDOM.render(
-    <MuiThemeProvider muiTheme={getMuiTheme()}>
+    <MuiThemeProvider theme={createMuiTheme()}>
       <Provider store={sendStore}>
         <SendGradesDialog />
       </Provider>
@@ -113,7 +110,7 @@ nodes.forEach(signUpButton => {
 })
 
 ReactDOM.render(
-  <MuiThemeProvider muiTheme={getMuiTheme()}>
+  <MuiThemeProvider theme={createMuiTheme()}>
     <Provider store={store}>
       <SignupDialog />
     </Provider>

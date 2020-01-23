@@ -1,22 +1,22 @@
 // @flow
 import React from "react"
 import PropTypes from "prop-types"
-import Dialog from "material-ui/Dialog"
-import IconButton from "react-mdl/lib/IconButton"
-import Button from "react-mdl/lib/Button"
+import Dialog from "@material-ui/core/Dialog"
+import IconButton from "@material-ui/core/IconButton"
+import Icon from "@material-ui/core/Icon"
 import type { Course, CourseRun } from "../flow/programTypes"
+import DialogTitle from "@material-ui/core/DialogTitle"
+import DialogContent from "@material-ui/core/DialogContent"
+import DialogActions from "@material-ui/core/DialogActions"
 
 const dialogTitle = (course, setDialogVisibility) => (
   <div className="title">
     <div className="text" key={1}>
       Enroll in {course.title}
     </div>
-    <IconButton
-      name="close"
-      className="close"
-      onClick={() => setDialogVisibility(false)}
-      key={2}
-    />
+    <IconButton className="close" onClick={() => setDialogVisibility(false)}>
+      <Icon>close</Icon>
+    </IconButton>
   </div>
 )
 
@@ -91,14 +91,13 @@ export default class CourseEnrollmentDialog extends React.Component {
         </p>
       ]
       payButton = (
-        <Button
+        <button
           key="pay"
           disabled
-          colored
-          className="dashboard-button pay-button"
+          className="mdl-button dashboard-button pay-button"
         >
           Pay Now
-        </Button>
+        </button>
       )
     } else if (courseRun.has_paid) {
       message = (
@@ -108,14 +107,13 @@ export default class CourseEnrollmentDialog extends React.Component {
         </p>
       )
       payButton = (
-        <Button
+        <button
           key="pay"
           disabled
-          colored
-          className="dashboard-button pay-button"
+          className="mdl-button dashboard-button pay-button"
         >
           Pay Now
-        </Button>
+        </button>
       )
     } else if (hasUserApplied) {
       message = [
@@ -130,14 +128,13 @@ export default class CourseEnrollmentDialog extends React.Component {
         </p>
       ]
       payButton = (
-        <Button
+        <button
           key="pay"
           onClick={this.handlePayClick}
-          colored
-          className="dashboard-button pay-button"
+          className="mdl-button dashboard-button pay-button"
         >
           Pay Now
-        </Button>
+        </button>
       )
     } else {
       message = [
@@ -159,40 +156,37 @@ export default class CourseEnrollmentDialog extends React.Component {
         </p>
       ]
       payButton = (
-        <Button
+        <button
           key="pay"
           disabled
-          colored
-          className="dashboard-button pay-button"
+          className="mdl-button dashboard-button pay-button"
         >
           Pay Now
-        </Button>
+        </button>
       )
     }
     const auditButton = (
-      <Button
+      <button
         key="audit"
         onClick={this.handleAuditClick}
-        colored
-        className="dashboard-button audit-button"
+        className="mdl-button dashboard-button audit-button"
       >
         {courseRun.has_paid ? "Enroll" : "Audit for Free & Pay Later"}
-      </Button>
+      </button>
     )
 
     return (
       <Dialog
-        title={dialogTitle(course, setVisibility)}
-        titleClassName="dialog-title"
-        contentClassName="dialog course-enrollment-dialog"
+        classes={{ paper: "dialog course-enrollment-dialog" }}
         className="course-enrollment-dialog-wrapper"
         open={open}
-        onRequestClose={() => setVisibility(false)}
-        actions={[payButton, auditButton]}
-        contentStyle={{ maxWidth: "600px" }}
-        actionsContainerStyle={{ paddingBottom: "20px", textAlign: "center" }}
+        onClose={() => setVisibility(false)}
       >
-        {message}
+        <DialogTitle className="dialog-title">
+          {dialogTitle(course, setVisibility)}
+        </DialogTitle>
+        <DialogContent>{message}</DialogContent>
+        <DialogActions>{[payButton, auditButton]}</DialogActions>
       </Dialog>
     )
   }

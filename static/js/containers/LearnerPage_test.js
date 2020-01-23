@@ -4,7 +4,7 @@ import { assert } from "chai"
 import _ from "lodash"
 import moment from "moment"
 import sinon from "sinon"
-import Dialog from "material-ui/Dialog"
+import Dialog from "@material-ui/core/Dialog"
 
 import * as inputUtil from "../components/inputs/util"
 import {
@@ -167,7 +167,7 @@ describe("LearnerPage", function() {
     describe("validation", () => {
       const inputs = dialog => [...dialog.getElementsByTagName("input")]
       const getEditPersonalButton = div =>
-        div.querySelector(".edit-profile-holder .mdl-button")
+        div.querySelector(".edit-profile-holder .edit-personal-info-button")
       const getDialog = () => document.querySelector(".personal-dialog")
       const getSave = () => getDialog().querySelector(".save-button")
 
@@ -280,7 +280,7 @@ describe("LearnerPage", function() {
 
       describe("date field", () => {
         const dobMonth = dialog =>
-          inputs(dialog).find(i => i.id.includes("MM-Month"))
+          inputs(dialog).find(i => i.placeholder === "MM")
         it("should clearValidation when filling out a required date field", () => {
           return clearValidation(
             userProfileActions.concat([
@@ -345,7 +345,7 @@ describe("LearnerPage", function() {
 
       describe("radio field", () => {
         const genderField = dialog =>
-          inputs(dialog).find(i => i.name === "Gender")
+          inputs(dialog).find(i => i.name === "gender")
 
         it("should clearValidationErrors when filling out a required radio field", () => {
           const createValidationError = () => {
@@ -552,7 +552,7 @@ describe("LearnerPage", function() {
             const editButton = div
               .getElementsByClassName("profile-form")[1]
               .getElementsByClassName("profile-row-icons")[0]
-              .getElementsByClassName("mdl-button")[0]
+              .getElementsByClassName("edit-button")[0]
 
             return listenForActions(
               [
@@ -564,7 +564,7 @@ describe("LearnerPage", function() {
                 ReactTestUtils.Simulate.click(editButton)
 
                 assert.equal(
-                  document.querySelector(".dialog-title").innerHTML,
+                  document.querySelector(".dialog-title h2").innerHTML,
                   "Edit Doctorate"
                 )
               }
@@ -626,7 +626,7 @@ describe("LearnerPage", function() {
               ReactTestUtils.Simulate.click(addButton)
 
               assert.equal(
-                document.querySelector(".dialog-title").innerHTML,
+                document.querySelector("h2").innerHTML,
                 "Add a High school"
               )
 
@@ -689,17 +689,18 @@ describe("LearnerPage", function() {
       const deleteButton = div => {
         return div
           .getElementsByClassName("profile-form")[2]
-          .getElementsByClassName("profile-row-icons")[0]
-          .getElementsByClassName("mdl-button")[1]
+          .getElementsByClassName("delete-button")[0]
       }
 
       it("shows the employment history component", () => {
         const username = SETTINGS.user.username
         return renderComponent(`/learner/${username}`, userActions).then(
           ([wrapper]) => {
+            wrapper.update()
             const headerText = wrapper
               .find("#work-history-card")
               .find(".profile-card-header")
+              .hostNodes()
               .text()
             assert.equal(headerText, "Employment")
           }
@@ -713,7 +714,7 @@ describe("LearnerPage", function() {
             const editButton = div
               .getElementsByClassName("profile-form")[2]
               .getElementsByClassName("profile-row-icons")[0]
-              .getElementsByClassName("mdl-button")[0]
+              .getElementsByClassName("edit-button")[0]
 
             return confirmResumeOrder(
               editButton,
@@ -841,7 +842,7 @@ describe("LearnerPage", function() {
             const editButton = div
               .getElementsByClassName("profile-form")[2]
               .getElementsByClassName("profile-row-icons")[0]
-              .getElementsByClassName("mdl-button")[0]
+              .getElementsByClassName("edit-button")[0]
 
             return listenForActions(
               [SET_WORK_DIALOG_INDEX, SET_WORK_DIALOG_VISIBILITY],
@@ -849,7 +850,7 @@ describe("LearnerPage", function() {
                 ReactTestUtils.Simulate.click(editButton)
 
                 assert.equal(
-                  document.querySelector(".dialog-title").innerHTML,
+                  document.querySelector("h2").innerHTML,
                   "Edit Employment"
                 )
               }
@@ -917,7 +918,7 @@ describe("LearnerPage", function() {
               ReactTestUtils.Simulate.click(addButton)
 
               assert.equal(
-                document.querySelector(".dialog-title").innerHTML,
+                document.querySelector("h2").innerHTML,
                 "Add Employment"
               )
               const dialog = document.querySelector(".employment-dialog")
@@ -1032,13 +1033,15 @@ describe("LearnerPage", function() {
           .returns(Promise.resolve(expectedProfile))
 
         return renderComponent(`/learner/${username}`, userActions).then(
-          ([wrapper]) => {
-            const personalButton = wrapper.find(".edit-personal-info-button")
+          ([,]) => {
+            const personalButton = document.querySelector(
+              ".edit-personal-info-button"
+            )
 
             return listenForActions(
               [SET_LEARNER_PAGE_DIALOG_VISIBILITY, START_PROFILE_EDIT],
               () => {
-                personalButton.simulate("click")
+                ReactTestUtils.Simulate.click(personalButton)
               }
             ).then(() => {
               const dialog = document.querySelector(".personal-dialog")
@@ -1167,11 +1170,11 @@ describe("LearnerPage", function() {
         ([, div]) => {
           const count = div
             .querySelector(".page-content")
-            .getElementsByClassName("mdl-button--icon").length
-          // edit profile and edit about me represents hard coded 2 here.
+            .getElementsByClassName("MuiIcon-root").length
+          // edit profile and edit about me, navbar represents hard coded 3
           assert.equal(
             count,
-            2 +
+            3 +
               USER_PROFILE_RESPONSE.work_history.length * 2 +
               USER_PROFILE_RESPONSE.education.length * 2
           )
@@ -1226,6 +1229,7 @@ describe("LearnerPage", function() {
       ])
       return renderComponent(`/learner/${username}`, actions).then(
         ([wrapper]) => {
+          wrapper.update()
           assert.equal(wrapper.find(StaffLearnerInfoCard).length, 1)
         }
       )
@@ -1240,6 +1244,7 @@ describe("LearnerPage", function() {
       ])
       return renderComponent(`/learner/${username}`, actions).then(
         ([wrapper]) => {
+          wrapper.update()
           wrapper
             .find(".open-popup")
             .at(0)
@@ -1268,13 +1273,14 @@ describe("LearnerPage", function() {
       ])
       return renderComponent(`/learner/${username}`, actions).then(
         ([wrapper]) => {
+          wrapper.update()
           wrapper
             .find(Grades)
             .at(0)
             .find(Dialog)
             .at(0)
             .props()
-            .onRequestClose()
+            .onClose()
           const state = helper.store.getState().ui
           assert.isFalse(state.dialogVisibility[key])
         }

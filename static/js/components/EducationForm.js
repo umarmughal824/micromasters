@@ -1,12 +1,14 @@
 // @flow
 import React from "react"
-import IconButton from "react-mdl/lib/IconButton"
-import Grid, { Cell } from "react-mdl/lib/Grid"
-import { Card } from "react-mdl/lib/Card"
+import IconButton from "@material-ui/core/IconButton"
+import Icon from "@material-ui/core/Icon"
+import Grid from "@material-ui/core/Grid"
+import Card from "@material-ui/core/Card"
 import _ from "lodash"
 import R from "ramda"
-import Dialog from "material-ui/Dialog"
-import { RadioButton, RadioButtonGroup } from "material-ui/RadioButton"
+import Dialog from "@material-ui/core/Dialog"
+import Radio from "@material-ui/core/Radio"
+import RadioGroup from "@material-ui/core/RadioGroup"
 
 import { FETCH_PROCESSING } from "../actions"
 import { educationValidation } from "../lib/validation/profile"
@@ -36,6 +38,12 @@ import type { Validator, UIValidator } from "../lib/validation/profile"
 import { formatMonthDate } from "../util/date"
 import FIELDS_OF_STUDY from "../data/fields_of_study"
 import { generateNewEducation } from "../util/util"
+import DialogTitle from "@material-ui/core/DialogTitle"
+import DialogActions from "@material-ui/core/DialogActions"
+import FormControlLabel from "@material-ui/core/FormControlLabel"
+import FormControl from "@material-ui/core/FormControl"
+import CardContent from "@material-ui/core/CardContent"
+import DialogContent from "@material-ui/core/DialogContent"
 
 const fieldOfStudyOptions = labelSort(
   _.map(FIELDS_OF_STUDY, (name, code) => ({
@@ -116,29 +124,30 @@ class EducationForm extends ProfileFormFields {
     const {
       ui: { educationLevelAnswers }
     } = this.props
-    const radioIconStyle = { marginRight: "8px" }
     const valueSelected = level.value in educationLevelAnswers ? "false" : null
     return (
-      <RadioButtonGroup
-        className={`profile-radio-group ${level.value}`}
-        id={`profile-tab-education-switch-${level.value}`}
-        name={`profile-tab-education-switch-${level.value}`}
-        onChange={(event, value) => this.handleRadioClick(value, level.value)}
-        valueSelected={valueSelected}
-      >
-        <RadioButton
-          value="true"
-          label="Yes"
-          iconStyle={radioIconStyle}
-          style={{ marginRight: "30px" }}
-        />
-        <RadioButton
-          value="false"
-          label="No"
-          iconStyle={radioIconStyle}
-          style={{ marginRight: "15px" }}
-        />
-      </RadioButtonGroup>
+      <FormControl>
+        <RadioGroup
+          className={`profile-radio-group ${level.value}`}
+          id={`profile-tab-education-switch-${level.value}`}
+          name={`profile-tab-education-switch-${level.value}`}
+          onChange={(event, value) => this.handleRadioClick(value, level.value)}
+          value={valueSelected}
+        >
+          <FormControlLabel
+            value="true"
+            label="Yes"
+            classes={{ root: "radio-style" }}
+            control={<Radio />}
+          />
+          <FormControlLabel
+            value="false"
+            label="No"
+            classes={{ root: "radio-style" }}
+            control={<Radio />}
+          />
+        </RadioGroup>
+      </FormControl>
     )
   }
 
@@ -167,12 +176,12 @@ class EducationForm extends ProfileFormFields {
       ? `${label.toLowerCase()} degree`
       : label.toLowerCase()
     return (
-      <Cell col={12} className="profile-card-header profile-form-row">
+      <Grid item xs={12} className="profile-card-header profile-form-row">
         <span className="question">
           {`Do you have ${prefix} ${levelName}?`}
         </span>
         {this.educationLevelRadioSwitch(level)}
-      </Cell>
+      </Grid>
     )
   }
 
@@ -188,9 +197,9 @@ class EducationForm extends ProfileFormFields {
       const label = EDUCATION_LEVEL_LABELS[levelValue]
       filterDegreeName = ([, entry]) => entry.degree_name === level.value
       title = (
-        <Cell col={12} className="profile-form-row" key="header-row">
+        <Grid item xs={12} className="profile-form-row" key="header-row">
           <strong>{label}</strong>
-        </Cell>
+        </Grid>
       )
     }
 
@@ -206,14 +215,14 @@ class EducationForm extends ProfileFormFields {
       userPrivilegeCheck(
         profile,
         () => (
-          <Cell col={12} className="profile-form-row add" key="add-row">
+          <Grid item xs={12} className="profile-form-row add" key="add-row">
             <button
               className="mm-minor-action add-education-button"
               onClick={() => this.openNewEducationForm(levelValue)}
             >
               Add a degree
             </button>
-          </Cell>
+          </Grid>
         ),
         null
       )
@@ -253,17 +262,18 @@ class EducationForm extends ProfileFormFields {
       const icons = () => (
         <div className="profile-row-icons">
           {validationAlert()}
-          <IconButton className="edit-button" name="edit" onClick={editEntry} />
-          <IconButton
-            className="delete-button"
-            name="delete"
-            onClick={deleteEntry}
-          />
+          <IconButton className="edit-button" onClick={editEntry}>
+            <Icon>edit</Icon>
+          </IconButton>
+          <IconButton className="delete-button" onClick={deleteEntry}>
+            <Icon>delete</Icon>
+          </IconButton>
         </div>
       )
       return (
-        <Cell
-          col={12}
+        <Grid
+          item
+          xs={12}
           className="profile-form-row row-padding row-with-border"
           key={index}
         >
@@ -281,7 +291,7 @@ class EducationForm extends ProfileFormFields {
               <div />
             ))}
           </div>
-        </Cell>
+        </Grid>
       )
     }
   )
@@ -333,7 +343,7 @@ class EducationForm extends ProfileFormFields {
     const fieldOfStudy = () => {
       if (educationDegreeLevel !== HIGH_SCHOOL) {
         return (
-          <Cell col={12}>
+          <Grid item xs={12}>
             <SelectField
               options={fieldOfStudyOptions}
               keySet={keySet("field_of_study")}
@@ -341,41 +351,41 @@ class EducationForm extends ProfileFormFields {
               allowCreate={true}
               {...this.defaultInputComponentProps()}
             />
-          </Cell>
+          </Grid>
         )
       }
     }
     const levelForm = () => {
       if (!showSwitch) {
         return (
-          <Cell col={12}>
+          <Grid item xs={12}>
             <SelectField
               keySet={keySet("degree_name")}
               label="Degree Type"
               options={EDUCATION_LEVELS}
               {...this.defaultInputComponentProps()}
             />
-          </Cell>
+          </Grid>
         )
       }
     }
 
     return (
-      <Grid className="profile-tab-grid">
+      <Grid container spacing={3} className="profile-tab-grid">
         {levelForm()}
         {fieldOfStudy()}
-        <Cell col={12}>
+        <Grid item xs={12}>
           {this.boundTextField(keySet("school_name"), "School Name")}
-        </Cell>
-        <Cell col={12}>
+        </Grid>
+        <Grid item xs={12}>
           {this.boundDateField(
             keySet("graduation_date"),
             "Graduation Date",
             true,
             true
           )}
-        </Cell>
-        <Cell col={4}>
+        </Grid>
+        <Grid item xs={4}>
           <CountrySelectField
             stateKeySet={keySet("school_state_or_territory")}
             countryKeySet={keySet("school_country")}
@@ -383,8 +393,8 @@ class EducationForm extends ProfileFormFields {
             topMenu={true}
             {...this.defaultInputComponentProps()}
           />
-        </Cell>
-        <Cell col={4}>
+        </Grid>
+        <Grid item xs={4}>
           <StateSelectField
             stateKeySet={keySet("school_state_or_territory")}
             countryKeySet={keySet("school_country")}
@@ -392,10 +402,10 @@ class EducationForm extends ProfileFormFields {
             topMenu={true}
             {...this.defaultInputComponentProps()}
           />
-        </Cell>
-        <Cell col={4} key="school_city">
+        </Grid>
+        <Grid item xs={4} key="school_city">
           {this.boundTextField(keySet("school_city"), "City")}
-        </Cell>
+        </Grid>
       </Grid>
     )
   }
@@ -411,10 +421,10 @@ class EducationForm extends ProfileFormFields {
         return (
           <Card
             shadow={1}
-            className={`profile-form ${cardClass(level.value)}`}
+            className={`card profile-form ${cardClass(level.value)}`}
             key={level.label}
           >
-            <Grid className="profile-form-grid">
+            <Grid container className="profile-form-grid">
               {this.renderEducationLevel(level)}
             </Grid>
           </Card>
@@ -429,13 +439,19 @@ class EducationForm extends ProfileFormFields {
       }
 
       return (
-        <Card shadow={1} className="profile-form" id="education-card">
-          <Grid className="profile-form-grid">
-            <Cell col={12} className="profile-form-row profile-card-header">
-              <span className="title">Education</span>
-            </Cell>
-            {this.renderEducationLevelEntries(null)}
-          </Grid>
+        <Card shadow={1} className="card profile-form" id="education-card">
+          <CardContent>
+            <Grid container className="profile-form-grid">
+              <Grid
+                item
+                xs={12}
+                className="profile-form-row profile-card-header"
+              >
+                <span className="title">Education</span>
+              </Grid>
+              {this.renderEducationLevelEntries(null)}
+            </Grid>
+          </CardContent>
         </Card>
       )
     } else {
@@ -472,20 +488,22 @@ class EducationForm extends ProfileFormFields {
           inFlight={inFlight}
         />
         <Dialog
-          title={title}
-          titleClassName="dialog-title"
-          contentClassName="dialog education-dialog"
-          className="education-dialog-wrapper"
+          classes={{
+            paper: "dialog education-dialog",
+            root:  "education-dialog-wrapper"
+          }}
           open={educationDialogVisibility}
-          onRequestClose={this.clearEducationEdit}
-          actions={dialogActions(
-            this.clearEducationEdit,
-            this.saveEducationForm,
-            inFlight
-          )}
-          autoScrollBodyContent={true}
+          onClose={this.clearEducationEdit}
         >
-          {this.editEducationForm()}
+          <DialogTitle className="dialog-title">{title}</DialogTitle>
+          <DialogContent dividers>{this.editEducationForm()}</DialogContent>
+          <DialogActions>
+            {dialogActions(
+              this.clearEducationEdit,
+              this.saveEducationForm,
+              inFlight
+            )}
+          </DialogActions>
         </Dialog>
         {this.renderCard()}
       </div>

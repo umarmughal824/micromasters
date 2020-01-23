@@ -7,19 +7,6 @@
     align-items: center;
   }
 
-  h2 {
-    font-size: 20px;
-    margin: 0;
-  }
-
-  h3 {
-    font-size: 16px;
-    font-weight: 500;
-    padding-top: 30px;
-    margin: 0;
-    display: inline-block;
-  }
-
   .alert-info {
     background-color: $text-highlight;
     font-style: italic;
@@ -60,5 +47,61 @@
     cursor: pointer;
     display: inline-block;
     margin-left: .5em;
+  }
+
+  .input-text {
+    margin: 8px 0;
+    padding-right: 10px;
+
+    input {
+      font-size: 16px;
+    }
+
+    label {
+      color: $input-label;
+      font-size: 16px;
+    }
+
+    p {
+      font-size: 12px;
+    }
+  }
+
+  .date-field {
+    color: $input-label;
+
+    p {
+      font-size: 12px;
+    }
+
+    input {
+      font-size: 16px;
+      padding-top: 1px;
+    }
+  }
+
+  .form-label {
+    font-size: 12px;
+  }
+
+  .date-field-legend {
+    margin-bottom: 10px;
+  }
+
+  .dialog-title {
+
+    h2 {
+      font-size: 22px;
+      line-height: 32px;
+      font-weight: 400;
+    }
+  }
+
+  fieldset {
+    margin: 20px 0;
+  }
+
+  .employment-dialog {
+    width: 75%;
   }
 }

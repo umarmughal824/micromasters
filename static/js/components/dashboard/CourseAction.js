@@ -2,7 +2,7 @@
 // @flow
 import React from "react"
 import PropTypes from "prop-types"
-import Button from "react-mdl/lib/Button"
+import Button from "@material-ui/core/Button"
 import R from "ramda"
 
 import SpinnerButton from "../SpinnerButton"
@@ -127,9 +127,13 @@ export default class CourseAction extends React.Component {
     }
     return (
       <div className="course-action">
-        <Button className="dashboard-button pay-button" key="1" {...props}>
+        <button
+          className="mdl-button dashboard-button pay-button"
+          key="1"
+          {...props}
+        >
           {payText}
-        </Button>
+        </button>
       </div>
     )
   }

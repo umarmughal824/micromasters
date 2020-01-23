@@ -1,6 +1,6 @@
 // @flow
 import React from "react"
-import Dialog from "material-ui/Dialog"
+import Dialog from "@material-ui/core/Dialog"
 import R from "ramda"
 // $FlowFixMe: Flow thinks this module isn't present for some reason
 import { Editor } from "react-draft-wysiwyg"
@@ -16,6 +16,9 @@ import { dialogActions } from "../inputs/util"
 import { isNilOrBlank } from "../../util/util"
 import type { EmailState, Filter } from "../../flow/emailTypes"
 import { S, getm } from "../../lib/sanctuary"
+import DialogTitle from "@material-ui/core/DialogTitle"
+import DialogContent from "@material-ui/core/DialogContent"
+import DialogActions from "@material-ui/core/DialogActions"
 
 // this takes an HTML string and returns a draft-js EditorState object
 // unfortunately draft-js has a lot of state and wants to manage it all itself,
@@ -23,11 +26,15 @@ import { S, getm } from "../../lib/sanctuary"
 // with it, which we can then keep in the state for our EmailCompositionDialog component.
 const convertHTMLToEditorState = (html: string): Object => {
   const blocksFromHTML = convertFromHTML(html)
-  const contentState = ContentState.createFromBlockArray(
-    blocksFromHTML.contentBlocks,
-    blocksFromHTML.entityMap
-  )
-  return EditorState.createWithContent(contentState)
+  if (blocksFromHTML.contentBlocks) {
+    const contentState = ContentState.createFromBlockArray(
+      blocksFromHTML.contentBlocks,
+      blocksFromHTML.entityMap
+    )
+    return EditorState.createWithContent(contentState)
+  } else {
+    return EditorState.createEmpty()
+  }
 }
 
 // this attempts to pull the email body out of `props`, and, if it's
@@ -84,16 +91,17 @@ export default class EmailCompositionDialog extends React.Component {
     this.state = editorStateFromProps(props)
   }
 
-  componentWillReceiveProps(nextProps: EmailDialogProps) {
+  static getDerivedStateFromProps(nextProps: EmailDialogProps, prevState) {
     const newState = editorStateFromProps(nextProps)
     const newStateHasText = newState.editorState.getCurrentContent().hasText()
 
     if (
-      !this.state.editorState.getCurrentContent().hasText() &&
+      !prevState.editorState.getCurrentContent().hasText() &&
       newStateHasText
     ) {
-      this.setState(newState)
+      return newState
     }
+    return null
   }
 
   insertRecipientVariable = (variableName: string) => {
@@ -236,44 +244,51 @@ export default class EmailCompositionDialog extends React.Component {
 
     return (
       <Dialog
-        title={title || "New Email"}
-        titleClassName="dialog-title"
-        contentClassName="dialog email-composition-dialog"
-        className="email-composition-dialog-wrapper"
+        classes={{
+          paper: "dialog email-composition-dialog",
+          root:  "email-composition-dialog-wrapper"
+        }}
         open={dialogVisibility}
-        actions={dialogActions(
-          this.closeEmailComposeAndClear,
-          this.closeEmailComposerAndSend,
-          fetchStatus === FETCH_PROCESSING,
-          this.okButtonLabel(dialogType)
-        )}
-        onRequestClose={this.closeEmailComposeAndClear}
+        onClose={this.closeEmailComposeAndClear}
       >
-        <div className="email-composition-contents">
-          {supportsAutomaticEmails
-            ? this.renderAutomaticEmailSettings(
-              inputs.sendAutomaticEmails || false
-            )
-            : null}
-          {this.renderSubheading()}
-          {renderRecipients ? renderRecipients(filters) : null}
-          <textarea
-            rows="1"
-            className="email-subject"
-            placeholder="Subject"
-            value={inputs.subject || ""}
-            onChange={updateEmailFieldEdit("subject")}
-          />
-          {this.showValidationError("subject")}
-          <Editor
-            wrapperClassName="email-body"
-            editorState={editorState}
-            onEditorStateChange={this.onEditorStateChange}
-            toolbar={draftWysiwygToolbar}
-          />
-          {supportBulkEmails ? this.renderRecipientVariable() : null}
-          {this.showValidationError("body")}
-        </div>
+        <DialogTitle className="dialog-title">
+          {title || "New Email"}
+        </DialogTitle>
+        <DialogContent>
+          <div className="email-composition-contents">
+            {supportsAutomaticEmails
+              ? this.renderAutomaticEmailSettings(
+                inputs.sendAutomaticEmails || false
+              )
+              : null}
+            {this.renderSubheading()}
+            {renderRecipients ? renderRecipients(filters) : null}
+            <textarea
+              rows="1"
+              className="email-subject"
+              placeholder="Subject"
+              value={inputs.subject || ""}
+              onChange={updateEmailFieldEdit("subject")}
+            />
+            {this.showValidationError("subject")}
+            <Editor
+              wrapperClassName="email-body"
+              editorState={editorState}
+              onEditorStateChange={this.onEditorStateChange}
+              toolbar={draftWysiwygToolbar}
+            />
+            {supportBulkEmails ? this.renderRecipientVariable() : null}
+            {this.showValidationError("body")}
+          </div>
+        </DialogContent>
+        <DialogActions>
+          {dialogActions(
+            this.closeEmailComposeAndClear,
+            this.closeEmailComposerAndSend,
+            fetchStatus === FETCH_PROCESSING,
+            this.okButtonLabel(dialogType)
+          )}
+        </DialogActions>
       </Dialog>
     )
   }

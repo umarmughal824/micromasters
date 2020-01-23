@@ -3,8 +3,7 @@ import React from "react"
 import sinon from "sinon"
 import { mount } from "enzyme"
 import { assert } from "chai"
-import MuiThemeProvider from "material-ui/styles/MuiThemeProvider"
-import getMuiTheme from "material-ui/styles/getMuiTheme"
+import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles"
 
 import AutomaticEmailOptions from "./AutomaticEmailOptions"
 
@@ -22,7 +21,7 @@ describe("AutomaticEmailOptions", () => {
 
   const renderComponent = (sendAutomaticEmails: boolean = false) =>
     mount(
-      <MuiThemeProvider muiTheme={getMuiTheme()}>
+      <MuiThemeProvider theme={createMuiTheme()}>
         <AutomaticEmailOptions
           setSendAutomaticEmails={setSendAutomaticEmailsStub}
           sendAutomaticEmails={sendAutomaticEmails}
@@ -32,7 +31,8 @@ describe("AutomaticEmailOptions", () => {
 
   it("should render a div", () => {
     const wrapper = renderComponent()
-    assert.equal(wrapper.find(".type-radio-group").children().length, 2)
+    assert.equal(wrapper.find(".send-one-time-email").hostNodes().length, 1)
+    assert.equal(wrapper.find(".create-campaign").hostNodes().length, 1)
     const radioOneTime = wrapper.find("input").at(0)
     assert.isFalse(radioOneTime.prop("value"))
   })

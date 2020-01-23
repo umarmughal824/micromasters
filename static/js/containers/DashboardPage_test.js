@@ -5,7 +5,7 @@ import moment from "moment"
 import ReactDOM from "react-dom"
 import Decimal from "decimal.js-light"
 import R from "ramda"
-import Dialog from "material-ui/Dialog"
+import Dialog from "@material-ui/core/Dialog"
 
 import ProgramEnrollmentDialog from "../components/ProgramEnrollmentDialog"
 import {
@@ -147,10 +147,10 @@ describe("DashboardPage", () => {
   it("has all the cards we expect", () => {
     return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
       ([wrapper]) => {
-        assert.lengthOf(wrapper.find(".dashboard-user-card"), 1)
-        assert.lengthOf(wrapper.find(".course-list"), 1)
-        assert.lengthOf(wrapper.find(".progress-widget"), 1)
-        assert.lengthOf(wrapper.find(".learners-card"), 1)
+        assert.lengthOf(wrapper.find(".dashboard-user-card").hostNodes(), 1)
+        assert.lengthOf(wrapper.find(".course-list").hostNodes(), 1)
+        assert.lengthOf(wrapper.find(".progress-widget").hostNodes(), 1)
+        assert.lengthOf(wrapper.find(".learners-card").hostNodes(), 1)
       }
     )
   })
@@ -231,7 +231,10 @@ describe("DashboardPage", () => {
 
     return renderComponent("/dashboard", actionsNoFrontpage).then(
       ([wrapper]) => {
-        const text = wrapper.find(".no-program-card").text()
+        const text = wrapper
+          .find(".no-program-card")
+          .hostNodes()
+          .text()
         assert.equal(
           text,
           "You are not currently enrolled in any programsEnroll in a MicroMasters Program"
@@ -327,7 +330,7 @@ describe("DashboardPage", () => {
           .find(Dialog)
           .first()
           .props()
-          .onRequestClose()
+          .onClose()
         const state = helper.store.getState().ui
         assert.isFalse(state.dialogVisibility[key])
       }
@@ -585,7 +588,10 @@ describe("DashboardPage", () => {
           return renderComponent("/dashboard", DASHBOARD_SUCCESS_ACTIONS).then(
             ([wrapper]) => {
               sinon.assert.notCalled(helper.skipFinancialAidStub)
-              assert.equal(wrapper.find(".financial-aid-card").length, 1)
+              assert.equal(
+                wrapper.find(".financial-aid-card").hostNodes().length,
+                1
+              )
             }
           )
         })

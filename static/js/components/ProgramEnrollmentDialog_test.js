@@ -1,11 +1,10 @@
 // @flow
 import React from "react"
 import { assert } from "chai"
-import MenuItem from "material-ui/MenuItem"
 import _ from "lodash"
 import { shallow } from "enzyme"
-import Dialog from "material-ui/Dialog"
-import SelectField from "material-ui/SelectField"
+import MenuItem from "@material-ui/core/MenuItem"
+import Select from "@material-ui/core/Select"
 
 import { FETCH_PROCESSING } from "../actions"
 import { DASHBOARD_SUCCESS_ACTIONS } from "../containers/test_util"
@@ -102,9 +101,9 @@ describe("ProgramEnrollmentDialog", () => {
       setSelectedProgram: stub
     })
     wrapper
-      .find(SelectField)
+      .find(Select)
       .props()
-      .onChange(null, null, enrollment)
+      .onChange({ target: { value: enrollment } })
     assert(stub.calledWith(enrollment))
   })
 
@@ -115,11 +114,8 @@ describe("ProgramEnrollmentDialog", () => {
       enrollInProgram: enrollStub,
       selectedProgram: selectedEnrollment
     })
-    const button = wrapper
-      .find(Dialog)
-      .props()
-      .actions.find(button => button.props.className.includes("enroll"))
-    button.props.onClick()
+    const button = wrapper.find(".enroll-button")
+    button.props().onClick()
     assert(enrollStub.calledWith(selectedEnrollment))
   })
 
@@ -128,12 +124,9 @@ describe("ProgramEnrollmentDialog", () => {
       const wrapper = renderEnrollmentDialog({
         fetchAddStatus: activity ? FETCH_PROCESSING : undefined
       })
-      const button = wrapper
-        .find(Dialog)
-        .props()
-        .actions.find(button => button.props.className.includes("enroll"))
-      assert.equal(button.type.name, "SpinnerButton")
-      assert.equal(button.props.spinning, activity)
+      const button = wrapper.find(".enroll-button")
+      assert.equal(button.name(), "SpinnerButton")
+      assert.equal(button.props().spinning, activity)
     })
   }
 
@@ -142,11 +135,8 @@ describe("ProgramEnrollmentDialog", () => {
     const wrapper = renderEnrollmentDialog({
       setError: stub
     })
-    const button = wrapper
-      .find(Dialog)
-      .props()
-      .actions.find(button => button.props.className.includes("enroll"))
-    button.props.onClick()
+    const button = wrapper.find(".enroll-button")
+    button.props().onClick()
     assert(stub.calledWith("No program selected"))
   })
 
@@ -155,11 +145,8 @@ describe("ProgramEnrollmentDialog", () => {
     const wrapper = renderEnrollmentDialog({
       setVisibility: stub
     })
-    const button = wrapper
-      .find(Dialog)
-      .props()
-      .actions.find(button => button.props.className.includes("cancel"))
-    button.props.onClick()
+    const button = wrapper.find(".cancel-button")
+    button.props().onClick()
     assert(stub.calledWith(false))
   })
 
@@ -194,14 +181,14 @@ describe("ProgramEnrollmentDialog", () => {
     assert.deepEqual(list, unenrolledPrograms)
   })
 
-  it("shows the current enrollment in the SelectField", () => {
+  it("shows the current enrollment in the Select", () => {
     const selectedEnrollment = PROGRAMS[0]
 
     const wrapper = renderEnrollmentDialog({
       selectedProgram: selectedEnrollment,
       visibility:      false
     })
-    const select = wrapper.find(SelectField)
+    const select = wrapper.find(Select)
     assert.equal(select.props().value, selectedEnrollment)
   })
 })

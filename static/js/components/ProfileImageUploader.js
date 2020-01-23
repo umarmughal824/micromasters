@@ -1,14 +1,17 @@
 // @flow
 import React from "react"
-import Dialog from "material-ui/Dialog"
+import Dialog from "@material-ui/core/Dialog"
 import R from "ramda"
 import Dropzone from "react-dropzone"
-import Spinner from "react-mdl/lib/Spinner"
+import CircularProgress from "@material-ui/core/CircularProgress"
 
 import CropperWrapper from "./CropperWrapper"
 import { FETCH_PROCESSING } from "../actions"
 import type { ImageUploadState } from "../reducers/image_upload"
 import { dialogActions } from "./inputs/util"
+import DialogTitle from "@material-ui/core/DialogTitle"
+import DialogActions from "@material-ui/core/DialogActions"
+import DialogContent from "@material-ui/core/DialogContent"
 
 const onDrop = R.curry((startPhotoEdit, files) => startPhotoEdit(...files))
 
@@ -45,7 +48,7 @@ const dialogContents = (
         className="photo-active-item dashed-border spinner"
         style={{ height: uploaderBodyHeight() }}
       >
-        <Spinner singleColor />
+        <CircularProgress />
       </div>
     )
   } else if (photo) {
@@ -87,34 +90,37 @@ const ProfileImageUploader = ({
 
   return (
     <Dialog
-      title="Upload a Profile Photo"
-      titleClassName="dialog-title"
-      contentClassName="dialog photo-upload-dialog"
-      className="photo-upload-dialog-wrapper"
-      onRequestClose={() => setDialogVisibility(false)}
-      autoScrollBodyContent={true}
-      contentStyle={{ maxWidth: "620px" }}
+      classes={{
+        paper: "dialog photo-upload-dialog",
+        root:  "photo-upload-dialog-wrapper"
+      }}
+      onClose={() => setDialogVisibility(false)}
       open={photoDialogOpen}
-      actions={dialogActions(
-        () => {
-          setDialogVisibility(false)
-          clearPhotoEdit()
-        },
-        updateUserPhoto,
-        false,
-        "Save",
-        "",
-        disabled
-      )}
     >
-      {imageError(error)}
-      {dialogContents(
-        updatePhotoEdit,
-        photo,
-        startPhotoEdit,
-        setPhotoError,
-        inFlight
-      )}
+      <DialogTitle className="dialog-title">Upload a Profile Photo</DialogTitle>
+      <DialogContent dividers>
+        {imageError(error)}
+        {dialogContents(
+          updatePhotoEdit,
+          photo,
+          startPhotoEdit,
+          setPhotoError,
+          inFlight
+        )}
+      </DialogContent>
+      <DialogActions>
+        {dialogActions(
+          () => {
+            setDialogVisibility(false)
+            clearPhotoEdit()
+          },
+          updateUserPhoto,
+          false,
+          "Save",
+          "",
+          disabled
+        )}
+      </DialogActions>
     </Dialog>
   )
 }

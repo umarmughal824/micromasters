@@ -7,7 +7,6 @@ import moment from "moment"
 import { assert } from "chai"
 import _ from "lodash"
 import sinon from "sinon"
-import { CardTitle } from "react-mdl/lib/Card"
 
 import { calculatePrices } from "../../lib/coupon"
 import CourseListCard from "./CourseListCard"
@@ -18,8 +17,7 @@ import {
 } from "../../test_constants"
 import { INITIAL_EMAIL_STATE } from "../../reducers/email"
 import { INITIAL_UI_STATE } from "../../reducers/ui"
-import MuiThemeProvider from "material-ui/styles/MuiThemeProvider"
-import getMuiTheme from "material-ui/styles/getMuiTheme"
+import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles"
 import IntegrationTestHelper from "../../util/integration_test_helper"
 import { Provider } from "react-redux"
 import {
@@ -85,7 +83,7 @@ describe("CourseListCard", () => {
 
     const couponPrices = calculatePrices([program], [coursePrice], [])
     return mount(
-      <MuiThemeProvider muiTheme={getMuiTheme()}>
+      <MuiThemeProvider theme={createMuiTheme()}>
         <Provider store={helper.store}>
           <CourseListCard
             program={program}
@@ -292,7 +290,7 @@ describe("CourseListCard", () => {
   describe("staff view mode", () => {
     it("should have the program title in the card title", () => {
       const wrapper = renderCourseListCard({ showStaffView: true })
-      assert.equal(wrapper.find(CardTitle).text(), `Courses - ${program.title}`)
+      assert.equal(wrapper.find("h2").text(), `Courses - ${program.title}`)
     })
 
     it("should pass the showStaffView to relevant child components", () => {

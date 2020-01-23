@@ -7,10 +7,16 @@ import {
   setSelectedSchool
 } from "../actions/send_grades_dialog"
 import { connect } from "react-redux"
-import Dialog from "material-ui/Dialog"
+import Dialog from "@material-ui/core/Dialog"
 import R from "ramda"
-import SelectField from "material-ui/SelectField"
-import MenuItem from "material-ui/MenuItem"
+import Select from "@material-ui/core/Select"
+import MenuItem from "@material-ui/core/MenuItem"
+import DialogTitle from "@material-ui/core/DialogTitle"
+import DialogContent from "@material-ui/core/DialogContent"
+import FormControl from "@material-ui/core/FormControl"
+import InputLabel from "@material-ui/core/InputLabel"
+import DialogContentText from "@material-ui/core/DialogContentText"
+import DialogActions from "@material-ui/core/DialogActions"
 
 class SendGradesDialog extends React.Component {
   props: {
@@ -21,9 +27,9 @@ class SendGradesDialog extends React.Component {
     sendGradeEmailClick: (f: Array<*>) => void,
     sentSuccess: boolean
   }
-  handleSelectedSchoolChange = (event, index, value) => {
+  handleSelectedSchoolChange = event => {
     const { setSelectedSchool } = this.props
-    setSelectedSchool(value)
+    setSelectedSchool(event.target.value)
   }
 
   render() {
@@ -35,62 +41,66 @@ class SendGradesDialog extends React.Component {
       sentSuccess
     } = this.props
     const options = SETTINGS.partner_schools.map(program => (
-      <MenuItem value={program[0]} primaryText={program[1]} key={program[0]} />
+      <MenuItem value={program[0]} key={program[0]}>
+        {program[1]}
+      </MenuItem>
     ))
     return (
       <Dialog
-        title="Send Record to Partner"
-        titleClassName="dialog-title"
-        contentClassName="dialog send-dialog"
+        classes={{ paper: "dialog send-dialog" }}
         open={open}
-        onRequestClose={() => {
+        onClose={() => {
           setSendDialogVisibility(false)
         }}
-        autoScrollBodyContent={true}
       >
-        <p>
-          You can directly share your program record with partners that accept
-          credit for this MicroMasters Program. Once you send the record you
-          cannot unsend it.
-        </p>
-        <p>Select organization(s) you wish to send this record to:</p>
-        <SelectField
-          value={selectedSchool}
-          onChange={this.handleSelectedSchoolChange}
-          floatingLabelText="Select School"
-          fullWidth={true}
-          style={{
-            width: "500px"
-          }}
-          menuStyle={{
-            width:    "500px",
-            overflow: "hidden"
-          }}
-        >
-          {options}
-        </SelectField>
+        <DialogTitle className="dialog-title">
+          Send Record to Partner
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            You can directly share your program record with partners that accept
+            credit for this MicroMasters Program. Once you send the record you
+            cannot unsend it.
+          </DialogContentText>
+          <DialogContentText>
+            Select organization(s) you wish to send this record to:
+          </DialogContentText>
 
-        <div>
-          <div className="sent-email">{sentSuccess ? "Email Sent!" : ""}</div>
-          <button
-            className="btn pull-right close-send-dialog"
-            onClick={() => {
-              setSendDialogVisibility(false)
-            }}
-          >
-            Close
-          </button>
-          <button
-            className="btn btn-primary pull-right send-grades"
-            onClick={() => {
-              selectedSchool
-                ? sendGradeEmailClick([selectedSchool, SETTINGS.hash])
-                : null
-            }}
-          >
-            Send
-          </button>
-        </div>
+          <FormControl className="select-control">
+            <InputLabel>Select School</InputLabel>
+            <Select
+              value={selectedSchool || ""}
+              onChange={this.handleSelectedSchoolChange}
+              style={{
+                width: "500px"
+              }}
+            >
+              {options}
+            </Select>
+          </FormControl>
+
+          <DialogActions>
+            <div className="sent-email">{sentSuccess ? "Email Sent!" : ""}</div>
+            <button
+              className="btn pull-right close-send-dialog"
+              onClick={() => {
+                setSendDialogVisibility(false)
+              }}
+            >
+              Close
+            </button>
+            <button
+              className="btn btn-primary pull-right send-grades"
+              onClick={() => {
+                selectedSchool
+                  ? sendGradeEmailClick([selectedSchool, SETTINGS.hash])
+                  : null
+              }}
+            >
+              Send
+            </button>
+          </DialogActions>
+        </DialogContent>
       </Dialog>
     )
   }

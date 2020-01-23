@@ -1,5 +1,5 @@
 import React from "react"
-import Spinner from "react-mdl/lib/Spinner"
+import CircularProgress from "@material-ui/core/CircularProgress"
 
 type SpinnerButtonProps = {
   spinning: boolean,
@@ -24,7 +24,8 @@ export default class SpinnerButton extends React.Component {
     }
   }
 
-  componentWillReceiveProps(nextProps: SpinnerButtonProps) {
+  // eslint-disable-next-line
+  UNSAFE_componentWillReceiveProps(nextProps: SpinnerButtonProps) {
     if (!nextProps.spinning && this.props.spinning) {
       // spinning has finished, so reset the state
       this.setState({
@@ -63,7 +64,7 @@ export default class SpinnerButton extends React.Component {
         className = ""
       }
       className = `${className} disabled-with-spinner`
-      children = <Spinner singleColor />
+      children = <CircularProgress />
     }
 
     return (

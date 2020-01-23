@@ -80,6 +80,7 @@ describe("LearnerSearchPage", function() {
     await searchkit.registrationCompleted
     // cycle through the event loop to let searchkit do its rendering
     await wait(0)
+    wrapper.update()
     return [wrapper]
   }
 
@@ -272,10 +273,10 @@ describe("LearnerSearchPage", function() {
     return renderSearch()
       .then(([wrapper]) => {
         wrapper
-          .find("SearchBox")
+          .find("CustomSearchBox")
           .find('input[type="text"]')
           .props()
-          .onInput({
+          .onChange({
             target: {
               value: "xyz"
             }
@@ -542,7 +543,7 @@ describe("LearnerSearchPage", function() {
       return renderSearch().then(([wrapper]) => {
         const searchkit = wrapper.find("SearchkitProvider").props().searchkit
         searchkit.searchFromUrlQuery(qs.stringify(query))
-
+        wrapper.update()
         const titles = wrapper
           .find(".mm-filters .sk-selected-filters-option__name")
           .map(filter => filter.text())
@@ -571,7 +572,7 @@ describe("LearnerSearchPage", function() {
       return renderSearch().then(([wrapper]) => {
         const searchkit = wrapper.find("SearchkitProvider").props().searchkit
         searchkit.searchFromUrlQuery(qs.stringify(query))
-
+        wrapper.update()
         const titles = wrapper
           .find(".mm-filters .sk-selected-filters-option__name")
           .map(filter => filter.text())

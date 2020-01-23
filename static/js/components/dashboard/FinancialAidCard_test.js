@@ -5,8 +5,7 @@ import { mount } from "enzyme"
 import { assert } from "chai"
 import sinon from "sinon"
 import moment from "moment"
-import MuiThemeProvider from "material-ui/styles/MuiThemeProvider"
-import getMuiTheme from "material-ui/styles/getMuiTheme"
+import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles"
 import DatePicker from "react-datepicker"
 
 import { makeCoursePrices } from "../../factories/dashboard"
@@ -57,7 +56,7 @@ describe("FinancialAidCard", () => {
       []
     )
     return mount(
-      <MuiThemeProvider muiTheme={getMuiTheme()}>
+      <MuiThemeProvider theme={createMuiTheme()}>
         <FinancialAidCard
           program={program}
           coursePrice={COURSE_PRICES_RESPONSE[0]}
@@ -160,7 +159,7 @@ describe("FinancialAidCard", () => {
       it(`don't show card if status is ${status}`, () => {
         const program = programWithStatus(status)
         const wrapper = renderCard({ program })
-        assert.isNull(wrapper.html())
+        assert.equal(wrapper.html(), "")
       })
 
       it(`don't show no-calls message if status is ${status}`, () => {
@@ -203,8 +202,10 @@ describe("FinancialAidCard", () => {
         const setDocumentSentDate = sandbox.stub()
         const wrapper = renderCard({ program, setDocumentSentDate })
         const props = wrapper.find(DatePicker).props()
-
-        assert.equal(props.selected.format(ISO_8601_FORMAT), "2011-11-11")
+        assert.equal(
+          moment(props.selected).format(ISO_8601_FORMAT),
+          "2011-11-11"
+        )
         props.onChange(moment("1999-01-01"))
         sinon.assert.calledWith(setDocumentSentDate, "1999-01-01")
       })
@@ -244,8 +245,10 @@ describe("FinancialAidCard", () => {
         const updateDocumentSentDate = sandbox.stub()
         updateDocumentSentDate.returns(Promise.resolve())
         const wrapper = renderCard({ program, updateDocumentSentDate })
-
-        wrapper.find(".document-sent-button").simulate("click")
+        wrapper
+          .find(".document-sent-button")
+          .hostNodes()
+          .simulate("click")
         sinon.assert.calledWith(updateDocumentSentDate, 123, "2011-11-11")
       })
 

@@ -1,7 +1,7 @@
 // @flow
 import React from "react"
 import R from "ramda"
-import Icon from "react-mdl/lib/Icon"
+import Icon from "@material-ui/core/Icon"
 
 import type { Course } from "../../../flow/programTypes"
 import { formatGrade } from "../util"
@@ -67,7 +67,7 @@ const renderPassed = (course: Course) => {
     return (
       <div className="passed-course">
         <div className="check-mark-surround">
-          <Icon name="check" />
+          <Icon>done</Icon>
         </div>
         Passed
       </div>

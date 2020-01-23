@@ -1,12 +1,12 @@
 // @flow
 /* global SETTINGS: false */
 import React from "react"
-import { Card, CardTitle } from "react-mdl/lib/Card"
-import Button from "react-mdl/lib/Button"
+import Card from "@material-ui/core/Card"
 import R from "ramda"
 
 import type { Program } from "../flow/programTypes"
 import { programCourseInfo } from "../util/util"
+import CardContent from "@material-ui/core/CardContent"
 
 export const circularProgressWidget = (
   radius: number,
@@ -99,31 +99,33 @@ export default class ProgressWidget extends React.Component {
     const { program } = this.props
 
     return (
-      <Card className="progress-widget" shadow={0}>
-        <img
-          className="certificate-thumbnail"
-          src="/static/images/diploma_sm.png"
-          alt="Certificate"
-        />
-        <div className="text-course-complete">Congratulations!</div>
-        <p className="certificate-text">
-          You completed the MicroMasters Certificate in {program.title}
-        </p>
-        <Button
-          className="dashboard-button"
-          onClick={() => {
-            window.open(program.certificate)
-          }}
-        >
-          View Certificate
-        </Button>
-        {SETTINGS.FEATURES.PROGRAM_RECORD_LINK &&
-          program.financial_aid_availability &&
-          gradeRecordsLink(program.grade_records_url)}
+      <Card className="card progress-widget" shadow={0}>
+        <CardContent className="progress-widget-content">
+          <img
+            className="certificate-thumbnail"
+            src="/static/images/diploma_sm.png"
+            alt="Certificate"
+          />
+          <div className="text-course-complete">Congratulations!</div>
+          <p className="certificate-text">
+            You completed the MicroMasters Certificate in {program.title}
+          </p>
+          <button
+            className="mdl-button dashboard-button"
+            onClick={() => {
+              window.open(program.certificate)
+            }}
+          >
+            View Certificate
+          </button>
+          {SETTINGS.FEATURES.PROGRAM_RECORD_LINK &&
+            program.financial_aid_availability &&
+            gradeRecordsLink(program.grade_records_url)}
 
-        {SETTINGS.FEATURES.ENABLE_PROGRAM_LETTER &&
-          program.program_letter_url &&
-          programLetterLink(program.program_letter_url)}
+          {SETTINGS.FEATURES.ENABLE_PROGRAM_LETTER &&
+            program.program_letter_url &&
+            programLetterLink(program.program_letter_url)}
+        </CardContent>
       </Card>
     )
   }
@@ -133,21 +135,23 @@ export default class ProgressWidget extends React.Component {
     const totalPassedCourses = programCourseInfo(program)
 
     return (
-      <Card className="progress-widget" shadow={0}>
-        <CardTitle className="progress-title">Progress</CardTitle>
-        {circularProgressWidget(
-          60,
-          6,
-          totalPassedCourses,
-          program.number_courses_required
-        )}
-        {SETTINGS.FEATURES.PROGRAM_RECORD_LINK &&
-          program.financial_aid_availability &&
-          gradeRecordsLink(program.grade_records_url)}
-        {SETTINGS.FEATURES.ENABLE_PROGRAM_LETTER &&
-          !program.financial_aid_availability &&
-          program.program_letter_url &&
-          programLetterLink(program.program_letter_url)}
+      <Card className="card progress-widget" shadow={0}>
+        <CardContent className="progress-widget-content">
+          <h2 className="progress-title">Progress</h2>
+          {circularProgressWidget(
+            60,
+            6,
+            totalPassedCourses,
+            program.number_courses_required
+          )}
+          {SETTINGS.FEATURES.PROGRAM_RECORD_LINK &&
+            program.financial_aid_availability &&
+            gradeRecordsLink(program.grade_records_url)}
+          {SETTINGS.FEATURES.ENABLE_PROGRAM_LETTER &&
+            !program.financial_aid_availability &&
+            program.program_letter_url &&
+            programLetterLink(program.program_letter_url)}
+        </CardContent>
       </Card>
     )
   }

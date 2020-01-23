@@ -4,9 +4,8 @@ import React from "react"
 import { mount } from "enzyme"
 import { assert } from "chai"
 import sinon from "sinon"
-import IconButton from "react-mdl/lib/IconButton"
-import MuiThemeProvider from "material-ui/styles/MuiThemeProvider"
-import getMuiTheme from "material-ui/styles/getMuiTheme"
+import IconButton from "@material-ui/core/IconButton"
+import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles"
 import ReactTestUtils from "react-dom/test-utils"
 
 import FinalExamCard from "./FinalExamCard"
@@ -58,14 +57,14 @@ pay for the course and pass the online work.`
   const getDialog = () => document.querySelector(".dialog-to-pearson-site")
   const renderCard = props =>
     mount(
-      <MuiThemeProvider muiTheme={getMuiTheme()}>
+      <MuiThemeProvider theme={createMuiTheme()}>
         <FinalExamCard {...props} />
       </MuiThemeProvider>
     )
 
   it("should not render when pearson_exam_status is empty", () => {
     const card = renderCard(props)
-    assert.isNull(card.html())
+    assert.equal(card.html(), "")
   })
 
   it("should just show a basic message if the profile is absent", () => {

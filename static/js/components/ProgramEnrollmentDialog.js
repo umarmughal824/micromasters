@@ -1,12 +1,18 @@
 import React from "react"
-import Dialog from "material-ui/Dialog"
+import Dialog from "@material-ui/core/Dialog"
 import _ from "lodash"
-import SelectField from "material-ui/SelectField"
-import MenuItem from "material-ui/MenuItem"
+import Select from "@material-ui/core/Select"
+import MenuItem from "@material-ui/core/MenuItem"
 
 import { FETCH_PROCESSING } from "../actions"
 import { dialogActions } from "./inputs/util"
 import type { AvailablePrograms } from "../flow/enrollmentTypes"
+import DialogTitle from "@material-ui/core/DialogTitle"
+import DialogActions from "@material-ui/core/DialogActions"
+import InputLabel from "@material-ui/core/InputLabel"
+import FormControl from "@material-ui/core/FormControl"
+import DialogContent from "@material-ui/core/DialogContent"
+import FormHelperText from "@material-ui/core/FormHelperText"
 
 export default class ProgramEnrollmentDialog extends React.Component {
   props: {
@@ -36,9 +42,9 @@ export default class ProgramEnrollmentDialog extends React.Component {
     }
   }
 
-  handleSelectedProgramChange = (event, index, value) => {
+  handleSelectedProgramChange = event => {
     const { setSelectedProgram } = this.props
-    setSelectedProgram(value)
+    setSelectedProgram(event.target.value)
   }
 
   render() {
@@ -55,11 +61,9 @@ export default class ProgramEnrollmentDialog extends React.Component {
       "title"
     )
     const options = unenrolledPrograms.map(program => (
-      <MenuItem
-        value={program.id}
-        primaryText={program.title}
-        key={program.id}
-      />
+      <MenuItem className="menu-item" value={program.id} key={program.id}>
+        {program.title}
+      </MenuItem>
     ))
 
     const actions = dialogActions(
@@ -73,29 +77,33 @@ export default class ProgramEnrollmentDialog extends React.Component {
     // to close the dialog right after opening it. See https://github.com/JedWatson/react-select/issues/532
     return (
       <Dialog
-        title="Enroll in a new MicroMasters Program"
-        titleClassName="dialog-title"
-        contentClassName="dialog enroll-program-dialog"
+        classes={{ paper: "dialog enroll-program-dialog" }}
         className="enroll-program-dialog-wrapper"
         open={visibility}
-        actions={actions}
+        maxWidth="md"
       >
-        <SelectField
-          value={selectedProgram}
-          onChange={this.handleSelectedProgramChange}
-          floatingLabelText="Select Program"
-          errorText={error}
-          fullWidth={true}
-          style={{
-            width: "500px"
-          }}
-          menuStyle={{
-            width:    "500px",
-            overflow: "hidden"
-          }}
-        >
-          {options}
-        </SelectField>
+        <DialogTitle className="dialog-title">
+          Enroll in a new MicroMasters Program
+        </DialogTitle>
+        <DialogContent>
+          <FormControl className="select-program">
+            <InputLabel>Select Program</InputLabel>
+            <Select
+              value={selectedProgram || ""}
+              onChange={this.handleSelectedProgramChange}
+              error={!!error}
+              style={{
+                width: "500px"
+              }}
+            >
+              {options}
+            </Select>
+            <FormHelperText error className="error-helper-text">
+              {error}
+            </FormHelperText>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>{actions}</DialogActions>
       </Dialog>
     )
   }

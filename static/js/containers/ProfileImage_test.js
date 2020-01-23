@@ -3,8 +3,7 @@ import React from "react"
 import ReactTestUtils from "react-dom/test-utils"
 import { mount } from "enzyme"
 import { assert } from "chai"
-import MuiThemeProvider from "material-ui/styles/MuiThemeProvider"
-import getMuiTheme from "material-ui/styles/getMuiTheme"
+import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles"
 import { Provider } from "react-redux"
 
 import ProfileImage, { PROFILE_IMAGE_DIALOG } from "./ProfileImage"
@@ -27,7 +26,7 @@ describe("ProfileImage", () => {
   const renderProfileImage = (props = {}) => {
     div = document.createElement("div")
     return mount(
-      <MuiThemeProvider muiTheme={getMuiTheme()}>
+      <MuiThemeProvider theme={createMuiTheme()}>
         <Provider store={helper.store}>
           <ProfileImage profile={thatProfile} {...props} />
         </Provider>
@@ -131,7 +130,7 @@ describe("ProfileImage", () => {
         const dialog = document.querySelector(".photo-upload-dialog")
         const saveButton = dialog.querySelector(".save-button")
         assert.isFalse(saveButton.className.includes("disabled"))
-        assert.isNull(dialog.querySelector(".mdl-spinner"))
+        assert.isNull(dialog.querySelector(".MuiCircularProgress-root"))
         ReactTestUtils.Simulate.click(saveButton)
         assert.isTrue(updateProfileImageStub.called)
       })
@@ -147,7 +146,7 @@ describe("ProfileImage", () => {
         assert.isFalse(saveButton.innerHTML.includes("mdl-spinner"))
         ReactTestUtils.Simulate.click(saveButton)
         assert.isFalse(updateProfileImageStub.called)
-        assert.isNull(dialog.querySelector(".mdl-spinner"))
+        assert.isNull(dialog.querySelector(".MuiCircularProgress-root"))
       })
 
       it("should show a spinner while uploading the image", () => {
@@ -158,7 +157,7 @@ describe("ProfileImage", () => {
         helper.store.dispatch(showDialog(PROFILE_IMAGE_DIALOG))
         helper.store.dispatch(requestPatchUserPhoto(SETTINGS.user.username))
         const dialog = document.querySelector(".photo-upload-dialog")
-        assert.isNotNull(dialog.querySelector(".mdl-spinner"))
+        assert.isNotNull(dialog.querySelector(".MuiCircularProgress-root"))
       })
 
       it("should disable the save button when uploading an image", () => {
@@ -171,7 +170,9 @@ describe("ProfileImage", () => {
         const dialog = document.querySelector(".photo-upload-dialog")
         const saveButton = dialog.querySelector(".save-button")
         assert.isTrue(saveButton.disabled)
-        assert.isFalse(saveButton.innerHTML.includes("mdl-spinner"))
+        assert.isFalse(
+          saveButton.innerHTML.includes("MuiCircularProgress-root")
+        )
         ReactTestUtils.Simulate.click(saveButton)
         assert.isFalse(updateProfileImageStub.called)
       })

@@ -3,8 +3,7 @@ import _ from "lodash"
 import { mount } from "enzyme"
 import { assert } from "chai"
 import sinon from "sinon"
-import MuiThemeProvider from "material-ui/styles/MuiThemeProvider"
-import getMuiTheme from "material-ui/styles/getMuiTheme"
+import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles"
 import ReactTestUtils from "react-dom/test-utils"
 
 import { SEARCH_RESULT_EMAIL_CONFIG } from "./lib"
@@ -55,7 +54,7 @@ describe("EmailCompositionDialog", () => {
       updatedEmailState
     )
     return mount(
-      <MuiThemeProvider muiTheme={getMuiTheme()}>
+      <MuiThemeProvider theme={createMuiTheme()}>
         <EmailCompositionDialog
           updateEmailFieldEdit={() => updateStub}
           updateEmailBody={updateStub}
@@ -74,7 +73,10 @@ describe("EmailCompositionDialog", () => {
 
   it("should have a title", () => {
     renderDialog()
-    assert.equal(document.querySelector("h3").textContent, "Test Email Dialog")
+    assert.equal(
+      document.querySelector(".dialog-title").textContent,
+      "Test Email Dialog"
+    )
   })
 
   it("renders a radio button for setting whether an email is automatic or not", () => {
@@ -161,7 +163,10 @@ describe("EmailCompositionDialog", () => {
 
   it("should show a default title when one is not passed in", () => {
     renderDialog({}, { title: undefined })
-    assert.equal(document.querySelector("h3").textContent, "New Email")
+    assert.equal(
+      document.querySelector(".dialog-title").textContent,
+      "New Email"
+    )
   })
 
   describe("editing subject", () => {

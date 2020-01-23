@@ -3,7 +3,7 @@ import React from "react"
 import moment from "moment"
 import _ from "lodash"
 import R from "ramda"
-import TextField from "material-ui/TextField"
+import TextField from "@material-ui/core/TextField"
 import { S, mstr, allJust } from "../../lib/sanctuary"
 const { Just } = S
 
@@ -147,57 +147,50 @@ export default class DateField extends React.Component {
     }
 
     const edit = getEditObject()
+    const error = _.get(errors, keySet, undefined) !== undefined
 
     let dayField, daySlash
     if (!omitDay) {
       daySlash = <span className="slash"> / </span>
       dayField = (
         <TextField
-          hintText="DD"
-          floatingLabelText="Day"
-          floatingLabelFixed={true}
+          placeholder="DD"
+          helperText="Day"
+          classes={{ root: "date-field" }}
           style={{
             maxWidth: "3em"
           }}
-          fullWidth={true}
+          error={error}
           value={edit.day !== undefined ? edit.day : ""}
           onChange={e => setNewDate(e.target.value, undefined, undefined)}
         />
       )
     }
-
     return (
       <fieldset className={validationErrorSelector(errors, keySet)}>
-        <legend>{label}</legend>{" "}
+        <legend className="date-field-legend">{label}</legend>{" "}
         <TextField
-          hintText="MM"
-          floatingLabelText="Month"
-          floatingLabelFixed={true}
-          floatingLabelStyle={{ whiteSpace: "nowrap" }}
+          placeholder="MM"
+          helperText="Month"
+          classes={{ root: "date-field" }}
           style={{
             maxWidth: "3em"
           }}
-          errorStyle={{
-            position:   "absolute",
-            top:        "100%",
-            whiteSpace: "nowrap"
-          }}
-          fullWidth={true}
+          error={error}
           value={edit.month !== undefined ? edit.month : ""}
           onChange={e => setNewDate(undefined, e.target.value, undefined)}
-          errorText={_.get(errors, keySet)}
         />
         <span className="slash"> / </span>
         {dayField}
         {daySlash}
         <TextField
-          hintText="YYYY"
-          floatingLabelText="Year"
-          floatingLabelFixed={true}
+          placeholder="YYYY"
+          helperText="Year"
+          classes={{ root: "date-field" }}
           style={{
             maxWidth: "4em"
           }}
-          fullWidth={true}
+          error={error}
           value={edit.year !== undefined ? edit.year : ""}
           onChange={e => setNewDate(undefined, undefined, e.target.value)}
           onBlur={onBlur}

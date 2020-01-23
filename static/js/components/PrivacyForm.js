@@ -2,9 +2,16 @@
 /* global SETTINGS: false */
 import DocumentTitle from "react-document-title"
 import React from "react"
-import { Card } from "react-mdl/lib/Card"
+import _ from "lodash"
+import Card from "@material-ui/core/Card"
+import FormControl from "@material-ui/core/FormControl"
+import FormLabel from "@material-ui/core/FormLabel"
+import RadioGroup from "@material-ui/core/RadioGroup"
+import CardContent from "@material-ui/core/CardContent"
 
 import ProfileFormFields from "../util/ProfileFormFields"
+import { sendFormFieldEvent } from "../lib/google_analytics"
+import { radioButtons } from "../util/profile_edit"
 import type {
   Profile,
   ValidationErrors,
@@ -12,6 +19,7 @@ import type {
 } from "../flow/profileTypes"
 import type { UIState } from "../reducers/ui"
 import type { Validator } from "../lib/validation/profile"
+import type { Option } from "../flow/generalTypes"
 
 class PrivacyForm extends ProfileFormFields {
   props: {
@@ -19,10 +27,11 @@ class PrivacyForm extends ProfileFormFields {
     ui: UIState,
     updateProfile: UpdateProfileFunc,
     errors: ValidationErrors,
+    updateValidationVisibility: (xs: Array<string>) => void,
     validator: Validator
   }
 
-  privacyOptions: Array<{ value: string, label: string, helper: string }> = [
+  privacyOptions: Array<Option> = [
     {
       value:  "public",
       label:  "Public to the world",
@@ -43,7 +52,7 @@ class PrivacyForm extends ProfileFormFields {
     }
   ]
 
-  emailOptions: Array<{ value: string, label: string }> = [
+  emailOptions: Array<Option> = [
     {
       value: "true",
       label: "Faculty, staff, and other learners can send me emails"
@@ -51,29 +60,72 @@ class PrivacyForm extends ProfileFormFields {
     { value: "false", label: "I don't want to receive any emails" }
   ]
 
+  radioGroupField(
+    keySet: string[],
+    label: string,
+    options: Option[]
+  ): React$Element<*> {
+    const {
+      profile,
+      updateProfile,
+      validator,
+      updateValidationVisibility
+    } = this.props
+    const onChange = e => {
+      const clone = _.cloneDeep(profile)
+      let value = e.target.value
+      if (value === "true") {
+        value = true
+      } else if (value === "false") {
+        value = false
+      }
+      _.set(clone, keySet, value)
+      updateValidationVisibility(keySet)
+      updateProfile(clone, validator)
+      sendFormFieldEvent(keySet)
+    }
+
+    const value = String(_.get(profile, keySet))
+    return (
+      <FormControl>
+        <FormLabel>{label}</FormLabel>
+        <RadioGroup
+          className="profile-radio-group"
+          name={label}
+          onChange={onChange}
+          value={value}
+        >
+          {radioButtons(options)}
+        </RadioGroup>
+      </FormControl>
+    )
+  }
+
   render() {
     return (
       <DocumentTitle title="Settings | MITx MicroMasters">
         <div>
-          <Card shadow={1} className="profile-form">
-            <h4 className="privacy-form-heading">Who can see your profile?</h4>
-            <div className="profile-form-row">
-              {this.boundRadioGroupField(
-                ["account_privacy"],
-                "",
-                this.privacyOptions
-              )}
-            </div>
+          <Card shadow={1} className="card profile-form">
+            <CardContent>
+              <h4 className="privacy-form-heading">
+                Who can see your profile?
+              </h4>
+              <div className="profile-form-row">
+                {this.radioGroupField(
+                  ["account_privacy"],
+                  "",
+                  this.privacyOptions
+                )}
+              </div>
+            </CardContent>
           </Card>
-          <Card shadow={1} className="profile-form">
-            <h4 className="privacy-form-heading">Email Preferences</h4>
-            <div className="profile-form-row">
-              {this.boundRadioGroupField(
-                ["email_optin"],
-                "",
-                this.emailOptions
-              )}
-            </div>
+          <Card shadow={1} className="card profile-form">
+            <CardContent>
+              <h4 className="privacy-form-heading">Email Preferences</h4>
+              <div className="profile-form-row">
+                {this.radioGroupField(["email_optin"], "", this.emailOptions)}
+              </div>
+            </CardContent>
           </Card>
         </div>
       </DocumentTitle>

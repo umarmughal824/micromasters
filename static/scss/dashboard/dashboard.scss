@@ -21,7 +21,13 @@
 }
 
 .dashboard {
+
+  h2 {
+    line-height: normal;
+  }
+
   .dashboard-user-card {
+    display: flex;
     flex-direction: row;
 
     .dashboard-user-card-text {
@@ -33,22 +39,16 @@
         padding-bottom: 13px;
       }
 
-      .mdl-card__supporting-text {
+      p {
         padding: 0;
         color: $font-gray;
         font-size: 15px;
         font-weight: 400;
       }
 
-      .mdl-card__title {
-        padding-bottom: 0 !important;
-        padding: 0;
-        margin: 0 0 12px;
-
-        .mdl-card__title-text {
-          font-size: 22px;
-          font-weight: 400;
-        }
+      h2 {
+        font-size: 22px;
+        font-weight: 400;
       }
     }
   }
@@ -56,7 +56,6 @@
   .financial-aid-box {
     background-color: $bg-light-gray;
     padding: 13px;
-    margin: 0;
 
     @include breakpoint(phone) {
       padding: 22px;
@@ -159,15 +158,18 @@
   }
 
   .course-list {
-    padding: 20px 0 0 0;
+    padding: 0;
 
     @include breakpoint(phone) {
       padding: 17px 0 19px !important;
     }
 
-    .mdl-card__title {
-      // align with course-row below which includes an extra 8px of grid cell padding
-      padding-left: 28px;
+    .course-list-content {
+      padding: 1px;
+
+      h2 {
+        margin: 22px 27px;
+      }
     }
 
     .course-container {
@@ -360,35 +362,46 @@
   }
 }
 
+.dialog {
+
+  .dialog-content {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .select-control {
+    padding-bottom: 20px;
+  }
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+}
+
 .dashboard-page .dialog {
-  width: 700px;
-  padding: 30px;
+  width: 70%;
+  max-width: 768px;
 
   h3 {
-    border-bottom: 0 !important;
+    font-size: 16px;
+    font-weight: 500;
+    padding-top: 30px;
+    margin: 0;
+    display: inline-block;
+  }
+
+  .select-program {
+    padding-bottom: 30px;
+
+    div {
+      line-height: 1.8rem;
+    }
+  }
+
+  label {
+    font-size: 16px;
   }
 
   .mdl-button {
-    font-size: 17px;
-    font-weight: 500;
-    margin: 6px 10px;
-    padding: 0 2px;
-
-    &.mdl-button--colored {
-      background: $button-color;
-      color: white;
-      font-size: 13px;
-      font-weight: normal;
-      text-align: center;
-      min-width: 120px;
-      padding: 0 10px;
-
-      &[disabled] {
-        background-color: $medgray;
-        color: white;
-      }
-    }
-
     &.close {
       margin: 0;
     }
@@ -396,6 +409,7 @@
 
   .primary-button, .secondary-button {
     box-shadow: none;
+    font-size: 17px;
 
     &:hover, &:focus, &:active, &:focus:not(:active) {
       box-shadow: none;
@@ -426,12 +440,6 @@
       opacity: 0.3;
       cursor: not-allowed;
     }
-  }
-}
-
-.dialog {
-  p:last-child {
-    margin-bottom: 0;
   }
 }
 
@@ -513,5 +521,13 @@
     .actions {
       border-top: 0 !important;
     }
+  }
+}
+
+.dialog  .dialog-title {
+  h2 {
+    padding: 5px 0;
+    font-size: 22px;
+    font-weight: 400;
   }
 }

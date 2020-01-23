@@ -1,7 +1,10 @@
 // @flow
 import React from "react"
-import Dialog from "material-ui/Dialog"
-import Button from "react-mdl/lib/Button"
+import Dialog from "@material-ui/core/Dialog"
+import Button from "@material-ui/core/Button"
+import DialogTitle from "@material-ui/core/DialogTitle"
+import DialogContent from "@material-ui/core/DialogContent"
+import DialogActions from "@material-ui/core/DialogActions"
 
 import {
   COUPON_AMOUNT_TYPE_PERCENT_DISCOUNT,
@@ -105,7 +108,6 @@ const CouponNotificationDialog = ({
 
   const okButton = (
     <Button
-      type="ok"
       key="ok"
       className="primary-button ok-button"
       onClick={() => setDialogVisibility(false)}
@@ -116,16 +118,19 @@ const CouponNotificationDialog = ({
 
   return (
     <Dialog
-      title={title}
-      titleClassName="dialog-title"
-      contentClassName="dialog coupon-notification-dialog"
-      className="coupon-notification-dialog-wrapper"
-      actions={okButton}
+      classes={{
+        paper: "dialog coupon-notification-dialog",
+        root:  "coupon-notification-dialog-wrapper"
+      }}
       open={open}
-      onRequestClose={() => setDialogVisibility(false)}
+      onClose={() => setDialogVisibility(false)}
     >
-      {message}
-      {discountAppliedMessage}
+      <DialogTitle className="dialog-title">{title}</DialogTitle>
+      <DialogContent>
+        {message}
+        {discountAppliedMessage}
+      </DialogContent>
+      <DialogActions>{okButton}</DialogActions>
     </Dialog>
   )
 }

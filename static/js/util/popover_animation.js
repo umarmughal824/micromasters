@@ -1,8 +1,7 @@
 // @flow
 import React, { Component } from "react"
 import PropTypes from "prop-types"
-import Paper from "material-ui/Paper"
-import propTypes from "material-ui/utils/propTypes"
+import Paper from "@material-ui/core/Paper"
 
 function getStyles(props, context, state) {
   const { open } = state
@@ -28,8 +27,8 @@ export default class PopoverNullAnimation extends Component {
      * Override the inline-styles of the root element.
      */
     style:        PropTypes.object,
-    targetOrigin: propTypes.origin.isRequired,
-    zDepth:       propTypes.zDepth
+    targetOrigin: PropTypes.string.isRequired,
+    zDepth:       PropTypes.number
   }
 
   static defaultProps = {
@@ -49,7 +48,7 @@ export default class PopoverNullAnimation extends Component {
     this.setState({ open: true }) // eslint-disable-line react/no-did-mount-set-state
   }
 
-  componentWillReceiveProps(nextProps: any) {
+  getDerivedStateFromProps(nextProps: any) {
     this.setState({
       open: nextProps.open
     })

@@ -1,6 +1,18 @@
 // @flow
 import React from "react"
-import { RadioButton, RadioButtonGroup } from "material-ui/RadioButton"
+import Radio from "@material-ui/core/Radio"
+import RadioGroup from "@material-ui/core/RadioGroup"
+import FormControlLabel from "@material-ui/core/FormControlLabel"
+import FormControl from "@material-ui/core/FormControl"
+import PropTypes from "prop-types"
+
+// Fix value prop type. This is a string but the docs say any type can be passed in
+// and the value will be cast to a string at the DOM layer.
+// https://material-ui.com/api/radio-group/
+if (RadioGroup.propTypes) {
+  // check that RadioGroup.propTypes exists. It won't exist in production
+  RadioGroup.propTypes.value = PropTypes.any
+}
 
 export default class AutomaticEmailOptions extends React.Component {
   props: {
@@ -8,9 +20,9 @@ export default class AutomaticEmailOptions extends React.Component {
     setSendAutomaticEmails: (b: boolean) => void
   }
 
-  handleRadioClick = (event: Event, value: boolean): void => {
+  handleRadioClick = (event: any): void => {
     const { setSendAutomaticEmails } = this.props
-    setSendAutomaticEmails(value)
+    setSendAutomaticEmails(event.target.value === "true")
   }
 
   renderEmailCampaign = (): React$Element<*> => (
@@ -25,23 +37,28 @@ export default class AutomaticEmailOptions extends React.Component {
 
     return (
       <div className="email-type">
-        <RadioButtonGroup
-          className="type-radio-group"
-          name="email-options"
-          valueSelected={sendAutomaticEmails}
-          onChange={this.handleRadioClick}
-        >
-          <RadioButton
-            value={false}
-            label="Send a one-time email"
-            className="send-one-time-email"
-          />
-          <RadioButton
-            value={true}
-            label="Create an Email Campaign"
-            className="create-campaign"
-          />
-        </RadioButtonGroup>
+        <FormControl>
+          <RadioGroup
+            className="type-radio-group"
+            name="email-options"
+            value={sendAutomaticEmails}
+            onChange={this.handleRadioClick}
+          >
+            <FormControlLabel
+              value={false}
+              control={<Radio />}
+              label="Send a one-time email"
+              className="send-one-time-email"
+            />
+
+            <FormControlLabel
+              value={true}
+              control={<Radio />}
+              label="Create an Email Campaign"
+              className="create-campaign"
+            />
+          </RadioGroup>
+        </FormControl>
         {sendAutomaticEmails ? this.renderEmailCampaign() : null}
       </div>
     )

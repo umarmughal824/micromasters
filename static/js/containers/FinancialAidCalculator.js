@@ -1,10 +1,10 @@
 /* global SETTINGS:false */
 import React from "react"
-import Dialog from "material-ui/Dialog"
+import Dialog from "@material-ui/core/Dialog"
 import { connect } from "react-redux"
 import R from "ramda"
-import TextField from "material-ui/TextField"
-import Checkbox from "react-mdl/lib/Checkbox"
+import TextField from "@material-ui/core/TextField"
+import Checkbox from "@material-ui/core/Checkbox"
 import Select from "react-select"
 import _ from "lodash"
 
@@ -33,6 +33,10 @@ import type { Program } from "../flow/programTypes"
 import { formatPrice } from "../util/util"
 import { dialogActions } from "../components/inputs/util"
 import { getOwnDashboard } from "../reducers/util"
+import DialogActions from "@material-ui/core/DialogActions"
+import DialogTitle from "@material-ui/core/DialogTitle"
+import DialogContent from "@material-ui/core/DialogContent"
+import FormControlLabel from "@material-ui/core/FormControlLabel"
 
 export const CALCULATOR_DIALOG = "CALCULATOR_DIALOG"
 
@@ -70,7 +74,6 @@ const salaryField = (update, current) => (
     name="salary"
     aria-required="true"
     aria-invalid={_.has(current, ["validation", "income"])}
-    label="income (yearly)"
     id="user-salary-input"
     className="salary-field"
     value={current.income}
@@ -89,12 +92,17 @@ const checkboxUpdate = (update, current, bool) => {
 }
 
 const checkBox = (update, current) => (
-  <Checkbox
-    checked={current.checkBox}
-    required="true"
-    aria-invalid={_.has(current, ["validation", "checkBox"])}
+  <FormControlLabel
+    classes={{ label: "testify-income-text" }}
+    control={
+      <Checkbox
+        classes={{ root: "checkbox-income" }}
+        checked={current.checkBox}
+        required={true}
+        onChange={() => checkboxUpdate(update, current, !current.checkBox)}
+      />
+    }
     label={checkboxText}
-    onChange={() => checkboxUpdate(update, current, !current.checkBox)}
   />
 )
 
@@ -199,80 +207,90 @@ const FinancialAidCalculator = ({
   const confirmDialog = (
     <Dialog
       key="confirm"
-      title="Confirm Your Income"
-      titleClassName="dialog-title"
-      contentClassName="dialog confirm-dialog"
-      className="financial-aid-calculator-wrapper"
+      classes={{
+        paper: "dialog confirm-dialog",
+        root:  "financial-aid-calculator-wrapper"
+      }}
       open={confirmIncomeDialogVisibility}
-      bodyClassName="financial-aid-calculator-body"
-      onRequestClose={closeConfirmDialogAndCancel}
-      actions={dialogActions(
-        closeConfirmDialogAndCancel,
-        () => submitFinancialAid(financialAid),
-        fetchSkipStatus === FETCH_PROCESSING,
-        "Submit",
-        "confirm-income-button",
-        fetchAddStatus === FETCH_PROCESSING
-      )}
+      onClose={closeConfirmDialogAndCancel}
     >
-      <div>
-        Household Income:{" "}
-        <b>
-          {currency} {income}
-        </b>
-      </div>
-      <br />
-      Please make sure that your household income is accurate and that you can
-      provide documentation (if necessary). If you can't provide an accurate
-      income at this time, click cancel.
-      {fetchError ? apiError(fetchError) : null}
+      <DialogTitle className="dialog-title">Confirm Your Income</DialogTitle>
+      <DialogContent>
+        <div>
+          Household Income:{" "}
+          <b>
+            {currency} {income}
+          </b>
+        </div>
+        <br />
+        Please make sure that your household income is accurate and that you can
+        provide documentation (if necessary). If you can't provide an accurate
+        income at this time, click cancel.
+        {fetchError ? apiError(fetchError) : null}
+      </DialogContent>
+      <DialogActions>
+        {dialogActions(
+          closeConfirmDialogAndCancel,
+          () => submitFinancialAid(financialAid),
+          fetchSkipStatus === FETCH_PROCESSING,
+          "Submit",
+          "confirm-income-button",
+          fetchAddStatus === FETCH_PROCESSING
+        )}
+      </DialogActions>
     </Dialog>
   )
 
   return (
     <div>
       <Dialog
-        title="Personal Course Pricing"
-        titleClassName="dialog-title"
-        contentClassName="dialog financial-aid-calculator"
-        className="financial-aid-calculator-wrapper"
         open={calculatorDialogVisibility}
-        bodyClassName="financial-aid-calculator-body"
-        autoScrollBodyContent={true}
-        onRequestClose={closeDialogAndCancel}
-        actions={calculatorActions(
-          openConfirmSkipDialog,
-          closeDialogAndCancel,
-          () => saveFinancialAid(financialAid),
-          fetchAddStatus,
-          fetchSkipStatus
-        )}
+        classes={{
+          paper: "dialog financial-aid-calculator",
+          root:  "financial-aid-calculator-wrapper"
+        }}
+        onClose={closeDialogAndCancel}
       >
-        <div className="copy">
-          {`The cost of courses in the ${title} MicroMasters varies between ${minPossibleCost} and ${maxPossibleCost},
+        <DialogTitle className="dialog-title">
+          Personal Course Pricing
+        </DialogTitle>
+        <DialogContent className="dialog-content" dividers>
+          <div className="copy">
+            {`The cost of courses in the ${title} MicroMasters varies between ${minPossibleCost} and ${maxPossibleCost},
         depending on your income and ability to pay.`}
-        </div>
-        <div className="salary-input">
-          <div className="income">
-            <label>
-              Income (yearly)
-              {salaryField(updateCalculatorEdit, financialAid)}
-            </label>
-            {validationMessage("income", validation)}
           </div>
-          <div className="currency">
-            <div>Currency</div>
-            {currencySelect(updateCalculatorEdit, financialAid)}
-            {validationMessage("currency", validation)}
+          <div className="salary-input">
+            <div className="income">
+              <label>
+                Income (yearly)
+                {salaryField(updateCalculatorEdit, financialAid)}
+              </label>
+              {validationMessage("income", validation)}
+            </div>
+            <div className="currency">
+              <div>Currency</div>
+              {currencySelect(updateCalculatorEdit, financialAid)}
+              {validationMessage("currency", validation)}
+            </div>
           </div>
-        </div>
-        <div className="checkbox">
-          {checkBox(updateCalculatorEdit, financialAid)}
-        </div>
-        <div className="checkbox-alert">
-          {validationMessage("checkBox", validation)}
-        </div>
-        {fetchError ? apiError(fetchError) : null}
+          <div className="checkbox">
+            {checkBox(updateCalculatorEdit, financialAid)}
+          </div>
+          <div className="checkbox-alert">
+            {validationMessage("checkBox", validation)}
+          </div>
+          {fetchError ? apiError(fetchError) : null}
+        </DialogContent>
+
+        <DialogActions>
+          {calculatorActions(
+            openConfirmSkipDialog,
+            closeDialogAndCancel,
+            () => saveFinancialAid(financialAid),
+            fetchAddStatus,
+            fetchSkipStatus
+          )}
+        </DialogActions>
       </Dialog>
       {confirmDialog}
     </div>
