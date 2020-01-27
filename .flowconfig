@@ -32,6 +32,7 @@
 .*/node_modules/jss-plugin-vendor-prefixer/.*
 .*/node_modules/jss/.*
 .*/node_modules/react-popper/.*
+.*/node_modules/gensync/index.js.flow
 .*.git/.*
 .*/staticfiles/.*
 
