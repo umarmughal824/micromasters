@@ -116,6 +116,7 @@
     "sass-lint": "^1.10.2",
     "sass-loader": "^6.0.5",
     "searchkit": "2.3.0",
+    "set-value": "^3.0.1",
     "sinon": "^2.3.1",
     "slick-carousel": "^1.6.0",
     "striptags": "2.2.1",
