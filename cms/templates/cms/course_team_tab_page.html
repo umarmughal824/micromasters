@@ -13,10 +13,29 @@
   <div class="course-team-header">
 
       <ul class="navigation">
-       <a class="page-link" href="#instructors">Instructors | </a>
-        <a class="page-link" href="#administrators">Administrators Team | </a>
-        <a class="page-link" href="#contributors">Course Contributors | </a>
-        <a class="page-link" href="#tas">Current TAs</a>
+      {% if child_page.instructors|length > 0 %}
+        <a class="page-link" href="#instructors">
+          {{ child_page.instructors_heading }} |
+        </a>
+      {% endif %}
+
+      {% if child_page.administrators|length > 0 %}
+        <a class="page-link" href="#administrators">
+          {{ child_page.administrators_heading }} |
+        </a>
+      {% endif %}
+
+      {% if child_page.contributors|length > 0 %}
+        <a class="page-link" href="#contributors">
+          {{ child_page.contributors_heading }} |
+        </a>
+      {% endif %}
+
+      {% if child_page.teaching_assistants|length > 0 %}
+        <a class="page-link" href="#tas">
+          {{ child_page.teaching_assistants_heading }}
+        </a>
+      {% endif %}
       </ul>
 
     {{ child_page.address|richtext }}
@@ -33,13 +52,13 @@
           <div class="admin-team-list-item">
             <div class="profile-image-wrapper">
               <img class="member-image" src="{{ instructor.value.image.file.url }}" alt="">
-            </div>
-            <div class="bio-content">
-              <p class="bio">{{ instructor.value.bio }}</p>
+              <div class="bio-content">
+                <p class="bio">{{ instructor.value.bio }}</p>
+              </div>
             </div>
             <div class="profile-content">
               <span class="name">{{ instructor.value.name }}</span>
-              <span class="title">{{ instructor.value.title }}</span>
+              {{ instructor.value.title }}
             </div>
           </div>
         </li>
@@ -57,13 +76,13 @@
           <div class="admin-team-list-item">
               <div class="profile-image-wrapper">
                 <img class="member-image" src="{{ administrator.value.image.file.url }}" alt="">
-              </div>
-              <div class="bio-content">
-                <p class="bio">{{ administrator.value.bio }}</p>
+                <div class="bio-content">
+                  <p class="bio">{{ administrator.value.bio }}</p>
+                </div>
               </div>
               <div class="profile-content">
                 <span class="name">{{ administrator.value.name }}</span>
-                <span class="title">{{ administrator.value.title }}</span>
+                {{ administrator.value.title }}
               </div>
           </div>
         </li>
@@ -81,13 +100,13 @@
           <div class="admin-team-list-item">
             <div class="profile-image-wrapper">
               <img class="member-image" src="{{ contributor.value.image.file.url }}" alt="" />
-            </div>
-            <div class="bio-content">
-              <p class="bio">{{ contributor.value.bio }}</p>
+              <div class="bio-content">
+                <p class="bio">{{ contributor.value.bio }}</p>
+              </div>
             </div>
             <div class="profile-content">
               <span class="name">{{ contributor.value.name }}</span>
-              <span class="title">{{ contributor.value.title }}</span>
+              {{ contributor.value.title }}
             </div>
           </div>
         </li>
@@ -105,13 +124,13 @@
           <div class="admin-team-list-item">
             <div class="profile-image-wrapper">
               <img class="member-image" src="{{ ta.value.image.file.url }}" alt="" />
-            </div>
-            <div class="bio-content">
-              <p class="bio">{{ ta.value.bio }}</p>
+              <div class="bio-content">
+                <p class="bio">{{ ta.value.bio }}</p>
+              </div>
             </div>
             <div class="profile-content">
               <span class="name">{{ ta.value.name }}</span>
-              <span class="title">{{ ta.value.title }}</span>
+              {{ ta.value.title }}
             </div>
           </div>
         </li>
