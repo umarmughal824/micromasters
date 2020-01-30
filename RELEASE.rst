@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.158.0
+Version 0.158.0 (Released January 30, 2020)
 ---------------
 
 - Tasawer/course team page (#4502)
