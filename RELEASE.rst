@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.158.2
+Version 0.158.2 (Released February 03, 2020)
 ---------------
 
 - Fix program page styles (#4511)
