@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.159.0
+Version 0.159.0 (Released February 04, 2020)
 ---------------
 
 - remove required constraint from title on course team page (#4514)
