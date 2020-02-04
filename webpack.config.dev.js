@@ -1,19 +1,20 @@
-var webpack = require('webpack');
-var path = require("path");
-var R = require('ramda');
-var BundleTracker = require('webpack-bundle-tracker');
-const { config, babelSharedLoader } = require(path.resolve("./webpack.config.shared.js"));
+ webpack = require('webpack')
+const path = require("path")
+const R = require('ramda')
+const BundleTracker = require('webpack-bundle-tracker')
+const { config, babelSharedLoader } = require(path.resolve("./webpack.config.shared.js"))
 
 const hotEntry = (host, port) => (
   `webpack-hot-middleware/client?path=http://${host}:${port}/__webpack_hmr&timeout=20000&reload=true`
-);
+)
 
 const insertHotReload = (host, port, entries) => (
   R.map(R.compose(R.flatten, v => [v].concat(hotEntry(host, port))), entries)
-);
+)
 
 const devConfig = Object.assign({}, config, {
   context: __dirname,
+  mode: 'development',
   output: {
     path: path.resolve('./static/bundles/'),
     filename: "[name].js"
@@ -24,17 +25,15 @@ const devConfig = Object.assign({}, config, {
         'NODE_ENV': '"development"'
       }
     }),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'common',
-      minChunks: 2,
-    }),
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.NamedModulesPlugin(),
-    new webpack.NoEmitOnErrorsPlugin(),
     new BundleTracker({filename: './webpack-stats.json'})
   ],
+  optimization: {
+    namedModules: true,
+    noEmitOnErrors: true
+  },
   devtool: 'source-map'
-});
+})
 
 devConfig.module.rules = [
   babelSharedLoader,
@@ -48,12 +47,12 @@ devConfig.module.rules = [
       { loader: 'sass-loader' },
     ]
   },
-];
+]
 
 const makeDevConfig = (host, port) => (
   Object.assign({}, devConfig, {
     entry: insertHotReload(host, port, devConfig.entry),
   })
-);
+)
 
-module.exports = makeDevConfig;
+module.exports = makeDevConfig
