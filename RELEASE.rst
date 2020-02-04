@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.159.1
+Version 0.159.1 (Released February 04, 2020)
 ---------------
 
 - Update webpack to v4 (#4510)
