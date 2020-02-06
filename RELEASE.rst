@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.159.2
+---------------
+
+- Prgram letter: print on one page (#4508)
+- Fix FinalGradeAdmin timeout error (#4509)
+- Upgrade node-sass to bump up tar to 2.2.2 (#4521)
+- Fix styles for share and send grades dialogs (#4499)
+
 Version 0.159.1 (Released February 04, 2020)
 ---------------
 
