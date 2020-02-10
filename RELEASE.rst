@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.159.2
+Version 0.159.2 (Released February 10, 2020)
 ---------------
 
 - Prgram letter: print on one page (#4508)
