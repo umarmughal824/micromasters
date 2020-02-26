@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.160.0
+---------------
+
+- Home page: login button fix (#4528)
+- course team styling fix (#4529)
+- Upgrade postgres verison in docker-compose (#4531)
+- SendGrades: MIT comes first (#4500)
+
 Version 0.159.2 (Released February 10, 2020)
 ---------------
 
