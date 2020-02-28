@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.160.0
+Version 0.160.0 (Released February 28, 2020)
 ---------------
 
 - Home page: login button fix (#4528)
