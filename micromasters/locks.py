@@ -3,7 +3,7 @@ from contextlib import AbstractContextManager
 
 from django.core.cache import caches
 from redis.exceptions import LockError
-from redis.lock import LuaLock
+from redis.lock import Lock as LuaLock
 
 from micromasters.utils import now_in_utc
 
@@ -17,7 +17,7 @@ def _get_lock(lock_name, expiration):
         expiration (datetime.datetime): The expiration datetime
 
     Returns:
-        redis.lock.LuaLock: a redis lua-based lock
+        redis.lock.Lock: a redis lua-based lock
     """
     timeout = int((expiration - now_in_utc()).total_seconds())
 
