@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.160.1
+Version 0.160.1 (Released March 06, 2020)
 ---------------
 
 - Downgrade redis to workaround https://github.com/andymccurdy/redis-py/issues/1274#issuecomment-580897258 (#4538)
