@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.160.1
+---------------
+
+- Downgrade redis to workaround https://github.com/andymccurdy/redis-py/issues/1274#issuecomment-580897258 (#4538)
+- Update docker configuration (#4533)
+
 Version 0.160.0 (Released February 28, 2020)
 ---------------
 
