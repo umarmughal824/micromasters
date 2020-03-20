@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.160.2
+---------------
+
+- Mobile Home View: fix header name (#4558)
+
 Version 0.160.1 (Released March 06, 2020)
 ---------------
 
