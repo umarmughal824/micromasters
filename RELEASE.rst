@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.161.0
+---------------
+
+- Update heroku Python runtime to 3.7 (#4540)
+
 Version 0.160.2 (Released March 23, 2020)
 ---------------
 
