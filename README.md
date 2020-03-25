@@ -25,92 +25,18 @@ you get it running locally. It's obviously more configurable that way, and you'l
 likely need to run it locally for other projects in the future.
 
 #### 1) Install edX
+Install edX following this guide https://github.com/mitodl/micromasters/blob/master/docs/configure_open_edx.md
 
-Download the edX Vagrant box according to
-[these instructions provided by edX](https://edx-installing-configuring-and-running.readthedocs.io/en/latest/installation/devstack/install_devstack.html#installing-devstack-with-a-direct-vagrant-box-download)
 
-*NOTE: edX now maintains a [Docker-based solution](https://github.com/edx/devstack) for running Open edX, and they have stopped supporting the Vagrant solution. We have not yet done the work necessary to properly
-integrate MicroMasters with Open edX running on Docker in a development context, so Vagrant is still recommended here*
-
-#### 2) Connect to the VM and run the LMS server
-
-edX has [instructions for this as well](https://edx-installing-configuring-and-running.readthedocs.io/en/latest/installation/devstack/start_devstack.html#connect-to-devstack-vm).
-More concisely, these are the commands you should run to connect to the VM and run the LMS server:
-
-    # In your local edx_devstack/ directory, start the VM
-    vagrant up
-    # Once that's done, ssh into the running VM
-    vagrant ssh
-    # Switch to the edxapp account within SSH session
-    sudo su edxapp
-    # Run the LMS server
-    paver devstack lms
-    # To run the server without updating requirements and compiling assets, add the '--fast' parameter
-    # eg: paver devstack --fast lms
-
-A few notes:
-
-- Switching to the edxapp account sources the edxapp environment and sets the
- current working directory to the edx-platform repository.
-- "LMS" stands for "Learning Management System". The Open edX platform has
- [several different components](http://edx.readthedocs.io/projects/edx-developer-guide/en/latest/architecture.html#overview);
- MicroMaster's only depends on LMS.
-
-#### 3) Configure a user with superuser permissions
-
-edX devstack ships with [several test users](https://openedx.atlassian.net/wiki/spaces/OXA/pages/157751033/What+are+the+default+accounts+and+passwords) (there
-is also an `edx` user not listed in this wiki, already configured as a superuser). To keep things
-simple, it is **highly** recommended that for your main MicroMasters login you use (a) the `edx` superuser, or (b) 
-one of the other test users and manually set superuser permissions. Setting superuser permissions can be done
-in Django admin or in a shell. It's preferable to do it in Django admin as you'll
-need to use Django admin for the next step anyway.
-
-- **In Django admin**
-
-    Run the server (discussed in step 2) and navigate to Django admin
-    (eg: http://192.168.33.10:8000/admin). In the **Authentication and Authorization**
-    section, select a **User**, or add one then select it. In the **Permissions**
-    section, check the **Superuser status** box and save.
-
-- **In a Python shell**
-
-        # Kick off an interactive shell
-        python manage.py lms --settings=devstack shell
-
-        ### RUN THESE WITHIN THE SHELL ###
-        from django.contrib.auth.models import User
-        # Using 'staff' here, but this will work with any test user's username
-        user = User.objects.get(username='staff')
-        user.is_superuser=True
-        user.save()
-
-#### 4) Add an OAuth client
-
-Open Django admin (see "In Django admin" in the previous step),
-login as the user you chose in the previous step,
-navigate to the Django OAuth Toolkit section (/admin/oauth2_provider/),
-and add a new Application. Fill in the values as follows:
-
-- **User**: Use the lookup (magnifying glass) to find your superuser from the previous step.
-- **Redirect uris**: The URL where MicroMaster’s will be running, followed by "/complete/edxorg/".
- **Linux users:** the MicroMaster’s URL will be `http://localhost:8079`. **OSX users:** The MicroMaster's
- IP can be found by running ``docker-machine ip <machine_name>`` from the host machine. MicroMaster’s runs on port
- ``8079`` by default, so the full URL should be something like
- ``http://192.168.99.100:8079/complete/edxorg/``
-- **Client type**: Set to '_Confidential_'.
-- **Authorization grant type**: Set to '_Authorization Code_'.
-- **Name**: Anything you want. Something like 'mm-local' would do fine here.
-
-#### 5) Copy relevant values to use in the MicroMasters .env file
+#### 2) Copy relevant values to use in the MicroMasters .env file
 
 The MicroMasters codebase contains a ``.env.example`` file which will be used as
 a template to create your ``.env`` file. For MicroMasters to work, it needs 4 values:
 
 - ``EDXORG_BASE_URL``
 
-    The base URL where the LMS server is running on your machine. When running in Vagrant, this 
-    _should_ be ``http://192.168.33.10:8000``. The Vagrant VM IP is hard-coded in the Vagrantfile, and 
-    it's unlikely that edX will change that. The LMS server runs on port ``8000`` by default.
+    The base URL where the LMS server is running on your machine. This 
+    _should_ typically be ``http://edx.odl.local:18000``.
     
 - ``EDXORG_CLIENT_ID`` and ``EDXORG_CLIENT_SECRET``
 
@@ -118,25 +44,6 @@ a template to create your ``.env`` file. For MicroMasters to work, it needs 4 va
     **Client id:** and **Client secret:** values should be auto-generated for
     that new Application. Use those values for the corresponding ``EDXORG_``
     variables in the ``.env`` file.
-
-#### General edX devstack debugging notes
-
-- To update your devstack with important changes from edX, run `vagrant provision` in
-your edx_devstack directory. This will pull down the latest release and run migrations, among
-other things.
-- If you get an error related to Mongo locking while ssh'ed into the Vagrant VM, run the following
- **as the default 'vagrant' user, NOT as the 'edxapp' user**:
-
-       function mongo_unlock {
-           sudo rm /edx/var/mongo/mongodb/mongod.lock
-           sudo mongod -repair --config /etc/mongod.conf
-           sudo chown -R mongodb:mongodb /edx/var/mongo/.
-           sudo /etc/init.d/mongod start
-       }
-       mongo_unlock
-- If you get the error  _"Unknown task: devstack, the working directory has not been updated
-properly"_, simply run ``cd /edx/app/edxapp/edx-platform`` and re-run the command.
-
 
 # Additional setup
 
@@ -317,3 +224,7 @@ If you want to connect to an ES cluster aside from the one created by Docker, yo
 You should now be able to connect to the external ES cluster. You
 can run `docker-compose run web ./manage.py recreate_index` to test
 that it's working.
+
+## Session persistence issue
+If you experience intermittent logouts while browsing the application and a general ephemeral behaviour from user sessions, switch the Django session backend by adding the following in your environment file:
+`SESSION_ENGINE=django.contrib.sessions.backends.file`
