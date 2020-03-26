@@ -1,22 +1,29 @@
 /* global SETTINGS:false */
 import React from "react"
+import { connect } from "react-redux"
+import Dialog from "@material-ui/core/Dialog"
+import R from "ramda"
+import Select from "@material-ui/core/Select"
+import DialogTitle from "@material-ui/core/DialogTitle"
+import MenuItem from "@material-ui/core/MenuItem"
+import DialogContent from "@material-ui/core/DialogContent"
+import FormControl from "@material-ui/core/FormControl"
+import InputLabel from "@material-ui/core/InputLabel"
+import DialogContentText from "@material-ui/core/DialogContentText"
+import DialogActions from "@material-ui/core/DialogActions"
+
 import { createSimpleActionHelpers } from "../lib/redux"
 import {
   setSendDialogVisibility,
   sendGradeEmail,
   setSelectedSchool
 } from "../actions/send_grades_dialog"
-import { connect } from "react-redux"
-import Dialog from "@material-ui/core/Dialog"
-import R from "ramda"
-import Select from "@material-ui/core/Select"
-import DialogTitle from "@material-ui/core/DialogTitle"
-import DialogContent from "@material-ui/core/DialogContent"
-import FormControl from "@material-ui/core/FormControl"
-import InputLabel from "@material-ui/core/InputLabel"
-import DialogContentText from "@material-ui/core/DialogContentText"
-import DialogActions from "@material-ui/core/DialogActions"
-import { getMenuItem } from "../util/util"
+
+const getMenuItem = (key: number, value: string): React$Element<*> => (
+  <MenuItem value={key} classes={{ root: "menu-item" }} key={key}>
+    {value}
+  </MenuItem>
+)
 
 class SendGradesDialog extends React.Component {
   props: {
