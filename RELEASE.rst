@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.161.1
+Version 0.161.1 (Released March 26, 2020)
 ---------------
 
 - retire users by email
