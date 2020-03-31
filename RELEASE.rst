@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.161.2
+Version 0.161.2 (Released March 31, 2020)
 ---------------
 
 - Upgrade to latest redis (#4570)
