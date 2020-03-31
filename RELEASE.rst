@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.161.2 (Released March 31, 2020)
+---------------
+
+- Upgrade to latest redis (#4570)
+- fix issue on /profile/personal
+
 Version 0.161.1 (Released March 26, 2020)
 ---------------
 
