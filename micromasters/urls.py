@@ -7,6 +7,10 @@ from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.documents import urls as wagtaildocs_urls
 from wagtail.core import urls as wagtail_urls
 
+from cms.views import (
+    cms_signin_redirect_to_site_signin,
+    cms_password_reset_redirect_to_site_signin
+)
 
 urlpatterns = []
 
@@ -34,6 +38,8 @@ urlpatterns += [
     # Hijack
     url(r'^hijack/', include('hijack.urls', namespace='hijack')),
     # Wagtail
+    url(r'^cms/login/', cms_signin_redirect_to_site_signin, name='wagtailadmin_login'),
+    url(r'^cms/password_reset/', cms_password_reset_redirect_to_site_signin, name='wagtailadmin_password_reset'),
     url(r'^cms/', include(wagtailadmin_urls)),
     url(r'^documents/', include(wagtaildocs_urls)),
     url('', include(wagtail_urls)),
