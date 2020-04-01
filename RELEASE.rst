@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.161.3
+---------------
+
+- Youtube embed should be column width - #4581
+- redirect cms login and forgot password pages to our site login page
+- Add registered trademark to home page title
+- Bump django from 2.2.9 to 2.2.10
+- Bump codecov from 3.5.0 to 3.6.5
+- Bump minimist from 1.2.0 to 1.2.2
+
 Version 0.161.2 (Released March 31, 2020)
 ---------------
 
