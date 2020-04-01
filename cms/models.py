@@ -26,7 +26,7 @@ from micromasters.utils import webpack_dev_server_host
 from profiles.api import get_social_username
 from roles.models import Instructor, Staff
 from cms.util import get_coupon_code
-from cms.blocks import CourseTeamBlock
+from cms.blocks import CourseTeamBlock, ImageWithLinkBlock
 
 
 class HomePage(Page):
@@ -80,10 +80,14 @@ class BenefitsPage(Page):
     """
     parent_page_types = ['HomePage']
 
-    description = RichTextField(
+    description = StreamField(
+        [
+            ('paragraph', RichTextBlock(blank=True)),
+            ('image_with_link', ImageWithLinkBlock(help_text='Upload an image with a clickable link', blank=True))
+        ],
         blank=True,
-        help_text='The description shown on the benefits page'
-    )
+        help_text='The description shown on the benefits page')
+
     background_image = models.ForeignKey(
         Image,
         null=True,
@@ -92,12 +96,14 @@ class BenefitsPage(Page):
         related_name='+',
         help_text='The hero image on the benefits page'
     )
+
     content = StreamField([
-        ('rich_text', RichTextBlock())
-    ], blank=True, help_text='The content of the benefits page')
+        ('rich_text', RichTextBlock()),
+        ('image_with_link', ImageWithLinkBlock(help_text='Upload an image with a clickable link', blank=True))
+        ], blank=True, help_text='The content of the benefits page')
 
     content_panels = Page.content_panels + [
-        FieldPanel('description', classname="full"),
+        StreamFieldPanel('description', classname="full"),
         FieldPanel('background_image'),
         StreamFieldPanel('content'),
     ]
@@ -248,10 +254,14 @@ class ProgramPage(Page):
     """
     CMS page representing the department e.g. Biology
     """
-    description = RichTextField(
+    description = StreamField(
+        [
+            ('paragraph', RichTextBlock(blank=True)),
+            ('image_with_link', ImageWithLinkBlock(help_text='Upload an image with a clickable link', blank=True))
+        ],
         blank=True,
-        help_text='The description shown on the program page'
-    )
+        help_text='The description shown on the program page')
+
     faculty_description = models.CharField(
         max_length=500,
         blank=True,
@@ -346,7 +356,7 @@ class ProgramPage(Page):
 
     subpage_types = ['FaqsPage', 'CourseTeamTabPage', 'ProgramTabPage']
     content_panels = Page.content_panels + [
-        FieldPanel('description', classname="full"),
+        StreamFieldPanel('description'),
         FieldPanel('program'),
         FieldPanel('thumbnail_image'),
         FieldPanel('program_home_page_url'),
