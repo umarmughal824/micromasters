@@ -11,16 +11,13 @@ Following steps are inspired by [edx-devstack](https://github.com/edx/devstack).
 ```
 $ git clone https://github.com/edx/devstack
 $ cd devstack
-$ git checkout open-release/ironwood.master
 $ make requirements
-$ export OPENEDX_RELEASE=ironwood.master
 $ make dev.clone
 ```
 
-#### Clone and checkout edx-platform (if not already).
+#### Clone edx-platform (if not already).
 ```
 $ git clone https://github.com/mitodl/edx-platform
-$ git checkout open-release/ironwood.master
 ```
 
 #### Pull latest images and run provision
@@ -49,6 +46,6 @@ $ make dev.provision
       - Other values are arbitrary but be sure to fill them all out. Save the client id and secret for later
   - In Micromasters:
     - Set `EDXORG_BASE_URL` to the correct URL that is accessible from Micromasters container and host, e.g. `http://edx.odl.local:18000/`
-      - If Micromasters isn't able to access the Open edX hostname directly (primarily due to the way networking is handled in compose projects) you will need to set `OPENEDX_HOST_ENTRY` in `.env` file such that Mircomasters is able to resolve the Open edX hostname from within the container. Typically this would mean setting the value similar to `edx.odl.local:172.22.0.1`.
+      - If Micromasters isn't able to access the Open edX hostname directly (primarily due to the way networking is handled in compose projects) you will need to set `OPENEDX_HOST_ENTRY` in `.env` file such that Mircomasters is able to resolve the Open edX hostname from within the container. Typically this would mean setting the value similar to `edx.odl.local:172.22.0.1` where the IP is the gateway IP on the Micromasters docker network.
     - Set `OPENEDX_API_CLIENT_ID` to the client id
     - Set `OPENEDX_API_CLIENT_SECRET` to the client secret

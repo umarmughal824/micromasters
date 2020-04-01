@@ -40,7 +40,7 @@ a template to create your ``.env`` file. For MicroMasters to work, it needs 4 va
     
 - ``EDXORG_CLIENT_ID`` and ``EDXORG_CLIENT_SECRET``
 
-    These values can be found in the Django OAuth Toolkit Application you created above.
+    These values can be found in the Django OAuth Toolkit Application you created [above](https://github.com/mitodl/micromasters/blob/master/docs/configure_open_edx.md).
     **Client id:** and **Client secret:** values should be auto-generated for
     that new Application. Use those values for the corresponding ``EDXORG_``
     variables in the ``.env`` file.
