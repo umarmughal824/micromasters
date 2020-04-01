@@ -17,7 +17,7 @@ pytestmark = [
 FAKE_RESPONSE = 'Custom response message for selenium test'
 urlpatterns = [
     url(r'login/edxorg/', lambda *args: HttpResponse(content=FAKE_RESPONSE))
-    if urlpattern.app_name == 'social' else urlpattern
+    if hasattr(urlpattern, 'app_name') and urlpattern.app_name == 'social' else urlpattern
     for urlpattern in urlpatterns
 ]
 
