@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.161.3
+Version 0.161.3 (Released April 02, 2020)
 ---------------
 
 - Youtube embed should be column width - #4581
