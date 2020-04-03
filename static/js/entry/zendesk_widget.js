@@ -50,7 +50,7 @@ window.zEmbed ||
     o.write('<body onload="document._l();">'),
     o.close()
   })(
-    "https://assets.zendesk.com/embeddable_framework/main.js",
+    "https://static.zdassets.com/ekr/snippet.js?key=0c7cfbbc-76c9-4083-869f-b76d03922056",
     "odl.zendesk.com"
   )
 /*]]>*/
