@@ -81,6 +81,10 @@
         display: flex;
         justify-content: space-between;
 
+        .vertical-center {
+          align-self: center;
+        }
+
         .address {
           display: flex;
           flex-direction: column;
