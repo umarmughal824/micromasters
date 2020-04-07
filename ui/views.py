@@ -11,7 +11,6 @@ from django.shortcuts import Http404, redirect, render
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View, TemplateView
-from raven.contrib.django.raven_compat.models import client as sentry
 from rolepermissions.permissions import available_perm_status
 from rolepermissions.checkers import has_role
 
@@ -53,7 +52,7 @@ class ReactView(View):  # pylint: disable=unused-argument
             "roles": roles,
             "release_version": settings.VERSION,
             "environment": settings.ENVIRONMENT,
-            "sentry_dsn": sentry.get_public_dsn(),
+            "sentry_dsn": settings.SENTRY_DSN,
             "search_url": reverse('search_api', kwargs={"elastic_url": ""}),
             "support_email": settings.EMAIL_SUPPORT,
             "user": serialize_maybe_user(request.user),
@@ -133,7 +132,7 @@ def standard_error_page(request, status_code, template_filename):
             "js_settings_json": json.dumps({
                 "release_version": settings.VERSION,
                 "environment": settings.ENVIRONMENT,
-                "sentry_dsn": sentry.get_public_dsn(),
+                "sentry_dsn": settings.SENTRY_DSN,
                 "user": serialize_maybe_user(request.user),
             }),
             "authenticated": authenticated,
@@ -141,7 +140,7 @@ def standard_error_page(request, status_code, template_filename):
             "username": username,
             "is_staff": has_role(request.user, [Staff.ROLE_ID, Instructor.ROLE_ID]),
             "support_email": settings.EMAIL_SUPPORT,
-            "sentry_dsn": sentry.get_public_dsn(),
+            "sentry_dsn": settings.SENTRY_DSN,
         }
     )
     response.status_code = status_code
@@ -161,7 +160,7 @@ def terms_of_service(request):
             "js_settings_json": json.dumps({
                 "release_version": settings.VERSION,
                 "environment": settings.ENVIRONMENT,
-                "sentry_dsn": sentry.get_public_dsn(),
+                "sentry_dsn": settings.SENTRY_DSN,
                 "user": serialize_maybe_user(request.user),
             }),
             "ga_tracking_id": "",
