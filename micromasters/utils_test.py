@@ -60,7 +60,7 @@ class ExceptionHandlerTest(MockedESTestCase):
         cls.request = RequestFactory()
         cls.context = RequestContext(cls.request)
 
-    @patch('raven.contrib.django.raven_compat.models.client.captureException', autospec=True)
+    @patch('sentry_sdk.capture_exception', autospec=True)
     def test_validation_error(self, mock_sentry):
         """
         Test a standard exception handled by default by the rest framework
@@ -71,7 +71,7 @@ class ExceptionHandlerTest(MockedESTestCase):
         assert resp.data == ['validation error']
         assert mock_sentry.called is False
 
-    @patch('raven.contrib.django.raven_compat.models.client.captureException', autospec=True)
+    @patch('sentry_sdk.capture_exception', autospec=True)
     @ddt.data(
         ImproperlyConfigured,
         PossiblyImproperlyConfigured,
@@ -86,7 +86,7 @@ class ExceptionHandlerTest(MockedESTestCase):
         assert resp.data == ['{0}: improperly configured'.format(exception_to_raise.__name__)]
         mock_sentry.assert_called_once_with()
 
-    @patch('raven.contrib.django.raven_compat.models.client.captureException', autospec=True)
+    @patch('sentry_sdk.capture_exception', autospec=True)
     def test_index_error(self, mock_sentry):
         """
         Test a other kind of exceptions are not handled

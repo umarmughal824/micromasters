@@ -7,7 +7,6 @@ from django.conf import settings
 from django.db import models
 from django.utils.text import slugify
 from modelcluster.fields import ParentalKey
-from raven.contrib.django.raven_compat.models import client as sentry
 from rolepermissions.checkers import has_role
 from wagtail.admin.edit_handlers import (
     FieldPanel,
@@ -44,7 +43,7 @@ class HomePage(Page):
             "gaTrackingID": settings.GA_TRACKING_ID,
             "host": webpack_dev_server_host(request),
             "environment": settings.ENVIRONMENT,
-            "sentry_dsn": sentry.get_public_dsn(),
+            "sentry_dsn": settings.SENTRY_DSN,
             "release_version": settings.VERSION
         }
 
@@ -108,7 +107,7 @@ class BenefitsPage(Page):
             "gaTrackingID": settings.GA_TRACKING_ID,
             "host": webpack_dev_server_host(request),
             "environment": settings.ENVIRONMENT,
-            "sentry_dsn": sentry.get_public_dsn(),
+            "sentry_dsn": settings.SENTRY_DSN,
             "release_version": settings.VERSION
         }
 
@@ -395,7 +394,7 @@ def get_program_page_context(programpage, request):
         "gaTrackingID": settings.GA_TRACKING_ID,
         "host": webpack_dev_server_host(request),
         "environment": settings.ENVIRONMENT,
-        "sentry_dsn": sentry.get_public_dsn(),
+        "sentry_dsn": settings.SENTRY_DSN,
         "release_version": settings.VERSION,
         "user": serialize_maybe_user(request.user),
         "program": ProgramPageSerializer(programpage).data,
