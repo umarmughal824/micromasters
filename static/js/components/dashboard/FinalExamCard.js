@@ -81,7 +81,7 @@ const accountCreated = (profile, navigateToProfile) => (
 )
 
 const editProfileButton = fn => (
-  <IconButton onClick={fn}>
+  <IconButton className="vertical-center" onClick={fn}>
     <Icon>edit</Icon>
   </IconButton>
 )
