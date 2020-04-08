@@ -431,7 +431,7 @@ class InfoLinks(Orderable):
         help_text='The text for the link to an external homepage.'
     )
 
-    content_panels = [
+    panels = [
         MultiFieldPanel(
             [
                 FieldPanel('url'),
@@ -452,7 +452,7 @@ class SemesterDate(Orderable):
     )
     start_date = models.DateField()
 
-    content_panels = [
+    panels = [
         MultiFieldPanel(
             [
                 FieldPanel('semester_name'),
@@ -475,10 +475,12 @@ class ProgramCourse(Orderable):
     )
     title = models.CharField(max_length=255, default='')
     description = RichTextField(blank=True, null=True)
-    content_panels = Page.content_panels + [
+    panels = [
         MultiFieldPanel(
             [
+                FieldPanel('course'),
                 FieldPanel('title'),
+                FieldPanel('description'),
             ]
         )
     ]
@@ -500,7 +502,7 @@ class ProgramFaculty(Orderable):
         related_name='+',
         help_text='Image for the faculty member. Should be 500px by 385px.'
     )
-    content_panels = Page.content_panels + [
+    panels = [
         MultiFieldPanel(
             [
                 FieldPanel('name'),
@@ -536,7 +538,7 @@ class FrequentlyAskedQuestion(Orderable):
             self.slug = slug
         super(FrequentlyAskedQuestion, self).save(*args, **kwargs)
 
-    content_panels = [
+    panels = [
         MultiFieldPanel(
             [
                 FieldPanel('question'),
@@ -575,7 +577,7 @@ class CourseCertificateSignatories(Orderable):
         on_delete=models.CASCADE,
     )
 
-    content_panels = [
+    panels = [
         MultiFieldPanel(
             [
                 FieldPanel('name'),
@@ -608,7 +610,7 @@ class ProgramCertificateSignatories(Orderable):
         on_delete=models.CASCADE,
     )
 
-    content_panels = [
+    panels = [
         MultiFieldPanel(
             [
                 FieldPanel('name'),
@@ -637,7 +639,7 @@ class ProgramLetterSignatory(Orderable):
         on_delete=models.CASCADE,
     )
 
-    content_panels = [
+    panels = [
         MultiFieldPanel(
             [
                 FieldPanel('name'),
