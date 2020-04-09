@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.162.0
+Version 0.162.0 (Released April 09, 2020)
 ---------------
 
 - upgrade raven to sentry-sdk
