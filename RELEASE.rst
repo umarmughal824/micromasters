@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.162.0 (Released April 09, 2020)
+---------------
+
+- upgrade raven to sentry-sdk
+- Bump minimist from 1.2.2 to 1.2.3 (#4589)
+- update zendesk widget
+
 Version 0.161.3 (Released April 02, 2020)
 ---------------
 
