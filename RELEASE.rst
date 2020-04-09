@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.162.1
+---------------
+
+- Configure sentry's python sdk to not capture SystemExit
+- Mouseover highlight squished fix - #4574
+- Warnings related to wagtail upgrade - #4563
+
 Version 0.162.0 (Released April 09, 2020)
 ---------------
 
