@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.162.1
+Version 0.162.1 (Released April 10, 2020)
 ---------------
 
 - Configure sentry's python sdk to not capture SystemExit
