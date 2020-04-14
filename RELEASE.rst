@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.163.0
+---------------
+
+- Temporarily remove uwsgi strict mode (#4598)
+- Add uWSGI settings (#4569)
+
 Version 0.162.1 (Released April 10, 2020)
 ---------------
 
