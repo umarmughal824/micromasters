@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.164.0
+---------------
+
+- linkable wagtail images
+- Rename UWSGI_THREAD_COUNT and UWSGI_PROCESS_COUNT, and remove redundant if-not-env blocks (#4601)
+
 Version 0.163.0 (Released April 14, 2020)
 ---------------
 
