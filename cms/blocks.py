@@ -19,3 +19,25 @@ class CourseTeamBlock(blocks.StructBlock):
     image = ImageChooserBlock(
         help_text='Image for the faculty member. Should be 385px by 385px.'
     )
+
+
+class ImageWithLinkBlock(blocks.StructBlock):
+    """ Image with a clickable link on it """
+    image = ImageChooserBlock(label="Image", required=True, help_text="The image to display.")
+    link = blocks.URLBlock(
+        label="Link",
+        required=True,
+        help_text="Absolute URL to the image, like https://example.com/some_image.jpg"
+    )
+    align = blocks.ChoiceBlock(
+        choices=[('center', 'Center'), ('right', 'Right'), ('left', 'Left')],
+        default='left',
+        max_length=10,
+    )
+    width = blocks.IntegerBlock(required=False)
+    height = blocks.IntegerBlock(required=False)
+
+    class Meta:
+        template = 'cms/imagewithlink.html'
+        form_classname = 'ImageWithLinkBlock'
+        icon = 'picture'
