@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.164.0
+Version 0.164.0 (Released April 28, 2020)
 ---------------
 
 - linkable wagtail images
