@@ -385,15 +385,32 @@ describe("Profile validation functions", () => {
       assert.deepEqual(personalValidation(profile), {})
     })
 
-    it("should complain if you enter an invalid phone number", () => {
-      const profile = {
-        ...USER_PROFILE_RESPONSE,
-        phone_number: "+1 222"
-      }
-      const errors = {
-        phone_number: "Please enter a valid phone number"
-      }
-      assert.deepEqual(personalValidation(profile), errors)
+    //
+    ;[
+      ["+84-03-6123-4567", true],
+      ["+1-213-223-3321", true],
+      ["+1-911-223-3321", false],
+      ["+1 222", false],
+      ["asdfasdf", false],
+      ["一二三四五六", false]
+    ].forEach(([number, isValid]) => {
+      it(`${
+        isValid ? "shouldn't" : "should"
+      } complain that ${number} is invalid`, () => {
+        const profile = {
+          ...USER_PROFILE_RESPONSE,
+          phone_number: number
+        }
+        assert.d
+        assert.deepEqual(
+          personalValidation(profile),
+          isValid
+            ? {}
+            : {
+              phone_number: "Please enter a valid phone number"
+            }
+        )
+      })
     })
   })
 

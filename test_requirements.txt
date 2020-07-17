@@ -20,3 +20,4 @@ semantic-version
 selenium==3.141.0
 testfixtures
 tox
+isort==4.3.21

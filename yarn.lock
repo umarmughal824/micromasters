@@ -919,10 +919,10 @@ autoprefixer@^7.1.1:
     postcss "^6.0.17"
     postcss-value-parser "^3.2.3"
 
-awesome-phonenumber@^1.1.3:
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/awesome-phonenumber/-/awesome-phonenumber-1.6.0.tgz#fdb89d5d1ac3306cf830ddcb72327e9fdb0b18ec"
-  integrity sha512-/2bqNSeMzZoAelMImkX3cFV44H0CTSCelofYBVN4jJxvtSL3p99/iUysiP1E2nRBbJPoyX0SH0vEwQFF6rXAzw==
+awesome-phonenumber@^2.35.0:
+  version "2.35.0"
+  resolved "https://registry.yarnpkg.com/awesome-phonenumber/-/awesome-phonenumber-2.35.0.tgz#4c8fe5ec74bde86c86f7535fe74b588ce98b9327"
+  integrity sha512-d9PgzixrJqYnk5GHOL+7yKVcgpDAxHCmaiMS4NkuPhCC37I9rDFYbMM9cHftDmCiZ85q24FmXOC1/O6mnD+RbQ==
 
 aws-sign2@~0.7.0:
   version "0.7.0"
