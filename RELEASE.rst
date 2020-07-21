@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.165.0
+Version 0.165.0 (Released July 21, 2020)
 ---------------
 
 - fix an issue with the phone number validation
