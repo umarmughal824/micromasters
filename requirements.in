@@ -1,5 +1,5 @@
 Django==2.2.10
-Pillow==6.2.2
+Pillow==7.1.0
 boto==2.39.0
 celery==4.3.0
 certifi==2018.1.18
@@ -42,4 +42,4 @@ robohash
 static3==0.5.1
 urllib3>=1.24.2
 uwsgi
-wagtail==2.8
+wagtail==2.9.3
