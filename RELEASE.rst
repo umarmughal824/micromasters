@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.166.0
+---------------
+
+- Bump django from 2.2.10 to 2.2.13 (#4617)
+- Bump jquery from 3.4.0 to 3.5.0 (#4613)
+- Bump codecov from 3.6.5 to 3.7.1 (#4623)
+- Bump elliptic from 6.5.2 to 6.5.3
+
 Version 0.165.0 (Released July 21, 2020)
 ---------------
 
