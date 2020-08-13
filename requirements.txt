@@ -25,6 +25,7 @@ django-cors-headers==2.1.0  # via -r requirements.in
 django-discover-runner==1.0  # via django-role-permissions
 django-hijack-admin==2.1.10  # via -r requirements.in
 django-hijack==2.1.10     # via -r requirements.in, django-hijack-admin
+django-ipware==3.0.0      # via -r requirements.in
 django-modelcluster==5.0.1  # via wagtail
 django-redis==4.7.0       # via -r requirements.in
 django-role-permissions==2.2.0  # via -r requirements.in

@@ -7,6 +7,7 @@ from django.conf import settings
 from django.db import transaction
 from django.http.response import Http404
 from django.shortcuts import get_object_or_404
+from ipware import get_client_ip
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.exceptions import ValidationError
 from rest_framework.mixins import ListModelMixin
@@ -66,6 +67,7 @@ class CheckoutView(APIView):
         If the program does not have financial aid, this will return a URL to let the user
         pay for the course on edX.
         """
+        user_ip, _ = get_client_ip(request)
         try:
             course_id = request.data['course_id']
         except KeyError:
@@ -114,7 +116,7 @@ class CheckoutView(APIView):
                 method = 'GET'
             else:
                 # This generates a signed payload which is submitted as an HTML form to CyberSource
-                payload = generate_cybersource_sa_payload(order, dashboard_url)
+                payload = generate_cybersource_sa_payload(order, dashboard_url, user_ip)
                 url = settings.CYBERSOURCE_SECURE_ACCEPTANCE_URL
                 method = 'POST'
         else:

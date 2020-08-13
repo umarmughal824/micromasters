@@ -190,13 +190,14 @@ def make_dashboard_receipt_url(dashboard_url, course_key, status):
     )
 
 
-def generate_cybersource_sa_payload(order, dashboard_url):
+def generate_cybersource_sa_payload(order, dashboard_url, ip_address=None):
     """
     Generates a payload dict to send to CyberSource for Secure Acceptance
 
     Args:
         order (Order): An order
         dashboard_url: (str): The absolute url for the dashboard
+        ip_address (str): The user's IP address
     Returns:
         dict: the payload to send to CyberSource via Secure Acceptance
     """
@@ -238,6 +239,7 @@ def generate_cybersource_sa_payload(order, dashboard_url):
         'merchant_defined_data1': 'course',
         'merchant_defined_data2': '{}'.format(course_run.title),
         'merchant_defined_data3': '{}'.format(course_key),
+        "customer_ip_address": ip_address if ip_address else None,
     }
 
     field_names = sorted(list(payload.keys()) + ['signed_field_names'])
