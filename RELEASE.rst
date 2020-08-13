@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.166.0
+Version 0.166.0 (Released August 13, 2020)
 ---------------
 
 - Bump django from 2.2.10 to 2.2.13 (#4617)
