@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.167.0
+Version 0.167.0 (Released August 20, 2020)
 ---------------
 
 - Added accessiblity link
