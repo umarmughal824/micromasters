@@ -103,8 +103,9 @@ class CheckoutViewTests(MockedESTestCase):
             course__program__financial_aid_availability=True,
         )
         order = LineFactory.create(order__status=Order.CREATED).order
+        fake_ip = "195.0.0.1"
         payload = {
-            'a': 'payload'
+            'a': 'payload',
         }
         with patch(
             'ecommerce.views.create_unfulfilled_order',
@@ -114,9 +115,13 @@ class CheckoutViewTests(MockedESTestCase):
             'ecommerce.views.generate_cybersource_sa_payload',
             autospec=True,
             return_value=payload,
-        ) as generate_mock:
+        ) as generate_mock, patch(
+            "ecommerce.views.get_client_ip",
+            return_value=(fake_ip, True)
+        ) as mock_ip_call:
             resp = self.client.post(reverse('checkout'), {'course_id': course_run.edx_course_key}, format='json')
 
+        assert mock_ip_call.call_count == 1
         assert resp.status_code == status.HTTP_200_OK
         assert resp.json() == {
             'payload': payload,
@@ -127,7 +132,7 @@ class CheckoutViewTests(MockedESTestCase):
         assert create_mock.call_count == 1
         assert create_mock.call_args[0] == (course_run.edx_course_key, user)
         assert generate_mock.call_count == 1
-        assert generate_mock.call_args[0] == (order, 'http://testserver/dashboard/')
+        assert generate_mock.call_args[0] == (order, 'http://testserver/dashboard/', fake_ip)
 
     @override_settings(EDXORG_BASE_URL='http://edx_base')
     def test_provides_edx_link(self):

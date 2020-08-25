@@ -361,13 +361,14 @@ class CybersourceTests(MockedESTestCase):
         order = create_unfulfilled_order(course_run.edx_course_key, user)
         username = 'username'
         transaction_uuid = 'hex'
+        fake_user_ip = "194.100.0.1"
 
         now = now_in_utc()
 
         with patch('ecommerce.api.get_social_username', autospec=True, return_value=username):
             with patch('ecommerce.api.now_in_utc', autospec=True, return_value=now) as now_mock:
                 with patch('ecommerce.api.uuid.uuid4', autospec=True, return_value=MagicMock(hex=transaction_uuid)):
-                    payload = generate_cybersource_sa_payload(order, 'dashboard_url')
+                    payload = generate_cybersource_sa_payload(order, 'dashboard_url', fake_user_ip)
         signature = payload.pop('signature')
         assert generate_cybersource_sa_signature(payload) == signature
         signed_field_names = payload['signed_field_names'].split(',')
@@ -399,6 +400,7 @@ class CybersourceTests(MockedESTestCase):
             'merchant_defined_data1': 'course',
             'merchant_defined_data2': '{}'.format(course_run.title),
             'merchant_defined_data3': '{}'.format(course_run.edx_course_key),
+            "customer_ip_address": fake_user_ip if fake_user_ip else None,
         }
         assert now_mock.called
 
