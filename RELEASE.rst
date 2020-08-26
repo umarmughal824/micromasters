@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.168.0
+---------------
+
+- Fix the size of the SCHEDULE EXAM button (#4633)
+- send ip address to cybersource
+
 Version 0.167.0 (Released August 20, 2020)
 ---------------
 
