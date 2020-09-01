@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.168.0
+Version 0.168.0 (Released September 01, 2020)
 ---------------
 
 - Fix the size of the SCHEDULE EXAM button (#4633)
