@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.169.0
+---------------
+
+- update serialize-javascript version to fix the security alert
+
 Version 0.168.0 (Released September 01, 2020)
 ---------------
 
