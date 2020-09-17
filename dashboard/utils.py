@@ -4,6 +4,7 @@ Utility functions and classes for the dashboard
 import logging
 from decimal import Decimal
 
+from django.conf import settings
 from django.db import transaction
 from django.db.models import Q, Count
 from django.urls import reverse
@@ -46,7 +47,7 @@ class MMTrack:
     certificates = None
     edx_course_keys = set()
     edx_course_keys_no_exam = set()  # Course keys for courses that don't have exams
-    pearson_exam_status = None
+    exam_card_status = None
 
     def __init__(self, user, program, edx_user_data):
         """
@@ -422,7 +423,7 @@ class MMTrack:
             .distinct().count()
         )
 
-    def get_pearson_exam_status(self):  # pylint: disable=too-many-return-statements
+    def get_exam_card_status(self):  # pylint: disable=too-many-return-statements
         """
         Get the pearson exam status for the user / program combo
 
@@ -445,6 +446,16 @@ class MMTrack:
             exam_profile = ExamProfile.objects.only('status').get(profile=user.profile)
         except ExamProfile.DoesNotExist:
             return ExamProfile.PROFILE_ABSENT
+        if settings.FEATURES.get('ENABLE_EDX_EXAMS', False):
+            auths = ExamAuthorization.objects.filter(
+                user=user,
+                status=ExamAuthorization.STATUS_SUCCESS,
+                exam_run__in=future_runs,
+            )
+            if auths.exists():
+                return ExamProfile.PROFILE_SCHEDULABLE
+            else:
+                return ExamProfile.PROFILE_SUCCESS
 
         if exam_profile.status in (ExamProfile.PROFILE_PENDING, ExamProfile.PROFILE_IN_PROGRESS,):
             return ExamProfile.PROFILE_IN_PROGRESS

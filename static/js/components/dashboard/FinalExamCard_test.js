@@ -1,4 +1,5 @@
 // @flow
+/* global SETTINGS: false */
 import _ from "lodash"
 import React from "react"
 import { mount } from "enzyme"
@@ -34,6 +35,7 @@ describe("FinalExamCard", () => {
     navigateToProfileStub = sandbox.stub()
     submitPearsonSSOStub = sandbox.stub()
     showPearsonTOSDialogStub = sandbox.stub()
+    SETTINGS.FEATURES.ENABLE_EDX_EXAMS = false
     const program: Program = (_.cloneDeep(
       DASHBOARD_RESPONSE.programs.find(
         program => program.pearson_exam_status !== undefined

@@ -113,6 +113,47 @@ const messageForAttemptedExams = (course: Course, passedExam: boolean) => {
   return `${whenFailed}${payAgain}${whenToSchedule}`
 }
 
+const messageForNotAttemptedEdxExam = (course: Course) => {
+  let message =
+    "There are currently no exams available. Please check back later."
+
+  if (course.can_schedule_exam) {
+    message = (
+      <span>
+        {
+          "You are authorized to take the virtual proctored exam for this course. Please "
+        }
+        <a href="https://edx.org">
+          enroll now and complete the exam onboarding.
+        </a>
+      </span>
+    )
+  } else if (!R.isEmpty(course.exams_schedulable_in_future)) {
+    message =
+      "You can take the exam starting " +
+      `on ${formatDate(course.exams_schedulable_in_future[0])}.`
+  }
+  return message
+}
+
+const messageForAttemptedEdxExams = (course: Course, passedExam: boolean) => {
+  const whenFailed = passedExam ? "" : "You did not pass the exam. "
+  if (course.has_to_pay) {
+    return `${whenFailed}If you want to re-take the exam, you need to pay again.`
+  }
+  if (course.can_schedule_exam) {
+    return (
+      <span>
+        {`${whenFailed}You are authorized to take the virtual proctored exam for this course. Please `}
+        <a href="https://edx.org">
+          enroll now and complete the exam onboarding.
+        </a>
+      </span>
+    )
+  }
+  return `${whenFailed}`
+}
+
 const courseStartMessage = (run: CourseRun) => {
   const startDate = notNilorEmpty(run.course_start_date)
     ? formatDate(run.course_start_date)
@@ -311,12 +352,23 @@ export const calculateMessages = (props: CalculateMessagesProps) => {
     paid
   ) {
     let message
-    if (!passedExam) {
-      message = failedExam
-        ? messageForAttemptedExams(course, passedExam)
-        : messageForNotAttemptedExam(course)
+
+    if (SETTINGS.FEATURES.ENABLE_EDX_EXAMS) {
+      if (!passedExam) {
+        message = failedExam
+          ? messageForAttemptedEdxExams(course, passedExam)
+          : messageForNotAttemptedEdxExam(course)
+      } else {
+        message = messageForAttemptedEdxExams(course, passedExam)
+      }
     } else {
-      message = messageForAttemptedExams(course, passedExam)
+      if (!passedExam) {
+        message = failedExam
+          ? messageForAttemptedExams(course, passedExam)
+          : messageForNotAttemptedExam(course)
+      } else {
+        message = messageForAttemptedExams(course, passedExam)
+      }
     }
     if (course.has_to_pay) {
       messages.push({
