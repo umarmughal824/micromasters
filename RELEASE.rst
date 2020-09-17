@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.170.0
+---------------
+
+- Move proctored exams to edx (#4642)
+
 Version 0.169.0 (Released September 11, 2020)
 ---------------
 
