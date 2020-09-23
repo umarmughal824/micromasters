@@ -537,6 +537,9 @@ def clear_and_create_index(index_name, *, index_type, skip_mapping=False):
     # from https://www.elastic.co/guide/en/elasticsearch/guide/current/asciifolding-token-filter.html
     conn.indices.create(index_name, body={
         'settings': {
+            'index': {
+                'number_of_shards': settings.ELASTICSEARCH_SHARD_COUNT,
+            },
             'analysis': {
                 'analyzer': {
                     'folding': {

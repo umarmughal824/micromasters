@@ -71,6 +71,9 @@
     "ELASTICSEARCH_HTTP_AUTH": {
       "description": "Basic auth settings for connecting to Elasticsearch"
     },
+    "ELASTICSEARCH_SHARD_COUNT": {
+      "description": "Configurable shard cound for Elasticsearch"
+    },
     "ELASTICSEARCH_INDEX": {
       "description": "Index to use on Elasticsearch"
     },

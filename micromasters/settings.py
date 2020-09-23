@@ -549,6 +549,7 @@ else:
 if not ELASTICSEARCH_INDEX:
     raise ImproperlyConfigured("Missing ELASTICSEARCH_INDEX")
 ELASTICSEARCH_HTTP_AUTH = get_string("ELASTICSEARCH_HTTP_AUTH", None)
+ELASTICSEARCH_SHARD_COUNT = get_int('ELASTICSEARCH_SHARD_COUNT', 5)
 
 # django-role-permissions
 ROLEPERMISSIONS_MODULE = 'roles.roles'
