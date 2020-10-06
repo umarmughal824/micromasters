@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.171.0
+Version 0.171.0 (Released October 06, 2020)
 ---------------
 
 - Configurable shard Count while creating index
