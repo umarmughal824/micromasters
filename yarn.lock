@@ -5295,9 +5295,9 @@ isexe@^2.0.0:
   resolved "https://registry.yarnpkg.com/isexe/-/isexe-2.0.0.tgz#e8fbf374dc556ff8947a10dcb0572d633f2cfa10"
   integrity sha1-6PvzdNxVb/iUehDcsFctYz8s+hA=
 
-"iso-3166-2@https://github.com/mitodl/iso-3166-2.js/#36ef6437693efed2e5261a5fab5a9ceaf9650363":
+"iso-3166-2@https://github.com/mitodl/iso-3166-2.js/#918e407919b22cc3cb3bb2cd024549a563e251f7":
   version "1.0.0"
-  resolved "https://github.com/mitodl/iso-3166-2.js/#36ef6437693efed2e5261a5fab5a9ceaf9650363"
+  resolved "https://github.com/mitodl/iso-3166-2.js/#918e407919b22cc3cb3bb2cd024549a563e251f7"
 
 isobject@^2.0.0:
   version "2.1.0"
