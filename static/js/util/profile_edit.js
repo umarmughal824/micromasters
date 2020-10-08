@@ -259,5 +259,12 @@ export function saveProfileStep(
 export function shouldRenderRomanizedFields(profile: Profile): boolean {
   const firstName = _.get(profile, ["first_name"], "")
   const lastName = _.get(profile, ["last_name"], "")
-  return !CP1252_REGEX.test(firstName) || !CP1252_REGEX.test(lastName)
+  const romanizedFirstName = _.get(profile, ["romanized_first_name"], "")
+  const romanizedLastName = _.get(profile, ["romanized_last_name"], "")
+  return (
+    !CP1252_REGEX.test(firstName) ||
+    !CP1252_REGEX.test(lastName) ||
+    !CP1252_REGEX.test(romanizedFirstName) ||
+    !CP1252_REGEX.test(romanizedLastName)
+  )
 }
