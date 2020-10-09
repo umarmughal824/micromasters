@@ -617,10 +617,16 @@ describe("Course Status Messages", () => {
           }
         ])
       })
-      it("should prompt the user to take exam", () => {
+      it("should prompt the user to take exam if exam coupon available", () => {
         course.runs = [course.runs[0]]
         course.can_schedule_exam = true
-        const messages = calculateMessages(calculateMessagesProps).value
+        let messages = calculateMessages(calculateMessagesProps).value
+        assert.equal(
+          messages[0]["message"],
+          "There are currently no exams available. Please check back later."
+        )
+        course.exam_url = "http://example-url.com"
+        messages = calculateMessages(calculateMessagesProps).value
         const mounted = shallow(messages[0]["message"])
         assert.equal(
           mounted.text(),
@@ -649,7 +655,13 @@ describe("Course Status Messages", () => {
         course.can_schedule_exam = true
         course.proctorate_exams_grades = [makeProctoredExamResult()]
         course.proctorate_exams_grades[0].passed = true
-        const messages = calculateMessages(calculateMessagesProps).value
+
+        let messages = calculateMessages(calculateMessagesProps).value
+        assert.equal(messages[0]["message"], "You passed this course.")
+        assert.equal(messages[1]["message"], "")
+
+        course.exam_url = "http://example.com"
+        messages = calculateMessages(calculateMessagesProps).value
         const mounted = shallow(messages[1]["message"])
         assert.equal(
           mounted.text(),
@@ -658,12 +670,17 @@ describe("Course Status Messages", () => {
         )
       })
       // Cases with failed exam attempts
-      it("should prompt the user to take another exam", () => {
+      it("should prompt the user to take another exam if there is exam coupon url", () => {
         course.runs = [course.runs[0]]
         course.proctorate_exams_grades = [makeProctoredExamResult()]
         course.proctorate_exams_grades[0].passed = false
         course.can_schedule_exam = true
-        const messages = calculateMessages(calculateMessagesProps).value
+
+        let messages = calculateMessages(calculateMessagesProps).value
+        assert.equal(messages[0]["message"], "You did not pass the exam. ")
+
+        course.exam_url = "http://example.com"
+        messages = calculateMessages(calculateMessagesProps).value
         const mounted = shallow(messages[0]["message"])
         assert.equal(
           mounted.text(),
