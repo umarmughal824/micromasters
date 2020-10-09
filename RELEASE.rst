@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.171.1
+Version 0.171.1 (Released October 09, 2020)
 ---------------
 
 - Adding instruction on adding electives to a program (#4655)
