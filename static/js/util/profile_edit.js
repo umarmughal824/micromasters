@@ -100,7 +100,7 @@ export function boundTextField(
       fullWidth={true}
       error={error}
       onChange={onChange}
-      {...options}
+      inputProps={{ ...options }}
     />
   )
 }
