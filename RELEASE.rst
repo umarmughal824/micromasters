@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.171.2 (Released October 14, 2020)
+---------------
+
+- Populate exam authorizations with coupon codes (#4651)
+- upading iso-3166-2 branch to latest master branch's commit
+- enhance validations for romanized fields
+
 Version 0.171.1 (Released October 09, 2020)
 ---------------
 
