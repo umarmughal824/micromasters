@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.171.2
+Version 0.171.2 (Released October 14, 2020)
 ---------------
 
 - Populate exam authorizations with coupon codes (#4651)
