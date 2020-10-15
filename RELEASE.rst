@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.171.3
+---------------
+
+- Limit the address field to 100 characters
+
 Version 0.171.2 (Released October 14, 2020)
 ---------------
 
